@@ -20,6 +20,7 @@ import type {
     IConditionFormattingRule,
     IDeleteCfCommandParams,
     IMoveCfCommandParams,
+    ISetCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
 import type { ComponentType } from 'react';
 import {
@@ -48,6 +49,7 @@ import {
     DeleteConditionalRuleMutation,
     MoveCfCommand,
     MoveConditionalRuleMutation,
+    SetCfCommand,
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
 import { useHighlightRange } from '@univerjs/sheets-ui';
@@ -167,7 +169,7 @@ export function RuleList(props: IRuleListProps) {
         if (!unitId || !subUnitId) {
             throw new Error('No active sheet found');
         }
-        commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
+        return commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
     };
 
     const handleDragStart = (_layout: unknown, from: { y: number }) => {
@@ -193,7 +195,7 @@ export function RuleList(props: IRuleListProps) {
             return;
         }
         if (cfId !== targetCfId) {
-            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommandParams);
+            return commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommandParams);
         }
     };
 
@@ -203,12 +205,10 @@ export function RuleList(props: IRuleListProps) {
 
     const handleClear = () => {
         if (selectValue === '2') {
-            commandService.executeCommand(ClearWorksheetCfCommand.id);
+            return commandService.executeCommand(ClearWorksheetCfCommand.id);
         } else if (selectValue === '1') {
             const list = ruleList.map((rule) => ({ unitId, subUnitId, cfId: rule.cfId }));
-            list.forEach((config) => {
-                commandService.executeCommand(DeleteCfCommand.id, config);
-            });
+            return Promise.all(list.map((config) => commandService.executeCommand(DeleteCfCommand.id, config)));
         }
     };
     const ruleListByPermissionCheck = useMemo(() => {
@@ -344,12 +344,16 @@ export function RuleList(props: IRuleListProps) {
                                 <ConditionalFormattingRulePreview rule={rule.rule} />
                             </div>
                             {rule.rule.type === CFRuleType.highlightCell && (
-                                <div className="univer-pointer-events-none univer-mt-2 univer-w-full">
+                                <div className="univer-mt-2 univer-w-full" onClick={(event) => event.stopPropagation()}>
                                     <Checkbox
                                         className="univer-max-w-full"
                                         contentClassName="univer-min-w-0"
                                         checked={!!rule.stopIfTrue}
-                                        disabled
+                                        onChange={(checked) => commandService.executeCommand<ISetCfCommandParams>(SetCfCommand.id, {
+                                            unitId,
+                                            subUnitId,
+                                            rule: { ...rule, stopIfTrue: !!checked },
+                                        })}
                                     >
                                         {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.stopIfTrue')}
                                     </Checkbox>
@@ -367,8 +371,8 @@ export function RuleList(props: IRuleListProps) {
                                 })}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(rule);
                                     setCurrentRuleRanges([]);
+                                    return handleDelete(rule);
                                 }}
                             >
                                 <DeleteIcon />

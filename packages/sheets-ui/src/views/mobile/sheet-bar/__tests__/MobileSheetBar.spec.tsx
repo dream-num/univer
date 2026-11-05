@@ -42,6 +42,8 @@ import enUS from '../../../../locale/en-US';
 import { ISheetBarService, SheetBarService } from '../../../../services/sheet-bar/sheet-bar.service';
 import { MobileSheetBar } from '../MobileSheetBar';
 
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
 const disposals: Array<() => void> = [];
 
 function renderSheetBar(show = true) {
@@ -87,18 +89,17 @@ describe('MobileSheetBar permissions', () => {
         { label: 'workbook editing', Permission: WorkbookEditablePermission },
         { label: 'sheet creation', Permission: WorkbookCreateSheetPermission },
     ])(
-        'prevents insertion when $label is revoked and allows it after permission is restored',
+        'hides the add button when $label is revoked and allows insertion after permission is restored',
         async ({ Permission }) => {
             const { container, workbook, permissions } = renderSheetBar();
-            const button = container.querySelector<HTMLButtonElement>('button[aria-label="Add sheet"]')!;
             const initialCount = workbook.getSheets().length;
             const permission = new Permission(workbook.getUnitId());
             act(() => permissions.updatePermissionPoint(permission.id, false));
-            expect(button.disabled).toBe(true);
-            await act(async () => button.click());
-            expect(workbook.getSheets()).toHaveLength(initialCount);
+            expect(container.querySelector('button[aria-label="Add sheet"]')).toBeNull();
 
             act(() => permissions.updatePermissionPoint(permission.id, true));
+            const button = container.querySelector<HTMLButtonElement>('button[aria-label="Add sheet"]')!;
+            expect(button).not.toBeNull();
             expect(button.disabled).toBe(false);
             await act(async () => button.click());
             expect(workbook.getSheets()).toHaveLength(initialCount + 1);

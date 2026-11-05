@@ -323,16 +323,14 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         ))}
                     </div>
                 </div>
-                {addSheetButtonShow && (
+                {addSheetButtonShow && !addSheetDisabled && (
                     <button
                         type="button"
                         aria-label={localeService.t<LocaleKey>('sheets-ui.mobile.addSheet')}
-                        disabled={addSheetDisabled}
                         className={clsx(resetButtonClassName, borderLeftClassName, `
                           univer-flex univer-h-10 univer-w-12 univer-shrink-0 univer-items-center univer-justify-center
                           univer-bg-gray-100 univer-text-lg univer-text-gray-800
                           active:univer-bg-gray-200
-                          disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                           dark:!univer-bg-gray-800 dark:!univer-text-gray-100
                           dark:active:!univer-bg-gray-700
                         `)}

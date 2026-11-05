@@ -418,6 +418,30 @@ describe('Transformer', () => {
         }
     });
 
+    it.each(['ResizeLT', 'ResizeRB'])('clips a resized object to the content bounds at %s', (key) => {
+        const { engine, scene, rect } = createTransformerFixture();
+        rect.translate(80, 60);
+        const transformer = new Transformer(scene, { keepRatio: false, zeroLeft: 46, zeroTop: 20 });
+        try {
+            transformer.setSelectedControl(rect);
+            const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes(key))!;
+            const start = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
+            const direction = key === 'ResizeLT' ? -1 : 1;
+            anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', start.x, start.y));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', start.x + direction * 600, start.y + direction * 600));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', start.x + direction * 600, start.y + direction * 600));
+            if (key === 'ResizeLT') {
+                expect([rect.left, rect.top, rect.left + rect.width, rect.top + rect.height]).toEqual([46, 20, 180, 120]);
+            } else {
+                expect([rect.left, rect.top, rect.left + rect.width, rect.top + rect.height]).toEqual([80, 60, 500, 400]);
+            }
+        } finally {
+            transformer.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
     it.each([true, false])('respects the move boundary setting %s', (moveBoundaryEnabled) => {
         const { engine, scene, rect } = createTransformerFixture();
         const transformer = new Transformer(scene, { moveBoundaryEnabled });
@@ -439,6 +463,68 @@ describe('Transformer', () => {
             expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ objects: new Map([[rect.oKey, rect]]) }));
         } finally {
             subscription.unsubscribe();
+            transformer.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it.each([0.5, 1, 2])('keeps a selection inside scene bounds including the header origin at zoom %s', (scale) => {
+        const { engine, scene, rect } = createTransformerFixture();
+        scene.scale(scale, scale);
+        rect.translate(80, 60);
+        const second = new Rect('second', { left: 200, top: 150, width: 80, height: 50 });
+        scene.addObject(second);
+        const transformer = new Transformer(scene, { zeroLeft: 46, zeroTop: 20 });
+        try {
+            transformer.attachTo(rect);
+            transformer.setSelectedControl(rect);
+            transformer.setSelectedControl(second);
+            rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 100 * scale, 80 * scale));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', -500, -500));
+            expect([rect.left, rect.top, second.left - rect.left, second.top - rect.top]).toEqual([46, 20, 120, 90]);
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', -500, -500));
+
+            rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 70 * scale, 40 * scale));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 2000, 2000));
+            expect([second.left + second.width, second.top + second.height]).toEqual([scene.width, scene.height]);
+            expect([second.left - rect.left, second.top - rect.top]).toEqual([120, 90]);
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 2000, 2000));
+        } finally {
+            transformer.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it('keeps an oversized object reachable without resizing it', () => {
+        const { engine, scene, rect } = createTransformerFixture();
+        rect.transformByState({ left: 46, top: 20, width: 800, height: 600 });
+        const transformer = new Transformer(scene, { zeroLeft: 46, zeroTop: 20 });
+        try {
+            transformer.attachTo(rect);
+            rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 100, 80));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 800, 600));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 800, 600));
+            expect([rect.left, rect.top, rect.width, rect.height]).toEqual([46, 20, 800, 600]);
+        } finally {
+            transformer.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it('allows moving outside the viewport while remaining inside the scene', () => {
+        const { engine, scene, rect } = createTransformerFixture();
+        scene.transformByState({ width: 2000, height: 2000 });
+        const transformer = new Transformer(scene);
+        try {
+            transformer.attachTo(rect);
+            rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 30, 30));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 900, 800));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 900, 800));
+            expect([rect.left, rect.top]).toEqual([880, 780]);
+        } finally {
             transformer.dispose();
             scene.dispose();
             engine.dispose();

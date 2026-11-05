@@ -629,37 +629,23 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
-    private _checkMoveBoundary(moveObject: BaseObject, moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
-        if (this._getConfig(moveObject).moveBoundaryEnabled === false) {
-            return {
-                moveLeft,
-                moveTop,
-            };
+    private _checkMoveBoundary(objects: BaseObject[], moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
+        let minX = -Infinity;
+        let minY = -Infinity;
+        let maxX = Infinity;
+        let maxY = Infinity;
+        for (const object of objects) {
+            if (this._getConfig(object).moveBoundaryEnabled === false) continue;
+            minX = Math.max(minX, this.zeroLeft - object.left - ancestorLeft);
+            minY = Math.max(minY, this.zeroTop - object.top - ancestorTop);
+            maxX = Math.min(maxX, topSceneWidth - object.left - object.width - ancestorLeft);
+            maxY = Math.min(maxY, topSceneHeight - object.top - object.height - ancestorTop);
         }
 
-        const { left, top, width, height } = moveObject;
-        let resultMoveLeft = moveLeft;
-        let resultMoveTop = moveTop;
-
-        if (resultMoveLeft + left + ancestorLeft < this.zeroLeft) {
-            resultMoveLeft = -ancestorLeft;
-        }
-
-        if (resultMoveTop + top + ancestorTop < this.zeroTop) {
-            resultMoveTop = -ancestorTop;
-        }
-
-        if (resultMoveLeft + left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
-            resultMoveLeft = this.zeroLeft + topSceneWidth - width - left - ancestorLeft;
-        }
-
-        if (resultMoveTop + top + height + ancestorTop > topSceneHeight + this.zeroTop) {
-            resultMoveTop = this.zeroTop + topSceneHeight - height - top - ancestorTop;
-        }
-
+        // Keep the leading edge reachable when the selection is larger than the scene.
         return {
-            moveLeft: resultMoveLeft,
-            moveTop: resultMoveTop,
+            moveLeft: Math.max(minX, Math.min(moveLeft, maxX)),
+            moveTop: Math.max(minY, Math.min(moveTop, maxY)),
         };
     }
 
@@ -686,23 +672,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         if (!isCropper) {
             const selectedObjects = Array.from(this._selectedObjectMap.values());
-            // move boundary check
-            for (let i = 0; i < selectedObjects.length; i++) {
-                const moveObject = selectedObjects[i];
-
-                const boundary = this._checkMoveBoundary(
-                    moveObject,
-                    moveLeft,
-                    moveTop,
-                    ancestorLeft,
-                    ancestorTop,
-                    topSceneWidth,
-                    topSceneHeight
-                );
-
-                moveLeft = boundary.moveLeft;
-                moveTop = boundary.moveTop;
-            }
+            const boundary = this._checkMoveBoundary(selectedObjects, moveLeft, moveTop, ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
+            moveLeft = boundary.moveLeft;
+            moveTop = boundary.moveTop;
 
             this._selectedObjectMap.forEach((moveObject) => {
                 moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
@@ -718,7 +690,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         } else if (this._copperSelectedObject) {
             const cropper = this._copperSelectedObject;
             // move boundary check
-            const boundary = this._checkMoveBoundary(cropper, moveLeft, moveTop, ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
+            const boundary = this._checkMoveBoundary([cropper], moveLeft, moveTop, ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
 
             moveLeft = boundary.moveLeft;
             moveTop = boundary.moveTop;
@@ -1151,16 +1123,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             if (left + ancestorLeft < this.zeroLeft) {
                 newTransform.left = this.zeroLeft - ancestorLeft;
-                newTransform.width = width + left;
-            } else if (left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
-                newTransform.width = this.zeroLeft + topSceneWidth - left - ancestorLeft;
+                newTransform.width = width + left + ancestorLeft - this.zeroLeft;
+            } else if (left + width + ancestorLeft > topSceneWidth) {
+                newTransform.width = topSceneWidth - left - ancestorLeft;
             }
 
             if (top + ancestorTop < this.zeroTop) {
                 newTransform.top = this.zeroTop - ancestorTop;
-                newTransform.height = height + top;
-            } else if (top + height + ancestorTop > topSceneHeight + this.zeroTop) {
-                newTransform.height = this.zeroTop + topSceneHeight - top - ancestorTop;
+                newTransform.height = height + top + ancestorTop - this.zeroTop;
+            } else if (top + height + ancestorTop > topSceneHeight) {
+                newTransform.height = topSceneHeight - top - ancestorTop;
             }
 
             moveObject.transformByState(newTransform);

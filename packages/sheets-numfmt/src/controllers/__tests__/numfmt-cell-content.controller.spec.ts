@@ -34,6 +34,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    InterceptCellContentPriority,
     INTERCEPTOR_POINT,
     INumfmtService,
     NumfmtService,
@@ -83,6 +84,7 @@ function createWorkbookData(
                         3: { v: '20%', t: CellValueType.STRING, s: 'textStyle' },
                         4: { v: 0, t: CellValueType.NUMBER },
                         5: { v: 0.009999999999999787, t: CellValueType.NUMBER, s: 'textStyle' },
+                        6: { v: 12.345, t: CellValueType.NUMBER, s: { n: null } },
                     },
                 },
             },
@@ -181,6 +183,39 @@ describe('SheetsNumfmtCellContentController', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('formats runtime table number formats without persisting cell styles and respects direct formats', () => {
+        get(SheetsNumfmtCellContentController);
+        get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            priority: InterceptCellContentPriority.TABLE_STYLE,
+            effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
+            handler: (cell, location, next) => {
+                return next({ ...cell, themeStyle: { n: { pattern: '0.000' } } });
+            },
+        });
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.500');
+        expect(get(SheetInterceptorService).fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, InterceptorEffectEnum.Value)(
+            worksheet.getCellRaw(1, 1),
+            { rawData: worksheet.getCellRaw(1, 1), workbook, worksheet, unitId: 'test', subUnitId: 'sheet1', row: 1, col: 1 }
+        )?.v).toBe('1234.500');
+        expect(worksheet.getCellRaw(1, 1)).toEqual({ v: '1234.5', t: CellValueType.STRING });
+        expect(getInterceptedCell(worksheet, workbook, 1, 6, get)?.v).toBe(12.345);
+        expect(worksheet.getCellRaw(1, 6)?.s).toEqual({ n: null });
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.0', ranges: [cellToRange(1, 1)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.5');
+        expect(getInterceptedCell(worksheet, workbook, 1, 0, get)?.v).toBe('123');
+    });
+
+    it('keeps legacy number-format lookup when no table dxf is present', () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.5');
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.00', ranges: [cellToRange(1, 1), cellToRange(1, 6)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.50');
+        expect(getInterceptedCell(worksheet, workbook, 1, 6, get)?.v).toBe('12.35');
+        expect(workbook.getStyles().getStyleByCell(worksheet.getCellRaw(1, 6))?.n?.pattern).toBe('0.00');
     });
 
     it('skips unsupported cells and handles text format markers', () => {

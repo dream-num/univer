@@ -21,8 +21,6 @@ import type {
     IInsertRowMutationParams,
     IRemoveRowColCommandParams,
 } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
-import type { ITableColumnJson, ITableJson } from '../types/type';
 import {
     Disposable,
     ICommandService,
@@ -31,6 +29,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     Rectangle,
+    Tools,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
@@ -46,10 +45,13 @@ import {
     RemoveRowMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
+import type { ITableColumnJson, ITableJson } from '../types/type';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../commands/utils/calculated-column';
+import { hasTableDxfStyles } from '../models/table-dxf';
 import { TableManager } from '../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
@@ -74,21 +76,20 @@ export class SheetTableRefRangeController extends Disposable {
     }
 
     private _initCommandInterceptor() {
-        const self = this;
         this._sheetInterceptorService.interceptCommand({
             priority: -1,
-            getMutations(commandInfo) {
+            getMutations: (commandInfo) => {
                 const defaultReturn = { redos: [], undos: [] };
                 const { id, params } = commandInfo;
                 switch (id) {
                     case InsertRowCommand.id:
-                        return self._generateTableMutationWithInsertRow(params as IInsertRowCommandParams);
+                        return this._generateTableMutationWithInsertRow(params as IInsertRowCommandParams);
                     case InsertColCommand.id:
-                        return self._generateTableMutationWithInsertCol(params as IInsertColCommandParams);
+                        return this._generateTableMutationWithInsertCol(params as IInsertColCommandParams);
                     case RemoveRowCommand.id:
-                        return self._generateTableMutationWithRemoveRow(params as IRemoveRowColCommandParams);
+                        return this._generateTableMutationWithRemoveRow(params as IRemoveRowColCommandParams);
                     case RemoveColCommand.id:
-                        return self._generateTableMutationWithRemoveCol(params as IRemoveRowColCommandParams);
+                        return this._generateTableMutationWithRemoveCol(params as IRemoveRowColCommandParams);
                 }
 
                 return defaultReturn;
@@ -262,7 +263,10 @@ export class SheetTableRefRangeController extends Disposable {
                             tableId: tableJson.id,
                             name: tableJson.name,
                             range: tableJson.range,
-                            options: tableJson.options,
+                            ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
+                            options: hasTableDxfStyles(tableJson)
+                                ? { ...tableJson.options, columns: Tools.deepClone(tableJson.columns) }
+                                : tableJson.options,
                         },
                     });
                 } else if (range.startRow > tableRange.startRow && range.startRow <= tableRange.endRow) {
@@ -398,7 +402,10 @@ export class SheetTableRefRangeController extends Disposable {
                             name: tableJson.name,
                             header,
                             range: tableJson.range,
-                            options: tableJson.options,
+                            ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
+                            options: hasTableDxfStyles(tableJson)
+                                ? { ...tableJson.options, columns: Tools.deepClone(tableJson.columns) }
+                                : tableJson.options,
                         },
                     });
                     undos.push(...(formulaMutations.preUndos ?? []), ...formulaMutations.undos);
@@ -543,9 +550,10 @@ export class SheetTableRefRangeController extends Disposable {
                 name: tableJson.name,
                 header,
                 range: tableJson.range,
+                ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
                 options: {
                     ...tableJson.options,
-                    columns: tableJson.columns,
+                    columns: hasTableDxfStyles(tableJson) ? Tools.deepClone(tableJson.columns) : tableJson.columns,
                     filters: tableJson.filters.tableColumnFilterList,
                 },
             },
@@ -612,13 +620,16 @@ export class SheetTableRefRangeController extends Disposable {
                 allTables.forEach((table) => {
                     const tableRange = table.getRange();
                     if (range.startColumn <= tableRange.startColumn) {
-                        this._tableManager.updateTableRange(unitId, table.getId(), {
-                            newRange: {
-                                ...tableRange,
-                                startColumn: tableRange.startColumn + insertCount,
-                                endColumn: tableRange.endColumn + insertCount,
-                            },
-                        });
+                        const newRange = {
+                            ...tableRange,
+                            startColumn: tableRange.startColumn + insertCount,
+                            endColumn: tableRange.endColumn + insertCount,
+                        };
+                        if (hasTableDxfStyles(table.toJSON())) {
+                            this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
+                        } else {
+                            this._tableManager.updateTableRange(unitId, table.getId(), { newRange });
+                        }
                     }
                 });
             } else if (commandInfo.id === RemoveRowMutation.id) {
@@ -646,13 +657,16 @@ export class SheetTableRefRangeController extends Disposable {
                 allTables.forEach((table) => {
                     const tableRange = table.getRange();
                     if (range.startColumn < tableRange.startColumn) {
-                        this._tableManager.updateTableRange(unitId, table.getId(), {
-                            newRange: {
-                                ...tableRange,
-                                startColumn: tableRange.startColumn - removeCount,
-                                endColumn: tableRange.endColumn - removeCount,
-                            },
-                        });
+                        const newRange = {
+                            ...tableRange,
+                            startColumn: tableRange.startColumn - removeCount,
+                            endColumn: tableRange.endColumn - removeCount,
+                        };
+                        if (hasTableDxfStyles(table.toJSON())) {
+                            this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
+                        } else {
+                            this._tableManager.updateTableRange(unitId, table.getId(), { newRange });
+                        }
                     }
                 });
             }

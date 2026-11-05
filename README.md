@@ -1,23 +1,64 @@
-<div align="center">
+<p align="center"><img src="./docs/img/readme/hero-banner.png" alt="Univer Office SDK" width="960" /></p>
 
-<img src="./docs/img/banner.png" alt="Univer Office SDK" width="640" />
+<h1 align="center">Build your own AI office with Univer Office SDK.</h1>
 
-<h1>Build your own AI office with Univer Office SDK.</h1>
+<p align="center">Start with open-source Sheets and Docs, then connect your own application or agent.</p>
 
-<p>Start with open-source Sheets and Docs, then connect your own application or agent.</p>
+<p align="center"><a href="#quick-start">🚀 Quick start</a> · <a href="https://docs.univer.ai/">📚 Documentation</a> · <a href="https://univer.ai/compare/">⚖️ Feature comparison</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://docs.univer.ai/showcase">🎮 Showcase</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
 
-<p><a href="#quick-start">Quick start</a> · <a href="https://docs.univer.ai/">Documentation</a> · <a href="https://univer.ai/compare/">Feature comparison</a> · <a href="https://univer.ai/">Website</a></p>
+<p align="center"><strong>English</strong> · <a href="./docs/readme/fr-FR.md">Français</a> · <a href="./docs/readme/de-DE.md">Deutsch</a> · <a href="./docs/readme/es-ES.md">Español</a> · <a href="./docs/readme/zh-CN.md">简体中文</a> · <a href="./docs/readme/zh-TW.md">繁體中文</a> · <a href="./docs/readme/ja-JP.md">日本語</a> · <a href="./docs/readme/ko-KR.md">한국어</a></p>
 
-</div>
+<p align="center">
+  <a href="https://github.com/dream-num/univer/releases"><img src="https://img.shields.io/github/v/release/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=4F46E5&amp;logo=github&amp;logoColor=white" alt="Release" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=0F766E" alt="License" /></a>
+  <a href="https://github.com/dream-num/univer/actions/workflows/build-packages.yml"><img src="https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat&amp;labelColor=30363D" alt="Build" /></a>
+  <a href="https://www.codefactor.io/repository/github/dream-num/univer/overview/dev"><img src="https://www.codefactor.io/repository/github/dream-num/univer/badge/dev?style=flat" alt="CodeFactor" /></a>
+  <a href="https://codecov.io/gh/dream-num/univer"><img src="https://img.shields.io/codecov/c/gh/dream-num/univer?token=aPfyW2pIMN&amp;style=flat&amp;labelColor=30363D" alt="Codecov" /></a>
+</p>
 
-English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](https://github.com/dream-num/univer/blob/dev/docs/readme/zh-TW.md) | [日本語](https://github.com/dream-num/univer/blob/dev/docs/readme/ja-JP.md) | [한국어](https://github.com/dream-num/univer/blob/dev/docs/readme/ko-KR.md) | [Español](https://github.com/dream-num/univer/blob/dev/docs/readme/es-ES.md)
+<p align="center">
+  <a href="https://github.com/dream-num/univer"><img src="https://img.shields.io/github/stars/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=4F46E5" alt="Stars" /></a>
+  <a href="https://github.com/dream-num/univer/graphs/contributors"><img src="https://img.shields.io/github/contributors/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=4F46E5" alt="Contributors" /></a>
+  <a href="https://github.com/dream-num/univer/issues"><img src="https://img.shields.io/github/issues/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=4F46E5" alt="Issues" /></a>
+  <a href="https://github.com/dream-num/univer/commits/dev/"><img src="https://img.shields.io/github/last-commit/dream-num/univer?style=flat&amp;labelColor=30363D&amp;color=4F46E5" alt="Last Commit" /></a>
+</p>
 
-[![Release](https://img.shields.io/github/v/release/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/releases)
-[![License](https://img.shields.io/github/license/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/blob/dev/LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/dream-num/univer/build-packages.yml?style=flat-square)](https://github.com/dream-num/univer/actions/workflows/build-packages.yml)
-[![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
-[![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
-[![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
+<p align="center">
+  <a href="https://discord.gg/z3NKNT6D2f"><img src="https://img.shields.io/discord/1136129819961217077?logo=discord&amp;logoColor=FFFFFF&amp;label=discord&amp;color=5865F2&amp;style=flat&amp;labelColor=30363D" alt="Discord" /></a>
+  <a href="https://twitter.com/univerhq"><img src="https://img.shields.io/badge/%40univerhq-18181B?style=flat&amp;logo=x&amp;logoColor=white" alt="X: @univerhq" /></a>
+  <a href="https://opencollective.com/univer"><img src="https://img.shields.io/opencollective/all/univer?logo=opencollective&amp;style=flat&amp;labelColor=30363D&amp;color=0F766E&amp;label=supporters&amp;logoColor=white" alt="Open Collective" /></a>
+</p>
+
+<p align="center">
+  <a href="https://trendshift.io/repositories/4376"><img src="https://trendshift.io/api/badge/repositories/4376" alt="Trendshift" /></a>
+</p>
+
+<details>
+<summary>Table of contents</summary>
+
+- [What is Univer?](#what-is-univer)
+  - [Open-source capabilities](#open-source-capabilities)
+- [Build on the open-source foundation](#what-you-can-build)
+  - [Quick start: an open-source spreadsheet editor](#quick-start)
+  - [Connect your application to editable content](#connect-your-application-to-editable-content)
+- [Explore the open-source architecture](#open-source-architecture)
+  - [Give custom features clear boundaries](#give-custom-features-clear-boundaries)
+  - [Compose cross-feature edits and undo/redo](#compose-cross-feature-edits-and-undoredo)
+  - [Connect applications and agents through Facade APIs and events](#connect-applications-and-agents-through-facade-apis-and-events)
+- [Extend your application with Univer Office SDK](#open-source-and-commercial-extensions)
+  - [Scope and licensing](#scope-and-licensing)
+- [Application patterns and ecosystem](#application-patterns-and-ecosystem)
+  - [Univer Workspace: an Office SDK reference application](#univer-workspace-an-office-sdk-reference-application)
+  - [CLI, agent integrations, and developer skills](#cli-agent-integrations-and-developer-skills)
+- [Documentation and contributing](#documentation-and-contributing)
+- [Community](#community)
+- [Security](#security)
+- [Sponsors](#sponsors)
+- [License](#license)
+
+</details>
+
+<a id="what-is-univer"></a>
 
 ## What is Univer?
 
@@ -33,7 +74,11 @@ Univer Office SDK has three parts:
 
 Agents can use the same open-source APIs; your application supplies the model and tool orchestration. The [quotation example](#connect-your-application-to-editable-content) demonstrates editing, calculation, and saving without an AI SDK dependency.
 
+<a id="open-source-capabilities"></a>
+
 ### Open-source capabilities
+
+<p><img src="./docs/img/readme/intro-banner.png" alt="Sheets &amp; Docs" width="960" /></p>
 
 | Area | Selected capabilities |
 | --- | --- |
@@ -45,56 +90,44 @@ Features are composed through plugins and presets; the [quick start](#quick-star
 
 The demos below showcase the wider **Univer Office SDK**, including commercial capabilities. They show more than the default open-source setup; see [open source and commercial extensions](#open-source-and-commercial-extensions) for scope.
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/spreadsheets"><img src="./docs/img/readme/previews/spreadsheet.png" alt="Sheets" width="420" /></a>
-      <br /><strong>Sheets · Full SDK demo</strong>
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/docs"><img src="./docs/img/readme/previews/docs-modern.png" alt="Docs" width="420" /></a>
-      <br /><strong>Docs · Full SDK demo</strong>
-    </td>
-  </tr>
-</table>
+<p><a href="https://univer.ai/demo/spreadsheets"><img src="./docs/img/readme/sheets.webp" alt="Sheets" width="960" /></a><br /><strong>Sheets · Full SDK demo</strong></p>
 
-<details>
-<summary>More demos: Web Apps, composed content, Slides, Relational Tables, Canvases, and PDF</summary>
+<p><a href="https://univer.ai/demo/docs"><img src="./docs/img/readme/docs.webp" alt="Docs" width="960" /></a><br /><strong>Docs · Full SDK demo</strong></p>
+
+<p><strong>More demos: Web Apps, composed content, Slides, Relational Tables, Canvases, and PDF</strong></p>
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/web-app"><img src="./docs/img/readme/previews/web-app.png" alt="Web App · Sheet-powered apps" width="420" /></a>
+      <a href="https://univer.ai/demo/web-app"><img src="./docs/img/readme/web-app.webp" alt="Web App · Sheet-powered apps" width="420" /></a>
       <br /><strong>Web App · Sheet-powered apps</strong>
     </td>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/universe"><img src="./docs/img/readme/previews/univer.png" alt="Univer · Composed Office content" width="420" /></a>
+      <a href="https://univer.ai/demo/universe"><img src="./docs/img/readme/universe.webp" alt="Univer · Composed Office content" width="420" /></a>
       <br /><strong>Composed Office content</strong>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/slides"><img src="./docs/img/readme/previews/slides.png" alt="Slides" width="420" /></a>
+      <a href="https://univer.ai/demo/slides"><img src="./docs/img/readme/slides.webp" alt="Slides" width="420" /></a>
       <br /><strong>Slides</strong>
     </td>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/relational-tables"><img src="./docs/img/readme/previews/relational-table.png" alt="Relational Tables" width="420" /></a>
+      <a href="https://univer.ai/demo/relational-tables"><img src="./docs/img/readme/relational-tables.webp" alt="Relational Tables" width="420" /></a>
       <br /><strong>Relational Tables</strong>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/canvases"><img src="./docs/img/readme/previews/canvas.png" alt="Canvases" width="420" /></a>
+      <a href="https://univer.ai/demo/canvases"><img src="./docs/img/readme/canvases.webp" alt="Canvases" width="420" /></a>
       <br /><strong>Canvases</strong>
     </td>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/pdf"><img src="./docs/img/readme/previews/pdf.png" alt="PDF" width="420" /></a>
+      <a href="https://univer.ai/demo/pdf"><img src="./docs/img/readme/pdf.webp" alt="PDF" width="420" /></a>
       <br /><strong>PDF</strong>
     </td>
   </tr>
 </table>
-
-</details>
 
 <a id="what-you-can-build"></a>
 
@@ -128,7 +161,6 @@ Create the container before initializing Univer:
 import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
 import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
 import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
 import '@univerjs/preset-sheets-core/lib/index.css'
 
 const { univerAPI } = createUniver({
@@ -152,7 +184,7 @@ For component frameworks, retain the `univer` instance returned by `createUniver
 
 Presets compose plugins and register their Facade APIs. For manual control, see the [Plugin Mode example](#manual-plugin-composition) below. The [installation guide](https://docs.univer.ai/guides/sheets/getting-started/installation) covers both modes, peer dependencies, and framework integrations.
 
-Keep coordinated `@univerjs/*` packages on the same version. Commercial packages must use the matching release line; independently released packages such as icons follow their declared compatibility. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md).
+Keep coordinated `@univerjs/*` packages on the same version. Commercial packages must use the matching release line; independently released packages such as icons follow their declared compatibility. See the [API Stability Policy](./docs/API_STABILITY.md).
 
 <a id="connect-your-application-to-editable-content"></a>
 
@@ -161,6 +193,20 @@ Keep coordinated `@univerjs/*` packages on the same version. Commercial packages
 Facade APIs are the application-facing interface to workbooks, worksheets, and ranges. Continue from the quick start to populate a quotation, update a quantity from application code, and read the recalculated total:
 
 ```ts
+// Wait for formula controllers before editing a newly created workbook.
+await new Promise<void>((resolve) => {
+  if (univerAPI.getCurrentLifecycleStage() >= univerAPI.Enum.LifecycleStages.Steady) {
+    resolve()
+    return
+  }
+  const listener = univerAPI.addEvent(univerAPI.Event.LifeCycleChanged, ({ stage }) => {
+    if (stage === univerAPI.Enum.LifecycleStages.Steady) {
+      listener.dispose()
+      resolve()
+    }
+  })
+})
+
 const workbook = univerAPI.getActiveWorkbook()!
 const sheet = workbook.getActiveSheet()
 
@@ -189,7 +235,7 @@ if (saved) {
 }
 ```
 
-This workflow uses only open-source packages. Snapshot persistence is separate from XLSX import and export, which uses the separately distributed file-conversion capabilities. Use public Facade APIs for application integration; the source links below explain internal implementation and extension points. See the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md) before depending on an extension point.
+This workflow uses only open-source packages. Snapshot persistence is separate from XLSX import and export, which uses the separately distributed file-conversion capabilities. Use public Facade APIs for application integration; the source links below explain internal implementation and extension points. See the [API Stability Policy](./docs/API_STABILITY.md) before depending on an extension point.
 
 <a id="manual-plugin-composition"></a>
 
@@ -232,14 +278,12 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui'
 import SheetsUIEnUS from '@univerjs/sheets-ui/locale/en-US'
 import { UniverUIPlugin } from '@univerjs/ui'
 import UIEnUS from '@univerjs/ui/locale/en-US'
-
 import '@univerjs/design/lib/index.css'
 import '@univerjs/ui/lib/index.css'
 import '@univerjs/docs-ui/lib/index.css'
 import '@univerjs/sheets-ui/lib/index.css'
 import '@univerjs/sheets-formula-ui/lib/index.css'
 import '@univerjs/sheets-numfmt-ui/lib/index.css'
-
 import '@univerjs/network/facade'
 import '@univerjs/docs/facade'
 import '@univerjs/docs-ui/facade'
@@ -296,6 +340,10 @@ The Docs plugins support spreadsheet rich-text editing. When adding a feature, i
 <a id="open-source-architecture"></a>
 
 ## Explore the open-source architecture
+
+<img src="./docs/img/readme/architecture-banner.png" alt="" width="960" />
+
+<a id="give-custom-features-clear-boundaries"></a>
 
 ### Give custom features clear boundaries
 
@@ -362,7 +410,7 @@ Dependencies are explicit at two levels:
 
 Disposable registration also gives commands, listeners, components, and icons a cleanup path when their owner is disposed.
 
-The [filter plugin](https://github.com/dream-num/univer/blob/dev/packages/sheets-filter/src/plugin.ts) and its [UI plugin](https://github.com/dream-num/univer/blob/dev/packages/sheets-filter-ui/src/plugin.ts) show these boundaries in working code.
+The [filter plugin](./packages/sheets-filter/src/plugin.ts) and its [UI plugin](./packages/sheets-filter-ui/src/plugin.ts) show these boundaries in working code.
 
 <details>
 <summary>Inside a feature: Model, Controller, Service, and the UI foundation</summary>
@@ -406,9 +454,11 @@ flowchart LR
 
 **Figure 2: code organization. Arrows mean “contains.”** Both plugins can contain Controllers and Services: logic Controllers coordinate content changes and related features; UI Controllers connect menus, shortcuts, and interactions, with UI Services managing panel state. These responsibilities give new features a consistent structure to implement and test.
 
-The UI foundation follows the same division. **`@univerjs/design`** supplies shared components and styles, **`@univerjs/ui`** provides workbench services such as menus, shortcuts, panels, and component registration, and **`@univerjs/icons`** supplies icons. A feature registers its components and icons, contributes menus, and attaches its rendering through these extension points. Teams can add a panel or toolbar feature while reusing the application's UI infrastructure. See the [UI overview](https://docs.univer.ai/guides/sheets/ui/overview) and the filter plugin's [component and icon registration](https://github.com/dream-num/univer/blob/dev/packages/sheets-filter-ui/src/controllers/components.controller.ts).
+The UI foundation follows the same division. **`@univerjs/design`** supplies shared components and styles, **`@univerjs/ui`** provides workbench services such as menus, shortcuts, panels, and component registration, and **`@univerjs/icons`** supplies icons. A feature registers its components and icons, contributes menus, and attaches its rendering through these extension points. Teams can add a panel or toolbar feature while reusing the application's UI infrastructure. See the [UI overview](https://docs.univer.ai/guides/sheets/ui/overview) and the filter plugin's [component and icon registration](./packages/sheets-filter-ui/src/controllers/components.controller.ts).
 
 </details>
+
+<a id="compose-cross-feature-edits-and-undoredo"></a>
 
 ### Compose cross-feature edits and undo/redo
 
@@ -454,29 +504,33 @@ flowchart TD
   class EXT extension
 ```
 
-This diagram simplifies an insert-row workflow. Nested command executions have their own callbacks; it does not show every event or the separate Operation path. See the [row command](https://github.com/dream-num/univer/blob/dev/packages/sheets/src/commands/commands/insert-row-col.command.ts), [filter controller](https://github.com/dream-num/univer/blob/dev/packages/sheets-filter/src/controllers/sheets-filter.controller.ts), and [interceptor service](https://github.com/dream-num/univer/blob/dev/packages/sheets/src/services/sheet-interceptor/sheet-interceptor.service.ts).
+This diagram simplifies an insert-row workflow. Nested command executions have their own callbacks; it does not show every event or the separate Operation path. See the [row command](./packages/sheets/src/commands/commands/insert-row-col.command.ts), [filter controller](./packages/sheets-filter/src/controllers/sheets-filter.controller.ts), and [interceptor service](./packages/sheets/src/services/sheet-interceptor/sheet-interceptor.service.ts).
 
 </details>
 
-These boundaries support a practical testing strategy: test models and services independently, replace external dependencies through DI, and add regression cases for combined actions and undo/redo. The [filter controller tests](https://github.com/dream-num/univer/blob/dev/packages/sheets-filter/src/controllers/__tests__/sheets-filter.controller.spec.ts) exercise row and column changes and their effect on filtering.
+These boundaries support a practical testing strategy: test models and services independently, replace external dependencies through DI, and add regression cases for combined actions and undo/redo. The [filter controller tests](./packages/sheets-filter/src/controllers/__tests__/sheets-filter.controller.spec.ts) exercise row and column changes and their effect on filtering.
+
+<a id="connect-applications-and-agents-through-facade-apis-and-events"></a>
 
 ### Connect applications and agents through Facade APIs and events
 
 The repository includes the content models, formula engine, and Canvas rendering and layout engine behind the editors. They are shared building blocks: spreadsheet rich text, for example, reuses document layout and rendering. Custom features can build on these engines instead of implementing a separate content stack. Read about the [formula engine architecture](https://docs.univer.ai/blog/formula) and [rendering engine architecture](https://docs.univer.ai/blog/rendering).
 
-Browser editors, Node.js Headless tasks, and appropriately composed Workers can reuse the corresponding content plugins, models, commands, and calculation. See [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) and the [isomorphic architecture](https://github.com/dream-num/univer/blob/dev/docs/ISOMORPHIC.md).
+Browser editors, Node.js Headless tasks, and appropriately composed Workers can reuse the corresponding content plugins, models, commands, and calculation. See [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) and the [isomorphic architecture](./docs/ISOMORPHIC.md).
 
 `ICommandService` exposes execution callbacks so plugins can observe commands before and after execution. Facade APIs wrap the underlying capabilities in application objects such as `FWorkbook`, `FWorksheet`, and `FRange`.
 
 Each plugin contributes its own Facade extensions, **typed events through `univerAPI.Event`**, and **enums through `univerAPI.Enum`**. Application code can discover event names and constants from one entry point instead of importing private services or repeating strings. For example, `BeforeCommandExecute` can inspect and cancel an execution; `CommandExecuted` reports executions to listeners. Listeners return disposables, and cancellation applies where the event supports it.
 
-Facade extensions stay with their feature packages, so a content API does not have to pull in unrelated UI APIs. See the [Facade design](https://docs.univer.ai/blog/facade), [command callbacks and event bridge](https://github.com/dream-num/univer/blob/dev/packages/core/src/facade/f-univer.ts), and [Enum entry point](https://github.com/dream-num/univer/blob/dev/packages/core/src/facade/f-enum.ts).
+Facade extensions stay with their feature packages, so a content API does not have to pull in unrelated UI APIs. See the [Facade design](https://docs.univer.ai/blog/facade), [command callbacks and event bridge](./packages/core/src/facade/f-univer.ts), and [Enum entry point](./packages/core/src/facade/f-enum.ts).
 
-The repository provides working feature implementations and patterns for extending them. Read the [filter implementation walkthrough](https://docs.univer.ai/blog/anatomy) for a complete example, or the [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md) before depending on an extension point.
+The repository provides working feature implementations and patterns for extending them. Read the [filter implementation walkthrough](https://docs.univer.ai/blog/anatomy) for a complete example, or the [API Stability Policy](./docs/API_STABILITY.md) before depending on an extension point.
 
 <a id="open-source-and-commercial-extensions"></a>
 
 ## Extend your application with Univer Office SDK
+
+<img src="./docs/img/readme/sdk-banner.png" alt="" width="960" />
 
 When you want more ready-to-integrate capabilities, compose the corresponding **Univer Office SDK** modules: additional content types, advanced editing plugins, collaboration, file conversion, and agent tooling. They extend the same content models, plugin architecture, command system, and Facade design introduced above, so you can build on your existing integration.
 
@@ -486,6 +540,8 @@ When you want more ready-to-integrate capabilities, compose the corresponding **
 | **Commercial Web SDK plugins** | Follow the core's Plugin, dependency injection, Command/Mutation, and Facade extension patterns. Add charts, shapes, pivot tables, SmartArt, and other features for the corresponding content types. |
 | **Server SDK** | Extends the same content models and mutation conventions with real-time collaboration, revision history, and Office file conversion. Integrates with your application's identity, permissions, and storage. |
 | **AI SDK extensions** | Reuse Web SDK Headless and Facade capabilities to provide composable Node.js APIs and CLI building blocks for agents to inspect, edit, and check content, with collaboration and Worktree review integrations. |
+
+<a id="scope-and-licensing"></a>
 
 ### Scope and licensing
 
@@ -519,7 +575,13 @@ For repeated calls, optional [Worker pools and a daemon](https://docs.univer.ai/
 
 </details>
 
+<a id="application-patterns-and-ecosystem"></a>
+
 ## Application patterns and ecosystem
+
+<img src="./docs/img/readme/ecosystem-banner.png" alt="" width="960" />
+
+<a id="univer-workspace-an-office-sdk-reference-application"></a>
 
 ### Univer Workspace: an Office SDK reference application
 
@@ -528,10 +590,10 @@ For a complete application reference, start with [Univer Workspace](https://gith
 <table>
   <tr>
     <td width="50%" valign="top">
-      <a href="https://space.univer.ai/"><img src="./docs/img/readme/previews/workspace.png" alt="An agent conversation beside an editable budget spreadsheet in Univer Workspace" width="420" /></a>
+      <a href="https://space.univer.ai/"><img src="./docs/img/readme/workspace.webp" alt="An editable budget spreadsheet in Univer Workspace" width="420" /></a>
     </td>
     <td width="50%" valign="top">
-      <a href="https://univer.ai/demo/web-app"><img src="./docs/img/readme/previews/workspace-web-app.png" alt="A Web App with assumption controls beside its connected editable spreadsheet" width="420" /></a>
+      <a href="https://univer.ai/demo/web-app"><img src="./docs/img/readme/web-app.webp" alt="A Web App with assumption controls beside its connected editable spreadsheet" width="420" /></a>
     </td>
   </tr>
   <tr>
@@ -550,7 +612,11 @@ For a complete application reference, start with [Univer Workspace](https://gith
 
 Workspace is open source; its SDK dependencies follow their respective licenses. See the [Workspace overview](https://univer.ai/workspace/) for connected apps and review workflows.
 
+<p align="center"><a href="https://www.youtube.com/watch?v=1p-SMEiK6Kg"><img src="./docs/img/readme/integration-demo.png" alt="Watch an SDK integration demo" width="720" /></a></p>
+
 [Watch an SDK integration demo](https://www.youtube.com/watch?v=1p-SMEiK6Kg)
+
+<a id="cli-agent-integrations-and-developer-skills"></a>
 
 ### CLI, agent integrations, and developer skills
 
@@ -566,11 +632,13 @@ The same SDK capabilities can also be composed into the agents and tools you alr
 
 Each repository documents its setup and SDK dependencies. Explore the [ecosystem](https://univer.ai/ecosystem/) for agent entry points, or the [documentation](https://docs.univer.ai/) to build your own integration.
 
+<a id="documentation-and-contributing"></a>
+
 ## Documentation and contributing
 
 Thanks to all [contributors](https://github.com/dream-num/univer/graphs/contributors) who build and improve Univer. Contributions to engines, plugins, tests, documentation, and examples are welcome.
 
-[Web SDK](https://docs.univer.ai/guides/sheets) · [Server SDK](https://docs.univer.ai/server) · [AI SDK](https://docs.univer.ai/ai) · [API reference](https://docs.univer.ai/reference/classes/univer) · [Live showcase](https://office.univer.ai/)
+<p align="center"><a href="https://docs.univer.ai/guides/sheets">🧩 Web SDK</a> · <a href="https://docs.univer.ai/server">🖥️ Server SDK</a> · <a href="https://docs.univer.ai/ai">🤖 AI SDK</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API reference</a> · <a href="https://office.univer.ai/">🎮 Live showcase</a></p>
 
 <details>
 <summary>Runtime compatibility</summary>
@@ -597,7 +665,7 @@ Thanks to all [contributors](https://github.com/dream-num/univer/graphs/contribu
 └── docs/          Architecture notes, images, and repository-local documentation
 ```
 
-Package-level READMEs live beside each package under [`packages/`](https://github.com/dream-num/univer/tree/dev/packages).
+Package-level READMEs live beside each package under [`packages/`](./packages).
 
 ### Local development
 
@@ -624,30 +692,58 @@ Useful commands:
 | `pnpm lint` | Run ESLint. |
 | `pnpm storybook:dev` | Start Storybook for UI component development. |
 
-Read [CONTRIBUTING.md](https://github.com/dream-num/univer/blob/dev/CONTRIBUTING.md) before opening a pull request.
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
 </details>
 
 <details>
 <summary>Architecture and contributor references</summary>
 
-- [Repository packages](https://github.com/dream-num/univer/tree/dev/packages), [presets](https://github.com/dream-num/univer/tree/dev/presets), and [examples](https://github.com/dream-num/univer/tree/dev/examples).
-- [Building Isomorphic Univer](https://github.com/dream-num/univer/blob/dev/docs/ISOMORPHIC.md).
-- [Contributing to Facade API](https://github.com/dream-num/univer/blob/dev/docs/CONTRIBUTING-FACADE.md).
-- [API Stability Policy](https://github.com/dream-num/univer/blob/dev/docs/API_STABILITY.md).
-- [Naming Convention](https://github.com/dream-num/univer/blob/dev/docs/NAMING_CONVENTION.md) and [Fixing Memory Leaks](https://github.com/dream-num/univer/blob/dev/docs/FIX_MEMORY_LEAK.md).
-- [Architecture TLDRs](https://github.com/dream-num/univer/tree/dev/docs/tldr) and [OLE attachment notes](https://github.com/dream-num/univer/blob/dev/packages/drawing/docs/ole-attachments.md).
+- [Repository packages](./packages), [presets](./presets), and [examples](./examples).
+- [Building Isomorphic Univer](./docs/ISOMORPHIC.md).
+- [Contributing to Facade API](./docs/CONTRIBUTING-FACADE.md).
+- [API Stability Policy](./docs/API_STABILITY.md).
+- [Naming Convention](./docs/NAMING_CONVENTION.md) and [Fixing Memory Leaks](./docs/FIX_MEMORY_LEAK.md).
+- [Architecture TLDRs](./docs/tldr) and [OLE attachment notes](./packages/drawing/docs/ole-attachments.md).
 
 </details>
 
+<a id="community"></a>
+
 ## Community
 
-Ask questions in [GitHub Discussions](https://github.com/dream-num/univer/discussions), join [Discord](https://discord.gg/z3NKNT6D2f), and follow [X](https://twitter.com/univerhq) or [YouTube](https://www.youtube.com/@dreamNum). Please read the [Code of Conduct](https://github.com/dream-num/univer/blob/dev/CODE_OF_CONDUCT.md).
+Ask questions in [GitHub Discussions](https://github.com/dream-num/univer/discussions), join [Discord](https://discord.gg/z3NKNT6D2f), and follow [X](https://twitter.com/univerhq) or [YouTube](https://www.youtube.com/@dreamNum). Please read the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-For security reports, follow the [Security Policy](https://github.com/dream-num/univer/blob/dev/SECURITY.md). Support development through [Open Collective](https://opencollective.com/univer).
+<a id="security"></a>
+
+## Security
+
+If you believe you have found a security issue, please follow the [Security Policy](./SECURITY.md).
+
+<a id="sponsors"></a>
+
+## Sponsors
+
+Univer is supported by the community and sponsors. You can support the project through [Open Collective](https://opencollective.com/univer).
+
+<p>
+  <a href="https://opencollective.com/univer/sponsor/0/website"><img src="https://opencollective.com/univer/sponsor/0/avatar.svg" alt="Become a sponsor" /></a>
+</p>
+
+<p>
+  <a href="https://opencollective.com/univer/backer/0/website"><img src="https://opencollective.com/univer/backer/0/avatar.svg" width="64" height="64" alt="Backer 0" /></a>
+  <a href="https://opencollective.com/univer/backer/1/website"><img src="https://opencollective.com/univer/backer/1/avatar.svg" width="64" height="64" alt="Backer 1" /></a>
+  <a href="https://opencollective.com/univer/backer/2/website"><img src="https://opencollective.com/univer/backer/2/avatar.svg" width="64" height="64" alt="Backer 2" /></a>
+  <a href="https://opencollective.com/univer/backer/3/website"><img src="https://opencollective.com/univer/backer/3/avatar.svg" width="64" height="64" alt="Backer 3" /></a>
+  <a href="https://opencollective.com/univer/backer/4/website"><img src="https://opencollective.com/univer/backer/4/avatar.svg" width="64" height="64" alt="Backer 4" /></a>
+  <a href="https://opencollective.com/univer/backer/5/website"><img src="https://opencollective.com/univer/backer/5/avatar.svg" width="64" height="64" alt="Backer 5" /></a>
+  <a href="https://opencollective.com/univer/backer/6/website"><img src="https://opencollective.com/univer/backer/6/avatar.svg" width="64" height="64" alt="Backer 6" /></a>
+</p>
+
+<a id="license"></a>
 
 ## License
 
 Copyright (c) 2021-present DreamNum Co., Ltd.
 
-The open-source packages in this repository are licensed under [Apache-2.0](https://github.com/dream-num/univer/blob/dev/LICENSE). Commercial SDK modules are distributed and licensed separately.
+The open-source packages in this repository are licensed under [Apache-2.0](./LICENSE). Commercial SDK modules are distributed and licensed separately.

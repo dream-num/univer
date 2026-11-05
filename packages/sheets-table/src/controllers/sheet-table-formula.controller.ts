@@ -15,10 +15,10 @@
  */
 
 import type { IRemoveSuperTableMutationParam, ISetSuperTableMutationParam, ISetSuperTableMutationSearchParam } from '@univerjs/engine-formula';
-import type { ISetSheetTableParams } from '../commands/mutations/set-table-filter.mutation';
-import type { Table } from '../models/table';
 import { Disposable, ICommandService, Inject, toDisposable } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveSuperTableMutation, SetSuperTableMutation } from '@univerjs/engine-formula';
+import type { ISetSheetTableParams } from '../commands/mutations/set-table-filter.mutation';
+import type { Table } from '../models/table';
 import { SetSheetTableFilterMutation } from '../commands/mutations/set-table-filter.mutation';
 import { TableManager } from '../models/table-manager';
 
@@ -112,10 +112,7 @@ export class SheetTableFormulaController extends Disposable {
         const tableInfo = table.getTableInfo();
         const name = tableInfo.name;
         const columns = tableInfo.columns;
-        const titleMap = new Map<string, number>();
-        columns.forEach((column, index) => {
-            titleMap.set(column.displayName, index);
-        });
+        const titleMap = Object.fromEntries(columns.map((column, index) => [column.displayName, index]));
         this._commandService.executeCommand<ISetSuperTableMutationParam>(SetSuperTableMutation.id, {
             unitId,
             tableName: name,

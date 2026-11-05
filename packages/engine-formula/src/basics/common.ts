@@ -233,6 +233,10 @@ export interface ISuperTable {
     showFooter?: boolean;
 }
 
+export interface ISuperTableData extends Omit<ISuperTable, 'titleMap'> {
+    titleMap: Record<string, number>;
+}
+
 export enum TableOptionType {
     ALL = '#All',
     DATA = '#Data',

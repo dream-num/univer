@@ -95,7 +95,7 @@ export class UniverRPCNodeMainPlugin extends Plugin {
 function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessageProtocol, ChildProcess] {
     const logService = injector.get(ILogService);
 
-    const child = fork(path, { serialization: 'advanced' });
+    const child = fork(path);
     child.on('spawn', () => logService.log('Child computing process spawned!'));
     child.on('error', (error) => logService.error(error));
 

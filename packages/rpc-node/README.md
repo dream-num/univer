@@ -34,8 +34,6 @@ univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc });
 
 The referenced worker module must create its own Univer instance and register `UniverRPCNodeWorkerPlugin`; see the [Node.js worker example](../../examples/src/node/sdk/worker.ts).
 
-The child process uses Node.js advanced IPC serialization so formula metadata such as table column `Map` objects, sets, and typed arrays retain their types across the process boundary.
-
 Exported plugin classes:
 
 - `UniverRPCNodeMainPlugin`

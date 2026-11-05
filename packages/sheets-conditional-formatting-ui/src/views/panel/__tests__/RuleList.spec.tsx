@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
-import { BooleanNumber, LocaleService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, LocaleService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
     AddCfCommand,
@@ -26,6 +26,7 @@ import {
     CFSubRuleType,
     DeleteCfCommand,
     MoveCfCommand,
+    SetCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { RediContext } from '@univerjs/ui';
@@ -91,29 +92,10 @@ async function createRuleListTestBed(stopIfTrue = false) {
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(DeleteCfCommand);
     testBed.commandService.registerCommand(MoveCfCommand);
+    testBed.commandService.registerCommand(SetCfCommand);
     testBed.commandService.registerCommand(SetSelectionsOperation);
     testBed.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
-            sheets: {
-                conditional: {
-                    formatting: {
-                        ui: {
-                            panel: {
-                                managerRuleSelect: 'Show {0}',
-                                workSheet: 'Worksheet',
-                                selectedRange: 'Selected range',
-                                createRule: 'Create rule',
-                                clear: 'Clear rules',
-                            },
-                            preview: {
-                                describe: {
-                                    greaterThan: 'Greater than {0}',
-                                },
-                            },
-                        },
-                    },
-                },
-            },
             'sheets-conditional-formatting-ui': {
                 panel: {
                     managerRuleSelect: 'Show {0}',
@@ -163,7 +145,7 @@ describe('RuleList', () => {
         currentTestBed = undefined;
     });
 
-    it.each([false, true])('opens the rule from its read-only stopIfTrue=%s display without toggling it', async (stopIfTrue) => {
+    it.each([false, true])('toggles stopIfTrue=%s from the rule list with undo and redo without opening the editor', async (stopIfTrue) => {
         currentTestBed = await createRuleListTestBed(stopIfTrue);
         container = document.createElement('div');
         document.body.appendChild(container);
@@ -182,19 +164,31 @@ describe('RuleList', () => {
         const row = container.querySelector('[data-draggable-list-item-id="cf-active"]')!;
         const label = row.querySelector('[data-u-comp="checkbox"]')!;
         const checkbox = label.querySelector('input')!;
-        expect(checkbox.checked).toBe(stopIfTrue);
-        expect(checkbox.disabled).toBe(true);
+        const originalRule = currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active')!;
 
-        // The display's icon and label both belong to the surrounding rule's edit target.
         const target = stopIfTrue ? label.lastElementChild! : checkbox.parentElement!.lastElementChild!;
         await act(async () => {
             target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             await Promise.resolve();
         });
 
-        expect(openedRuleIds).toEqual(['cf-active']);
+        expect(currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active'))
+            .toEqual({ ...originalRule, stopIfTrue: !stopIfTrue });
+        expect(openedRuleIds).toEqual([]);
+        expect(checkbox.checked).toBe(!stopIfTrue);
+
+        await act(async () => {
+            expect(await currentTestBed!.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        });
+        expect(currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active')).toEqual(originalRule);
         expect(checkbox.checked).toBe(stopIfTrue);
-        expect(currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active')?.stopIfTrue).toBe(stopIfTrue);
+
+        await act(async () => {
+            expect(await currentTestBed!.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        });
+        expect(currentTestBed.ruleModel.getRule(currentTestBed.unitId, currentTestBed.subUnitId, 'cf-active'))
+            .toEqual({ ...originalRule, stopIfTrue: !stopIfTrue });
+        expect(checkbox.checked).toBe(!stopIfTrue);
     });
 
     it('shows only conditional formatting rules intersecting the current sheet selection in selected-range mode', async () => {

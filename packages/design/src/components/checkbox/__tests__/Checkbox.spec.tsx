@@ -22,15 +22,18 @@ import { Checkbox } from '../Checkbox';
 afterEach(cleanup);
 
 describe('Checkbox', () => {
-    it('click Checkbox', async () => {
+    it('exposes mixed selection to assistive technology', () => {
+        const root = render(<Checkbox indeterminate>Wrapping</Checkbox>);
+        expect(root.getByRole('checkbox').getAttribute('aria-checked')).toBe('mixed');
+        root.rerender(<Checkbox checked>Wrapping</Checkbox>);
+        expect(root.getByRole('checkbox').getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('changes the checked state when clicked', () => {
         function Component() {
             const [checked, setChecked] = useState(false);
 
-            function handleChange(value: string | number | boolean) {
-                setChecked(value as boolean);
-            }
-
-            return <Checkbox checked={checked} onChange={handleChange}>text</Checkbox>;
+            return <Checkbox checked={checked} onChange={(value) => setChecked(value === true)}>text</Checkbox>;
         }
 
         const root = render(<Component />);

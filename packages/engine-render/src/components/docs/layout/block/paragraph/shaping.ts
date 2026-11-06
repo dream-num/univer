@@ -15,12 +15,6 @@
  */
 
 import type { ICustomRangeForInterceptor, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { IBreakPoints } from '../../line-breaker/line-breaker';
-import type { ILayoutContext } from '../../tools';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -31,11 +25,17 @@ import {
     PositionedObjectLayoutType,
     resolveDocumentParagraphStyle,
 } from '@univerjs/core';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { IBreakPoints } from '../../line-breaker/line-breaker';
+import type { ILayoutContext } from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
-    getFirstGrapheme,
     getFontStyleString,
+    graphemeSegmenter,
     hasArabic,
     hasThai,
     hasTibetan,
@@ -55,7 +55,6 @@ import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/who
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
-import { LineBreaker } from '../../line-breaker/line-breaker';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
@@ -398,10 +397,11 @@ function createShapingLineBreaker(
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraph: IParagraph,
+    resolvedParagraphStyle: IParagraphStyle,
     traditionalLayout: boolean,
     measuredWholeEntityRanges: ICustomRangeForInterceptor[]
 ): IBreakPoints {
-    const lineBreaker = new LineBreaker(content);
+    const lineBreaker = viewModel.createLineBreaker(content, resolvedParagraphStyle, paragraphNode.contentStartIndex);
     const { paragraphStyle = {} } = paragraph;
     const { hyphen } = ctx;
 
@@ -428,12 +428,8 @@ function createShapingLineBreaker(
         }
     }
 
-    const documentSnapshot = viewModel.getSnapshot();
-    const { wordWrap } = resolveDocumentParagraphStyle(documentSnapshot.documentStyle, paragraphStyle, {
-        styles: documentSnapshot.styles,
-        paragraphStyleId: paragraph.styleId,
-    });
-    let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker, !traditionalLayout && wordWrap !== BooleanNumber.FALSE);
+    const explicitWordWrap = resolvedParagraphStyle.wordWrap;
+    let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker, !traditionalLayout && explicitWordWrap !== BooleanNumber.FALSE);
 
     const lang = getHyphenationLanguage(ctx, content, paragraphStyle, sectionBreakConfig);
     const doNotHyphenateCaps = sectionBreakConfig.doNotHyphenateCaps === BooleanNumber.TRUE;
@@ -553,6 +549,12 @@ export function shaping(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const snapshot = viewModel.getSnapshot();
+    const resolvedParagraphStyle = resolveDocumentParagraphStyle(snapshot.documentStyle, paragraphStyle, {
+        styles: snapshot.styles,
+        paragraphStyleId: paragraph.styleId,
+    });
+    const wordWrap = viewModel.getParagraphWordWrap(resolvedParagraphStyle);
     const measuredWholeEntityRanges = collectMeasuredWholeEntityRanges(content, viewModel, paragraphNode);
     const measuredWholeEntityRangeByStart = new Map(measuredWholeEntityRanges.map((range) => [
         range.startIndex - paragraphNode.contentStartIndex,
@@ -571,6 +573,7 @@ export function shaping(
         paragraphNode,
         sectionBreakConfig,
         paragraph,
+        resolvedParagraphStyle,
         traditionalLayout,
         measuredWholeEntityRanges
     );
@@ -583,7 +586,7 @@ export function shaping(
         }
         // Word keeps Western names such as Breyer/Duitsland together. Oversized
         // words still use the layout ruler's normal emergency-break path.
-        if (traditionalLayout && bk.type === BreakPointType.Normal
+        if (traditionalLayout && wordWrap !== BooleanNumber.TRUE && bk.type === BreakPointType.Normal
             && /[a-z]\/[a-z]/i.test(content.slice(bk.position - 2, bk.position + 1))) {
             continue;
         }
@@ -600,6 +603,7 @@ export function shaping(
 
         let src = word;
         let i = last;
+        let graphemes: Intl.Segments | undefined;
         while (src.length > 0) {
             while (
                 measuredWholeEntityRangeIndex < measuredWholeEntityRangeStarts.length &&
@@ -650,8 +654,11 @@ export function shaping(
                 src = src.substring(char.length);
             } else if (/\s/.test(char) || cjk.hasCJK(char)) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-                if (config.textStyle.sc && cjk.hasCJK(char)) {
-                    char = getFirstGrapheme(src) ?? char;
+                if (cjk.hasCJK(char) && (config.textStyle.sc
+                    || (wordWrap != null && /\p{Script=Hangul}/u.test(char)))) {
+                    graphemes ??= graphemeSegmenter.segment(word);
+                    const grapheme = graphemes.containing(i - last);
+                    char = grapheme ? grapheme.segment.slice(i - last - grapheme.index) : char;
                 }
                 const newGlyph = createWhitespaceGlyph(char, config, i, viewModel, paragraphNode, sectionBreakConfig, snapToGrid, traditionalLayout);
                 if (char === DataStreamTreeTokenType.PARAGRAPH

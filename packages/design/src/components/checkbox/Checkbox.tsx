@@ -100,6 +100,7 @@ export function Checkbox(props: ICheckboxProps) {
                     className="univer-absolute univer-size-0 univer-opacity-0"
                     type="checkbox"
                     checked={checked}
+                    aria-checked={indeterminate ? 'mixed' : checked}
                     disabled={disabled}
                     onChange={handleChange}
                 />

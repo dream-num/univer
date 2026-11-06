@@ -34,11 +34,6 @@ import type {
     Styles,
     Worksheet,
 } from '@univerjs/core';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import type { Scene } from '../../scene';
-import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     BooleanNumber,
     CellValueType,
@@ -69,6 +64,11 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { ITransformChangeState } from '../../basics/interfaces';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
+import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -77,7 +77,6 @@ import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { FontCache } from '../docs/layout/shaping-engine/font-cache';
 import { columnIterator } from '../docs/layout/tools';
-import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import {
     EXPAND_SIZE_FOR_RENDER_OVERFLOW,
     MEASURE_EXTENT,
@@ -85,6 +84,7 @@ import {
     shouldRenderRowText,
 } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
+import { SheetCellDocumentViewModel } from './sheet-cell-document-view-model';
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
 
@@ -784,7 +784,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return undefined;
             }
 
-            const documentViewModel = new DocumentViewModel(documentModel);
+            const documentViewModel = new SheetCellDocumentViewModel(documentModel);
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
@@ -1013,7 +1013,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return measuredWidth;
         }
 
-        const documentViewModel = new DocumentViewModel(documentModel);
+        const documentViewModel = new SheetCellDocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         if (style?.tb === WrapStrategy.WRAP) {
@@ -1469,7 +1469,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (fontCache.documentSkeleton) {
             const snapshot = fontCache.documentSkeleton.getViewModel().getDataModel().getSnapshot();
             const documentModel = new DocumentDataModel(scaleDocumentDataForShrinkToFit(snapshot, scale, fallbackFontSize));
-            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap });
+            const documentSkeleton = DocumentSkeleton.create(new SheetCellDocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap });
             documentSkeleton.calculate();
             fontCache.documentSkeleton = documentSkeleton;
         } else {
@@ -1547,7 +1547,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
                     updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
                 }
-                const documentViewModel = new DocumentViewModel(documentModel);
+                const documentViewModel = new SheetCellDocumentViewModel(documentModel);
                 if (documentViewModel) {
                     const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
                     documentSkeleton.calculate();

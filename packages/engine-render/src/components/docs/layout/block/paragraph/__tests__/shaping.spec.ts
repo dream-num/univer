@@ -21,6 +21,7 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
+    MODERN_DOCUMENT_DEFAULT_MARGIN,
     NamedStyleType,
     PositionedObjectLayoutType,
     TabStopAlignment,
@@ -39,6 +40,101 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each([
+        { content: '오늘 전략을', inherited: 1, direct: undefined, lines: ['오늘 전략', '을'] },
+        { content: '오늘 전략을', inherited: 1, direct: 0, lines: ['오늘 ', '전략을'] },
+        { content: '오늘 전략을', inherited: 0, direct: 1, lines: ['오늘 전략', '을'] },
+        { content: 'ab cdef', inherited: 1, direct: undefined, lines: ['ab cd', 'ef'] },
+        { content: 'ab cdef', inherited: 1, direct: 0, lines: ['ab ', 'cdef'] },
+    ])('honors inherited wrapping and direct overrides: $content / $inherited / $direct', ({ content, inherited, direct, lines }) => {
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.DRAWINGML,
+                defaultParagraphStyle: { wordWrap: inherited },
+                pageSize: { width: 90, height: 600 },
+                renderConfig: { zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+            body: {
+                textRuns: [{ st: 0, ed: content.length, ts: { textAdvance: 10 } }],
+                paragraphs: [{ startIndex: content.length, paragraphStyle: { wordWrap: direct, snapToGrid: BooleanNumber.FALSE } }],
+            },
+        });
+        try {
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            expect(pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))
+                .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''))).toEqual(lines);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.MODERN, lines: ['오늘 ', '전략을'] },
+        { flavor: DocumentFlavor.TRADITIONAL, lines: ['오늘 ', '전략을'] },
+        { flavor: DocumentFlavor.UNSPECIFIED, lines: ['오늘 전략', '을'] },
+        { flavor: DocumentFlavor.DRAWINGML, lines: ['오늘 ', '전략을'] },
+        { flavor: undefined, lines: ['오늘 ', '전략을'] },
+    ])('wraps Korean words according to the host layout: $flavor', ({ flavor, lines }) => {
+        const content = '오늘 전략을';
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: flavor,
+                pageSize: { width: 50 + 2 * (flavor == null || flavor === DocumentFlavor.MODERN ? MODERN_DOCUMENT_DEFAULT_MARGIN : 20), height: 600 },
+                renderConfig: { zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+            body: {
+                textRuns: [{ st: 0, ed: content.length, ts: { textAdvance: 10 } }],
+                paragraphs: [{ startIndex: content.length, paragraphStyle: { snapToGrid: BooleanNumber.FALSE } }],
+            },
+        });
+        try {
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const actual = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))
+                .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
+            expect(actual).toEqual(lines);
+            expect(dataModel.getBody()?.dataStream).toBe(`${content}\r\n`);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('splits oversized Korean words only between graphemes: %s', (flavor) => {
+        const segmenter = new Intl.Segmenter('ko', { granularity: 'grapheme' });
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: [...segmenter.segment(text)].length * 10,
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        }));
+        const content = '한글단어'.normalize('NFD').repeat(128);
+        const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: flavor,
+                pageSize: { width: 20 + 2 * (flavor === DocumentFlavor.MODERN ? MODERN_DOCUMENT_DEFAULT_MARGIN : 20), height: 600 },
+                renderConfig: { zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+            body: {
+                paragraphs: [{ startIndex: content.length, paragraphStyle: { snapToGrid: BooleanNumber.FALSE } }],
+            },
+        });
+        try {
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))
+                .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
+            expect(lines).toEqual(Array.from({ length: 128 }, () => ['한글', '단어'].map((text) => text.normalize('NFD'))).flat());
+        } finally {
+            measure.mockRestore();
+            viewModel.dispose();
+            dataModel.dispose();
+        }
+    });
+
     it.each([
         { content: '/\t/\t/\t/', positions: [0, 100, 200, 300] },
         { content: '/\t/1\t/\t/', positions: [0, 100, 200, 300] },
@@ -1043,9 +1139,11 @@ describe('shaping', () => {
         ];
         for (const token of columnTokens) {
             const glyph = createSkeletonLetterGlyph(token, {
-                fontStyle: {},
+                fontStyle: getFontStyleString({}),
                 textStyle: {},
-            } as any);
+                charSpace: 0,
+                snapToGrid: BooleanNumber.FALSE,
+            });
 
             expect(glyph.raw).toBe(token);
             expect(glyph.streamType).toBe(token);
@@ -1087,18 +1185,17 @@ describe('shaping', () => {
         const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
         paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
 
-        const fakeHyphen = {
-            hasPattern: vi.fn(() => false),
-            loadPattern: vi.fn(() => Promise.resolve()),
-            fetchHyphenCache: vi.fn(),
-            hyphenate: vi.fn(),
-            dispose: vi.fn(),
-        };
-        ctx.hyphen = fakeHyphen as any;
-        ctx.languageDetector = { detect: vi.fn(() => Lang.Fr), dispose: vi.fn() } as any;
-
-        shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
-        expect(fakeHyphen.loadPattern).toHaveBeenCalledWith(Lang.Fr);
+        const hasPattern = vi.spyOn(ctx.hyphen, 'hasPattern').mockReturnValue(false);
+        const loadPattern = vi.spyOn(ctx.hyphen, 'loadPattern').mockResolvedValue();
+        const detect = vi.spyOn(ctx.languageDetector, 'detect').mockReturnValue(Lang.Fr);
+        try {
+            shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            expect(loadPattern).toHaveBeenCalledWith(Lang.Fr);
+        } finally {
+            hasPattern.mockRestore();
+            loadPattern.mockRestore();
+            detect.mockRestore();
+        }
     });
 
     it('uses hyphen enhancer when hyphenation is enabled and pattern exists', () => {
@@ -1107,18 +1204,15 @@ describe('shaping', () => {
         const paragraph = viewModel.getParagraph(paragraphNode.endIndex)!;
         paragraph.paragraphStyle = { ...paragraph.paragraphStyle, suppressHyphenation: BooleanNumber.FALSE };
 
-        const fakeHyphen = {
-            hasPattern: vi.fn(() => true),
-            loadPattern: vi.fn(() => Promise.resolve()),
-            fetchHyphenCache: vi.fn(),
-            hyphenate: vi.fn((word: string) => [word]),
-            dispose: vi.fn(),
-        };
-        ctx.hyphen = fakeHyphen as any;
-        ctx.languageDetector = { detect: vi.fn(() => Lang.EnUs), dispose: vi.fn() } as any;
-
-        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
-        expect(result.length).toBeGreaterThan(0);
-        expect(fakeHyphen.loadPattern).not.toHaveBeenCalled();
+        const loadPattern = vi.spyOn(ctx.hyphen, 'loadPattern');
+        const detect = vi.spyOn(ctx.languageDetector, 'detect').mockReturnValue(Lang.EnUs);
+        try {
+            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            expect(result.map((run) => run.text)).toEqual(['hy', 'phen', 'ation\r']);
+            expect(loadPattern).not.toHaveBeenCalled();
+        } finally {
+            loadPattern.mockRestore();
+            detect.mockRestore();
+        }
     });
 });

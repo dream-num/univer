@@ -16,6 +16,7 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    BooleanNumber,
     BorderStyleTypes,
     DataStreamTreeTokenType,
     DocumentFlavor,
@@ -32,6 +33,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
+import { DocSimpleSkeleton } from '../../docs/layout/doc-simple-skeleton';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 import { getCustomNumberDisplayText, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
@@ -99,6 +101,85 @@ describe('Rich-text render snapshot isolation', () => {
 });
 
 describe('Cell layout and merged styles', () => {
+    it.each([
+        { documentFlavor: undefined, wordWrap: undefined },
+        ...[DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) => [undefined, BooleanNumber.FALSE, BooleanNumber.TRUE].map((wordWrap) => ({ documentFlavor, wordWrap }))),
+    ])('keeps Korean syllable wrapping in cells, including rich text from Docs: $documentFlavor, $wordWrap', ({ documentFlavor, wordWrap }) => {
+        const environment = setupRenderTestEnv();
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 10,
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const content = '오늘 전략을';
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'korean-cell-wrapping',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 50,
+                    cellData: { 0: { 0: {
+                        v: content,
+                        s: { tb: WrapStrategy.WRAP, pd: { t: 0, b: 0, l: 0, r: 0 } },
+                        p: documentFlavor == null
+                            ? undefined
+                            : {
+                                id: 'korean-rich-cell',
+                                documentStyle: { documentFlavor, textStyle: { lang: 'ko-KR' } },
+                                body: {
+                                    dataStream: `${content}\r\n`,
+                                    paragraphs: [{ startIndex: content.length, paragraphId: 'korean-cell-paragraph', paragraphStyle: { wordWrap } }],
+                                },
+                            },
+                    } } },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const before = Tools.deepClone(workbook.getSnapshot());
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const cache = skeleton.stylesCache.fontMatrix.getValue(0, 0)!;
+            let lines: string[];
+            let renderedHeight: number;
+            if (cache.documentSkeleton) {
+                const document = cache.documentSkeleton.getViewModel().getDataModel();
+                document.updateDocumentDataPageSize(50);
+                cache.documentSkeleton.makeDirty(true);
+                cache.documentSkeleton.calculate();
+                const pages = cache.documentSkeleton.getSkeletonData()!.pages;
+                const layoutLines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+                lines = layoutLines
+                    .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
+                renderedHeight = layoutLines.reduce((height, line) => Math.max(height, line.top + line.marginTop + line.lineHeight), 0);
+            } else {
+                const simple = new DocSimpleSkeleton(content, cache.fontString, true, 50, Infinity, skeleton.textLineGap);
+                lines = simple.calculate().map((line) => line.text);
+                renderedHeight = simple.getTotalHeight();
+            }
+            expect(lines).toEqual(['오늘 전략', '을']);
+            expect(skeleton.calculateAutoHeightForCell(0, 0)).toBeCloseTo(renderedHeight);
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 50)).toBeCloseTo(50);
+            expect(workbook.getSnapshot()).toEqual(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+            environment.restore();
+        }
+    });
+
     it('renders justified plain text using the cell width', () => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });

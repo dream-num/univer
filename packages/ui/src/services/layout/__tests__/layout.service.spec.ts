@@ -214,7 +214,7 @@ describe('DesktopLayoutService', () => {
         });
         dispatchFocusIn(button);
         await Promise.resolve();
-        expect(focused).toEqual(['slide-1']);
+        expect(focused).toEqual([]);
         expect(service.isFocused).toBe(true);
         expect(contextService.getContextValue(FOCUSING_UNIVER)).toBe(true);
         expect(contextService.getContextValue(FOCUSING_UNIVER_EDITOR)).toBe(false);

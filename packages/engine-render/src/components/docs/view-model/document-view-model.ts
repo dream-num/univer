@@ -1094,7 +1094,7 @@ export class DocumentViewModel implements IDisposable {
         };
         this._children.forEach(visit);
         this._treeNodes = nodes;
-        this._treeNodesByStartIndex = nodes.toSorted((left, right) => left.startIndex - right.startIndex);
+        this._treeNodesByStartIndex = [...nodes].sort((left, right) => left.startIndex - right.startIndex);
         this._plainTopLevelParagraphNodes = this._children.flatMap((section) =>
             section.children.filter(
                 (node) => node.nodeType === DataStreamTreeNodeType.PARAGRAPH && node.children.length === 0

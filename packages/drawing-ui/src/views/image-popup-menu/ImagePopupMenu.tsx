@@ -221,7 +221,7 @@ function ToolbarButton(props: {
 
     return (
         <Tooltip
-            className="univer-fill-mode-backwards univer-delay-100"
+            className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
             title={props.title}
             placement="bottom"
             visible={tooltipVisible}
@@ -307,7 +307,7 @@ function ToolbarDropdownButton<T extends string | number>(props: {
         >
             <span>
                 <Tooltip
-                    className="univer-fill-mode-backwards univer-delay-100"
+                    className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
                     title={props.title}
                     placement="bottom"
                     visible={tooltipVisible && !open}

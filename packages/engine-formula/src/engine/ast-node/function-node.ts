@@ -68,10 +68,6 @@ export class FunctionNode extends BaseAstNode {
             this._setLocale();
         }
 
-        if (this._functionExecutor.needsSheetsInfo) {
-            this._setSheetsInfo();
-        }
-
         if (this._functionExecutor.needsFormulaDataModel) {
             this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
         }
@@ -169,6 +165,11 @@ export class FunctionNode extends BaseAstNode {
         }
 
         return object.withDateSystem(dateSystem);
+    }
+
+    isAffectedBySheetMetadata(sheetOrderChanged: boolean, sheetSizeChanged: boolean): boolean {
+        return (sheetOrderChanged && this._functionExecutor.needsSheetsInfo) ||
+            (sheetSizeChanged && this._functionExecutor.needsSheetRowColumnCount);
     }
 
     isFunctionExecutorArgumentsIgnoreNumberPattern() {
@@ -403,6 +404,10 @@ export class FunctionNode extends BaseAstNode {
 
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount);
         this._functionExecutor.setDateSystem(this._currentConfigService.getDateSystem(currentUnitId));
+
+        if (this._functionExecutor.needsSheetsInfo) {
+            this._setSheetsInfo();
+        }
 
         if (this._functionExecutor.needsSheetRowColumnCount) {
             const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);

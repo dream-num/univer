@@ -30,6 +30,7 @@ import type {
     ISetRangeValuesMutationParams,
     ISetRowHiddenMutationParams,
     ISetRowVisibleMutationParams,
+    ISetWorksheetOrderMutationParams,
 } from '@univerjs/sheets';
 import {
     Disposable,
@@ -183,7 +184,9 @@ export class ActiveDirtyController extends Disposable {
         for (const mutation of [SetWorksheetRowCountMutation, SetWorksheetColumnCountMutation]) {
             this._activeDirtyManagerService.register(mutation.id, {
                 commandId: mutation.id,
-                getDirtyData: () => ({ forceCalculation: true }),
+                getDirtyData: (command: ICommandInfo) => ({
+                    dirtyReferenceUnits: [(command.params as { unitId: string }).unitId],
+                }),
             });
         }
 
@@ -280,7 +283,10 @@ export class ActiveDirtyController extends Disposable {
     private _initialSheet() {
         this._activeDirtyManagerService.register(SetWorksheetOrderMutation.id, {
             commandId: SetWorksheetOrderMutation.id,
-            getDirtyData: () => ({ forceCalculation: true }),
+            getDirtyData: (command: ICommandInfo) => {
+                const { unitId, fromOrder, toOrder } = command.params as ISetWorksheetOrderMutationParams;
+                return { dirtyReferenceUnits: fromOrder === toOrder ? [] : [unitId] };
+            },
         });
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,

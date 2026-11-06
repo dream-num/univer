@@ -96,14 +96,15 @@ describe('ActiveDirtyController', () => {
         testBed?.univer.dispose();
     });
 
-    it('rebuilds dependencies across the workbook when sheet order changes', () => {
+    it('reports reference context changes without forcing every formula', () => {
         testBed = createControllerTestBed();
         testBed.injector.get(ActiveDirtyController);
         const dirty = getDirtyData(testBed, {
             id: SetWorksheetOrderMutation.id,
-            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 0 },
+            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 1 },
         });
-        expect(dirty.forceCalculation).toBe(true);
+        expect(dirty.forceCalculation).toBeUndefined();
+        expect(dirty.dirtyReferenceUnits).toEqual(['test']);
         expect(dirty.clearDependencyTreeCache).toBeUndefined();
     });
 
@@ -121,7 +122,7 @@ describe('ActiveDirtyController', () => {
     it.each([SetWorksheetRowCountMutation.id, SetWorksheetColumnCountMutation.id])('triggers calculation for direct dimension changes: %s', (id) => {
         testBed = createControllerTestBed();
         testBed.injector.get(ActiveDirtyController);
-        expect(getDirtyData(testBed, { id, params: { unitId: 'test', subUnitId: 'sheet1', rowCount: 12, columnCount: 16 } })).toEqual({ forceCalculation: true });
+        expect(getDirtyData(testBed, { id, params: { unitId: 'test', subUnitId: 'sheet1', rowCount: 12, columnCount: 16 } })).toEqual({ dirtyReferenceUnits: ['test'] });
     });
 
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {

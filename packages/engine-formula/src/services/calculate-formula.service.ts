@@ -275,7 +275,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             this._preserveCircularUnits = new Set(formulaDatasetConfig.preserveCircularUnits);
             this._runtimeService.beginCircularReferences();
             this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
-            await this._executeStep();
+            let completed = false;
+            try {
+                await this._executeStep();
+                completed = !this._runtimeService.isStopExecution();
+            } finally {
+                this._formulaDependencyGenerator.finishReferenceContext?.(completed);
+            }
             this._runtimeService.completeCircularReferences();
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
             this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());

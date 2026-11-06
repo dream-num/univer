@@ -49,6 +49,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
 
 export interface IFormulaDirtyData {
+    dirtyReferenceUnits?: string[];
     dirtyIterationUnits?: string[];
     forceCalculation: boolean;
     dirtyRanges: IUnitRange[];
@@ -144,6 +145,7 @@ export interface IFormulaCurrentConfigService {
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
+    private _dirtyReferenceUnits: string[] = [];
     private _dirtyIterationUnits: string[] = [];
     private _unitData: IUnitData = Object.create(null);
 
@@ -404,6 +406,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._formulaData = config.formulaData;
         this._dirtyIterationUnits = config.dirtyIterationUnits ?? [];
+        this._dirtyReferenceUnits = config.dirtyReferenceUnits ?? [];
 
         this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
 
@@ -454,6 +457,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     getDirtyData(): IFormulaDirtyData {
         return {
             dirtyIterationUnits: this._dirtyIterationUnits,
+            dirtyReferenceUnits: this._dirtyReferenceUnits,
             forceCalculation: this._forceCalculate,
             dirtyRanges: this._dirtyRanges,
             dirtyNameMap: this._dirtyNameMap,
@@ -468,6 +472,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
         this._dirtyIterationUnits = [];
+        this._dirtyReferenceUnits = [];
         this._dirtyRanges = dirtyRanges;
 
         this._excludedCell = excludedCell;

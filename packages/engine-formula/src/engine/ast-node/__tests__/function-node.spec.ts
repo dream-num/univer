@@ -15,9 +15,9 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import type { LambdaValueObjectObject } from '../../value-object/lambda-value-object';
-import { DateSystem, LocaleType, UniverInstanceType } from '@univerjs/core';
+import { DateSystem, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { LambdaValueObjectObject } from '../../value-object/lambda-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction, CustomFunction } from '../../../functions/custom-function';
@@ -25,6 +25,7 @@ import { DateFunction } from '../../../functions/date/date';
 import { FUNCTION_NAMES_DATE } from '../../../functions/date/function-names';
 import { Accrint } from '../../../functions/financial/accrint';
 import { FUNCTION_NAMES_FINANCIAL } from '../../../functions/financial/function-names';
+import { Sheet } from '../../../functions/information/sheet';
 import { Abs } from '../../../functions/math/abs';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
@@ -72,6 +73,27 @@ function createDateSystemWorkbookData(id: string, dateSystem: DateSystem): IWork
 }
 
 describe('FunctionNode workbook context', () => {
+    it('refreshes worksheet metadata when reusing an AST after repeated moves', () => {
+        const data = createWorkbookData();
+        data.sheetOrder = ['sheet1', 'sheet2'];
+        data.sheets.sheet2 = { id: 'sheet2', name: 'Sheet2', rowCount: 1, columnCount: 1 };
+        const bed = createFunctionTestBed(data);
+        try {
+            const config = bed.get(IFormulaCurrentConfigService);
+            config.load({ formulaData: {}, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: false, dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {}, allUnitData: { [bed.unitId]: bed.sheetData } });
+            bed.get(IFunctionService).registerExecutors(new Sheet('SHEET'));
+            bed.get(IFormulaRuntimeService).setCurrent(0, 0, 1, 1, bed.sheetId, bed.unitId);
+            const lexerNode = bed.get(Lexer).treeBuilder('=SHEET("Sheet2")') as LexerNode;
+            const node = bed.get(AstTreeBuilder).parse(lexerNode) as BaseAstNode;
+            const book = bed.get(IUniverInstanceService).getUnit<Workbook>(bed.unitId, UniverInstanceType.UNIVER_SHEET)!;
+            for (const order of [['sheet1', 'sheet2'], ['sheet2', 'sheet1'], ['sheet1', 'sheet2']]) {
+                book.getConfig().sheetOrder = order;
+                node.resetCalculationState();
+                expect(getObjectValue(bed.get(Interpreter).execute(generateExecuteAstNodeData(node)))).toBe(order.indexOf('sheet2') + 1);
+            }
+        } finally { bed.univer.dispose(); }
+    });
+
     it('does not use the executing workbook locale to parse formula text', () => {
         const testBed = createFunctionTestBed(createWorkbookData());
         const currentConfigService = testBed.get(IFormulaCurrentConfigService);

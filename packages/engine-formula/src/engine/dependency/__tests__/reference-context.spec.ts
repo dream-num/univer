@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleType, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { expect, it } from 'vitest';
 import type { LexerNode } from '../../analysis/lexer-node';
 import { CustomFunction } from '../../../functions/custom-function';
 import { Sheet } from '../../../functions/information/sheet';
 import { Rows } from '../../../functions/lookup/rows';
 import { Sum } from '../../../functions/math/sum';
+import { ICalculateFormulaService } from '../../../services/calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
@@ -93,4 +96,35 @@ it('selects order and size sensitive references while retaining ordinary formula
         expect(context.update({ test: bed.sheetData }, info)).toBe(true);
         expect(affected('=CUSTOMSIZE()')).toBe(true);
     } finally { bed.univer.dispose(); }
+});
+
+it('executes opaque features without parsing an empty formula or recalculating unrelated cells', async () => {
+    const bed = createCommandTestBed({ id: 'test', name: 'test', appVersion: '1.3.1', locale: LocaleType.EN_US, styles: {}, sheetOrder: ['s'], sheets: { s: { id: 's', name: 'Sheet', rowCount: 10, columnCount: 10 } } });
+    const service = bed.get(ICalculateFormulaService);
+    let featureValue = 41;
+    const observed: unknown[][] = [];
+    const subscription = service.executionCompleteListener$.subscribe((data) => {
+        observed.push([data.unitData.test?.s?.getValue(0, 0)?.v, data.unitData.test?.s?.getValue(0, 2)?.v]);
+    });
+    try {
+        bed.get(IFeatureCalculationManagerService).register('test', 's', 'feature', {
+            unitId: 'test',
+            subUnitId: 's',
+            dependencyRanges: [],
+            getDirtyData: (dirty) => ({
+                runtimeCellData: { test: { s: new ObjectMatrix({ 0: { 1: { v: featureValue } } }) } },
+                dirtyRanges: dirty.forceCalculation ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } } : {},
+            }),
+        });
+        const config = { formulaData: { test: { s: { 0: { 0: { f: '=B1' }, 2: { f: '=5' } } } } }, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: true, dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {} };
+        await service.execute(config);
+        featureValue = 42;
+        bed.get(IUniverInstanceService).getUnit<Workbook>(bed.unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(bed.sheetId)!.setRowCount(11);
+        await service.execute({ ...config, forceCalculate: false, dirtyReferenceUnits: ['test'] });
+        expect(observed).toEqual([[41, 5], [42, undefined]]);
+        expect(bed.get(IFormulaCurrentConfigService).isForceCalculate()).toBe(false);
+    } finally {
+        subscription.unsubscribe();
+        bed.univer.dispose();
+    }
 });

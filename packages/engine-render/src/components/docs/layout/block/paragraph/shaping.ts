@@ -34,8 +34,8 @@ import type { ILayoutContext } from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
-    getFirstGrapheme,
     getFontStyleString,
+    graphemeSegmenter,
     hasArabic,
     hasThai,
     hasTibetan,
@@ -397,10 +397,11 @@ function createShapingLineBreaker(
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraph: IParagraph,
+    resolvedParagraphStyle: IParagraphStyle,
     traditionalLayout: boolean,
     measuredWholeEntityRanges: ICustomRangeForInterceptor[]
 ): IBreakPoints {
-    const lineBreaker = viewModel.createLineBreaker(content, paragraph, paragraphNode.contentStartIndex);
+    const lineBreaker = viewModel.createLineBreaker(content, resolvedParagraphStyle, paragraphNode.contentStartIndex);
     const { paragraphStyle = {} } = paragraph;
     const { hyphen } = ctx;
 
@@ -427,11 +428,7 @@ function createShapingLineBreaker(
         }
     }
 
-    const snapshot = viewModel.getSnapshot();
-    const explicitWordWrap = resolveDocumentParagraphStyle(snapshot.documentStyle, paragraphStyle, {
-        styles: snapshot.styles,
-        paragraphStyleId: paragraph.styleId,
-    }).wordWrap;
+    const explicitWordWrap = resolvedParagraphStyle.wordWrap;
     let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker, !traditionalLayout && explicitWordWrap !== BooleanNumber.FALSE);
 
     const lang = getHyphenationLanguage(ctx, content, paragraphStyle, sectionBreakConfig);
@@ -552,7 +549,12 @@ export function shaping(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    const wordWrap = viewModel.getParagraphWordWrap(paragraph);
+    const snapshot = viewModel.getSnapshot();
+    const resolvedParagraphStyle = resolveDocumentParagraphStyle(snapshot.documentStyle, paragraphStyle, {
+        styles: snapshot.styles,
+        paragraphStyleId: paragraph.styleId,
+    });
+    const wordWrap = viewModel.getParagraphWordWrap(resolvedParagraphStyle);
     const measuredWholeEntityRanges = collectMeasuredWholeEntityRanges(content, viewModel, paragraphNode);
     const measuredWholeEntityRangeByStart = new Map(measuredWholeEntityRanges.map((range) => [
         range.startIndex - paragraphNode.contentStartIndex,
@@ -571,6 +573,7 @@ export function shaping(
         paragraphNode,
         sectionBreakConfig,
         paragraph,
+        resolvedParagraphStyle,
         traditionalLayout,
         measuredWholeEntityRanges
     );
@@ -600,6 +603,7 @@ export function shaping(
 
         let src = word;
         let i = last;
+        let graphemes: Intl.Segments | undefined;
         while (src.length > 0) {
             while (
                 measuredWholeEntityRangeIndex < measuredWholeEntityRangeStarts.length &&
@@ -652,7 +656,9 @@ export function shaping(
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                 if (cjk.hasCJK(char) && (config.textStyle.sc
                     || (wordWrap != null && /\p{Script=Hangul}/u.test(char)))) {
-                    char = getFirstGrapheme(src) ?? char;
+                    graphemes ??= graphemeSegmenter.segment(word);
+                    const grapheme = graphemes.containing(i - last);
+                    char = grapheme ? grapheme.segment.slice(i - last - grapheme.index) : char;
                 }
                 const newGlyph = createWhitespaceGlyph(char, config, i, viewModel, paragraphNode, sectionBreakConfig, snapToGrid, traditionalLayout);
                 if (char === DataStreamTreeTokenType.PARAGRAPH

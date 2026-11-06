@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, resolveDocumentParagraphStyle } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
 import { getFirstGrapheme, getFontStyleString, getTextWithCaps } from '../../../basics/tools';
@@ -263,7 +263,11 @@ function* documentBreakPoints(document: IDocumentData) {
     let start = 0;
     for (const paragraph of [...paragraphs, undefined]) {
         const end = paragraph ? paragraph.startIndex + 1 : dataStream.length;
-        const breaker = createDocumentLineBreaker(document, paragraph, dataStream.slice(start, end), start);
+        const style = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
+            styles: document.styles,
+            paragraphStyleId: paragraph?.styleId,
+        });
+        const breaker = createDocumentLineBreaker(document, style, dataStream.slice(start, end), start);
         let point = breaker.nextBreakPoint();
         while (point) {
             yield { position: start + point.position, type: point.type };

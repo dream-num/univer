@@ -22,8 +22,6 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
-import type { IBoundRectNoAngle } from './vector2';
 import {
     BaselineOffset,
     ColorKit,
@@ -32,6 +30,8 @@ import {
     Rectangle,
     Tools,
 } from '@univerjs/core';
+import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
+import type { IBoundRectNoAngle } from './vector2';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 
@@ -407,7 +407,7 @@ export function hasLatinExtendedB(text: string) {
 }
 
 // Emoji check logic
-const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+export const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 export function getFirstGrapheme(text: string): string | null {
     // One UTF-16 code unit cannot span multiple graphemes. CJK letter glyphs
@@ -415,7 +415,7 @@ export function getFirstGrapheme(text: string): string | null {
     if (text.length <= 1) {
         return text || null;
     }
-    const it = segmenter.segment(text)[Symbol.iterator]();
+    const it = graphemeSegmenter.segment(text)[Symbol.iterator]();
     return it.next().value?.segment ?? null;
 }
 

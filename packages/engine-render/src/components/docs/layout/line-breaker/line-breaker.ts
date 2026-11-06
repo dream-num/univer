@@ -30,16 +30,8 @@ interface ILineBreakExtension {
 
 const classTrie = new UnicodeTrie(data);
 
-function mapClass(c: number, wordWrap?: BooleanNumber) {
+function mapClass(c: number) {
     switch (c) {
-        case H2:
-        case H3:
-        case JL:
-        case JV:
-        case JT:
-            // UAX #14 Hangul tailoring keeps Korean words together in Docs.
-            return wordWrap === BooleanNumber.FALSE ? AL : c;
-
         case AI:
             return AL;
 
@@ -76,23 +68,18 @@ export interface IBreakPoints {
 }
 
 export class LineBreaker implements IBreakPoints {
-    private _pos: number = 0;
+    protected _pos: number = 0;
     private _lastPos: number = 0;
     private _curClass: Nullable<number> = null;
-    private _codePoint: Nullable<number> = null;
-    private _lastCodePoint: Nullable<number> = null;
+    protected _codePoint: Nullable<number> = null;
+    protected _lastCodePoint: Nullable<number> = null;
     private _nextClass: Nullable<number> = null;
     private _lb8a: boolean = false;
     private _lb21a: boolean = false;
     private _lb30a: number = 0;
     private _rule: Rule = new Rule();
 
-    constructor(
-        public content: string,
-        private readonly _wordWrap?: BooleanNumber,
-        private readonly _languageAt?: (offset: number) => string | undefined,
-        private readonly _inferKorean = true
-    ) {}
+    constructor(public content: string) {}
 
     use(extension: ILineBreakExtension) {
         extension(this);
@@ -154,7 +141,7 @@ export class LineBreaker implements IBreakPoints {
         return null;
     }
 
-    private _getNextCodePoint() {
+    protected _getNextCodePoint() {
         const code = this.content.charCodeAt(this._pos++);
         const next = this.content.charCodeAt(this._pos);
 
@@ -167,19 +154,11 @@ export class LineBreaker implements IBreakPoints {
         return code;
     }
 
-    private _nextCharClass() {
-        const language = this._wordWrap == null ? undefined : this._languageAt?.(this._pos);
-        const korean = language != null && /^ko(?:-|$)/i.test(language);
+    protected _nextCharClass() {
         const nextCodePoint = this._getNextCodePoint();
-        const rawClass = classTrie.get(nextCodePoint);
-
         this._lastCodePoint = this._codePoint;
         this._codePoint = nextCodePoint;
-
-        if (this._wordWrap === BooleanNumber.TRUE && !korean && rawClass === AL && /\p{Script=Latin}/u.test(String.fromCodePoint(nextCodePoint))) {
-            return ID;
-        }
-        return mapClass(rawClass, this._inferKorean || korean ? this._wordWrap : undefined);
+        return mapClass(classTrie.get(nextCodePoint));
     }
 
     private _getSimpleBreak() {
@@ -259,5 +238,35 @@ export class LineBreaker implements IBreakPoints {
         this._curClass = this._nextClass;
 
         return shouldBreak;
+    }
+}
+
+export class DocumentLineBreaker extends LineBreaker {
+    constructor(
+        content: string,
+        private readonly _wordWrap: BooleanNumber,
+        private readonly _languageAt?: (offset: number) => string | undefined,
+        private readonly _inferKorean = true
+    ) {
+        super(content);
+    }
+
+    protected override _nextCharClass() {
+        const offset = this._pos;
+        const nextCodePoint = this._getNextCodePoint();
+        const rawClass = classTrie.get(nextCodePoint);
+        this._lastCodePoint = this._codePoint;
+        this._codePoint = nextCodePoint;
+
+        if (this._wordWrap === BooleanNumber.FALSE) {
+            if ((rawClass === H2 || rawClass === H3 || rawClass === JL || rawClass === JV || rawClass === JT)
+                && (this._inferKorean || /^ko(?:-|$)/i.test(this._languageAt?.(offset) ?? ''))) {
+                return AL;
+            }
+        } else if (rawClass === AL && /\p{Script=Latin}/u.test(String.fromCodePoint(nextCodePoint))
+            && !/^ko(?:-|$)/i.test(this._languageAt?.(offset) ?? '')) {
+            return ID;
+        }
+        return mapClass(rawClass);
     }
 }

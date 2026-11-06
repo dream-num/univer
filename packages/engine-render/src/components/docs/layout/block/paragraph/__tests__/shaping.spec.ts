@@ -111,7 +111,7 @@ describe('shaping', () => {
             actualBoundingBoxAscent: 10,
             actualBoundingBoxDescent: 2,
         }));
-        const content = '한글단어'.normalize('NFD');
+        const content = '한글단어'.normalize('NFD').repeat(128);
         const { dataModel, viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: {
                 documentFlavor: flavor,
@@ -127,7 +127,7 @@ describe('shaping', () => {
             const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
             const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))
                 .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
-            expect(lines).toEqual(['한글', '단어'].map((text) => text.normalize('NFD')));
+            expect(lines).toEqual(Array.from({ length: 128 }, () => ['한글', '단어'].map((text) => text.normalize('NFD'))).flat());
         } finally {
             measure.mockRestore();
             viewModel.dispose();

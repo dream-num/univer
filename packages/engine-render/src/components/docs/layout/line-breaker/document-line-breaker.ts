@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IParagraph } from '@univerjs/core';
-import { DocumentFlavor, resolveDocumentParagraphStyle, resolveDocumentParagraphWordWrap } from '@univerjs/core';
-import { LineBreaker } from './line-breaker';
+import type { IDocumentBody, IDocumentData, IParagraphStyle } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
+import { DocumentLineBreaker, LineBreaker } from './line-breaker';
 
-export function createDocumentLineBreaker(document: IDocumentData, paragraph: IParagraph | undefined, content: string, start: number, body: IDocumentBody | undefined = document.body): LineBreaker {
-    const wordWrap = resolveDocumentParagraphWordWrap(document, paragraph);
-    const style = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
-        styles: document.styles,
-        paragraphStyleId: paragraph?.styleId,
-    });
-    const defaultLanguage = style.textStyle?.lang ?? document.documentStyle?.textStyle?.lang;
+export function createDocumentLineBreaker(document: IDocumentData, paragraphStyle: IParagraphStyle, content: string, start: number, body: IDocumentBody | undefined = document.body): LineBreaker {
+    const wordWrap = paragraphStyle.wordWrap ?? BooleanNumber.FALSE;
+    if (wordWrap === BooleanNumber.FALSE ? !/\p{Script=Hangul}/u.test(content) : !/\p{Script=Latin}/u.test(content)) {
+        return new LineBreaker(content);
+    }
     const inferKorean = document.documentStyle?.documentFlavor === DocumentFlavor.MODERN
         || document.documentStyle?.documentFlavor === DocumentFlavor.TRADITIONAL
         || document.documentStyle?.documentFlavor === DocumentFlavor.DRAWINGML;
+    if (wordWrap === BooleanNumber.FALSE && inferKorean) {
+        return new DocumentLineBreaker(content, wordWrap);
+    }
+    const defaultLanguage = paragraphStyle.textStyle?.lang ?? document.documentStyle?.textStyle?.lang;
     const runs = body?.textRuns ?? [];
     let runIndex = 0;
     let end = runs.length;
@@ -39,7 +41,7 @@ export function createDocumentLineBreaker(document: IDocumentData, paragraph: IP
             end = middle;
         }
     }
-    return new LineBreaker(content, wordWrap, (offset) => {
+    return new DocumentLineBreaker(content, wordWrap, (offset) => {
         const index = start + offset;
         while (runIndex < runs.length && runs[runIndex].ed <= index) {
             runIndex++;

@@ -15,12 +15,17 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, resolveDocumentParagraphStyle } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { createDocumentLineBreaker } from '../document-line-breaker';
 
 function segments(document: IDocumentData, text: string): string[] {
-    const breaker = createDocumentLineBreaker(document, document.body?.paragraphs?.[0], text, 0);
+    const paragraph = document.body?.paragraphs?.[0];
+    const style = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
+        styles: document.styles,
+        paragraphStyleId: paragraph?.styleId,
+    });
+    const breaker = createDocumentLineBreaker(document, style, text, 0);
     const result: string[] = [];
     let start = 0;
     let point = breaker.nextBreakPoint();
@@ -79,7 +84,7 @@ describe('document word wrapping', () => {
             documentStyle: { documentFlavor: DocumentFlavor.UNSPECIFIED, defaultParagraphStyle: { wordWrap: BooleanNumber.FALSE } },
             body: { dataStream: text, textRuns: [{ st: 0, ed: 7, ts: { lang: 'en-US' } }, { st: 7, ed: text.length, ts: { lang: 'ko-KR' } }] },
         };
-        const breaker = createDocumentLineBreaker(document, undefined, text.slice(7), 7);
+        const breaker = createDocumentLineBreaker(document, {}, text.slice(7), 7);
         expect(breaker.nextBreakPoint()?.position).toBe(3);
         expect(breaker.nextBreakPoint()?.position).toBe(6);
         expect(breaker.nextBreakPoint()).toBeNull();

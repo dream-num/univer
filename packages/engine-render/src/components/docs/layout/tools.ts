@@ -1957,7 +1957,6 @@ export interface IDocumentPaginationMetrics {
 }
 
 export interface ILayoutContext {
-    /** Cell layout and editors keep spreadsheet line breaks independently of document formatting. */
     headerFooterFieldContext?: { pageNumber: number; pageCount?: number };
     fieldPageCount?: number;
     hasNumPagesFields?: boolean;

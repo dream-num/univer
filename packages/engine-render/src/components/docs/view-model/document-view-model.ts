@@ -15,27 +15,26 @@
  */
 
 import type {
-    BooleanNumber,
     DocumentDataModel,
     ICustomBlock,
     ICustomDecorationForInterceptor,
     ICustomRangeForInterceptor,
     ICustomTable,
     IDisposable,
-    IParagraph,
+    IParagraphStyle,
     ITable,
     JSONXActions,
     JSONXPath,
     Nullable,
 } from '@univerjs/core';
 import {
+    BooleanNumber,
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
     getRichTextEditPath,
     JSON1,
     resolveDocumentParagraphStyle,
-    resolveDocumentParagraphWordWrap,
     TextX,
     TextXActionType,
     toDisposable,
@@ -709,12 +708,12 @@ export class DocumentViewModel implements IDisposable {
         return getDocumentLayoutPresentation(this._documentDataModel)?.getSnapshot(snapshot) ?? snapshot;
     }
 
-    getParagraphWordWrap(paragraph: IParagraph): BooleanNumber | undefined {
-        return resolveDocumentParagraphWordWrap(this.getSnapshot(), paragraph);
+    getParagraphWordWrap(paragraphStyle: IParagraphStyle): BooleanNumber | undefined {
+        return paragraphStyle.wordWrap ?? BooleanNumber.FALSE;
     }
 
-    createLineBreaker(content: string, paragraph: IParagraph, start: number) {
-        return createDocumentLineBreaker(this.getSnapshot(), paragraph, content, start, this.getBody());
+    createLineBreaker(content: string, paragraphStyle: IParagraphStyle, start: number) {
+        return createDocumentLineBreaker(this.getSnapshot(), paragraphStyle, content, start, this.getBody());
     }
 
     getDataModel() {

@@ -41,7 +41,7 @@ describe('SheetCellDocumentViewModel', () => {
                     viewModel.reset(model);
                 }
                 const story = viewModel.getSelfOrHeaderFooterViewModel('story');
-                const breaker = story.createLineBreaker(text, paragraph, 0);
+                const breaker = story.createLineBreaker(text, paragraph.paragraphStyle, 0);
                 const segments: string[] = [];
                 let start = 0;
                 for (let point = breaker.nextBreakPoint(); point; point = breaker.nextBreakPoint()) {

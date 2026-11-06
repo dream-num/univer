@@ -16,6 +16,8 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Input } from '../Input';
 
@@ -85,6 +87,23 @@ describe('Input', () => {
 
         expect(onChange).toHaveBeenCalledWith('');
         expect(parentClick).not.toHaveBeenCalled();
+    });
+
+    it('names the clear action in the current locale and preserves its behavior', () => {
+        const onChange = vi.fn();
+        const { getByRole, rerender } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Input allowClear value="abc" onChange={onChange} />
+            </ConfigProvider>
+        );
+        fireEvent.click(getByRole('button', { name: 'Clear input' }));
+        expect(onChange).toHaveBeenCalledWith('');
+        rerender(
+            <ConfigProvider locale={zhCN.design} mountContainer={document.body}>
+                <Input allowClear value="abc" onChange={onChange} />
+            </ConfigProvider>
+        );
+        expect(getByRole('button', { name: '清空输入' })).toBeDefined();
     });
 
     it('should observe slot mutations and apply slot paddingRight', () => {

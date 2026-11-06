@@ -17,6 +17,7 @@
 const locale = {
     design: {
         Accessibility: {
+            clearInput: 'Clear input',
             closeBadge: 'Close badge',
             close: 'Close',
             menu: 'Menu',

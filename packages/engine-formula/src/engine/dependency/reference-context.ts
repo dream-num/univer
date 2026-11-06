@@ -98,7 +98,7 @@ export class ReferenceContext {
             if (token === 'INDIRECT' || token === 'OFFSET') {
                 return true;
             }
-            if ((node as FunctionNode).isAffectedBySheetMetadata(this._orderChanged, this.isSheetSizeChanged(unitId, sheetId))) {
+            if ((node as FunctionNode).isAffectedBySheetMetadata?.(this._orderChanged, this.isSheetSizeChanged(unitId, sheetId)) ?? true) {
                 return true;
             }
         }

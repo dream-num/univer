@@ -17,7 +17,6 @@
 import { LocaleType } from '@univerjs/core';
 import { expect, it } from 'vitest';
 import type { LexerNode } from '../../analysis/lexer-node';
-import type { BaseAstNode } from '../../ast-node/base-ast-node';
 import { CustomFunction } from '../../../functions/custom-function';
 import { Sheet } from '../../../functions/information/sheet';
 import { Rows } from '../../../functions/lookup/rows';
@@ -28,7 +27,15 @@ import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
 import { Lexer } from '../../analysis/lexer';
 import { AstTreeBuilder } from '../../analysis/parser';
+import { BaseAstNode } from '../../ast-node/base-ast-node';
+import { NodeType } from '../../ast-node/node-type';
 import { ReferenceContext } from '../reference-context';
+
+class CustomAstFunction extends BaseAstNode {
+    override get nodeType(): NodeType {
+        return NodeType.FUNCTION;
+    }
+}
 
 it('selects order and size sensitive references while retaining ordinary formula caches', () => {
     const sheets = Object.fromEntries(['Main', 'Start', 'End', 'Middle'].map((name) => [name, {
@@ -62,6 +69,7 @@ it('selects order and size sensitive references while retaining ordinary formula
         expect(affected('=SUM(Start:End!A1)')).toBe(true);
         expect(affected('=SHEET("Start")')).toBe(true);
         expect(affected('=CUSTOMSHEETS()')).toBe(true);
+        expect(context.isAffected(new CustomAstFunction('CUSTOM_AST'), 'test', 'Main')).toBe(true);
         expect(affected('=CUSTOMSIZE()')).toBe(false);
         expect(affected('=SUM(Start!A1:A3)')).toBe(false);
         expect(affected('=SUM("Start:End!A1")')).toBe(false);

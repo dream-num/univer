@@ -1,0 +1,15 @@
+{
+    "baseline": "879250cd3",
+    "capture": "Chromium, macOS, 2600x1700 screenshot, 90% zoom",
+    "before": "Baseline shaping.ts, doc-no-wrap-measure.ts, and line-breaker.ts; import paths adjusted to direct defining files after barrel removal. Same fixture and UI as after.",
+    "after": "feat/8090-paragraph-word-wrap",
+    "fixtures": {
+        "docs": "fixture.json with documentFlavor=2",
+        "drawingml": "fixture.json with documentFlavor=3; shared text renderer in Docs workbench, not full Slides UI"
+    },
+    "cases": [
+        "Korean default",
+        "Latin wordWrap=1",
+        "Mixed Korean/Latin default"
+    ]
+}

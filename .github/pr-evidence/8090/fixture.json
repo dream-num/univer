@@ -1,0 +1,173 @@
+{
+  "id": "8090-evidence",
+  "title": "Issue 8090",
+  "body": {
+    "dataStream": "Korean · default\r오늘 전략을\rLatin · on\rab cdefgh\rMixed · default\r오늘 전략을 plan\r\n",
+    "paragraphs": [
+      {
+        "startIndex": 16,
+        "paragraphId": "evidence-0",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 20
+          },
+          "spaceBelow": {
+            "v": 0
+          }
+        }
+      },
+      {
+        "startIndex": 23,
+        "paragraphId": "evidence-1",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 4
+          },
+          "spaceBelow": {
+            "v": 16
+          }
+        }
+      },
+      {
+        "startIndex": 34,
+        "paragraphId": "evidence-2",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 20
+          },
+          "spaceBelow": {
+            "v": 0
+          }
+        }
+      },
+      {
+        "startIndex": 44,
+        "paragraphId": "evidence-3",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 4
+          },
+          "spaceBelow": {
+            "v": 16
+          },
+          "wordWrap": 1
+        }
+      },
+      {
+        "startIndex": 60,
+        "paragraphId": "evidence-4",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 20
+          },
+          "spaceBelow": {
+            "v": 0
+          }
+        }
+      },
+      {
+        "startIndex": 72,
+        "paragraphId": "evidence-5",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 4
+          },
+          "spaceBelow": {
+            "v": 16
+          }
+        }
+      }
+    ],
+    "textRuns": [
+      {
+        "st": 0,
+        "ed": 16,
+        "ts": {
+          "ff": "Arial",
+          "fs": 10,
+          "cl": {
+            "rgb": "#6b7280"
+          }
+        }
+      },
+      {
+        "st": 17,
+        "ed": 23,
+        "ts": {
+          "ff": "Arial",
+          "fs": 28,
+          "cl": {
+            "rgb": "#111827"
+          }
+        }
+      },
+      {
+        "st": 24,
+        "ed": 34,
+        "ts": {
+          "ff": "Arial",
+          "fs": 10,
+          "cl": {
+            "rgb": "#6b7280"
+          }
+        }
+      },
+      {
+        "st": 35,
+        "ed": 44,
+        "ts": {
+          "ff": "Arial",
+          "fs": 28,
+          "cl": {
+            "rgb": "#111827"
+          }
+        }
+      },
+      {
+        "st": 45,
+        "ed": 60,
+        "ts": {
+          "ff": "Arial",
+          "fs": 10,
+          "cl": {
+            "rgb": "#6b7280"
+          }
+        }
+      },
+      {
+        "st": 61,
+        "ed": 72,
+        "ts": {
+          "ff": "Arial",
+          "fs": 28,
+          "cl": {
+            "rgb": "#111827"
+          }
+        }
+      }
+    ],
+    "sectionBreaks": [
+      {
+        "startIndex": 73
+      }
+    ]
+  },
+  "documentStyle": {
+    "documentFlavor": 3,
+    "pageSize": {
+      "width": 260,
+      "height": 720
+    },
+    "zoomRatio": 0.9,
+    "autoHyphenation": 0,
+    "renderConfig": {
+      "zeroWidthParagraphBreak": 1
+    }
+  }
+}

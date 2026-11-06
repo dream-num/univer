@@ -20,6 +20,7 @@ import {
     CommandService,
     ConfigService,
     ContextService,
+    createInternalEditorID,
     DesktopLogService,
     DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -257,6 +258,7 @@ describe('DocSkeletonManagerService', () => {
         { id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, initial: ['오늘 전략', '을'], resized: ['오늘 전', '략을'] },
         { id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, initial: ['오늘 전략', '을'], resized: ['오늘 전', '략을'] },
         { id: 'ordinary-document', initial: ['오늘 ', '전략을'], resized: ['오늘 ', '전략을'] },
+        { id: createInternalEditorID('shape-word-wrap'), initial: ['오늘 ', '전략을'], resized: ['오늘 ', '전략을'] },
     ])('keeps host wrapping when alignment metadata is cleared and the editor is resized: $id', ({ id, initial, resized }) => {
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
             width: text.length * 10,

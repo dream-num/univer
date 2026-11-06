@@ -135,6 +135,7 @@ export * from './components/sheets/extensions/row-header-layout';
 export * from './components/sheets/extensions/sheet-extension';
 export * from './components/sheets/interfaces';
 export * from './components/sheets/row-header';
+export { SheetCellDocumentViewModel } from './components/sheets/sheet-cell-document-view-model';
 export * from './components/sheets/sheet-component';
 export * from './components/sheets/sheet.render-skeleton';
 export { RENDER_RAW_FORMULA_KEY } from './components/sheets/sheet.render-skeleton';

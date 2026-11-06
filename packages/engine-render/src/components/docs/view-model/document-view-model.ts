@@ -15,12 +15,14 @@
  */
 
 import type {
+    BooleanNumber,
     DocumentDataModel,
     ICustomBlock,
     ICustomDecorationForInterceptor,
     ICustomRangeForInterceptor,
     ICustomTable,
     IDisposable,
+    IParagraph,
     ITable,
     JSONXActions,
     JSONXPath,
@@ -33,6 +35,7 @@ import {
     getRichTextEditPath,
     JSON1,
     resolveDocumentParagraphStyle,
+    resolveDocumentParagraphWordWrap,
     TextX,
     TextXActionType,
     toDisposable,
@@ -49,6 +52,7 @@ import type {
 } from '../document-layout-presentation';
 import type { IHeadingSection } from './heading-sections';
 import { getDocumentLayoutPresentation } from '../document-layout-presentation';
+import { createDocumentLineBreaker } from '../layout/line-breaker/document-line-breaker';
 import { DataStreamTreeNode } from './data-stream-tree-node';
 import { getHeadingSections } from './heading-sections';
 
@@ -703,6 +707,14 @@ export class DocumentViewModel implements IDisposable {
     getSnapshot(): IDocumentLayoutSnapshot {
         const snapshot = this._documentDataModel.getSnapshot();
         return getDocumentLayoutPresentation(this._documentDataModel)?.getSnapshot(snapshot) ?? snapshot;
+    }
+
+    getParagraphWordWrap(paragraph: IParagraph): BooleanNumber | undefined {
+        return resolveDocumentParagraphWordWrap(this.getSnapshot(), paragraph);
+    }
+
+    createLineBreaker(content: string, paragraph: IParagraph, start: number) {
+        return createDocumentLineBreaker(this.getSnapshot(), paragraph, content, start, this.getBody());
     }
 
     getDataModel() {

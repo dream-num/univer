@@ -1242,23 +1242,21 @@ export class DocumentSkeleton extends Skeleton {
     private _modernHorizontalMargin: number | undefined;
 
     private readonly _lineGap: number;
-    private readonly _isSheetCell: boolean;
 
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean; lineGap?: number; isSheetCell?: boolean } = {}
+        options: { isolateIncrementalPublications?: boolean; lineGap?: number } = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
         this._lineGap = options.lineGap ?? 0;
-        this._isSheetCell = options.isSheetCell === true;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean; lineGap?: number; isSheetCell?: boolean }
+        options?: { isolateIncrementalPublications?: boolean; lineGap?: number }
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -5275,7 +5273,6 @@ export class DocumentSkeleton extends Skeleton {
             skeleton,
             skeletonResourceReference,
             docsConfig,
-            isSheetCell: this._isSheetCell,
             modernPageWidth: this._modernPageWidth,
             modernHorizontalMargin: this._modernHorizontalMargin,
             layoutStartPointer: {

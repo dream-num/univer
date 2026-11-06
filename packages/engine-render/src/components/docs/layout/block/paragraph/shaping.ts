@@ -24,7 +24,6 @@ import {
     GridType,
     PositionedObjectLayoutType,
     resolveDocumentParagraphStyle,
-    resolveDocumentParagraphWordWrap,
 } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
@@ -50,14 +49,12 @@ import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } fr
 import { resolveHeaderFooterFieldGlyph } from '../../header-footer-field';
 import { Lang } from '../../hyphenation/lang';
 import { BreakPointType } from '../../line-breaker/break';
-import { createDocumentLineBreaker } from '../../line-breaker/document-line-breaker';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
 import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
 import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/whole-entity-enhancer';
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
-import { LineBreaker } from '../../line-breaker/line-breaker';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
@@ -403,9 +400,7 @@ function createShapingLineBreaker(
     traditionalLayout: boolean,
     measuredWholeEntityRanges: ICustomRangeForInterceptor[]
 ): IBreakPoints {
-    const lineBreaker = ctx.isSheetCell
-        ? new LineBreaker(content)
-        : createDocumentLineBreaker(viewModel.getSnapshot(), paragraph, content, paragraphNode.contentStartIndex, viewModel.getBody());
+    const lineBreaker = viewModel.createLineBreaker(content, paragraph, paragraphNode.contentStartIndex);
     const { paragraphStyle = {} } = paragraph;
     const { hyphen } = ctx;
 
@@ -557,7 +552,7 @@ export function shaping(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    const wordWrap = ctx.isSheetCell ? undefined : resolveDocumentParagraphWordWrap(viewModel.getSnapshot(), paragraph);
+    const wordWrap = viewModel.getParagraphWordWrap(paragraph);
     const measuredWholeEntityRanges = collectMeasuredWholeEntityRanges(content, viewModel, paragraphNode);
     const measuredWholeEntityRangeByStart = new Map(measuredWholeEntityRanges.map((range) => [
         range.startIndex - paragraphNode.contentStartIndex,

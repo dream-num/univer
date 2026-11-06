@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ITable } from '@univerjs/core';
 import { LineBreaker } from '../docs/layout/line-breaker/line-breaker';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 
@@ -25,5 +26,9 @@ export class SheetCellDocumentViewModel extends DocumentViewModel {
 
     override createLineBreaker(content: string) {
         return new LineBreaker(content);
+    }
+
+    protected override _createChildViewModel(model: DocumentDataModel, tableSource?: Record<string, ITable>): SheetCellDocumentViewModel {
+        return new SheetCellDocumentViewModel(model, tableSource);
     }
 }

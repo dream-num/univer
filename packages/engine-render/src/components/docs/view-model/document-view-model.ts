@@ -1246,6 +1246,10 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
+    protected _createChildViewModel(model: DocumentDataModel, tableSource?: Record<string, ITable>): DocumentViewModel {
+        return new DocumentViewModel(model, tableSource);
+    }
+
     private _buildHeaderFooterViewModel() {
         for (const [noteId, viewModel] of this._noteTreeMap) {
             if (viewModel.getDataModel() !== this._documentDataModel.noteModelMap.get(noteId)) {
@@ -1257,7 +1261,7 @@ export class DocumentViewModel implements IDisposable {
         const viewModels = [];
         const rootTableSource = this.getSnapshot().tableSource;
         for (const [headerId, headerModel] of headerModelMap) {
-            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel, {
+            this._headerTreeMap.set(headerId, this._createChildViewModel(headerModel, {
                 ...rootTableSource,
                 ...headerModel.getSnapshot().tableSource,
             }));
@@ -1265,7 +1269,7 @@ export class DocumentViewModel implements IDisposable {
         }
 
         for (const [footerId, footerModel] of footerModelMap) {
-            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel, {
+            this._footerTreeMap.set(footerId, this._createChildViewModel(footerModel, {
                 ...rootTableSource,
                 ...footerModel.getSnapshot().tableSource,
             }));
@@ -1274,7 +1278,7 @@ export class DocumentViewModel implements IDisposable {
 
         for (const [noteId, model] of this._documentDataModel.noteModelMap) {
             const viewModel = this._noteTreeMap.get(noteId)
-                ?? new DocumentViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
+                ?? this._createChildViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
             this._noteTreeMap.set(noteId, viewModel);
             viewModels.push(viewModel);
         }

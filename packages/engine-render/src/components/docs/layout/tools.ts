@@ -1681,6 +1681,7 @@ export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide, excludeTrail
 }
 
 interface IFontCreateConfig {
+    stackedText?: boolean;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
@@ -1718,6 +1719,7 @@ export function getFontConfigFromLastGlyph(
 
     const result = {
         documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
+        stackedText: sectionBreakConfig.renderConfig?.stackedText,
         fontStyle: fontStyle!,
         textStyle: ts!,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
@@ -1816,6 +1818,7 @@ export function getFontCreateConfig(
 
     const result = {
         fontStyle,
+        stackedText: renderConfig.stackedText,
         textStyle: mixTextStyle,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
@@ -2232,7 +2235,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionType,
         sectionTypeNext,
         textDirection,
-        renderConfig,
+        renderConfig: viewModel.getLayoutRenderConfig(renderConfig),
 
         autoHyphenation,
         spaceWidthEastAsian,

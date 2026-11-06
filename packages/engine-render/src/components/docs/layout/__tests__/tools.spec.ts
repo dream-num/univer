@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { IDocumentStyle, ISectionBreak } from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocumentDataModel,
     DocumentFlavor,
     GridType,
     NumberUnitType,
@@ -29,9 +30,11 @@ import {
     SectionType,
     SpacingRule,
 } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
+import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import {
     clearFontCreateConfigCache,
@@ -79,6 +82,24 @@ import {
     updateParagraphBorders,
     validationGrid,
 } from '../tools';
+
+function createSectionLayoutContext(documentStyle: IDocumentStyle, sections: Array<Omit<ISectionBreak, 'startIndex'>>) {
+    const dataModel = new DocumentDataModel({
+        id: 'section-layout',
+        documentStyle,
+        body: {
+            dataStream: 'abc\r\n'.repeat(sections.length),
+            paragraphs: sections.map((_, index) => ({ startIndex: index * 5 + 3, paragraphId: `paragraph-${index}` })),
+            sectionBreaks: sections.map((section, index) => ({ ...section, startIndex: index * 5 + 4 })),
+        },
+    });
+    const viewModel = new DocumentViewModel(dataModel);
+    onTestFinished(() => {
+        viewModel.dispose();
+        dataModel.dispose();
+    });
+    return { dataModel, viewModel, docsConfig: {} };
+}
 
 function createPageSkeleton() {
     const divide1 = {
@@ -777,44 +798,33 @@ describe('docs layout tools extra', () => {
         expect(pages[0].parent).toBe(skeleton);
 
         const ctx = {
-            docsConfig: { locale: 'zh-CN' },
+            ...createSectionLayoutContext({
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 800, height: 1000 },
+                balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
+                marginLeft: 20,
+                marginRight: 20,
+                marginTop: 20,
+                marginBottom: 20,
+                renderConfig: {},
+                defaultHeaderId: 'document-header',
+                defaultFooterId: 'document-footer',
+            }, [{
+                sectionId: 'first',
+                sectionType: SectionType.CONTINUOUS,
+                pageSize: { width: 900, height: 1200 },
+                marginLeft: 30,
+                marginRight: 40,
+                renderConfig: { isRenderStyle: BooleanNumber.TRUE },
+                defaultHeaderId: 'section-header',
+                defaultFooterId: 'section-footer',
+                evenPageHeaderId: 'section-even-header',
+                evenPageFooterId: 'section-even-footer',
+                firstPageHeaderId: 'section-first-header',
+                firstPageFooterId: 'section-first-footer',
+            }, { sectionId: 'second', sectionType: SectionType.CONTINUOUS }]),
             modernPageWidth: 390,
             modernHorizontalMargin: 20,
-            viewModel: {
-                getChildren: () => [{ endIndex: 9 }, { endIndex: 19 }],
-                getSectionBreak: vi.fn((endIndex: number) => {
-                    if (endIndex === 9) {
-                        return {
-                            sectionType: SectionType.CONTINUOUS,
-                            pageSize: { width: 900, height: 1200 },
-                            marginLeft: 30,
-                            marginRight: 40,
-                            renderConfig: { isRenderStyle: BooleanNumber.TRUE },
-                            defaultHeaderId: 'section-header',
-                            defaultFooterId: 'section-footer',
-                            evenPageHeaderId: 'section-even-header',
-                            evenPageFooterId: 'section-even-footer',
-                            firstPageHeaderId: 'section-first-header',
-                            firstPageFooterId: 'section-first-footer',
-                        };
-                    }
-                    return { sectionType: SectionType.CONTINUOUS };
-                }),
-            },
-            dataModel: {
-                documentStyle: {
-                    documentFlavor: DocumentFlavor.MODERN,
-                    pageSize: { width: 800, height: 1000 },
-                    balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE,
-                    marginLeft: 20,
-                    marginRight: 20,
-                    marginTop: 20,
-                    marginBottom: 20,
-                    renderConfig: {},
-                    defaultHeaderId: 'document-header',
-                    defaultFooterId: 'document-footer',
-                },
-            },
         };
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
@@ -883,19 +893,7 @@ describe('docs layout tools extra', () => {
             { sectionId: 'section_1', defaultHeaderId: 'header-section-1' },
             { sectionId: 'section_2' },
         ];
-        const ctx = {
-            docsConfig: {},
-            viewModel: {
-                getChildren: () => [{ endIndex: 4 }, { endIndex: 9 }],
-                getSectionBreak: (endIndex: number) => endIndex === 4 ? sections[0] : sections[1],
-            },
-            dataModel: {
-                documentStyle: {
-                    documentFlavor: DocumentFlavor.TRADITIONAL,
-                    defaultHeaderId: 'header-global',
-                },
-            },
-        };
+        const ctx = createSectionLayoutContext({ documentFlavor: DocumentFlavor.TRADITIONAL, defaultHeaderId: 'header-global' }, sections);
 
         expect(prepareSectionBreakConfig(ctx as any, 1).headerIds?.defaultHeaderId).toBe('header-section-1');
     });
@@ -905,38 +903,14 @@ describe('docs layout tools extra', () => {
             { sectionId: 'cover', useFirstPageHeaderFooter: BooleanNumber.TRUE },
             { sectionId: 'body' },
         ];
-        const ctx = {
-            docsConfig: {},
-            viewModel: {
-                getChildren: () => [{ endIndex: 4 }, { endIndex: 9 }],
-                getSectionBreak: (endIndex: number) => endIndex === 4 ? sections[0] : sections[1],
-            },
-            dataModel: {
-                documentStyle: {
-                    documentFlavor: DocumentFlavor.TRADITIONAL,
-                    useFirstPageHeaderFooter: BooleanNumber.TRUE,
-                },
-            },
-        };
+        const ctx = createSectionLayoutContext({ documentFlavor: DocumentFlavor.TRADITIONAL, useFirstPageHeaderFooter: BooleanNumber.TRUE }, sections);
 
         expect(prepareSectionBreakConfig(ctx as any, 0).useFirstPageHeaderFooter).toBe(BooleanNumber.TRUE);
         expect(prepareSectionBreakConfig(ctx as any, 1).useFirstPageHeaderFooter).toBe(BooleanNumber.FALSE);
     });
 
     it('keeps a traditional section without an explicit grid off the line grid', () => {
-        const ctx = {
-            docsConfig: {},
-            viewModel: {
-                getChildren: () => [{ endIndex: 4 }],
-                getSectionBreak: () => ({ sectionId: 'section_1', linePitch: 24 }),
-            },
-            dataModel: {
-                documentStyle: {
-                    documentFlavor: DocumentFlavor.TRADITIONAL,
-                    linePitch: 24,
-                },
-            },
-        };
+        const ctx = createSectionLayoutContext({ documentFlavor: DocumentFlavor.TRADITIONAL }, [{ sectionId: 'section_1', linePitch: 24 }]);
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
         expect(sectionConfig.linePitch).toBe(24);

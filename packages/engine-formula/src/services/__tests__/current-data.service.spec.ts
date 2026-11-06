@@ -240,6 +240,14 @@ describe('FormulaCurrentConfigService', () => {
         expect(service.getDateSystem('missing')).toBe(DateSystem.Date1900);
     });
 
+    it('resolves explicit workbook order independently of the focused workbook', () => {
+        const { service, workbookById } = createService();
+        workbookById.set('other', { getSnapshot: () => ({ id: 'other', sheetOrder: ['end', 'start'] }) });
+        expect(service.getSheetsInfo('other').sheetOrder).toEqual(['end', 'start']);
+        expect(service.getSheetsInfo().sheetOrder).toEqual(['sheet-current']);
+        expect(service.getSheetsInfo('missing')).toEqual({ sheetOrder: [], sheetNameMap: {} });
+    });
+
     it('should resolve sheet size, filtered rows and lightweight data loading', () => {
         const { service, workbookById, formulaDataModel } = createService();
 

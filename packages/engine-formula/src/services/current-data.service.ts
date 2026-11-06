@@ -15,6 +15,16 @@
  */
 
 import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable, Workbook } from '@univerjs/core';
+import {
+    createIdentifier,
+    DateSystem,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -34,16 +44,6 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
-import {
-    createIdentifier,
-    DateSystem,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    LocaleService,
-    ObjectMatrix,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
@@ -129,7 +129,7 @@ export interface IFormulaCurrentConfigService {
     getLocale(): LocaleType;
     getDateSystem(unitId?: string): DateSystem;
 
-    getSheetsInfo(): {
+    getSheetsInfo(unitId?: string): {
         sheetOrder: string[];
         sheetNameMap: { [sheetId: string]: string };
     };
@@ -328,8 +328,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getDateSystem() ?? DateSystem.Date1900;
     }
 
-    getSheetsInfo() {
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    getSheetsInfo(unitId?: string) {
+        const workbook = unitId
+            ? this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return {
                 sheetOrder: [],

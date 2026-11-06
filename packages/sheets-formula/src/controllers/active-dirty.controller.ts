@@ -57,7 +57,9 @@ import {
     SetRowVisibleMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetColumnCountMutation,
     SetWorksheetOrderMutation,
+    SetWorksheetRowCountMutation,
 } from '@univerjs/sheets';
 
 export class ActiveDirtyController extends Disposable {
@@ -178,6 +180,13 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialRowAndColumn() {
+        for (const mutation of [SetWorksheetRowCountMutation, SetWorksheetColumnCountMutation]) {
+            this._activeDirtyManagerService.register(mutation.id, {
+                commandId: mutation.id,
+                getDirtyData: () => ({ forceCalculation: true }),
+            });
+        }
+
         this._activeDirtyManagerService.register(RemoveRowMutation.id, {
             commandId: RemoveRowMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -271,18 +280,7 @@ export class ActiveDirtyController extends Disposable {
     private _initialSheet() {
         this._activeDirtyManagerService.register(SetWorksheetOrderMutation.id, {
             commandId: SetWorksheetOrderMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const { unitId } = command.params as { unitId: string };
-                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-                const sheets: Record<string, string> = Object.create(null);
-                for (const sheet of workbook?.getSheets() ?? []) {
-                    sheets[sheet.getSheetId()] = sheet.getName();
-                }
-                return {
-                    forceCalculation: true,
-                    clearDependencyTreeCache: { [unitId]: sheets },
-                };
-            },
+            getDirtyData: () => ({ forceCalculation: true }),
         });
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,

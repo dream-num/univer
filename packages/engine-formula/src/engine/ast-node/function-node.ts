@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
@@ -25,7 +26,6 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
@@ -439,7 +439,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _setSheetsInfo() {
-        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
+        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo(this._runtimeService.currentUnitId));
     }
 
     private _setFilteredOutRows(referenceObject: BaseReferenceObject) {

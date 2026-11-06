@@ -81,7 +81,7 @@ export class UnionNode extends BaseAstNode {
             return;
         }
 
-        const { sheetOrder, sheetNameMap } = this._currentConfigService.getSheetsInfo();
+        const { sheetOrder, sheetNameMap } = this._currentConfigService.getSheetsInfo(source.getUnitId());
         const sheetIdsByName = new Map(
             Object.entries(sheetNameMap).map(([sheetId, sheetName]) => [sheetName.toLocaleLowerCase(), sheetId])
         );

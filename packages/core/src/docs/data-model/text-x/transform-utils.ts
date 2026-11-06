@@ -98,7 +98,7 @@ function transformTextRuns(
                         const keys = Object.keys(targetStyle);
 
                         for (const key of keys) {
-                            if (originStyle[key as keyof ITextStyle]) {
+                            if (originStyle[key as keyof ITextStyle] !== undefined) {
                                 delete newTs[key as keyof ITextStyle];
                             }
                         }

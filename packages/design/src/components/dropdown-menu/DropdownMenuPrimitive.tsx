@@ -255,7 +255,7 @@ function DropdownMenuCheckboxItem({
                 >
                     <ItemIndicator>
                         <CheckMarkIcon
-                            className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
+                            className="univer-block univer-size-4 univer-text-primary-600"
                         />
                     </ItemIndicator>
                 </span>
@@ -300,7 +300,7 @@ function DropdownMenuRadioItem({
 
                     <ItemIndicator>
                         <CheckMarkIcon
-                            className="univer-block univer-size-4 univer-fill-current univer-text-primary-600"
+                            className="univer-block univer-size-4 univer-text-primary-600"
                         />
                     </ItemIndicator>
                 </span>

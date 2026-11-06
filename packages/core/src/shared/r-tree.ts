@@ -15,9 +15,9 @@
  */
 
 import type { BBox } from 'rbush';
-import type { IUnitRange } from '../sheets/typedef';
 import KDBush from 'kdbush';
 import RBush from 'rbush';
+import type { IUnitRange } from '../sheets/typedef';
 
 type StringOrNumber = string | number;
 
@@ -27,6 +27,11 @@ export interface IRTreeItem extends IUnitRange {
 
 interface IRBushItem extends BBox {
     id: StringOrNumber;
+}
+
+interface IRBushNode extends BBox {
+    children: (IRBushNode | IRBushItem)[];
+    leaf: boolean;
 }
 
 interface IRdTreeItem {
@@ -295,7 +300,8 @@ export class RTree {
 
     private _removeRTreeItem(search: IRTreeItem) {
         const { unitId, sheetId: subUnitId, range, id } = search;
-        const tree = this.getTree(unitId, subUnitId);
+        const tree = this._tree.get(unitId)?.get(subUnitId);
+        if (!tree) return;
 
         const items = tree.search({
             minX: range.startColumn,
@@ -327,9 +333,127 @@ export class RTree {
     }
 
     bulkRemove(searchList: IRTreeItem[]) {
-        for (const search of searchList) {
-            this.remove(search);
+        if (searchList.length < 2) {
+            for (const search of searchList) {
+                this.remove(search);
+            }
+            return;
         }
+        const groups = new Map<string, Map<string, Map<StringOrNumber, IRTreeItem[]>>>();
+        for (const search of searchList) {
+            let sheets = groups.get(search.unitId);
+            if (!sheets) {
+                sheets = new Map();
+                groups.set(search.unitId, sheets);
+            }
+            let ids = sheets.get(search.sheetId);
+            if (!ids) {
+                ids = new Map();
+                sheets.set(search.sheetId, ids);
+            }
+            const ranges = ids.get(search.id);
+            if (ranges) {
+                ranges.push(search);
+            } else {
+                ids.set(search.id, [search]);
+            }
+        }
+        for (const [unitId, sheets] of groups) {
+            for (const [sheetId, ids] of sheets) {
+                if (!this._removeSparseRanges(unitId, sheetId, ids)) {
+                    this._bulkRemoveFromSheet(unitId, sheetId, ids);
+                }
+            }
+        }
+    }
+
+    private _bulkRemoveFromSheet(unitId: string, sheetId: string, searches: Map<StringOrNumber, IRTreeItem[]>) {
+        if (searches.size === 1) {
+            const [ranges] = searches.values();
+            if (ranges.length === 1) {
+                this.remove(ranges[0]);
+                return;
+            }
+        }
+        // With the point cache enabled, remove() treats point searches as point-cache-only removals.
+        const matches = (id: StringOrNumber, bounds: BBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
+            (!rangedOnly || !this._enableOneCellCache || range.startRow !== range.endRow || range.startColumn !== range.endColumn) &&
+            range.startColumn <= bounds.maxX && range.endColumn >= bounds.minX &&
+            range.startRow <= bounds.maxY && range.endRow >= bounds.minY
+        ) ?? false;
+        const tree = this._tree.get(unitId)?.get(sheetId);
+        if (tree) {
+            const entries = tree.all();
+            let retained = 0;
+            for (const item of entries) {
+                if (!matches(item.id, item, true)) {
+                    entries[retained++] = item;
+                }
+            }
+            if (retained !== entries.length) {
+                entries.length = retained;
+                tree.clear();
+                tree.load(entries);
+            }
+        }
+        const cells = this._oneCellCache.get(unitId)?.get(sheetId);
+        if (cells) {
+            for (const [row, columns] of cells) {
+                for (const [column, ids] of columns) {
+                    const bounds = { minX: column, maxX: column, minY: row, maxY: row };
+                    for (const id of ids) {
+                        if (matches(id, bounds)) {
+                            ids.delete(id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private _removeSparseRanges(unitId: string, sheetId: string, searches: Map<StringOrNumber, IRTreeItem[]>) {
+        // Probe a bounded number of candidates without allocating a full-tree snapshot.
+        let remaining = 128;
+        if (searches.size > remaining) return false;
+        const visit = (node: IRBushNode, range: IUnitRange['range']): boolean => {
+            if (--remaining < 0) return false;
+            if (!node.leaf && range.startColumn <= node.minX && range.endColumn >= node.maxX &&
+                range.startRow <= node.minY && range.endRow >= node.maxY) {
+                return false;
+            }
+            for (const child of node.children) {
+                if (range.startColumn <= child.maxX && range.endColumn >= child.minX &&
+                    range.startRow <= child.maxY && range.endRow >= child.minY) {
+                    if (node.leaf) {
+                        if (--remaining < 0) return false;
+                    } else if (!visit(child as IRBushNode, range)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+        const tree = this._tree.get(unitId)?.get(sheetId);
+        const root = tree?.toJSON() as IRBushNode | undefined;
+        const cells = this._oneCellCache.get(unitId)?.get(sheetId);
+        for (const [id, ranges] of searches) {
+            if (Number.isNaN(id)) return false;
+            for (const { range } of ranges) {
+                if (--remaining < 0) return false;
+                if (this._enableOneCellCache) {
+                    if (range.startRow === range.endRow && range.startColumn === range.endColumn) continue;
+                    // Ranged cache removal must visit stored coordinates, including sparse and fractional keys.
+                    if (cells) return false;
+                }
+                if (root && !visit(root, range)) return false;
+            }
+        }
+        for (const ranges of searches.values()) {
+            for (const search of ranges) {
+                this.remove(search);
+            }
+        }
+        return true;
     }
 
     clear() {

@@ -17,7 +17,6 @@
 import type { Dependency, ICommandInfo, IWorkbookData } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IInsertSheetMutationParams, IRemoveRowsMutationParams } from '@univerjs/sheets';
-import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { LocaleType } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
@@ -37,8 +36,10 @@ import {
     SetRowHiddenMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 
@@ -91,6 +92,17 @@ describe('ActiveDirtyController', () => {
 
     afterEach(() => {
         testBed?.univer.dispose();
+    });
+
+    it('rebuilds dependencies across the workbook when sheet order changes', () => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const dirty = getDirtyData(testBed, {
+            id: SetWorksheetOrderMutation.id,
+            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 0 },
+        });
+        expect(dirty.forceCalculation).toBe(true);
+        expect(dirty.clearDependencyTreeCache).toEqual({ test: { sheet1: 'Sheet1' } });
     });
 
     it('marks iteration-sensitive workbooks without making every sheet dirty', () => {

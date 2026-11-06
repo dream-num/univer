@@ -510,11 +510,22 @@ describe('Sheet table formula integration', () => {
     });
 
     it('should sync table formulas when a table is renamed, undone, and redone', async () => {
+        let tableParams: unknown;
+        const listener = commandService.onCommandExecuted((command) => {
+            if (command.id === SetSuperTableMutation.id) {
+                tableParams = command.params;
+            }
+        });
         expect(await commandService.executeCommand(SetSheetTableCommand.id, {
             unitId: 'test',
             tableId: 'orders-table',
             name: 'Sales',
         })).toBe(true);
+        listener.dispose();
+
+        const wireParams = JSON.parse(JSON.stringify(tableParams));
+        expect(wireParams.reference.titleMap).toEqual({ product: 0, amount: 1, tax: 2 });
+        expect(commandService.syncExecuteCommand(SetSuperTableMutation.id, wireParams)).toBe(true);
 
         expect(getFormula('test', 'sheet1', 5, 4)).toBe('=SUM(Sales[amount])');
         expect(getCellFormula('sheet1', 5, 4)).toBe('=SUM(Sales[amount])');

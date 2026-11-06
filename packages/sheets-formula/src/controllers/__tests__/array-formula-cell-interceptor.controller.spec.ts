@@ -53,7 +53,7 @@ import {
     RemoteSyncPrimaryService,
     WebWorkerRemoteInstanceService,
 } from '@univerjs/rpc';
-import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService, UniverSheetsPlugin } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, SetRangeValuesMutation, SetWorksheetOrderMutation, SheetInterceptorService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { ReplaySubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
@@ -272,7 +272,7 @@ function createWorkerWorkbookData(): IWorkbookData {
     };
 }
 
-function createWorkerFormulaTestBed() {
+function createWorkerFormulaTestBed(workbookData = createWorkerWorkbookData()) {
     const [mainProtocol, workerProtocol] = createPairedMessageProtocols();
 
     class MainRPCPlugin extends Plugin {
@@ -357,7 +357,7 @@ function createWorkerFormulaTestBed() {
     mainInjector.get(ILogService).setLogLevel(LogLevel.SILENT);
     workerInjector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
-    const sheet = mainUniver.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkerWorkbookData());
+    const sheet = mainUniver.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     return {
         commandService: mainCommandService,
@@ -434,6 +434,36 @@ describe('ArrayFormulaCellInterceptorController with remote calculation', () => 
             },
         });
     }
+
+    it('should synchronize worksheet moves to a formula-only replica before recalculation', async () => {
+        const data = createWorkerWorkbookData();
+        data.sheetOrder = [subUnitId, 'start', 'end', 'middle'];
+        data.sheets[subUnitId].cellData = { 0: { 0: { f: '=SUM(Start:End!A1)' } } };
+        for (const [id, name, value] of [['start', 'Start', 1], ['end', 'End', 2], ['middle', 'Middle', 3]] as const) {
+            data.sheets[id] = { id, name, rowCount: 20, columnCount: 20, cellData: { 0: { 0: { v: value, t: CellValueType.NUMBER } } } };
+        }
+        testBed = createWorkerFormulaTestBed(data);
+        commandService = testBed.commandService;
+        const sync = testBed.mainUniver.__getInjector().get(DataSyncPrimaryController);
+        await sync.waitForPendingMutations();
+        await calculateInWorker();
+        const replica = testBed.workerInstanceService.getUnit<Workbook>(unitId)!;
+        expect(testBed.sheet.getSheetBySheetId(subUnitId)!.getCellRaw(0, 0)?.v).toBe(3);
+
+        for (const [fromOrder, toOrder, total] of [[3, 2, 6], [2, 3, 3]]) {
+            expect(commandService.syncExecuteCommand(SetWorksheetOrderMutation.id, {
+                unitId,
+                subUnitId: 'middle',
+                fromOrder,
+                toOrder,
+            }, { onlyLocal: true })).toBe(true);
+            await sync.waitForPendingMutations();
+            expect(replica.getSheetOrders()).toEqual(testBed.sheet.getSheetOrders());
+            await calculateInWorker();
+            expect(replica.getSheetBySheetId(subUnitId)!.getCellRaw(0, 0)?.v).toBe(total);
+            expect(testBed.sheet.getSheetBySheetId(subUnitId)!.getCellRaw(0, 0)?.v).toBe(total);
+        }
+    });
 
     it('should preserve multiple real blockers inside a spilled array reference formula', async () => {
         testBed = createWorkerFormulaTestBed();

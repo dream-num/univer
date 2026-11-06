@@ -57,6 +57,7 @@ import {
     SetRowVisibleMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
 
 export class ActiveDirtyController extends Disposable {
@@ -268,6 +269,21 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
+        this._activeDirtyManagerService.register(SetWorksheetOrderMutation.id, {
+            commandId: SetWorksheetOrderMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const { unitId } = command.params as { unitId: string };
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const sheets: Record<string, string> = Object.create(null);
+                for (const sheet of workbook?.getSheets() ?? []) {
+                    sheets[sheet.getSheetId()] = sheet.getName();
+                }
+                return {
+                    forceCalculation: true,
+                    clearDependencyTreeCache: { [unitId]: sheets },
+                };
+            },
+        });
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {

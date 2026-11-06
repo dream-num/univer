@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: '節設定',
             },
             paragraphSetting: {
+                wordWrap: '允許在單字中間換行',
+                inheritWordWrap: '使用繼承的設定',
                 alignment: '對齊方式',
                 indentation: '縮排',
                 left: '左',

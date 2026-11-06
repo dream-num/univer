@@ -291,6 +291,7 @@ export { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenu } from './views/mobile-el
 export { MobileRichTextEditor } from './views/mobile-rich-text-editor/MobileRichTextEditor';
 export { MobileRichTextToolbar } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export type { IMobileRichTextToolbarProps } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
+export { ParagraphWordWrapSetting } from './views/paragraph-setting/ParagraphWordWrapSetting';
 export {
     createEditorUndoRedoKeyboardConfig,
     executeEditorUndoRedoCommand,
@@ -307,6 +308,7 @@ export type {
     IExecuteEditorUndoRedoCommandOptions,
     IKeyboardEventConfig,
 } from './views/rich-text-editor/hooks';
+
 export { RichTextEditor } from './views/RichTextEditor';
 
 export type { IRichTextEditorProps } from './views/RichTextEditor';

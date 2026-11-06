@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Paramètres de section',
             },
             paragraphSetting: {
+                wordWrap: 'Autoriser les retours à la ligne au milieu des mots',
+                inheritWordWrap: 'Utiliser le réglage hérité',
                 alignment: 'Alignement',
                 indentation: 'Retrait',
                 left: 'Gauche',

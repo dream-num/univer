@@ -183,6 +183,8 @@ const locale = {
                 sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
+                wordWrap: 'Allow words to split across lines',
+                inheritWordWrap: 'Use inherited setting',
                 alignment: 'Alignment',
                 indentation: 'Indentation',
                 left: 'Left',

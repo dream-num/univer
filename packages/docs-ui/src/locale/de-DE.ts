@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Abschnittseinstellungen',
             },
             paragraphSetting: {
+                wordWrap: 'Zeilenumbruch innerhalb von Wörtern zulassen',
+                inheritWordWrap: 'Geerbte Einstellung verwenden',
                 alignment: 'Ausrichtung',
                 indentation: 'Einzug',
                 left: 'Links',

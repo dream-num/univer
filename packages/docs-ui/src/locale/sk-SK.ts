@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Nastavenia sekcie',
             },
             paragraphSetting: {
+                wordWrap: 'Povoliť zalomenie riadka uprostred slov',
+                inheritWordWrap: 'Použiť zdedené nastavenie',
                 alignment: 'Zarovnanie',
                 indentation: 'Odsadenie',
                 left: 'Vľavo',

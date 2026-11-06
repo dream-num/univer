@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'تنظیمات بخش',
             },
             paragraphSetting: {
+                wordWrap: 'اجازه شکستن کلمات بین سطرها',
+                inheritWordWrap: 'استفاده از تنظیم به‌ارث‌رسیده',
                 alignment: 'تراز',
                 indentation: 'تورفتگی',
                 left: 'چپ',

@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Параметры раздела',
             },
             paragraphSetting: {
+                wordWrap: 'Разрешить перенос строки внутри слова',
+                inheritWordWrap: 'Использовать унаследованную настройку',
                 alignment: 'Выравнивание',
                 indentation: 'Отступ',
                 left: 'Левый',

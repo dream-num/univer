@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/naming-convention */
-
 import type { Nullable } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import type { ILineBreakRule } from './rule';
 import { Break, BreakPointType } from './break';
-import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
+import { AI, AL, BA, BK, CJ, CR, H2, H3, HL, HY, ID, JL, JT, JV, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
 import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
 import { Rule } from './rule';
 import data from './trie-data';
@@ -31,8 +30,16 @@ interface ILineBreakExtension {
 
 const classTrie = new UnicodeTrie(data);
 
-function mapClass(c: number) {
+function mapClass(c: number, wordWrap?: BooleanNumber) {
     switch (c) {
+        case H2:
+        case H3:
+        case JL:
+        case JV:
+        case JT:
+            // UAX #14 Hangul tailoring keeps Korean words together in Docs.
+            return wordWrap === BooleanNumber.FALSE ? AL : c;
+
         case AI:
             return AL;
 
@@ -75,12 +82,17 @@ export class LineBreaker implements IBreakPoints {
     private _codePoint: Nullable<number> = null;
     private _lastCodePoint: Nullable<number> = null;
     private _nextClass: Nullable<number> = null;
-    private _LB8a: boolean = false;
-    private _LB21a: boolean = false;
-    private _LB30a: number = 0;
+    private _lb8a: boolean = false;
+    private _lb21a: boolean = false;
+    private _lb30a: number = 0;
     private _rule: Rule = new Rule();
 
-    constructor(public content: string) {}
+    constructor(
+        public content: string,
+        private readonly _wordWrap?: BooleanNumber,
+        private readonly _languageAt?: (offset: number) => string | undefined,
+        private readonly _inferKorean = true
+    ) {}
 
     use(extension: ILineBreakExtension) {
         extension(this);
@@ -100,8 +112,8 @@ export class LineBreaker implements IBreakPoints {
             const firstClass = this._nextCharClass();
             this._curClass = mapFirst(firstClass);
             this._nextClass = firstClass;
-            this._LB8a = firstClass === ZWJ;
-            this._LB30a = 0;
+            this._lb8a = firstClass === ZWJ;
+            this._lb30a = 0;
         }
 
         while (this._pos < this.content.length) {
@@ -126,8 +138,8 @@ export class LineBreaker implements IBreakPoints {
                 shouldBreak = this._getPairTableBreak(lastClass!);
             }
 
-            // Rule _LB8a
-            this._LB8a = this._nextClass === ZWJ;
+            // Rule LB8a
+            this._lb8a = this._nextClass === ZWJ;
 
             if (shouldBreak) {
                 return new Break(this._lastPos);
@@ -156,13 +168,18 @@ export class LineBreaker implements IBreakPoints {
     }
 
     private _nextCharClass() {
+        const language = this._wordWrap == null ? undefined : this._languageAt?.(this._pos);
+        const korean = language != null && /^ko(?:-|$)/i.test(language);
         const nextCodePoint = this._getNextCodePoint();
         const rawClass = classTrie.get(nextCodePoint);
 
         this._lastCodePoint = this._codePoint;
         this._codePoint = nextCodePoint;
 
-        return mapClass(rawClass);
+        if (this._wordWrap === BooleanNumber.TRUE && !korean && rawClass === AL && /\p{Script=Latin}/u.test(String.fromCodePoint(nextCodePoint))) {
+            return ID;
+        }
+        return mapClass(rawClass, this._inferKorean || korean ? this._wordWrap : undefined);
     }
 
     private _getSimpleBreak() {
@@ -216,27 +233,27 @@ export class LineBreaker implements IBreakPoints {
                 break;
         }
 
-        if (this._LB8a) {
+        if (this._lb8a) {
             shouldBreak = false;
         }
 
-        // Rule _LB21a
-        if (this._LB21a && (this._curClass === HY || this._curClass === BA)) {
+        // Rule LB21a
+        if (this._lb21a && (this._curClass === HY || this._curClass === BA)) {
             shouldBreak = false;
-            this._LB21a = false;
+            this._lb21a = false;
         } else {
-            this._LB21a = this._curClass === HL;
+            this._lb21a = this._curClass === HL;
         }
 
-        // Rule _LB30a
+        // Rule LB30a
         if (this._curClass === RI) {
-            this._LB30a++;
-            if (this._LB30a === 2 && this._nextClass === RI) {
+            this._lb30a++;
+            if (this._lb30a === 2 && this._nextClass === RI) {
                 shouldBreak = true;
-                this._LB30a = 0;
+                this._lb30a = 0;
             }
         } else {
-            this._LB30a = 0;
+            this._lb30a = 0;
         }
 
         this._curClass = this._nextClass;

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { Dependency, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
@@ -148,10 +146,10 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         unit: doc,
         unitId: doc.getUnitId(),
         type: UniverInstanceType.UNIVER_DOC,
-        engine: null as any,
-        scene: null as any,
-        mainComponent: null as any,
-        components: null as any,
+        engine: null!,
+        scene: null!,
+        mainComponent: null!,
+        components: null!,
         isMainScene: true,
         activated$: new BehaviorSubject(true),
         activate: () => {},
@@ -164,9 +162,9 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         renderManagerService.addRender(doc.getUnitId(), {
             unitId: doc.getUnitId(),
             type: UniverInstanceType.UNIVER_DOC,
-            engine: new DisposableCollection() as any,
-            scene: new DisposableCollection() as any,
-            mainComponent: null as any,
+            engine: new DisposableCollection() as unknown as IRenderContext['engine'],
+            scene: new DisposableCollection() as unknown as IRenderContext['scene'],
+            mainComponent: null!,
             components: new Map(),
             isMainScene: true,
             activated$: new BehaviorSubject(true),

@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Impostazioni sezione',
             },
             paragraphSetting: {
+                wordWrap: 'Consenti interruzioni di riga nelle parole',
+                inheritWordWrap: 'Usa impostazione ereditata',
                 alignment: 'Allineamento',
                 indentation: 'Rientro',
                 left: 'Sinistra',

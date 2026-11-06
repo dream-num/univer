@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'إعدادات المقطع',
             },
             paragraphSetting: {
+                wordWrap: 'السماح بتقسيم الكلمات بين الأسطر',
+                inheritWordWrap: 'استخدام الإعداد الموروث',
                 alignment: 'محاذاة',
                 indentation: 'إزاحة',
                 left: 'يسار',

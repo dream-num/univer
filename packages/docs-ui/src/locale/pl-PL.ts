@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Ustawienia sekcji',
             },
             paragraphSetting: {
+                wordWrap: 'Zezwalaj na podział wyrazów między wierszami',
+                inheritWordWrap: 'Użyj odziedziczonego ustawienia',
                 alignment: 'Wyrównanie',
                 indentation: 'Wcięcie',
                 left: 'Lewe',

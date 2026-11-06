@@ -185,6 +185,8 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configuració de secció',
             },
             paragraphSetting: {
+                wordWrap: 'Permet salts de línia dins de les paraules',
+                inheritWordWrap: 'Utilitza la configuració heretada',
                 alignment: 'Alineació',
                 indentation: 'Sagnat',
                 left: 'Esquerra',

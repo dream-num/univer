@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, ThemeService } from '@univerjs/core';
 import { clsx, resetButtonClassName, Switch } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { map } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import {
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
@@ -56,6 +56,7 @@ export function MobileCrosshairHighlightPanel() {
                     {localeService.t<LocaleKey>('sheets-crosshair-highlight.button.tooltip')}
                 </span>
                 <Switch
+                    aria-label={localeService.t<LocaleKey>('sheets-crosshair-highlight.button.tooltip')}
                     defaultChecked={enabled}
                     onChange={(checked) => {
                         const operation = checked

@@ -18,9 +18,10 @@ import type { VariantProps } from 'class-variance-authority';
 import type { InputHTMLAttributes } from 'react';
 import { CloseIcon } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
-import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import enUS from '../../locale/en-US';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
@@ -88,7 +89,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         inputStyle,
         ...props
     }, ref) => {
-        const { direction } = useContext(ConfigContext);
+        const { direction, locale } = useContext(ConfigContext);
 
         const handleClear = (e: React.MouseEvent) => {
             e.stopPropagation();
@@ -99,9 +100,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             onChange?.(e.target.value);
         };
 
-        const hasSlotContent = useMemo(() => {
-            return (allowClear && value && !disabled) || slot;
-        }, [allowClear, disabled, slot, value]);
+        const hasSlotContent = (allowClear && value && !disabled) || slot;
 
         const [paddingRight, setPaddingRight] = useState(0);
         const slotRef = useRef<HTMLDivElement>(null);
@@ -121,18 +120,18 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             }
 
             return () => observer?.disconnect();
-        }, [slotRef.current]);
+        }, [slot]);
 
-        useEffect(() => {
-            if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
-        }, []); // only enough for init, otherwise it works again when you click it
-
-        const shouldOmitDefaultPadding = direction === 'rtl' && paddingRight === 0;
-        const mergedInputStyle = shouldOmitDefaultPadding
+        let trailingPadding = 0;
+        if (slot) {
+            trailingPadding = paddingRight;
+        } else if (allowClear) {
+            trailingPadding = 26;
+        }
+        const paddingSide = direction === 'rtl' ? 'paddingLeft' : 'paddingRight';
+        const mergedInputStyle = direction === 'rtl' && trailingPadding === 0
             ? inputStyle
-            : direction === 'rtl'
-                ? { ...inputStyle, paddingLeft: paddingRight }
-                : { ...inputStyle, paddingRight };
+            : { ...inputStyle, [paddingSide]: trailingPadding };
 
         return (
             <div
@@ -181,16 +180,17 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                         {allowClear && value && !disabled && (
                             <button
                                 type="button"
+                                aria-label={locale?.Accessibility.clearInput ?? enUS.design.Accessibility.clearInput}
                                 onClick={handleClear}
                                 className={`
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center
                                   univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
                                   univer-text-gray-400 univer-transition-colors univer-duration-200
                                   hover:univer-text-gray-500
-                                  focus:univer-outline-none
+                                  focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-600
                                 `}
                             >
-                                <CloseIcon className="univer-size-3" />
+                                <CloseIcon aria-hidden="true" className="univer-size-3" />
                             </button>
                         )}
                     </div>

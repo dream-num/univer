@@ -44,12 +44,23 @@ export function Gallery(props: IGalleryProps) {
     const { className, images, open, onOpenChange } = props;
     const [isVisible, setIsVisible] = useState(Boolean(open));
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+    const [previousOpen, setPreviousOpen] = useState(open);
     const [zoomLevel, setZoomLevel] = useState(1);
     const { direction, locale } = useContext(ConfigContext);
 
     const dialogRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
+    if (open !== previousOpen) {
+        setPreviousOpen(open);
+        if (open) {
+            setActiveImageIndex(0);
+        }
+    }
+    if (activeImageIndex > 0 && activeImageIndex >= images.length) {
+        setActiveImageIndex(0);
+    }
 
     const activeImage = images[activeImageIndex];
     const hasPagination = images.length > 1;
@@ -73,7 +84,9 @@ export function Gallery(props: IGalleryProps) {
     }, [open]);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            return;
+        }
 
         previouslyFocusedElementRef.current = document.activeElement instanceof HTMLElement
             ? document.activeElement
@@ -82,7 +95,9 @@ export function Gallery(props: IGalleryProps) {
     }, [open]);
 
     useEffect(() => {
-        if (!open && !isVisible) return;
+        if (!open && !isVisible) {
+            return;
+        }
 
         const handler = (event: KeyboardEvent) => {
             if (event.key === 'Escape' && open) {
@@ -133,7 +148,9 @@ export function Gallery(props: IGalleryProps) {
 
     // wheel
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            return;
+        }
 
         const handleWheel = (e: WheelEvent) => {
             e.preventDefault();
@@ -147,7 +164,9 @@ export function Gallery(props: IGalleryProps) {
         };
     }, [open]);
 
-    if (!open && !isVisible) return null;
+    if (!open && !isVisible) {
+        return null;
+    }
 
     function handleToggleZoom(ratio: number | 'reset') {
         if (ratio === 'reset') {

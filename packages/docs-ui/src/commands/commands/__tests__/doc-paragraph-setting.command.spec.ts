@@ -21,7 +21,7 @@ import { expect, it } from 'vitest';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-it('persists paragraph overrides and reset through mutations, undo and redo without changing inherited styles', async () => {
+it('persists paragraph word wrapping through mutations, undo and redo without changing inherited styles', async () => {
     const data: IDocumentData = {
         id: 'test-doc',
         documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, defaultParagraphStyle: { wordWrap: BooleanNumber.TRUE } },
@@ -52,14 +52,13 @@ it('persists paragraph overrides and reset through mutations, undo and redo with
             const saved = JSON.parse(JSON.stringify(doc.getSnapshot())) as IDocumentData;
             expect(saved.body!.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.wordWrap)).toEqual([wordWrap, wordWrap]);
         }
-        expect(await commands.executeCommand(DocParagraphSettingCommand.id, { resetWordWrap: true })).toBe(true);
-        await awaitTime(0);
+        await commands.executeCommand(UndoCommand.id);
+        expect(values()).toEqual([0, 0]);
+        await commands.executeCommand(UndoCommand.id);
         expect(values()).toEqual([0, 1]);
         expect(doc.getBody()!.paragraphs!.every((paragraph) => !Object.hasOwn(paragraph.paragraphStyle ?? {}, 'wordWrap'))).toBe(true);
-        await commands.executeCommand(UndoCommand.id);
-        expect(values()).toEqual([1, 1]);
         await commands.executeCommand(RedoCommand.id);
-        expect(values()).toEqual([0, 1]);
+        expect(values()).toEqual([0, 0]);
         expect(doc.getBody()!.paragraphs![0].paragraphStyle?.spaceAbove).toEqual({ v: 24 });
         expect(doc.getSnapshot().styles).toEqual(data.styles);
         expect(doc.getSnapshot().documentStyle.defaultParagraphStyle).toEqual(data.documentStyle.defaultParagraphStyle);

@@ -29,7 +29,7 @@ import { ParagraphWordWrapSetting } from '../ParagraphWordWrapSetting';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true });
 
-it('shows mixed paragraphs, applies the checkbox, resets inheritance and refreshes after undo', async () => {
+it('shows mixed paragraph settings, applies the checkbox and restores inherited values on undo', async () => {
     const { univer, injector, doc } = createCommandTestBed({
         id: 'test-doc',
         documentStyle: { documentFlavor: DocumentFlavor.MODERN },
@@ -66,17 +66,21 @@ it('shows mixed paragraphs, applies the checkbox, resets inheritance and refresh
         });
         expect(checkbox.getAttribute('aria-checked')).not.toBe('mixed');
         expect(doc.getBody()!.paragraphs!.map((p) => p.paragraphStyle?.wordWrap)).toEqual([1, 1]);
-        const reset = container.querySelector<HTMLButtonElement>('button')!;
         await act(async () => {
-            reset.click();
+            checkbox.click();
             await awaitTime(0);
         });
-        expect(reset.disabled).toBe(true);
-        expect(doc.getBody()!.paragraphs!.map((p) => p.paragraphStyle?.wordWrap)).toEqual([undefined, undefined]);
+        expect(checkbox.checked).toBe(false);
+        expect(doc.getBody()!.paragraphs!.map((p) => p.paragraphStyle?.wordWrap)).toEqual([0, 0]);
         await act(async () => {
             await commands.executeCommand(UndoCommand.id);
         });
-        expect(reset.disabled).toBe(false);
+        expect(checkbox.checked).toBe(true);
+        await act(async () => {
+            await commands.executeCommand(UndoCommand.id);
+        });
+        expect(checkbox.getAttribute('aria-checked')).toBe('mixed');
+        expect(doc.getBody()!.paragraphs!.map((p) => p.paragraphStyle?.wordWrap)).toEqual([1, undefined]);
     } finally {
         await act(async () => root.unmount());
         container.remove();

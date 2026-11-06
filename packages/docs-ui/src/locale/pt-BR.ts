@@ -185,8 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configurações da seção',
             },
             paragraphSetting: {
-                wordWrap: 'Permitir quebra de linha no meio das palavras',
-                inheritWordWrap: 'Usar configuração herdada',
+                wordWrap: 'Permitir quebra de texto latino no meio de uma palavra',
                 alignment: 'Alinhamento',
                 indentation: 'Recuo',
                 left: 'Esquerda',

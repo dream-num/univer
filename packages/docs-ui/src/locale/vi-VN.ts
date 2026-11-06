@@ -185,8 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Cài đặt phần',
             },
             paragraphSetting: {
-                wordWrap: 'Cho phép ngắt dòng giữa từ',
-                inheritWordWrap: 'Dùng thiết lập kế thừa',
+                wordWrap: 'Cho phép ngắt dòng văn bản Latinh ở giữa từ',
                 alignment: 'Căn chỉnh',
                 indentation: 'Thụt lề',
                 left: 'Trái',

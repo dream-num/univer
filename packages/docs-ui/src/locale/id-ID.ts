@@ -185,8 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Pengaturan bagian',
             },
             paragraphSetting: {
-                wordWrap: 'Izinkan pemisahan kata antarbaris',
-                inheritWordWrap: 'Gunakan pengaturan yang diwarisi',
+                wordWrap: 'Perbolehkan teks Latin untuk dibungkus di tengah kata',
                 alignment: 'Perataan',
                 indentation: 'Indentasi',
                 left: 'Kiri',

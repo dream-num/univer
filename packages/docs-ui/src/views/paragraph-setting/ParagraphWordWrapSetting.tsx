@@ -16,27 +16,18 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { BooleanNumber, BuildTextUtils, ICommandService, IUniverInstanceService, LocaleService, resolveDocumentParagraphWordWrap, UniverInstanceType } from '@univerjs/core';
-import { Button, Checkbox, Dropdown, Tooltip } from '@univerjs/design';
+import { Checkbox } from '@univerjs/design';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { AutowrapIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useState } from 'react';
-import type { IDocParagraphSettingCommandParams } from '../../commands/commands/doc-paragraph-setting.command';
 import type { LocaleKey } from '../../locale/types';
 import { DocParagraphSettingCommand } from '../../commands/commands/doc-paragraph-setting.command';
 
-export interface IParagraphWordWrapSettingProps {
-    dropdown?: boolean;
-    onBeforeChange?: () => void;
-    onAfterChange?: () => void;
-}
-
-export function ParagraphWordWrapSetting({ dropdown = false, onBeforeChange, onAfterChange }: IParagraphWordWrapSettingProps) {
+export function ParagraphWordWrapSetting() {
     const commandService = useDependency(ICommandService);
     const instanceService = useDependency(IUniverInstanceService);
     const selectionService = useDependency(DocSelectionManagerService);
     const localeService = useDependency(LocaleService);
-    const [open, setOpen] = useState(false);
     const label = localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.wordWrap');
 
     const readState = useCallback(() => {
@@ -50,7 +41,6 @@ export function ParagraphWordWrapSetting({ dropdown = false, onBeforeChange, onA
         return {
             checked: values[0] === BooleanNumber.TRUE,
             mixed: values.some((value) => value !== values[0]),
-            hasOverride: paragraphs.some((paragraph) => paragraph.paragraphStyle?.wordWrap != null),
             disabled: paragraphs.length === 0,
         };
     }, [instanceService, selectionService]);
@@ -71,15 +61,14 @@ export function ParagraphWordWrapSetting({ dropdown = false, onBeforeChange, onA
         };
     }, [commandService, refresh, selectionService]);
 
-    const apply = async (params: IDocParagraphSettingCommandParams) => {
-        onBeforeChange?.();
-        await commandService.executeCommand(DocParagraphSettingCommand.id, params);
+    const apply = async (checked: boolean) => {
+        await commandService.executeCommand(DocParagraphSettingCommand.id, {
+            paragraph: { wordWrap: checked ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+        });
         refresh();
-        onAfterChange?.();
     };
-    const content = (
+    return (
         <div
-            className="univer-flex univer-flex-col univer-items-start univer-gap-2 univer-p-2"
             data-u-editor-interaction-boundary="true"
             onMouseDown={(event) => event.preventDefault()}
         >
@@ -87,39 +76,10 @@ export function ParagraphWordWrapSetting({ dropdown = false, onBeforeChange, onA
                 checked={state.checked && !state.mixed}
                 indeterminate={state.mixed}
                 disabled={state.disabled}
-                onChange={(checked) => apply({ paragraph: { wordWrap: checked ? BooleanNumber.TRUE : BooleanNumber.FALSE } })}
+                onChange={(checked) => apply(checked === true)}
             >
                 {label}
             </Checkbox>
-            <Button
-                variant="link"
-                size="small"
-                disabled={!state.hasOverride}
-                onClick={() => apply({ resetWordWrap: true })}
-            >
-                {localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.inheritWordWrap')}
-            </Button>
         </div>
     );
-
-    return dropdown
-        ? (
-            <Dropdown open={open} onOpenChange={setOpen} overlay={content}>
-                <span>
-                    <Tooltip title={label}>
-                        <Button
-                            variant="ghost"
-                            size="small"
-                            aria-label={label}
-                            aria-expanded={open}
-                            data-u-editor-interaction-boundary="true"
-                            onMouseDown={(event) => event.preventDefault()}
-                        >
-                            <AutowrapIcon />
-                        </Button>
-                    </Tooltip>
-                </span>
-            </Dropdown>
-        )
-        : content;
 }

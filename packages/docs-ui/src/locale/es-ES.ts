@@ -185,8 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configuración de sección',
             },
             paragraphSetting: {
-                wordWrap: 'Permitir saltos de línea dentro de las palabras',
-                inheritWordWrap: 'Usar la configuración heredada',
+                wordWrap: 'Permitir ajuste de línea con división de palabra en el texto latino',
                 alignment: 'Alineación',
                 indentation: 'Sangría',
                 left: 'Izquierda',

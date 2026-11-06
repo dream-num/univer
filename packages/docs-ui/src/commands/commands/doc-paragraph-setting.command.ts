@@ -20,7 +20,6 @@ import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUni
 import { DocHistoryAction, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocParagraphSettingCommandParams {
-    resetWordWrap?: boolean;
     paragraph?: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule' | 'wordWrap'>>;
 };
 export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandParams> = {
@@ -59,7 +58,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             },
         };
 
-        if (!config.resetWordWrap && (!config.paragraph || Object.keys(config.paragraph).length === 0)) {
+        if (!config.paragraph || Object.keys(config.paragraph).length === 0) {
             return false;
         }
         const memoryCursor = new MemoryCursor();
@@ -71,9 +70,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         for (const paragraph of paragraphs) {
             const { startIndex } = paragraph;
             const paragraphStyle = { ...paragraph.paragraphStyle, ...config.paragraph };
-            if (config.resetWordWrap) {
-                delete paragraphStyle.wordWrap;
-            }
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,

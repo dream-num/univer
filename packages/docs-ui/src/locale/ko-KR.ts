@@ -185,8 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: '구역 설정',
             },
             paragraphSetting: {
-                wordWrap: '단어 중간에서 줄 바꿈 허용',
-                inheritWordWrap: '상속된 설정 사용',
+                wordWrap: '영어 단어 잘림 허용',
                 alignment: '정렬',
                 indentation: '들여쓰기',
                 left: '왼쪽',

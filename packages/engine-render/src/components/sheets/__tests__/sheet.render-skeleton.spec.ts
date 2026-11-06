@@ -104,6 +104,61 @@ describe('Rich-text render snapshot isolation', () => {
 });
 
 describe('Cell layout and merged styles', () => {
+    it.each([
+        { merged: false, rowHeight: 65, padding: 0, columns: ['ABC', 'DEF', 'GHI', 'JKL'] },
+        { merged: true, rowHeight: 65, padding: 0, columns: ['ABCDEF', 'GHIJKL'] },
+        { merged: true, rowHeight: 1, padding: 4, columns: Array.from('ABCDEFGHIJKL') },
+    ])('wraps and measures stacked cells, including rows smaller than padding (merged: $merged, height: $rowHeight)', ({ merged, rowHeight, padding, columns }) => {
+        const environment = setupRenderTestEnv();
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 4,
+            fontBoundingBoxAscent: 16,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 14,
+            actualBoundingBoxDescent: 2,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'wrapped-stack',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                name: 'Sheet',
+                rowCount: 5,
+                columnCount: 5,
+                defaultRowHeight: rowHeight,
+                defaultColumnWidth: 30,
+                mergeData: merged ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [],
+                cellData: { 0: { 0: {
+                    v: 'ABCDEFGHIJKL',
+                    s: { tr: { a: 0, v: BooleanNumber.TRUE }, tb: WrapStrategy.WRAP, pd: { t: padding, b: padding, l: padding, r: padding } },
+                } } },
+            } },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const document = skeleton.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!;
+            const renderedColumns = document.getSkeletonData()!.pages[0].sections[0].columns[0].lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup)
+                .filter((glyph) => glyph.content && glyph.content !== '\r')
+                .map((glyph) => glyph.content)
+                .join(''));
+            expect(renderedColumns.filter((column) => column.length > 0)).toEqual(columns);
+            const size = getDocsSkeletonPageSize(document, 90)!;
+            expect(size.height).toBeLessThanOrEqual(Math.max(20, rowHeight * (merged ? 2 : 1)));
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 30)).toBeCloseTo(size.width + padding * 2);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+            environment.restore();
+        }
+    });
+
     it.each([false, true])('stacks mixed scripts by font height without splitting graphemes or changing stored data (rich text: %s)', (richText) => {
         const environment = setupRenderTestEnv();
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({

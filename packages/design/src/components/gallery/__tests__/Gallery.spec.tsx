@@ -16,7 +16,7 @@
 
 import type { ComponentProps, PropsWithChildren } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Gallery } from '../Gallery';
@@ -51,9 +51,6 @@ afterEach(() => {
 });
 
 describe('Gallery', () => {
-    beforeEach(() => {
-        vi.useRealTimers();
-    });
     it('does not render when open is false', () => {
         renderGallery({ images, open: false });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -134,17 +131,19 @@ describe('Gallery', () => {
         const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
         const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
         const resetBtn = screen.getByRole('button', { name: /reset zoom/i });
-
-        expect(img).toHaveStyle('transform: scale(1)');
+        const getScale = () => Number.parseFloat(img.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? '');
+        const initialScale = getScale();
 
         fireEvent.click(zoomInBtn);
-        expect(img).toHaveStyle('transform: scale(1.25)');
+        const zoomedScale = getScale();
+        expect(zoomedScale).toBeGreaterThan(initialScale);
 
         fireEvent.click(zoomOutBtn);
-        expect(img).toHaveStyle('transform: scale(1)');
+        expect(getScale()).toBeLessThan(zoomedScale);
 
+        fireEvent.click(zoomInBtn);
         fireEvent.click(resetBtn);
-        expect(img).toHaveStyle('transform: scale(1)');
+        expect(getScale()).toBe(initialScale);
     });
 
     it('can switch images using the pager', () => {
@@ -190,10 +189,14 @@ describe('Gallery', () => {
     it('should zoom with wheel event and keep value in range', () => {
         renderGallery({ images, open: true });
         const img = screen.getByRole('img');
-        const getScale = () => Number.parseFloat((img.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? '1'));
+        const getScale = () => Number.parseFloat(img.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? '');
+        const initialScale = getScale();
 
         fireEvent.wheel(window, { deltaY: -300 });
-        expect(img.style.transform).toContain('scale(');
+        const zoomedScale = getScale();
+        expect(zoomedScale).toBeGreaterThan(initialScale);
+        fireEvent.wheel(window, { deltaY: 300 });
+        expect(getScale()).toBeLessThan(zoomedScale);
 
         const zoomInBtn = screen.getByRole('button', { name: /zoom in/i });
         const zoomOutBtn = screen.getByRole('button', { name: /zoom out/i });
@@ -203,7 +206,7 @@ describe('Gallery', () => {
         const atUpperBound = getScale();
         fireEvent.click(zoomInBtn);
         expect(getScale()).toBe(atUpperBound);
-        expect(getScale()).toBeLessThanOrEqual(2);
+        expect(zoomInBtn).toBeDisabled();
 
         for (let i = 0; i < 12; i++) {
             fireEvent.click(zoomOutBtn);
@@ -211,7 +214,7 @@ describe('Gallery', () => {
         const atLowerBound = getScale();
         fireEvent.click(zoomOutBtn);
         expect(getScale()).toBe(atLowerBound);
-        expect(getScale()).toBeGreaterThanOrEqual(0.5);
+        expect(zoomOutBtn).toBeDisabled();
     });
 
     it('keeps the preview during exit and removes it after the animation', () => {

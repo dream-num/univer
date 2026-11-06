@@ -132,7 +132,7 @@ describe('Cell layout and merged styles', () => {
                             ? undefined
                             : {
                                 id: 'korean-rich-cell',
-                                documentStyle: { documentFlavor },
+                                documentStyle: { documentFlavor, textStyle: { lang: 'ko-KR' } },
                                 body: {
                                     dataStream: `${content}\r\n`,
                                     paragraphs: [{ startIndex: content.length, paragraphId: 'korean-cell-paragraph', paragraphStyle: { wordWrap } }],
@@ -170,6 +170,7 @@ describe('Cell layout and merged styles', () => {
             }
             expect(lines).toEqual(['오늘 전략', '을']);
             expect(skeleton.calculateAutoHeightForCell(0, 0)).toBeCloseTo(renderedHeight);
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 50)).toBeCloseTo(50);
             expect(workbook.getSnapshot()).toEqual(before);
         } finally {
             skeleton.dispose();

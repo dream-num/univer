@@ -124,12 +124,8 @@ export function resolveDocumentParagraphStyle(
 }
 
 /** Resolves word splitting without materializing inherited defaults in the snapshot. */
-export function resolveDocumentParagraphWordWrap(document: IDocumentData, paragraph?: IParagraph): BooleanNumber | undefined {
+export function resolveDocumentParagraphWordWrap(document: IDocumentData, paragraph?: IParagraph): BooleanNumber {
     const { documentStyle } = document;
-    // Spreadsheet cells have their own wrapping rules, even when carrying rich text from Docs.
-    if (documentStyle?.renderConfig?.cellValueType != null) {
-        return undefined;
-    }
     const { wordWrap } = resolveDocumentParagraphStyle(documentStyle, paragraph?.paragraphStyle, {
         styles: document.styles,
         paragraphStyleId: paragraph?.styleId,

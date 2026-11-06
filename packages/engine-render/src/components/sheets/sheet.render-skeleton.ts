@@ -34,11 +34,6 @@ import type {
     Styles,
     Worksheet,
 } from '@univerjs/core';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import type { Scene } from '../../scene';
-import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     BooleanNumber,
     CellValueType,
@@ -69,6 +64,11 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { ITransformChangeState } from '../../basics/interfaces';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
+import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -791,7 +791,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
             documentSkeleton.calculate();
 
             let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
@@ -1022,7 +1022,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             documentModel.updateDocumentDataPageSize(Infinity, Infinity);
         }
 
-        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
 
         documentSkeleton.calculate();
         // key
@@ -1469,7 +1469,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (fontCache.documentSkeleton) {
             const snapshot = fontCache.documentSkeleton.getViewModel().getDataModel().getSnapshot();
             const documentModel = new DocumentDataModel(scaleDocumentDataForShrinkToFit(snapshot, scale, fallbackFontSize));
-            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap });
+            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
             documentSkeleton.calculate();
             fontCache.documentSkeleton = documentSkeleton;
         } else {
@@ -1549,7 +1549,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 }
                 const documentViewModel = new DocumentViewModel(documentModel);
                 if (documentViewModel) {
-                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap, isSheetCell: true });
                     documentSkeleton.calculate();
 
                     config = {

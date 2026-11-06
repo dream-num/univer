@@ -20,9 +20,6 @@ import { LineBreaker } from './line-breaker';
 
 export function createDocumentLineBreaker(document: IDocumentData, paragraph: IParagraph | undefined, content: string, start: number, body: IDocumentBody | undefined = document.body): LineBreaker {
     const wordWrap = resolveDocumentParagraphWordWrap(document, paragraph);
-    if (wordWrap == null) {
-        return new LineBreaker(content);
-    }
     const style = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
         styles: document.styles,
         paragraphStyleId: paragraph?.styleId,

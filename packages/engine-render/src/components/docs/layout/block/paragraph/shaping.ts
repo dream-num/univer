@@ -57,6 +57,7 @@ import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/who
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
+import { LineBreaker } from '../../line-breaker/line-breaker';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
@@ -402,7 +403,9 @@ function createShapingLineBreaker(
     traditionalLayout: boolean,
     measuredWholeEntityRanges: ICustomRangeForInterceptor[]
 ): IBreakPoints {
-    const lineBreaker = createDocumentLineBreaker(viewModel.getSnapshot(), paragraph, content, paragraphNode.contentStartIndex, viewModel.getBody());
+    const lineBreaker = ctx.isSheetCell
+        ? new LineBreaker(content)
+        : createDocumentLineBreaker(viewModel.getSnapshot(), paragraph, content, paragraphNode.contentStartIndex, viewModel.getBody());
     const { paragraphStyle = {} } = paragraph;
     const { hyphen } = ctx;
 
@@ -554,7 +557,7 @@ export function shaping(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
     const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    const wordWrap = resolveDocumentParagraphWordWrap(viewModel.getSnapshot(), paragraph);
+    const wordWrap = ctx.isSheetCell ? undefined : resolveDocumentParagraphWordWrap(viewModel.getSnapshot(), paragraph);
     const measuredWholeEntityRanges = collectMeasuredWholeEntityRanges(content, viewModel, paragraphNode);
     const measuredWholeEntityRangeByStart = new Map(measuredWholeEntityRanges.map((range) => [
         range.startIndex - paragraphNode.contentStartIndex,

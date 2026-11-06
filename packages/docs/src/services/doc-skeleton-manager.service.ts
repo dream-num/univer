@@ -76,12 +76,6 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        // this._currentViewModel$.complete();
-
-        // this._docViewModel?.dispose();
-
-        //@ts-ignore
-        // delete this._docViewModel;
     }
 
     getSkeleton(): DocumentSkeleton {
@@ -162,6 +156,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
             this._context.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
         return DocumentSkeleton.create(documentViewModel, this._localeService, {
             lineGap: isSheetEditor ? this._configService.getConfig<number>(SHEET_TEXT_LINE_GAP) : undefined,
+            isSheetCell: isSheetEditor,
         });
     }
 

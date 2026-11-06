@@ -1201,7 +1201,6 @@ export class Worksheet {
                     vertexAngle,
                     wrapStrategy,
                     zeroWidthParagraphBreak: 1,
-                    cellValueType: cell.t ?? CellValueType.STRING,
                 }
             );
         } else if (cell.v != null) {

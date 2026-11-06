@@ -36,6 +36,8 @@ import {
     INTERCEPTOR_POINT,
     IRefSelectionsService,
     RefSelectionsService,
+    SelectionMoveType,
+    SetSelectionsOperation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
     SheetsSelectionsService,
@@ -863,5 +865,72 @@ describe('Test FUniver UI mixin', () => {
         ]));
 
         disposables.forEach((disposable) => disposable.dispose());
+    });
+
+    it('should resolve a global selection service through the render unit injector', () => {
+        const testBed = createFacadeTestBed(undefined, [
+            [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [IEditorService, { useClass: EditorService }],
+            [DocSelectionManagerService],
+            [IDefinedNamesService, { useClass: DefinedNamesService }],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
+            [SheetsSelectionsService],
+        ]);
+
+        const workbook = testBed.univerAPI.getActiveWorkbook()!;
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(SetSelectionsOperation);
+
+        const changedRows: number[] = [];
+        const disposable = testBed.univerAPI.addEvent(testBed.univerAPI.Event.SelectionChanged, ({ selections }) => {
+            changedRows.push(selections[0]?.startRow ?? -1);
+        });
+
+        const scroll$ = new Subject<unknown>();
+        const renderInjector = testBed.injector.createChild();
+        const render = {
+            type: UniverInstanceType.UNIVER_SHEET,
+            unitId: workbook.getId(),
+            getInjector: () => renderInjector,
+            with: (service: unknown) => {
+                if (service === SheetScrollManagerService) {
+                    return { validViewportScrollInfo$: scroll$ };
+                }
+
+                // `RenderUnit.with` only resolves render modules from the unit's own injector.
+                // Global services are registered on an ancestor injector instead.
+                throw new Error(`[redi]: Cannot find "${String(service)}" registered by any injector.`);
+            },
+        };
+        const renderManagerService = testBed.get(IRenderManagerService) as IRenderManagerService & {
+            _renderCreated$: Subject<typeof render>;
+        };
+        renderManagerService._renderCreated$.next(render);
+        testBed.get(LifecycleService).stage = LifecycleStages.Steady;
+
+        const selection = [{
+            range: { startRow: 4, endRow: 4, startColumn: 0, endColumn: 0 },
+            primary: {
+                actualRow: 4,
+                actualColumn: 0,
+                startRow: 4,
+                startColumn: 0,
+                endRow: 4,
+                endColumn: 0,
+                isMerged: false,
+                isMergedMainCell: false,
+            },
+            style: null,
+        }];
+        commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId: workbook.getId(),
+            subUnitId: workbook.getActiveSheet().getSheetId(),
+            type: SelectionMoveType.MOVE_END,
+            selections: selection,
+        });
+
+        expect(changedRows).toEqual([4]);
+
+        disposable.dispose();
     });
 });

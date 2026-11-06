@@ -26,25 +26,6 @@ import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
 import type { Observable } from 'rxjs';
-import type {
-    IBeforeClipboardChangeEventParams,
-    IBeforeClipboardPasteEventParams,
-    IBeforeSheetEditEndEventParams,
-    IBeforeSheetEditStartEventParams,
-    ICellEventParams,
-    IClipboardChangedEventParams,
-    IClipboardPastedEventParams,
-    IDragEventParams,
-    IScrollEventParams,
-    ISelectionEventParams,
-    ISheetColumnHeaderEventParams,
-    ISheetEditChangingEventParams,
-    ISheetEditEndedEventParams,
-    ISheetEditStartedEventParams,
-    ISheetRowHeaderEventParams,
-    ISheetSkeletonChangedEventParams,
-    ISheetZoomEventParams,
-} from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, InterceptorEffectEnum, IPermissionService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -64,6 +45,25 @@ import {
 } from '@univerjs/sheets-ui';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter, of, take } from 'rxjs';
+import type {
+    IBeforeClipboardChangeEventParams,
+    IBeforeClipboardPasteEventParams,
+    IBeforeSheetEditEndEventParams,
+    IBeforeSheetEditStartEventParams,
+    ICellEventParams,
+    IClipboardChangedEventParams,
+    IClipboardPastedEventParams,
+    IDragEventParams,
+    IScrollEventParams,
+    ISelectionEventParams,
+    ISheetColumnHeaderEventParams,
+    ISheetEditChangingEventParams,
+    ISheetEditEndedEventParams,
+    ISheetEditStartedEventParams,
+    ISheetRowHeaderEventParams,
+    ISheetSkeletonChangedEventParams,
+    ISheetZoomEventParams,
+} from './f-event';
 
 /**
  * @ignore
@@ -887,6 +887,14 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
     private _tryGetRenderDependency<T>(render: IRender, dependency: DependencyIdentifier<T>): Nullable<T> {
         try {
+            // `IRender.with` only resolves render modules registered on the render unit itself.
+            // Global services such as `SheetsSelectionsService` live in an ancestor injector, so they
+            // must be resolved through the render unit's injector lookup chain instead.
+            const injector = render.getInjector?.();
+            if (injector) {
+                return injector.get(dependency);
+            }
+
             return render.with(dependency);
         } catch (error) {
             if (error instanceof Error && (error.message.includes('DependencyNotFoundError') || error.message.includes('Cannot find'))) {

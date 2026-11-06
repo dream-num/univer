@@ -1,0 +1,148 @@
+{
+  "id": "8090-ui-evidence",
+  "locale": "enUS",
+  "title": "Paragraph word wrapping",
+  "tableSource": {},
+  "drawings": {},
+  "drawingsOrder": [],
+  "headers": {},
+  "footers": {},
+  "notes": {},
+  "noteSettings": {},
+  "body": {
+    "dataStream": "段落换行设置\r오늘 전략을 함께 검토합니다.\rInternationalization demonstrates word wrapping.\r\n",
+    "paragraphs": [
+      {
+        "startIndex": 6,
+        "paragraphId": "ui-0",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 12
+          },
+          "spaceBelow": {
+            "v": 12
+          }
+        }
+      },
+      {
+        "startIndex": 23,
+        "paragraphId": "ui-1",
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 12
+          },
+          "spaceBelow": {
+            "v": 12
+          }
+        }
+      },
+      {
+        "startIndex": 72,
+        "paragraphStyle": {
+          "snapToGrid": 0,
+          "spaceAbove": {
+            "v": 12
+          },
+          "spaceBelow": {
+            "v": 12
+          }
+        },
+        "paragraphId": "ui-2"
+      }
+    ],
+    "sectionBreaks": [
+      {
+        "startIndex": 73,
+        "sectionId": "section_WcJvS3TUoyKX"
+      }
+    ],
+    "textRuns": [
+      {
+        "st": 0,
+        "ed": 6,
+        "ts": {
+          "fs": 26,
+          "bl": 1
+        }
+      },
+      {
+        "st": 7,
+        "ed": 24,
+        "ts": {
+          "fs": 26
+        }
+      }
+    ],
+    "customRanges": [],
+    "customDecorations": []
+  },
+  "documentStyle": {
+    "pageSize": {
+      "width": 600,
+      "height": 680
+    },
+    "documentFlavor": 2,
+    "marginTop": 48,
+    "marginBottom": 48,
+    "marginRight": 48,
+    "marginLeft": 48,
+    "autoHyphenation": 1,
+    "doNotHyphenateCaps": 0,
+    "consecutiveHyphenLimit": 2,
+    "defaultHeaderId": "",
+    "defaultFooterId": "",
+    "evenPageHeaderId": "",
+    "evenPageFooterId": "",
+    "firstPageHeaderId": "",
+    "firstPageFooterId": "",
+    "evenAndOddHeaders": 0,
+    "useFirstPageHeaderFooter": 0,
+    "marginHeader": 30,
+    "marginFooter": 30,
+    "renderConfig": {
+      "zeroWidthParagraphBreak": 1,
+      "vertexAngle": 0,
+      "centerAngle": 0,
+      "background": {
+        "rgb": "#ccc"
+      }
+    },
+    "textStyle": {
+      "ff": "Arial",
+      "fs": 22
+    }
+  },
+  "settings": {},
+  "resources": [
+    {
+      "name": "DOC_OBJECT_PERMISSION_PLUGIN",
+      "data": "[]"
+    },
+    {
+      "name": "DOC_WORD_STYLES_PLUGIN",
+      "data": ""
+    },
+    {
+      "name": "DOC_NOTE_PLUGIN",
+      "data": ""
+    },
+    {
+      "name": "UNIVER_OLE_ATTACHMENT_PLUGIN",
+      "data": "{\"version\":1,\"files\":{},\"objects\":{}}"
+    },
+    {
+      "name": "DOC_DRAWING_PLUGIN",
+      "data": "{\"data\":{},\"order\":[]}"
+    },
+    {
+      "name": "DOC_HYPER_LINK_PLUGIN",
+      "data": "{\"links\":[]}"
+    },
+    {
+      "name": "DOC_UNIVER_THREAD_COMMENT_PLUGIN",
+      "data": "{}"
+    }
+  ]
+}

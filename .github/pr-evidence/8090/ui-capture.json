@@ -1,0 +1,50 @@
+{
+  "sourceCommit": "6d234b81a9ecdbb7ace57f76154a15b23b93c1f2",
+  "capturedAt": "2026-11-06",
+  "surface": "Docs example workbench, existing Paragraph Settings sidebar",
+  "url": "http://127.0.0.1:5173/#docs",
+  "locale": "zhCN",
+  "devServer": "vite --host 127.0.0.1 --port 5173 --mode test (unbundled development mode)",
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1500,
+    "height": 851,
+    "devicePixelRatio": 2
+  },
+  "screenshotPixels": {
+    "width": 3000,
+    "height": 1702
+  },
+  "fixture": "ui-fixture.json",
+  "selection": {
+    "startOffset": 24,
+    "endOffset": 24
+  },
+  "entryPoint": "Document context menu > Paragraph Settings",
+  "captureMethod": "Opened the real sidebar via sidebar.operation.doc-paragraph-setting-panel; clicked the checkbox and Undo through browser automation. The context-menu click itself was not exercised.",
+  "captures": [
+    {
+      "file": "docs-paragraph-setting-off.png",
+      "checked": false,
+      "paragraphWordWrap": "absent; inherited effective default 0",
+      "latinLines": [
+        "Internationalization demonstrates",
+        "word wrapping."
+      ]
+    },
+    {
+      "file": "docs-paragraph-setting-on.png",
+      "checked": true,
+      "paragraphWordWrap": 1,
+      "latinLines": [
+        "Internationalization demonstrates w",
+        "ord wrapping."
+      ]
+    }
+  ],
+  "verification": [
+    "Clicking the checkbox sets wordWrap=1 only on the selected Latin paragraph.",
+    "The Korean and title paragraphs remain unchanged.",
+    "Undo removes the explicit wordWrap value and restores the unchecked state."
+  ]
+}

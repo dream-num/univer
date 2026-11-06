@@ -265,7 +265,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         FDtree.rangeList = dependencyRanges;
         FDtree.getDirtyData = getDirtyData;
 
-        const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
+        const allDependency = getDirtyData(this._currentConfigService.getDirtyData(true) as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
         const dirtyRanges = this._convertDirtyRangesToUnitRange(allDependency.dirtyRanges);
 
         FDtree.featureDirtyRanges = dirtyRanges;
@@ -834,6 +834,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
             // After entering the pivot table, no calculation is required if there is no formula
             if (!tree.formula) {
+                tree.isDirty = referenceContextChanged && tree.type === FormulaDependencyTreeType.FEATURE_FORMULA;
                 continue;
             }
 

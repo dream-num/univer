@@ -108,6 +108,18 @@ function createService(withCurrentWorkbook = true) {
 }
 
 describe('FormulaCurrentConfigService', () => {
+    it('keeps conservative feature invalidation separate from ordinary formula calculation', () => {
+        const bed = createFunctionTestBed();
+        try {
+            const service = bed.get(IFormulaCurrentConfigService);
+            service.load({ formulaData: {}, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: false, dirtyReferenceUnits: ['unit'], dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {}, allUnitData: {} });
+            expect(service.getDirtyData().forceCalculation).toBe(false);
+            expect(service.getDirtyData(true).forceCalculation).toBe(true);
+            service.loadDirtyRangesAndExcludedCell([]);
+            expect(service.getDirtyData(true).forceCalculation).toBe(false);
+        } finally { bed.univer.dispose(); }
+    });
+
     it('distinguishes transported filter exclusions from manual hiding and clears stale exclusions', () => {
         const testBed = createFunctionTestBed();
         try {

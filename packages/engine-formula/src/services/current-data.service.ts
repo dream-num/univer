@@ -123,7 +123,7 @@ export interface IFormulaCurrentConfigService {
     setExecuteUnitId(unitId: string): void;
     setExecuteSubUnitId(subUnitId: string): void;
 
-    getDirtyData(): IFormulaDirtyData;
+    getDirtyData(forFeatureCalculation?: boolean): IFormulaDirtyData;
 
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
@@ -454,11 +454,12 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         rowData && this._applyUnitRowData(rowData);
     }
 
-    getDirtyData(): IFormulaDirtyData {
+    // Feature callbacks expose no formula metadata; keep their conservative invalidation local.
+    getDirtyData(forFeatureCalculation = false): IFormulaDirtyData {
         return {
             dirtyIterationUnits: this._dirtyIterationUnits,
             dirtyReferenceUnits: this._dirtyReferenceUnits,
-            forceCalculation: this._forceCalculate,
+            forceCalculation: this._forceCalculate || (forFeatureCalculation && this._dirtyReferenceUnits.length > 0),
             dirtyRanges: this._dirtyRanges,
             dirtyNameMap: this._dirtyNameMap,
             dirtyDefinedNameMap: this._dirtyDefinedNameMap,

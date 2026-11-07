@@ -445,6 +445,7 @@ describe('CalculateController formula snapshot capability', () => {
             ) {
                 expect(this).toBe(service);
                 expect(Object.hasOwn(config, 'formulaData')).toBe(false);
+                expect(config.dirtyReferenceUnits).toEqual(['u']);
                 expect(snapshot.materialize()).toEqual({ u: { s: { 0: { 1: { f: '=1' } } } } });
             }),
         };
@@ -460,7 +461,7 @@ describe('CalculateController formula snapshot capability', () => {
                 return {};
             },
         };
-        await calculate.call({ _formulaDataModel: model, _calculateFormulaService: service }, {});
+        await calculate.call({ _formulaDataModel: model, _calculateFormulaService: service }, { dirtyReferenceUnits: ['u'] });
         expect(events).toEqual(['capture', 'cells', 'ranges']);
         expect(service.executeWithFormulaDataSnapshot).toHaveBeenCalledTimes(1);
         expect(service.execute).not.toHaveBeenCalled();
@@ -480,9 +481,10 @@ describe('CalculateController formula snapshot capability', () => {
             getArrayFormulaCellData: () => ({}),
             getArrayFormulaRange: () => ({}),
         };
-        await calculate.call({ _formulaDataModel: model, _calculateFormulaService: service }, {});
+        await calculate.call({ _formulaDataModel: model, _calculateFormulaService: service }, { dirtyReferenceUnits: ['u'] });
         expect(model.getFormulaData).toHaveBeenCalledTimes(1);
         expect(service.execute.mock.calls[0][0].formulaData).toBe(data);
+        expect(service.execute.mock.calls[0][0].dirtyReferenceUnits).toEqual(['u']);
         expect(service.executeWithFormulaDataSnapshot).not.toHaveBeenCalled();
     });
 

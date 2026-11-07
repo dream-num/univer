@@ -106,6 +106,7 @@ export class CalculateController extends Disposable {
     private async _calculate(formulaDirtyData: Partial<IFormulaDirtyData>) {
         const {
             dirtyIterationUnits,
+            dirtyReferenceUnits,
             forceCalculation: forceCalculate = false,
             dirtyRanges = [],
             dirtyNameMap = {},
@@ -134,6 +135,7 @@ export class CalculateController extends Disposable {
 
         const config = {
             dirtyIterationUnits,
+            dirtyReferenceUnits,
             arrayFormulaCellData,
             arrayFormulaRange,
             forceCalculate,

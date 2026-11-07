@@ -36,7 +36,9 @@ import {
     SetRowHiddenMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetColumnCountMutation,
     SetWorksheetOrderMutation,
+    SetWorksheetRowCountMutation,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { ITestBed } from '../../facade/__tests__/create-test-bed';
@@ -94,15 +96,16 @@ describe('ActiveDirtyController', () => {
         testBed?.univer.dispose();
     });
 
-    it('rebuilds dependencies across the workbook when sheet order changes', () => {
+    it('reports reference context changes without forcing every formula', () => {
         testBed = createControllerTestBed();
         testBed.injector.get(ActiveDirtyController);
         const dirty = getDirtyData(testBed, {
             id: SetWorksheetOrderMutation.id,
-            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 0 },
+            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 1 },
         });
-        expect(dirty.forceCalculation).toBe(true);
-        expect(dirty.clearDependencyTreeCache).toEqual({ test: { sheet1: 'Sheet1' } });
+        expect(dirty.forceCalculation).toBeUndefined();
+        expect(dirty.dirtyReferenceUnits).toEqual(['test']);
+        expect(dirty.clearDependencyTreeCache).toBeUndefined();
     });
 
     it('marks iteration-sensitive workbooks without making every sheet dirty', () => {
@@ -114,6 +117,12 @@ describe('ActiveDirtyController', () => {
         });
         expect(dirty.dirtyIterationUnits).toEqual(['test']);
         expect(dirty.dirtyRanges ?? []).toEqual([]);
+    });
+
+    it.each([SetWorksheetRowCountMutation.id, SetWorksheetColumnCountMutation.id])('triggers calculation for direct dimension changes: %s', (id) => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        expect(getDirtyData(testBed, { id, params: { unitId: 'test', subUnitId: 'sheet1', rowCount: 12, columnCount: 16 } })).toEqual({ dirtyReferenceUnits: ['test'] });
     });
 
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {

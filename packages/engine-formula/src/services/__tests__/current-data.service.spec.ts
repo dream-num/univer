@@ -217,6 +217,42 @@ describe('FormulaCurrentConfigService', () => {
         expect(calls).toBe(0);
     });
 
+    it('keeps conservative feature invalidation separate from ordinary formula calculation', () => {
+        const bed = createFunctionTestBed();
+        try {
+            const service = bed.get(IFormulaCurrentConfigService);
+            service.load({ formulaData: {}, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: false, dirtyReferenceUnits: ['unit'], dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {}, allUnitData: {} });
+            expect(service.getDirtyData().forceCalculation).toBe(false);
+            expect(service.getDirtyData(true).forceCalculation).toBe(true);
+            service.loadDirtyRangesAndExcludedCell([]);
+            expect(service.getDirtyData(true).forceCalculation).toBe(false);
+        } finally { bed.univer.dispose(); }
+    });
+
+    it('keeps reference invalidation independent of deferred formula materialization', () => {
+        const { service, formulaDataModel } = createService();
+        const materialize = vi.fn(() => ({ unit: { sheet: {} } }));
+        service.loadWithFormulaDataSnapshot({
+            ...createSnapshotDataset(),
+            dirtyReferenceUnits: ['unit'],
+        }, { materialize });
+
+        expect(service.getDirtyData().dirtyReferenceUnits).toEqual(['unit']);
+        expect(service.getDirtyData().forceCalculation).toBe(false);
+        expect(service.getDirtyData(true).forceCalculation).toBe(true);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(materialize).not.toHaveBeenCalled();
+        expect(formulaDataModel.getFormulaData).not.toHaveBeenCalled();
+
+        service.loadDirtyRangesAndExcludedCell([]);
+        expect(service.getDirtyData().dirtyReferenceUnits).toEqual([]);
+        expect(service.getDirtyData().forceCalculation).toBe(false);
+        expect(service.getDirtyData(true).forceCalculation).toBe(false);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(materialize).not.toHaveBeenCalled();
+        service.dispose();
+    });
+
     it('distinguishes transported filter exclusions from manual hiding and clears stale exclusions', () => {
         const testBed = createFunctionTestBed();
         try {
@@ -347,6 +383,14 @@ describe('FormulaCurrentConfigService', () => {
         workbookById.set('date-1904', { getDateSystem: () => DateSystem.Date1904 });
         expect(service.getDateSystem('date-1904')).toBe(DateSystem.Date1904);
         expect(service.getDateSystem('missing')).toBe(DateSystem.Date1900);
+    });
+
+    it('resolves explicit workbook order independently of the focused workbook', () => {
+        const { service, workbookById } = createService();
+        workbookById.set('other', { getSnapshot: () => ({ id: 'other', sheetOrder: ['end', 'start'] }) });
+        expect(service.getSheetsInfo('other').sheetOrder).toEqual(['end', 'start']);
+        expect(service.getSheetsInfo().sheetOrder).toEqual(['sheet-current']);
+        expect(service.getSheetsInfo('missing')).toEqual({ sheetOrder: [], sheetNameMap: {} });
     });
 
     it('should resolve sheet size, filtered rows and lightweight data loading', () => {

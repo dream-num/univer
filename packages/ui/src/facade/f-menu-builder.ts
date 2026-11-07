@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, IDisposable } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IRibbonGridLayout, MenuSchemaType } from '@univerjs/ui';
-import { CommandType, generateRandomId, ICommandService, Inject, Injector } from '@univerjs/core';
+import { CommandType, generateRandomId, ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 
@@ -118,9 +118,18 @@ abstract class FMenuBase extends FBase {
      *     console.log('Custom Menu 2 clicked');
      *   },
      * }).appendTo(['contextMenu.mainArea', 'contextMenu.others']);
+     *
+     * // Dispose the returned handle to remove the menu item again.
+     * const disposable = univerAPI.createMenu({
+     *   id: 'custom-menu-id-3',
+     *   title: 'Custom Menu 3',
+     *   action: () => {},
+     * }).appendTo('contextMenu.others');
+     * disposable.dispose();
      * ```
+     * @returns {IDisposable} A handle that removes the menu item from every position it was appended to.
      */
-    appendTo(path: string | string[]): void {
+    appendTo(path: string | string[]): IDisposable {
         const paths = typeof path === 'string' ? path.split('|') : path;
         const len = paths.length;
 
@@ -138,6 +147,10 @@ abstract class FMenuBase extends FBase {
         });
 
         this._menuManagerService.mergeMenu(menuConfig);
+
+        return toDisposable(() => {
+            Object.keys(schema).forEach((key) => this._menuManagerService.removeMenu(key));
+        });
     }
 }
 

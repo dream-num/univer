@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IOleAttachmentIo, IOleResource } from '../ole-model';
 import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
+import type { IOleAttachmentIo, IOleResource } from '../ole-model';
 import { parseOleResource, prepareOleResource, prepareOleSnapshot, readOleFile } from '../ole-model';
 
 const bytes = new TextEncoder().encode('%PDF-1.7 original attachment');
@@ -25,7 +25,6 @@ const sha256 = createHash('sha256').update(bytes).digest('hex');
 
 function resource(): IOleResource {
     return {
-        version: 1,
         files: { [sha256]: { name: 'original.pdf', mimeType: 'application/pdf', size: bytes.length, sha256, data: Buffer.from(bytes).toString('base64') } },
         objects: Object.fromEntries(['ole-1', 'ole-2'].map((id) => [id, {
             id,

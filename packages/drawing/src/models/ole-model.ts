@@ -15,8 +15,8 @@
  */
 
 import type { IBaseAttachment, IDisposable } from '@univerjs/core';
-import type { IImageData } from './image-model-interface';
 import { UniverInstanceType } from '@univerjs/core';
+import type { IImageData } from './image-model-interface';
 
 export const OLE_RESOURCE_NAME = 'UNIVER_OLE_ATTACHMENT_PLUGIN';
 export const OLE_MAX_RESOURCE_BYTES = 50 * 1024 * 1024;
@@ -91,7 +91,6 @@ export interface IOleObject {
 }
 
 export interface IOleResource {
-    version: 1;
     files: Record<string, IOleFile>;
     objects: Record<string, IOleObject>;
 }
@@ -138,7 +137,7 @@ export function parseOleResource(json: string): IOleResource {
         throw new Error('OLE resource exceeds size limit');
     }
     const value = JSON.parse(json) as IOleResource;
-    if (value?.version !== 1 || !value.files || !value.objects || Array.isArray(value.files) || Array.isArray(value.objects)) {
+    if (!value.files || !value.objects || Array.isArray(value.files) || Array.isArray(value.objects)) {
         throw new Error('Invalid OLE resource');
     }
     let total = 0;
@@ -164,7 +163,10 @@ export function parseOleResource(json: string): IOleResource {
             }
         }
     }
-    return value;
+    return {
+        files: value.files,
+        objects: value.objects,
+    };
 }
 
 export async function readOleFile(file: IOleFile, io?: IOleAttachmentIo, signal?: AbortSignal): Promise<Uint8Array> {

@@ -35,12 +35,12 @@ describe('headless OLE resource lifecycle', () => {
         ]);
         const service = injector.get(OleService);
         const resources = injector.get(IResourceManagerService);
-        const json = JSON.stringify({ version: 1, files: {}, objects: {} });
+        const json = JSON.stringify({ files: {}, objects: {} });
         resources.loadResources('first-host', [{ name: OLE_RESOURCE_NAME, data: json }]);
         const saved = resources.getResources('first-host', type);
         expect(saved).toEqual([{ name: OLE_RESOURCE_NAME, data: json }]);
         resources.loadResources('reopened-host', saved);
-        expect(service.getResource('reopened-host')).toEqual({ version: 1, files: {}, objects: {} });
+        expect(service.getResource('reopened-host')).toEqual({ files: {}, objects: {} });
         resources.unloadResources('first-host', type);
         expect(service.getResource('first-host')).toBeUndefined();
         expect(service.getResource('reopened-host')).toBeDefined();

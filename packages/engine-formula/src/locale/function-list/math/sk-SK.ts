@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Vracia absolútnu hodnotu čísla. Absolútna hodnota čísla je číslo bez znamienka.',
         abstract: 'Vracia absolútnu hodnotu čísla',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Vracia arkuskosínus (inverzný kosínus) čísla. Arkuskosínus čísla je uhol, ktorého kosínus je číslo. Uhol je v radiánoch v rozsahu 0 až pi.',
         abstract: 'Vracia arkuskosínus čísla',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Vracia inverzný hyperbolický kosínus čísla. Číslo musí byť väčšie alebo rovné 1. Inverzný hyperbolický kosínus čísla je hodnota, ktorej hyperbolický kosínus je číslo, takže ACOSH(COSH(číslo)) sa rovná číslu.',
         abstract: 'Vracia inverzný hyperbolický kosínus čísla',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Vracia hlavné hodnoty arkuskotangensu (inverzného kotangensu) čísla.',
         abstract: 'Vracia arkuskotangens čísla',
         links: [
@@ -73,6 +77,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Vracia hyperbolický arkuskotangens čísla',
         abstract: 'Vracia hyperbolický arkuskotangens čísla',
         links: [
@@ -86,6 +91,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGREGOVAŤ',
         description: 'Vracia agregovanú hodnotu v zozname alebo databáze',
         abstract: 'Vracia agregovanú hodnotu v zozname alebo databáze',
         links: [
@@ -102,6 +108,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'ARABČINA',
         description: 'Konvertuje rímske číslo na arabské číslo',
         abstract: 'Konvertuje rímske číslo na arabské číslo',
         links: [
@@ -115,6 +122,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Vracia arkussínus čísla.',
         abstract: 'Vracia arkussínus čísla',
         links: [
@@ -128,6 +136,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Vracia inverzný hyperbolický sínus čísla.',
         abstract: 'Vracia inverzný hyperbolický sínus čísla',
         links: [
@@ -141,6 +150,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Vracia arkustangens čísla.',
         abstract: 'Vracia arkustangens čísla',
         links: [
@@ -154,6 +164,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Vráti arkustangens alebo inverzný tangens zadaných súradníc x a y. Arkustangens je uhol, ktorý zviera os x a priamka obsahujúca počiatok (0, 0) a bod so súradnicami (x_num, y_num). Uhol je daný v radiánoch medzi -pí a pí, okrem -pí.',
         abstract: 'Vráti arkustangens alebo inverzný tangens zadaných súradníc x a y. Arkustangens je uhol, ktorý zviera os x a priamka obsahujúca počiatok (0, 0) a bod so súradnicami (x_num, y_num). Uhol je daný v radiánoch medzi -pí a pí, okrem -pí.',
         links: [
@@ -168,6 +179,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Vráti inverzný hyperbolický tangens čísla. Číslo musí byť väčšie než -1 a menšie než 1. Inverzný hyperbolický tangens je hodnota, ktorej hyperbolický tangens je dané číslo , takže ATANH(TANH(číslo)) = číslo .',
         abstract: 'Vráti inverzný hyperbolický tangens čísla. Číslo musí byť väčšie než -1 a menšie než 1. Inverzný hyperbolický tangens je hodnota, ktorej hyperbolický tangens je dané číslo , takže ATANH(TANH(číslo)) = číslo .',
         links: [
@@ -181,6 +193,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Konvertuje číslo na textové vyjadrenie s daným základom sústavy (základ).',
         abstract: 'Konvertuje číslo na textové vyjadrenie s daným základom sústavy (základ).',
         links: [
@@ -196,6 +209,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'STROP',
         description: 'Zaokrúhľuje číslo nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         abstract: 'Zaokrúhľuje číslo nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         links: [
@@ -210,6 +224,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'STROP.MAT',
         description: 'Zaokrúhľuje číslo nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         abstract: 'Zaokrúhľuje číslo nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         links: [
@@ -225,6 +240,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'STROP.PRESN',
         description: 'Zaokrúhľuje číslo na najbližšie celé číslo alebo na najbližší násobok významnosti. Bez ohľadu na znamienko čísla sa zaokrúhľuje nahor.',
         abstract: 'Zaokrúhľuje číslo na najbližšie celé číslo alebo na najbližší násobok významnosti. Bez ohľadu na znamienko čísla sa zaokrúhľuje nahor.',
         links: [
@@ -239,6 +255,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'KOMBINACIA',
         description: 'Vracia počet kombinácií pre daný počet objektov',
         abstract: 'Vracia počet kombinácií pre daný počet objektov',
         links: [
@@ -253,6 +270,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'KOMBINACIA.A',
         description: 'Vracia počet kombinácií s opakovaním pre daný počet položiek',
         abstract: 'Vracia počet kombinácií s opakovaním pre daný počet položiek',
         links: [
@@ -267,6 +285,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Vracia kosínus čísla.',
         abstract: 'Vracia kosínus čísla',
         links: [
@@ -280,6 +299,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Vracia hyperbolický kosínus čísla',
         abstract: 'Vracia hyperbolický kosínus čísla',
         links: [
@@ -293,6 +313,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Vracia kotangens uhla',
         abstract: 'Vracia kotangens uhla',
         links: [
@@ -306,6 +327,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Vracia hyperbolický kotangens čísla',
         abstract: 'Vracia hyperbolický kotangens čísla',
         links: [
@@ -319,6 +341,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Vracia kosekans uhla',
         abstract: 'Vracia kosekans uhla',
         links: [
@@ -332,6 +355,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Vracia hyperbolický kosekans uhla',
         abstract: 'Vracia hyperbolický kosekans uhla',
         links: [
@@ -345,6 +369,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: 'Konvertuje textové vyjadrenie čísla v zadanom základe na desiatkové číslo',
         abstract: 'Konvertuje textové vyjadrenie čísla v zadanom základe na desiatkové číslo',
         links: [
@@ -359,6 +384,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'STUPNE',
         description: 'Konvertuje radiány na stupne',
         abstract: 'Konvertuje radiány na stupne',
         links: [
@@ -372,6 +398,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'PARNY',
         description: 'Zaokrúhľuje číslo nahor na najbližšie párne celé číslo',
         abstract: 'Zaokrúhľuje číslo nahor na najbližšie párne celé číslo',
         links: [
@@ -385,6 +412,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Vracia e umocnené na zadané číslo',
         abstract: 'Vracia e umocnené na zadané číslo',
         links: [
@@ -398,6 +426,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'FAKT',
         description: 'Vracia faktoriál čísla',
         abstract: 'Vracia faktoriál čísla',
         links: [
@@ -411,6 +440,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FAKT.DVOJITY',
         description: 'Vracia dvojitý faktoriál čísla',
         abstract: 'Vracia dvojitý faktoriál čísla',
         links: [
@@ -424,6 +454,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'POSCHODIE',
         description: 'Zaokrúhľuje číslo nadol, smerom k nule',
         abstract: 'Zaokrúhľuje číslo nadol, smerom k nule',
         links: [
@@ -438,6 +469,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'POSCHODIE.MAT',
         description: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo alebo na najbližší násobok významnosti',
         abstract: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo alebo na najbližší násobok významnosti',
         links: [
@@ -453,6 +485,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'POSCHODIE.PRESN',
         description: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo alebo na najbližší násobok významnosti. Bez ohľadu na znamienko čísla sa zaokrúhľuje nadol.',
         abstract: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo alebo na najbližší násobok významnosti.',
         links: [
@@ -467,6 +500,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: 'Vracia najväčší spoločný deliteľ',
         abstract: 'Vracia najväčší spoločný deliteľ',
         links: [
@@ -481,6 +515,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo',
         abstract: 'Zaokrúhľuje číslo nadol na najbližšie celé číslo',
         links: [
@@ -494,6 +529,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.CEILING',
         description: 'Vracia číslo zaokrúhlené nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         abstract: 'Vracia číslo zaokrúhlené nahor na najbližšie celé číslo alebo na najbližší násobok významnosti',
         links: [
@@ -508,6 +544,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: 'Vracia najmenší spoločný násobok',
         abstract: 'Vracia najmenší spoločný násobok',
         links: [
@@ -522,6 +559,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Vracia prirodzený logaritmus čísla',
         abstract: 'Vracia prirodzený logaritmus čísla',
         links: [
@@ -535,6 +573,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Vracia logaritmus čísla pri zadanom základe',
         abstract: 'Vracia logaritmus čísla pri zadanom základe',
         links: [
@@ -549,6 +588,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Vracia logaritmus čísla so základom 10',
         abstract: 'Vracia logaritmus čísla so základom 10',
         links: [
@@ -562,6 +602,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Vracia determinant matice poľa',
         abstract: 'Vracia determinant matice poľa',
         links: [
@@ -575,6 +616,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: 'Vracia inverznú maticu poľa',
         abstract: 'Vracia inverznú maticu poľa',
         links: [
@@ -588,6 +630,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Vracia maticový súčin dvoch polí',
         abstract: 'Vracia maticový súčin dvoch polí',
         links: [
@@ -602,6 +645,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Vracia zvyšok po delení čísla deliteľom. Výsledok má rovnaké znamienko ako deliteľ.',
         abstract: 'Vracia zvyšok po delení',
         links: [
@@ -616,6 +660,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'Vracia číslo zaokrúhlené na požadovaný násobok',
         abstract: 'Vracia číslo zaokrúhlené na požadovaný násobok',
         links: [
@@ -630,6 +675,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Vracia multinomický koeficient pre množinu čísel',
         abstract: 'Vracia multinomický koeficient pre množinu čísel',
         links: [
@@ -644,6 +690,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'Vracia jednotkovú maticu pre zadaný rozmer',
         abstract: 'Vracia jednotkovú maticu pre zadaný rozmer',
         links: [
@@ -657,6 +704,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'NEPARNY',
         description: 'Zaokrúhľuje číslo nahor na najbližšie nepárne celé číslo',
         abstract: 'Zaokrúhľuje číslo nahor na najbližšie nepárne celé číslo',
         links: [
@@ -670,6 +718,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Vracia hodnotu čísla pí',
         abstract: 'Vracia hodnotu čísla pí',
         links: [
@@ -681,6 +730,7 @@ const locale: typeof enUS = {
         functionParameter: {},
     },
     POWER: {
+        label: 'MOCNINA',
         description: 'Vracia výsledok čísla umocneného na zadaný exponent.',
         abstract: 'Vracia výsledok čísla umocneného na zadaný exponent',
         links: [
@@ -695,6 +745,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'SUCIN',
         description: 'Násobí všetky čísla zadané ako argumenty a vracia súčin.',
         abstract: 'Násobí svoje argumenty',
         links: [
@@ -709,6 +760,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'KVOCIENT',
         description: 'Vracia celočíselnú časť podielu',
         abstract: 'Vracia celočíselnú časť podielu',
         links: [
@@ -723,6 +775,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANY',
         description: 'Konvertuje stupne na radiány',
         abstract: 'Konvertuje stupne na radiány',
         links: [
@@ -736,6 +789,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'NAHODNE',
         description: 'Vracia náhodné číslo medzi 0 a 1',
         abstract: 'Vracia náhodné číslo medzi 0 a 1',
         links: [
@@ -747,6 +801,7 @@ const locale: typeof enUS = {
         functionParameter: {},
     },
     RANDARRAY: {
+        label: 'NAHODNE.POLE',
         description: 'Vracia pole náhodných čísel medzi 0 a 1. Môžete však určiť počet riadkov a stĺpcov, minimálne a maximálne hodnoty a či sa majú vrátiť celé čísla alebo desatinné hodnoty.',
         abstract: 'Vracia pole náhodných čísel medzi 0 a 1.',
         links: [
@@ -764,6 +819,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'NAHODNE.MEDZI',
         description: 'Vracia náhodné číslo medzi číslami, ktoré zadáte',
         abstract: 'Vracia náhodné číslo medzi číslami, ktoré zadáte',
         links: [
@@ -778,6 +834,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'RIMSKE',
         description: 'Konvertuje arabské číslo na rímske číslo ako text',
         abstract: 'Konvertuje arabské číslo na rímske číslo ako text',
         links: [
@@ -792,6 +849,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'ZAOKRUHLENIE',
         description: 'Zaokrúhľuje číslo na zadaný počet číslic',
         abstract: 'Zaokrúhľuje číslo na zadaný počet číslic',
         links: [
@@ -806,6 +864,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'ZAOKRUHLENIE.BANK',
         description: 'Zaokrúhľuje číslo bankárskym zaokrúhľovaním',
         abstract: 'Zaokrúhľuje číslo bankárskym zaokrúhľovaním',
         links: [
@@ -820,6 +879,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'ZAOKRUHLENIE.NADOL',
         description: 'Zaokrúhľuje číslo nadol, smerom k nule',
         abstract: 'Zaokrúhľuje číslo nadol, smerom k nule',
         links: [
@@ -834,6 +894,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'ZAOKRUHLENIE.NAHOR',
         description: 'Zaokrúhľuje číslo nahor, smerom od nuly',
         abstract: 'Zaokrúhľuje číslo nahor, smerom od nuly',
         links: [
@@ -848,6 +909,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Vracia sekans uhla',
         abstract: 'Vracia sekans uhla',
         links: [
@@ -861,6 +923,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Vracia hyperbolický sekans uhla',
         abstract: 'Vracia hyperbolický sekans uhla',
         links: [
@@ -874,6 +937,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: 'Vracia súčet mocninového radu podľa vzorca',
         abstract: 'Vracia súčet mocninového radu podľa vzorca',
         links: [
@@ -890,6 +954,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Generuje zoznam postupných čísel v poli, napríklad 1, 2, 3, 4',
         abstract: 'Generuje zoznam postupných čísel v poli, napríklad 1, 2, 3, 4',
         links: [
@@ -906,6 +971,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'ZNAK',
         description: 'Vracia znamienko čísla',
         abstract: 'Vracia znamienko čísla',
         links: [
@@ -919,6 +985,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Vracia sínus zadaného uhla',
         abstract: 'Vracia sínus zadaného uhla',
         links: [
@@ -932,6 +999,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Vracia hyperbolický sínus čísla',
         abstract: 'Vracia hyperbolický sínus čísla',
         links: [
@@ -945,6 +1013,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'ODMOCNINA',
         description: 'Vracia kladnú druhú odmocninu',
         abstract: 'Vracia kladnú druhú odmocninu',
         links: [
@@ -958,6 +1027,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'ODMOCNINA.PI',
         description: 'Vracia druhú odmocninu z (číslo * pí)',
         abstract: 'Vracia druhú odmocninu z (číslo * pí)',
         links: [
@@ -971,6 +1041,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'CASTKOVNY_SUCET',
         description: 'Vracia medzisúčet v zozname alebo databáze.',
         abstract: 'Vracia medzisúčet v zozname alebo databáze',
         links: [
@@ -986,6 +1057,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUCET',
         description: 'Môžete sčítať jednotlivé hodnoty, odkazy na bunky alebo rozsahy, alebo kombináciu všetkých troch.',
         abstract: 'Sčíta svoje argumenty',
         links: [
@@ -1006,6 +1078,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUCET.AK',
         description: 'Sčíta hodnoty v rozsahu, ktoré spĺňajú zadané kritériá.',
         abstract: 'Sčíta bunky určené daným kritériom',
         links: [
@@ -1030,6 +1103,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUCET.AK.VIACNASOBNY',
         description: 'Sčíta všetky argumenty, ktoré spĺňajú viaceré kritériá.',
         abstract: 'Sčíta všetky argumenty, ktoré spĺňajú viaceré kritériá.',
         links: [
@@ -1047,6 +1121,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'SUCIN.SOUCTU',
         description: 'Vracia súčet súčinov zodpovedajúcich prvkov polí',
         abstract: 'Vracia súčet súčinov zodpovedajúcich prvkov polí',
         links: [
@@ -1061,6 +1136,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUCET.DRUHYCH_MOCNIN',
         description: 'Vracia súčet druhých mocnín argumentov',
         abstract: 'Vracia súčet druhých mocnín argumentov',
         links: [
@@ -1075,6 +1151,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Vracia súčet rozdielov druhých mocnín zodpovedajúcich hodnôt v dvoch poliach',
         abstract: 'Vracia súčet rozdielov druhých mocnín zodpovedajúcich hodnôt v dvoch poliach',
         links: [
@@ -1089,6 +1166,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Vracia súčet súčtov druhých mocnín zodpovedajúcich hodnôt v dvoch poliach',
         abstract: 'Vracia súčet súčtov druhých mocnín zodpovedajúcich hodnôt v dvoch poliach',
         links: [
@@ -1103,6 +1181,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'Vracia súčet druhých mocnín rozdielov zodpovedajúcich hodnôt v dvoch poliach',
         abstract: 'Vracia súčet druhých mocnín rozdielov zodpovedajúcich hodnôt v dvoch poliach',
         links: [
@@ -1117,6 +1196,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Vracia tangens čísla.',
         abstract: 'Vracia tangens čísla',
         links: [
@@ -1130,6 +1210,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Vracia hyperbolický tangens čísla.',
         abstract: 'Vracia hyperbolický tangens čísla',
         links: [
@@ -1143,6 +1224,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'SKRATENIE',
         description: 'Skráti číslo na celé číslo',
         abstract: 'Skráti číslo na celé číslo',
         links: [

@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: '返回数字的绝对值。一个数字的绝对值是该数字不带其符号的形式。',
         abstract: '返回数字的绝对值',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description:
             '返回数字的反余弦值。 反余弦值是指余弦值为 number 的角度。 返回的角度以弧度表示，弧度值在 0（零）到 pi 之间。',
         abstract: '返回数字的反余弦值',
@@ -45,6 +47,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description:
             '返回数字的反双曲余弦值。 该数字必须大于或等于 1。 反双曲余弦值是指双曲余弦值为 number 的值，因此 ACOSH(COSH(number)) 等于 number。',
         abstract: '返回数字的反双曲余弦值',
@@ -59,6 +62,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: '返回数字的反余切值的主值。',
         abstract: '返回一个数的反余切值',
         links: [
@@ -72,6 +76,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: '返回数字的反双曲余切值。',
         abstract: '返回一个数的双曲反余切值',
         links: [
@@ -85,6 +90,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: '聚合',
         description: '返回列表或数据库中的聚合',
         abstract: '返回列表或数据库中的聚合',
         links: [
@@ -101,6 +107,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: '阿拉伯数字',
         description: '将罗马数字转换为阿拉伯数字',
         abstract: '将罗马数字转换为阿拉伯数字',
         links: [
@@ -114,6 +121,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: '返回数字的反正弦值。',
         abstract: '返回数字的反正弦值',
         links: [
@@ -127,6 +135,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: '返回数字的反双曲正弦值。',
         abstract: '返回数字的反双曲正弦值',
         links: [
@@ -140,6 +149,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: '返回数字的反正切值。',
         abstract: '返回数字的反正切值',
         links: [
@@ -153,6 +163,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: '返回给定的 X 轴及 Y 轴坐标值的反正切值。 反正切值是指从 X 轴到通过原点 (0, 0) 和坐标点 (x_num, y_num) 的直线之间的夹角。 该角度以弧度表示，弧度值在 -pi 到 pi 之间（不包括 -pi）。',
         abstract: '返回给定的 X 轴及 Y 轴坐标值的反正切值。 反正切值是指从 X 轴到通过原点 (0, 0) 和坐标点 (x_num, y_num) 的直线之间的夹角。 该角度以弧度表示，弧度值在 -pi 到 pi 之间（不包括 -pi）。',
         links: [
@@ -167,6 +178,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: '返回数字的反双曲正切值。 Number 必须介于 -1 到 1 之间（不包括 -1 和 1）。 反双曲正切值是指双曲正切值为 number 的值，因此 ATANH(TANH(number)) 等于 number 。',
         abstract: '返回数字的反双曲正切值。 Number 必须介于 -1 到 1 之间（不包括 -1 和 1）。 反双曲正切值是指双曲正切值为 number 的值，因此 ATANH(TANH(number)) 等于 number 。',
         links: [
@@ -180,6 +192,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: '进制',
         description: '将一个数转换为具有给定基数的文本表示',
         abstract: '将一个数转换为具有给定基数的文本表示',
         links: [
@@ -195,6 +208,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: '向上舍入',
         description: '将数字舍入为最接近的整数或最接近的指定基数的倍数',
         abstract: '将数字舍入为最接近的整数或最接近的指定基数的倍数',
         links: [
@@ -209,6 +223,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'CEILING.MATH',
         description: '将数字向上舍入为最接近的整数或最接近的指定基数的倍数',
         abstract: '将数字向上舍入为最接近的整数或最接近的指定基数的倍数',
         links: [
@@ -224,6 +239,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING.PRECISE',
         description: '将数字舍入为最接近的整数或最接近的指定基数的倍数。 无论该数字的符号如何，该数字都向上舍入。',
         abstract: '将数字舍入为最接近的整数或最接近的指定基数的倍数。 无论该数字的符号如何，该数字都向上舍入。',
         links: [
@@ -238,6 +254,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: '组合',
         description: '返回给定数目对象的组合数',
         abstract: '返回给定数目对象的组合数',
         links: [
@@ -252,6 +269,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: '组合.A',
         description: '返回给定数目对象具有重复项的组合数',
         abstract: '返回给定数目对象具有重复项的组合数',
         links: [
@@ -266,6 +284,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: '返回数字的余弦值。',
         abstract: '返回数字的余弦值',
         links: [
@@ -279,6 +298,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: '返回数字的双曲余弦值',
         abstract: '返回数字的双曲余弦值',
         links: [
@@ -292,6 +312,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: '返回以弧度表示的角度的余切值。',
         abstract: '指定角度的余切值（以弧度表示）',
         links: [
@@ -305,6 +326,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: '返回数字的双曲余切值',
         abstract: '返回数字的双曲余切值',
         links: [
@@ -318,6 +340,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: '返回角度的余割值，以弧度表示。',
         abstract: '返回角度的余割值',
         links: [
@@ -331,6 +354,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: '返回角度的双曲余割值',
         abstract: '返回角度的双曲余割值',
         links: [
@@ -344,6 +368,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: '将给定基数内的数的文本表示转换为十进制数',
         abstract: '将给定基数内的数的文本表示转换为十进制数',
         links: [
@@ -358,6 +383,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: '度',
         description: '将弧度转换为度',
         abstract: '将弧度转换为度',
         links: [
@@ -371,6 +397,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: '偶数',
         description: '将数字向上舍入到最接近的偶数',
         abstract: '将数字向上舍入到最接近的偶数',
         links: [
@@ -384,6 +411,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: '返回e的 n 次方',
         abstract: '返回e的 n 次方',
         links: [
@@ -397,6 +425,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: '阶乘',
         description: '返回数字的阶乘',
         abstract: '返回数字的阶乘',
         links: [
@@ -410,6 +439,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: '双阶乘',
         description: '返回数字的双倍阶乘',
         abstract: '返回数字的双倍阶乘',
         links: [
@@ -423,6 +453,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: '向下舍入',
         description: '向绝对值减小的方向舍入数字',
         abstract: '向绝对值减小的方向舍入数字',
         links: [
@@ -437,6 +468,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'FLOOR.MATH',
         description: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数',
         abstract: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数',
         links: [
@@ -452,6 +484,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR.PRECISE',
         description: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数。 无论该数字的符号如何，该数字都向下舍入。',
         abstract: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数。',
         links: [
@@ -466,6 +499,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: '最大公约数',
         description: '返回最大公约数',
         abstract: '返回最大公约数',
         links: [
@@ -480,6 +514,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: '将数字向下舍入到最接近的整数',
         abstract: '将数字向下舍入到最接近的整数',
         links: [
@@ -493,6 +528,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.CEILING',
         description: '返回一个数字，该数字向上舍入为最接近的整数或最接近的有效位的倍数',
         abstract: '返回一个数字，该数字向上舍入为最接近的整数或最接近的有效位的倍数',
         links: [
@@ -507,6 +543,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: '最小公倍数',
         description: '返回最小公倍数',
         abstract: '返回最小公倍数',
         links: [
@@ -521,6 +558,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: '返回数字的自然对数',
         abstract: '返回数字的自然对数',
         links: [
@@ -534,6 +572,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: '返回数字的以指定底为底的对数',
         abstract: '返回数字的以指定底为底的对数',
         links: [
@@ -548,6 +587,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: '返回数字的以 10 为底的对数',
         abstract: '返回数字的以 10 为底的对数',
         links: [
@@ -561,6 +601,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: '返回数组的矩阵行列式的值',
         abstract: '返回数组的矩阵行列式的值',
         links: [
@@ -574,6 +615,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: '返回数组的逆矩阵',
         abstract: '返回数组的逆矩阵',
         links: [
@@ -587,6 +629,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: '返回两个数组的矩阵乘积',
         abstract: '返回两个数组的矩阵乘积',
         links: [
@@ -601,6 +644,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: '余数',
         description: '返回两数相除的余数。 结果的符号与除数相同。',
         abstract: '返回除法的余数',
         links: [
@@ -615,6 +659,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: '返回一个舍入到所需倍数的数字',
         abstract: '返回一个舍入到所需倍数的数字',
         links: [
@@ -629,6 +674,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: '返回一组数字的多项式',
         abstract: '返回一组数字的多项式',
         links: [
@@ -643,6 +689,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: '返回单位矩阵或指定维度',
         abstract: '返回单位矩阵或指定维度',
         links: [
@@ -656,6 +703,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: '奇数',
         description: '将数字向上舍入为最接近的奇数',
         abstract: '将数字向上舍入为最接近的奇数',
         links: [
@@ -669,6 +717,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: '返回 pi 的值',
         abstract: '返回 pi 的值',
         links: [
@@ -681,6 +730,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: '幂',
         description: '返回数字乘幂的结果。',
         abstract: '返回数的乘幂',
         links: [
@@ -695,6 +745,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: '乘积',
         description: '将作为参数提供的所有数字相乘，并返回乘积。',
         abstract: '将其参数相乘',
         links: [
@@ -709,6 +760,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: '商',
         description: '返回除法的整数部分',
         abstract: '返回除法的整数部分',
         links: [
@@ -723,6 +775,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: '弧度',
         description: '将度转换为弧度',
         abstract: '将度转换为弧度',
         links: [
@@ -736,6 +789,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: '随机',
         description: '返回 0 和 1 之间的一个随机数',
         abstract: '返回 0 和 1 之间的一个随机数',
         links: [
@@ -748,6 +802,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'RANDARRAY',
         description: 'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。但是，你可以指定要填充的行数和列数、最小值和最大值，以及是否返回整个数字或小数值。',
         abstract: 'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。',
         links: [
@@ -765,6 +820,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: '随机.之间',
         description: '返回位于两个指定数之间的一个随机数',
         abstract: '返回位于两个指定数之间的一个随机数',
         links: [
@@ -779,6 +835,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: '罗马数字',
         description: '将阿拉伯数字转换为文本式罗马数字',
         abstract: '将阿拉伯数字转换为文本式罗马数字',
         links: [
@@ -793,6 +850,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: '四舍五入',
         description: '将数字按指定位数舍入',
         abstract: '将数字按指定位数舍入',
         links: [
@@ -807,6 +865,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: '银行家舍入',
         description: '通过“四舍六入五成双”舍入数字',
         abstract: '通过“四舍六入五成双”舍入数字',
         links: [
@@ -821,6 +880,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: '向下四舍五入',
         description: '向绝对值减小的方向舍入数字',
         abstract: '向绝对值减小的方向舍入数字',
         links: [
@@ -835,6 +895,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: '向上四舍五入',
         description: '向绝对值增大的方向舍入数字',
         abstract: '向绝对值增大的方向舍入数字',
         links: [
@@ -849,6 +910,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: '正割',
         description: '返回角度的正割值',
         abstract: '返回角度的正割值',
         links: [
@@ -862,6 +924,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: '双曲正割',
         description: '返回角度的双曲正割值',
         abstract: '返回角度的双曲正割值',
         links: [
@@ -875,6 +938,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: '幂级数求和',
         description: '返回基于公式的幂级数的和',
         abstract: '返回基于公式的幂级数的和',
         links: [
@@ -891,6 +955,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: '序列',
         description: 'SEQUENCE 函数可在数组中生成一系列连续数字，例如，1、2、3、4。',
         abstract: 'SEQUENCE 函数可在数组中生成一系列连续数字，例如，1、2、3、4。',
         links: [
@@ -907,6 +972,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: '符号',
         description: '返回数字的符号',
         abstract: '返回数字的符号',
         links: [
@@ -920,6 +986,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: '返回给定角度的正弦值',
         abstract: '返回给定角度的正弦值',
         links: [
@@ -933,6 +1000,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: '返回数字的双曲正弦值',
         abstract: '返回数字的双曲正弦值',
         links: [
@@ -946,6 +1014,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: '平方根',
         description: '返回正平方根',
         abstract: '返回正平方根',
         links: [
@@ -959,6 +1028,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: '平方根.PI',
         description: '返回某数与 pi 的乘积的平方根',
         abstract: '返回某数与 pi 的乘积的平方根',
         links: [
@@ -972,6 +1042,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: '小计',
         description: '返回列表或数据库中的分类汇总。',
         abstract: '返回列表或数据库中的分类汇总',
         links: [
@@ -987,6 +1058,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: '总和',
         description: '将单个值、单元格引用或是区域相加，或者将三者的组合相加。',
         abstract: '求参数的和',
         links: [
@@ -1007,6 +1079,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: '条件求和',
         description: '对范围中符合指定条件的值求和。',
         abstract: '按给定条件对指定单元格求和',
         links: [
@@ -1031,6 +1104,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: '多条件求和',
         description: '用于计算其满足多个条件的全部参数的总量。',
         abstract: '用于计算其满足多个条件的全部参数的总量。',
         links: [
@@ -1048,6 +1122,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: '乘积和',
         description: '返回对应的数组元素的乘积和',
         abstract: '返回对应的数组元素的乘积和',
         links: [
@@ -1062,6 +1137,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: '平方和',
         description: '返回参数的平方和',
         abstract: '返回参数的平方和',
         links: [
@@ -1076,6 +1152,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: '返回两数组中对应值平方差之和',
         abstract: '返回两数组中对应值平方差之和',
         links: [
@@ -1090,6 +1167,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: '返回两数组中对应值的平方和之和',
         abstract: '返回两数组中对应值的平方和之和',
         links: [
@@ -1104,6 +1182,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: '返回两个数组中对应值差的平方和',
         abstract: '返回两个数组中对应值差的平方和',
         links: [
@@ -1118,6 +1197,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: '返回数字的正切值。',
         abstract: '返回数字的正切值',
         links: [
@@ -1131,6 +1211,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: '返回数字的双曲正切值。',
         abstract: '返回数字的双曲正切值',
         links: [
@@ -1144,6 +1225,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: '截断',
         description: '将数字截尾取整',
         abstract: '将数字截尾取整',
         links: [

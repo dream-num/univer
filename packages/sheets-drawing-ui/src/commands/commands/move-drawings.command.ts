@@ -43,26 +43,34 @@ export const MoveDrawingsCommand: ICommand = {
         }
 
         const unitId = drawings[0].unitId;
+        const positionedDrawings = drawings.flatMap((drawing) => {
+            const skeleton = sheetSkeletonService.getSkeleton(drawing.unitId, drawing.subUnitId);
+            return drawing.transform && skeleton ? [{ drawing: drawing as ISheetDrawing, skeleton }] : [];
+        });
+        if (positionedDrawings.length === 0) return false;
 
-        const newDrawings = drawings.map((drawing) => {
-            const { transform, unitId, subUnitId } = drawing as ISheetDrawing;
-            const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
-            if (!transform || !skeleton) {
-                return null;
-            }
+        let moveX = direction === Direction.LEFT ? -1 : direction === Direction.RIGHT ? 1 : 0;
+        let moveY = direction === Direction.UP ? -1 : direction === Direction.DOWN ? 1 : 0;
+        let minX = -Infinity;
+        let minY = -Infinity;
+        let maxX = Infinity;
+        let maxY = Infinity;
+        for (const { drawing, skeleton } of positionedDrawings) {
+            const { left = 0, top = 0, width = 0, height = 0 } = drawing.transform!;
+            const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop, columnTotalWidth, rowTotalHeight } = skeleton;
+            minX = Math.max(minX, rowHeaderWidthAndMarginLeft - left);
+            minY = Math.max(minY, columnHeaderHeightAndMarginTop - top);
+            maxX = Math.min(maxX, rowHeaderWidthAndMarginLeft + columnTotalWidth - left - width);
+            maxY = Math.min(maxY, columnHeaderHeightAndMarginTop + rowTotalHeight - top - height);
+        }
+        moveX = Math.max(minX, Math.min(moveX, maxX));
+        moveY = Math.max(minY, Math.min(moveY, maxY));
+        if (moveX === 0 && moveY === 0) return false;
 
-            const newTransform = { ...transform };
+        const newDrawings = positionedDrawings.map(({ drawing, skeleton }) => {
+            const transform = drawing.transform!;
             const { left = 0, top = 0 } = transform;
-
-            if (direction === Direction.UP) {
-                newTransform.top = top - 1;
-            } else if (direction === Direction.DOWN) {
-                newTransform.top = top + 1;
-            } else if (direction === Direction.LEFT) {
-                newTransform.left = left - 1;
-            } else if (direction === Direction.RIGHT) {
-                newTransform.left = left + 1;
-            }
+            const newTransform = { ...transform, left: left + moveX, top: top + moveY };
 
             return {
                 ...drawing,
@@ -70,7 +78,7 @@ export const MoveDrawingsCommand: ICommand = {
                 sheetTransform: transformToDrawingPosition(newTransform, skeleton),
                 axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton),
             } as ISheetDrawing;
-        }).filter((drawing) => drawing != null) as ISheetDrawing[];
+        });
 
         const result = undoRedoGroupService.runTimed(
             unitId,

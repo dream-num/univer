@@ -15,6 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
@@ -26,8 +28,6 @@ import type { Engine } from './engine';
 import type { ILayerRenderOptions, IScrollRenderInfo } from './layer';
 import type { SceneViewer } from './scene-viewer';
 import type { Viewport } from './viewport';
-import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
@@ -238,6 +238,9 @@ export class Scene extends Disposable {
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
 
+    private readonly _prepareRender$ = new Subject<void>();
+    /** Layout updates before scroll-cache decisions; paint on the canvas in beforeRender$ instead. */
+    readonly prepareRender$ = this._prepareRender$.asObservable();
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
     readonly beforeRender$ = this._beforeRender$.asObservable();
     private _afterRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
@@ -1017,6 +1020,7 @@ export class Scene extends Disposable {
 
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
+        this._prepareRender$.next();
         const shouldTryPreservingEngine = this._preserveEngineOnRender &&
             !this._hasPostRenderCanvasMutation &&
             parentCtx == null &&
@@ -1248,6 +1252,7 @@ export class Scene extends Disposable {
         this._inputManager = null;
         this._transformer?.dispose();
         this._transformer = null;
+        this._prepareRender$.complete();
 
         this.onFileLoaded$.complete();
         this.onClick$.complete();

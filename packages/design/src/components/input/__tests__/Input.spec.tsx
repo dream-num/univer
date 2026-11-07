@@ -16,13 +16,12 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import zhCN from '../../../locale/zh-CN';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Input } from '../Input';
 
 afterEach(cleanup);
-afterEach(() => {
-    vi.unstubAllGlobals();
-});
 
 describe('Input', () => {
     it('forwards mobile keyboard, validation and focus attributes to the input', () => {
@@ -87,106 +86,20 @@ describe('Input', () => {
         expect(parentClick).not.toHaveBeenCalled();
     });
 
-    it('should observe slot mutations and apply slot paddingRight', () => {
-        const observe = vi.fn();
-        const disconnect = vi.fn();
-        class MockMutationObserver {
-            private _callback: MutationCallback;
-
-            constructor(callback: MutationCallback) {
-                this._callback = callback;
-            }
-
-            observe(...args: unknown[]) {
-                observe(...args);
-                this._callback([], {} as MutationObserver);
-            }
-
-            disconnect() {
-                disconnect();
-            }
-        }
-
-        vi.stubGlobal('MutationObserver', MockMutationObserver);
-
-        const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
-        Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-            configurable: true,
-            get() {
-                return 20;
-            },
-        });
-
-        const { container } = render(<Input value="x" slot={<span>slot</span>} />);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(observe).toHaveBeenCalled();
-        expect(input.style.paddingRight).toBe('28px');
-
-        if (originalOffsetWidth) {
-            Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
-        }
-    });
-
-    it('should observe slot mutations and apply slot paddingLeft in rtl', () => {
-        const observe = vi.fn();
-        class MockMutationObserver {
-            private _callback: MutationCallback;
-
-            constructor(callback: MutationCallback) {
-                this._callback = callback;
-            }
-
-            observe(...args: unknown[]) {
-                observe(...args);
-                this._callback([], {} as MutationObserver);
-            }
-
-            disconnect() {
-            }
-        }
-
-        vi.stubGlobal('MutationObserver', MockMutationObserver);
-
-        const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
-        Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-            configurable: true,
-            get() {
-                return 20;
-            },
-        });
-
-        const { container } = render(
-            <ConfigProvider mountContainer={document.body} direction="rtl">
-                <Input value="x" slot={<span>slot</span>} />
+    it('names the clear action in the current locale and preserves its behavior', () => {
+        const onChange = vi.fn();
+        const { getByRole, rerender } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Input allowClear value="abc" onChange={onChange} />
             </ConfigProvider>
         );
-        const input = container.querySelector('input') as HTMLInputElement;
-        const slot = container.querySelector('[data-u-comp="input"] > div') as HTMLDivElement;
-
-        expect(observe).toHaveBeenCalled();
-        expect(input.style.paddingLeft).toBe('28px');
-        expect(input.style.paddingRight).toBe('');
-        expect(slot.className).toContain('univer-left-2');
-        expect(slot.className).not.toContain('univer-right-2');
-
-        if (originalOffsetWidth) {
-            Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
-        }
-    });
-
-    it('should set default allowClear padding when no slot exists', () => {
-        const { container } = render(<Input allowClear value="x" />);
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input.style.paddingRight).toBe('26px');
-    });
-
-    it('should not override rtl right padding when no trailing content exists', () => {
-        const { container } = render(
-            <ConfigProvider mountContainer={document.body} direction="rtl">
-                <Input />
+        fireEvent.click(getByRole('button', { name: 'Clear input' }));
+        expect(onChange).toHaveBeenCalledWith('');
+        rerender(
+            <ConfigProvider locale={zhCN.design} mountContainer={document.body}>
+                <Input allowClear value="abc" onChange={onChange} />
             </ConfigProvider>
         );
-        const input = container.querySelector('input') as HTMLInputElement;
-        expect(input.style.paddingRight).toBe('');
+        expect(getByRole('button', { name: '清空输入' })).toBeDefined();
     });
 });

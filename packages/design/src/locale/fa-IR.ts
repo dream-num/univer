@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Accessibility: {
+            clearInput: 'پاک کردن ورودی',
             closeBadge: 'بستن نشان',
             close: 'بستن',
             menu: 'منو',

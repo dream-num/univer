@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Switch, Tooltip } from '@univerjs/design';
 import { InfoIcon } from '@univerjs/icons';
 import { SheetsFilterSyncController } from '@univerjs/sheets-filter';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 
 export function FilterSyncSwitch() {
     const sheetsFilterSyncController = useDependency(SheetsFilterSyncController);
@@ -28,7 +28,9 @@ export function FilterSyncSwitch() {
     const messageService = useDependency(IMessageService);
     const enabled = useObservable(sheetsFilterSyncController.enabled$, undefined, true);
 
-    if (!visible) return null;
+    if (!visible) {
+        return null;
+    }
 
     return (
         <div
@@ -49,6 +51,7 @@ export function FilterSyncSwitch() {
                 </Tooltip>
             </div>
             <Switch
+                aria-label={localeService.t<LocaleKey>('sheets-filter-ui.sync.title')}
                 defaultChecked={enabled}
                 onChange={(checked) => {
                     const message = checked

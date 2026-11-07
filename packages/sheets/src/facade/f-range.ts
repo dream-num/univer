@@ -47,8 +47,6 @@ import type {
     IStyleTypeValue,
     SplitDelimiterEnum,
 } from '@univerjs/sheets';
-import type { IFacadeClearOptions } from './f-worksheet';
-import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     BooleanNumber,
     covertCellValue,
@@ -97,6 +95,8 @@ import {
     SheetRangeThemeService,
     SplitTextToColumnsCommand,
 } from '@univerjs/sheets';
+import type { IFacadeClearOptions } from './f-worksheet';
+import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';
@@ -1310,10 +1310,12 @@ export class FRange extends FBaseInitialable {
      * - `ICellData`: updates cell-data fields directly, for explicit control over `v` (value),
      *   `f` (formula), `p` (rich text), `t` (value type), and `s` (style). The object bypasses the
      *   formula and formatted-number parsing above: `{ v: '=SUM(A1:A2)' }` does not set a formula;
-     *   use `{ f: '=SUM(A1:A2)', v: null, p: null }` instead. Omitted content fields are not
-     *   automatically cleared, so use `f: null` and `p: null` when replacing a formula or rich text
-     *   with `v`. Use `v: null` to clear the stored value. Supplied style properties are merged into
-     *   the existing style; `s: null` clears the style.
+     *   use `{ f: '=SUM(A1:A2)', v: null, p: null }` instead. Writing `v` or `p` without `f` and
+     *   `si` replaces the target formula, as writing a scalar value does, and writing `f` without
+     *   `si` disassociates the cell from its previous shared formula. Rich text is still not
+     *   cleared by a value write, so pass `p: null` when replacing rich text with `v`. Use
+     *   `v: null` to clear the stored value. Supplied style properties are merged into the existing
+     *   style; `s: null` clears the style.
      *
      * In both modes, the stored value is converted according to its cell type. Unless an `ICellData`
      * input supplies `t`, the type is inferred from the value, number format, and existing cell type.

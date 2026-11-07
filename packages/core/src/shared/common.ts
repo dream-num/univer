@@ -552,7 +552,32 @@ export function cellToRange(row: number, col: number): IRange {
 }
 
 /**
+ * Writing content replaces the target formula, and writing a new formula disassociates the target
+ * from its shared formula id. The formula controller performs both removals for the current client
+ * with an `onlyLocal` mutation, which never reaches a collaboration changeset, so they have to be
+ * part of the write itself.
+ * @param {ICellData} cell - The cell data to normalize.
+ * @returns {ICellData} The same instance when no formula identity has to be removed.
+ */
+function withFormulaIdentityCleared(cell: ICellData): ICellData {
+    if (cell.si !== undefined) {
+        return cell;
+    }
+
+    if (cell.f !== undefined) {
+        return { ...cell, si: null };
+    }
+
+    if (cell.v === undefined && cell.p === undefined) {
+        return cell;
+    }
+
+    return { ...cell, f: null, si: null };
+}
+
+/**
  * Covert cell value to cell data.
+ * A formula or content value also clears the shared formula id of the cell it replaces.
  * @param {CellValue | ICellData} value - The cell value.
  * @returns {ICellData} The cell data.
  */
@@ -562,6 +587,7 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
             f: value as string,
             v: null,
             p: null,
+            si: null,
         };
     }
     if (isCellV(value)) {
@@ -573,6 +599,7 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
                     v: parseData.v as number,
                     p: null,
                     f: null,
+                    si: null,
                     s: {
                         n: {
                             pattern: parseData.z || DEFAULT_NUMBER_FORMAT,
@@ -586,10 +613,11 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
             v: value as Nullable<CellValue>,
             p: null,
             f: null,
+            si: null,
         };
     }
     if (isICellData(value)) {
-        return value;
+        return withFormulaIdentityCleared(value);
     }
 
     // maybe {}

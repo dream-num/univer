@@ -137,6 +137,20 @@ function createLifecycleService() {
 }
 
 describe('SheetsRenderService', () => {
+    it('keeps unknown mutations conservative and releases self-rendering registrations by owner', () => {
+        const service = createService();
+        const first = service.registerSelfRenderingMutations('derived.view');
+        const second = service.registerSelfRenderingMutations('derived.view');
+        expect(service.shouldAutomaticallyRenderMutation('unknown')).toBe(true);
+        expect(service.shouldAutomaticallyRenderMutation('derived.view')).toBe(false);
+        first.dispose();
+        first.dispose();
+        expect(service.shouldAutomaticallyRenderMutation('derived.view')).toBe(false);
+        second.dispose();
+        expect(service.shouldAutomaticallyRenderMutation('derived.view')).toBe(true);
+        service.dispose();
+    });
+
     it('tracks mutations that require rebuilding the sheet skeleton and unregisters them by disposable', () => {
         const service = createService();
         const disposable = service.registerSkeletonChangingMutations('sheet.mutation.resize-row');

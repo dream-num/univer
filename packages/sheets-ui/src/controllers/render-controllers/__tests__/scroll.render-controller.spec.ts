@@ -15,7 +15,7 @@
  */
 
 import type { IWheelEvent } from '@univerjs/engine-render';
-import { Direction, FOCUSING_SHEET, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, FOCUSING_SHEET, ICommandService } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -143,6 +143,66 @@ describe('SheetsScrollRenderController', () => {
         flushWheelFrame();
         expect(makeDirtySpy).toHaveBeenCalledTimes(2);
         void controller;
+    });
+
+    it.each([false, true])('preserves frozen viewport cache reuse armed by wheel scrolling with merges=%s', (hasMerges) => {
+        const testBed = createRenderTestBed({
+            dependencies: [[SheetScrollManagerService, { useValue: createScrollManagerServiceMock() }]],
+            parentClassType: RENDER_CLASS_TYPE.ENGINE,
+        });
+        const { context, contextService, scene, injector } = testBed;
+        const commands = injector.get(ICommandService);
+        let pending = false;
+        let armReuse = true;
+        scene.isViewportCacheReusePending = () => pending;
+        (context.mainComponent as any).getSkeleton = () => ({
+            worksheet: {
+                getMergeData: () => hasMerges ? [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 }] : [],
+            },
+        });
+        commands.registerCommand({
+            id: SetScrollRelativeCommand.id,
+            type: CommandType.COMMAND,
+            handler: () => {
+                pending = armReuse;
+                return true;
+            },
+        });
+        injector.add([SheetsScrollRenderController, {
+            useFactory: () => injector.createInstance(SheetsScrollRenderController, context),
+        }]);
+        const controller = injector.get(SheetsScrollRenderController);
+        const dirty = vi.spyOn(scene, 'makeDirty');
+        const preserveEngine = vi.spyOn(scene, 'makeDirtyForScrolling');
+        contextService.setContextValue(FOCUSING_SHEET, true);
+        const wheel = () => {
+            scene.onMouseWheel$.emit(
+                { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
+                { stopPropagation: vi.fn() }
+            );
+            flushWheelFrame();
+        };
+
+        try {
+            wheel();
+            expect(scene.isViewportCacheReusePending()).toBe(true);
+            expect(dirty).not.toHaveBeenCalled();
+            expect(preserveEngine).not.toHaveBeenCalled();
+
+            pending = false;
+            armReuse = false;
+            wheel();
+            if (hasMerges) {
+                expect(dirty).toHaveBeenCalledExactlyOnceWith(true);
+                expect(preserveEngine).not.toHaveBeenCalled();
+            } else {
+                expect(preserveEngine).toHaveBeenCalledOnce();
+                expect(dirty).not.toHaveBeenCalled();
+            }
+        } finally {
+            controller.dispose();
+            testBed.univer.dispose();
+        }
     });
 
     it('uses shift-wheel horizontal scrolling and prevents default on scrollable viewport', () => {

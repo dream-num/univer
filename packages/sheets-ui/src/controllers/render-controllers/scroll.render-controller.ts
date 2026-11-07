@@ -205,6 +205,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _markSceneDirtyForScrolling(canUseScrollFastPath: boolean) {
         const { scene } = this._context;
+        if (scene.isViewportCacheReusePending()) {
+            return;
+        }
         if (canUseScrollFastPath) {
             scene.makeDirtyForScrolling();
         } else {

@@ -19,6 +19,7 @@ import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import formulaEnUS from '../../../locale/en-US';
+import { FormulaCacheService } from '../../formula-cache.service';
 import { DescriptionService, IDescriptionService } from '../description.service';
 
 function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionInfo {
@@ -66,6 +67,7 @@ describe('DescriptionService', () => {
             },
         });
 
+        injector.add([FormulaCacheService]);
         injector.add([IFunctionService, { useClass: FunctionService }]);
         injector.add([IDescriptionService, { useClass: DescriptionService }]);
 

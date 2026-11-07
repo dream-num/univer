@@ -31,6 +31,7 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import {
     DefinedNamesService,
+    FormulaCacheService,
     FormulaDataModel,
     FunctionService,
     IDefinedNamesService,
@@ -108,6 +109,7 @@ function createTableFacadeTestBed(dependencies: Dependency[]) {
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
+            injector.add([FormulaCacheService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([SheetSkeletonService]);
             injector.add([SheetRangeThemeModel]);

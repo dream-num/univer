@@ -31,6 +31,7 @@ import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import {
     CalculateFormulaService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaRuntimeService,
@@ -144,6 +145,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([DefinedNameDataController]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
+            injector.add([FormulaCacheService]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             const hasSheetSkeletonManagerService = dependencies?.some((dependency) =>

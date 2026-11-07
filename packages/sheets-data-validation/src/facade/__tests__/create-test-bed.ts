@@ -35,6 +35,7 @@ import {
     ActiveDirtyManagerService,
     DefinedNamesService,
     DescriptionService,
+    FormulaCacheService,
     FormulaCalculationSessionController,
     FormulaCalculationSessionService,
     FormulaDataModel,
@@ -150,6 +151,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
+            injector.add([FormulaCacheService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([ISuperTableService, { useClass: SuperTableService }]);

@@ -19,7 +19,16 @@ import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../..
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
+import {
+    AbsoluteRefType,
+    Disposable,
+    isValidRange,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    moveRangeByOffset,
+    Optional,
+    Tools,
+} from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -49,6 +58,7 @@ import {
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
 import { NEW_EXCEL_FUNCTIONS } from '../../functions/new-excel-functions';
+import { FormulaCacheService } from '../../services/formula-cache.service';
 import {
     isReferenceStringWithEffectiveColumn,
     replaceRefPrefixString,
@@ -81,8 +91,6 @@ enum NewExcelFunctionNodeType {
 
 const FORMULA_CACHE_LRU_COUNT = 2000;
 
-export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_LRU_COUNT);
-
 export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequenceNode>>(FORMULA_CACHE_LRU_COUNT);
 
 interface IInjectDefinedNameParam {
@@ -97,6 +105,10 @@ interface IInjectDefinedNameParam {
 }
 
 export class LexerTreeBuilder extends Disposable {
+    constructor(@Optional(FormulaCacheService) private readonly _cacheService?: FormulaCacheService) {
+        super();
+    }
+
     private _currentLexerNode: LexerNode = new LexerNode();
 
     private _upLevel = 0;
@@ -144,10 +156,6 @@ export class LexerTreeBuilder extends Disposable {
         this._resetTemp();
 
         this._currentLexerNode.dispose();
-
-        FormulaLexerNodeCache.clear();
-
-        FormulaSequenceNodeCache.clear();
     }
 
     getUpLevel() {
@@ -721,7 +729,7 @@ export class LexerTreeBuilder extends Disposable {
             ? formulaString
             : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${injectDefinedNameParam.refOffsetX}\0${injectDefinedNameParam.refOffsetY}\0${formulaString}`;
         if (transformSuffix === true && isCacheable) {
-            const lexerNode = FormulaLexerNodeCache.get(cacheKey);
+            const lexerNode = this._cacheService?.getLexerTree(cacheKey);
             const simpleCheckDefinedNameResult = injectDefinedNameParam
                 && this._simpleCheckDefinedName(formulaString, injectDefinedNameParam, lexerNode);
             if (lexerNode && !simpleCheckDefinedNameResult) {
@@ -776,7 +784,7 @@ export class LexerTreeBuilder extends Disposable {
                 return ErrorType.VALUE;
             }
             if (isCacheable) {
-                FormulaLexerNodeCache.set(cacheKey, this._currentLexerNode);
+                this._cacheService?.setLexerTree(cacheKey, this._currentLexerNode, injectDefinedNameParam?.unitId ?? undefined);
             }
         }
 

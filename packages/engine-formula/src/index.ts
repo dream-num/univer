@@ -304,6 +304,7 @@ export {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
+export { FormulaCacheService } from './services/formula-cache.service';
 export { FormulaCalculationTriggerService, mergeDirtyData } from './services/formula-calculation-trigger.service';
 export { IFormulaChangesetCalculationService } from './services/formula-changeset-calculation.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';

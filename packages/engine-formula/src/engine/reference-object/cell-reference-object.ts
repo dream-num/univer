@@ -108,6 +108,7 @@ export class CellReferenceObject extends BaseReferenceObject {
             this.getForcedUnitId()
         );
 
+        rangeReferenceObject.setCalculationCache(this.getCalculationCache());
         rangeReferenceObject.setUnitData(this.getUnitData());
 
         rangeReferenceObject.setDefaultSheetId(this.getDefaultSheetId());

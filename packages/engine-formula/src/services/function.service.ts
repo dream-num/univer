@@ -17,8 +17,8 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-import { FORMULA_AST_CACHE } from '../engine/utils/generate-ast-node';
+import { createIdentifier, Disposable, Inject, toDisposable } from '@univerjs/core';
+import { FormulaCacheService } from './formula-cache.service';
 
 export interface IFunctionService {
     /**
@@ -65,6 +65,10 @@ export class FunctionService extends Disposable implements IFunctionService {
 
     private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
+    constructor(@Inject(FormulaCacheService) private readonly _cacheService: FormulaCacheService) {
+        super();
+    }
+
     override dispose(): void {
         super.dispose();
         this._functionExecutors.clear();
@@ -72,6 +76,7 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     registerExecutors(...functions: BaseFunction[]) {
+        this._cacheService.clearFunctions(functions.map((executor) => executor.name));
         for (let i = 0; i < functions.length; i++) {
             const func = functions[i];
             this._functionExecutors.set(func.name, func);
@@ -91,6 +96,7 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     unregisterExecutors(...functionTokens: IFunctionNames[]) {
+        this._cacheService.clearFunctions(functionTokens);
         for (let i = 0; i < functionTokens.length; i++) {
             const functionToken = functionTokens[i];
             this._functionExecutors.delete(functionToken);
@@ -135,12 +141,6 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     deleteFormulaAstCacheKey(...functionToken: IFunctionNames[]) {
-        FORMULA_AST_CACHE.forEach((_, key) => {
-            functionToken.forEach((token) => {
-                if (key.includes(token as string)) {
-                    FORMULA_AST_CACHE.delete(key);
-                }
-            });
-        });
+        this._cacheService.clearFunctions(functionToken);
     }
 }

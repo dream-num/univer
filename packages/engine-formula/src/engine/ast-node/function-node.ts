@@ -431,6 +431,7 @@ export class FunctionNode extends BaseAstNode {
         referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
 
         referenceObject.setRuntimeData(this._runtimeService.getUnitData());
+        referenceObject.setCalculationCache(this._runtimeService.getCalculationCache?.());
 
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
 

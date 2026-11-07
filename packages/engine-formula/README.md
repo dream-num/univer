@@ -30,6 +30,14 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
+## Formula cache ownership
+
+The formula plugin registers one `FormulaCacheService` per Univer injector. Parsed ASTs and expanded lexer trees belong to that instance. Range arrays and comparison indexes belong to a calculation context that is released on completion, failure, reset, or disposal. Closing a workbook invalidates only that workbook's entries. Disposing one Univer does not clear another instance's caches.
+
+Custom DI test beds that assemble the formula engine must register `FormulaCacheService` alongside the existing services. Standalone `LexerTreeBuilder` calls remain supported without an owner and parse without the expanded-tree cache. Custom runtime implementations may omit the optional calculation-cache hooks; references then compute without caching.
+
+`FORMULA_REF_TO_ARRAY_CACHE` and `CELL_INVERTED_INDEX_CACHE` remain exported for compatibility but are deprecated and no longer control engine calculations. Integrations that used these globals to invalidate the engine must use the owning runtime's `clearArrayObjectCache()` and `clearInvertedIndexCache()` hooks instead. Facade usage, workbook IDs, snapshots, and collaboration changesets are unchanged.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

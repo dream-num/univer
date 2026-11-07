@@ -97,12 +97,14 @@ export function DesktopContextMenu() {
             layoutService={activeLayoutService}
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
-                const { label: id, commandId, value } = params;
+                const { commandId, id, label, value } = params;
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
+                // Same order as MobileContextMenu: the item's own command before its menu key.
+                const commandIdToRun = commandId ?? id ?? (typeof label === 'string' ? label : undefined);
 
-                if (activeCommandService) {
-                    activeCommandService.executeCommand(commandId ?? id as string, commandParams);
+                if (activeCommandService && commandIdToRun) {
+                    activeCommandService.executeCommand(commandIdToRun, commandParams);
                 }
 
                 activeLayoutService.focus();

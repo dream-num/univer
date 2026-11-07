@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { SceneViewer } from './scene-viewer';
-import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
@@ -34,6 +34,7 @@ export interface ILayerRenderOptions {
     dirtyBounds?: IBoundRectNoAngle[];
     preserveCache?: boolean;
     viewportInfos?: Map<string, IViewportInfo>;
+    retainedViewportCache?: { bottom: number; viewportKeys: ReadonlySet<string> };
 }
 
 function clipContextToBounds(ctx: UniverRenderingContext, bounds: IBoundRectNoAngle[]) {
@@ -109,6 +110,7 @@ export class Layer extends Disposable {
 
     private _cacheCanvas: Nullable<Canvas>;
     private _cacheValid = false;
+    private _retainedCacheValid = false;
 
     protected _dirty: boolean = true;
 
@@ -147,6 +149,7 @@ export class Layer extends Disposable {
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
         this._cacheValid = false;
+        this._retainedCacheValid = false;
     }
 
     isAllowCache(): boolean {
@@ -212,6 +215,7 @@ export class Layer extends Disposable {
     }
 
     removeObject(object: BaseObject | string) {
+        this.makeDirty(true);
         const objects = this.getObjects();
         const objectsLength = objects.length;
 
@@ -248,6 +252,7 @@ export class Layer extends Disposable {
     }
 
     removeObjects(objects: BaseObject[] | string[]) {
+        this.makeDirty(true);
         const allObjects = this.getObjects();
         const allObjectsLength = allObjects.length;
 
@@ -271,7 +276,11 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
+        if (!state) {
+            this._retainedCacheValid = false;
+        }
         if (state) {
+            this._retainedCacheValid = false;
             this._cacheValid = false;
         }
         /**
@@ -285,7 +294,23 @@ export class Layer extends Disposable {
         return this;
     }
 
+    canReuseViewportCache(): boolean {
+        return this._allowCache && !!this._cacheCanvas &&
+            ((this._cacheValid && !this._dirty) || this._retainedCacheValid) &&
+            this.getObjectsByOrder().every((object) => !object.isDirty() && !object.isForceDirty() && object.canReuseViewportCache());
+    }
+
+    makeDirtyForViewportScroll(): void {
+        this._retainedCacheValid = this.canReuseViewportCache();
+        this._cacheValid = false;
+        this._dirty = true;
+    }
+
     makeDirtyWithDebounce(state: boolean = true) {
+        if (state) {
+            this._cacheValid = false;
+            this._retainedCacheValid = false;
+        }
         if (this._debounceDirtyFunc) {
             this._debounceDirtyFunc();
         }
@@ -319,14 +344,38 @@ export class Layer extends Disposable {
                 if (this.isDirty() || !this._cacheValid) {
                     const ctx = this._cacheCanvas.getContext();
 
-                    this._cacheCanvas.clear();
+                    const retained = options.retainedViewportCache && this._retainedCacheValid &&
+                        Number.isInteger(options.retainedViewportCache.bottom * this._cacheCanvas.getPixelRatio()) &&
+                        options.retainedViewportCache.bottom < this._cacheCanvas.getHeight() &&
+                        this._cacheCanvas.getWidth() === this.scene.getEngine()?.getCanvas().getWidth() &&
+                        this._cacheCanvas.getHeight() === this.scene.getEngine()?.getCanvas().getHeight() &&
+                        this.getObjectsByOrder().every((object) => !object.isDirty() && !object.isForceDirty() && object.canReuseViewportCache())
+                        ? options.retainedViewportCache
+                        : undefined;
+                    if (retained) {
+                        this.scene.getEngine()?.renderFrameTags$.next(['retainedViewportCache', this.zIndex]);
+                        ctx.save();
+                        try {
+                            const ratio = this._cacheCanvas.getPixelRatio();
+                            ctx.setTransform(1, 0, 0, 1, 0, 0);
+                            ctx.clearRect(0, retained.bottom * ratio, this._cacheCanvas.getWidth() * ratio, (this._cacheCanvas.getHeight() - retained.bottom) * ratio);
+                        } finally {
+                            ctx.restore();
+                        }
+                    } else {
+                        this._cacheCanvas.clear();
+                    }
 
                     ctx.save();
 
                     ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, isMaxLayer, viewportInfos);
+                    try {
+                        this._draw(ctx, isMaxLayer, viewportInfos, retained?.viewportKeys);
+                    } finally {
+                        this._retainedCacheValid = false;
+                        ctx.restore();
+                    }
 
-                    ctx.restore();
                     this._cacheValid = true;
                 }
                 this._applyCache(mainCtx);
@@ -366,13 +415,18 @@ export class Layer extends Disposable {
 
         this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
         this._cacheValid = false;
+        this._retainedCacheValid = false;
     }
 
-    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>) {
+    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>, retainedViewportKeys?: ReadonlySet<string>) {
         const viewports = this._scene.getViewports().filter((vp) => vp.shouldIntoRender());
         const objects = this.getObjectsByOrder();
         for (const [_index, vp] of viewports.entries()) {
-            vp.render(mainCtx, objects, isMaxLayer, viewportInfos?.get(vp.viewportKey));
+            if (retainedViewportKeys?.has(vp.viewportKey)) {
+                vp.reuseCachedRender(objects, viewportInfos?.get(vp.viewportKey));
+            } else {
+                vp.render(mainCtx, objects, isMaxLayer, viewportInfos?.get(vp.viewportKey));
+            }
         }
         objects.forEach((o) => {
             o.makeDirty(false);
@@ -401,6 +455,7 @@ export class Layer extends Disposable {
     }
 
     clear() {
+        this.makeDirty(true);
         this._objects = [];
     }
 
@@ -418,5 +473,6 @@ export class Layer extends Disposable {
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
         this._cacheValid = false;
+        this._retainedCacheValid = false;
     }
 }

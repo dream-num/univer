@@ -15,10 +15,16 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IConditionalFormattingRenderRangeResolver, IDataBarCellData } from './type';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { Range } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import {
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    SheetExtension,
+    SpreadsheetExtensionRegistry,
+    UniverRenderingContext,
+} from '@univerjs/engine-render';
+import type { IConditionalFormattingRenderRangeResolver, IDataBarCellData } from './type';
+import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 export const defaultDataBarPositiveColor = '#ffbe38';
@@ -34,8 +40,12 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class DataBar extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === DataBar;
+
     private _paddingRightAndLeft = 2;
     private _paddingTopAndBottom = 2;
+    private _barCanvas?: HTMLCanvasElement;
+    private _barContext?: UniverRenderingContext;
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = dataBarUKey;
 
@@ -59,15 +69,13 @@ export class DataBar extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
-        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
-            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
-            : sourceRanges;
+        const renderRanges = resolveRenderRanges(worksheet, sourceRanges, this._renderRangeResolver);
         if (!renderRanges.length) {
             return;
         }
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
-        // eslint-disable-next-line max-lines-per-function
+
         renderRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
@@ -106,47 +114,32 @@ export class DataBar extends SheetExtension {
                 const width = borderWidth - this._paddingRightAndLeft * 2;
                 const height = borderHeight - this._paddingTopAndBottom * 2;
 
-                if (value > 0) {
-                    // Width less than 1, almost invisible
-                    const dataBarWidth = Math.max(width * (1 - startPoint / 100) * value / 100, 1);
-                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width;
-                    const y0 = startY + this._paddingTopAndBottom;
+                const positive = value > 0;
+                const dataBarWidth = Math.max(positive
+                    ? width * (1 - startPoint / 100) * value / 100
+                    : width * startPoint / 100 * Math.abs(value) / 100, 1);
+                const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - (positive ? 0 : dataBarWidth);
+                const y0 = startY + this._paddingTopAndBottom;
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                const fillColor = ctx.fillStyle;
+                const strokeColor = ctx.strokeStyle;
+                this._drawAtLocalOrigin(ctx, x0, y0, dataBarWidth, height, (paint, x, y) => {
                     if (isGradient) {
-                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
-                        gradient.addColorStop(0, color);
-                        gradient.addColorStop(1, 'rgb(255 255 255)');
-                        ctx.fillStyle = gradient;
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
+                        const gradient = paint.createLinearGradient(x, y, x + dataBarWidth, y);
+                        gradient.addColorStop(0, positive ? color : 'rgb(255 255 255)');
+                        gradient.addColorStop(1, positive ? 'rgb(255 255 255)' : color);
+                        paint.fillStyle = gradient;
+                        paint.strokeStyle = strokeColor;
+                        paint.lineWidth = 1;
                     } else {
-                        ctx.fillStyle = color;
+                        paint.fillStyle = fillColor;
                     }
-
-                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
+                    this._drawRectWithRoundedCorner(paint, x, y, dataBarWidth, height, !positive, positive, positive, !positive);
                     if (isGradient) {
-                        ctx.stroke();
+                        paint.stroke();
                     }
-                } else {
-                    // Width less than 1, almost invisible
-                    const dataBarWidth = Math.max(width * startPoint / 100 * Math.abs(value) / 100, 1);
-                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
-                    const y0 = startY + this._paddingTopAndBottom;
-                    if (isGradient) {
-                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
-                        gradient.addColorStop(0, 'rgb(255 255 255)');
-                        gradient.addColorStop(1, color);
-                        ctx.fillStyle = gradient;
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
-                    } else {
-                        ctx.fillStyle = color;
-                    }
-
-                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, true, false, false, true);
-                    if (isGradient) {
-                        ctx.stroke();
-                    }
-                }
+                });
             });
         });
         ctx.restore();
@@ -154,7 +147,74 @@ export class DataBar extends SheetExtension {
 
     override dispose(): void {
         this._renderRangeResolver = null;
+        if (this._barCanvas) {
+            this._barCanvas.width = 0;
+            this._barCanvas.height = 0;
+        }
+        this._barCanvas = undefined;
+        this._barContext = undefined;
         super.dispose();
+    }
+
+    private _drawAtLocalOrigin(
+        ctx: UniverRenderingContext,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        draw: (paint: UniverRenderingContext, x: number, y: number) => void
+    ): void {
+        const native = ctx._context;
+        const m = native?.getTransform();
+        const colorSpace = native?.getContextAttributes?.()?.colorSpace;
+        if (!m || ctx.__mode === 'printing' || typeof document === 'undefined'
+            || m.a !== m.d || m.a <= 0 || m.b || m.c || native.globalAlpha !== 1
+            || native.globalCompositeOperation !== 'source-over' || (colorSpace && colorSpace !== 'srgb')
+            || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
+            || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
+            || (native.filter && native.filter !== 'none') || width <= 0 || height <= 0) {
+            draw(ctx, x, y);
+            return;
+        }
+        const px = x * m.a + m.e;
+        const py = y * m.d + m.f;
+        const left = Math.floor(px) - 2;
+        const top = Math.floor(py) - 2;
+        const pixelWidth = Math.ceil(px + width * m.a) - left + 2;
+        const pixelHeight = Math.ceil(py + height * m.d) - top + 2;
+        if (!Number.isFinite(pixelWidth * pixelHeight) || pixelWidth * pixelHeight > 128 * 1024) {
+            draw(ctx, x, y);
+            return;
+        }
+        // Keep curves and gradients at a stable native origin, without resampling the physical pixels.
+        const canvas = this._barCanvas ?? document.createElement('canvas');
+        if (!this._barCanvas) {
+            const context = canvas.getContext('2d');
+            if (!context) {
+                draw(ctx, x, y);
+                return;
+            }
+            this._barCanvas = canvas;
+            this._barContext = new UniverRenderingContext(context);
+        }
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+        const paint = this._barContext!;
+        paint.setTransform(m.a, 0, 0, m.d, px - left, py - top);
+        paint.setLineDash(ctx.getLineDash());
+        paint.lineDashOffset = ctx.lineDashOffset;
+        paint.lineCap = ctx.lineCap;
+        paint.lineJoin = ctx.lineJoin;
+        paint.miterLimit = ctx.miterLimit;
+        draw(paint, 0, 0);
+        ctx.save();
+        try {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(canvas, left, top);
+        } finally {
+            ctx.restore();
+        }
     }
 
     private _drawRectWithRoundedCorner(ctx: UniverRenderingContext, x: number, y: number, width: number, height: number, topLeftRadius: boolean, topRightRadius: boolean, bottomRightRadius: boolean, bottomLeftRadius: boolean) {

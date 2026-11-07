@@ -126,6 +126,34 @@ function createFixture(): IFixture {
     };
 }
 
+function createViewportCacheFixture(bottom = 40, dpr = 1) {
+    const engine = new Engine('viewport-cache-engine', { elementWidth: 320, elementHeight: 180, dpr });
+    const scene = new Scene('viewport-cache-scene', engine);
+    scene.transformByState({ width: 700, height: 500, scaleX: 1, scaleY: 1 });
+    const top = new Viewport('viewMainTop', scene, { left: 0, top: 0, width: 300, height: bottom, active: true, allowCache: true });
+    const main = new Viewport(MAIN_VIEW_PORT_KEY, scene, { left: 0, top: bottom, width: 300, height: 180 - bottom, active: true, allowCache: true });
+    const object = new Rect('viewport-cache-rect', { left: 5, top: 5, width: 40, height: 20, fill: '#44aa66' });
+    object.viewportCacheReusable = true;
+    scene.addObject(object, 1);
+    scene.enableLayerCache(1);
+    scene.setViewportCacheReuseKey(MAIN_VIEW_PORT_KEY);
+    engine.resizeBySize(320, 180);
+    scene.render();
+    const retained = vi.spyOn(top, 'reuseCachedRender');
+    const painted = vi.spyOn(top, 'render');
+    const rootClear = vi.spyOn(engine, 'clearCanvas');
+    const scroll = (x = 0, y = 20) => {
+        main.viewportScrollX += x;
+        main.viewportScrollY += y;
+        scene.makeDirtyForViewportScroll(main);
+    };
+    const dispose = () => {
+        scene.dispose();
+        engine.dispose();
+    };
+    return { engine, scene, top, main, object, retained, painted, rootClear, scroll, dispose };
+}
+
 describe('engine scene viewport extra', () => {
     let env: ReturnType<typeof setupRenderTestEnv>;
 
@@ -140,6 +168,123 @@ describe('engine scene viewport extra', () => {
         env.restore();
         vi.restoreAllMocks();
         document.body.innerHTML = '';
+    });
+
+    it('retains the frozen cache band across consecutive vertical scrolls and still clears the root', () => {
+        const fixture = createViewportCacheFixture();
+        const bookkeeping = vi.spyOn(fixture.object, 'onViewportCacheReuse');
+        try {
+            fixture.scroll();
+            fixture.scroll();
+            expect(fixture.scene.isViewportCacheReusePending()).toBe(true);
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledOnce();
+            expect(fixture.painted).not.toHaveBeenCalled();
+            expect(bookkeeping).toHaveBeenCalledOnce();
+            expect(fixture.rootClear).toHaveBeenCalledOnce();
+            expect(fixture.top.isDirty).toBe(false);
+            expect(fixture.top.isForceDirty).toBe(false);
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledTimes(2);
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it.each(['scene', 'unknown-command', 'object', 'hide', 'remove', 'clear', 'viewport', 'force-viewport', 'resize', 'horizontal', 'unsupported'] as const)(
+        'falls back when %s invalidates a pending frozen cache',
+        (reason) => {
+            const fixture = createViewportCacheFixture();
+            try {
+                fixture.scroll();
+                expect(fixture.scene.isViewportCacheReusePending()).toBe(true);
+                switch (reason) {
+                    case 'scene':
+                        fixture.scene.makeDirty(true);
+                        break;
+                    case 'unknown-command':
+                        fixture.scene.invalidateViewportCacheReuse();
+                        break;
+                    case 'object':
+                        fixture.object.makeDirty(true);
+                        break;
+                    case 'hide':
+                        fixture.object.hide();
+                        break;
+                    case 'remove':
+                        fixture.scene.removeObject(fixture.object);
+                        break;
+                    case 'clear':
+                        fixture.scene.getLayer(1).clear();
+                        break;
+                    case 'viewport':
+                        fixture.top.markDirty(true);
+                        break;
+                    case 'force-viewport':
+                        fixture.top.markForceDirty(true);
+                        break;
+                    case 'resize':
+                        fixture.engine.resizeBySize(330, 180);
+                        break;
+                    case 'horizontal':
+                        fixture.main.viewportScrollX = 1;
+                        break;
+                    case 'unsupported':
+                        fixture.object.viewportCacheReusable = false;
+                        break;
+                }
+                fixture.scene.render();
+                expect(fixture.retained).not.toHaveBeenCalled();
+                expect(fixture.painted).toHaveBeenCalledOnce();
+            } finally {
+                fixture.dispose();
+            }
+        }
+    );
+
+    it('does not resurrect invalidated intent when another relative scroll arrives before paint', () => {
+        const fixture = createViewportCacheFixture();
+        try {
+            fixture.scroll();
+            fixture.scene.invalidateViewportCacheReuse();
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledOnce();
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it.each([20.5, 21])('rejects fractional cache pixels at boundary %s', (bottom) => {
+        Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1.25 });
+        const fixture = createViewportCacheFixture(bottom, 2);
+        try {
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            expect(fixture.painted).toHaveBeenCalledOnce();
+        } finally {
+            fixture.dispose();
+            Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1 });
+        }
+    });
+
+    it('keeps before-render subscribers on the full rendering path', () => {
+        const fixture = createViewportCacheFixture();
+        const subscription = fixture.scene.beforeRender$.subscribe(() => {});
+        try {
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            expect(fixture.painted).toHaveBeenCalledOnce();
+        } finally {
+            subscription.unsubscribe();
+            fixture.dispose();
+        }
     });
 
     it('keeps wheel scrolling visually consistent when the scene is scaled', () => {

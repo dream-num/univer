@@ -16,10 +16,11 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { iconMap, IIconSetType } from '../models/icon-map';
+import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
@@ -32,11 +33,14 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class ConditionalFormattingIcon extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === ConditionalFormattingIcon;
+
     private _paddingRightAndLeft = DEFAULT_PADDING;
 
     private _width = DEFAULT_WIDTH;
 
     private _imageMap: Map<string, HTMLImageElement> = new Map();
+    private readonly _pendingImages = new Set<HTMLImageElement>();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
 
@@ -63,9 +67,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
-        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
-            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
-            : sourceRanges;
+        const renderRanges = resolveRenderRanges(worksheet, sourceRanges, this._renderRangeResolver);
         if (!renderRanges.length) {
             return;
         }
@@ -128,6 +130,11 @@ export class ConditionalFormattingIcon extends SheetExtension {
     }
 
     override dispose(): void {
+        for (const image of this._pendingImages) {
+            image.onload = null;
+        }
+        this._pendingImages.clear();
+        this._imageMap.clear();
         this._renderRangeResolver = null;
         super.dispose();
     }
@@ -139,8 +146,12 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 const key = this._createKey(type as IIconSetType, String(index));
                 const image = new Image();
                 image.onload = () => {
+                    image.onload = null;
+                    this._pendingImages.delete(image);
                     this._imageMap.set(key, image);
+                    this.parent?.makeDirty(true);
                 };
+                this._pendingImages.add(image);
                 image.src = base64;
             });
         }

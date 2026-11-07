@@ -15,13 +15,13 @@
  */
 
 import type { EventState, Nullable } from '@univerjs/core';
+import { Disposable, Tools } from '@univerjs/core';
+import { Subscription } from 'rxjs';
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { Scene } from '../scene';
 import type { Viewport } from '../viewport';
-import { Disposable, Tools } from '@univerjs/core';
-import { Subscription } from 'rxjs';
 import { hasScrollableOverflow } from '../basics/tools';
 import { Transform } from '../basics/transform';
 import { Rect } from './rect';
@@ -606,14 +606,18 @@ export class ScrollBar extends Disposable {
         this._resizeRightBottomCorner();
     }
 
-    makeDirty(state: boolean) {
+    makeDirty(state: boolean, viewportScroll = false) {
         this.horizonScrollTrack?.makeDirty(state);
         this.horizonThumbRect?.makeDirty(state);
         this.verticalScrollTrack?.makeDirty(state);
         this.verticalThumbRect?.makeDirty(state);
         this.placeholderBarRect?.makeDirty(state);
 
-        this.makeViewDirty(state);
+        if (viewportScroll && state && !this._mainScene) {
+            this._viewport.scene.makeDirtyForViewportScroll(this._viewport);
+        } else {
+            this.makeViewDirty(state);
+        }
     }
 
     makeViewDirty(state: boolean) {

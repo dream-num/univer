@@ -46,6 +46,7 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
 import { DEFAULT_PADDING_DATA, FULL_WIDTH_HORIZONTAL_ALIGNMENTS, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
+import { RenderPrimitiveCache } from './render-primitive-cache';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -122,12 +123,29 @@ interface IRenderFontContext {
 }
 
 export class Font extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === Font;
+
     override uKey = UNIQUE_KEY;
     override Z_INDEX = FONT_EXTENSION_Z_INDEX;
     private _imageFallback = new Image();
+    private readonly _primitiveCache = new RenderPrimitiveCache();
+
+    override clearCache(): void {
+        this._primitiveCache.clear();
+    }
+
+    override dispose(): void {
+        this._imageFallback.onload = null;
+        this._primitiveCache.dispose();
+        super.dispose();
+    }
 
     constructor() {
         super();
+        this._imageFallback.onload = () => {
+            this._imageFallback.onload = null;
+            this.parent?.makeDirty(true);
+        };
         this._imageFallback.src = IMAGE_FALLBACK_SRC;
     }
 
@@ -249,7 +267,11 @@ export class Font extends SheetExtension {
                     }
 
                     renderFontContext.cellInfo = cellInfo;
-                    this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
+                    if (fontCache.documentSkeleton) {
+                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache));
+                    } else {
+                        this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
+                    }
                 }
             }
         });
@@ -262,7 +284,7 @@ export class Font extends SheetExtension {
 
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
-            this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
+            this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache));
         });
 
         ctx.restore();

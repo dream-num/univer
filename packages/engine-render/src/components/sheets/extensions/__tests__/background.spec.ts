@@ -54,23 +54,20 @@ function createCellInfo(overrides?: Partial<any>) {
     };
 }
 
-function createBgMatrix(entries: Array<[number, number, string]>, size = entries.length) {
-    const valueMap = new Map(entries.map((item) => [`${item[0]}-${item[1]}`, item[2]]));
-    return {
-        getValue: vi.fn((row: number, col: number) => valueMap.get(`${row}-${col}`)),
-        forValue: vi.fn((cb: (row: number, col: number, value: string) => void) => {
-            entries.forEach(([row, col, value]) => cb(row, col, value));
-        }),
-        getSizeOf: vi.fn(() => size),
-    };
+function createBgMatrix(entries: Array<[number, number, string]>) {
+    const matrix = new ObjectMatrix<string>();
+    entries.forEach(([row, col, value]) => matrix.setValue(row, col, value));
+    vi.spyOn(matrix, 'forValue');
+    return matrix;
 }
 
 describe('background extension', () => {
-    it('draws by view ranges and by matrix iteration', () => {
+    it('draws populated cells inside visible ranges across background colors', () => {
         const extension = new Background();
         const ctx = createCtx();
-        const bgByRange = createBgMatrix([[0, 0, '1']], 99);
-        const bgByMatrix = createBgMatrix([[0, 0, '1']], 1);
+        const bgByRange = createBgMatrix([[0, 0, '1']]);
+        const bgByMatrix = createBgMatrix([[0, 0, '1'], [50, 50, '1']]);
+        const rendered = vi.spyOn(extension, 'renderBGByCell');
 
         const worksheet = {
             getMergedCellRange: vi.fn(() => []),
@@ -125,13 +122,14 @@ describe('background extension', () => {
                 checkOutOfViewBound: true,
             } as any
         );
-        expect(bgByMatrix.forValue).toHaveBeenCalled();
+        expect(rendered).toHaveBeenCalledTimes(2);
+        expect(rendered.mock.calls.every(([, row, col]) => row === 0 && col === 0)).toBe(true);
     });
 
     it('reuses cached background cell positions when drawing backgrounds', () => {
         const extension = new Background();
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
+        const bgMatrix = createBgMatrix([[0, 0, '1']]);
         const backgroundPositions = new ObjectMatrix();
         backgroundPositions.setValue(0, 0, createCellInfo());
 
@@ -173,7 +171,7 @@ describe('background extension', () => {
     it('skips merge lookups when drawing merge-free backgrounds', () => {
         const extension = new Background();
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
+        const bgMatrix = createBgMatrix([[0, 0, '1']]);
         const getMergeDataIndex = vi.fn(() => -1);
         const worksheet = {
             getMergedCellRange: vi.fn(() => []),
@@ -217,7 +215,7 @@ describe('background extension', () => {
     it('uses diff ranges to choose background iteration during incremental drawing', () => {
         const extension = new Background();
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[1, 1, '1']], 4);
+        const bgMatrix = createBgMatrix([[1, 1, '1']]);
 
         const skeleton = {
             worksheet: {
@@ -251,13 +249,13 @@ describe('background extension', () => {
         );
 
         expect(bgMatrix.forValue).not.toHaveBeenCalled();
-        expect(bgMatrix.getValue).toHaveBeenCalledWith(1, 1);
+        expect(skeleton.getCellWithCoordByIndex).toHaveBeenCalledWith(1, 1, false);
     });
 
     it('draws merged cell backgrounds and handles early draw exits', () => {
         const extension = new Background();
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 2);
+        const bgMatrix = createBgMatrix([[0, 0, '1']]);
         const mergedRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
 
         const skeleton = {

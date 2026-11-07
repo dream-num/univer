@@ -15,14 +15,16 @@
  */
 
 import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { BorderStyleTypes } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { IBorderCache, IBorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { BorderStyleTypes, Range } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
+import { BorderRowCache } from './border-row-cache';
+import { RenderPrimitiveCache } from './render-primitive-cache';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
@@ -36,15 +38,34 @@ interface IRenderBorderContext {
     spreadsheetSkeleton: SpreadsheetSkeleton;
     diffRanges: IRange[];
     viewRanges: IRange[];
+    lineStyle?: BorderStyleTypes;
+    lineWidth?: number;
+    lineColor?: string;
 }
 
 export class Border extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === Border;
+
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = BORDER_Z_INDEX;
 
     preStyle: BorderStyleTypes;
     preColor: string;
+
+    private readonly _strokeCache = new RenderPrimitiveCache();
+    private readonly _rowCache = new BorderRowCache();
+
+    override clearCache(): void {
+        this._strokeCache.clear();
+        this._rowCache.clear();
+    }
+
+    override dispose(): void {
+        this._strokeCache.dispose();
+        this._rowCache.dispose();
+        super.dispose();
+    }
 
     override draw(
         ctx: UniverRenderingContext,
@@ -81,18 +102,48 @@ export class Border extends SheetExtension {
             viewRanges,
             spreadsheetSkeleton,
         } as IRenderBorderContext;
+        const colors = new Map<string, string>();
+        const resolveColor = (color: string): string => {
+            let resolved = colors.get(color);
+            if (resolved === undefined) {
+                ctx.save();
+                ctx.strokeStyle = color;
+                resolved = ctx.strokeStyle as string;
+                ctx.restore();
+                colors.set(color, resolved);
+            }
+            return resolved;
+        };
 
-        ctx.beginPath();
-        viewRanges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                const borderConfig = border.getValue(row, col);
-                if (borderConfig) {
-                    this.renderBorderByCell(renderBorderContext, row, col, borderConfig);
+        this._strokeCache.draw(ctx, () => {
+            ctx.beginPath();
+            viewRanges.forEach((range) => {
+                for (let row = range.startRow; row <= range.endRow; row++) {
+                    const paintRow = (target: UniverRenderingContext) => {
+                        const context = target === ctx
+                            ? renderBorderContext
+                            : {
+                                ...renderBorderContext,
+                                ctx: target,
+                                lineStyle: undefined,
+                                lineWidth: undefined,
+                                lineColor: undefined,
+                            };
+                        for (let col = range.startColumn; col <= range.endColumn; col++) {
+                            const borderConfig = border.getValue(row, col);
+                            if (borderConfig) {
+                                this.renderBorderByCell(context, row, col, borderConfig);
+                            }
+                        }
+                    };
+                    if (!this.isRenderDiffRangesByRow(row, row, diffRanges)
+                        || !this._rowCache.draw(ctx, spreadsheetSkeleton, row, range, resolveColor, (target) => this._strokeCache.draw(target, () => paintRow(target)))) {
+                        paintRow(ctx);
+                    }
                 }
             });
+            ctx.closePath();
         });
-
-        ctx.closePath();
         ctx.restore();
     }
 
@@ -128,7 +179,9 @@ export class Border extends SheetExtension {
             let startX = cellStartX;
             let endX = cellEndX;
 
-            if (type !== BORDER_TYPE.TOP && type !== BORDER_TYPE.BOTTOM && type !== BORDER_TYPE.LEFT && type !== BORDER_TYPE.RIGHT) {
+            const isDiagonal = type !== BORDER_TYPE.TOP && type !== BORDER_TYPE.BOTTOM
+                && type !== BORDER_TYPE.LEFT && type !== BORDER_TYPE.RIGHT;
+            if (isDiagonal) {
                 if (isMerged) {
                     continue;
                 }
@@ -141,17 +194,29 @@ export class Border extends SheetExtension {
                 }
             }
 
-            const lineWidth = getLineWidth(style);
-            setLineType(ctx, style);
-            ctx.setLineWidthByPrecision(lineWidth);
-            ctx.strokeStyle = color || COLOR_BLACK_RGB;
+            let lineWidth = renderBorderContext.lineWidth;
+            if (renderBorderContext.lineStyle !== style || lineWidth === undefined) {
+                lineWidth = getLineWidth(style);
+                setLineType(ctx, style);
+                ctx.setLineWidthByPrecision(lineWidth);
+                renderBorderContext.lineStyle = style;
+                renderBorderContext.lineWidth = lineWidth;
+            }
+            const lineColor = color || COLOR_BLACK_RGB;
+            if (renderBorderContext.lineColor !== lineColor) {
+                ctx.strokeStyle = lineColor;
+                renderBorderContext.lineColor = lineColor;
+            }
 
-            drawDiagonalLineByBorderType(ctx, style, type, {
-                startX,
-                startY,
-                endX,
-                endY,
-            });
+            if (isDiagonal) {
+                drawDiagonalLineByBorderType(ctx, style, type, {
+                    startX,
+                    startY,
+                    endX,
+                    endY,
+                });
+                continue;
+            }
 
             if (this._getOverflowExclusion(overflowCache, type, row, col)) {
                 continue;
@@ -186,30 +251,21 @@ export class Border extends SheetExtension {
         borderRow: number,
         borderColumn: number
     ) {
-        let isDraw = false;
         if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
-            return isDraw;
+            return false;
         }
-
-        overflowCache?.forRow((row, rowArray) => {
-            if (row !== borderRow) {
+        const row = overflowCache?.getRow(borderRow);
+        if (!row) {
+            return false;
+        }
+        for (const column in row) {
+            const { startColumn, endColumn } = row[column];
+            if ((type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn)
+                || (type === BORDER_TYPE.RIGHT && borderColumn >= startColumn && borderColumn < endColumn)) {
                 return true;
             }
-            rowArray.forEach((column) => {
-                const rectangle = overflowCache.getValue(row, column)!;
-                const { startColumn, endColumn } = rectangle;
-                if (type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
-                    isDraw = true;
-                    return false;
-                }
-
-                if (type === BORDER_TYPE.RIGHT && borderColumn >= startColumn && borderColumn < endColumn) {
-                    isDraw = true;
-                    return false;
-                }
-            });
-        });
-        return isDraw;
+        }
+        return false;
     }
 
     // eslint-disable-next-line

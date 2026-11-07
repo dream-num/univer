@@ -21,6 +21,7 @@ import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { RenderComponent } from '../component';
+import { FontCache } from '../docs/layout/shaping-engine/font-cache';
 
 export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     constructor(
@@ -28,6 +29,16 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
         private _skeleton?: SpreadsheetSkeleton
     ) {
         super(oKey);
+    }
+
+    protected _viewportCacheFontRevision = FontCache.metricsRevision;
+
+    override canReuseViewportCache(): boolean {
+        return this._viewportCacheFontRevision === FontCache.metricsRevision && super.canReuseViewportCache();
+    }
+
+    override onViewportCacheReuse(viewportInfo: IViewportInfo): void {
+        this._skeleton?.updateVisibleRange(viewportInfo);
     }
 
     getSkeleton() {
@@ -40,6 +51,7 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
     }
 
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
+        this._viewportCacheFontRevision = FontCache.metricsRevision;
         if (!this.visible) {
             this.makeDirty(false);
             return this;

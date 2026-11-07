@@ -15,11 +15,11 @@
  */
 
 import type { IRange, IScale, Nullable } from '@univerjs/core';
+import { Registry } from '@univerjs/core';
 import type { BaseObject } from '../base-object';
 import type { IBoundRectNoAngle, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { IDocumentLayoutRenderConfig } from './docs/document-layout-presentation';
-import { Registry } from '@univerjs/core';
 import { getScale } from '../basics/tools';
 
 export interface IExtensionConfig {
@@ -42,6 +42,8 @@ export interface IDrawInfo {
 export class ComponentExtension<T, U, V> {
     uKey: string = '';
 
+    viewportCacheReusable: boolean = false;
+
     type!: U;
 
     protected Z_INDEX: number = 0;
@@ -56,6 +58,10 @@ export class ComponentExtension<T, U, V> {
 
     get zIndex() {
         return this.Z_INDEX;
+    }
+
+    canReuseViewportCache(): boolean {
+        return this.viewportCacheReusable;
     }
 
     draw(_ctx: UniverRenderingContext, _parentScale: IScale, _skeleton: T, _diff?: V, _more?: IDrawInfo) {

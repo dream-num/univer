@@ -31,6 +31,15 @@ class TestExtension extends ComponentExtension<unknown, string, unknown> {
 }
 
 describe('ComponentExtension', () => {
+    it('requires an explicit viewport cache opt-in', () => {
+        const extension = new TestExtension();
+        expect(extension.canReuseViewportCache()).toBe(false);
+        extension.viewportCacheReusable = true;
+        expect(extension.canReuseViewportCache()).toBe(true);
+        extension.viewportCacheReusable = false;
+        expect(extension.canReuseViewportCache()).toBe(false);
+    });
+
     it('uses the larger parent scale for extension rendering math', () => {
         const extension = new TestExtension();
 

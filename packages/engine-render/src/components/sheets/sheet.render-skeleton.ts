@@ -55,6 +55,7 @@ import {
     numfmt,
     ObjectMatrix,
     Range,
+    Rectangle,
     searchArray,
     SHEET_TEXT_LINE_GAP,
     SheetSkeleton,
@@ -316,6 +317,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
 
     private _incrementalFontRenderRanges: IRange[] = [];
+    private _preparedStyleRanges = new Map<string, { range: IRange; scaleY: number }>();
+    private _preparedMergeStyleRanges = new ObjectMatrix<IRange>();
     private _stylesCache: IStylesCache = {
         background: {},
         backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -327,6 +330,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /** A matrix to store if a (row, column) position has render cache. */
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
+    private _emptyFontCache = new ObjectMatrix<boolean>();
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
     private _defaultGridlinesColor!: string;
@@ -346,6 +350,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this.textLineGap = _configService.getConfig<number>(SHEET_TEXT_LINE_GAP) ?? 0;
         const themeService = _injector.get(ThemeService);
         this.disposeWithMe(themeService.currentTheme$.subscribe(() => {
+            this._preparedMergeStyleRanges.reset();
             const gray200 = themeService.getColorFromTheme('gray.200');
             const gray900 = themeService.getColorFromTheme('gray.900');
             this._defaultGridlinesColor = ColorKit.mix(gray200, gray900, 0.07).toHexString();
@@ -450,7 +455,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         };
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
+        this._emptyFontCache.reset();
+        this._preparedStyleRanges.clear();
         this._overflowCache.reset();
+        this._preparedMergeStyleRanges.reset();
     }
 
     setOverflowCache(value: ObjectMatrix<IRange>): void {
@@ -542,18 +550,22 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             !!vpInfo.diffX ||
             !!vpInfo.diffY
         );
+        const scaleY = options?.scaleY ?? 1;
+        const prepared = vpInfo && this._preparedStyleRanges.get(vpInfo.viewportKey);
+        const shouldUseIncrementalStyleRange = isIncrementalScroll && prepared?.scaleY === scaleY;
+        this._incrementalFontRenderRanges = [];
+        if (shouldUseIncrementalStyleRange && !vpInfo.shouldCacheUpdate
+            && Rectangle.contains(prepared.range, this.getRangeByViewport(vpInfo))) {
+            return this;
+        }
         const hasMergeData = this.worksheet.getMergeData().length > 0;
-        const shouldRefreshCacheForScroll = isIncrementalScroll && !!vpInfo.shouldCacheUpdate && !!vpInfo.diffX;
-        const shouldUseIncrementalStyleRange = isIncrementalScroll && !shouldRefreshCacheForScroll;
         const styleRanges = shouldUseIncrementalStyleRange
-            ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
+            ? Rectangle.subtract(rowColumnSegment, prepared.range)
             : [rowColumnSegment];
         const visibleCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: true, border: true }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
         const shortRowVisibleCellOptions: ISetStylesCacheForOneCellOptions = { ...visibleCellOptions, skipFontCache: true };
         const overflowCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: false, border: false }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
-        const scaleY = options?.scaleY ?? 1;
         const hasRenderContext = options !== undefined;
-        this._incrementalFontRenderRanges = [];
 
         // clear cache out of visible range
         // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
@@ -653,6 +665,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
+        if (vpInfo) {
+            this._preparedStyleRanges.set(vpInfo.viewportKey, { range: { ...rowColumnSegment }, scaleY });
+        }
         return this;
     }
 
@@ -1372,6 +1387,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * Any changes to sheet model would reset cache.
      */
     _resetCache(): void {
+        this._preparedStyleRanges.clear();
+        this._preparedMergeStyleRanges.reset();
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1381,10 +1398,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         this._handleBgMatrix?.reset();
         this._handleBorderMatrix?.reset();
+        this._emptyFontCache?.reset();
         this._overflowCache?.reset();
     }
 
     override resetRangeCache(ranges: IRange[]): void {
+        this._preparedStyleRanges.clear();
+        // An edited member can change any of a merged anchor's four prepared edges.
+        this._preparedMergeStyleRanges.reset();
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             Range.foreach(range, (row, col) => {
@@ -1393,6 +1414,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 this._stylesCache.backgroundPositions?.realDeleteValue(row, col);
                 this._handleBgMatrix.realDeleteValue(row, col);
                 this._handleBorderMatrix.realDeleteValue(row, col);
+                this._emptyFontCache.realDeleteValue(row, col);
                 Object.values(this._stylesCache.background ?? {}).forEach((backgroundMatrix) => {
                     backgroundMatrix.realDeleteValue(row, col);
                 });
@@ -1527,7 +1549,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
-        if (isNullCell(cellData)) return;
+        if (isNullCell(cellData)) {
+            this._emptyFontCache.setValue(row, col, true);
+            return;
+        }
+        this._emptyFontCache.realDeleteValue(row, col);
 
         let config: Partial<IFontCacheItem> = {
             cellData,
@@ -1633,11 +1659,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             options = { cacheItem: { bg: true, border: true } };
         }
 
-        const cacheItem = options.cacheItem;
-        if (options.reuseExisting && cacheItem && !options.mergeRange) {
+        const cacheItem = options.cacheItem ?? { bg: true, border: true };
+        const mergeRange = options.mergeRange;
+        const preparedMergeRange = mergeRange && this._preparedMergeStyleRanges.getValue(row, col);
+        if (options.reuseExisting && (!mergeRange || (preparedMergeRange && Rectangle.equals(preparedMergeRange, mergeRange)))) {
             const bgHandled = !cacheItem.bg || Tools.isDefine(this._handleBgMatrix.getValue(row, col));
             const borderHandled = !cacheItem.border || Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
-            if (bgHandled && borderHandled && (options.skipFontCache || this._stylesCache.fontMatrix.getValue(row, col))) {
+            if (bgHandled && borderHandled
+                && (options.skipFontCache || this._stylesCache.fontMatrix.getValue(row, col) || this._emptyFontCache.getValue(row, col))) {
                 return;
             }
         }
@@ -1667,12 +1696,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
-        if (!cell && Object.keys(style).length === 0) return;
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
         if (!options.skipFontCache) {
             this._setFontStylesCache(row, col, { ...cell, s: style }, style, options.hasMergeData ?? true);
+        }
+        if (mergeRange && cacheItem.bg && cacheItem.border && !options.skipFontCache) {
+            this._preparedMergeStyleRanges.setValue(row, col, { ...mergeRange });
         }
     }
 

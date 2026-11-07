@@ -73,6 +73,50 @@ describe('border extension', () => {
         vi.clearAllMocks();
     });
 
+    it('reuses a consecutive brush without omitting edges and reapplies dash transitions', () => {
+        const extension = new Border();
+        const ctx = createCtx();
+        const context = {
+            ctx,
+            precisionScale: 1,
+            overflowCache: new ObjectMatrix(),
+            spreadsheetSkeleton: {
+                worksheet: { getRowVisible: () => true, getColVisible: () => true },
+                getCellWithCoordByIndex: () => createCellInfo(),
+            },
+            diffRanges: [],
+            viewRanges: [],
+        } as any;
+        const solid = Object.fromEntries([BORDER_TYPE.TOP, BORDER_TYPE.RIGHT, BORDER_TYPE.BOTTOM, BORDER_TYPE.LEFT]
+            .map((type) => [type, { type, style: BorderStyleTypes.THIN, color: '#111' }]));
+        for (let col = 0; col < 4; col++) {
+            extension.renderBorderByCell(context, 0, col, solid);
+        }
+        expect(drawLineByBorderTypeMock).toHaveBeenCalledTimes(16);
+        expect(setLineTypeMock).toHaveBeenCalledTimes(1);
+        expect(ctx.setLineWidthByPrecision).toHaveBeenCalledTimes(1);
+        extension.renderBorderByCell(context, 0, 4, {
+            [BORDER_TYPE.TOP]: { type: BORDER_TYPE.TOP, style: BorderStyleTypes.DASHED, color: '#222' },
+            [BORDER_TYPE.BOTTOM]: { type: BORDER_TYPE.BOTTOM, style: BorderStyleTypes.THIN, color: '#111' },
+        });
+        expect(setLineTypeMock.mock.calls.map((call) => call[1]))
+            .toEqual([BorderStyleTypes.THIN, BorderStyleTypes.DASHED, BorderStyleTypes.THIN]);
+        expect(drawLineByBorderTypeMock).toHaveBeenCalledTimes(18);
+        expect(ctx.strokeStyle).toBe('#111');
+    });
+
+    it('checks only the border row for overflow exclusions', () => {
+        const extension = new Border() as any;
+        const overflow = new ObjectMatrix({
+            3: { 1: { startRow: 3, endRow: 3, startColumn: 1, endColumn: 4 } },
+            999: new Proxy({}, { ownKeys: () => { throw new Error('Unrelated overflow row enumerated'); } }),
+        });
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.LEFT, 3, 2)).toBe(true);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.RIGHT, 3, 4)).toBe(false);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.LEFT, 5, 2)).toBe(false);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.TOP, 3, 2)).toBe(false);
+    });
+
     it('returns early on invalid draw preconditions and iterates valid range', () => {
         const extension = new Border();
         const ctx = createCtx();
@@ -212,8 +256,8 @@ describe('border extension', () => {
 
         expect(getLineWidthMock).toHaveBeenCalled();
         expect(setLineTypeMock).toHaveBeenCalled();
-        expect(drawDiagonalLineByBorderTypeMock).toHaveBeenCalled();
-        expect(drawLineByBorderTypeMock).toHaveBeenCalled();
+        expect(drawDiagonalLineByBorderTypeMock.mock.calls.map((call) => call[2])).toEqual([BORDER_TYPE.TL_BR]);
+        expect(drawLineByBorderTypeMock.mock.calls.map((call) => call[1])).toEqual([BORDER_TYPE.TOP, BORDER_TYPE.LEFT]);
         expect(doubleSpy).toHaveBeenCalled();
 
         overflowCache.setValue(1, 3, {

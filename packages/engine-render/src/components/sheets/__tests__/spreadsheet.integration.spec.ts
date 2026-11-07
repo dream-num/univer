@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
+import type { IDocumentData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     BorderStyleTypes,
     createSheetGapTestConfig,
     CustomRangeType,
     HorizontalAlign,
-
     ILogService,
     IUniverInstanceService,
-
     LocaleType,
     LogLevel,
     ObjectMatrix,
@@ -34,19 +31,21 @@ import {
     Univer,
     UniverInstanceType,
     VerticalAlign,
-
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
-import { FontCache } from '../../../basics';
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Viewport } from '../../../viewport';
+import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
+import { Background } from '../extensions/background';
+import { Border } from '../extensions/border';
 import { Font } from '../extensions/font';
-import { SHEET_EXTENSION_TYPE } from '../extensions/sheet-extension';
+import { SHEET_EXTENSION_TYPE, SheetExtension } from '../extensions/sheet-extension';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
 import {
     convertTransformToOffsetX,
@@ -175,14 +174,14 @@ function createViewportInfo(scene: Scene, cacheCanvas: Canvas, overrides?: Parti
     };
 }
 
-function createFixture(): IFixture {
+function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     const renderEnv = setupRenderTestEnv();
 
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookDataFactory());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
     get(IUniverInstanceService).focusUnit('sheet-render-workbook');
     get(ILogService).setLogLevel(LogLevel.SILENT);
 
@@ -250,6 +249,21 @@ function disposeFixture(fixture: IFixture) {
     fixture.container.remove();
 }
 
+class RenderOrderProbe extends SheetExtension {
+    drawCount = 0;
+
+    constructor(key: string, zIndex: number, type: SHEET_EXTENSION_TYPE) {
+        super();
+        this.uKey = key;
+        this.Z_INDEX = zIndex;
+        this.type = type;
+    }
+
+    override draw() {
+        this.drawCount++;
+    }
+}
+
 describe('spreadsheet integration', () => {
     let fixture: IFixture;
 
@@ -267,6 +281,101 @@ describe('spreadsheet integration', () => {
         expect(getShrinkToFitScale(80, 100, 12)).toBe(1);
         expect(getShrinkToFitScale(200, 100, 12)).toBe(0.5);
         expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
+    });
+
+    it.each([
+        { reset: 'range', key: 't', row: 2, col: 3 },
+        { reset: 'range', key: 'r', row: 3, col: 3 },
+        { reset: 'range', key: 'b', row: 3, col: 2 },
+        { reset: 'range', key: 'l', row: 2, col: 2 },
+        { reset: 'all', key: 't', row: 2, col: 3 },
+        { reset: 'all', key: 'r', row: 3, col: 3 },
+        { reset: 'all', key: 'b', row: 3, col: 2 },
+        { reset: 'all', key: 'l', row: 2, col: 2 },
+    ] as const)('refreshes a cached merged $key edge after $reset invalidation', ({ reset, key, row, col }) => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        for (let r = 2; r <= 3; r++) {
+            for (let c = 2; c <= 3; c++) {
+                const cells = data.sheets['sheet-1'].cellData!;
+                (cells[r] ??= {})[c] = {
+                    v: r === 2 && c === 2 ? 'merged title' : undefined,
+                    s: {
+                        bg: { rgb: '#fef3c7' },
+                        bd: Object.fromEntries(['t', 'r', 'b', 'l'].map((side) => [side, {
+                            s: BorderStyleTypes.THIN,
+                            cl: { rgb: '#334455' },
+                        }])),
+                    },
+                };
+            }
+        }
+        fixture = createFixture(data);
+        const { skeleton, scene, cacheCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas);
+        skeleton.setStylesCache(info);
+        expect(skeleton.stylesCache.border?.getValue(row, col)?.[key]).toEqual(expect.objectContaining({ color: '#334455' }));
+
+        const previous = skeleton.worksheet.getCellRaw(row, col)!;
+        const previousStyle = previous.s as IStyleData;
+        skeleton.worksheet.getCellMatrix().setValue(row, col, {
+            ...previous,
+            s: {
+                ...previousStyle,
+                bd: {
+                    ...previousStyle.bd,
+                    [key]: {
+                        s: BorderStyleTypes.DOUBLE,
+                        cl: { rgb: '#be123c' },
+                    },
+                },
+            },
+        });
+        if (reset === 'range') {
+            skeleton.resetRangeCache([{ startRow: row, endRow: row, startColumn: col, endColumn: col }]);
+        } else {
+            skeleton.resetCache();
+        }
+        skeleton.setStylesCache({ ...info, isDirty: 0, shouldCacheUpdate: 0, diffX: 0.2 });
+        expect(skeleton.stylesCache.border?.getValue(row, col)?.[key]).toEqual(expect.objectContaining({
+            style: BorderStyleTypes.DOUBLE,
+            color: '#be123c',
+        }));
+        const opposites = {
+            t: { row: 3, col: 3, key: 'b' },
+            b: { row: 2, col: 2, key: 't' },
+            l: { row: 3, col: 3, key: 'r' },
+            r: { row: 2, col: 2, key: 'l' },
+        };
+        const opposite = opposites[key];
+        expect(skeleton.stylesCache.border?.getValue(opposite.row, opposite.col)?.[opposite.key])
+            .toEqual(expect.objectContaining({ color: '#334455' }));
+    });
+
+    it.each([false, true])('keeps consumer extensions ordered around native background, text and border draws, repair=%s', (repair) => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        expect(spreadsheet.backgroundExtension).toBeInstanceOf(Background);
+        expect(spreadsheet.borderExtension).toBeInstanceOf(Border);
+        const background = new RenderOrderProbe('ConsumerBackground', 1, SHEET_EXTENSION_TYPE.BACKGROUND);
+        const early = new RenderOrderProbe('ConsumerBeforeText', 25, SHEET_EXTENSION_TYPE.GRID);
+        const late = new RenderOrderProbe('ConsumerAfterBorder', 70, SHEET_EXTENSION_TYPE.GRID);
+        spreadsheet.register(background, early, late);
+        const backgroundDraw = vi.spyOn(background, 'draw');
+        const earlyDraw = vi.spyOn(early, 'draw');
+        const lateDraw = vi.spyOn(late, 'draw');
+        const textDraw = vi.spyOn(spreadsheet.fontExtension, 'draw');
+        const borderDraw = vi.spyOn(spreadsheet.borderExtension, 'draw');
+        const info = createViewportInfo(scene, cacheCanvas);
+        skeleton.setStylesCache(info);
+        spreadsheet.draw(mainCanvas.getContext(), info, repair);
+
+        expect(backgroundDraw).toHaveBeenCalled();
+        expect(earlyDraw).toHaveBeenCalledOnce();
+        expect(lateDraw).toHaveBeenCalledOnce();
+        expect(backgroundDraw.mock.invocationCallOrder.at(-1)).toBeLessThan(earlyDraw.mock.invocationCallOrder[0]);
+        expect(earlyDraw.mock.invocationCallOrder[0]).toBeLessThan(textDraw.mock.invocationCallOrder[0]);
+        expect(textDraw.mock.invocationCallOrder[0]).toBeLessThan(borderDraw.mock.invocationCallOrder[0]);
+        expect(borderDraw.mock.invocationCallOrder[0]).toBeLessThan(lateDraw.mock.invocationCallOrder[0]);
     });
 
     it('updates the mixed screen gridline color after theme changes', () => {
@@ -662,7 +771,14 @@ describe('spreadsheet integration', () => {
             endColumn: cacheRange.endColumn,
         }));
         expect(fontExtension.draw.mock.calls.at(-1)?.[4].viewRanges).toEqual(overflowSafeRanges);
-        expect(borderExtension.draw.mock.calls.at(-1)?.[4].viewRanges).toEqual(overflowSafeRanges);
+        const borderRanges = viewportInfo.diffBounds.map((bound) => skeleton.getRangeByViewBound(createBound(
+            bound.left - 2,
+            bound.top - 2,
+            bound.right + 2,
+            bound.bottom + 2
+        )));
+        expect(borderExtension.draw.mock.calls.at(-1)?.[4].viewRanges).toEqual(borderRanges);
+        expect(borderExtension.draw.mock.calls.at(-1)?.[3]).toEqual(borderRanges);
         expect(extensionDraw.mock.calls.at(-1)?.[4].viewRanges).toEqual(
             viewportInfo.diffBounds.map((bound) => skeleton.getRangeByViewBound(bound))
         );
@@ -743,6 +859,31 @@ describe('spreadsheet integration', () => {
         expect(renderFontSpy.mock.calls.some(([, row, column]) => row === 0 && column === 0)).toBe(true);
     });
 
+    it('keeps full-row border candidates when a merged diagonal intersects the damaged area', () => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const style = data.styles['style-bg-border'] as IStyleData;
+        style.bd!.tl_br = { s: BorderStyleTypes.THIN, cl: { rgb: '#be123c' } };
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(100, 60, 220, 140)],
+            isDirty: 0,
+            isForceDirty: false,
+        });
+        skeleton.setStylesCache(info);
+        const border = vi.spyOn(spreadsheet.borderExtension, 'draw');
+        (spreadsheet as any)._refreshIncrementalState = true;
+        spreadsheet.draw(mainCanvas.getContext(), info);
+        const cacheRange = skeleton.getCacheRangeByViewport(info);
+        const expected = info.diffBounds.map((bound) => ({
+            ...skeleton.getRangeByViewBound(bound),
+            startColumn: cacheRange.startColumn,
+            endColumn: cacheRange.endColumn,
+        }));
+        expect(border.mock.calls.at(-1)?.[4].viewRanges).toEqual(expected);
+    });
+
     it('skips merge gridline cleanup during merge-free drawing', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const context = mainCanvas.getContext() as any;
@@ -765,7 +906,7 @@ describe('spreadsheet integration', () => {
         const context = mainCanvas.getContext();
         const backgroundDraw = vi.fn();
         const gridDraw = vi.fn();
-        const clearRectSpy = vi.spyOn(context, 'clearRectByPrecision');
+        const clearRectSpy = vi.spyOn(context, 'clearRect');
         const mergedRange = { startRow: 2, endRow: 3, startColumn: 2, endColumn: 3, rangeType: RANGE_TYPE.NORMAL };
         vi.spyOn(skeleton, 'getCurrentRowColumnSegmentMergeData').mockReturnValue([mergedRange]);
         vi.spyOn(skeleton.overflowCache, 'toNativeArray').mockReturnValue([]);
@@ -792,7 +933,36 @@ describe('spreadsheet integration', () => {
         expect(backgroundDraw.mock.invocationCallOrder[1]).toBeLessThan(gridDraw.mock.invocationCallOrder[0]);
     });
 
-    it('skips sparse extensions outside merge repair bounds on sheets with merged cells', () => {
+    it('clears overflow gridlines at integral physical pixels without changing stroke geometry or caller state', () => {
+        const { spreadsheet, mainCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        context.setTransform(1.5, 0, 0, 1.5, -162.5, 100.5);
+        const clear = vi.spyOn(context, 'clearRect');
+        const line = vi.spyOn(context, 'moveToByPrecision');
+        const repaint = vi.fn();
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
+        (spreadsheet as any)._clearRectangle(context, [25], [54], ranges, repaint);
+
+        expect(clear).toHaveBeenCalledWith(-162, 101, 81, 38);
+        expect(line).toHaveBeenCalledWith(0, 0);
+        expect(repaint).toHaveBeenCalledWith(ranges);
+        expect(context.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: -162.5, f: 100.5 });
+    });
+
+    it.each(['printing', 'rotation'])('keeps the native gridline clear for %s', (mode) => {
+        const { spreadsheet, mainCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        if (mode === 'printing') {
+            context.__mode = 'printing';
+        } else {
+            context.setTransform(1, 0.2, 0, 1, 0, 0);
+        }
+        const clear = vi.spyOn(context, 'clearRectByPrecision');
+        (spreadsheet as any)._clearRectangle(context, [25], [54], [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
+        expect(clear).toHaveBeenCalledWith(0, 0, 54, 25);
+    });
+
+    it.each([false, true])('skips absent sparse extensions on merged sheets, repair=%s', (repair) => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const context = mainCanvas.getContext() as any;
         const sparseDraw = vi.fn();
@@ -814,11 +984,45 @@ describe('spreadsheet integration', () => {
         spreadsheet.draw(context, createViewportInfo(scene, cacheCanvas, {
             diffBounds: [createBound(100, 60, 220, 140)],
             diffCacheBounds: [createBound(100, 60, 220, 140)],
-        }));
+        }), repair);
         (spreadsheet as any)._refreshIncrementalState = false;
 
         expect(sparseDraw).not.toHaveBeenCalled();
         expect(regularDraw).toHaveBeenCalledOnce();
+    });
+
+    it.each([false, true])('includes an off-strip merged feature through a visible cell, hidden=%s', (hidden) => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const merge = { startRow: 0, endRow: 6, startColumn: 0, endColumn: 4 };
+        const markerDraw = vi.fn();
+        vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([merge]);
+        vi.spyOn(skeleton.worksheet, 'getMergedCellRange').mockReturnValue([merge]);
+        if (hidden) {
+            vi.spyOn(skeleton.worksheet, 'getRowVisible').mockImplementation((row) => row !== 1);
+            vi.spyOn(skeleton.worksheet, 'getColVisible').mockImplementation((column) => column !== 0);
+        }
+        skeleton.stylesCache.fontMatrix.reset();
+        vi.spyOn(skeleton.worksheet, 'getCell').mockImplementation((row, column) => (
+            row === 0 && column === 0 ? { markers: { tr: { color: '#ff0000', size: 4 } } } : undefined
+        ));
+        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([{
+            draw: markerDraw,
+            uKey: 'DefaultMarkerExtension',
+        }]);
+        (spreadsheet as any)._refreshIncrementalState = true;
+        spreadsheet.draw(mainCanvas.getContext(), createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(100, 60, 220, 140)],
+            diffCacheBounds: [createBound(100, 60, 220, 140)],
+        }), true);
+        (spreadsheet as any)._refreshIncrementalState = false;
+
+        expect(markerDraw).toHaveBeenCalledOnce();
+        expect(markerDraw.mock.calls[0][3]).toContainEqual({
+            startRow: hidden ? 2 : 1,
+            endRow: hidden ? 2 : 1,
+            startColumn: hidden ? 1 : 0,
+            endColumn: hidden ? 1 : 0,
+        });
     });
 
     it('does not skip conditional-formatting render extensions during sparse scans', () => {
@@ -956,9 +1160,103 @@ describe('spreadsheet integration', () => {
         }]);
     });
 
+    it.each([
+        { axis: 'row', edge: 'cell', delta: 5 / 6 },
+        { axis: 'column', edge: 'cell', delta: 5 / 6 },
+        { axis: 'row', edge: 'stroke', delta: 1 },
+        { axis: 'column', edge: 'stroke', delta: 1 },
+    ])('includes the $axis $edge intersecting a repair edge', ({ axis, edge, delta }) => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        sheet.rowCount = 160;
+        sheet.columnCount = 64;
+        sheet.defaultRowHeight = 25;
+        sheet.defaultColumnWidth = 54;
+        sheet.columnHeader = { height: 24 };
+        sheet.rowData = {};
+        sheet.columnData = {};
+        sheet.mergeData = [];
+        sheet.cellData = { 13: { 3: { v: 'repair edge', s: 'style-bg-border' } } };
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        cacheCanvas.setSize(1000, 760, 3);
+        const context = mainCanvas.getContext();
+        context.setTransform(6, 0, 0, 6, 0, 0);
+        const damage = axis === 'row'
+            ? createBound(46, 373 + delta, 700, 450)
+            : createBound(261 + delta, 24, 500, 450);
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(0, 0, 800, 1000),
+            diffBounds: [damage],
+            diffCacheBounds: [damage],
+            diffX: axis === 'column' ? -1 : 0,
+            diffY: axis === 'row' ? -1 : 0,
+        });
+        skeleton.setStylesCache(viewportInfo);
+        const extension = edge === 'stroke' ? spreadsheet.borderExtension : spreadsheet.backgroundExtension;
+        const draw = vi.spyOn(extension, 'draw');
+
+        spreadsheet.paintNewAreaForScrolling(viewportInfo, {
+            cacheCanvas,
+            cacheCtx: cacheCanvas.getContext(),
+            mainCtx: context,
+            topOrigin: 0,
+            leftOrigin: 0,
+            bufferEdgeX: viewportInfo.bufferEdgeX,
+            bufferEdgeY: viewportInfo.bufferEdgeY,
+            rowHeaderWidthAndMarginLeft: skeleton.rowHeaderWidthAndMarginLeft,
+            columnHeaderHeightAndMarginTop: skeleton.columnHeaderHeightAndMarginTop,
+            scaleX: 6,
+            scaleY: 6,
+        });
+
+        const ranges = draw.mock.calls.flatMap((call) => call[3]);
+        expect(ranges.some((range) => range.startRow <= 13 && range.endRow >= 13
+            && range.startColumn <= 3 && range.endColumn >= 3)).toBe(true);
+    });
+
+    it('keeps viewport ranges without recalculating styles for an unchanged cached viewport', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const styleSpy = vi.spyOn(skeleton, 'setStylesCache');
+        const rangeSpy = vi.spyOn(skeleton, 'updateVisibleRange');
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+
+        spreadsheet.render(mainCanvas.getContext(), viewportInfo);
+
+        expect(styleSpy).not.toHaveBeenCalled();
+        expect(rangeSpy).toHaveBeenCalledWith(viewportInfo);
+        expect(skeleton.rowColumnSegment).toEqual(skeleton.getCacheRangeByViewport(viewportInfo));
+    });
+
+    it.each(['dirty', 'uncached'])('calculates styles for a %s viewport even without scroll movement', (mode) => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        spreadsheet.makeForceDirty(false);
+        spreadsheet.makeDirty(mode === 'dirty');
+        const styleSpy = vi.spyOn(skeleton, 'setStylesCache');
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            cacheCanvas: mode === 'uncached' ? undefined : cacheCanvas,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+
+        spreadsheet.render(mainCanvas.getContext(), viewportInfo);
+
+        expect(styleSpy).toHaveBeenCalledOnce();
+    });
+
     it('skips style cache cell visits when scrolling inside the existing cache area', () => {
         const { skeleton, scene, cacheCanvas } = fixture;
         vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([]);
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
         const styleCellSpy = vi.spyOn(skeleton as any, '_setStylesCacheForOneCell');
         const viewportInfo = createViewportInfo(scene, cacheCanvas, {
             diffBounds: [createBound(100, 60, 220, 140)],
@@ -976,7 +1274,7 @@ describe('spreadsheet integration', () => {
         expect(skeleton.rowColumnSegment).toEqual(skeleton.getCacheRangeByViewport(viewportInfo));
     });
 
-    it('reuses cached member styles while rebuilding merged borders during scrolling', () => {
+    it('reuses prepared member and merged styles while scrolling within the covered range', () => {
         const { skeleton, scene, cacheCanvas } = fixture;
         skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
         const cachedStyle = skeleton.stylesCache.fontMatrix.getValue(1, 1);
@@ -994,7 +1292,73 @@ describe('spreadsheet integration', () => {
         }));
 
         expect(skeleton.stylesCache.fontMatrix.getValue(1, 1)).toBe(cachedStyle);
-        expect(borderStyleSpy.mock.calls.some(([, , , options]) => options?.mergeRange)).toBe(true);
+        expect(borderStyleSpy).not.toHaveBeenCalled();
+    });
+
+    it('reuses a fully prepared merged anchor without recomposing its perimeter during scrolling', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        const mergeRange = skeleton.worksheet.getMergeData()[0];
+        const cachedFont = skeleton.stylesCache.fontMatrix.getValue(2, 2);
+        const composed = vi.spyOn(skeleton.worksheet, 'getComposedCellStyleByCellData');
+        const borders = vi.spyOn(skeleton as any, '_setMergeBorderProps');
+
+        (skeleton as any)._setStylesCacheForOneCell(2, 2, { mergeRange, reuseExisting: true, hasMergeData: true });
+
+        expect(composed).not.toHaveBeenCalled();
+        expect(borders).not.toHaveBeenCalled();
+        expect(skeleton.stylesCache.fontMatrix.getValue(2, 2)).toBe(cachedFont);
+    });
+
+    it('prepares all merged edges after the ordinary anchor was visited first', () => {
+        const { skeleton } = fixture;
+        const mergeRange = skeleton.worksheet.getMergeData()[0];
+        (skeleton as any)._setStylesCacheForOneCell(2, 2, {
+            cacheItem: { bg: true, border: true },
+            hasMergeData: true,
+            reuseExisting: true,
+        });
+        const borders = vi.spyOn(skeleton as any, '_setMergeBorderProps');
+        (skeleton as any)._setStylesCacheForOneCell(2, 2, { mergeRange, reuseExisting: true, hasMergeData: true });
+        expect(borders).toHaveBeenCalledTimes(4);
+    });
+
+    it('recomposes merged styles after a theme change even during a scroll preparation pass', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        const mergeRange = skeleton.worksheet.getMergeData()[0];
+        const composed = vi.spyOn(skeleton.worksheet, 'getComposedCellStyleByCellData');
+        const themeService = fixture.univer.__getInjector().get(ThemeService);
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({ ...theme, gray: { ...theme.gray, 200: '#ccddee' } });
+        (skeleton as any)._setStylesCacheForOneCell(2, 2, { mergeRange, reuseExisting: true, hasMergeData: true });
+        expect(composed).toHaveBeenCalled();
+    });
+
+    it('bounds dense background candidates to the damaged columns across many cached rows', () => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        sheet.columnCount = 64;
+        sheet.mergeData = [];
+        sheet.cellData = Object.fromEntries(Array.from({ length: 20 }, (_, row) => [row, Object.fromEntries(Array.from({ length: 64 }, (_, col) => [col, { s: { bg: { rgb: '#fef3c7' } } }]))]));
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, { cacheBound: createBound(0, 0, 5000, 600) });
+        skeleton.setStylesCache(info);
+        const background = spreadsheet.backgroundExtension;
+        const candidates = vi.spyOn(background, 'renderBGByCell');
+        const damage = [{ startRow: 0, endRow: 19, startColumn: 20, endColumn: 21 }];
+
+        background.draw(mainCanvas.getContext(), { scaleX: 1, scaleY: 1 }, skeleton, damage, {
+            viewRanges: damage,
+            checkOutOfViewBound: true,
+            hasMergeData: false,
+            viewportKey: 'viewMain',
+        });
+
+        expect(candidates).toHaveBeenCalledTimes(38);
+        expect(candidates.mock.calls.every(([, , col]) => col === 20 || col === 21)).toBe(true);
     });
 
     it('skips merge lookups for one-cell style cache when merge data is absent', () => {
@@ -1050,6 +1414,55 @@ describe('spreadsheet integration', () => {
 
         expect(getCellSpy.mock.calls.length).toBe(getCellCalls);
         expect(getStyleSpy.mock.calls.length).toBe(getStyleCalls);
+    });
+
+    it('reuses styled cells without text during incremental scrolling', () => {
+        const { skeleton } = fixture;
+        const getCellSpy = vi.spyOn(skeleton.worksheet, 'getCell');
+        const getStyleSpy = vi.spyOn(skeleton.worksheet, 'getComposedCellStyleByCellData');
+        const options = { cacheItem: { bg: true, border: true }, reuseExisting: true };
+        (skeleton as any)._setStylesCacheForOneCell(0, 4, options);
+        expect(skeleton.stylesCache.fontMatrix.getValue(0, 4)).toBeUndefined();
+        getCellSpy.mockClear();
+        getStyleSpy.mockClear();
+
+        (skeleton as any)._setStylesCacheForOneCell(0, 4, options);
+
+        expect(getCellSpy).not.toHaveBeenCalled();
+        expect(getStyleSpy).not.toHaveBeenCalled();
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeDefined();
+        expect(skeleton.stylesCache.border?.getValue(0, 4)).toBeDefined();
+    });
+
+    it('reuses a completely empty cell without creating visible styles', () => {
+        const { skeleton } = fixture;
+        const options = { cacheItem: { bg: true, border: true }, reuseExisting: true };
+        (skeleton as any)._setStylesCacheForOneCell(15, 8, options);
+        const getCellSpy = vi.spyOn(skeleton.worksheet, 'getCell');
+
+        (skeleton as any)._setStylesCacheForOneCell(15, 8, options);
+
+        expect(getCellSpy).not.toHaveBeenCalled();
+        expect(skeleton.stylesCache.fontMatrix.getValue(15, 8)).toBeUndefined();
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(15, 8)).toBeUndefined();
+        expect(skeleton.stylesCache.border?.getValue(15, 8)).toBeUndefined();
+    });
+
+    it.each(['range', 'all'])('invalidates cached text absence on %s cache reset', (reset) => {
+        const { skeleton } = fixture;
+        const options = { cacheItem: { bg: true, border: true }, reuseExisting: true };
+        (skeleton as any)._setStylesCacheForOneCell(0, 4, options);
+        if (reset === 'range') {
+            skeleton.resetRangeCache([{ startRow: 0, endRow: 0, startColumn: 4, endColumn: 4 }]);
+        } else {
+            skeleton.resetCache();
+        }
+        const cell = skeleton.worksheet.getCellRaw(0, 4)!;
+        skeleton.worksheet.getCellMatrix().setValue(0, 4, { ...cell, v: 'New text' });
+
+        (skeleton as any)._setStylesCacheForOneCell(0, 4, options);
+
+        expect(skeleton.stylesCache.fontMatrix.getValue(0, 4)?.cellData?.v).toBe('New text');
     });
 
     it('skips overflow boundary scanning when text fits in the current column', () => {
@@ -1221,7 +1634,7 @@ describe('spreadsheet integration', () => {
         cacheCanvas.dispose();
     });
 
-    it('repairs the full merged range incrementally so merged text remains visible', () => {
+    it('clips merge repair to the exposed strip while retaining the merged text anchor', () => {
         const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
         const context = mainCanvas.getContext();
         const mergeInfo = skeleton.getCellWithCoordByIndex(2, 2, false).mergeInfo;
@@ -1245,22 +1658,83 @@ describe('spreadsheet integration', () => {
 
         const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
         const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
-        const drawSpy = vi.spyOn(spreadsheet, 'draw').mockImplementation(() => {});
+        skeleton.setStylesCache({ ...viewportInfo, isDirty: 1, shouldCacheUpdate: 1 });
+        const drawSpy = vi.spyOn(spreadsheet, 'draw');
+        const fontSpy = vi.spyOn(spreadsheet.fontExtension, '_renderFontEachCell');
+        const clear = vi.spyOn(cacheCanvas.getContext(), 'clearRect');
 
         spreadsheet.renderByViewports(context, viewportInfo, skeleton);
 
         expect(refreshSpy).not.toHaveBeenCalled();
         expect(paintSpy).toHaveBeenCalledOnce();
-        expect(drawSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-            diffBounds: [mergedBound],
-        }), true);
+        const repair = drawSpy.mock.calls.find((call) => call[2]);
+        expect(repair?.[1].diffBounds).toEqual(viewportInfo.diffBounds.map((bound) => createBound(
+            bound.left - 2,
+            bound.top - 2,
+            bound.right + 2,
+            bound.bottom + 2
+        )));
+        expect(clear).toHaveBeenCalledWith(mergeInfo.endX - 8 + 12, mergeInfo.startY + 8, 8, mergeInfo.endY - mergeInfo.startY);
+        expect(fontSpy.mock.calls.some(([, row, col]) => row === 2 && col === 2)).toBe(true);
+    });
+
+    it('keeps a wide merged title incremental when only a narrow frozen strip is exposed', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        skeleton.worksheet.setMergeData([{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 11 }]);
+        const cacheBound = createBound(46, 28, 506, 118);
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            viewportKey: SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+            cacheBound,
+            diffBounds: [createBound(498, 28, 506, 118)],
+            diffCacheBounds: [],
+            diffX: -8,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+        skeleton.setStylesCache({ ...viewportInfo, isDirty: 1, shouldCacheUpdate: 1 });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const draw = vi.spyOn(spreadsheet, 'draw');
+        const font = vi.spyOn(spreadsheet.fontExtension, '_renderFontEachCell');
+        const clear = vi.spyOn(cacheCanvas.getContext(), 'clearRect');
+        spreadsheet.renderByViewports(mainCanvas.getContext(), viewportInfo, skeleton);
+        expect(refresh).not.toHaveBeenCalled();
+        const repair = draw.mock.calls.find((call) => call[2]);
+        expect(repair?.[1].diffBounds).toEqual([createBound(496, 26, 508, 102)]);
+        expect(clear).toHaveBeenCalledWith(464, 8, 8, 72);
+        expect(font.mock.calls.some(([, row, col]) => row === 0 && col === 0)).toBe(true);
+    });
+
+    it('retains whole-merge repair for fractional bitmap shifts', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        skeleton.worksheet.setMergeData([{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 11 }]);
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(46, 28, 506, 118),
+            diffBounds: [createBound(498, 28, 506, 118)],
+            diffCacheBounds: [],
+            diffX: -0.5,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        spreadsheet.renderByViewports(mainCanvas.getContext(), viewportInfo, skeleton);
+        expect(refresh).toHaveBeenCalledOnce();
+        expect(paint).not.toHaveBeenCalled();
     });
 
     it('refreshes the cache when merge repair covers most of the cache area', () => {
         const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
         const context = mainCanvas.getContext();
         const viewportInfo = createViewportInfo(scene, cacheCanvas, {
-            diffBounds: [createBound(0, 200, 460, 280)],
+            diffBounds: [createBound(46, 28, 506, 240)],
             diffCacheBounds: [],
             diffX: 0,
             diffY: -80,
@@ -1270,8 +1744,8 @@ describe('spreadsheet integration', () => {
         });
         spreadsheet.makeDirty(false);
         spreadsheet.makeForceDirty(false);
-        vi.spyOn(skeleton.worksheet, 'getMergedCellRange').mockReturnValue([
-            { startRow: 0, endRow: 9, startColumn: 0, endColumn: 6, rangeType: RANGE_TYPE.NORMAL },
+        skeleton.worksheet.setMergeData([
+            { startRow: 0, endRow: 9, startColumn: 0, endColumn: 11, rangeType: RANGE_TYPE.NORMAL },
         ]);
 
         const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
@@ -1305,7 +1779,277 @@ describe('spreadsheet integration', () => {
         expect(drawSpy).not.toHaveBeenCalled();
     });
 
-    it('refreshes cache for horizontal cache updates to avoid exposing stale cache edges', () => {
+    it('limits horizontal style work to exposed columns while preparing new backgrounds', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        const initial = createViewportInfo(scene, cacheCanvas, { cacheBound: createBound(0, 0, 300, 280) });
+        skeleton.setStylesCache(initial);
+        const cachedFont = skeleton.stylesCache.fontMatrix.getValue(0, 1);
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeUndefined();
+        const cacheBuilder = skeleton as unknown as { _setStylesCacheForOneCell(...args: unknown[]): void };
+        const styleVisits = vi.spyOn(cacheBuilder, '_setStylesCacheForOneCell');
+        const changed = createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(72, 0, 460, 280),
+            diffBounds: [createBound(440, 0, 460, 280)],
+            diffCacheBounds: [createBound(300, 0, 460, 280)],
+            diffX: -72,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 1,
+        });
+        skeleton.setStylesCache(changed, { scaleY: 1 });
+        const incrementalVisits = styleVisits.mock.calls.length;
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeDefined();
+        expect(skeleton.stylesCache.fontMatrix.getValue(0, 1)).toBe(cachedFont);
+        styleVisits.mockClear();
+        skeleton.setStylesCache({ ...changed, isDirty: 1 }, { scaleY: 1 });
+        expect(incrementalVisits).toBeLessThan(styleVisits.mock.calls.length);
+    });
+
+    it.each(['distance', 'origin'])('reuses prepared merged styles when fractional %s needs a pixel refresh', (fractional) => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const cacheCanvas = viewport.canvas!;
+        cacheCanvas.setSize(700, 420, 1);
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        const mergedFont = skeleton.stylesCache.fontMatrix.getValue(2, 2);
+        expect(mergedFont).toBeDefined();
+        const prepareFont = vi.spyOn(skeleton, '_setFontStylesCache');
+        const renderFont = vi.spyOn(spreadsheet.fontExtension, '_renderFontEachCell');
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const context = mainCanvas.getContext();
+        if (fractional === 'origin') {
+            context.translate(0.5, 0);
+        }
+        spreadsheet.render(context, createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(440, 0, 460, 280)],
+            diffCacheBounds: [],
+            diffX: fractional === 'distance' ? -20.5 : -20,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        }));
+        expect(skeleton.stylesCache.fontMatrix.getValue(2, 2)).toBeDefined();
+        expect(prepareFont).not.toHaveBeenCalled();
+        expect(renderFont.mock.calls.some(([, row, col]) => row === 2 && col === 2)).toBe(true);
+    });
+
+    it.each([
+        { from: 69, to: 38.7, scale: 1.5, y: 11.25, reported: -20, expected: -30 },
+        { from: -287.15, to: -287.5, scale: 0.5, y: 0, reported: -2, expected: 0 },
+        { from: -287.5, to: -287.7, scale: 1, y: 0, reported: 0, expected: -1 },
+    ])('moves cached pixels by the actual raster origin: $from to $to at $scale', ({ from, to, scale, y, reported, expected }) => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const ctx = mainCanvas.getContext();
+        ctx.setTransform(scale, 0, 0, scale, from, y);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        ctx.setTransform(scale, 0, 0, scale, to, y);
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const copyTarget = spreadsheet as unknown as { _copyCacheForScrolling(...args: unknown[]): void };
+        const copy = vi.spyOn(copyTarget, '_copyCacheForScrolling');
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, viewport.canvas!, {
+            diffBounds: reported ? [createBound(400, 0, 420, 240)] : [],
+            diffCacheBounds: [],
+            diffX: reported,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        }), skeleton);
+        expect(refresh).not.toHaveBeenCalled();
+        if (expected) {
+            expect(copy).toHaveBeenCalledWith(expect.anything(), canvas, expected, 0);
+        } else {
+            expect(copy).not.toHaveBeenCalled();
+        }
+    });
+
+    it('rebuilds style coverage after a range reset even when the viewport stays in place', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas);
+        skeleton.setStylesCache(info, { scaleY: 1 });
+        skeleton.resetRangeCache([{ startRow: 2, endRow: 3, startColumn: 2, endColumn: 3 }]);
+        const cell = skeleton.worksheet.getCellRaw(2, 2)!;
+        skeleton.worksheet.getCellMatrix().setValue(2, 2, { ...cell, v: 'Updated merge' });
+        skeleton.setStylesCache({ ...info, isDirty: 0, shouldCacheUpdate: 0, diffX: -0.2 }, { scaleY: 1 });
+        expect(skeleton.stylesCache.fontMatrix.getValue(2, 2)?.cellData?.v).toBe('Updated merge');
+    });
+
+    it.each(['scale', 'size', 'pixel-ratio', 'untracked-origin', 'fractional-viewport'])('refreshes an existing bitmap after its %s changes', (change) => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const ctx = mainCanvas.getContext();
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        if (change === 'scale') {
+            ctx.setTransform(2, 0, 0, 2, 0, 0);
+        } else if (change === 'untracked-origin' || change === 'fractional-viewport') {
+            ctx.translate(-4, 0);
+        } else {
+            canvas.setSize(change === 'size' ? 710 : 700, 420, change === 'pixel-ratio' ? 2 : 1);
+        }
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas, {
+            diffX: change === 'fractional-viewport' ? -4 : 0,
+            viewPortPosition: createBound(change === 'fractional-viewport' ? 0.25 : 0, 0, 420, 240),
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        }), skeleton);
+        expect(refresh).toHaveBeenCalledOnce();
+    });
+
+    it('prepares missing style coverage independently of the bitmap damage strips', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, { cacheBound: createBound(0, 0, 300, 280) }));
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeUndefined();
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(72, 0, 460, 280),
+            diffX: -72,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        }));
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeDefined();
+    });
+
+    it('batches styles at the cache boundary while the prepared range covers the visible cells', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(0, 0, 300, 280),
+            viewBound: createBound(46, 28, 250, 240),
+        }));
+        const info = createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(20, 0, 320, 280),
+            viewBound: createBound(66, 28, 270, 240),
+            diffX: -20,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+        const prepareFont = vi.spyOn(skeleton, '_setFontStylesCache');
+        skeleton.setStylesCache(info);
+        expect(prepareFont).not.toHaveBeenCalled();
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeUndefined();
+        skeleton.setStylesCache({ ...info, shouldCacheUpdate: 1 });
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(0, 4)).toBeDefined();
+    });
+
+    it('keeps full and incremental raster origins integral at non-binary zooms', () => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const ctx = mainCanvas.getContext();
+        const origins: { left: number; top: number }[] = [];
+        const draw = spreadsheet.draw.bind(spreadsheet);
+        vi.spyOn(spreadsheet, 'draw').mockImplementation((context, info, repair) => {
+            const transform = context.getTransform();
+            origins.push({ left: transform.e, top: transform.f });
+            return draw(context, info, repair);
+        });
+        ctx.setTransform(2.01, 0, 0, 2.01, -387.123, 20.7);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        ctx.setTransform(2.01, 0, 0, 2.01, -407.4, 20.7);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, viewport.canvas!, {
+            diffX: -10.09,
+            diffY: 0,
+            diffBounds: [createBound(400, 0, 420, 240)],
+            diffCacheBounds: [createBound(400, 0, 460, 280)],
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 1,
+        }), skeleton);
+        expect(origins.length).toBeGreaterThan(1);
+        expect(origins.every(({ left, top }) => Number.isInteger(left) && Number.isInteger(top))).toBe(true);
+    });
+
+    it('uses independent viewport buffers to repaint only newly exposed horizontal cache strips', () => {
+        const { spreadsheet, skeleton, mainCanvas, viewport, scene } = fixture;
+        const cacheCanvas = viewport.canvas!;
+        cacheCanvas.setSize(700, 420, 1);
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(440, 0, 460, 280)],
+            diffCacheBounds: [createBound(400, 0, 460, 280)],
+            diffX: -20,
+            diffY: 0,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 1,
+        });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        spreadsheet.render(mainCanvas.getContext(), viewportInfo);
+        expect(refresh).not.toHaveBeenCalled();
+        expect(paint).toHaveBeenCalledOnce();
+        expect(viewport.canvas).not.toBe(cacheCanvas);
+    });
+
+    it.each([
+        { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32.16, full: true },
+        { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32, full: false },
+        { key: SHEET_VIEWPORT_KEY.VIEW_MAIN, width: 32.16, full: false },
+    ])('protects a fractional frozen edge without broadening main viewport refresh: $key $width', ({ key, width, full }) => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, {
+            viewportKey: key,
+            viewPortPosition: createBound(0, 0, width, 240),
+            diffY: -10,
+            diffBounds: [createBound(0, 240, 420, 250)],
+            diffCacheBounds: [createBound(0, 240, 460, 280)],
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 1,
+        });
+        skeleton.setStylesCache(info);
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        spreadsheet.renderByViewports(mainCanvas.getContext(), info, skeleton);
+        expect(refresh).toHaveBeenCalledTimes(full ? 1 : 0);
+        expect(paint).toHaveBeenCalledTimes(full ? 0 : 1);
+    });
+
+    it.each(['dirty', 'force', 'fractional', 'within-buffer-fractional', 'fractional-origin', 'within-buffer-fractional-origin', 'missing-strip', 'jump'])('retains the horizontal full-refresh fallback for %s', (reason) => {
+        const { spreadsheet, skeleton, mainCanvas, viewport, scene } = fixture;
+        const cacheCanvas = viewport.canvas!;
+        cacheCanvas.setSize(700, 420, 1);
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(440, 0, 460, 280)],
+            diffCacheBounds: reason === 'missing-strip' ? [] : [createBound(400, 0, 460, 280)],
+            diffX: reason.endsWith('fractional') ? -20.5 : -20,
+            diffY: 0,
+            isDirty: reason === 'dirty' ? 1 : 0,
+            isForceDirty: reason === 'force',
+            shouldCacheUpdate: reason.startsWith('within-buffer') ? 0 : 1,
+        });
+        if (reason === 'jump') {
+            viewportInfo.diffX = -10000;
+        }
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        if (reason.endsWith('fractional-origin')) {
+            mainCanvas.getContext().translate(0.5, 0);
+        }
+        const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        spreadsheet.renderByViewports(mainCanvas.getContext(), viewportInfo, skeleton);
+        expect(refresh).toHaveBeenCalledOnce();
+        expect(paint).not.toHaveBeenCalled();
+    });
+
+    it('retains full horizontal refresh when the cache is not owned by the viewport', () => {
         const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
         const context = mainCanvas.getContext();
         const viewportInfo = createViewportInfo(scene, cacheCanvas, {

@@ -76,6 +76,7 @@ function createSkeleton(cells: Record<string, unknown>, hiddenRows = new Set<num
             getUnitId: () => 'unit-1',
             getSheetId: () => 'sheet-1',
             getMergeData: () => [],
+            getMergedCellRange: () => [],
             getRowVisible: (row: number) => !hiddenRows.has(row),
             getColVisible: (col: number) => !hiddenCols.has(col),
             getCell: vi.fn((row: number, col: number) => cells[`${row},${col}`]),
@@ -165,7 +166,7 @@ describe('conditional formatting render extensions', () => {
         expect(ctx.save).not.toHaveBeenCalled();
     });
 
-    it('falls back to the original data bar path when indexed ranges are unavailable or merges exist', () => {
+    it('falls back when indexed ranges are unavailable but skips unmatched merged cells', () => {
         const ctx = createCtx();
         const skeleton = createSkeleton({
             '0,0': {
@@ -190,8 +191,62 @@ describe('conditional formatting render extensions', () => {
         skeleton.worksheet.getMergeData = () => [ranges[0]] as never;
         dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
 
-        expect(resolver).toHaveBeenCalledTimes(1);
-        expect(ctx.fill).toHaveBeenCalledTimes(2);
+        expect(resolver).toHaveBeenCalledTimes(2);
+        expect(ctx.fill).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['dataBar', 'icon'])('does not scan merged cells without %s rules', (kind) => {
+        const skeleton = createSkeleton({});
+        const merge = { startRow: 0, endRow: 100000, startColumn: 0, endColumn: 20 };
+        skeleton.worksheet.getMergeData = () => [merge];
+        skeleton.worksheet.getMergedCellRange = () => [merge];
+        const extension = kind === 'dataBar' ? new DataBar() : new ConditionalFormattingIcon();
+        const resolver = vi.fn(() => []);
+        extension.setRenderRangeResolver(resolver);
+
+        extension.draw(createCtx(), { scaleX: 1, scaleY: 1 }, skeleton, [
+            { startRow: 10, endRow: 12, startColumn: 4, endColumn: 5 },
+        ]);
+
+        expect(resolver).toHaveBeenCalledOnce();
+        expect(skeleton.worksheet.getCell).not.toHaveBeenCalled();
+    });
+
+    it.each(['dataBar', 'icon'])('keeps offscreen merged %s anchors and only visits visible repair cells', (kind) => {
+        const ctx = createCtx();
+        const anchor = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        const merge = { ...anchor, endRow: 100000, endColumn: 20 };
+        const repair = { startRow: 10, endRow: 12, startColumn: 4, endColumn: 5 };
+        const skeleton = createSkeleton({
+            '0,0': {
+                dataBar: { color: '#2f56ef', value: 75, startPoint: 0, isGradient: false },
+                iconSet: { iconType: IIconSetType.threeArrows, iconId: '0' },
+            },
+        }, new Set([10]), new Set([4]));
+        skeleton.worksheet.getMergeData = () => [merge];
+        skeleton.worksheet.getMergedCellRange = () => [merge];
+        skeleton.getCellWithCoordByIndex = (row: number, col: number) => createCellBounds(row, col, {
+            isMerged: true,
+            mergeInfo: { ...merge, startX: 0, endX: 1680, startY: 0, endY: 2400000 },
+        });
+        const extension = kind === 'dataBar' ? new DataBar() : new ConditionalFormattingIcon();
+        if (extension instanceof ConditionalFormattingIcon) {
+            (extension as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, document.createElement('img'));
+        }
+        const resolver = vi.fn((_unitId: string, _sheetId: string, ranges: IRange[]) => (
+            ranges.some((range) => range.startRow === 0 && range.startColumn === 0) ? [anchor] : []
+        ));
+        extension.setRenderRangeResolver(resolver);
+
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [repair]);
+
+        expect(resolver).toHaveBeenCalledOnce();
+        expect(kind === 'dataBar' ? ctx.fill : ctx.drawImage).toHaveBeenCalledOnce();
+        expect(skeleton.worksheet.getCell.mock.calls.length).toBeLessThanOrEqual(4);
+        expect(skeleton.worksheet.getCell.mock.calls).toEqual(expect.arrayContaining([[11, 5], [0, 0]]));
+        expect(skeleton.worksheet.getCell.mock.calls.every(([row, col]: [number, number]) => (
+            (row === 0 && col === 0) || (row >= 11 && row <= 12 && col === 5)
+        ))).toBe(true);
     });
 
     it('draws configured conditional-formatting icons and skips unavailable icons', () => {

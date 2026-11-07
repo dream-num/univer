@@ -15,6 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
+import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
@@ -24,20 +25,25 @@ import type { IDrawInfo } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
-import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
+import type { IPaintForRefresh, IPaintForScrolling } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { BORDER_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getColor } from '../../basics/tools';
 import { Canvas } from '../../canvas';
 import { Documents } from '../docs/document';
+import { FontCache } from '../docs/layout/shaping-engine/font-cache';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
+import { RenderPrimitiveCache } from './extensions/render-primitive-cache';
 import { SHEET_EXTENSION_PREFIX, SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
+import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 const MERGE_REPAIR_CACHE_REFRESH_RATIO = 0.6;
+const SCROLL_REPAIR_INK_HALO = 2;
+const BORDER_INK_HALO = 2;
+const BORDER_EDGE_KEYS = new Set<string>([BORDER_TYPE.TOP, BORDER_TYPE.BOTTOM, BORDER_TYPE.LEFT, BORDER_TYPE.RIGHT]);
 const CUSTOM_EXTENSION_KEY = 'DefaultCustomExtension';
 const MARKER_EXTENSION_KEY = 'DefaultMarkerExtension';
 const RANGE_PROTECTION_VIEW_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY';
@@ -47,6 +53,18 @@ const PRINTING_GRIDLINES_COLOR = getColor([214, 216, 219]);
 interface IRepaintBound {
     bound: IBoundRectNoAngle;
     repairsMerge: boolean;
+}
+
+interface IScrollCacheState {
+    canvas: Canvas;
+    width: number;
+    height: number;
+    pixelRatio: number;
+    scaleX: number;
+    scaleY: number;
+    left: number;
+    top: number;
+    axisAligned: boolean;
 }
 
 interface ISparseExtensionFeatureFlags {
@@ -73,7 +91,11 @@ function pushSparseCellRange(ranges: IRange[], row: number, col: number) {
     });
 }
 
-function scanSparseExtensionFeatures(spreadsheetSkeleton: SpreadsheetSkeleton, ranges: IRange[]): ISparseExtensionFeatureFlags | null {
+function scanSparseExtensionFeatures(
+    spreadsheetSkeleton: SpreadsheetSkeleton,
+    ranges: IRange[],
+    includeMergedAnchors: boolean
+): ISparseExtensionFeatureFlags | null {
     const { worksheet } = spreadsheetSkeleton;
     if (!worksheet || !ranges.length) {
         return null;
@@ -87,43 +109,61 @@ function scanSparseExtensionFeatures(spreadsheetSkeleton: SpreadsheetSkeleton, r
         selectionProtectionRanges: [],
     };
 
+    const visitCell = (row: number, col: number, renderRow = row, renderCol = col) => {
+        const cachedCell = spreadsheetSkeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData as Nullable<{
+            customRender?: unknown[];
+            markers?: unknown;
+            selectionProtection?: unknown[];
+        }>;
+        const cell = cachedCell ?? (worksheet.getCell(row, col) as typeof cachedCell);
+        if (!cell) {
+            return;
+        }
+        if (cell.customRender?.length) {
+            flags.hasCustomRender = true;
+            pushSparseCellRange(flags.customRenderRanges, renderRow, renderCol);
+        }
+        if (cell.markers) {
+            flags.hasMarkers = true;
+            pushSparseCellRange(flags.markerRanges, renderRow, renderCol);
+        }
+        if (cell.selectionProtection?.length) {
+            flags.hasSelectionProtection = true;
+            pushSparseCellRange(flags.selectionProtectionRanges, renderRow, renderCol);
+        }
+    };
+
     for (const range of ranges) {
         for (let row = range.startRow; row <= range.endRow; row++) {
             if (!worksheet.getRowVisible(row)) {
                 continue;
             }
-
             for (let col = range.startColumn; col <= range.endColumn; col++) {
-                if (!worksheet.getColVisible(col)) {
-                    continue;
+                if (worksheet.getColVisible(col)) {
+                    visitCell(row, col);
                 }
-
-                const cachedCell = spreadsheetSkeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData as Nullable<{
-                    customRender?: unknown[];
-                    markers?: unknown;
-                    selectionProtection?: unknown[];
-                }>;
-                const cell = cachedCell ?? (worksheet.getCell(row, col) as Nullable<{
-                    customRender?: unknown[];
-                    markers?: unknown;
-                    selectionProtection?: unknown[];
-                }>);
-                if (!cell) {
-                    continue;
-                }
-
-                if (cell.customRender?.length) {
-                    flags.hasCustomRender = true;
-                    pushSparseCellRange(flags.customRenderRanges, row, col);
-                }
-                if (cell.markers) {
-                    flags.hasMarkers = true;
-                    pushSparseCellRange(flags.markerRanges, row, col);
-                }
-                if (cell.selectionProtection?.length) {
-                    flags.hasSelectionProtection = true;
-                    pushSparseCellRange(flags.selectionProtectionRanges, row, col);
-                }
+            }
+        }
+        if (!includeMergedAnchors) {
+            continue;
+        }
+        for (const merge of worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn)) {
+            if (merge.startRow >= range.startRow && merge.startColumn >= range.startColumn
+                && worksheet.getRowVisible(merge.startRow) && worksheet.getColVisible(merge.startColumn)) {
+                continue;
+            }
+            let row = Math.max(range.startRow, merge.startRow);
+            let col = Math.max(range.startColumn, merge.startColumn);
+            const endRow = Math.min(range.endRow, merge.endRow);
+            const endColumn = Math.min(range.endColumn, merge.endColumn);
+            while (row <= endRow && !worksheet.getRowVisible(row)) {
+                row++;
+            }
+            while (col <= endColumn && !worksheet.getColVisible(col)) {
+                col++;
+            }
+            if (row <= endRow && col <= endColumn) {
+                visitCell(merge.startRow, merge.startColumn, row, col);
             }
         }
     }
@@ -196,6 +236,23 @@ function boundsOverlap(a: IBoundRectNoAngle, b: IBoundRectNoAngle) {
     return a.left <= b.right && a.right >= b.left && a.top <= b.bottom && a.bottom >= b.top;
 }
 
+function getIntersectBound(a: IBoundRectNoAngle, b: IBoundRectNoAngle): Nullable<IBoundRectNoAngle> {
+    const left = Math.max(a.left, b.left);
+    const right = Math.min(a.right, b.right);
+    const top = Math.max(a.top, b.top);
+    const bottom = Math.min(a.bottom, b.bottom);
+    return right > left && bottom > top ? { left, right, top, bottom } : null;
+}
+
+function getOutwardRoundedBound(bound: IBoundRectNoAngle): IBoundRectNoAngle {
+    return {
+        left: Math.floor(bound.left),
+        top: Math.floor(bound.top),
+        right: Math.ceil(bound.right),
+        bottom: Math.ceil(bound.bottom),
+    };
+}
+
 function getClippedBoundArea(bound: IBoundRectNoAngle, clipBound: IBoundRectNoAngle) {
     const width = Math.max(0, Math.min(bound.right, clipBound.right) - Math.max(bound.left, clipBound.left));
     const height = Math.max(0, Math.min(bound.bottom, clipBound.bottom) - Math.max(bound.top, clipBound.top));
@@ -266,7 +323,17 @@ function clipBlitRectToBounds(rect: IBlitRect, sourceWidth: number, sourceHeight
 }
 
 export class Spreadsheet extends SheetComponent {
+    override viewportCacheReusable = this.constructor === Spreadsheet;
+
+    override onViewportCacheReuse(viewportInfo: IViewportInfo): void {
+        if (!sheetHeaderViewportKeys.includes(viewportInfo.viewportKey as SHEET_VIEWPORT_KEY)) {
+            super.onViewportCacheReuse(viewportInfo);
+        }
+    }
+
     private _scrollBufferCanvases = new Map<string, Canvas>();
+    private _scrollCacheStates = new Map<string, IScrollCacheState>();
+    private readonly _gridlineCache = new RenderPrimitiveCache();
     private _backgroundExtension!: Background;
 
     private _borderExtension!: Border;
@@ -292,6 +359,7 @@ export class Spreadsheet extends SheetComponent {
         private _allowCache: boolean = true
     ) {
         super(oKey, spreadsheetSkeleton);
+        this.disposeWithMe(this._gridlineCache);
         this._initialDefaultExtension();
         this.makeDirty(true);
     }
@@ -325,6 +393,7 @@ export class Spreadsheet extends SheetComponent {
         this._documents?.dispose();
         this._scrollBufferCanvases.forEach((canvas) => canvas.dispose());
         this._scrollBufferCanvases.clear();
+        this._scrollCacheStates.clear();
 
         // TODO: fix memory leak without reassigning these properties
         this._documents = null as unknown as Documents;
@@ -347,7 +416,7 @@ export class Spreadsheet extends SheetComponent {
         const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState && viewportInfo.diffBounds
-            ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(bound))
+            ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(getOutwardRoundedBound(bound)))
             : [];
 
         const cacheRange = spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo, this.isPrinting);
@@ -361,11 +430,14 @@ export class Spreadsheet extends SheetComponent {
                 endColumn: cacheRange.endColumn,
             }))
             : viewRanges;
+        const borderViewRanges = this._refreshIncrementalState && diffRanges.length > 0
+            ? this._getBorderRenderRanges(spreadsheetSkeleton, viewportInfo, overflowSafeViewRanges, hasMergeData)
+            : viewRanges;
         const extensions = this.getExtensionsByOrder();
         const backgroundExtensions = extensions.filter((extension) => extension.type === SHEET_EXTENSION_TYPE.BACKGROUND);
         const gridExtensions = extensions.filter((extension) => extension.type !== SHEET_EXTENSION_TYPE.BACKGROUND);
-        const sparseExtensionFeatures = !isMergeRepair && hasSparseExtension(gridExtensions)
-            ? scanSparseExtensionFeatures(spreadsheetSkeleton, viewRanges)
+        const sparseExtensionFeatures = hasSparseExtension(gridExtensions)
+            ? scanSparseExtensionFeatures(spreadsheetSkeleton, viewRanges, isMergeRepair)
             : null;
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
@@ -388,8 +460,10 @@ export class Spreadsheet extends SheetComponent {
         };
 
         drawBackgroundExtensions(diffRanges, viewRanges);
-        this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
-            drawBackgroundExtensions(clearedRanges, clearedRanges);
+        this._gridlineCache.draw(ctx, () => {
+            this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
+                drawBackgroundExtensions(clearedRanges, clearedRanges);
+            });
         });
 
         for (const extension of gridExtensions) {
@@ -397,10 +471,15 @@ export class Spreadsheet extends SheetComponent {
                 continue;
             }
 
-            const extensionViewRanges = extension === this._fontExtension || extension === this._borderExtension
-                ? overflowSafeViewRanges
-                : viewRanges;
-            const extensionDiffRanges = getSparseExtensionDiffRanges(extension.uKey, sparseExtensionFeatures, diffRanges);
+            let extensionViewRanges = viewRanges;
+            if (extension === this._fontExtension) {
+                extensionViewRanges = overflowSafeViewRanges;
+            } else if (extension === this._borderExtension) {
+                extensionViewRanges = borderViewRanges;
+            }
+            const extensionDiffRanges = extension === this._borderExtension && diffRanges.length
+                ? borderViewRanges
+                : getSparseExtensionDiffRanges(extension.uKey, sparseExtensionFeatures, diffRanges);
             const timeKey = `${SHEET_EXTENSION_PREFIX}${extension.uKey}`;
             const st = Tools.now();
             extension.draw(ctx, parentScale, spreadsheetSkeleton, extensionDiffRanges, {
@@ -414,6 +493,37 @@ export class Spreadsheet extends SheetComponent {
             const cost = Tools.now() - st;
             this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
         }
+    }
+
+    private _getBorderRenderRanges(
+        skeleton: SpreadsheetSkeleton,
+        viewportInfo: IViewportInfo,
+        overflowSafeRanges: IRange[],
+        hasMergeData: boolean
+    ): IRange[] {
+        if (this.isPrinting) {
+            return overflowSafeRanges;
+        }
+        // Three-unit thick borders and double edges can reach beyond their owning cell.
+        const ranges = viewportInfo.diffBounds!.map((bound) => skeleton.getRangeByViewBound(getOutwardRoundedBound({
+            left: bound.left - BORDER_INK_HALO,
+            top: bound.top - BORDER_INK_HALO,
+            right: bound.right + BORDER_INK_HALO,
+            bottom: bound.bottom + BORDER_INK_HALO,
+        })));
+        if (hasMergeData) {
+            for (const range of ranges) {
+                const merges = skeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+                for (const merge of merges) {
+                    const border = skeleton.stylesCache.border?.getValue(merge.startRow, merge.startColumn);
+                    if (border && Object.keys(border).some((key) => !BORDER_EDGE_KEYS.has(key))) {
+                        // Preserve the existing full-row path for diagonals owned by an offscreen anchor.
+                        return overflowSafeRanges;
+                    }
+                }
+            }
+        }
+        return ranges;
     }
 
     addRenderFrameTimeMetricToScene(timeKey: string, val: number, scene: Scene) {
@@ -476,7 +586,7 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-    isForceDirty(): boolean {
+    override isForceDirty(): boolean {
         return this._forceDirty;
     }
 
@@ -514,7 +624,34 @@ export class Spreadsheet extends SheetComponent {
         this._dirtyBounds = dirtyBounds;
     }
 
-    renderByViewports(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    renderByViewports(mainCtx: UniverRenderingContext2D, inputViewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        let viewportInfo = inputViewportInfo;
+        const cacheState = this._getScrollCacheState(mainCtx, viewportInfo);
+        const previousState = this._getReusableScrollCacheState(mainCtx, viewportInfo);
+        if (previousState) {
+            const diffX = (cacheState.left - previousState.left) / cacheState.scaleX;
+            const diffY = (cacheState.top - previousState.top) / cacheState.scaleY;
+            const { viewBound } = viewportInfo;
+            const diffBounds = [...viewportInfo.diffBounds];
+            if (!diffBounds.length) {
+                if (diffX) {
+                    const left = diffX < 0 ? viewBound.right + diffX : viewBound.left;
+                    diffBounds.push({ ...viewBound, left, right: left + Math.abs(diffX) });
+                }
+                if (diffY) {
+                    const top = diffY < 0 ? viewBound.bottom + diffY : viewBound.top;
+                    diffBounds.push({ ...viewBound, top, bottom: top + Math.abs(diffY) });
+                }
+            }
+            // View bounds and bitmap origins can round opposite sides of a half pixel.
+            const expand = (bound: IBoundRectNoAngle) => ({
+                left: bound.left - 1 / cacheState.scaleX,
+                right: bound.right + 1 / cacheState.scaleX,
+                top: bound.top - 1 / cacheState.scaleY,
+                bottom: bound.bottom + 1 / cacheState.scaleY,
+            });
+            viewportInfo = { ...viewportInfo, diffX, diffY, diffBounds: diffBounds.map(expand), diffCacheBounds: viewportInfo.diffCacheBounds.map(expand) };
+        }
         const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty, shouldCacheUpdate } = viewportInfo as Required<IViewportInfo>;
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
@@ -534,9 +671,16 @@ export class Spreadsheet extends SheetComponent {
         const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
         const isScrolling = diffX !== 0 || diffY !== 0;
         const mergeRepairBounds = this._getMergeRepairBounds(spreadsheetSkeleton, viewportInfo, hasMergeData, isScrolling);
-        const repaintBounds = this._getRepaintBounds(viewportInfo, mergeRepairBounds);
+        const repaintBounds = this._getRepaintBounds(viewportInfo, mergeRepairBounds, mainCtx);
         const shouldRefreshForMergeRepairArea = exceedsMergeRepairThreshold(viewportInfo.cacheBound, repaintBounds, mergeRepairBounds.length > 0);
-        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache || shouldRefreshForMergeRepairArea || (shouldCacheUpdate && diffX !== 0);
+        const shouldRefreshForHorizontalResampling = this._requiresHorizontalResampling(mainCtx, viewportInfo);
+        // Fractional frozen-column clipping changes translucent edge coverage after a vertical cache copy.
+        const shouldRefreshForFrozenEdge = viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT
+            && diffY !== 0 && this._hasFractionalViewportPixels(viewportInfo);
+        const incompatibleCache = this._scrollCacheStates.has(viewportInfo.viewportKey) && !previousState;
+        const shouldRefreshCache = isDirty || isForceDirty || incompatibleCache || isScrollJumpOutsideCache || shouldRefreshForMergeRepairArea
+            || shouldRefreshForHorizontalResampling || shouldRefreshForFrozenEdge ||
+            (shouldCacheUpdate && diffX !== 0 && !this._canPaintHorizontalScrollIncrementally(mainCtx, viewportInfo));
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
             if (shouldRefreshCache) {
                 this.addRenderTagToScene('scrolling', false);
@@ -570,6 +714,7 @@ export class Spreadsheet extends SheetComponent {
         const dh = bottom - top + columnHeaderHeightAndMarginTop;
         this._applyCache(renderCacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
+        this._scrollCacheStates.set(viewportInfo.viewportKey, { ...cacheState, canvas: renderCacheCanvas });
     }
 
     private _getMergeRepairBounds(spreadsheetSkeleton: SpreadsheetSkeleton, viewportInfo: IViewportInfo, hasMergeData: boolean, isScrolling: boolean) {
@@ -583,7 +728,7 @@ export class Spreadsheet extends SheetComponent {
         const visited = new Set<string>();
 
         for (const dirtyBound of dirtyBounds) {
-            const range = spreadsheetSkeleton.getRangeByViewBound(dirtyBound);
+            const range = spreadsheetSkeleton.getRangeByViewBound(getOutwardRoundedBound(dirtyBound));
             const mergeRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
             for (const mergeRange of mergeRanges) {
                 const key = `${mergeRange.startRow}:${mergeRange.startColumn}`;
@@ -604,23 +749,119 @@ export class Spreadsheet extends SheetComponent {
         return mergeBounds;
     }
 
-    private _getRepaintBounds(viewportInfo: IViewportInfo, mergeRepairBounds: IBoundRectNoAngle[]): IRepaintBound[] {
-        const repaintBounds: IRepaintBound[] = viewportInfo.shouldCacheUpdate
-            ? viewportInfo.diffCacheBounds.map((bound) => ({ bound: { ...bound }, repairsMerge: false }))
-            : [];
-        for (const mergeRepairBound of mergeRepairBounds) {
-            const overlappingBound = repaintBounds.find(({ bound }) => boundsOverlap(bound, mergeRepairBound));
-            if (overlappingBound) {
-                overlappingBound.bound.left = Math.min(overlappingBound.bound.left, mergeRepairBound.left);
-                overlappingBound.bound.top = Math.min(overlappingBound.bound.top, mergeRepairBound.top);
-                overlappingBound.bound.right = Math.max(overlappingBound.bound.right, mergeRepairBound.right);
-                overlappingBound.bound.bottom = Math.max(overlappingBound.bound.bottom, mergeRepairBound.bottom);
-                overlappingBound.repairsMerge = true;
+    private _getRepaintBounds(
+        viewportInfo: IViewportInfo,
+        mergeRepairBounds: IBoundRectNoAngle[],
+        mainCtx: UniverRenderingContext2D
+    ): IRepaintBound[] {
+        const transform = mainCtx.getTransform();
+        if (!this._getReusableScrollCacheState(mainCtx, viewportInfo) && mergeRepairBounds.length && (!Number.isInteger(viewportInfo.diffX * transform.a)
+            || !Number.isInteger(viewportInfo.diffY * transform.d))) {
+            // Fractional bitmap shifts resample text. Rebuild the full merge to preserve its rasterization.
+            const repaintBounds: IRepaintBound[] = viewportInfo.shouldCacheUpdate
+                ? viewportInfo.diffCacheBounds.map((bound) => ({ bound: { ...bound }, repairsMerge: false }))
+                : [];
+            for (const mergeBound of mergeRepairBounds) {
+                const overlapping = repaintBounds.find(({ bound }) => boundsOverlap(bound, mergeBound));
+                if (overlapping) {
+                    overlapping.bound.left = Math.min(overlapping.bound.left, mergeBound.left);
+                    overlapping.bound.top = Math.min(overlapping.bound.top, mergeBound.top);
+                    overlapping.bound.right = Math.max(overlapping.bound.right, mergeBound.right);
+                    overlapping.bound.bottom = Math.max(overlapping.bound.bottom, mergeBound.bottom);
+                    overlapping.repairsMerge = true;
+                } else {
+                    repaintBounds.push({ bound: { ...mergeBound }, repairsMerge: true });
+                }
+            }
+            return repaintBounds;
+        }
+        const repaintBounds: IRepaintBound[] = [];
+        const dirtyBounds = viewportInfo.shouldCacheUpdate ? viewportInfo.diffCacheBounds : viewportInfo.diffBounds;
+        for (const dirtyBound of dirtyBounds) {
+            const clipped = getIntersectBound(dirtyBound, viewportInfo.cacheBound);
+            if (!clipped) {
+                continue;
+            }
+            if (viewportInfo.shouldCacheUpdate) {
+                repaintBounds.push({
+                    bound: clipped,
+                    repairsMerge: mergeRepairBounds.some((mergeBound) => getIntersectBound(clipped, mergeBound)),
+                });
             } else {
-                repaintBounds.push({ bound: { ...mergeRepairBound }, repairsMerge: true });
+                // Layout uses the full merge anchor; only the exposed pixels need repair.
+                for (const mergeBound of mergeRepairBounds) {
+                    const intersection = getIntersectBound(clipped, mergeBound);
+                    if (intersection) {
+                        repaintBounds.push({ bound: intersection, repairsMerge: true });
+                    }
+                }
             }
         }
         return repaintBounds;
+    }
+
+    private _requiresHorizontalResampling(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): boolean {
+        if (viewportInfo.diffX !== 0 && this._hasFractionalViewportPixels(viewportInfo)) {
+            return true;
+        }
+        if (this._getReusableScrollCacheState(mainCtx, viewportInfo)) {
+            return false;
+        }
+        const transform = mainCtx.getTransform();
+        // Rounded scroll bounds can still disagree with a fractional canvas origin at pixel boundaries.
+        return viewportInfo.diffX !== 0 && (!Number.isInteger(viewportInfo.diffX * transform.a)
+            || !Number.isInteger(viewportInfo.diffY * transform.d)
+            || !Number.isInteger(transform.e) || !Number.isInteger(transform.f));
+    }
+
+    private _hasFractionalViewportPixels(viewportInfo: IViewportInfo): boolean {
+        const pixelRatio = viewportInfo.cacheCanvas!.getPixelRatio();
+        return Object.values(viewportInfo.viewPortPosition)
+            .some((value) => Math.abs(value * pixelRatio - Math.round(value * pixelRatio)) > 1e-6);
+    }
+
+    private _getScrollCacheState(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): IScrollCacheState {
+        const { a, b, c, d, e, f } = mainCtx.getTransform();
+        const canvas = viewportInfo.cacheCanvas!;
+        return {
+            canvas,
+            width: canvas.getWidth(),
+            height: canvas.getHeight(),
+            pixelRatio: canvas.getPixelRatio(),
+            scaleX: a,
+            scaleY: d,
+            left: Math.round((e / a - viewportInfo.leftOrigin + viewportInfo.bufferEdgeX) * a),
+            top: Math.round((f / d - viewportInfo.topOrigin + viewportInfo.bufferEdgeY) * d),
+            axisAligned: a > 0 && d > 0 && b === 0 && c === 0,
+        };
+    }
+
+    private _getReusableScrollCacheState(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): IScrollCacheState | undefined {
+        const previous = this._scrollCacheStates.get(viewportInfo.viewportKey);
+        const canvas = viewportInfo.cacheCanvas;
+        const { a, b, c, d } = mainCtx.getTransform();
+        if (!(previous?.axisAligned && canvas === previous.canvas && a > 0 && d > 0 && b === 0 && c === 0
+            && a === previous.scaleX && d === previous.scaleY && canvas.getWidth() === previous.width
+            && canvas.getHeight() === previous.height && canvas.getPixelRatio() === previous.pixelRatio)) {
+            return undefined;
+        }
+        const current = this._getScrollCacheState(mainCtx, viewportInfo);
+        // The repair strips cover one rounding pixel, not precision loss at very large coordinates.
+        return Math.abs(current.left - previous.left - viewportInfo.diffX * a) <= 1 + 1e-6
+            && Math.abs(current.top - previous.top - viewportInfo.diffY * d) <= 1 + 1e-6
+            ? previous
+            : undefined;
+    }
+
+    private _canPaintHorizontalScrollIncrementally(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): boolean {
+        const cacheCanvas = viewportInfo.cacheCanvas;
+        const viewport = this.getScene().getViewport(viewportInfo.viewportKey);
+        const transform = mainCtx.getTransform();
+        // Keep the full refresh for in-place caches, missing damage, and resampling of fractional pixels.
+        return !!cacheCanvas && this._getAncestorParent()?.classType === RENDER_CLASS_TYPE.ENGINE
+            && viewport?.canvas === cacheCanvas && viewportInfo.diffBounds.length > 0 && viewportInfo.diffCacheBounds.length > 0
+            && transform.b === 0 && transform.c === 0
+            && !this._requiresHorizontalResampling(mainCtx, viewportInfo);
     }
 
     paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling, mergeRepairBounds: IBoundRectNoAngle[] = []) {
@@ -631,30 +872,38 @@ export class Spreadsheet extends SheetComponent {
         const viewport = this.getScene().getViewport(viewportInfo.viewportKey);
         const canSwapCache = this._getAncestorParent()?.classType === RENDER_CLASS_TYPE.ENGINE && viewport?.canvas === cacheCanvas;
 
+        const previousState = this._getReusableScrollCacheState(mainCtx, viewportInfo);
+        const cacheState = this._getScrollCacheState(mainCtx, viewportInfo);
+        const offsetX = previousState ? cacheState.left - previousState.left : diffX * scaleX;
+        const offsetY = previousState ? cacheState.top - previousState.top : diffY * scaleY;
         if (canSwapCache) {
             renderCacheCanvas = this._getScrollBufferCanvas(viewportInfo.viewportKey, cacheCanvas);
             renderCacheCtx = renderCacheCanvas.getContext();
-            this._copyCacheForScrolling(renderCacheCtx, cacheCanvas, diffX * scaleX, diffY * scaleY);
+            this._copyCacheForScrolling(renderCacheCtx, cacheCanvas, offsetX, offsetY);
 
             const previousBufferCanvas = viewport.swapCacheCanvas(renderCacheCanvas);
             if (previousBufferCanvas) {
                 this._scrollBufferCanvases.set(viewportInfo.viewportKey, previousBufferCanvas);
             }
         } else {
-            this._copyCacheForScrolling(cacheCtx, cacheCanvas, diffX * scaleX, diffY * scaleY);
+            this._copyCacheForScrolling(cacheCtx, cacheCanvas, offsetX, offsetY);
         }
 
         this._refreshIncrementalState = true;
         // Reset the ctx position to the spreadsheet content origin before drawing.
         // trasnlation should be (rowHeaderWidth, colHeaderHeight) at start.
         const m = mainCtx.getTransform();
-        renderCacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
 
         // leftOrigin is the offset of viewport relative to sheetcorner (without considering zoom)
         // - (leftOrigin - bufferEdgeX)  ----> simplified to - leftOrigin + bufferEdgeX
-        renderCacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+        if (cacheState.axisAligned) {
+            renderCacheCtx.setTransform(m.a, 0, 0, m.d, cacheState.left, cacheState.top);
+        } else {
+            renderCacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
+            renderCacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+        }
 
-        const repaintBounds = this._getRepaintBounds(viewportInfo, mergeRepairBounds);
+        const repaintBounds = this._getRepaintBounds(viewportInfo, mergeRepairBounds, mainCtx);
         if (repaintBounds.length) {
             for (const { bound: diffBound, repairsMerge } of repaintBounds) {
                 const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
@@ -665,20 +914,37 @@ export class Spreadsheet extends SheetComponent {
                 const y = diffTop - columnHeaderHeightAndMarginTop;
                 const w = diffRight - diffLeft;
                 const h = diffBottom - diffTop; // w and h must exactly match the diffarea size, otherwise when scrolling back, the clear area will be too large, causing valid content from the previous frame to be erased
-
-                renderCacheCtx.clearRectByPrecision(x, y, w, h);
-                // cacheCtx.fillStyle = this.testGetRandomLightColor();
-                // cacheCtx.fillRectByPrecision(x, y, w, h); // x, y is diffBounds, means it's relative to scrolling distance.
+                let renderBound = diffBound;
 
                 renderCacheCtx.save();
-                renderCacheCtx.beginPath();
-                renderCacheCtx.rectByPrecision(x, y, w, h);
-                renderCacheCtx.closePath();
-                // The reason for clipping here is to avoid duplicate drawing (otherwise the text would be jagged, especially on Windows)
-                renderCacheCtx.clip();
+                if (cacheState.axisAligned) {
+                    // Avoid fractional clear/clip edges from transform round trips at non-binary zooms.
+                    const left = Math.round(x * m.a) + cacheState.left;
+                    const top = Math.round(y * m.d) + cacheState.top;
+                    const width = Math.round((x + w) * m.a) + cacheState.left - left;
+                    const height = Math.round((y + h) * m.d) + cacheState.top - top;
+                    renderCacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    renderCacheCtx.clearRect(left, top, width, height);
+                    renderCacheCtx.beginPath();
+                    renderCacheCtx.rect(left, top, width, height);
+                    renderCacheCtx.clip();
+                    renderCacheCtx.setTransform(m.a, 0, 0, m.d, cacheState.left, cacheState.top);
+                    // Adjacent three-pixel borders can cross the clip even when their cell does not.
+                    renderBound = {
+                        left: (left - cacheState.left - SCROLL_REPAIR_INK_HALO) / m.a + rowHeaderWidthAndMarginLeft,
+                        right: (left + width - cacheState.left + SCROLL_REPAIR_INK_HALO) / m.a + rowHeaderWidthAndMarginLeft,
+                        top: (top - cacheState.top - SCROLL_REPAIR_INK_HALO) / m.d + columnHeaderHeightAndMarginTop,
+                        bottom: (top + height - cacheState.top + SCROLL_REPAIR_INK_HALO) / m.d + columnHeaderHeightAndMarginTop,
+                    };
+                } else {
+                    renderCacheCtx.clearRectByPrecision(x, y, w, h);
+                    renderCacheCtx.beginPath();
+                    renderCacheCtx.rectByPrecision(x, y, w, h);
+                    renderCacheCtx.clip();
+                }
                 this.draw(renderCacheCtx, {
                     ...viewportInfo,
-                    diffBounds: [diffBound],
+                    diffBounds: [renderBound],
                 }, repairsMerge);
                 renderCacheCtx.restore();
             }
@@ -730,17 +996,23 @@ export class Spreadsheet extends SheetComponent {
         // cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
         const m = mainCtx.getTransform();
         // cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
-        cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
 
         // The 'leftOrigin' is the offset of the viewport relative to the sheet corner, which is the position of cell(0, 0), and it does not consider scaling.
         // - (leftOrigin - bufferEdgeX)  ----> - leftOrigin + bufferEdgeX
-        cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+        const cacheState = this._getScrollCacheState(mainCtx, viewportInfo);
+        if (cacheState.axisAligned) {
+            cacheCtx.setTransform(m.a, 0, 0, m.d, cacheState.left, cacheState.top);
+        } else {
+            cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
+            cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+        }
         // when extension drawing, sheet content coordinate was used by sheet extension, not viewport coordinate, that means ext does not take rowheader into consideration
         this.draw(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }
 
     override render(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo) {
+        this._viewportCacheFontRevision = FontCache.metricsRevision;
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -758,9 +1030,17 @@ export class Spreadsheet extends SheetComponent {
             return this;
         }
 
-        spreadsheetSkeleton.setStylesCache(viewportInfo, {
-            scaleY: this.getParentScale().scaleY,
-        });
+        if (this._canReuseStyleCache(viewportInfo)) {
+            spreadsheetSkeleton.updateVisibleRange(viewportInfo);
+        } else {
+            // Preserve the conservative border preparation for fractionally clipped viewports.
+            const stylesViewportInfo = viewportInfo.cacheCanvas && viewportInfo.diffX && this._hasFractionalViewportPixels(viewportInfo)
+                ? { ...viewportInfo, isForceDirty: true }
+                : viewportInfo;
+            spreadsheetSkeleton.setStylesCache(stylesViewportInfo, {
+                scaleY: this.getParentScale().scaleY,
+            });
+        }
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
@@ -810,6 +1090,13 @@ export class Spreadsheet extends SheetComponent {
         }
         mainCtx.restore();
         return this;
+    }
+
+    private _canReuseStyleCache(viewportInfo: IViewportInfo): boolean {
+        return !!viewportInfo.cacheCanvas && !this.isDirty() && !this.isForceDirty()
+            && !viewportInfo.isDirty && !viewportInfo.isForceDirty && !viewportInfo.shouldCacheUpdate
+            && !viewportInfo.diffX && !viewportInfo.diffY
+            && !viewportInfo.diffBounds?.length && !viewportInfo.diffCacheBounds?.length;
     }
 
     /**
@@ -1093,7 +1380,20 @@ export class Spreadsheet extends SheetComponent {
             const endX =
                 columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-            ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
+            const m = ctx.getTransform();
+            if (ctx.__mode !== 'printing' && m.a > 0 && m.d > 0 && !m.b && !m.c) {
+                // A fractional clear repeatedly attenuates grid intersections as cached pixels are repaired.
+                const left = Math.round(Math.round(startX * m.a) + m.e);
+                const top = Math.round(Math.round(startY * m.d) + m.f);
+                const right = Math.round(Math.round(endX * m.a) + m.e);
+                const bottom = Math.round(Math.round(endY * m.d) + m.f);
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(left, top, right - left, bottom - top);
+                ctx.restore();
+            } else {
+                ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
+            }
             bounds.push({ left: startX, top: startY, right: endX, bottom: endY });
         }
 

@@ -20,6 +20,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../../__tests__/render-test-utils';
 import { VERTICAL_ROTATE_ANGLE } from '../../../../basics/text-rotation';
 import { UniverRenderingContext2D } from '../../../../context';
+import { Rect } from '../../../../shape/rect';
 import { Text } from '../../../../shape/text';
 import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { Font } from '../font';
@@ -124,6 +125,30 @@ describe('font extension', () => {
             naturalWidth = 1;
             src = '';
         });
+    });
+
+    it.each([false, true])('invalidates loaded fallback image pixels and disconnects after disposal (loaded: %s)', (loaded) => {
+        const image = document.createElement('img');
+        vi.stubGlobal('Image', vi.fn(function () {
+            return image;
+        }));
+        const extension = new Font();
+        const parent = new Rect('fallback-image-parent');
+        const dirty = vi.spyOn(parent, 'makeDirty');
+        extension.parent = parent;
+        try {
+            if (loaded) {
+                image.dispatchEvent(new Event('load'));
+                expect(dirty).toHaveBeenCalledExactlyOnceWith(true);
+            }
+            extension.dispose();
+            expect(image.onload).toBeNull();
+            image.dispatchEvent(new Event('load'));
+            expect(dirty).toHaveBeenCalledTimes(Number(loaded));
+        } finally {
+            extension.dispose();
+            parent.dispose();
+        }
     });
 
     it.each([

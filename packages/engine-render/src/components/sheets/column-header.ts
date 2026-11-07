@@ -49,6 +49,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
 
     constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);
+        this.viewportCacheReusable = this.constructor === SpreadsheetColumnHeader;
         this._initialDefaultExtension();
         this.makeDirty(true);
     }

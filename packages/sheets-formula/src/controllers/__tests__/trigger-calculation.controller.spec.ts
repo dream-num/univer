@@ -374,4 +374,51 @@ describe('TriggerCalculationController', () => {
         testBed.executedDisposable.dispose();
         testBed.testBed.univer.dispose();
     });
+
+    it.each([0, 250, 999, 1000])('should cancel delayed progress when Univer is disposed after %d ms', async (delay) => {
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+
+        await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START,
+                totalFormulasToCalculate: 0,
+                completedFormulasCount: 0,
+                totalArrayFormulasToCalculate: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } satisfies IExecutionInProgressParams,
+        });
+        vi.advanceTimersByTime(delay);
+
+        testBed.testBed.univer.dispose();
+
+        expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
+    });
+
+    it('should release the latest progress timer when disposed after successive starts', async () => {
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+        const controller = testBed.testBed.injector.get(TriggerCalculationController);
+
+        try {
+            for (let index = 0; index < 3; index++) {
+                await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+                    stageInfo: {
+                        stage: FormulaExecuteStageType.START,
+                        totalFormulasToCalculate: 0,
+                        completedFormulasCount: 0,
+                        totalArrayFormulasToCalculate: 0,
+                        completedArrayFormulasCount: 0,
+                        formulaCycleIndex: 0,
+                    } satisfies IExecutionInProgressParams,
+                });
+                vi.advanceTimersByTime(100);
+            }
+
+            controller.dispose();
+
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            testBed.testBed.univer.dispose();
+        }
+    });
 });

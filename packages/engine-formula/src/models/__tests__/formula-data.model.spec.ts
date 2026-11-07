@@ -201,6 +201,13 @@ function createCompactFormulaTestBed(cellData: IObjectMatrixPrimitiveType<Nullab
     return { ...testBed, worksheet, model: testBed.get(FormulaDataModel) };
 }
 
+function readFormulaInput(model: FormulaDataModel, compact: boolean): IFormulaData {
+    if (!compact) return model.getFormulaData();
+    const snapshot = model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+    expect(snapshot).toBeDefined();
+    return snapshot!.materialize();
+}
+
 describe('compact execution formula snapshots', () => {
     it('declines an own getFormulaData override before calling it, then preserves the legacy result', () => {
         const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
@@ -257,60 +264,104 @@ describe('compact execution formula snapshots', () => {
         }
     });
 
-    it('does not reorder custom unit-service callbacks before the legacy Sheets-then-Base capture', () => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
-        const service = testBed.get(IUniverInstanceService);
-        const getUnits = service.getAllUnitsForType.bind(service);
-        const events: UniverInstanceType[] = [];
-        const override = vi.spyOn(service, 'getAllUnitsForType').mockImplementation(<T>(type: UniverInstanceType): T[] => {
-            events.push(type);
-            if (type === UniverInstanceType.UNIVER_BASE) {
-                testBed.worksheet.getCellMatrix().getValue(0, 0)!.f = '=AFTER()';
-            }
-            return getUnits<T>(type);
-        });
-        try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            expect(events).toEqual([]);
-            const data = testBed.model.getFormulaData();
-            expect(events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
-            expect(data.test!.sheet1![0][0]?.f).toBe('=BEFORE()');
-            expect(testBed.worksheet.getCellMatrix().getValue(0, 0)?.f).toBe('=AFTER()');
-        } finally {
-            override.mockRestore();
-            testBed.univer.dispose();
-        }
-    });
-
-    it.each(['custom', 'proxy'] as const)('declines a %s unit service without executing its callbacks', (kind) => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
-        const original = testBed.get(IUniverInstanceService);
-        const getUnits = original.getAllUnitsForType.bind(original);
-        const events: UniverInstanceType[] = [];
-        const custom = {
-            getAllUnitsForType: (type: UniverInstanceType) => {
-                events.push(type);
-                return getUnits(type);
+    it.each(['initSheetFormulaData', '_initSheetArrayFormulaData'] as const)('declines a custom %s method before observing its getter', (name) => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const original = Object.getOwnPropertyDescriptor(FormulaDataModel.prototype, name)!.value;
+        let reads = 0;
+        Object.defineProperty(testBed.model, name, {
+            configurable: true,
+            get: () => {
+                reads++;
+                return original;
             },
-        };
-        const proxy = new Proxy(original, {
-            get: (target, key, receiver) => key === 'getAllUnitsForType'
-                ? custom.getAllUnitsForType
-                : Reflect.get(target, key, receiver),
         });
-        Object.assign(testBed.model, { _univerInstanceService: kind === 'custom' ? custom : proxy });
         try {
             expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            expect(events).toEqual([]);
-            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=BEFORE()');
-            expect(events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
+            expect(reads).toBe(0);
+            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=A1');
+            expect(reads).toBe(2);
         } finally {
-            Object.assign(testBed.model, { _univerInstanceService: original });
+            Reflect.deleteProperty(testBed.model, name);
             testBed.univer.dispose();
         }
     });
 
-    it.each(['getMatrix', 'getValue', 'forValue'] as const)('declines an own ObjectMatrix.%s override without invoking it', (name) => {
+    it('keeps the eager route when output matrix writes have been customized', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const writes = vi.spyOn(ObjectMatrix.prototype, 'setValue');
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(writes).not.toHaveBeenCalled();
+            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=A1');
+            expect(writes).toHaveBeenCalledTimes(1);
+        } finally {
+            writes.mockRestore();
+            testBed.univer.dispose();
+        }
+    });
+
+    it('preserves Sheets-then-Base callback order and captures before later edits', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+            const service = testBed.get(IUniverInstanceService);
+            const getUnits = service.getAllUnitsForType.bind(service);
+            const events: UniverInstanceType[] = [];
+            const override = vi.spyOn(service, 'getAllUnitsForType').mockImplementation(<T>(type: UniverInstanceType): T[] => {
+                events.push(type);
+                if (type === UniverInstanceType.UNIVER_BASE) {
+                    testBed.worksheet.getCellMatrix().getValue(0, 0)!.f = '=AFTER()';
+                }
+                return getUnits<T>(type);
+            });
+            try {
+                return {
+                    data: readFormulaInput(testBed.model, compact),
+                    events,
+                    current: testBed.worksheet.getCellMatrix().getValue(0, 0)?.f,
+                };
+            } finally {
+                override.mockRestore();
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
+        expect(expected.data.test!.sheet1![0][0]?.f).toBe('=BEFORE()');
+        expect(expected.current).toBe('=AFTER()');
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['custom', 'proxy'] as const)('preserves a %s unit service without repeating its callbacks', (kind) => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+            const original = testBed.get(IUniverInstanceService);
+            const getUnits = original.getAllUnitsForType.bind(original);
+            const events: UniverInstanceType[] = [];
+            const custom = {
+                getAllUnitsForType: (type: UniverInstanceType) => {
+                    events.push(type);
+                    return getUnits(type);
+                },
+            };
+            const proxy = new Proxy(original, {
+                get: (target, key, receiver) => key === 'getAllUnitsForType'
+                    ? custom.getAllUnitsForType
+                    : Reflect.get(target, key, receiver),
+            });
+            Object.assign(testBed.model, { _univerInstanceService: kind === 'custom' ? custom : proxy });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), events };
+            } finally {
+                Object.assign(testBed.model, { _univerInstanceService: original });
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['getMatrix', 'getValue'] as const)('does not read an ObjectMatrix.%s method the source traversal does not use', (name) => {
         const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
         const matrix = testBed.worksheet.getCellMatrix();
         let calls = 0;
@@ -322,12 +373,38 @@ describe('compact execution formula snapshots', () => {
             },
         });
         try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            const expected = testBed.model.getFormulaData();
+            expect(readFormulaInput(testBed.model, true)).toStrictEqual(expected);
             expect(calls).toBe(0);
         } finally {
             Reflect.deleteProperty(matrix, name);
             testBed.univer.dispose();
         }
+    });
+
+    it('propagates an original forValue getter failure once, without falling back and rereading it', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+            const matrix = testBed.worksheet.getCellMatrix();
+            let calls = 0;
+            const error = new Error('custom source traversal');
+            Object.defineProperty(matrix, 'forValue', {
+                configurable: true,
+                get: () => {
+                    calls++;
+                    throw error;
+                },
+            });
+            try {
+                expect(() => readFormulaInput(testBed.model, compact)).toThrow(error);
+                return calls;
+            } finally {
+                Reflect.deleteProperty(matrix, 'forValue');
+                testBed.univer.dispose();
+            }
+        };
+        expect(run(false)).toBe(1);
+        expect(run(true)).toBe(1);
     });
 
     it('keeps private snapshot arrays independent of later global iterator callbacks', () => {
@@ -461,133 +538,471 @@ describe('compact execution formula snapshots', () => {
         }
     });
 
-    it('declines an own sheet-order constructor without executing it before fallback', () => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
-        const workbook = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!;
-        const order = workbook.getSnapshot().sheetOrder;
-        let calls = 0;
-        Object.defineProperty(order, 'constructor', {
-            configurable: true,
-            get: () => {
-                calls++;
-                return Array;
-            },
-        });
-        try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            expect(calls).toBe(0);
-            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=1+2');
-            expect(calls).toBe(1);
-        } finally {
-            Reflect.deleteProperty(order, 'constructor');
-            testBed.univer.dispose();
-        }
-    });
-
-    it('declines custom array species without executing it before fallback', () => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
-        const original = Object.getOwnPropertyDescriptor(Array, Symbol.species)!;
-        let calls = 0;
-        let declined = false;
-        let gateCalls = -1;
-        let fallbackCalls = -1;
-        try {
-            Object.defineProperty(Array, Symbol.species, {
+    it('reads an own sheet-order constructor exactly as the eager getter does', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+            const workbook = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const order = workbook.getSnapshot().sheetOrder;
+            let calls = 0;
+            Object.defineProperty(order, 'constructor', {
                 configurable: true,
                 get: () => {
                     calls++;
                     return Array;
                 },
             });
-            declined = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy) === undefined;
-            gateCalls = calls;
-            testBed.model.getFormulaData();
-            fallbackCalls = calls;
-        } finally {
-            Object.defineProperty(Array, Symbol.species, original);
-            testBed.univer.dispose();
-        }
-        expect(declined).toBe(true);
-        expect(gateCalls).toBe(0);
-        expect(fallbackCalls).toBe(1);
-    });
-
-    it.each(['f', 'si', 'ref'] as const)('declines a known %s accessor without invoking it', (key) => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
-        const cell = testBed.worksheet.getCellMatrix().getValue(0, 0)!;
-        let reads = 0;
-        const original = Object.getOwnPropertyDescriptor(cell, key);
-        Object.defineProperty(cell, key, {
-            configurable: true,
-            get: () => {
-                reads++;
-                return '=A1';
-            },
-        });
-        try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            expect(reads).toBe(0);
-        } finally {
-            if (original) Object.defineProperty(cell, key, original);
-            else Reflect.deleteProperty(cell, key);
-            testBed.univer.dispose();
-        }
-    });
-
-    it.each(['matrix', 'row', 'cell'] as const)('declines a %s Proxy without executing its traps', (kind) => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
-        const matrix = testBed.worksheet.getCellMatrix();
-        const raw = matrix.getMatrix();
-        const row = raw[0];
-        const cell = row[0];
-        let traps = 0;
-        const proxy = new Proxy(kind === 'matrix' ? raw : kind === 'row' ? row : cell!, {
-            get: () => {
-                traps++;
-                throw new Error('unexpected get');
-            },
-            ownKeys: () => {
-                traps++;
-                throw new Error('unexpected ownKeys');
-            },
-            getPrototypeOf: () => {
-                traps++;
-                throw new Error('unexpected prototype');
-            },
-        });
-        if (kind === 'matrix') Object.assign(matrix, { _matrix: proxy });
-        else if (kind === 'row') raw[0] = proxy as typeof row;
-        else row[0] = proxy as ICellData;
-        try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            expect(traps).toBe(0);
-        } finally {
-            Object.assign(matrix, { _matrix: raw });
-            raw[0] = row;
-            row[0] = cell;
-            testBed.univer.dispose();
-        }
-    });
-
-    it('declines missing proxy classification, shared IDs, refs, arrays and noncanonical coordinates', () => {
-        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
-        const matrix = testBed.worksheet.getCellMatrix();
-        try {
-            expect(testBed.model.tryCreateFormulaDataSnapshot()).toBeUndefined();
-            for (const cell of [{ f: '=A1', si: 'shared' }, { f: '=A1', ref: 'A1:A2' }]) {
-                matrix.setValue(0, 0, cell);
-                expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-                expect(testBed.model.getArrayFormulaRange()).toEqual({});
+            try {
+                return { data: readFormulaInput(testBed.model, compact), calls };
+            } finally {
+                Reflect.deleteProperty(order, 'constructor');
+                testBed.univer.dispose();
             }
-            matrix.setValue(0, 0, { f: '=A1' });
-            Object.assign(matrix.getMatrix(), { '01': { 0: { f: '=A2' } } });
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
-            Reflect.deleteProperty(matrix.getMatrix(), '01');
-            testBed.model.setArrayFormulaRange({ test: { sheet1: { 0: { 0: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 } } } } });
-            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+        };
+        const expected = run(false);
+        expect(expected.calls).toBe(1);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves custom array species without probing it or repeating getSheets', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+            const original = Object.getOwnPropertyDescriptor(Array, Symbol.species)!;
+            let calls = 0;
+            let data: IFormulaData;
+            try {
+                Object.defineProperty(Array, Symbol.species, {
+                    configurable: true,
+                    get: () => {
+                        calls++;
+                        return Array;
+                    },
+                });
+                data = readFormulaInput(testBed.model, compact);
+            } finally {
+                Object.defineProperty(Array, Symbol.species, original);
+                testBed.univer.dispose();
+            }
+            return { data, calls };
+        };
+        const expected = run(false);
+        expect(expected.calls).toBe(1);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['f', 'si', 'ref'] as const)('reads a %s accessor the same number of times and in the same phase as eager capture', (key) => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+            const cell = testBed.worksheet.getCellMatrix().getValue(0, 0)!;
+            const reads: string[] = [];
+            const original = Object.getOwnPropertyDescriptor(cell, key);
+            Object.defineProperty(cell, key, {
+                configurable: true,
+                get: () => {
+                    reads.push(key);
+                    return key === 'f' ? '=A1' : key === 'si' ? 'shared' : 'A1';
+                },
+            });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), reads };
+            } finally {
+                if (original) Object.defineProperty(cell, key, original);
+                else Reflect.deleteProperty(cell, key);
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.reads).toHaveLength(key === 'ref' ? 1 : 3);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['matrix', 'row', 'cell'] as const)('preserves a %s Proxy trap sequence through the original traversal', (kind) => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+            const matrix = testBed.worksheet.getCellMatrix();
+            const raw = matrix.getMatrix();
+            const row = raw[0];
+            const cell = row[0];
+            const traps: string[] = [];
+            const proxy = new Proxy(kind === 'matrix' ? raw : kind === 'row' ? row : cell!, {
+                get: (target, key, receiver) => {
+                    traps.push(`get:${String(key)}`);
+                    return Reflect.get(target, key, receiver);
+                },
+                ownKeys: (target) => {
+                    traps.push('ownKeys');
+                    return Reflect.ownKeys(target);
+                },
+                getOwnPropertyDescriptor: (target, key) => {
+                    traps.push(`descriptor:${String(key)}`);
+                    return Reflect.getOwnPropertyDescriptor(target, key);
+                },
+                getPrototypeOf: (target) => {
+                    traps.push('prototype');
+                    return Reflect.getPrototypeOf(target);
+                },
+            });
+            if (kind === 'matrix') Object.assign(matrix, { _matrix: proxy });
+            else if (kind === 'row') raw[0] = proxy as typeof row;
+            else row[0] = proxy as ICellData;
+            try {
+                return { data: readFormulaInput(testBed.model, compact), traps };
+            } finally {
+                Object.assign(matrix, { _matrix: raw });
+                raw[0] = row;
+                row[0] = cell;
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.traps.length).toBeGreaterThan(0);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('captures shared formulas and array metadata without replaying source reads', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({
+                0: { 0: { f: '=1' }, 1: { si: 'late' }, 2: { si: 'missing' } },
+                1: { 1: { f: '=A2+1', si: 'late' } },
+                3: { 0: { f: '={1;2}', ref: 'A4:A5', v: 1 } as ICellData, 1: { f: '=4' } },
+                4: { 0: { v: 2 } },
+            });
+            try {
+                const data = readFormulaInput(testBed.model, compact);
+                return {
+                    data,
+                    anchors: Object.getOwnPropertyDescriptor(testBed.model, '_formulaIdMapData')!.value,
+                    arrays: testBed.model.getArrayFormulaRange(),
+                    arrayCells: testBed.model.getArrayFormulaCellData(),
+                };
+            } finally {
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.data.test!.sheet1![0][1]).toEqual({ f: '=A2+1', si: 'late', x: 0, y: -1 });
+        expect(expected.data.test!.sheet1![0][2]).toBeUndefined();
+        expect(expected.arrays.test?.sheet1?.[3]?.[0]).toMatchObject({ startRow: 3, endRow: 4 });
+        expect(expected.arrayCells.test?.sheet1?.[4]?.[0]?.v).toBe(2);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('does not reread getter values when a late shared formula changes the output representation', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=PREFIX()' }, 1: {} } });
+            const cell = testBed.worksheet.getCellMatrix().getValue(0, 1)!;
+            const reads: string[] = [];
+            let formulaReads = 0;
+            let idReads = 0;
+            Object.defineProperties(cell, {
+                f: {
+                    configurable: true,
+                    get: () => {
+                        reads.push('f');
+                        return `=${++formulaReads}`;
+                    },
+                },
+                si: {
+                    configurable: true,
+                    get: () => {
+                        reads.push('si');
+                        return ++idReads === 3 ? 'late' : '';
+                    },
+                },
+                ref: {
+                    configurable: true,
+                    get: () => {
+                        reads.push('ref');
+                        return undefined;
+                    },
+                },
+            });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), reads };
+            } finally {
+                Reflect.deleteProperty(cell, 'f');
+                Reflect.deleteProperty(cell, 'si');
+                Reflect.deleteProperty(cell, 'ref');
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.reads).toEqual(['si', 'f', 'ref', 'f', 'si', 'f', 'si']);
+        expect(expected.data.test!.sheet1![0][1]).toEqual({ f: '=3', si: 'late' });
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves getter edits to cells later in each traversal pass', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: {}, 1: {} } });
+            const row = testBed.worksheet.getCellMatrix().getMatrix()[0];
+            const reads: string[] = [];
+            let laterFormula = '=0';
+            let changes = 0;
+            Object.defineProperty(row[0], 'f', {
+                configurable: true,
+                get: () => {
+                    reads.push('first');
+                    laterFormula = `=${++changes}`;
+                    return '=FIRST()';
+                },
+            });
+            Object.defineProperty(row[1], 'f', {
+                configurable: true,
+                get: () => {
+                    reads.push(`later:${laterFormula}`);
+                    return laterFormula;
+                },
+            });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), reads };
+            } finally {
+                Reflect.deleteProperty(row[0]!, 'f');
+                Reflect.deleteProperty(row[1]!, 'f');
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.reads).toEqual(['first', 'later:=1', 'first', 'later:=2', 'first', 'later:=3']);
+        expect(expected.data.test!.sheet1![0][1]?.f).toBe('=3');
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves earlier values when duplicate sheet ids merge a later partial traversal', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=SOURCE()' } } });
+            const workbook = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            workbook.getSnapshot().sheetOrder.splice(1, 0, 'sheet1');
+            const matrix = testBed.worksheet.getCellMatrix();
+            let calls = 0;
+            const override = vi.spyOn(matrix, 'forValue').mockImplementation((callback) => {
+                const capture = Math.floor(calls++ / 3);
+                callback(0, 0, { f: `=${capture + 1}` });
+                if (capture === 0) callback(0, 1, { f: '=KEEP()' });
+                return matrix;
+            });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), calls };
+            } finally {
+                override.mockRestore();
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.calls).toBe(6);
+        expect(expected.data.test!.sheet1![0]).toEqual({ 0: { f: '=2' }, 1: { f: '=KEEP()' } });
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['repeated', 'reversed', 'outside-uint32'] as const)('preserves %s coordinates from a custom source traversal', (kind) => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=SOURCE()' } } });
+            const matrix = testBed.worksheet.getCellMatrix();
+            const events: number[] = [];
+            const coordinates = kind === 'repeated'
+                ? [[0, 0], [0, 0]]
+                : kind === 'reversed' ? [[1, 1], [0, 0]] : [[0, 0], [0x1_0000_0000, 1]];
+            const override = vi.spyOn(matrix, 'forValue').mockImplementation((callback) => {
+                events.push(events.length);
+                for (let index = 0; index < coordinates.length; index++) {
+                    const [row, column] = coordinates[index];
+                    if (callback(row, column, { f: `=${index + 1}` }) === false) break;
+                }
+                return matrix;
+            });
+            try {
+                return { data: readFormulaInput(testBed.model, compact), events };
+            } finally {
+                override.mockRestore();
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.events).toEqual([0, 1, 2]);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it.each(['initial', 'during-capture'] as const)('preserves String tag classification when customized %s', (timing) => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1' }, 1: {} } });
+            const cell = testBed.worksheet.getCellMatrix().getValue(0, 1)!;
+            const original = Object.getOwnPropertyDescriptor(String.prototype, Symbol.toStringTag);
+            const classifications: string[] = [];
+            let reads = 0;
+            let data: IFormulaData | undefined;
+            const installTag = () => {
+                // eslint-disable-next-line no-extend-native -- Restore this classification fixture before assertions and disposal.
+                Object.defineProperty(String.prototype, Symbol.toStringTag, {
+                    configurable: true,
+                    get() {
+                        classifications.push(String.prototype.valueOf.call(this));
+                        return 'String';
+                    },
+                });
+            };
+            Object.defineProperty(cell, 'f', {
+                configurable: true,
+                get: () => {
+                    reads++;
+                    if (timing === 'during-capture' && reads === 3) installTag();
+                    return '=2';
+                },
+            });
+            try {
+                if (timing === 'initial') installTag();
+                data = compact
+                    ? testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)?.materialize()
+                    : testBed.model.getFormulaData();
+            } finally {
+                // eslint-disable-next-line no-extend-native -- Restore the original global descriptor before assertions and disposal.
+                if (original) Object.defineProperty(String.prototype, Symbol.toStringTag, original);
+                else Reflect.deleteProperty(String.prototype, Symbol.toStringTag);
+                Reflect.deleteProperty(cell, 'f');
+                testBed.univer.dispose();
+            }
+            return { data, reads, classifications };
+        };
+        const expected = run(false);
+        expect(expected.data!.test!.sheet1![0][1]).toEqual({ f: '=2' });
+        expect(expected.reads).toBe(3);
+        expect(expected.classifications).toEqual(timing === 'initial'
+            ? ['=1', '=2', '=1', '=2', '=1', '', '=2', '', '', '']
+            : ['=2', '', '', '']);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves boxed formula strings after a compact prefix', () => {
+        const run = (compact: boolean) => {
+            const boxedFormula = new Object('=BOXED()') as string;
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=PREFIX()' }, 1: { f: boxedFormula } } });
+            try {
+                return readFormulaInput(testBed.model, compact);
+            } finally {
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(typeof expected.test!.sheet1![0][1]?.f).toBe('object');
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves formulas across chunk boundaries and multiple sheets after edits and disposal', () => {
+        const cellData: IObjectMatrixPrimitiveType<ICellData> = {};
+        for (let index = 0; index < 8_193; index++) {
+            const row = Math.floor(index / 3);
+            cellData[row] ??= {};
+            cellData[row][index % 3] = { f: `=${index}+1` };
+        }
+        const testBed = createCompactFormulaTestBed(cellData);
+        const secondMatrix = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('empty')!.getCellMatrix();
+        secondMatrix.setValue(2, 2, { f: '=SECOND()' });
+        const expected = testBed.model.getFormulaData();
+        const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+        expect(snapshot).toBeDefined();
+        testBed.worksheet.getCellMatrix().realDeleteValue(0, 0);
+        secondMatrix.setValue(2, 2, { f: '=EDITED()' });
+        testBed.univer.dispose();
+        expect(snapshot!.materialize()).toStrictEqual(expected);
+        expect(snapshot!.materialize()).toBe(snapshot!.materialize());
+    });
+
+    it('preserves numeric enumeration order when draining captured chunks, including the Uint32 boundary', () => {
+        const last = 0xFFFF_FFFF;
+        const testBed = createCompactFormulaTestBed({
+            0: { 0: { f: '=1' }, [last]: { f: '=2' } },
+            [last]: { 0: { f: '=3' }, [last]: { f: '=4' } },
+        });
+        try {
+            const expected = testBed.model.getFormulaData();
+            const actual = readFormulaInput(testBed.model, true);
+            expect(actual).toStrictEqual(expected);
+            expect(JSON.stringify(actual)).toBe(JSON.stringify(expected));
         } finally {
             testBed.univer.dispose();
         }
+    });
+
+    it('uses normal instance methods in their original order without requiring a proxy classifier', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+            const worksheet = testBed.worksheet;
+            const getMatrix = worksheet.getCellMatrix.bind(worksheet);
+            const getId = worksheet.getSheetId.bind(worksheet);
+            const events: string[] = [];
+            const matrixMethod = vi.spyOn(worksheet, 'getCellMatrix').mockImplementation(() => {
+                events.push('matrix');
+                return getMatrix();
+            });
+            const idMethod = vi.spyOn(worksheet, 'getSheetId').mockImplementation(() => {
+                events.push('id');
+                return getId();
+            });
+            try {
+                const snapshot = compact ? testBed.model.tryCreateFormulaDataSnapshot() : undefined;
+                if (compact) expect(snapshot).toBeDefined();
+                return { data: compact ? snapshot!.materialize() : testBed.model.getFormulaData(), events };
+            } finally {
+                matrixMethod.mockRestore();
+                idMethod.mockRestore();
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.events).toEqual(['matrix', 'id']);
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('preserves the original numeric-key coercion for noncanonical source keys', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 1: { 0: { f: '=CANONICAL()' } } });
+            const raw = testBed.worksheet.getCellMatrix().getMatrix();
+            Object.assign(raw, { '01': { 0: { f: '=ALIAS()' } } });
+            try {
+                return readFormulaInput(testBed.model, compact);
+            } finally {
+                Reflect.deleteProperty(raw, '01');
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.test!.sheet1![1][0]?.f).toBe('=CANONICAL()');
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('keeps mixed Sheets and Base formula inputs unchanged', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+            testBed.get(IUniverInstanceService).registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+            testBed.univer.createUnit(UniverInstanceType.UNIVER_BASE, Tools.deepClone(TEST_BASE_DATA));
+            try {
+                return readFormulaInput(testBed.model, compact);
+            } finally {
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected['base-test']!['table-main']![0][7]?.si).toBe('total');
+        expect(run(true)).toStrictEqual(expected);
+    });
+
+    it('keeps existing array metadata when capturing subsequent calculations', () => {
+        const run = (compact: boolean) => {
+            const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+            const arrays = { test: { sheet1: { 0: { 0: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 } } } } };
+            testBed.model.setArrayFormulaRange(arrays);
+            testBed.model.setArrayFormulaCellData({ test: { sheet1: { 1: { 0: { v: 7 } } } } });
+            try {
+                return {
+                    data: readFormulaInput(testBed.model, compact),
+                    arrays: testBed.model.getArrayFormulaRange(),
+                    arrayCells: testBed.model.getArrayFormulaCellData(),
+                };
+            } finally {
+                testBed.univer.dispose();
+            }
+        };
+        const expected = run(false);
+        expect(expected.arrayCells.test?.sheet1?.[1]?.[0]?.v).toBe(7);
+        expect(run(true)).toStrictEqual(expected);
     });
 });
 

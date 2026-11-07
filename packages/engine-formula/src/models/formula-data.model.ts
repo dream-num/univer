@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable } from '@univerjs/core';
-import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceService, UniverInstanceType, Workbook, Worksheet } from '@univerjs/core';
+import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -45,12 +45,9 @@ export interface IRangeChange {
     newCell: IRange | null;
 }
 
-const SNAPSHOT_LOOKUP_GETTER = Object.getOwnPropertyDescriptor(Object.prototype, '__lookupGetter__')?.value;
-const SNAPSHOT_LOOKUP_SETTER = Object.getOwnPropertyDescriptor(Object.prototype, '__lookupSetter__')?.value;
-const SNAPSHOT_MATRIX_FOR_VALUE = Object.getOwnPropertyDescriptor(ObjectMatrix.prototype, 'forValue')?.value;
-const SNAPSHOT_MATRIX_METHODS = [
+const COMPACT_FORMULA_CHUNK_SIZE = 4096;
+const SNAPSHOT_OUTPUT_METHODS = [
     'getMatrix',
-    'getValue',
     'forValue',
     'setValue',
     'getRowOrCreate',
@@ -58,195 +55,94 @@ const SNAPSHOT_MATRIX_METHODS = [
     'realDeleteValue',
     '_setOriginValue',
 ].map((name) => [name, Object.getOwnPropertyDescriptor(ObjectMatrix.prototype, name)?.value] as const);
-const SNAPSHOT_INSTANCE_METHODS = ['getAllUnitsForType'].map((name) =>
-    [name, Object.getOwnPropertyDescriptor(UniverInstanceService.prototype, name)?.value] as const
-);
-const SNAPSHOT_STRING_SUBSTRING = Object.getOwnPropertyDescriptor(String.prototype, 'substring')?.value;
-const SNAPSHOT_ARRAY_MAP = Object.getOwnPropertyDescriptor(Array.prototype, 'map')?.value;
-const SNAPSHOT_ARRAY_SPECIES_GETTER = Object.getOwnPropertyDescriptor(Array, Symbol.species)?.get;
-const SNAPSHOT_MAP_GET = Object.getOwnPropertyDescriptor(Map.prototype, 'get')?.value;
-const SNAPSHOT_WORKBOOK_METHODS = ['getUnitId', 'getSheets'].map((name) =>
-    [name, Object.getOwnPropertyDescriptor(Workbook.prototype, name)?.value] as const
-);
-const SNAPSHOT_WORKSHEET_METHODS = ['getSheetId', 'getCellMatrix'].map((name) =>
-    [name, Object.getOwnPropertyDescriptor(Worksheet.prototype, name)?.value] as const
-);
 
 type SnapshotProxyClassifier = (value: unknown) => boolean;
 
-interface ICompactFormulaSheet {
-    sheetId: string;
+interface ICompactFormulaChunk {
     coordinates: Uint32Array;
     formulas: string[];
 }
 
-interface ICompactFormulaUnit {
-    unitId: string;
-    sheets: ICompactFormulaSheet[];
+type CompactFormulaData = Record<string, Record<string, ICompactFormulaChunk[]>>;
+
+function materializeCompactFormulaSheet(
+    chunks: ICompactFormulaChunk[],
+    matrix: IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>
+): void {
+    let previousRow: number | undefined;
+    let row: Record<number, Nullable<IFormulaDataItem>> | undefined;
+    // Numeric coordinates retain their enumeration order while consumed chunks can be released.
+    while (chunks.length > 0) {
+        const chunk = chunks.pop()!;
+        for (let index = chunk.formulas.length - 1; index >= 0; index--) {
+            const rowNumber = chunk.coordinates[index * 2];
+            if (previousRow !== rowNumber) {
+                if (row) Object.setPrototypeOf(row, Object.prototype);
+                row = Object.create(null);
+                matrix[rowNumber] = row!;
+                previousRow = rowNumber;
+            }
+            row![chunk.coordinates[index * 2 + 1]] = { f: chunk.formulas[index] };
+        }
+    }
+    // Captured coordinates were own data properties before any later prototype setters.
+    if (row) Object.setPrototypeOf(row, Object.prototype);
 }
 
 class CompactFormulaDataSnapshot implements IFormulaDataSnapshot {
-    private _materialized: IFormulaData | undefined;
-
-    constructor(private _units: ICompactFormulaUnit[] | undefined) {}
+    constructor(
+        private _data: IFormulaData,
+        private _compactData: CompactFormulaData | undefined
+    ) {}
 
     materialize(): IFormulaData {
-        if (this._materialized) return this._materialized;
-        const result: IFormulaData = Object.create(null);
-        const units = this._units!;
-        for (let unitIndex = 0; unitIndex < units.length; unitIndex++) {
-            const unit = units[unitIndex];
-            const sheets: Record<string, IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> = Object.create(null);
-            result[unit.unitId] = sheets;
-            for (let sheetIndex = 0; sheetIndex < unit.sheets.length; sheetIndex++) {
-                const sheet = unit.sheets[sheetIndex];
-                const matrix: IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>> = Object.create(null);
-                sheets[sheet.sheetId] = matrix;
-                let previousRow: number | undefined;
-                let row: Record<number, Nullable<IFormulaDataItem>> | undefined;
-                for (let index = 0; index < sheet.formulas.length; index++) {
-                    const rowNumber = sheet.coordinates[index * 2];
-                    if (previousRow !== rowNumber) {
-                        if (row) Object.setPrototypeOf(row, Object.prototype);
-                        row = Object.create(null);
-                        matrix[rowNumber] = row!;
-                        previousRow = rowNumber;
-                    }
-                    row![sheet.coordinates[index * 2 + 1]] = { f: sheet.formulas[index] };
+        const compactData = this._compactData;
+        if (compactData) {
+            for (const unitId in compactData) {
+                for (const sheetId in compactData[unitId]) {
+                    materializeCompactFormulaSheet(compactData[unitId][sheetId], this._data[unitId]![sheetId]!);
                 }
-                // Construct own coordinates before adopting the old ordinary-row prototype.
-                // A prototype setter installed after capture must not observe deferred reconstruction.
-                if (row) Object.setPrototypeOf(row, Object.prototype);
             }
+            this._compactData = undefined;
         }
-        this._materialized = result;
-        this._units = undefined;
-        return result;
+        return this._data;
     }
 }
 
-function hasSnapshotAccessor(value: object, key: string): boolean {
-    return SNAPSHOT_LOOKUP_GETTER.call(value, key) !== undefined || SNAPSHOT_LOOKUP_SETTER.call(value, key) !== undefined;
-}
-
-function isPlainSnapshotObject(value: unknown, isProxy: SnapshotProxyClassifier): value is Record<string, unknown> {
-    if (value == null || typeof value !== 'object' || isProxy(value)) return false;
-    const prototype = Object.getPrototypeOf(value);
-    return prototype === Object.prototype || prototype === null;
-}
-
-function ownSnapshotData(value: object, key: PropertyKey): unknown {
-    const descriptor = Object.getOwnPropertyDescriptor(value, key);
-    return descriptor && Object.hasOwn(descriptor, 'value') ? descriptor.value : undefined;
-}
-
-function hasSnapshotMethods(
-    value: object,
-    prototype: object,
-    methods: Array<readonly [string, unknown]>,
-    isProxy: SnapshotProxyClassifier
-): boolean {
-    if (isProxy(value) || Object.getPrototypeOf(value) !== prototype) return false;
-    for (let index = 0; index < methods.length; index++) {
-        const name = methods[index][0];
-        const method = methods[index][1];
+function supportsCompactFormulaSnapshot(model: FormulaDataModel, isProxy?: SnapshotProxyClassifier): boolean {
+    if (
+        isProxy?.(model) || Object.getPrototypeOf(model) !== FormulaDataModel.prototype ||
+        Object.getPrototypeOf(ObjectMatrix.prototype) !== Object.prototype
+    ) {
+        return false;
+    }
+    for (let index = 0; index < SNAPSHOT_MODEL_METHODS.length; index++) {
+        const name = SNAPSHOT_MODEL_METHODS[index][0];
+        const method = SNAPSHOT_MODEL_METHODS[index][1];
         if (
-            typeof method !== 'function' || Object.hasOwn(value, name) ||
-            ownSnapshotData(prototype, name) !== method
+            typeof method !== 'function' || Object.hasOwn(model, name) ||
+            Object.getOwnPropertyDescriptor(FormulaDataModel.prototype, name)?.value !== method
         ) {
             return false;
         }
     }
-    return true;
-}
-
-function hasPlainSnapshotSheetOrder(workbook: Workbook, isProxy: SnapshotProxyClassifier): boolean {
-    const snapshot = ownSnapshotData(workbook, '_snapshot');
-    if (!isPlainSnapshotObject(snapshot, isProxy)) return false;
-    const order = ownSnapshotData(snapshot, 'sheetOrder');
-    const species = Object.getOwnPropertyDescriptor(Array, Symbol.species);
-    if (
-        isProxy(order) || !Array.isArray(order) || Object.getPrototypeOf(order) !== Array.prototype ||
-        Object.hasOwn(order, 'map') || Object.hasOwn(order, 'constructor') ||
-        ownSnapshotData(Array.prototype, 'map') !== SNAPSHOT_ARRAY_MAP ||
-        ownSnapshotData(Array.prototype, 'constructor') !== Array ||
-        !species || !Object.hasOwn(species, 'get') || species.get !== SNAPSHOT_ARRAY_SPECIES_GETTER
-    ) {
-        return false;
-    }
-    for (let index = 0; index < order.length; index++) {
-        const key = String(index);
-        if (!Object.hasOwn(order, key) || hasSnapshotAccessor(order, key) || typeof order[index] !== 'string') return false;
-    }
-    const worksheets = ownSnapshotData(workbook, '_worksheets');
-    return (
-        worksheets != null && !isProxy(worksheets) && Object.getPrototypeOf(worksheets) === Map.prototype &&
-        !Object.hasOwn(worksheets, 'get') && ownSnapshotData(Map.prototype, 'get') === SNAPSHOT_MAP_GET
-    );
-}
-
-function isSnapshotCoordinate(key: string): boolean {
-    const coordinate = Number(key);
-    return Number.isInteger(coordinate) && coordinate >= 0 && coordinate <= 0xFFFF_FFFF && String(coordinate) === key;
-}
-
-function supportsCompactFormulaSnapshot(): boolean {
-    if (
-        typeof SNAPSHOT_LOOKUP_GETTER !== 'function' || typeof SNAPSHOT_LOOKUP_SETTER !== 'function' ||
-        typeof SNAPSHOT_MATRIX_FOR_VALUE !== 'function' || typeof SNAPSHOT_STRING_SUBSTRING !== 'function' ||
-        typeof SNAPSHOT_ARRAY_MAP !== 'function' || typeof SNAPSHOT_ARRAY_SPECIES_GETTER !== 'function' ||
-        typeof SNAPSHOT_MAP_GET !== 'function' ||
-        Object.getPrototypeOf(Object.prototype) !== null ||
-        Object.getPrototypeOf(ObjectMatrix.prototype) !== Object.prototype ||
-        ownSnapshotData(ObjectMatrix.prototype, 'forValue') !== SNAPSHOT_MATRIX_FOR_VALUE ||
-        Object.getPrototypeOf(String.prototype) !== Object.prototype ||
-        Symbol.toStringTag in String.prototype ||
-        ownSnapshotData(String.prototype, 'substring') !== SNAPSHOT_STRING_SUBSTRING
-    ) {
-        return false;
+    // Compact output replaces ordinary DTO writes, not customized output-matrix behavior.
+    for (let index = 0; index < SNAPSHOT_OUTPUT_METHODS.length; index++) {
+        const name = SNAPSHOT_OUTPUT_METHODS[index][0];
+        const method = SNAPSHOT_OUTPUT_METHODS[index][1];
+        if (typeof method !== 'function' || Object.getOwnPropertyDescriptor(ObjectMatrix.prototype, name)?.value !== method) return false;
     }
     const prototypeKeys = Object.getOwnPropertyNames(Object.prototype);
     for (let index = 0; index < prototypeKeys.length; index++) {
         const key = prototypeKeys[index];
         if (
-            !Number.isNaN(Number(key)) || key === 'f' || key === 'si' || key === 'ref' ||
+            !Number.isNaN(Number(key)) || key === 'f' || key === 'si' ||
             Object.getOwnPropertyDescriptor(Object.prototype, key)?.enumerable
         ) {
             return false;
         }
     }
     return true;
-}
-
-function countCompactSheetFormulas(matrix: unknown, isProxy: SnapshotProxyClassifier): number | undefined {
-    if (!isPlainSnapshotObject(matrix, isProxy)) return undefined;
-    let count = 0;
-    for (const rowKey in matrix) {
-        if (!Object.hasOwn(matrix, rowKey) || !isSnapshotCoordinate(rowKey) || hasSnapshotAccessor(matrix, rowKey)) return undefined;
-        const columns = matrix[Number(rowKey)];
-        if (!columns) continue;
-        if (!isPlainSnapshotObject(columns, isProxy)) return undefined;
-        for (const columnKey in columns) {
-            if (!Object.hasOwn(columns, columnKey) || !isSnapshotCoordinate(columnKey) || hasSnapshotAccessor(columns, columnKey)) return undefined;
-            const cell = columns[Number(columnKey)];
-            if (cell == null) continue;
-            if (
-                !isPlainSnapshotObject(cell, isProxy) || hasSnapshotAccessor(cell, 'f') ||
-                hasSnapshotAccessor(cell, 'si') || hasSnapshotAccessor(cell, 'ref')
-            ) {
-                return undefined;
-            }
-            const formula = cell.f;
-            if (
-                (formula != null && typeof formula !== 'string') ||
-                (cell.si != null && cell.si !== '') || (cell.ref != null && cell.ref !== '')
-            ) {
-                return undefined;
-            }
-            if (isFormulaString(formula)) count++;
-        }
-    }
-    return count <= 0x7FFF_FFFF ? count : undefined;
 }
 
 export class FormulaDataModel extends Disposable {
@@ -405,12 +301,17 @@ export class FormulaDataModel extends Disposable {
     }
 
     getFormulaData(): IFormulaData {
+        return this._collectFormulaData();
+    }
+
+    private _collectFormulaData(compactData?: CompactFormulaData): IFormulaData {
         const formulaData: IFormulaData = Object.create(null);
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         for (let i = 0; i < allSheets.length; i++) {
             const workbook = allSheets[i];
             const unitId = workbook.getUnitId();
             formulaData[unitId] = Object.create(null);
+            if (compactData) compactData[unitId] = Object.create(null);
 
             const worksheets = workbook.getSheets();
             for (let j = 0; j < worksheets.length; j++) {
@@ -418,8 +319,25 @@ export class FormulaDataModel extends Disposable {
                 const cellMatrix = worksheet.getCellMatrix();
                 const sheetId = worksheet.getSheetId();
 
+                const previousChunks = compactData?.[unitId][sheetId];
+                if (previousChunks) {
+                    materializeCompactFormulaSheet(previousChunks, formulaData[unitId]![sheetId]!);
+                    delete compactData![unitId][sheetId];
+                }
                 this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
-                this.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+                if (compactData) {
+                    const compact = !Object.hasOwn(formulaData[unitId]!, sheetId);
+                    const result = buildSheetFormulaData(formulaData, unitId, sheetId, cellMatrix, compact);
+                    this._formulaIdMapData[unitId] ??= Object.create(null);
+                    this._formulaIdMapData[unitId]![sheetId] = result.formulaIdMap;
+                    if (result.compactChunks) {
+                        compactData[unitId][sheetId] = result.compactChunks;
+                    } else {
+                        delete compactData[unitId][sheetId];
+                    }
+                } else {
+                    this.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+                }
             }
         }
 
@@ -429,6 +347,7 @@ export class FormulaDataModel extends Disposable {
             const snapshot = base.getSnapshot();
             const unitId = base.getUnitId();
             formulaData[unitId] = Object.create(null);
+            if (compactData) delete compactData[unitId];
 
             const tables = Object.values(snapshot.tables);
             const formulaTableNames = createBaseFormulaTableNameMap(snapshot);
@@ -477,98 +396,15 @@ export class FormulaDataModel extends Disposable {
     }
 
     /**
-     * @experimental Optional calculation-engine capability; unsupported models retain the eager DTO path.
-     * Capture ordinary formulas without DTOs. The classifier must reject Proxies without observing traps.
-     * Unsupported data returns undefined without changing array or shared-formula metadata.
+     * @experimental Optional calculation-engine capability; customized model methods retain the eager DTO path.
+     * Reuse ordinary model traversal and metadata preparation, deferring per-formula DTO objects where possible.
+     * The optional classifier is retained for cooperating engines that reject a proxied model before capture.
      */
     tryCreateFormulaDataSnapshot(isProxy?: SnapshotProxyClassifier): IFormulaDataSnapshot | undefined {
-        if (
-            typeof isProxy !== 'function' || !supportsCompactFormulaSnapshot() ||
-            !hasSnapshotMethods(this, FormulaDataModel.prototype, SNAPSHOT_MODEL_METHODS, isProxy)
-        ) {
-            return undefined;
-        }
-        const instanceService = ownSnapshotData(this, '_univerInstanceService');
-        if (
-            instanceService == null || typeof instanceService !== 'object' ||
-            !hasSnapshotMethods(instanceService, UniverInstanceService.prototype, SNAPSHOT_INSTANCE_METHODS, isProxy) ||
-            Object.keys(this._arrayFormulaRange).length > 0 || Object.keys(this._arrayFormulaCellData).length > 0
-        ) {
-            return undefined;
-        }
-        const unitsService = instanceService as IUniverInstanceService;
-        const bases = unitsService.getAllUnitsForType<BaseDataModel>(UniverInstanceType.UNIVER_BASE);
-        if (isProxy(bases) || !Array.isArray(bases) || bases.length > 0) return undefined;
-        const units: ICompactFormulaUnit[] = [];
-        const workbooks = unitsService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (isProxy(workbooks) || !Array.isArray(workbooks)) return undefined;
-        for (let workbookIndex = 0; workbookIndex < workbooks.length; workbookIndex++) {
-            const workbook = ownSnapshotData(workbooks, String(workbookIndex));
-            if (
-                workbook == null || typeof workbook !== 'object' ||
-                !hasSnapshotMethods(workbook, Workbook.prototype, SNAPSHOT_WORKBOOK_METHODS, isProxy) ||
-                !hasPlainSnapshotSheetOrder(workbook as Workbook, isProxy) ||
-                typeof ownSnapshotData(workbook, '_unitId') !== 'string'
-            ) {
-                return undefined;
-            }
-            const unitId = (workbook as Workbook).getUnitId();
-            if (typeof unitId !== 'string') return undefined;
-            const sheets: ICompactFormulaSheet[] = [];
-            const worksheets = (workbook as Workbook).getSheets();
-            if (isProxy(worksheets) || !Array.isArray(worksheets)) return undefined;
-            for (let sheetIndex = 0; sheetIndex < worksheets.length; sheetIndex++) {
-                const worksheet = ownSnapshotData(worksheets, String(sheetIndex));
-                if (
-                    worksheet == null || typeof worksheet !== 'object' ||
-                    !hasSnapshotMethods(worksheet, Worksheet.prototype, SNAPSHOT_WORKSHEET_METHODS, isProxy) ||
-                    typeof ownSnapshotData(worksheet, '_sheetId') !== 'string' ||
-                    !Object.hasOwn(Object.getOwnPropertyDescriptor(worksheet, '_cellData') ?? {}, 'value')
-                ) {
-                    return undefined;
-                }
-                const sheetId = (worksheet as Worksheet).getSheetId();
-                const matrix = (worksheet as Worksheet).getCellMatrix();
-                if (
-                    typeof sheetId !== 'string' || matrix == null || typeof matrix !== 'object' ||
-                    !hasSnapshotMethods(matrix, ObjectMatrix.prototype, SNAPSHOT_MATRIX_METHODS, isProxy)
-                ) {
-                    return undefined;
-                }
-                const storage = Object.getOwnPropertyDescriptor(matrix, '_matrix');
-                if (!storage || !Object.hasOwn(storage, 'value')) return undefined;
-                const count = countCompactSheetFormulas(storage.value, isProxy);
-                if (count == null) return undefined;
-                const cellData = storage.value as IObjectMatrixPrimitiveType<Nullable<ICellData>>;
-                const coordinates = new Uint32Array(count * 2);
-                const formulas = new Array<string>(count);
-                let index = 0;
-                for (const rowKey in cellData) {
-                    const row = Number(rowKey);
-                    const columns = cellData[row];
-                    if (!columns) continue;
-                    for (const columnKey in columns) {
-                        const formula = columns[Number(columnKey)]?.f;
-                        if (!isFormulaString(formula)) continue;
-                        coordinates[index * 2] = row;
-                        coordinates[index * 2 + 1] = Number(columnKey);
-                        formulas[index++] = formula!;
-                    }
-                }
-                sheets.push({ sheetId, coordinates, formulas });
-            }
-            units.push({ unitId, sheets });
-        }
-        // With no shared IDs or refs, the old preparation only installs empty anchor maps;
-        // array initialization has no effects. Commit these effects after successful capture.
-        for (let unitIndex = 0; unitIndex < units.length; unitIndex++) {
-            const unit = units[unitIndex];
-            this._formulaIdMapData[unit.unitId] ??= Object.create(null);
-            for (let sheetIndex = 0; sheetIndex < unit.sheets.length; sheetIndex++) {
-                this._formulaIdMapData[unit.unitId]![unit.sheets[sheetIndex].sheetId] = Object.create(null);
-            }
-        }
-        return new CompactFormulaDataSnapshot(units);
+        if (!supportsCompactFormulaSnapshot(this, isProxy)) return undefined;
+        const compactData: CompactFormulaData = Object.create(null);
+        const formulaData = this._collectFormulaData(compactData);
+        return new CompactFormulaDataSnapshot(formulaData, compactData);
     }
 
     initSheetFormulaData(
@@ -1247,7 +1083,8 @@ function buildSheetFormulaData(
     formulaData: IFormulaData,
     unitId: string,
     sheetId: string,
-    cellMatrix: ObjectMatrix<Nullable<ICellData>>
+    cellMatrix: ObjectMatrix<Nullable<ICellData>>,
+    compact = false
 ) {
     const unitData = Object.assign(
         Object.create(null),
@@ -1260,6 +1097,9 @@ function buildSheetFormulaData(
 
     const formulaIdMap: Record<string, IFormulaIdMap> = Object.create(null); // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(unitData[sheetId]);
+    let compactChunks: ICompactFormulaChunk[] | undefined = compact ? [] : undefined;
+    let previousRow = -1;
+    let previousColumn = -1;
 
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
@@ -1267,6 +1107,35 @@ function buildSheetFormulaData(
 
         const checkFormulaString = isFormulaString(formulaString);
         const checkFormulaId = isFormulaId(formulaId);
+
+        if (compactChunks) {
+            const ordinaryFormula = typeof formulaString === 'string' && formulaId === '';
+            const orderedCoordinates = r > previousRow || (r === previousRow && c > previousColumn);
+            if (
+                ordinaryFormula && orderedCoordinates &&
+                Number.isInteger(r) && r >= 0 && r <= 0xFFFF_FFFF &&
+                Number.isInteger(c) && c >= 0 && c <= 0xFFFF_FFFF
+            ) {
+                previousRow = r;
+                previousColumn = c;
+                if (checkFormulaString) {
+                    let chunk = compactChunks[compactChunks.length - 1];
+                    if (!chunk || chunk.formulas.length * 2 === chunk.coordinates.length) {
+                        const size = compactChunks.length === 0 ? 128 : COMPACT_FORMULA_CHUNK_SIZE;
+                        chunk = { coordinates: new Uint32Array(size * 2), formulas: [] };
+                        compactChunks.push(chunk);
+                    }
+                    const index = chunk.formulas.length;
+                    chunk.coordinates[index * 2] = r;
+                    chunk.coordinates[index * 2 + 1] = c;
+                    chunk.formulas.push(formulaString);
+                }
+                return;
+            }
+            // Continue from captured values; rereading the source would repeat getters and callbacks.
+            materializeCompactFormulaSheet(compactChunks, sheetFormulaDataMatrix.getMatrix());
+            compactChunks = undefined;
+        }
 
         if (checkFormulaString && checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, { f: formulaString, si: formulaId });
@@ -1279,29 +1148,39 @@ function buildSheetFormulaData(
         }
     });
 
-    sheetFormulaDataMatrix.forValue((r, c, cell) => {
-        const formulaString = cell?.f || '';
-        const formulaId = cell?.si || '';
+    if (
+        compactChunks &&
+        (Object.getPrototypeOf(String.prototype) !== Object.prototype || Symbol.toStringTag in String.prototype)
+    ) {
+        materializeCompactFormulaSheet(compactChunks, sheetFormulaDataMatrix.getMatrix());
+        compactChunks = undefined;
+    }
 
-        if (isFormulaId(formulaId) && !isFormulaString(formulaString)) {
-            const formulaInfo = formulaIdMap[formulaId];
-            if (formulaInfo) {
-                const x = c - formulaInfo.c;
-                const y = r - formulaInfo.r;
-                const f = formulaInfo.f;
-                sheetFormulaDataMatrix.setValue(r, c, {
-                    f,
-                    si: formulaId,
-                    x,
-                    y,
-                });
-            } else {
-                // If the formula ID is not found in the formula ID map, delete the formula ID.
-                // Prevent IDs without corresponding formulas from appearing
-                sheetFormulaDataMatrix.realDeleteValue(r, c);
+    if (!compactChunks) {
+        sheetFormulaDataMatrix.forValue((r, c, cell) => {
+            const formulaString = cell?.f || '';
+            const formulaId = cell?.si || '';
+
+            if (isFormulaId(formulaId) && !isFormulaString(formulaString)) {
+                const formulaInfo = formulaIdMap[formulaId];
+                if (formulaInfo) {
+                    const x = c - formulaInfo.c;
+                    const y = r - formulaInfo.r;
+                    const f = formulaInfo.f;
+                    sheetFormulaDataMatrix.setValue(r, c, {
+                        f,
+                        si: formulaId,
+                        x,
+                        y,
+                    });
+                } else {
+                    // If the formula ID is not found in the formula ID map, delete the formula ID.
+                    // Prevent IDs without corresponding formulas from appearing
+                    sheetFormulaDataMatrix.realDeleteValue(r, c);
+                }
             }
-        }
-    });
+        });
+    }
 
     const newSheetFormulaData = sheetFormulaDataMatrix.getMatrix(); // Don't use clone, otherwise it will cause performance problems
 
@@ -1312,6 +1191,7 @@ function buildSheetFormulaData(
             },
         },
         formulaIdMap,
+        compactChunks,
     };
 }
 

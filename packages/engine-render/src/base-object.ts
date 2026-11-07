@@ -339,7 +339,7 @@ export abstract class BaseObject extends Disposable {
         this.setCursor(val);
     }
 
-    set layer(layer: Layer) {
+    set layer(layer: Nullable<Layer>) {
         this._layer = layer;
     }
 

@@ -14,195 +14,238 @@
  * limitations under the License.
  */
 
-import type { IViewportInfo } from '../basics/vector2';
-import { describe, expect, it, vi } from 'vitest';
-import { BaseObject } from '../base-object';
-import { RENDER_CLASS_TYPE } from '../basics/const';
-import { Layer } from '../layer';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Layer } from '../layer';
+import { Engine } from '../engine';
+import { Group } from '../group';
+import { Scene } from '../scene';
+import { DumbCanvasColorService, ICanvasColorService } from '../services/canvas-color.service';
+import { Rect } from '../shape/rect';
+import { Viewport } from '../viewport';
+import { setupRenderTestEnv } from './render-test-utils';
 
-class TestObject extends BaseObject {
-    constructor(id: string, zIndex = 1) {
-        super(id);
-        this.zIndex = zIndex;
-    }
-
-    override render(_ctx: any, _bounds?: IViewportInfo) {
-        return this;
-    }
-}
-
-class TestGroup extends TestObject {
-    constructor(id: string, private readonly _children: BaseObject[]) {
-        super(id, 100);
-    }
-
-    override get classType() {
-        return RENDER_CLASS_TYPE.GROUP;
-    }
-
-    override getObjects() {
-        return this._children;
-    }
-}
-
-function createScene() {
-    let transformCallback: (() => void) | undefined;
-    const sceneViewer = {
-        classType: RENDER_CLASS_TYPE.SCENE_VIEWER,
-        makeDirty: vi.fn(),
-    };
-    const viewport = {
-        viewportKey: 'viewport',
-        shouldIntoRender: vi.fn(() => true),
-        render: vi.fn(),
-    };
-    const engine = {
-        width: 160,
-        height: 90,
-        canvasColorService: undefined,
-        onTransformChange$: {
-            subscribeEvent: vi.fn((callback: () => void) => {
-                transformCallback = callback;
-                return { dispose: vi.fn() };
-            }),
-        },
-    };
-    const scene = {
-        getParent: vi.fn(() => sceneViewer),
-        getEngine: vi.fn(() => engine),
-        getObject: vi.fn(() => null),
-        setObjectBehavior: vi.fn(),
-        getViewports: vi.fn(() => [viewport]),
-        __viewport: viewport,
-        __sceneViewer: sceneViewer,
-        __resizeCache: () => transformCallback?.(),
-    };
-
-    return scene as any;
-}
-
-function createCtx() {
-    const canvas = document.createElement('canvas');
-    const transform = document.createElement('canvas').getContext('2d')!.getTransform();
-    return {
-        canvas,
-        save: vi.fn(),
-        restore: vi.fn(),
-        beginPath: vi.fn(),
-        rect: vi.fn(),
-        clip: vi.fn(),
-        clearRect: vi.fn(),
-        setTransform: vi.fn(),
-        getTransform: vi.fn(() => transform),
-        drawImage: vi.fn(),
-    } as any;
+function retainedRegistrations(layer: Layer): number {
+    // Closed subscriptions are absent from Subject.observers but can still be retained by the Layer.
+    const collection = Reflect.get(layer, '_collection') as { _disposables: Set<unknown> };
+    return collection._disposables.size;
 }
 
 describe('layer', () => {
-    it('adds, orders, filters and removes regular objects', () => {
-        const scene = createScene();
-        const visible = new TestObject('visible', 2);
-        const hidden = new TestObject('hidden', 1);
-        const eventless = new TestObject('eventless', 3);
-        hidden.hide();
-        eventless.evented = false;
+    let env: ReturnType<typeof setupRenderTestEnv>;
+    const injectors: Injector[] = [];
 
-        const layer = new Layer(scene, [visible, hidden, eventless], 4);
+    function createFixture() {
+        const injector = new Injector([[ICanvasColorService, { useClass: DumbCanvasColorService }]]);
+        injectors.push(injector);
+        const createEngine = () => injector.createInstance(Engine, 'layer-test', { elementWidth: 160, elementHeight: 90, dpr: 1 });
+        injector.add([Engine, { useFactory: createEngine }]);
+        const engine = injector.get(Engine);
+        const scene = new Scene('scene', engine, { width: 160, height: 90 });
+        const viewport = new Viewport('viewport', scene, { left: 0, top: 0, width: 160, height: 90 });
+        const layer = scene.getLayer(1);
+        const ctx = engine.getCanvas().getContext();
+        return { engine, scene, viewport, layer, ctx };
+    }
 
-        expect(layer.scene).toBe(scene);
-        expect(layer.zIndex).toBe(4);
-        expect(layer.getObjectsByOrder().map((object) => object.oKey)).toEqual(['visible', 'eventless']);
-        expect(layer.getObjectsByOrderForPick().map((object) => object.oKey)).toEqual(['visible']);
-        expect(scene.setObjectBehavior).toHaveBeenCalledTimes(3);
-        expect(scene.__sceneViewer.makeDirty).toHaveBeenCalledWith(true);
-
-        layer.removeObject(visible);
-        expect(layer.getObjects().map((object) => object.oKey)).not.toContain('visible');
-        layer.removeObject('hidden');
-        expect(layer.getObjects().map((object) => object.oKey)).not.toContain('hidden');
-        layer.removeObjects(['eventless']);
-        expect(layer.getObjects()).toEqual([]);
-
-        layer.dispose();
+    beforeEach(() => {
+        env = setupRenderTestEnv();
+        vi.useFakeTimers();
     });
 
-    it('expands groups, renders through viewports and updates dirty state', async () => {
-        const scene = createScene();
-        const child = new TestObject('child', 1);
-        const duplicateChild = new TestObject('duplicate-child', 2);
-        scene.getObject = vi.fn((key: string) => key === 'duplicate-child' ? duplicateChild : null);
-        const group = new TestGroup('group', [child, duplicateChild]);
-        const layer = new Layer(scene, [], 1);
+    afterEach(() => {
+        injectors.splice(0).forEach((injector) => injector.dispose());
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
+        env.restore();
+        vi.restoreAllMocks();
+    });
 
+    it('orders visible objects and removes objects by identity or key', () => {
+        const { layer } = createFixture();
+        const visible = new Rect('visible');
+        const hidden = new Rect('hidden');
+        const eventless = new Rect('eventless');
+        visible.zIndex = 2;
+        hidden.zIndex = 1;
+        eventless.zIndex = 3;
+        hidden.hide();
+        eventless.evented = false;
+        layer.addObjects([visible, hidden, eventless]);
+
+        expect(layer.getObjectsByOrder().map((object) => object.oKey)).toEqual(['visible', 'eventless']);
+        expect(layer.getObjectsByOrderForPick().map((object) => object.oKey)).toEqual(['visible']);
+
+        layer.removeObject(visible);
+        layer.removeObject('hidden');
+        layer.removeObjects(['eventless']);
+        expect(layer.getObjects()).toEqual([]);
+        for (const object of [visible, hidden, eventless]) {
+            expect(object.layer).toBeNull();
+            expect(object.onTransformChange$.observed).toBe(false);
+            object.dispose();
+        }
+    });
+
+    it('moves grouped children into their rendering layer and repaints their transforms', () => {
+        const { scene, layer, ctx, viewport } = createFixture();
+        const child = new Rect('child', { width: 10, height: 10 });
+        const existingChild = new Rect('existing-child');
+        scene.addObject(existingChild, 2);
+        const group = new Group('group', child, existingChild);
         layer.addObject(group);
-        expect(layer.getObjects().map((object) => object.oKey)).toEqual(['child', 'group']);
+        expect(layer.getObjects()).toEqual([child, existingChild, group]);
         expect(child.layer).toBe(layer);
-        expect(group.layer).toBe(layer);
+        expect(existingChild.layer).toBe(layer);
+        expect(scene.getLayer(2).getObjects()).toEqual([]);
 
-        layer.makeDirtyWithDebounce(true);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        expect(layer.isDirty()).toBe(true);
-
-        const ctx = createCtx();
+        const render = vi.spyOn(viewport, 'render');
         layer.render(ctx, true);
-        expect(ctx.save).toHaveBeenCalled();
-        expect(scene.__viewport.render).toHaveBeenCalledWith(ctx, [child, group], true, undefined);
+        expect(render).toHaveBeenCalledWith(ctx, [group], true, undefined);
         expect(layer.isDirty()).toBe(false);
-
-        child.onTransformChange$.emitEvent({} as any);
+        child.translate(10, 20);
+        expect(layer.isDirty()).toBe(true);
+        layer.makeDirty(false);
+        existingChild.translate(20, 30);
         expect(layer.isDirty()).toBe(true);
 
         layer.clear();
         expect(layer.getObjects()).toEqual([]);
-        layer.dispose();
+        expect(child.onTransformChange$.observed).toBe(false);
+        expect(group.onTransformChange$.observed).toBe(false);
+        group.dispose();
     });
 
-    it('clips scroll repaint and refreshes the stale layer cache before reuse', () => {
-        const scene = createScene();
-        const object = new TestObject('cached', 1);
-        const layer = new Layer(scene, [object], 1, true);
-        const ctx = createCtx();
-        const viewportInfo = { viewportKey: 'viewport' } as IViewportInfo;
-        const dirtyBounds = [{ left: 140, top: 0, right: 160, bottom: 90 }];
-
-        scene.__resizeCache();
+    it('clips a scroll repaint and refreshes the stale cache before reusing it', () => {
+        const { engine, layer, ctx, viewport } = createFixture();
+        layer.addObject(new Rect('cached', { width: 20, height: 20 }));
+        layer.enableCache();
+        engine.resizeBySize(200, 100);
+        const render = vi.spyOn(viewport, 'render');
+        const rect = vi.spyOn(ctx, 'rect');
+        const drawImage = vi.spyOn(ctx, 'drawImage');
+        const viewportInfo = viewport.calcViewportInfo();
         layer.render(ctx, false, {
-            dirtyBounds,
+            dirtyBounds: [{ left: 140, top: 0, right: 160, bottom: 90 }],
             preserveCache: true,
             viewportInfos: new Map([['viewport', viewportInfo]]),
         });
-        expect(scene.__viewport.render).toHaveBeenLastCalledWith(expect.anything(), [object], false, viewportInfo);
-        expect(ctx.rect).toHaveBeenCalledWith(140, 0, 20, 90);
-        expect(ctx.drawImage).not.toHaveBeenCalled();
+        expect(render).toHaveBeenCalledWith(ctx, layer.getObjects(), false, viewportInfo);
+        expect(rect).toHaveBeenCalledWith(140, 0, 20, 90);
+        expect(drawImage).not.toHaveBeenCalled();
 
-        scene.__viewport.render.mockClear();
+        render.mockClear();
         layer.render(ctx);
-        expect(scene.__viewport.render).toHaveBeenCalledWith(expect.anything(), [object], false, undefined);
-        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
-
-        layer.dispose();
+        expect(render).toHaveBeenCalledWith(expect.anything(), layer.getObjects(), false, undefined);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 200, 100);
     });
 
-    it('uses cache canvas rendering, resizing and disposal paths', () => {
-        const scene = createScene();
-        const object = new TestObject('cached', 1);
-        const layer = new Layer(scene, [object], 1, true);
-        const ctx = createCtx();
-
-        expect(layer.isAllowCache()).toBe(true);
+    it('supports disabling and re-enabling the resized cache', () => {
+        const { engine, layer, ctx } = createFixture();
+        layer.addObject(new Rect('cached', { width: 20, height: 20 }));
+        layer.enableCache();
+        engine.resizeBySize(200, 100);
+        const drawImage = vi.spyOn(ctx, 'drawImage');
         layer.render(ctx);
-        expect(ctx.drawImage).not.toHaveBeenCalled();
-
-        scene.__resizeCache();
-        layer.render(ctx);
-        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 200, 100);
 
         layer.disableCache();
-        expect(layer.isAllowCache()).toBe(false);
+        drawImage.mockClear();
+        layer.render(ctx);
+        expect(drawImage).not.toHaveBeenCalled();
         layer.enableCache();
-        expect(layer.isAllowCache()).toBe(true);
+        engine.resizeBySize(220, 110);
+        layer.render(ctx);
+        expect(drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 220, 110);
+    });
 
-        layer.dispose();
+    it('releases completed subscriptions after repeatedly destroying selection objects', () => {
+        const { layer } = createFixture();
+        const initialRegistrations = retainedRegistrations(layer);
+        for (let i = 0; i < 100; i++) {
+            const object = new Rect(`selection-${i}`);
+            layer.addObject(object);
+            object.dispose();
+        }
         expect(layer.getObjects()).toEqual([]);
+        expect(retainedRegistrations(layer)).toBe(initialRegistrations);
+    });
+
+    it.each(['identity', 'key'] as const)('stops observing a removed object by %s and supports reattachment', (method) => {
+        const { layer } = createFixture();
+        const object = new Rect('object');
+        const initialRegistrations = retainedRegistrations(layer);
+        layer.addObject(object);
+        layer.removeObject(method === 'key' ? object.oKey : object);
+        vi.runOnlyPendingTimers();
+        layer.makeDirty(false);
+        object.translate(10, 20);
+        vi.runOnlyPendingTimers();
+        expect(layer.isDirty()).toBe(false);
+        expect(object.layer).toBeNull();
+        expect(retainedRegistrations(layer)).toBe(initialRegistrations);
+
+        layer.addObject(object);
+        layer.makeDirty(false);
+        object.translate(20, 30);
+        expect(layer.isDirty()).toBe(true);
+        object.dispose();
+        expect(retainedRegistrations(layer)).toBe(initialRegistrations);
+    });
+
+    it('releases bulk removals and cleared objects without disposing reusable objects', () => {
+        const { layer } = createFixture();
+        const objects = [new Rect('first'), new Rect('second'), new Rect('third')];
+        const initialRegistrations = retainedRegistrations(layer);
+        layer.addObjects(objects);
+        layer.removeObjects(objects.slice(0, 2));
+        layer.clear();
+        expect(retainedRegistrations(layer)).toBe(initialRegistrations);
+        for (const object of objects) {
+            expect(object.onTransformChange$.observed).toBe(false);
+            expect(object.layer).toBeNull();
+        }
+        layer.addObjects(objects);
+        layer.makeDirty(false);
+        objects[0].translate(10, 20);
+        expect(layer.isDirty()).toBe(true);
+    });
+
+    it('keeps a single registration when adding again or moving between layers', () => {
+        const { scene, layer } = createFixture();
+        const other = scene.getLayer(2);
+        const object = new Rect('moving');
+        const initialRegistrations = retainedRegistrations(layer);
+        layer.addObject(object);
+        const attachedRegistrations = retainedRegistrations(layer);
+        layer.addObject(object);
+        expect(layer.getObjects()).toEqual([object]);
+        expect(retainedRegistrations(layer)).toBe(attachedRegistrations);
+
+        other.addObject(object);
+        expect(layer.getObjects()).toEqual([]);
+        expect(retainedRegistrations(layer)).toBe(initialRegistrations);
+        vi.runOnlyPendingTimers();
+        layer.makeDirty(false);
+        other.makeDirty(false);
+        object.translate(10, 20);
+        vi.runOnlyPendingTimers();
+        expect(layer.isDirty()).toBe(false);
+        expect(other.isDirty()).toBe(true);
+        expect(object.layer).toBe(other);
+    });
+
+    it('disposes remaining objects and releases their registrations with the layer', () => {
+        const { layer } = createFixture();
+        const object = new Rect('remaining');
+        const onDispose = vi.fn();
+        object.onDispose$.subscribeEvent(onDispose);
+        layer.addObject(object);
+        layer.dispose();
+        layer.dispose();
+        expect(onDispose).toHaveBeenCalledTimes(1);
+        expect(layer.getObjects()).toEqual([]);
+        expect(retainedRegistrations(layer)).toBe(0);
+        expect(object.onTransformChange$.observed).toBe(false);
     });
 });

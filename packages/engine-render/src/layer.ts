@@ -15,12 +15,13 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { Subscription } from 'rxjs';
+import { Disposable, requestImmediateMacroTask, sortRules } from '@univerjs/core';
+import type { BaseObject } from './base-object';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { SceneViewer } from './scene-viewer';
-import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
-import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
 
@@ -106,6 +107,7 @@ function clearCanvasBounds(ctx: UniverRenderingContext, pixelRatio: number, dirt
 
 export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
+    private readonly _objectSubscriptions = new Map<BaseObject, Subscription>();
 
     private _cacheCanvas: Nullable<Canvas>;
     private _cacheValid = false;
@@ -193,12 +195,18 @@ export class Layer extends Disposable {
      * @returns {Layer} this
      */
     addObject(o: BaseObject): Layer {
+        if (this._objects.includes(o)) {
+            return this;
+        }
+        o.layer?.removeObject(o);
+
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
             const objects = (o as BaseObject).getObjects();
             for (const object of objects) {
-                if (this.scene.getObject(object.oKey)) {
+                if (this._objects.includes(object)) {
                     continue;
                 }
+                object.layer?.removeObject(object);
                 this._objects.push(object);
                 this.scene.setObjectBehavior(object);
                 this._layerBehavior(object);
@@ -212,27 +220,14 @@ export class Layer extends Disposable {
     }
 
     removeObject(object: BaseObject | string) {
-        const objects = this.getObjects();
-        const objectsLength = objects.length;
-
-        if (object instanceof BaseObject) {
-            for (let i = 0; i < objectsLength; i++) {
-                const o = objects[i];
-
-                if (o === object) {
-                    objects.splice(i, 1);
-                    return;
-                }
-            }
-        } else {
-            for (let i = 0; i < objectsLength; i++) {
-                const o = objects[i];
-                if (o.oKey === object) {
-                    objects.splice(i, 1);
-                    return;
-                }
-            }
+        const index = this._objects.findIndex((o) => typeof object === 'string' ? o.oKey === object : o === object);
+        if (index === -1) {
+            return;
         }
+
+        const [removed] = this._objects.splice(index, 1);
+        this._detachObject(removed);
+        this.makeDirty(true);
     }
 
     /**
@@ -248,23 +243,12 @@ export class Layer extends Disposable {
     }
 
     removeObjects(objects: BaseObject[] | string[]) {
-        const allObjects = this.getObjects();
-        const allObjectsLength = allObjects.length;
-
-        for (let i = allObjectsLength - 1; i >= 0; i--) {
-            let o: BaseObject | string = allObjects[i];
-            const objectsLength = objects.length;
-
-            if (objectsLength === 0) break;
-
-            for (let j = 0; j < objectsLength; j++) {
-                const object = objects[j];
-                o = object instanceof BaseObject ? o : (o as BaseObject).oKey;
-                if (o === object) {
-                    allObjects.splice(i, 1);
-                    // objects.splice(j, 1);
-                    break;
-                }
+        for (let i = this._objects.length - 1; i >= 0; i--) {
+            const o = this._objects[i];
+            if (objects.some((object) => typeof object === 'string' ? o.oKey === object : o === object)) {
+                this._objects.splice(i, 1);
+                this._detachObject(o);
+                this.makeDirty(true);
             }
         }
     }
@@ -345,15 +329,25 @@ export class Layer extends Disposable {
     }
 
     private _layerBehavior(o: BaseObject) {
-        this.disposeWithMe(
-            toDisposable(
-                o.onTransformChange$.subscribeEvent(() => {
-                    this.makeDirty(true);
-                })
-            )
-        );
+        const subscription = o.onTransformChange$.subscribeEvent(() => {
+            this.makeDirty(true);
+        });
+        const registration = this.disposeWithMe(subscription);
+        this._objectSubscriptions.set(o, subscription);
+        // Completion must release the Layer's registration as well as close the subscription.
+        subscription.add(() => {
+            registration.dispose();
+            this._objectSubscriptions.delete(o);
+        });
 
         o.layer = this;
+    }
+
+    private _detachObject(o: BaseObject) {
+        this._objectSubscriptions.get(o)?.unsubscribe();
+        if (o.layer === this) {
+            o.layer = null;
+        }
     }
 
     private _initialCacheCanvas() {
@@ -401,7 +395,9 @@ export class Layer extends Disposable {
     }
 
     clear() {
+        this._objects.forEach((o) => this._detachObject(o));
         this._objects = [];
+        this.makeDirty(true);
     }
 
     override dispose() {

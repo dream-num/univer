@@ -32,12 +32,21 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
 univer.onDispose(() => worker.terminate());
 ```
 
-The referenced worker module must create its own Univer instance and register `UniverRPCWorkerThreadPlugin`; see the [browser worker example](../../examples/src/sheets-mobile/worker.ts).
-
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverRPCMainThreadPlugin`
-- `UniverRPCWorkerThreadPlugin`
+
+## Worker usage
+
+On the main thread, import `UniverRPCMainThreadPlugin` from `@univerjs/rpc`. Set `workerURL` to the worker URL or instance.
+
+In the worker entry, import `UniverRPCWorkerThreadPlugin` from `@univerjs/rpc/worker`:
+
+```ts
+import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc/worker';
+
+univer.registerPlugin(UniverRPCWorkerThreadPlugin);
+```
 
 ## Resources
 

@@ -31,6 +31,19 @@ import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
 // createUniver({ presets: [UniverSheetsCorePreset()] });
 ```
 
+## Worker usage
+
+On the main thread, import `UniverSheetsCorePreset` from `@univerjs/preset-sheets-core`. Set `workerURL` to the worker URL or instance.
+
+In the worker entry, import `UniverSheetsCoreWorkerPreset` from `@univerjs/preset-sheets-core/worker`:
+
+```ts
+import { UniverSheetsCoreWorkerPreset } from '@univerjs/preset-sheets-core/worker';
+import { createUniver } from '@univerjs/presets';
+
+createUniver({ presets: [UniverSheetsCoreWorkerPreset()] });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

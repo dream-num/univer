@@ -32,7 +32,3 @@ export {
     RemoteRegisterFunctionService,
 } from './services/remote/remote-register-function.service';
 export { calculateFormula } from './util/calculate';
-export {
-    /** @deprecated Import from '@univerjs/sheets-formula/worker' instead. This root export will be removed in the next release. */
-    UniverRemoteSheetsFormulaPlugin,
-} from './worker';

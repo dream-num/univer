@@ -15,7 +15,3 @@
  */
 
 export { UniverRPCNodeMainPlugin } from './plugin';
-export {
-    /** @deprecated Import from '@univerjs/rpc-node/worker' instead. This root export will be removed in the next release. */
-    UniverRPCNodeWorkerPlugin,
-} from './worker';

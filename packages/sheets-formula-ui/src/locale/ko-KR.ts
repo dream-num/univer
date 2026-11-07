@@ -35,6 +35,10 @@ const locale: typeof enUS = {
 
         shortcut: {
             'quick-sum': '빠른 합계',
+            'toggle-show-formulas': '수식 표시',
+        },
+        showFormulas: {
+            tooltip: '수식 표시',
         },
 
         insert: {

@@ -627,6 +627,9 @@ function updateCustomRanges(
     const removeCustomRanges: ICustomRange[] = [];
 
     if (!updateDataCustomRanges) {
+        // The splits above still cut ranges at the retain's edges, so join the
+        // pieces again, as a retain carrying ranges does below.
+        body.customRanges = mergeContinuousRanges(body.customRanges);
         return [];
     }
 

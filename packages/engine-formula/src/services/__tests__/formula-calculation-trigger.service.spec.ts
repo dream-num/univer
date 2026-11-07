@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
 import { CommandType, ICommandService, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -67,6 +67,26 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('batches reference context changes and preserves explicit full calculation on restart', async () => {
+        const bed = createTestBed();
+        bed.conversions.set('structure', {
+            commandId: 'structure',
+            getDirtyData: (command) => command.params as ReturnType<IDirtyConversionManagerParams['getDirtyData']>,
+        });
+        try {
+            bed.emit({ id: 'structure', params: { dirtyReferenceUnits: ['first'] } });
+            bed.emit({ id: 'structure', params: { dirtyReferenceUnits: ['first', 'second'] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[0].params).toMatchObject({ dirtyReferenceUnits: ['first', 'second'], forceCalculation: false, dirtyRanges: [] });
+            bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: { forceCalculation: true } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[1].id).toBe(SetFormulaCalculationStopMutation.id);
+            bed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: { functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[2].params).toMatchObject({ dirtyReferenceUnits: ['first', 'second'], forceCalculation: true });
+        } finally { bed.service.dispose(); }
     });
 
     it('batches iteration settings changes and preserves them when restarting an active calculation', async () => {

@@ -15,6 +15,16 @@
  */
 
 import type { BaseDataModel, ITableSnapshot, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable, Workbook } from '@univerjs/core';
+import {
+    createIdentifier,
+    DateSystem,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -34,21 +44,12 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
-import {
-    createIdentifier,
-    DateSystem,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    LocaleService,
-    ObjectMatrix,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
 
 export interface IFormulaDirtyData {
+    dirtyReferenceUnits?: string[];
     dirtyIterationUnits?: string[];
     forceCalculation: boolean;
     dirtyRanges: IUnitRange[];
@@ -122,14 +123,14 @@ export interface IFormulaCurrentConfigService {
     setExecuteUnitId(unitId: string): void;
     setExecuteSubUnitId(subUnitId: string): void;
 
-    getDirtyData(): IFormulaDirtyData;
+    getDirtyData(forFeatureCalculation?: boolean): IFormulaDirtyData;
 
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
     getDateSystem(unitId?: string): DateSystem;
 
-    getSheetsInfo(): {
+    getSheetsInfo(unitId?: string): {
         sheetOrder: string[];
         sheetNameMap: { [sheetId: string]: string };
     };
@@ -144,6 +145,7 @@ export interface IFormulaCurrentConfigService {
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
+    private _dirtyReferenceUnits: string[] = [];
     private _dirtyIterationUnits: string[] = [];
     private _unitData: IUnitData = Object.create(null);
 
@@ -328,8 +330,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getDateSystem() ?? DateSystem.Date1900;
     }
 
-    getSheetsInfo() {
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    getSheetsInfo(unitId?: string) {
+        const workbook = unitId
+            ? this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return {
                 sheetOrder: [],
@@ -402,6 +406,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._formulaData = config.formulaData;
         this._dirtyIterationUnits = config.dirtyIterationUnits ?? [];
+        this._dirtyReferenceUnits = config.dirtyReferenceUnits ?? [];
 
         this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
 
@@ -449,10 +454,12 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         rowData && this._applyUnitRowData(rowData);
     }
 
-    getDirtyData(): IFormulaDirtyData {
+    // Feature callbacks expose no formula metadata; keep their conservative invalidation local.
+    getDirtyData(forFeatureCalculation = false): IFormulaDirtyData {
         return {
             dirtyIterationUnits: this._dirtyIterationUnits,
-            forceCalculation: this._forceCalculate,
+            dirtyReferenceUnits: this._dirtyReferenceUnits,
+            forceCalculation: this._forceCalculate || (forFeatureCalculation && this._dirtyReferenceUnits.length > 0),
             dirtyRanges: this._dirtyRanges,
             dirtyNameMap: this._dirtyNameMap,
             dirtyDefinedNameMap: this._dirtyDefinedNameMap,
@@ -466,6 +473,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
         this._dirtyIterationUnits = [];
+        this._dirtyReferenceUnits = [];
         this._dirtyRanges = dirtyRanges;
 
         this._excludedCell = excludedCell;

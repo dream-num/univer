@@ -275,7 +275,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             this._preserveCircularUnits = new Set(formulaDatasetConfig.preserveCircularUnits);
             this._runtimeService.beginCircularReferences();
             this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
-            await this._executeStep();
+            let completed = false;
+            try {
+                await this._executeStep();
+                completed = !this._runtimeService.isStopExecution();
+            } finally {
+                this._formulaDependencyGenerator.finishReferenceContext?.(completed);
+            }
             this._runtimeService.completeCircularReferences();
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
             this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
@@ -473,35 +479,35 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 continue;
             }
 
-            const node = generateAstNode(
-                tree.unitId,
-                tree.formula,
-                this._lexer,
-                this._astTreeBuilder,
-                this._currentConfigService,
-                tree.subUnitId,
-                tree.column,
-                tree.row
-            );
-            const nodeData = {
-                node,
-                refOffsetX: tree.refOffsetX,
-                refOffsetY: tree.refOffsetY,
-            };
-            let value: FunctionVariantType;
-
             if (getDirtyData != null && tree.featureId != null) {
                 /**
                  * Execute the dependencies registered by the feature,
                  * and return the dirty area marked by the feature,
                  * so as to allow the formulas depending on the dirty area to continue the calculation.
                  */
-                const { runtimeCellData, dirtyRanges } = getDirtyData(this._currentConfigService.getDirtyData(), this._runtimeService.getAllRuntimeData());
+                const { runtimeCellData, dirtyRanges } = getDirtyData(this._currentConfigService.getDirtyData(true), this._runtimeService.getAllRuntimeData());
 
                 this._runtimeService.setRuntimeFeatureCellData(tree.featureId, runtimeCellData);
 
                 this._runtimeService.setRuntimeFeatureRange(tree.featureId, dirtyRanges);
-            } else if (nodeData != null) {
+            } else {
+                const node = generateAstNode(
+                    tree.unitId,
+                    tree.formula,
+                    this._lexer,
+                    this._astTreeBuilder,
+                    this._currentConfigService,
+                    tree.subUnitId,
+                    tree.column,
+                    tree.row
+                );
+                const nodeData = {
+                    node,
+                    refOffsetX: tree.refOffsetX,
+                    refOffsetY: tree.refOffsetY,
+                };
+                let value: FunctionVariantType;
+
                 if (interpreter.checkAsyncNode(nodeData.node)) {
                     value = await interpreter.executeAsync(nodeData);
                 } else {
@@ -513,9 +519,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 } else {
                     this._runtimeService.setRuntimeData(value);
                 }
+                node.resetCalculationState();
             }
-
-            node.resetCalculationState();
 
             i++;
         }

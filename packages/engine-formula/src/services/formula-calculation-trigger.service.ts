@@ -15,12 +15,12 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
-import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -238,6 +238,9 @@ function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirt
     if (source.dirtyIterationUnits?.length) {
         target.dirtyIterationUnits = Array.from(new Set([...(target.dirtyIterationUnits ?? []), ...source.dirtyIterationUnits]));
     }
+    if (source.dirtyReferenceUnits?.length) {
+        target.dirtyReferenceUnits = Array.from(new Set([...(target.dirtyReferenceUnits ?? []), ...source.dirtyReferenceUnits]));
+    }
     mergeDirtyRanges(target.dirtyRanges, source.dirtyRanges ?? [], rangeKeys);
     mergeDirtyUnitStringMap(target.dirtyNameMap, source.dirtyNameMap);
     mergeDirtyUnitStringMap(target.dirtyDefinedNameMap, source.dirtyDefinedNameMap);
@@ -280,6 +283,7 @@ function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUni
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {
     return dirtyData.forceCalculation ||
         Boolean(dirtyData.dirtyIterationUnits?.length) ||
+        Boolean(dirtyData.dirtyReferenceUnits?.length) ||
         dirtyData.dirtyRanges.length > 0 ||
         hasNestedValue(dirtyData.dirtyNameMap) ||
         hasNestedValue(dirtyData.dirtyDefinedNameMap) ||
@@ -300,7 +304,7 @@ function hasNestedValue(value: unknown): boolean {
 }
 
 function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData): boolean {
-    if (left.forceCalculation || right.forceCalculation || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
+    if (left.forceCalculation || right.forceCalculation || left.dirtyReferenceUnits?.length || right.dirtyReferenceUnits?.length || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
         return true;
     }
 

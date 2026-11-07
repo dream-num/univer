@@ -113,7 +113,6 @@ export interface IFormulaExternalReferenceBinding {
 }
 
 export interface IFormulaExternalReferenceResource {
-    schemaVersion: number;
     references: Record<string, IFormulaExternalReferenceBinding>;
 }
 

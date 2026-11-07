@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
     CellValueType,
     ContextService,
@@ -28,7 +27,8 @@ import {
     ObjectMatrix,
     UniverInstanceService,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
@@ -96,6 +96,55 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('preserves legacy empty-circle reads while deferring unused snapshots and filtering deleted formulas', () => {
+        const { injector, runtime } = createRuntimeService();
+        const config = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;
+        const formulaData = { unit: { sheet: { 2: { 3: { f: '=D3' } } } } };
+        const materialize = vi.fn(() => formulaData);
+        const getter = vi.spyOn(config, 'getFormulaData');
+        const current = { unitId: 'unit', sheetId: 'sheet', row: 2, column: 3, groupId: 'cycle', iterations: 1 };
+        const deleted = { ...current, row: 4, column: 5 };
+        try {
+            runtime.beginCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            getter.mockClear();
+            config.loadWithFormulaDataSnapshot({
+                allUnitData: config.getUnitData(),
+                unitStylesData: config.getUnitStylesData(),
+                unitSheetNameMap: config.getSheetNameMap(),
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            }, { materialize });
+            runtime.beginCircularReferences();
+            expect(getter).not.toHaveBeenCalled();
+            expect(materialize).not.toHaveBeenCalled();
+            runtime.recordCircularReferences([current, deleted]);
+            runtime.completeCircularReferences();
+            runtime.beginCircularReferences();
+            runtime.completeCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            expect(materialize).toHaveBeenCalledTimes(1);
+            expect(runtime.getRuntimeState().circularReferences).toEqual([current]);
+            runtime.beginCircularReferences();
+            runtime.clearCircularReferenceCells([{ unitId: 'unit', subUnitId: 'sheet', row: 2, column: 3 }]);
+            runtime.completeCircularReferences();
+            getter.mockClear();
+            runtime.beginCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            expect(materialize).toHaveBeenCalledTimes(1);
+            expect(runtime.getRuntimeState().circularReferences).toEqual([]);
+        } finally {
+            getter.mockRestore();
+            injector.dispose();
+        }
+    });
+
     it('keeps the scalar result source from before an asynchronous formula replacement and clears it on reset', () => {
         const { injector, runtime, unitDataMatrix } = createRuntimeService();
         try {

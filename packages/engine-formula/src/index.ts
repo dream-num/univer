@@ -277,6 +277,7 @@ export { FUNCTION_NAMES_UNIVER } from './functions/univer/function-names';
 export { getObjectValue } from './functions/util';
 export { functionWeb } from './functions/web/function-map';
 export { FUNCTION_NAMES_WEB } from './functions/web/function-names';
+export type { IFormulaDataSnapshot } from './models/formula-data-snapshot';
 export { FormulaDataModel } from './models/formula-data.model';
 export type { IRangeChange } from './models/formula-data.model';
 export { UniverFormulaEnginePlugin } from './plugin';

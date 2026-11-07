@@ -31,6 +31,143 @@ describe('FormulaCalculationSessionService', () => {
         vi.useRealTimers();
     });
 
+    it.skipIf(typeof (globalThis as { gc?: () => void }).gc !== 'function')(
+        'releases the completed result after every model acknowledges it',
+        async () => {
+            const service = createService();
+            service.initialize();
+            service.start();
+            let applications = 0;
+            const subscription = service.resultApplied$.subscribe(() => applications++);
+            const reference = (() => {
+                const result = { unitData: { book: { sheet: { 0: { 0: { v: 42 } } } } }, unitOtherData: {} };
+                const reference = new WeakRef(result);
+                service.markResultEmitted(result, [
+                    FormulaResultApplicationType.SHEET,
+                    FormulaResultApplicationType.BASE,
+                    FormulaResultApplicationType.OTHER_FORMULA,
+                ]);
+                service.markResultApplied(FormulaResultApplicationType.SHEET, result);
+                service.markResultApplied(FormulaResultApplicationType.BASE, result);
+                expect(applications).toBe(0);
+                expect(service.state.resultApplied).toBe(false);
+                service.markResultApplied(FormulaResultApplicationType.OTHER_FORMULA, result);
+                return reference;
+            })();
+            expect(applications).toBe(1);
+            expect(service.state.resultApplied).toBe(true);
+            const collect = (globalThis as { gc?: () => void }).gc;
+            expect(collect).toBeTypeOf('function');
+            for (let attempt = 0; attempt < 20; attempt++) {
+                await new Promise((resolve) => setTimeout(resolve, 0));
+                collect!();
+                if (reference.deref() == null) break;
+            }
+            expect(reference.deref()).toBeUndefined();
+            expect(applications).toBe(1);
+            expect(service.state.resultApplied).toBe(true);
+            subscription.unsubscribe();
+            service.dispose();
+        }
+    );
+
+    it('ignores repeated acknowledgements without pre-applying a later result', () => {
+        const service = createService();
+        const first = { unitData: {}, unitOtherData: {} };
+        const second = { unitData: {}, unitOtherData: {} };
+        let applications = 0;
+        const subscription = service.resultApplied$.subscribe(() => applications++);
+        service.start();
+        service.markResultEmitted(first, true);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        service.markResultApplied();
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        service.markResultEmitted(first, true);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        expect(applications).toBe(1);
+        service.markResultEmitted(second, true);
+        expect(service.state.resultApplied).toBe(false);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, second);
+        expect(applications).toBe(2);
+        subscription.unsubscribe();
+    });
+
+    it('keeps a reentrant next session pending when the previous result is released', () => {
+        const service = createService();
+        const first = { unitData: {}, unitOtherData: {} };
+        const second = { unitData: {}, unitOtherData: {} };
+        const applied: ISetFormulaCalculationResultMutation[] = [];
+        const subscription = service.resultApplied$.subscribe((result) => {
+            applied.push(result);
+            if (result === first) {
+                service.start();
+                service.markResultEmitted(second, true);
+            }
+        });
+        service.start();
+        service.markResultEmitted(first, true);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        expect(service.state.id).toBe(2);
+        expect(service.state.resultApplied).toBe(false);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        expect(service.state.resultApplied).toBe(false);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, second);
+        expect(applied).toEqual([first, second]);
+        expect(service.state.resultApplied).toBe(true);
+        subscription.unsubscribe();
+    });
+
+    it.each(['emit', 'ack'] as const)('keeps a session started by the %s state notification pending', (phase) => {
+        const service = createService();
+        const first = { unitData: {}, unitOtherData: {} };
+        const second = { unitData: {}, unitOtherData: {} };
+        const applied: ISetFormulaCalculationResultMutation[] = [];
+        const resultSubscription = service.resultApplied$.subscribe((result) => applied.push(result));
+        service.start();
+        let restarted = false;
+        const stateSubscription = service.state$.subscribe((state) => {
+            if (!restarted && state.id === 1 && state.resultEmitted && state.resultApplied) {
+                restarted = true;
+                service.start();
+                service.markResultEmitted(second, true);
+            }
+        });
+        service.markResultEmitted(first, phase === 'ack');
+        if (phase === 'ack') service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        expect(restarted).toBe(true);
+        expect(service.state.id).toBe(2);
+        expect(service.state.resultApplied).toBe(false);
+        expect(applied).toEqual([]);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, second);
+        expect(applied).toEqual([second]);
+        expect(service.state.resultApplied).toBe(true);
+        stateSubscription.unsubscribe();
+        resultSubscription.unsubscribe();
+        service.dispose();
+    });
+
+    it('keeps a different result emitted reentrantly in the same session pending', () => {
+        const service = createService();
+        const first = { unitData: {}, unitOtherData: {} };
+        const second = { unitData: {}, unitOtherData: {} };
+        const applied: ISetFormulaCalculationResultMutation[] = [];
+        const subscription = service.resultApplied$.subscribe((result) => {
+            applied.push(result);
+            if (result === first) service.markResultEmitted(second, true);
+        });
+        service.start();
+        service.markResultEmitted(first, true);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, first);
+        expect(service.state.id).toBe(1);
+        expect(service.state.resultApplied).toBe(false);
+        expect(applied).toEqual([first]);
+        service.markResultApplied(FormulaResultApplicationType.SHEET, second);
+        expect(applied).toEqual([first, second]);
+        expect(service.state.resultApplied).toBe(true);
+        subscription.unsubscribe();
+        service.dispose();
+    });
+
     it('waits for the latest restarted session to be applied', async () => {
         vi.useFakeTimers();
 

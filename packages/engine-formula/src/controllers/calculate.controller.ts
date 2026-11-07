@@ -121,15 +121,21 @@ export class CalculateController extends Disposable {
             isCalculateTreeModel = false,
         } = formulaDirtyData;
 
-        const formulaData = this._formulaDataModel.getFormulaData();
+        const snapshotExecutor = this._calculateFormulaService.supportsFormulaDataSnapshot === true
+            ? this._calculateFormulaService.executeWithFormulaDataSnapshot
+            : undefined;
+        // Capture at the same point as the eager list, before any later config reads.
+        const snapshot = typeof snapshotExecutor === 'function'
+            ? this._calculateFormulaService.prepareFormulaDataSnapshot?.()
+            : undefined;
+        const formulaData = snapshot ? undefined : this._formulaDataModel.getFormulaData();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
         // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
-        this._calculateFormulaService.execute({
+        const config = {
             dirtyIterationUnits,
             dirtyReferenceUnits,
-            formulaData,
             arrayFormulaCellData,
             arrayFormulaRange,
             forceCalculate,
@@ -144,7 +150,12 @@ export class CalculateController extends Disposable {
             isCalculateTreeModel,
             rowData,
             externalReferences,
-        });
+        };
+        if (snapshot && typeof snapshotExecutor === 'function') {
+            snapshotExecutor.call(this._calculateFormulaService, config, snapshot);
+        } else {
+            this._calculateFormulaService.execute({ ...config, formulaData: formulaData! });
+        }
     }
 
     private async _queryFormulaDependencyJson(param: ISetQueryFormulaDependencyMutation) {
@@ -341,6 +352,13 @@ export class CalculateController extends Disposable {
         }
 
         this._applyTreeResult(data);
+
+        // RPC modules synthesize functions for unknown property reads. Only an
+        // actual implementation can prove local ownership of this completion.
+        if ('hasEmittedCalculationResult' in this._calculateFormulaService &&
+            this._calculateFormulaService.hasEmittedCalculationResult?.(data) === true) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetFormulaCalculationResultMutation.id,

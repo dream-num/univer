@@ -15,10 +15,18 @@
  */
 
 import type { DocumentDataModel, ITable } from '@univerjs/core';
+import type { IDocumentLayoutRenderConfig } from '../docs/document-layout-presentation';
 import { LineBreaker } from '../docs/layout/line-breaker/line-breaker';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 
 export class SheetCellDocumentViewModel extends DocumentViewModel {
+    override getLayoutRenderConfig(config: IDocumentLayoutRenderConfig): IDocumentLayoutRenderConfig {
+        // Only cell stacking uses upright Latin glyphs; Docs and shapes retain their own vertical text rules.
+        return config.centerAngle === 90 && config.vertexAngle === 90
+            ? { ...config, stackedText: true }
+            : config;
+    }
+
     override getParagraphWordWrap(): undefined {
         // Cell layout ignores paragraph word splitting, including formatting pasted from Docs.
         return undefined;

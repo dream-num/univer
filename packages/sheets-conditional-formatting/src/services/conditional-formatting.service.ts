@@ -230,6 +230,9 @@ export class ConditionalFormattingService extends Disposable {
                     case SetRangeValuesMutation.id: {
                         const params = commandInfo.params as ISetRangeValuesMutationParams;
                         const { subUnitId, unitId, cellValue } = params;
+                        if (!this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)?.length) {
+                            break;
+                        }
                         const ranges: IRange[] = [];
                         new ObjectMatrix(cellValue).forValue((row, col, value) => {
                             // When P and V are involved

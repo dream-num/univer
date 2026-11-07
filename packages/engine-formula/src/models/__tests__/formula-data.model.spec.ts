@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { IFormulaData } from '../../basics/common';
+import type { IBaseSnapshot, ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BASE_RECORD_ID_FIELD_ID,
     BaseDataModel,
@@ -23,6 +22,8 @@ import {
     BooleanNumber,
     CellValueType,
     createBaseRecordIdField,
+    isFormulaId,
+    isFormulaString,
     IUniverInstanceService,
     LocaleType,
     ObjectMatrix,
@@ -30,7 +31,9 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import { types as nodeUtilTypes } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IFormulaData } from '../../basics/common';
 import { FormulaDataModel } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -185,6 +188,408 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
         },
     },
 };
+
+function createCompactFormulaTestBed(cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
+    const data = Tools.deepClone(TEST_WORKBOOK_DATA_EXTRA);
+    data.sheetOrder = ['sheet1', 'empty'];
+    // These fixtures include runtime null/undefined slots, which the public cell matrix supports.
+    // Keep their exact descriptors and prototypes when passing through the narrower snapshot type.
+    data.sheets.sheet1.cellData = cellData as IObjectMatrixPrimitiveType<ICellData>;
+    data.sheets.empty = { id: 'empty', name: 'Empty', rowCount: 2, columnCount: 2, cellData: {} };
+    const testBed = createCommandTestBed(data);
+    const worksheet = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+    return { ...testBed, worksheet, model: testBed.get(FormulaDataModel) };
+}
+
+describe('compact execution formula snapshots', () => {
+    it('declines an own getFormulaData override before calling it, then preserves the legacy result', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+        const customData = { custom: { sheet: { 0: { 0: { f: '=CUSTOM()' } } } } };
+        const override = vi.spyOn(testBed.model, 'getFormulaData').mockImplementation(() => {
+            testBed.worksheet.getCellMatrix().getValue(0, 0)!.f = '=AFTER()';
+            return customData;
+        });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(override).not.toHaveBeenCalled();
+            expect(testBed.worksheet.getCellMatrix().getValue(0, 0)?.f).toBe('=BEFORE()');
+            expect(testBed.model.getFormulaData()).toBe(customData);
+            expect(override).toHaveBeenCalledTimes(1);
+        } finally {
+            override.mockRestore();
+            testBed.univer.dispose();
+        }
+    });
+
+    it('declines a subclass formula getter without executing it during qualification', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+        let calls = 0;
+        class CustomFormulaDataModel extends FormulaDataModel {
+            override getFormulaData(): IFormulaData {
+                calls++;
+                return { custom: {} };
+            }
+        }
+        Object.setPrototypeOf(testBed.model, CustomFormulaDataModel.prototype);
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(calls).toBe(0);
+            expect(testBed.model.getFormulaData()).toEqual({ custom: {} });
+            expect(calls).toBe(1);
+        } finally {
+            Object.setPrototypeOf(testBed.model, FormulaDataModel.prototype);
+            testBed.univer.dispose();
+        }
+    });
+
+    it('declines a changed prototype formula getter before legacy execution', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+        const customData = { custom: {} };
+        const override = vi.spyOn(FormulaDataModel.prototype, 'getFormulaData').mockReturnValue(customData);
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(override).not.toHaveBeenCalled();
+            expect(testBed.model.getFormulaData()).toBe(customData);
+            expect(override).toHaveBeenCalledTimes(1);
+        } finally {
+            override.mockRestore();
+            testBed.univer.dispose();
+        }
+    });
+
+    it('does not reorder custom unit-service callbacks before the legacy Sheets-then-Base capture', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+        const service = testBed.get(IUniverInstanceService);
+        const getUnits = service.getAllUnitsForType.bind(service);
+        const events: UniverInstanceType[] = [];
+        const override = vi.spyOn(service, 'getAllUnitsForType').mockImplementation(<T>(type: UniverInstanceType): T[] => {
+            events.push(type);
+            if (type === UniverInstanceType.UNIVER_BASE) {
+                testBed.worksheet.getCellMatrix().getValue(0, 0)!.f = '=AFTER()';
+            }
+            return getUnits<T>(type);
+        });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(events).toEqual([]);
+            const data = testBed.model.getFormulaData();
+            expect(events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
+            expect(data.test!.sheet1![0][0]?.f).toBe('=BEFORE()');
+            expect(testBed.worksheet.getCellMatrix().getValue(0, 0)?.f).toBe('=AFTER()');
+        } finally {
+            override.mockRestore();
+            testBed.univer.dispose();
+        }
+    });
+
+    it.each(['custom', 'proxy'] as const)('declines a %s unit service without executing its callbacks', (kind) => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
+        const original = testBed.get(IUniverInstanceService);
+        const getUnits = original.getAllUnitsForType.bind(original);
+        const events: UniverInstanceType[] = [];
+        const custom = {
+            getAllUnitsForType: (type: UniverInstanceType) => {
+                events.push(type);
+                return getUnits(type);
+            },
+        };
+        const proxy = new Proxy(original, {
+            get: (target, key, receiver) => key === 'getAllUnitsForType'
+                ? custom.getAllUnitsForType
+                : Reflect.get(target, key, receiver),
+        });
+        Object.assign(testBed.model, { _univerInstanceService: kind === 'custom' ? custom : proxy });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(events).toEqual([]);
+            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=BEFORE()');
+            expect(events).toEqual([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_BASE]);
+        } finally {
+            Object.assign(testBed.model, { _univerInstanceService: original });
+            testBed.univer.dispose();
+        }
+    });
+
+    it.each(['getMatrix', 'getValue', 'forValue'] as const)('declines an own ObjectMatrix.%s override without invoking it', (name) => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const matrix = testBed.worksheet.getCellMatrix();
+        let calls = 0;
+        Object.defineProperty(matrix, name, {
+            configurable: true,
+            get: () => {
+                calls++;
+                throw new Error('unexpected matrix method');
+            },
+        });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(calls).toBe(0);
+        } finally {
+            Reflect.deleteProperty(matrix, name);
+            testBed.univer.dispose();
+        }
+    });
+
+    it('keeps private snapshot arrays independent of later global iterator callbacks', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const iterator = Object.getOwnPropertyDescriptor(Array.prototype, Symbol.iterator)!;
+        let calls = 0;
+        let result: IFormulaData | undefined;
+        let captured = false;
+        try {
+            // eslint-disable-next-line no-extend-native -- This adversarial fixture restores the native descriptor in finally.
+            Object.defineProperty(Array.prototype, Symbol.iterator, {
+                configurable: true,
+                get: () => {
+                    calls++;
+                    throw new Error('unexpected iterator');
+                },
+            });
+            const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+            captured = snapshot != null;
+            result = snapshot?.materialize();
+        } finally {
+            // eslint-disable-next-line no-extend-native -- Restore the native descriptor changed by this adversarial fixture.
+            Object.defineProperty(Array.prototype, Symbol.iterator, iterator);
+            testBed.univer.dispose();
+        }
+        expect(captured).toBe(true);
+        expect(result?.test?.sheet1?.[0]?.[0]?.f).toBe('=A1');
+        expect(calls).toBe(0);
+    });
+
+    it('captures formula values independently of subsequent cell edits and preserves exact DTO structure', () => {
+        const testBed = createCompactFormulaTestBed({
+            0: { 0: { f: '=A1+1', v: 4 }, 2: { f: '=B1+2' }, 3: { f: '=' } },
+            1: { 1: { f: '=C2', s: 'style' } },
+            5: { 0: { v: 9 } },
+        });
+        try {
+            const expected = testBed.model.getFormulaData();
+            const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+            expect(snapshot).toBeDefined();
+            const matrix = testBed.worksheet.getCellMatrix();
+            matrix.getValue(0, 0)!.f = '=99';
+            matrix.realDeleteValue(0, 2);
+            matrix.setValue(1, 1, { f: '=REPLACED()' });
+            matrix.setValue(7, 0, { f: '=NEW()' });
+            const actual = snapshot!.materialize();
+
+            expect(actual).toStrictEqual(expected);
+            expect(snapshot!.materialize()).toBe(actual);
+            expect(Object.getPrototypeOf(actual)).toBeNull();
+            expect(Object.getPrototypeOf(actual.test!)).toBeNull();
+            expect(Object.getPrototypeOf(actual.test!.sheet1!)).toBeNull();
+            expect(Object.getPrototypeOf(actual.test!.sheet1![0])).toBe(Object.prototype);
+            expect(Object.getPrototypeOf(actual.test!.sheet1![0][0])).toBe(Object.prototype);
+            expect(Object.getOwnPropertyDescriptors(actual.test!.sheet1![0][0]!))
+                .toEqual(Object.getOwnPropertyDescriptors(expected.test!.sheet1![0][0]!));
+            expect(Object.keys(actual.test!.sheet1![0][0]!)).toEqual(['f']);
+            expect(actual.test!.empty).toEqual({});
+            actual.test!.sheet1![0][0]!.f = '=LOCAL()';
+            expect(matrix.getValue(0, 0)?.f).toBe('=99');
+            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=99');
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it('keeps captured data alive after workbook disposal without observing later prototype setters', () => {
+        const column = 90_000_001;
+        const testBed = createCompactFormulaTestBed({ 7: { [column]: { f: '=1+2' } } });
+        const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+        expect(snapshot).toBeDefined();
+        testBed.univer.dispose();
+        let calls = 0;
+        try {
+            // eslint-disable-next-line no-extend-native -- This adversarial fixture restores the native descriptor in finally.
+            Object.defineProperty(Object.prototype, String(column), {
+                configurable: true,
+                set: () => { calls++; },
+            });
+            const result = snapshot!.materialize();
+            expect(result.test!.sheet1![7][column]).toEqual({ f: '=1+2' });
+            expect(Object.getOwnPropertyDescriptor(result.test!.sheet1![7], String(column)))
+                .toMatchObject({ enumerable: true, writable: true, configurable: true });
+            expect(calls).toBe(0);
+        } finally {
+            Reflect.deleteProperty(Object.prototype, String(column));
+        }
+    });
+
+    it('accepts null-prototype data and ignores cell fields the old formula builder never reads', () => {
+        let reads = 0;
+        const cell = Object.assign(Object.create(null), { f: '=SUM(A1)' });
+        Object.defineProperty(cell, 'unrelated', {
+            enumerable: true,
+            get: () => {
+                reads++;
+                return 9;
+            },
+        });
+        const data = Object.create(null);
+        data[0] = Object.assign(Object.create(null), { 0: cell });
+        const testBed = createCompactFormulaTestBed(data);
+        try {
+            reads = 0;
+            const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+            expect(snapshot?.materialize()).toStrictEqual(testBed.model.getFormulaData());
+            expect(reads).toBe(0);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it('uses unit-array indices without observing an iterator the old getter does not read', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+        const units = testBed.get(IUniverInstanceService).getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        let calls = 0;
+        Object.defineProperty(units, Symbol.iterator, {
+            configurable: true,
+            get: () => {
+                calls++;
+                throw new Error('iterator must not be observed');
+            },
+        });
+        try {
+            const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+            expect(snapshot?.materialize()).toStrictEqual(testBed.model.getFormulaData());
+            expect(calls).toBe(0);
+        } finally {
+            Reflect.deleteProperty(units, Symbol.iterator);
+            testBed.univer.dispose();
+        }
+    });
+
+    it('declines an own sheet-order constructor without executing it before fallback', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+        const workbook = testBed.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const order = workbook.getSnapshot().sheetOrder;
+        let calls = 0;
+        Object.defineProperty(order, 'constructor', {
+            configurable: true,
+            get: () => {
+                calls++;
+                return Array;
+            },
+        });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(calls).toBe(0);
+            expect(testBed.model.getFormulaData().test!.sheet1![0][0]?.f).toBe('=1+2');
+            expect(calls).toBe(1);
+        } finally {
+            Reflect.deleteProperty(order, 'constructor');
+            testBed.univer.dispose();
+        }
+    });
+
+    it('declines custom array species without executing it before fallback', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=1+2' } } });
+        const original = Object.getOwnPropertyDescriptor(Array, Symbol.species)!;
+        let calls = 0;
+        let declined = false;
+        let gateCalls = -1;
+        let fallbackCalls = -1;
+        try {
+            Object.defineProperty(Array, Symbol.species, {
+                configurable: true,
+                get: () => {
+                    calls++;
+                    return Array;
+                },
+            });
+            declined = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy) === undefined;
+            gateCalls = calls;
+            testBed.model.getFormulaData();
+            fallbackCalls = calls;
+        } finally {
+            Object.defineProperty(Array, Symbol.species, original);
+            testBed.univer.dispose();
+        }
+        expect(declined).toBe(true);
+        expect(gateCalls).toBe(0);
+        expect(fallbackCalls).toBe(1);
+    });
+
+    it.each(['f', 'si', 'ref'] as const)('declines a known %s accessor without invoking it', (key) => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const cell = testBed.worksheet.getCellMatrix().getValue(0, 0)!;
+        let reads = 0;
+        const original = Object.getOwnPropertyDescriptor(cell, key);
+        Object.defineProperty(cell, key, {
+            configurable: true,
+            get: () => {
+                reads++;
+                return '=A1';
+            },
+        });
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(reads).toBe(0);
+        } finally {
+            if (original) Object.defineProperty(cell, key, original);
+            else Reflect.deleteProperty(cell, key);
+            testBed.univer.dispose();
+        }
+    });
+
+    it.each(['matrix', 'row', 'cell'] as const)('declines a %s Proxy without executing its traps', (kind) => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const matrix = testBed.worksheet.getCellMatrix();
+        const raw = matrix.getMatrix();
+        const row = raw[0];
+        const cell = row[0];
+        let traps = 0;
+        const proxy = new Proxy(kind === 'matrix' ? raw : kind === 'row' ? row : cell!, {
+            get: () => {
+                traps++;
+                throw new Error('unexpected get');
+            },
+            ownKeys: () => {
+                traps++;
+                throw new Error('unexpected ownKeys');
+            },
+            getPrototypeOf: () => {
+                traps++;
+                throw new Error('unexpected prototype');
+            },
+        });
+        if (kind === 'matrix') Object.assign(matrix, { _matrix: proxy });
+        else if (kind === 'row') raw[0] = proxy as typeof row;
+        else row[0] = proxy as ICellData;
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            expect(traps).toBe(0);
+        } finally {
+            Object.assign(matrix, { _matrix: raw });
+            raw[0] = row;
+            row[0] = cell;
+            testBed.univer.dispose();
+        }
+    });
+
+    it('declines missing proxy classification, shared IDs, refs, arrays and noncanonical coordinates', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=A1' } } });
+        const matrix = testBed.worksheet.getCellMatrix();
+        try {
+            expect(testBed.model.tryCreateFormulaDataSnapshot()).toBeUndefined();
+            for (const cell of [{ f: '=A1', si: 'shared' }, { f: '=A1', ref: 'A1:A2' }]) {
+                matrix.setValue(0, 0, cell);
+                expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+                expect(testBed.model.getArrayFormulaRange()).toEqual({});
+            }
+            matrix.setValue(0, 0, { f: '=A1' });
+            Object.assign(matrix.getMatrix(), { '01': { 0: { f: '=A2' } } });
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+            Reflect.deleteProperty(matrix.getMatrix(), '01');
+            testBed.model.setArrayFormulaRange({ test: { sheet1: { 0: { 0: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 } } } } });
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)).toBeUndefined();
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+});
 
 describe('Test formula data model', () => {
     describe('formulaDataModel function', () => {
@@ -1265,6 +1670,136 @@ describe('Test formula data model', () => {
 
         afterEach(() => {
             univer.dispose();
+        });
+
+        it('scans primitive formulas and shared ids without boxing strings', () => {
+            const isString = vi.spyOn(Tools, 'isString');
+            let result: IFormulaData;
+            let fallbackCalls: number;
+            try {
+                result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                    0: {
+                        0: { f: '=1', si: '' },
+                        1: { f: '=' },
+                        2: { f: ' =1' },
+                        3: { f: '', si: '' },
+                        4: { f: '=2', si: ' ' },
+                        5: { si: ' ' },
+                        6: { f: '=3', si: '0' },
+                        7: { si: '0' },
+                        8: { v: 1 },
+                    },
+                }));
+                fallbackCalls = isString.mock.calls.length;
+            } finally {
+                isString.mockRestore();
+            }
+            expect(fallbackCalls!).toBe(0);
+            expect(result!.unit?.sheet?.[0]).toEqual({
+                0: { f: '=1' },
+                4: { f: '=2', si: ' ' },
+                5: { f: '=2', si: ' ', x: 1, y: 0 },
+                6: { f: '=3', si: '0' },
+                7: { f: '=3', si: '0', x: 1, y: 0 },
+            });
+        });
+
+        it('keeps core formula predicate behavior for nonprimitive values', () => {
+            const values: unknown[] = [
+                new Object('=A1'),
+                new Object('='),
+                Symbol('=A1'),
+                1,
+                null,
+                Object.assign(Object.create(null), { [Symbol.toStringTag]: 'Other' }),
+                {
+                    [Symbol.toStringTag]: 'String',
+                    length: 3,
+                    substring: (start: number, end: number) => '=A1'.substring(start, end),
+                },
+                new Proxy({ [Symbol.toStringTag]: 'Other' }, {}),
+            ];
+            for (const value of values) {
+                const expected = isFormulaString(value || '');
+                const result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                    0: { 0: { f: value } as ICellData },
+                }));
+                if (expected) {
+                    expect(result.unit?.sheet?.[0]?.[0]?.f).toBe(value);
+                } else {
+                    expect(result.unit?.sheet?.[0]).toBeUndefined();
+                }
+            }
+        });
+
+        it('keeps core shared id predicate behavior for nonprimitive values', () => {
+            const values: unknown[] = [
+                new Object('shared'),
+                new Object(''),
+                Symbol('shared'),
+                1,
+                null,
+                { [Symbol.toStringTag]: 'String', length: 1, toString: () => 'tagged-id' },
+                new Proxy({ [Symbol.toStringTag]: 'Other' }, {}),
+            ];
+            for (const value of values) {
+                const expected = isFormulaId(value || '');
+                const result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                    0: { 0: { f: '=1', si: value } as ICellData },
+                }));
+                const cell = result.unit?.sheet?.[0]?.[0];
+                expect(cell?.f).toBe('=1');
+                expect(cell?.si).toBe(expected ? value : undefined);
+            }
+        });
+
+        it('preserves errors raised by nonprimitive formula and id predicates', () => {
+            const failure = new Error('tag getter');
+            const throwing = new Proxy({}, {
+                get(target, key, receiver) {
+                    if (key === Symbol.toStringTag) throw failure;
+                    return Reflect.get(target, key, receiver);
+                },
+            });
+            const invalidStringProxy = new Proxy(new Object('=1'), {
+                get(target, key, receiver) {
+                    return key === Symbol.toStringTag ? 'String' : Reflect.get(target, key, receiver);
+                },
+            });
+            expect(() => isFormulaString(invalidStringProxy)).toThrow(TypeError);
+            expect(() => formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                0: { 0: { f: invalidStringProxy } as ICellData },
+            }))).toThrow(TypeError);
+            for (const cell of [{ f: throwing }, { f: '=1', si: throwing }]) {
+                expect(() => formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                    0: { 0: cell as ICellData },
+                }))).toThrow(failure);
+            }
+        });
+
+        it('falls back when primitive strings have a custom prototype tag', () => {
+            const previous = Object.getOwnPropertyDescriptor(String.prototype, Symbol.toStringTag);
+            let result: IFormulaData;
+            let tagReads = 0;
+            try {
+                // eslint-disable-next-line no-extend-native -- This adversarial fixture restores the native descriptor in finally.
+                Object.defineProperty(String.prototype, Symbol.toStringTag, {
+                    configurable: true,
+                    get() {
+                        tagReads += 1;
+                        return 'CustomString';
+                    },
+                });
+                result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                    0: { 0: { f: '=1', si: 'shared' } },
+                }));
+            } finally {
+                // eslint-disable-next-line no-extend-native -- Restore the native descriptor changed by this adversarial fixture.
+                if (previous) Object.defineProperty(String.prototype, Symbol.toStringTag, previous);
+                else Reflect.deleteProperty(String.prototype, Symbol.toStringTag);
+            }
+            expect(result!.unit?.sheet?.[0]).toBeUndefined();
+            expect(tagReads).toBe(2);
         });
 
         it('propagates explicit implicit intersection to shared formula followers', () => {

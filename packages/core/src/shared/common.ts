@@ -157,12 +157,21 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
     return null;
 }
 
+const STRING_PROTOTYPE = String.prototype;
+
 /**
  * A string starting with an equal sign is a formula
  * @param value
  * @returns
  */
 export function isFormulaString(value: any): boolean {
+    // Avoid boxing primitive strings while preserving custom prototype tag behavior.
+    if (
+        typeof value === 'string' && Object.getPrototypeOf(STRING_PROTOTYPE) === Object.prototype &&
+        !(Symbol.toStringTag in STRING_PROTOTYPE)
+    ) {
+        return value.substring(0, 1) === '=' && value.length > 1;
+    }
     return Tools.isString(value) && value.substring(0, 1) === '=' && value.length > 1;
 }
 
@@ -172,6 +181,12 @@ export function isFormulaString(value: any): boolean {
  * @returns
  */
 export function isFormulaId(value: any): boolean {
+    if (
+        typeof value === 'string' && Object.getPrototypeOf(STRING_PROTOTYPE) === Object.prototype &&
+        !(Symbol.toStringTag in STRING_PROTOTYPE)
+    ) {
+        return value.length > 0;
+    }
     return Tools.isString(value) && value.length > 0;
 }
 

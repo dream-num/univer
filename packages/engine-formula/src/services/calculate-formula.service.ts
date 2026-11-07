@@ -52,6 +52,7 @@ import type {
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
@@ -73,8 +74,21 @@ export const DEFAULT_INTERVAL_COUNT = 500;
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export interface ICalculateFormulaService {
+    /** @experimental Explicit opt-in; legacy engines and RPC proxies keep the complete formula DTO input. */
+    readonly supportsFormulaDataSnapshot?: boolean;
+    /** @experimental Captures formula values for a cooperating in-process engine. */
+    prepareFormulaDataSnapshot?(): IFormulaDataSnapshot | undefined;
+    /** @experimental Consumes the snapshot captured by the cooperating engine. */
+    executeWithFormulaDataSnapshot?(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): Promise<void>;
     readonly executionInProgressListener$: Observable<IExecutionInProgressParams>;
     readonly executionCompleteListener$: Observable<IAllRuntimeData>;
+    /**
+     * @experimental
+     * Whether this exact completion's unit and other-formula results have already been emitted through
+     * SetFormulaCalculationResultMutation. Model application can still be pending; application acknowledgements
+     * and completion notifications follow their normal flow.
+     */
+    hasEmittedCalculationResult?(data: IAllRuntimeData): boolean;
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;

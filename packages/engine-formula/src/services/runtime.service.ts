@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -31,7 +32,6 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
@@ -42,7 +42,7 @@ import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
-import { IFormulaCurrentConfigService } from './current-data.service';
+import { hasDeferredFormulaDataSnapshot, IFormulaCurrentConfigService } from './current-data.service';
 import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
 
 /**
@@ -465,6 +465,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     beginCircularReferences(): void {
         this._pendingCircularReferences = new Map(this._circularReferences);
+        if (this._pendingCircularReferences.size === 0 && hasDeferredFormulaDataSnapshot(this._currentConfigService)) return;
         const formulaData = this._currentConfigService.getFormulaData();
         for (const [key, cell] of this._pendingCircularReferences) {
             if (!formulaData[cell.unitId]?.[cell.sheetId]?.[cell.row]?.[cell.column]) {

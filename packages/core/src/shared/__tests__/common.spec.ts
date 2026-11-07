@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi } from 'vitest';
 import type { ICellData, ICellWithCoord, IRange, ISelectionCell } from '../../sheets/typedef';
 import type { IDocumentData } from '../../types/interfaces';
-import { describe, expect, it } from 'vitest';
 import {
     RANGE_TYPE,
 } from '../../sheets/typedef';
@@ -44,6 +44,15 @@ import {
     isValidRange,
     makeCellRangeToRangeData,
 } from '../common';
+import { Tools } from '../tools';
+
+function legacyIsFormulaString(value: unknown): boolean {
+    return Tools.isString(value) && value.substring(0, 1) === '=' && value.length > 1;
+}
+
+function legacyIsFormulaId(value: unknown): boolean {
+    return Tools.isString(value) && value.length > 0;
+}
 
 function createCellWithCoord(overrides?: Partial<ICellWithCoord>): ICellWithCoord {
     return {
@@ -96,6 +105,243 @@ describe('Test common', () => {
         expect(isFormulaId(true)).toBe(false);
         expect(isFormulaId({})).toBe(false);
         expect(isFormulaId({ f: '' })).toBe(false);
+    });
+
+    it('checks primitive formula strings and ids without boxing through Tools', () => {
+        const values = ['=A1', '=', '', ' =A1', '= ', 'id', '0', ' '];
+        const expected = values.map((value) => [legacyIsFormulaString(value), legacyIsFormulaId(value)]);
+        const isString = vi.spyOn(Tools, 'isString');
+        let actual: boolean[][];
+        let calls: number;
+        try {
+            actual = values.map((value) => [isFormulaString(value), isFormulaId(value)]);
+            calls = isString.mock.calls.length;
+        } finally {
+            isString.mockRestore();
+        }
+        expect(actual!).toEqual(expected);
+        expect(calls!).toBe(0);
+    });
+
+    it('matches the original predicates for nonprimitive inputs', () => {
+        const values: unknown[] = [
+            undefined,
+            null,
+            true,
+            false,
+            0,
+            1,
+            Number.NaN,
+            0n,
+            Symbol('=A1'),
+            [],
+            {},
+            Object.create(null),
+            new Object('=A1'),
+            new Object('='),
+            new Object(''),
+            new Object('id'),
+            new Object(1),
+            { [Symbol.toStringTag]: 'Other' },
+            {
+                [Symbol.toStringTag]: 'String',
+                substring: (start: number, end: number) => '=A1'.substring(start, end),
+                length: 3,
+            },
+            new Proxy({ [Symbol.toStringTag]: 'Other' }, {}),
+        ];
+        for (const value of values) {
+            expect(isFormulaString(value)).toBe(legacyIsFormulaString(value));
+            expect(isFormulaId(value)).toBe(legacyIsFormulaId(value));
+        }
+    });
+
+    it('preserves proxy property reads and errors in the original predicates', () => {
+        const reads: PropertyKey[] = [];
+        const value = new Proxy({
+            [Symbol.toStringTag]: 'String',
+            substring: (start: number, end: number) => '=A1'.substring(start, end),
+            length: 3,
+        }, {
+            get(target, key, receiver) {
+                reads.push(key);
+                return Reflect.get(target, key, receiver);
+            },
+        });
+        for (const [current, legacy] of [[isFormulaString, legacyIsFormulaString], [isFormulaId, legacyIsFormulaId]]) {
+            reads.length = 0;
+            const expected = legacy(value);
+            const expectedReads = [...reads];
+            reads.length = 0;
+            expect(current(value)).toBe(expected);
+            expect(reads).toEqual(expectedReads);
+        }
+
+        const invalidString = new Proxy(new Object('=1'), {
+            get(target, key, receiver) {
+                return key === Symbol.toStringTag ? 'String' : Reflect.get(target, key, receiver);
+            },
+        });
+        expect(() => legacyIsFormulaString(invalidString)).toThrow(TypeError);
+        expect(() => isFormulaString(invalidString)).toThrow(TypeError);
+        expect(isFormulaId(invalidString)).toBe(legacyIsFormulaId(invalidString));
+
+        const revoked = Proxy.revocable({}, {});
+        revoked.revoke();
+        for (const predicate of [isFormulaString, legacyIsFormulaString, isFormulaId, legacyIsFormulaId]) {
+            expect(() => predicate(revoked.proxy)).toThrow(TypeError);
+        }
+    });
+
+    it('preserves errors thrown by custom nonprimitive tags', () => {
+        const failure = new Error('custom string tag');
+        const value = Object.defineProperty({}, Symbol.toStringTag, {
+            get() {
+                throw failure;
+            },
+        });
+        for (const predicate of [isFormulaString, legacyIsFormulaString, isFormulaId, legacyIsFormulaId]) {
+            let caught: unknown;
+            try {
+                predicate(value);
+            } catch (error) {
+                caught = error;
+            }
+            expect(caught).toBe(failure);
+        }
+    });
+
+    it('preserves inherited and own custom string prototype tags', () => {
+        for (const prototype of [String.prototype, Object.prototype]) {
+            const previous = Object.getOwnPropertyDescriptor(prototype, Symbol.toStringTag);
+            let expected: boolean[];
+            let actual: boolean[];
+            let reads = 0;
+            let expectedReads: number;
+            let actualReads: number;
+            try {
+                Object.defineProperty(prototype, Symbol.toStringTag, {
+                    configurable: true,
+                    get() {
+                        reads += 1;
+                        return 'CustomString';
+                    },
+                });
+                expected = [legacyIsFormulaString('=1'), legacyIsFormulaString(''), legacyIsFormulaId('id'), legacyIsFormulaId('')];
+                expectedReads = reads;
+                reads = 0;
+                actual = [isFormulaString('=1'), isFormulaString(''), isFormulaId('id'), isFormulaId('')];
+                actualReads = reads;
+            } finally {
+                if (previous) Object.defineProperty(prototype, Symbol.toStringTag, previous);
+                else Reflect.deleteProperty(prototype, Symbol.toStringTag);
+            }
+            expect(actual!).toEqual(expected!);
+            expect(actualReads!).toBe(expectedReads!);
+        }
+    });
+
+    it('preserves errors raised by primitive string prototype tags', () => {
+        const previous = Object.getOwnPropertyDescriptor(String.prototype, Symbol.toStringTag);
+        const failure = new Error('primitive string tag');
+        const failures: unknown[] = [];
+        try {
+            // eslint-disable-next-line no-extend-native -- This adversarial fixture restores the native descriptor in finally.
+            Object.defineProperty(String.prototype, Symbol.toStringTag, {
+                configurable: true,
+                get() {
+                    throw failure;
+                },
+            });
+            for (const predicate of [isFormulaString, legacyIsFormulaString, isFormulaId, legacyIsFormulaId]) {
+                try {
+                    predicate('=1');
+                } catch (error) {
+                    failures.push(error);
+                }
+            }
+        } finally {
+            // eslint-disable-next-line no-extend-native -- Restore the native descriptor changed by this adversarial fixture.
+            if (previous) Object.defineProperty(String.prototype, Symbol.toStringTag, previous);
+            else Reflect.deleteProperty(String.prototype, Symbol.toStringTag);
+        }
+        expect(failures).toHaveLength(4);
+        failures.forEach((error) => expect(error).toBe(failure));
+    });
+
+    it('preserves get behavior for custom proxy string prototype chains', () => {
+        const previous = Object.getPrototypeOf(String.prototype);
+        const reads: string[] = [];
+        const customPrototype = new Proxy(previous, {
+            get(target, key, receiver) {
+                if (key === Symbol.toStringTag) {
+                    reads.push('get');
+                    return 'Other';
+                }
+                return Reflect.get(target, key, receiver);
+            },
+            has(target, key) {
+                if (key === Symbol.toStringTag) {
+                    reads.push('has');
+                    return false;
+                }
+                return Reflect.has(target, key);
+            },
+        });
+        const expected: boolean[] = [];
+        const actual: boolean[] = [];
+        const expectedReads: string[][] = [];
+        const actualReads: string[][] = [];
+        try {
+            Object.setPrototypeOf(String.prototype, customPrototype);
+            for (const [current, legacy] of [[isFormulaString, legacyIsFormulaString], [isFormulaId, legacyIsFormulaId]]) {
+                reads.length = 0;
+                expected.push(legacy('=1'));
+                expectedReads.push([...reads]);
+                reads.length = 0;
+                actual.push(current('=1'));
+                actualReads.push([...reads]);
+            }
+        } finally {
+            Object.setPrototypeOf(String.prototype, previous);
+        }
+        expect(actual).toEqual(expected);
+        expect(actualReads).toEqual(expectedReads);
+    });
+
+    it('preserves proxy string prototype errors without invoking has traps', () => {
+        const previous = Object.getPrototypeOf(String.prototype);
+        const getFailure = new Error('custom prototype get');
+        const hasFailure = new Error('custom prototype has');
+        const failures: unknown[] = [];
+        const customPrototype = new Proxy(previous, {
+            get(target, key, receiver) {
+                if (key === Symbol.toStringTag) {
+                    throw getFailure;
+                }
+                return Reflect.get(target, key, receiver);
+            },
+            has(target, key) {
+                if (key === Symbol.toStringTag) {
+                    throw hasFailure;
+                }
+                return Reflect.has(target, key);
+            },
+        });
+        try {
+            Object.setPrototypeOf(String.prototype, customPrototype);
+            for (const predicate of [legacyIsFormulaString, isFormulaString, legacyIsFormulaId, isFormulaId]) {
+                try {
+                    predicate('=1');
+                } catch (error) {
+                    failures.push(error);
+                }
+            }
+        } finally {
+            Object.setPrototypeOf(String.prototype, previous);
+        }
+        expect(failures).toHaveLength(4);
+        failures.forEach((error) => expect(error).toBe(getFailure));
     });
 
     it('should convert merged and merged-main cells into ranges', () => {

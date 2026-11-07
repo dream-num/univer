@@ -127,7 +127,7 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        return () => remove(this._interceptorsByName.get(key)!, interceptor);
+        return () => remove(interceptors, interceptor);
     }
 
     public getInterceptPoints() {
@@ -237,7 +237,7 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        return () => remove(this._asyncInterceptorsByName.get(key)!, interceptor);
+        return () => remove(interceptors, interceptor);
     }
 
     public getInterceptPoints() {

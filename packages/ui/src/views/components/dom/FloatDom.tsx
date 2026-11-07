@@ -15,13 +15,14 @@
  */
 
 import type { ComponentType, CSSProperties } from 'react';
-import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
+import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { ComponentManager } from '../../../common/component-manager';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { preventBrowserZoomInContainers } from '../../hooks/prevent-browser-zoom';
 import { resolveFloatDomLayout } from './float-dom-layout';
 
 function applyFloatDomLayout(
@@ -77,6 +78,13 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
     const wrapperInset = layer.contentBox?.wrapperInset;
     const contentInset = layer.contentBox?.contentInset;
     const forwardEvents = shouldForwardFloatDomEvents(layer);
+
+    useEffect(() => {
+        // React's passive wheel listener cannot cancel the native event copied to the host canvas.
+        if (forwardEvents && domRef.current) {
+            return preventBrowserZoomInContainers([domRef.current]);
+        }
+    }, [forwardEvents, position]);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {

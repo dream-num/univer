@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { AsyncInterceptorManager, createAsyncInterceptorKey } from '../interceptor';
+import { AsyncInterceptorManager, createAsyncInterceptorKey, createInterceptorKey, InterceptorManager } from '../interceptor';
 
 describe('Test interceptor', () => {
     it('should return "true" when each interceptor returns true ', async () => {
@@ -60,5 +60,33 @@ describe('Test interceptor', () => {
 
         const interceptorRes = await interceptor.fetchThroughAsyncInterceptors(INTERCEPTOR_KEY)(false, true);
         expect(interceptorRes).toBe(false);
+    });
+});
+
+describe('interceptor subscription cleanup', () => {
+    it('can release a synchronous registration after its manager is disposed', () => {
+        const key = createInterceptorKey<boolean, boolean>('late-cleanup');
+        const manager = new InterceptorManager({ key });
+        const handler = { handler: () => true };
+        const release = manager.intercept(key, handler);
+        manager.dispose();
+        expect(() => release()).not.toThrow();
+        manager.intercept(key, handler);
+        expect(() => release()).not.toThrow();
+        expect(manager.fetchThroughInterceptors(key)(false, false)).toBe(true);
+        expect(() => release()).not.toThrow();
+    });
+
+    it('can release an asynchronous registration after its manager is disposed', async () => {
+        const key = createAsyncInterceptorKey<boolean, boolean>('late-cleanup');
+        const manager = new AsyncInterceptorManager({ key });
+        const handler = { handler: async () => true };
+        const release = await manager.interceptAsync(key, handler);
+        manager.dispose();
+        expect(() => release()).not.toThrow();
+        await manager.interceptAsync(key, handler);
+        expect(() => release()).not.toThrow();
+        expect(await manager.fetchThroughAsyncInterceptors(key)(false, false)).toBe(true);
+        expect(() => release()).not.toThrow();
     });
 });

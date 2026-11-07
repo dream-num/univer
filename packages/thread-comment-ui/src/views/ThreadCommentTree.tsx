@@ -216,6 +216,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                   univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                                   univer-items-center univer-justify-center univer-rounded-sm
                                                   univer-border-0 univer-bg-transparent univer-p-0 univer-text-base
+                                                  univer-text-inherit
                                                   hover:univer-bg-gray-50
                                                   rtl:univer-ml-0 rtl:univer-mr-1
                                                   dark:hover:!univer-bg-gray-800
@@ -281,6 +282,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                               univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                               univer-items-center univer-justify-center univer-rounded-sm
                                               univer-border-0 univer-bg-transparent univer-p-0 univer-text-base
+                                              univer-text-inherit
                                               hover:univer-bg-gray-50
                                               rtl:univer-ml-0 rtl:univer-mr-1
                                               dark:hover:!univer-bg-gray-800
@@ -603,7 +605,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 className={clsx(`
                                   univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
                                   univer-justify-center univer-rounded-[3px] univer-border-0 univer-bg-transparent
-                                  univer-p-0 univer-text-base
+                                  univer-p-0 univer-text-base univer-text-inherit
                                   hover:univer-bg-gray-50
                                   rtl:univer-ml-0 rtl:univer-mr-1
                                   dark:hover:!univer-bg-gray-800
@@ -624,7 +626,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                         className={`
                                           univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-[3px] univer-border-0
-                                          univer-bg-transparent univer-p-0 univer-text-base
+                                          univer-bg-transparent univer-p-0 univer-text-base univer-text-inherit
                                           hover:univer-bg-gray-50
                                           rtl:univer-ml-0 rtl:univer-mr-1
                                           dark:hover:!univer-bg-gray-800

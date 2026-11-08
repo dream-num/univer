@@ -14,11 +14,72 @@
  * limitations under the License.
  */
 
+import { BooleanNumber, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { Canvas } from '../../../canvas';
 import type { UniverRenderingContext2D } from '../../../context';
 import { UniverRenderingContext } from '../../../context';
 import { Spreadsheet } from '../spreadsheet';
+
+describe('native compound grid fallback', () => {
+    it.each([
+        { system: 'Linux', scale: 1.5, merges: true, overflow: false, hidden: false, disabled: false, expected: true },
+        { system: 'Linux', scale: 1.5, merges: false, overflow: true, hidden: false, disabled: false, expected: true },
+        { system: 'Mac', scale: 1.5, merges: true, overflow: true, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 2, merges: true, overflow: true, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: false, overflow: false, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: true, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: false, disabled: true, expected: false },
+    ])('uses the native fallback only for affected geometry: %j', (scenario) => {
+        const sheet = new Spreadsheet('native-grid-fallback');
+        const overflowCache = new ObjectMatrix();
+        if (scenario.overflow) {
+            overflowCache.setValue(1, 1, { startRow: 1, endRow: 1, startColumn: 1, endColumn: 4 });
+        }
+        Reflect.set(sheet, '_forceDisableGridlines', scenario.disabled);
+        try {
+            expect(Reflect.get(sheet, '_requiresNativeGridlineRepaint').call(sheet, {
+                _context: {},
+                getSystemType: () => scenario.system,
+                getTransform: () => ({ a: scenario.scale, d: scenario.scale }),
+            }, {
+                showGridlines: scenario.hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+                overflowCache,
+                getRangeByViewBound: () => ({ startRow: 0, endRow: 3, startColumn: 0, endColumn: 5 }),
+                worksheet: { getMergedCellRange: () => scenario.merges ? [{}] : [] },
+            }, { cacheBound: { left: 0, top: 0, right: 100, bottom: 100 } }, scenario.merges)).toBe(scenario.expected);
+        } finally {
+            sheet.dispose();
+        }
+    });
+
+    it('ignores offscreen and historical cuts while finding an offscreen horizontal overflow anchor', () => {
+        const sheet = new Spreadsheet('visible-native-grid-cuts');
+        const overflowCache = new ObjectMatrix();
+        overflowCache.setValue(0, 0, { startRow: 0, endRow: 0, startColumn: 0, endColumn: 100 });
+        overflowCache.setValue(42, 70, { startRow: 42, endRow: 42, startColumn: 70, endColumn: 75 });
+        const getRow = vi.spyOn(overflowCache, 'getRow');
+        const getMergedCellRange = vi.fn(() => []);
+        const context = { _context: {}, getSystemType: () => 'Linux', getTransform: () => ({ a: 1.5, d: 1.5 }) };
+        const skeleton = {
+            showGridlines: BooleanNumber.TRUE,
+            overflowCache,
+            getRangeByViewBound: () => ({ startRow: 40, endRow: 44, startColumn: 20, endColumn: 25 }),
+            worksheet: { getMergedCellRange },
+        };
+        const viewport = { cacheBound: { left: 0, top: 0, right: 100, bottom: 100 } };
+        const requiresRepaint = Reflect.get(sheet, '_requiresNativeGridlineRepaint').bind(sheet);
+        try {
+            expect(requiresRepaint(context, skeleton, viewport, true)).toBe(false);
+            expect(getMergedCellRange).toHaveBeenCalledExactlyOnceWith(40, 20, 44, 25);
+            expect(getRow.mock.calls.map(([row]) => row)).toEqual([40, 41, 42, 43, 44]);
+            overflowCache.setValue(42, 0, { startRow: 42, endRow: 42, startColumn: 0, endColumn: 20 });
+            expect(requiresRepaint(context, skeleton, viewport, false)).toBe(true);
+        } finally {
+            sheet.dispose();
+        }
+    });
+});
 
 interface ISpreadsheetApplyCache {
     _repairGridlineStroke: (ctx: UniverRenderingContext2D, left: number, top: number, right: number, bottom: number, rectangle?: boolean) => void;

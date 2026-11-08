@@ -19,19 +19,25 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DataBar } from '../data-bar.render';
 
 function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-    return {
+    const smoothing: boolean[] = [];
+    const context = {
         canvas,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'low',
+        fillStyle: '#38bdf8',
+        strokeStyle: '#38bdf8',
         globalAlpha: 1,
         globalCompositeOperation: 'source-over',
         shadowColor: 'rgba(0, 0, 0, 0)',
         getTransform: () => ({ a: 3, b: 0, c: 0, d: 3, e: -162.5, f: 100.5 }),
         setTransform: vi.fn(),
-        save: vi.fn(),
-        restore: vi.fn(),
+        save: vi.fn(() => smoothing.push(context.imageSmoothingEnabled)),
+        restore: vi.fn(() => { context.imageSmoothingEnabled = smoothing.pop()!; }),
         drawImage: vi.fn(),
         setLineDash: vi.fn(),
         getLineDash: () => [],
     } as unknown as CanvasRenderingContext2D;
+    return context;
 }
 
 describe('data bar local rasterization', () => {

@@ -15,15 +15,15 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { Range } from '@univerjs/core';
 import {
     FIX_ONE_PIXEL_BLUR_OFFSET,
     SheetExtension,
     SpreadsheetExtensionRegistry,
-    UniverRenderingContext,
 } from '@univerjs/engine-render';
 import type { IConditionalFormattingRenderRangeResolver, IDataBarCellData } from './type';
+import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
 import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
@@ -44,8 +44,7 @@ export class DataBar extends SheetExtension {
 
     private _paddingRightAndLeft = 2;
     private _paddingTopAndBottom = 2;
-    private _barCanvas?: HTMLCanvasElement;
-    private _barContext?: UniverRenderingContext;
+    private readonly _rasterCache = new ConditionalFormattingRasterCache();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = dataBarUKey;
 
@@ -139,20 +138,15 @@ export class DataBar extends SheetExtension {
                     if (isGradient) {
                         paint.stroke();
                     }
-                });
+                }, `${positive}:${isGradient}:${this._radius}:${color}`, isGradient ? 1 : 0);
             });
         });
         ctx.restore();
     }
 
     override dispose(): void {
+        this._rasterCache.dispose();
         this._renderRangeResolver = null;
-        if (this._barCanvas) {
-            this._barCanvas.width = 0;
-            this._barCanvas.height = 0;
-        }
-        this._barCanvas = undefined;
-        this._barContext = undefined;
         super.dispose();
     }
 
@@ -162,59 +156,11 @@ export class DataBar extends SheetExtension {
         y: number,
         width: number,
         height: number,
-        draw: (paint: UniverRenderingContext, x: number, y: number) => void
+        draw: (paint: UniverRenderingContext, x: number, y: number) => void,
+        variant = '',
+        strokeWidth = 0
     ): void {
-        const native = ctx._context;
-        const m = native?.getTransform();
-        const colorSpace = native?.getContextAttributes?.()?.colorSpace;
-        if (!m || ctx.__mode === 'printing' || typeof document === 'undefined'
-            || m.a !== m.d || m.a <= 0 || m.b || m.c || native.globalAlpha !== 1
-            || native.globalCompositeOperation !== 'source-over' || (colorSpace && colorSpace !== 'srgb')
-            || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
-            || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
-            || (native.filter && native.filter !== 'none') || width <= 0 || height <= 0) {
-            draw(ctx, x, y);
-            return;
-        }
-        const px = x * m.a + m.e;
-        const py = y * m.d + m.f;
-        const left = Math.floor(px) - 2;
-        const top = Math.floor(py) - 2;
-        const pixelWidth = Math.ceil(px + width * m.a) - left + 2;
-        const pixelHeight = Math.ceil(py + height * m.d) - top + 2;
-        if (!Number.isFinite(pixelWidth * pixelHeight) || pixelWidth * pixelHeight > 128 * 1024) {
-            draw(ctx, x, y);
-            return;
-        }
-        // Keep curves and gradients at a stable native origin, without resampling the physical pixels.
-        const canvas = this._barCanvas ?? document.createElement('canvas');
-        if (!this._barCanvas) {
-            const context = canvas.getContext('2d');
-            if (!context) {
-                draw(ctx, x, y);
-                return;
-            }
-            this._barCanvas = canvas;
-            this._barContext = new UniverRenderingContext(context);
-        }
-        canvas.width = pixelWidth;
-        canvas.height = pixelHeight;
-        const paint = this._barContext!;
-        paint.setTransform(m.a, 0, 0, m.d, px - left, py - top);
-        paint.setLineDash(ctx.getLineDash());
-        paint.lineDashOffset = ctx.lineDashOffset;
-        paint.lineCap = ctx.lineCap;
-        paint.lineJoin = ctx.lineJoin;
-        paint.miterLimit = ctx.miterLimit;
-        draw(paint, 0, 0);
-        ctx.save();
-        try {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(canvas, left, top);
-        } finally {
-            ctx.restore();
-        }
+        this._rasterCache.draw(ctx, x, y, width, height, variant, draw, strokeWidth);
     }
 
     private _drawRectWithRoundedCorner(ctx: UniverRenderingContext, x: number, y: number, width: number, height: number, topLeftRadius: boolean, topRightRadius: boolean, bottomRightRadius: boolean, bottomLeftRadius: boolean) {

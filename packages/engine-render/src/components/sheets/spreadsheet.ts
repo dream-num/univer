@@ -681,9 +681,10 @@ export class Spreadsheet extends SheetComponent {
         // Fractional frozen-column clipping changes translucent edge coverage after a vertical cache copy.
         const shouldRefreshForFrozenEdge = viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT
             && diffY !== 0 && this._hasFractionalViewportPixels(viewportInfo);
+        const shouldRefreshForNativeGridlines = isScrolling && this._requiresNativeGridlineRepaint(mainCtx, spreadsheetSkeleton, viewportInfo, hasMergeData);
         const incompatibleCache = this._scrollCacheStates.has(viewportInfo.viewportKey) && !previousState;
         const shouldRefreshCache = isDirty || isForceDirty || incompatibleCache || isScrollJumpOutsideCache || shouldRefreshForMergeRepairArea
-            || shouldRefreshForHorizontalResampling || shouldRefreshForFrozenEdge ||
+            || shouldRefreshForHorizontalResampling || shouldRefreshForFrozenEdge || shouldRefreshForNativeGridlines ||
             (shouldCacheUpdate && diffX !== 0 && !this._canPaintHorizontalScrollIncrementally(mainCtx, viewportInfo));
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
             if (shouldRefreshCache) {
@@ -802,6 +803,35 @@ export class Spreadsheet extends SheetComponent {
             }
         }
         return repaintBounds;
+    }
+
+    private _requiresNativeGridlineRepaint(ctx: UniverRenderingContext2D, skeleton: SpreadsheetSkeleton, viewportInfo: IViewportInfo, hasMergeData: boolean): boolean {
+        if (!ctx._context || ctx.getSystemType() !== 'Linux' || this._forceDisableGridlines || skeleton.showGridlines === BooleanNumber.FALSE) {
+            return false;
+        }
+        const { a, d } = ctx.getTransform();
+        if (Number.isInteger(a) && Number.isInteger(d)) {
+            return false;
+        }
+        const range = skeleton.getRangeByViewBound(getOutwardRoundedBound(viewportInfo.cacheBound));
+        // Fractional Linux compound grid corners vary after cache translation; preserve the native full paint.
+        if (hasMergeData && skeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn).length) {
+            return true;
+        }
+        // Overflow anchors can be offscreen horizontally, but overflow never spans another row.
+        for (let row = range.startRow; row <= range.endRow; row++) {
+            const values = skeleton.overflowCache.getRow(row);
+            if (!values) {
+                continue;
+            }
+            for (const column in values) {
+                const overflow = values[column];
+                if (overflow.startColumn <= range.endColumn && overflow.endColumn >= range.startColumn) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private _requiresHorizontalResampling(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): boolean {

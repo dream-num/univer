@@ -38,6 +38,12 @@ Custom DI test beds that assemble the formula engine must register `FormulaCache
 
 `FORMULA_REF_TO_ARRAY_CACHE` and `CELL_INVERTED_INDEX_CACHE` remain exported for compatibility but are deprecated and no longer control engine calculations. Integrations that used these globals to invalidate the engine must use the owning runtime's `clearArrayObjectCache()` and `clearInvertedIndexCache()` hooks instead. Facade usage, workbook IDs, snapshots, and collaboration changesets are unchanged.
 
+## Formula reference compatibility
+
+Reference-form `INDEX` returns `#VALUE!` when its areas span different worksheets or workbooks. References that resolve to the same worksheet remain valid.
+
+Use whole-span quoting for quoted 3D ranges, such as `'Jan:Mar'!B2:C3`. Separately quoted endpoints, such as `'Jan':'Mar'!B2:C3`, return `#NAME?`. Adjust formulas that depend on these invalid forms or their previous incorrect results. Workbook/Worksheet models, persisted snapshots, and mutation formats require no migration.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

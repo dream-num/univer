@@ -752,6 +752,89 @@ describe('spreadsheet integration', () => {
         skeleton.dispose();
     });
 
+    it.each([
+        { system: 'Linux', browser: 'Safari', fractional: true, printing: false, corner: true, native: true },
+        { system: 'Mac', browser: 'Safari', fractional: true, printing: false, corner: true, native: false },
+        { system: 'Unknown system', browser: 'Safari', fractional: true, printing: false, corner: true, native: false },
+        { system: 'Linux', browser: 'Chrome', fractional: true, printing: false, corner: true, native: false },
+        { system: 'Linux', browser: 'Safari', fractional: false, printing: false, corner: true, native: false },
+        { system: 'Linux', browser: 'Safari', fractional: true, printing: true, corner: true, native: false },
+        { system: 'Linux', browser: 'Safari', fractional: true, printing: false, corner: false, native: false },
+    ])('preserves native frozen-corner coverage without changing other cache paths: %j', (scenario) => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const mainCtx = mainCanvas.getContext();
+        vi.spyOn(mainCtx, 'getSystemType').mockReturnValue(scenario.system);
+        vi.spyOn(mainCtx, 'getBrowserType').mockReturnValue(scenario.browser);
+        mainCtx.__mode = scenario.printing ? 'printing' : 'rendering';
+        const drawSpy = vi.spyOn(spreadsheet, 'draw');
+        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const info = createViewportInfo(scene, cacheCanvas, {
+            viewportKey: scenario.corner ? SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP : SHEET_VIEWPORT_KEY.VIEW_MAIN,
+            viewPortPosition: createBound(scenario.fractional ? 30.82 : 30, 16, 140, 67),
+        });
+
+        spreadsheet.render(mainCtx, info);
+
+        expect(drawSpy.mock.calls.some(([ctx]) => ctx === mainCtx)).toBe(scenario.native);
+        expect(refreshSpy).toHaveBeenCalledTimes(scenario.native ? 0 : 1);
+        expect(drawSpy.mock.calls.filter(([ctx]) => ctx === mainCtx)).toHaveLength(scenario.native ? 1 : 0);
+        expect(drawSpy.mock.calls.some(([ctx]) => ctx === cacheCanvas.getContext())).toBe(!scenario.native);
+        skeleton.dispose();
+    });
+
+    it('rebuilds the frozen-corner bitmap once after native paints even on a clean return to integral bounds', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const mainCtx = mainCanvas.getContext();
+        vi.spyOn(mainCtx, 'getSystemType').mockReturnValue('Linux');
+        vi.spyOn(mainCtx, 'getBrowserType').mockReturnValue('Safari');
+        const drawSpy = vi.spyOn(spreadsheet, 'draw');
+        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        spreadsheet.render(mainCtx, createViewportInfo(scene, cacheCanvas, {
+            viewportKey: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+            viewPortPosition: createBound(30, 16, 140, 67),
+        }));
+        expect(refreshSpy).toHaveBeenCalledOnce();
+        drawSpy.mockClear();
+        refreshSpy.mockClear();
+        spreadsheet.makeDirty(false);
+        const info = createViewportInfo(scene, cacheCanvas, {
+            viewportKey: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+            diffBounds: [],
+            diffCacheBounds: [],
+            viewPortPosition: createBound(30.82, 16, 140, 67),
+        });
+        spreadsheet.render(mainCtx, info);
+        spreadsheet.makeDirty(true);
+        spreadsheet.render(mainCtx, info);
+        expect(refreshSpy).not.toHaveBeenCalled();
+        expect(drawSpy.mock.calls.filter(([ctx]) => ctx === mainCtx)).toHaveLength(2);
+
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        drawSpy.mockClear();
+        const clean = {
+            ...info,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+            diffBounds: [],
+            diffCacheBounds: [],
+            diffX: 0,
+            diffY: 0,
+            viewPortPosition: createBound(30, 16, 140, 67),
+        };
+        spreadsheet.render(mainCtx, clean);
+        expect(drawSpy.mock.calls.some(([ctx]) => ctx === mainCtx)).toBe(false);
+        expect(refreshSpy).toHaveBeenCalledOnce();
+        spreadsheet.makeDirty(false);
+        spreadsheet.render(mainCtx, clean);
+        expect(refreshSpy).toHaveBeenCalledOnce();
+        skeleton.dispose();
+    });
+
     it('renders sheet content from the header plus outline margin origin', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const mainCtx = mainCanvas.getContext() as any;

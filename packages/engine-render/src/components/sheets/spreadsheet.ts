@@ -332,7 +332,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     private _scrollBufferCanvases = new Map<string, Canvas>();
-    private _scrollCacheStates = new Map<string, IScrollCacheState>();
+    private _scrollCacheStates = new Map<string, IScrollCacheState | null>();
     private readonly _gridlineCache = new RenderPrimitiveCache();
     private _backgroundExtension!: Background;
 
@@ -630,6 +630,14 @@ export class Spreadsheet extends SheetComponent {
 
     renderByViewports(mainCtx: UniverRenderingContext2D, inputViewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
         let viewportInfo = inputViewportInfo;
+        if (viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && mainCtx.__mode !== 'printing'
+            && mainCtx._context && mainCtx.getSystemType() === 'Linux' && mainCtx.getBrowserType() === 'Safari'
+            && this._hasFractionalViewportPixels(viewportInfo)) {
+            // WebKit varies fractional frozen-corner bitmap coverage; invalidate the bitmap and use native extension draws.
+            this._scrollCacheStates.set(viewportInfo.viewportKey, null);
+            this.draw(mainCtx, viewportInfo);
+            return;
+        }
         const cacheState = this._getScrollCacheState(mainCtx, viewportInfo);
         const previousState = this._getReusableScrollCacheState(mainCtx, viewportInfo);
         if (previousState) {

@@ -407,7 +407,7 @@ export class Spreadsheet extends SheetComponent {
      * @param ctx
      * @param viewportInfo
      */
-    override draw(ctx: UniverRenderingContext2D, viewportInfo: IViewportInfo, isMergeRepair = false) {
+    override draw(ctx: UniverRenderingContext2D, viewportInfo: IViewportInfo, isMergeRepair = false, textClipBound?: IBoundRectNoAngle) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
@@ -460,10 +460,13 @@ export class Spreadsheet extends SheetComponent {
         };
 
         drawBackgroundExtensions(diffRanges, viewRanges);
+        // Overwrite opaque interiors only inside the offscreen cache's integer device clip.
+        const repairNativeGridlines = !!ctx._context && ctx.__mode !== 'printing' && ctx.getSystemType() === 'Linux'
+            && this.allowCache && ctx._context.canvas === (scene?.getViewport(viewportInfo.viewportKey)?.canvas ?? viewportInfo.cacheCanvas)?.getCanvasEle();
         this._gridlineCache.draw(ctx, () => {
             this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
                 drawBackgroundExtensions(clearedRanges, clearedRanges);
-            });
+            }, repairNativeGridlines);
         });
 
         for (const extension of gridExtensions) {
@@ -489,6 +492,7 @@ export class Spreadsheet extends SheetComponent {
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
                 diffBounds: viewportInfo.diffBounds,
+                textClipBound,
             } as IDrawInfo);
             const cost = Tools.now() - st;
             this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
@@ -915,6 +919,7 @@ export class Spreadsheet extends SheetComponent {
                 const w = diffRight - diffLeft;
                 const h = diffBottom - diffTop; // w and h must exactly match the diffarea size, otherwise when scrolling back, the clear area will be too large, causing valid content from the previous frame to be erased
                 let renderBound = diffBound;
+                let textClipBound: IBoundRectNoAngle | undefined;
 
                 renderCacheCtx.save();
                 if (cacheState.axisAligned) {
@@ -923,6 +928,7 @@ export class Spreadsheet extends SheetComponent {
                     const top = Math.round(y * m.d) + cacheState.top;
                     const width = Math.round((x + w) * m.a) + cacheState.left - left;
                     const height = Math.round((y + h) * m.d) + cacheState.top - top;
+                    textClipBound = { left, top, right: left + width, bottom: top + height };
                     renderCacheCtx.setTransform(1, 0, 0, 1, 0, 0);
                     renderCacheCtx.clearRect(left, top, width, height);
                     renderCacheCtx.beginPath();
@@ -945,7 +951,7 @@ export class Spreadsheet extends SheetComponent {
                 this.draw(renderCacheCtx, {
                     ...viewportInfo,
                     diffBounds: [renderBound],
-                }, repairsMerge);
+                }, repairsMerge, textClipBound);
                 renderCacheCtx.restore();
             }
         }
@@ -1217,7 +1223,8 @@ export class Spreadsheet extends SheetComponent {
     private _drawAuxiliary(
         ctx: UniverRenderingContext2D,
         hasMergeData = true,
-        redrawBackgrounds?: (ranges: IRange[]) => void
+        redrawBackgrounds?: (ranges: IRange[]) => void,
+        repairNativeGridlines = false
     ) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
@@ -1277,6 +1284,9 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.closePathByEnv();
         ctx.stroke();
+        if (repairNativeGridlines) {
+            this._repairGridlineStroke(ctx, startX, startY, endX, endY);
+        }
 
         const mergeVisibleRanges: IRange[] = [];
         let mergeVisibleRangeStartRow = startRow;
@@ -1339,7 +1349,7 @@ export class Spreadsheet extends SheetComponent {
                 mergeCellRanges.push(...mergeRangeInVisible);
             }
         }
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges, redrawBackgrounds);
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges, redrawBackgrounds, repairNativeGridlines);
 
         // clear line of overflow cell
         this._clearRectangle(
@@ -1347,7 +1357,8 @@ export class Spreadsheet extends SheetComponent {
             rowHeightAccumulation,
             columnWidthAccumulation,
             overflowCache.toNativeArray(),
-            redrawBackgrounds
+            redrawBackgrounds,
+            repairNativeGridlines
         );
 
         // Draw gap areas AFTER merge/overflow clearing so gap visuals are always on top
@@ -1364,7 +1375,8 @@ export class Spreadsheet extends SheetComponent {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         cellRanges?: IRange[],
-        redrawBackgrounds?: (ranges: IRange[]) => void
+        redrawBackgrounds?: (ranges: IRange[]) => void,
+        repairNativeGridlines = false
     ) {
         if (!cellRanges?.length) {
             return;
@@ -1408,7 +1420,55 @@ export class Spreadsheet extends SheetComponent {
             ctx.lineToByPrecision(left, bottom);
             ctx.lineToByPrecision(left, top);
             ctx.stroke();
+            if (repairNativeGridlines) {
+                this._repairGridlineStroke(ctx, left, top, right, bottom, true);
+            }
             ctx.closePath();
+        }
+    }
+
+    private _repairGridlineStroke(ctx: UniverRenderingContext2D, left: number, top: number, right: number, bottom: number, rectangle = false) {
+        const native = ctx._context;
+        const m = native.getTransform();
+        const colorSpace = native.getContextAttributes?.()?.colorSpace;
+        if (m.a !== m.d || m.a <= 0 || m.b || m.c || (colorSpace && colorSpace !== 'srgb')
+            || native.globalAlpha !== 1 || native.globalCompositeOperation !== 'source-over'
+            || typeof native.strokeStyle !== 'string' || !/^#[\da-f]{6}$/i.test(native.strokeStyle)
+            || native.getLineDash().length || native.lineCap !== 'butt' || native.lineJoin !== 'miter'
+            || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
+            || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
+            || (native.filter && native.filter !== 'none')) {
+            return;
+        }
+        const width = native.lineWidth * m.a;
+        const padding = Math.round(width) * 2 + 2;
+        const segments: Array<[number, number, number, number]> = [[left, top, right, top], [left, top, left, bottom]];
+        if (rectangle) {
+            segments.push([left, bottom, right, bottom], [right, top, right, bottom]);
+        }
+        native.save();
+        try {
+            native.setTransform(1, 0, 0, 1, 0, 0);
+            native.fillStyle = native.strokeStyle;
+            for (const [x0, y0, x1, y1] of segments) {
+                const horizontal = y0 === y1;
+                const start = Math.round((horizontal ? x0 : y0) * m.a) + (horizontal ? m.e : m.f);
+                const end = Math.round((horizontal ? x1 : y1) * m.a) + (horizontal ? m.e : m.f);
+                const center = Math.round((horizontal ? y0 : x0) * m.a) + (horizontal ? m.f : m.e);
+                const low = center - width / 2;
+                const high = center + width / 2;
+                const lowPixel = Math.round(low);
+                const highPixel = Math.round(high);
+                const from = Math.ceil(Math.min(start, end) + padding);
+                const to = Math.floor(Math.max(start, end) - padding);
+                if (Math.abs(low - lowPixel) > 1e-6 || Math.abs(high - highPixel) > 1e-6 || highPixel <= lowPixel || to <= from) {
+                    continue;
+                }
+                // Linux software strokes can leave interior holes; preserve native corners and their coverage.
+                native.fillRect(horizontal ? from : lowPixel, horizontal ? lowPixel : from, horizontal ? to - from : highPixel - lowPixel, horizontal ? highPixel - lowPixel : to - from);
+            }
+        } finally {
+            native.restore();
         }
     }
 

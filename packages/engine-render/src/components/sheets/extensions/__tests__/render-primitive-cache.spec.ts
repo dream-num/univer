@@ -70,6 +70,104 @@ describe('render primitive raster cache', () => {
         expect(native.getTransform().e).toBe(-162);
     });
 
+    it.each(['horizontal', 'vertical', 'reverse', 'fractional-width', 'dash', 'round-cap', 'round-join', 'zero'])('retains native stroke semantics for %s lines', (mode) => {
+        const image = vi.spyOn(native, 'drawImage');
+        if (mode === 'fractional-width') ctx.lineWidth = 2;
+        if (mode === 'dash') ctx.setLineDash([2, 2]);
+        if (mode === 'round-cap') ctx.lineCap = 'round';
+        if (mode === 'round-join') ctx.lineJoin = 'round';
+        cache.draw(ctx, () => {
+            ctx.beginPath();
+            ctx.moveTo(10.5, 20.5);
+            ctx.lineTo(mode === 'vertical' || mode === 'zero' ? 10.5 : mode === 'reverse' ? 2.5 : 64.5, mode === 'vertical' ? 64.5 : 20.5);
+            ctx.closePath();
+            ctx.stroke();
+        });
+        const paint = (image.mock.calls[0][0] as HTMLCanvasElement).getContext('2d')!;
+        const usesRectangle = ['horizontal', 'vertical', 'reverse'].includes(mode);
+        expect(paint.fillRect).toHaveBeenCalledTimes(usesRectangle ? 1 : 0);
+        expect(paint.stroke).toHaveBeenCalledTimes(usesRectangle ? 0 : 1);
+        expect(native.strokeStyle).toBe('#1d4ed8');
+        expect(native.getTransform()).toMatchObject({ a: 1, d: 1, e: 0, f: 0 });
+    });
+
+    it.each([20, 21, 30])('repairs only antialiased text edges culled by the damage clip at %s', (top) => {
+        const text = vi.spyOn(native, 'fillText');
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), { left: 0, top, right: 100, bottom: 40 });
+
+        expect(image).toHaveBeenCalledTimes(top === 21 ? 1 : 0);
+        expect(text).toHaveBeenCalledTimes(top === 21 ? 0 : 1);
+    });
+
+    it.each(['left', 'right', 'top', 'bottom'])('repairs a culled %s text edge in transformed physical pixels', (edge) => {
+        ctx.setTransform(2, 0, 0, 2, 10, 14);
+        const text = vi.spyOn(native, 'fillText');
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        const clip = { left: 0, top: 0, right: 100, bottom: 100 };
+        if (edge === 'left') clip.left = 36;
+        if (edge === 'right') clip.right = 14;
+        if (edge === 'top') clip.top = 56;
+        if (edge === 'bottom') clip.bottom = 34;
+        cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), clip);
+
+        expect(image).toHaveBeenCalledOnce();
+        expect(text).not.toHaveBeenCalled();
+        expect(native.getTransform()).toMatchObject({ a: 2, d: 2, e: 10, f: 14 });
+    });
+
+    it('keeps text decorations native and releases the damage bound after exceptions', () => {
+        const stroke = vi.spyOn(native, 'stroke');
+        const image = vi.spyOn(native, 'drawImage');
+        expect(() => cache.draw(ctx, () => {
+            ctx.beginPath();
+            ctx.moveTo(10, 20);
+            ctx.lineTo(64, 20);
+            ctx.stroke();
+            throw new Error('failed repair');
+        }, { left: 0, top: 21, right: 100, bottom: 40 })).toThrow('failed repair');
+        expect(stroke).toHaveBeenCalledOnce();
+        expect(image).not.toHaveBeenCalled();
+
+        line();
+        expect(stroke).toHaveBeenCalledOnce();
+        expect(image).toHaveBeenCalledOnce();
+        expect(ctx._context).toBe(native);
+    });
+
+    it.each([1e-8, -1e-8, 1e-4])('distinguishes Float32 stroke drift from intentional fractional edges: %s', (drift) => {
+        const scale = 1.340000033378601;
+        ctx.setTransform(scale, 0, 0, scale, 0.5, 0.5 + drift);
+        ctx.lineWidth = 0.999999989146616 / scale;
+        const image = vi.spyOn(native, 'drawImage');
+        cache.draw(ctx, () => {
+            ctx.beginPath();
+            ctx.moveTo(10 / scale, 20 / scale);
+            ctx.lineTo(64 / scale, 20 / scale);
+            ctx.stroke();
+        });
+        const paint = (image.mock.calls[0][0] as HTMLCanvasElement).getContext('2d')!;
+        if (Math.abs(drift) < 1e-6) {
+            expect(paint.fillRect).toHaveBeenCalledWith(expect.any(Number), 3, expect.any(Number), 1);
+            expect(paint.stroke).not.toHaveBeenCalled();
+        } else {
+            expect(paint.fillRect).not.toHaveBeenCalled();
+            expect(paint.stroke).toHaveBeenCalledOnce();
+        }
+    });
+
     it('keeps color, dash, width, fractional phase and physical scale in the bitmap identity', () => {
         const image = vi.spyOn(native, 'drawImage');
         line();

@@ -38,6 +38,8 @@ export interface IDrawInfo {
     fontRenderRanges?: IRange[];
     hasMergeData?: boolean;
     viewBound?: IBoundRectNoAngle;
+    /** Physical-pixel damage clip, before any extension-specific clipping. */
+    textClipBound?: IBoundRectNoAngle;
 }
 export class ComponentExtension<T, U, V> {
     uKey: string = '';

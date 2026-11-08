@@ -395,6 +395,39 @@ describe('spreadsheet integration', () => {
         expect(borderDraw.mock.invocationCallOrder[0]).toBeLessThan(lateDraw.mock.invocationCallOrder[0]);
     });
 
+    it.each(['cache', 'swapped-cache', 'stale-cache', 'main', 'mac', 'printing', 'disabled'])('limits native gridline interior repair to the current Linux cache: %s', (mode) => {
+        const { spreadsheet, skeleton, scene, viewport, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas);
+        skeleton.setStylesCache(info);
+        const previousCache = viewport.canvas!;
+        if (mode === 'swapped-cache') {
+            viewport.swapCacheCanvas(cacheCanvas);
+        }
+        let canvas = viewport.canvas!;
+        if (mode === 'main') {
+            canvas = mainCanvas;
+        } else if (mode === 'stale-cache') {
+            canvas = cacheCanvas;
+        }
+        const context = canvas.getContext();
+        vi.spyOn(context, 'getSystemType').mockReturnValue(mode === 'mac' ? 'Mac' : 'Linux');
+        if (mode === 'printing') {
+            context.__mode = 'printing';
+        }
+        if (mode === 'disabled') {
+            vi.spyOn(spreadsheet, 'allowCache', 'get').mockReturnValue(false);
+        }
+        const repair = vi.spyOn(spreadsheet as unknown as {
+            _repairGridlineStroke: (...args: unknown[]) => void;
+        }, '_repairGridlineStroke');
+        try {
+            spreadsheet.draw(context, info);
+        } finally {
+            viewport.swapCacheCanvas(previousCache);
+        }
+        expect(repair.mock.calls.length > 0).toBe(mode === 'cache' || mode === 'swapped-cache');
+    });
+
     it('updates the mixed screen gridline color after theme changes', () => {
         const { scene, skeleton, viewport } = fixture;
         const themeService = fixture.univer.__getInjector().get(ThemeService);

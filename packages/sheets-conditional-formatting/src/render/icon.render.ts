@@ -40,6 +40,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
     private _width = DEFAULT_WIDTH;
 
     private _imageMap: Map<string, HTMLImageElement> = new Map();
+    private _iconCanvas?: HTMLCanvasElement;
     private readonly _pendingImages = new Set<HTMLImageElement>();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
@@ -123,13 +124,18 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
                 // Highly centered processing
                 const y = (borderHeight - this._width) / 2 + startY;
-                ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
+                this._drawIcon(ctx, icon, startX + this._paddingRightAndLeft, y);
             });
         });
         ctx.restore();
     }
 
     override dispose(): void {
+        if (this._iconCanvas) {
+            this._iconCanvas.width = 0;
+            this._iconCanvas.height = 0;
+            this._iconCanvas = undefined;
+        }
         for (const image of this._pendingImages) {
             image.onload = null;
         }
@@ -137,6 +143,53 @@ export class ConditionalFormattingIcon extends SheetExtension {
         this._imageMap.clear();
         this._renderRangeResolver = null;
         super.dispose();
+    }
+
+    private _drawIcon(ctx: UniverRenderingContext, image: HTMLImageElement, x: number, y: number): void {
+        const native = ctx._context;
+        const m = native?.getTransform();
+        const colorSpace = native?.getContextAttributes?.()?.colorSpace;
+        if (!m || ctx.__mode === 'printing' || ctx.getSystemType() !== 'Linux' || typeof document === 'undefined'
+            || m.a !== m.d || m.a <= 0 || m.b || m.c || native.globalAlpha !== 1
+            || native.globalCompositeOperation !== 'source-over' || (colorSpace && colorSpace !== 'srgb')
+            || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
+            || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
+            || (native.filter && native.filter !== 'none')) {
+            ctx.drawImage(image, x, y, this._width, this._width);
+            return;
+        }
+        const px = x * m.a + m.e;
+        const py = y * m.d + m.f;
+        const left = Math.floor(px) - 2;
+        const top = Math.floor(py) - 2;
+        const width = Math.ceil(px + this._width * m.a) - left + 2;
+        const height = Math.ceil(py + this._width * m.d) - top + 2;
+        if (!Number.isFinite(width * height) || width * height > 128 * 1024) {
+            ctx.drawImage(image, x, y, this._width, this._width);
+            return;
+        }
+        const canvas = this._iconCanvas ?? document.createElement('canvas');
+        const paint = canvas.getContext('2d');
+        if (!paint) {
+            ctx.drawImage(image, x, y, this._width, this._width);
+            return;
+        }
+        this._iconCanvas = canvas;
+        canvas.width = width;
+        canvas.height = height;
+        // Linux SVG rasterization can vary under integer translation; keep native DPR at a local origin.
+        paint.setTransform(m.a, 0, 0, m.d, px - left, py - top);
+        paint.imageSmoothingEnabled = native.imageSmoothingEnabled;
+        paint.imageSmoothingQuality = native.imageSmoothingQuality;
+        paint.drawImage(image, 0, 0, this._width, this._width);
+        ctx.save();
+        try {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(canvas, left, top);
+        } finally {
+            ctx.restore();
+        }
     }
 
     private _init() {

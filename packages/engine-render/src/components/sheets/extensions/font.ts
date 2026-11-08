@@ -267,8 +267,8 @@ export class Font extends SheetExtension {
                     }
 
                     renderFontContext.cellInfo = cellInfo;
-                    if (fontCache.documentSkeleton) {
-                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache));
+                    if (fontCache.documentSkeleton || moreBoundsInfo.textClipBound) {
+                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache), fontCache.documentSkeleton ? undefined : moreBoundsInfo.textClipBound);
                     } else {
                         this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
                     }

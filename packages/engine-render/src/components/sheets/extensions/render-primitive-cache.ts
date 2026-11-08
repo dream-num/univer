@@ -15,6 +15,7 @@
  */
 
 import { Disposable } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { createCanvasElement } from '../../../basics/tools';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
@@ -57,8 +58,9 @@ export class RenderPrimitiveCache extends Disposable {
     private _pixels = 0;
     private _fontRevision = -1;
     private _fonts?: FontFaceSet;
+    private _textClipBound?: IBoundRectNoAngle;
 
-    draw(ctx: UniverRenderingContext, draw: () => void): void {
+    draw(ctx: UniverRenderingContext, draw: () => void, textClipBound?: IBoundRectNoAngle): void {
         const original = ctx._context;
         const colorSpace = original?.getContextAttributes?.()?.colorSpace;
         if (ctx.__mode === 'printing' || !original || typeof document === 'undefined'
@@ -66,11 +68,14 @@ export class RenderPrimitiveCache extends Disposable {
             draw();
             return;
         }
+        const previousTextClipBound = this._textClipBound;
+        this._textClipBound = textClipBound;
         ctx._context = this._getContext(original);
         try {
             draw();
         } finally {
             ctx._context = original;
+            this._textClipBound = previousTextClipBound;
         }
     }
 
@@ -158,7 +163,7 @@ export class RenderPrimitiveCache extends Disposable {
 
     private _stroke(native: CanvasRenderingContext2D, path: IStrokePath, args: unknown[]): void {
         const m = native.getTransform();
-        if (args.length || path.unsupported || path.points.length !== 2 || m.a !== m.d || m.a <= 0 || m.b || m.c
+        if (this._textClipBound || args.length || path.unsupported || path.points.length !== 2 || m.a !== m.d || m.a <= 0 || m.b || m.c
             || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
             || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
             || (native.filter && native.filter !== 'none') || typeof native.strokeStyle !== 'string'
@@ -224,7 +229,30 @@ export class RenderPrimitiveCache extends Disposable {
             if (path.closed) {
                 paint.closePath();
             }
-            paint.stroke();
+            const halfWidth = native.lineWidth * m.a / 2;
+            const horizontal = localY0 === localY1 && localX0 !== localX1;
+            const vertical = localX0 === localX1 && localY0 !== localY1;
+            const center = horizontal ? localY0 : localX0;
+            const low = center - halfWidth;
+            const high = center + halfWidth;
+            // DOMMatrix's Float32 scale can slightly shift otherwise integral physical edges.
+            const lowPixel = Math.round(low);
+            const highPixel = Math.round(high);
+            if ((horizontal || vertical) && !dash.length && native.lineCap === 'butt'
+                && (!path.closed || native.lineJoin === 'miter')
+                && Math.abs(low - lowPixel) <= 1e-6 && Math.abs(high - highPixel) <= 1e-6 && highPixel > lowPixel) {
+                // Native software strokes can leave length-dependent gaps even on pixel-aligned straight lines.
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+                paint.fillStyle = native.strokeStyle;
+                paint.fillRect(
+                    horizontal ? Math.min(localX0, localX1) : lowPixel,
+                    vertical ? Math.min(localY0, localY1) : lowPixel,
+                    horizontal ? Math.abs(localX1 - localX0) : highPixel - lowPixel,
+                    vertical ? Math.abs(localY1 - localY0) : highPixel - lowPixel
+                );
+            } else {
+                paint.stroke();
+            }
             bitmap = { canvas, pixels: width * height };
             this._trim(bitmap.pixels);
             this._bitmaps.set(key, bitmap);
@@ -275,6 +303,21 @@ export class RenderPrimitiveCache extends Disposable {
         const py = (args[2] as number) * m.d + m.f;
         const ix = Math.floor(px);
         const iy = Math.floor(py);
+        let metrics: TextMetrics | undefined;
+        if (this._textClipBound) {
+            metrics = native.measureText(text);
+            const left = px - metrics.actualBoundingBoxLeft * m.a;
+            const right = px + metrics.actualBoundingBoxRight * m.a;
+            const top = py - metrics.actualBoundingBoxAscent * m.d;
+            const bottom = py + metrics.actualBoundingBoxDescent * m.d;
+            const clip = this._textClipBound;
+            // Keep native rasterization unless its bounds cull a still-visible antialiased edge.
+            if ((right > clip.left && left < clip.right && bottom > clip.top && top < clip.bottom)
+                || right < clip.left - 2 || left > clip.right + 2 || bottom < clip.top - 2 || top > clip.bottom + 2) {
+                fallback();
+                return;
+            }
+        }
         const values = TEXT_PROPERTIES.map((property) => Reflect.get(native, property));
         const language = native.canvas.closest('[lang]')?.getAttribute('lang') ?? document.documentElement.lang;
         if (native.direction === 'inherit' && !['ltr', 'rtl'].includes(native.canvas.dir)) {
@@ -295,7 +338,7 @@ export class RenderPrimitiveCache extends Disposable {
         ]);
         let bitmap = this._bitmaps.get(key);
         if (!bitmap) {
-            const metrics = native.measureText(text);
+            metrics ??= native.measureText(text);
             const left = Math.floor(px - metrics.actualBoundingBoxLeft * m.a) - 2;
             const top = Math.floor(py - metrics.actualBoundingBoxAscent * m.d) - 2;
             const width = Math.ceil(px + metrics.actualBoundingBoxRight * m.a) - left + 2;

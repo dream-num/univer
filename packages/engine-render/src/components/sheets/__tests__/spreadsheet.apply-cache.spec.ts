@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi } from 'vitest';
 import type { Canvas } from '../../../canvas';
 import type { UniverRenderingContext2D } from '../../../context';
-import { describe, expect, it, vi } from 'vitest';
+import { UniverRenderingContext } from '../../../context';
 import { Spreadsheet } from '../spreadsheet';
 
 interface ISpreadsheetApplyCache {
+    _repairGridlineStroke: (ctx: UniverRenderingContext2D, left: number, top: number, right: number, bottom: number, rectangle?: boolean) => void;
     _applyCache: (
         cacheCanvas: Canvas,
         ctx: UniverRenderingContext2D,
@@ -180,5 +182,67 @@ describe('spreadsheet _applyCache blit clipping', () => {
             0,
             200
         );
+    });
+});
+
+describe('spreadsheet native cache gridline interiors', () => {
+    it.each(['opaque', 'alpha', 'translucent', 'fractional', 'shadow', 'dash', 'filter', 'color-space'])('preserves native corners, style composition and texture bounds for %s', (mode) => {
+        const spreadsheet = new Spreadsheet('native-grid-test');
+        const native = document.createElement('canvas').getContext('2d')!;
+        const ctx = new UniverRenderingContext(native);
+        ctx.setTransform(1.5, 0, 0, 1.5, mode === 'fractional' ? 0.51 : 0.5, mode === 'fractional' ? 0.51 : 0.5);
+        ctx.lineWidth = 2 / 3;
+        native.strokeStyle = mode === 'translucent' ? 'rgba(29,78,216,0.5)' : '#1d4ed8';
+        native.fillStyle = '#be123c';
+        if (mode === 'alpha') {
+            native.globalAlpha = 0.5;
+        }
+        if (mode === 'shadow') {
+            native.shadowBlur = 2;
+        }
+        if (mode === 'dash') {
+            native.setLineDash([2, 2]);
+        }
+        if (mode === 'filter') {
+            native.filter = 'blur(2px)';
+        }
+        if (mode === 'color-space') {
+            Object.defineProperty(native, 'getContextAttributes', { value: () => ({ colorSpace: 'display-p3' }) });
+        }
+        const fill = vi.spyOn(native, 'fillRect');
+        const allocation = vi.spyOn(document, 'createElement');
+        try {
+            (spreadsheet as unknown as ISpreadsheetApplyCache)._repairGridlineStroke(ctx, 10, 20, 10000, 10000, true);
+            expect(fill).toHaveBeenCalledTimes(mode === 'opaque' ? 4 : 0);
+            if (mode === 'opaque') {
+                expect(fill).toHaveBeenNthCalledWith(1, 20, 30, 14976, 1);
+                for (const rect of fill.mock.calls) {
+                    expect(rect.every(Number.isInteger)).toBe(true);
+                    expect(Math.min(rect[2], rect[3])).toBe(1);
+                }
+            }
+            expect(allocation).not.toHaveBeenCalled();
+            expect(native.fillStyle).toBe('#be123c');
+            expect(native.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: mode === 'fractional' ? 0.51 : 0.5 });
+        } finally {
+            allocation.mockRestore();
+            spreadsheet.dispose();
+        }
+    });
+
+    it('restores native drawing state when an interior repair throws', () => {
+        const spreadsheet = new Spreadsheet('native-grid-error');
+        const native = document.createElement('canvas').getContext('2d')!;
+        const ctx = new UniverRenderingContext(native);
+        ctx.setTransform(1, 0, 0, 1, 0.5, 0.5);
+        native.strokeStyle = '#1d4ed8';
+        native.fillStyle = '#be123c';
+        vi.spyOn(native, 'fillRect').mockImplementation(() => {
+            throw new Error('failed repair');
+        });
+        expect(() => (spreadsheet as unknown as ISpreadsheetApplyCache)._repairGridlineStroke(ctx, 10, 20, 100, 100)).toThrow('failed repair');
+        expect(native.fillStyle).toBe('#be123c');
+        expect(native.getTransform()).toMatchObject({ a: 1, d: 1, e: 0.5, f: 0.5 });
+        spreadsheet.dispose();
     });
 });

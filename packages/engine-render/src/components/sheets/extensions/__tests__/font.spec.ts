@@ -1002,6 +1002,30 @@ describe('font extension', () => {
         expect(renderCellSpy).toHaveBeenCalledOnce();
     });
 
+    it.each([true, false])('preserves native overflow rasterization outside damage repairs: %s', (hasClip) => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const skeleton = createSpreadsheetSkeleton();
+        const matrix = new ObjectMatrix<any>();
+        matrix.setValue(0, 0, createFontCache({ textFitsCurrentCell: false }));
+        skeleton.stylesCache = { fontMatrix: matrix };
+        skeleton.columnTotalWidth = 120;
+        skeleton.rowTotalHeight = 60;
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        const clip = hasClip ? { left: 0, top: 19, right: 120, bottom: 60 } : undefined;
+        const raster = vi.spyOn(font._primitiveCache, 'draw');
+        vi.spyOn(font, '_renderFontEachCell').mockReturnValue(false);
+
+        font.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [range], {
+            viewRanges: [range],
+            viewportKey: 'viewMain',
+            textClipBound: clip,
+        });
+
+        expect(raster).toHaveBeenCalledTimes(hasClip ? 1 : 0);
+        if (hasClip) expect(raster).toHaveBeenCalledWith(ctx, expect.any(Function), clip);
+    });
+
     it('skips font work for rows that are too short to display text on screen', () => {
         const font = new Font() as any;
         const ctx = createCtx();

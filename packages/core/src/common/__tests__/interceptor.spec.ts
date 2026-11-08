@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AsyncInterceptorManager, createAsyncInterceptorKey, createInterceptorKey, InterceptorManager } from '../interceptor';
 
 describe('Test interceptor', () => {
@@ -88,5 +88,234 @@ describe('interceptor subscription cleanup', () => {
         expect(() => release()).not.toThrow();
         expect(await manager.fetchThroughAsyncInterceptors(key)(false, false)).toBe(true);
         expect(() => release()).not.toThrow();
+    });
+});
+
+describe('synchronous interceptor lifecycle', () => {
+    it('preserves priority, context, filtering and cached chains when unregistering', () => {
+        const key = createInterceptorKey<number, number>('chain');
+        const manager = new InterceptorManager({ key });
+        const calls: string[] = [];
+        manager.intercept(key, {
+            priority: 0,
+            handler: (value, context, next) => {
+                calls.push('last');
+                return next(value! + context);
+            },
+        });
+        const release = manager.intercept(key, {
+            priority: 5,
+            handler: (value, _context, next) => {
+                calls.push('middle');
+                return next(value! * 2);
+            },
+        });
+        manager.intercept(key, {
+            priority: 10,
+            handler: (value, context, next) => {
+                calls.push('first');
+                return next(value! + context);
+            },
+        });
+        const chain = manager.fetchThroughInterceptors(key);
+        const filtered = manager.fetchThroughInterceptors(key, (entry) => entry.priority! >= 5);
+        expect(chain(1, 2)).toBe(8);
+        expect(calls).toEqual(['first', 'middle', 'last']);
+        expect(filtered(1, 2)).toBe(6);
+        expect(release()).toBe(true);
+        expect(chain(1, 2)).toBe(5);
+        expect(filtered(1, 2)).toBe(6);
+    });
+
+    it('preserves short circuiting and propagates handler errors', () => {
+        const key = createInterceptorKey<boolean, null>('validation');
+        const manager = new InterceptorManager({ key });
+        const tail = vi.fn(() => true);
+        manager.intercept(key, { priority: 0, handler: tail });
+        const release = manager.intercept(key, { priority: 10, handler: () => false });
+        expect(manager.fetchThroughInterceptors(key)(true, null)).toBe(false);
+        expect(tail).not.toHaveBeenCalled();
+        release();
+        expect(manager.fetchThroughInterceptors(key)(false, null)).toBe(true);
+        const error = new Error('validation failed');
+        manager.intercept(key, {
+            priority: 20,
+            handler: () => {
+                throw error;
+            },
+        });
+        expect(() => manager.fetchThroughInterceptors(key)(true, null)).toThrow(error);
+    });
+
+    it('does not remove another registration when an old callback is called twice', () => {
+        const key = createInterceptorKey<boolean, null>('repeated-release');
+        const manager = new InterceptorManager({ key });
+        const handler = { handler: () => true };
+        const release = manager.intercept(key, handler);
+        const releaseOther = manager.intercept(key, handler);
+        expect(release()).toBe(true);
+        expect(release()).toBe(false);
+        expect(manager.fetchThroughInterceptors(key)(false, null)).toBe(true);
+        expect(releaseOther()).toBe(true);
+        expect(manager.fetchThroughInterceptors(key)(false, null)).toBe(false);
+    });
+
+    it('rejects an uncalled stale callback after disposal and re-registration', () => {
+        const key = createInterceptorKey<boolean, null>('generation');
+        const manager = new InterceptorManager({ key });
+        const handler = { handler: () => true };
+        const release = manager.intercept(key, handler);
+        manager.dispose();
+        manager.dispose();
+        const releaseCurrent = manager.intercept(key, handler);
+        expect(release()).toBe(false);
+        expect(manager.fetchThroughInterceptors(key)(false, null)).toBe(true);
+        expect(releaseCurrent()).toBe(true);
+    });
+
+    it('only unregisters from the requested interception point', () => {
+        const first = createInterceptorKey<boolean, null>('first');
+        const second = createInterceptorKey<boolean, null>('second');
+        const manager = new InterceptorManager({ first, second });
+        const handler = { handler: () => true };
+        const release = manager.intercept(first, handler);
+        manager.intercept(second, handler);
+        release();
+        expect(manager.fetchThroughInterceptors(first)(false, null)).toBe(false);
+        expect(manager.fetchThroughInterceptors(second)(false, null)).toBe(true);
+    });
+
+    it('lets a running chain finish when a handler disposes the manager', () => {
+        const key = createInterceptorKey<number, null>('in-flight');
+        const manager = new InterceptorManager({ key });
+        manager.intercept(key, {
+            priority: 10,
+            handler: (value, _context, next) => {
+                manager.dispose();
+                manager.intercept(key, { handler: () => 100 });
+                return next(value! + 1);
+            },
+        });
+        manager.intercept(key, { handler: (value, _context, next) => next(value! * 2) });
+        expect(manager.fetchThroughInterceptors(key)(1, null)).toBe(4);
+        expect(manager.fetchThroughInterceptors(key)(1, null)).toBe(100);
+    });
+});
+
+describe('asynchronous interceptor lifecycle', () => {
+    it('preserves priority, context, filtering and cached chains when unregistering', async () => {
+        const key = createAsyncInterceptorKey<number, number>('chain');
+        const manager = new AsyncInterceptorManager({ key });
+        const calls: string[] = [];
+        await manager.interceptAsync(key, {
+            priority: 0,
+            handler: async (value, context, next) => {
+                calls.push('last');
+                return next(value! + context);
+            },
+        });
+        const release = await manager.interceptAsync(key, {
+            priority: 5,
+            handler: async (value, _context, next) => {
+                calls.push('middle');
+                return next(value! * 2);
+            },
+        });
+        await manager.interceptAsync(key, {
+            priority: 10,
+            handler: async (value, context, next) => {
+                calls.push('first');
+                return next(value! + context);
+            },
+        });
+        const chain = manager.fetchThroughAsyncInterceptors(key);
+        const filtered = manager.fetchThroughAsyncInterceptors(key, (entry) => entry.priority! >= 5);
+        expect(await chain(1, 2)).toBe(8);
+        expect(calls).toEqual(['first', 'middle', 'last']);
+        expect(await filtered(1, 2)).toBe(6);
+        expect(release()).toBe(true);
+        expect(await chain(1, 2)).toBe(5);
+        expect(await filtered(1, 2)).toBe(6);
+    });
+
+    it('preserves short circuiting and propagates handler errors', async () => {
+        const key = createAsyncInterceptorKey<boolean, null>('validation');
+        const manager = new AsyncInterceptorManager({ key });
+        const tail = vi.fn(async () => true);
+        await manager.interceptAsync(key, { priority: 0, handler: tail });
+        const release = await manager.interceptAsync(key, { priority: 10, handler: async () => false });
+        expect(await manager.fetchThroughAsyncInterceptors(key)(true, null)).toBe(false);
+        expect(tail).not.toHaveBeenCalled();
+        release();
+        expect(await manager.fetchThroughAsyncInterceptors(key)(false, null)).toBe(true);
+        const error = new Error('validation failed');
+        await manager.interceptAsync(key, {
+            priority: 20,
+            handler: async () => {
+                throw error;
+            },
+        });
+        await expect(manager.fetchThroughAsyncInterceptors(key)(true, null)).rejects.toThrow(error);
+    });
+
+    it('does not remove another registration when an old callback is called twice', async () => {
+        const key = createAsyncInterceptorKey<boolean, null>('repeated-release');
+        const manager = new AsyncInterceptorManager({ key });
+        const handler = { handler: async () => true };
+        const release = await manager.interceptAsync(key, handler);
+        const releaseOther = await manager.interceptAsync(key, handler);
+        expect(release()).toBe(true);
+        expect(release()).toBe(false);
+        expect(await manager.fetchThroughAsyncInterceptors(key)(false, null)).toBe(true);
+        expect(releaseOther()).toBe(true);
+        expect(await manager.fetchThroughAsyncInterceptors(key)(false, null)).toBe(false);
+    });
+
+    it('rejects an uncalled stale callback after disposal and re-registration', async () => {
+        const key = createAsyncInterceptorKey<boolean, null>('generation');
+        const manager = new AsyncInterceptorManager({ key });
+        const handler = { handler: async () => true };
+        const release = await manager.interceptAsync(key, handler);
+        manager.dispose();
+        manager.dispose();
+        const releaseCurrent = await manager.interceptAsync(key, handler);
+        expect(release()).toBe(false);
+        expect(await manager.fetchThroughAsyncInterceptors(key)(false, null)).toBe(true);
+        expect(releaseCurrent()).toBe(true);
+    });
+
+    it('only unregisters from the requested interception point', async () => {
+        const first = createAsyncInterceptorKey<boolean, null>('first');
+        const second = createAsyncInterceptorKey<boolean, null>('second');
+        const manager = new AsyncInterceptorManager({ first, second });
+        const handler = { handler: async () => true };
+        const release = await manager.interceptAsync(first, handler);
+        await manager.interceptAsync(second, handler);
+        release();
+        expect(await manager.fetchThroughAsyncInterceptors(first)(false, null)).toBe(false);
+        expect(await manager.fetchThroughAsyncInterceptors(second)(false, null)).toBe(true);
+    });
+
+    it('lets an in-flight chain complete after disposal without entering new registrations', async () => {
+        const key = createAsyncInterceptorKey<number, null>('in-flight');
+        const manager = new AsyncInterceptorManager({ key });
+        let resume = () => {};
+        const pending = new Promise<void>((resolve) => {
+            resume = resolve;
+        });
+        await manager.interceptAsync(key, {
+            priority: 10,
+            handler: async (value, _context, next) => {
+                await pending;
+                return next(value! + 1);
+            },
+        });
+        await manager.interceptAsync(key, { handler: async (value, _context, next) => next(value! * 2) });
+        const result = manager.fetchThroughAsyncInterceptors(key)(1, null);
+        manager.dispose();
+        await manager.interceptAsync(key, { handler: async () => 100 });
+        resume();
+        expect(await result).toBe(4);
+        expect(await manager.fetchThroughAsyncInterceptors(key)(1, null)).toBe(100);
     });
 });

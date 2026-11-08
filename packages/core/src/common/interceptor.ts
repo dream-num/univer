@@ -92,6 +92,7 @@ export const composeInterceptors = <T, C>(interceptors: Array<IInterceptor<T, C>
 export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>> {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _interceptorPoints: P;
+    private _generation = 0;
 
     constructor(interceptorPoints: P) {
         this._interceptorPoints = interceptorPoints;
@@ -127,7 +128,18 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        return () => remove(interceptors, interceptor);
+        const generation = this._generation;
+        let registration: T | undefined = interceptor;
+        return () => {
+            const current = registration;
+            registration = undefined;
+            if (!current || generation !== this._generation) {
+                return false;
+            }
+
+            const list = this._interceptorsByName.get(key);
+            return list ? remove(list, current) : false;
+        };
     }
 
     public getInterceptPoints() {
@@ -135,6 +147,7 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
     }
 
     public dispose() {
+        this._generation += 1;
         this._interceptorsByName.clear();
     }
 }
@@ -201,6 +214,7 @@ export const composeAsyncInterceptors = <T, C>(
 export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<any, any>>> {
     private _asyncInterceptorsByName: Map<string, Array<IAsyncInterceptor<unknown, unknown>>> = new Map();
     private _asyncInterceptorPoints: P;
+    private _generation = 0;
 
     constructor(asyncInterceptorPoints: P) {
         this._asyncInterceptorPoints = asyncInterceptorPoints;
@@ -237,7 +251,18 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        return () => remove(interceptors, interceptor);
+        const generation = this._generation;
+        let registration: T | undefined = interceptor;
+        return () => {
+            const current = registration;
+            registration = undefined;
+            if (!current || generation !== this._generation) {
+                return false;
+            }
+
+            const list = this._asyncInterceptorsByName.get(key);
+            return list ? remove(list, current) : false;
+        };
     }
 
     public getInterceptPoints() {
@@ -245,6 +270,7 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
     }
 
     public dispose() {
+        this._generation += 1;
         this._asyncInterceptorsByName.clear();
     }
 }

@@ -17,6 +17,7 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Nullable } from '../shared/types';
+import { Disposable } from '../shared/lifecycle';
 import { remove } from './array';
 
 export type InterceptorHandler<M = unknown, C = unknown> = (
@@ -89,12 +90,12 @@ export const composeInterceptors = <T, C>(interceptors: Array<IInterceptor<T, C>
         return value;
     } as ReturnType<IComposeInterceptors<T, C>>;
 
-export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>> {
+export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>> extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _interceptorPoints: P;
-    private _generation = 0;
 
     constructor(interceptorPoints: P) {
+        super();
         this._interceptorPoints = interceptorPoints;
     }
 
@@ -104,8 +105,10 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
      * @param filter A callback function to filter the interceptors.
      * @returns It will return a composed interceptor function. If you will perform the interceptor repeatedly,
      * you should cache the result instead of calling this function multiple times.
+     * A cached chain cannot start a new call after this manager is disposed.
      */
     public fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>, filter?: (interceptor: IInterceptor<any, any>) => boolean) {
+        this.ensureNotDisposed();
         const key = name as unknown as string;
         let interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
 
@@ -113,10 +116,15 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
             interceptors = interceptors.filter(filter);
         }
 
-        return composeInterceptors(interceptors || []);
+        const handler = composeInterceptors(interceptors || []);
+        return (initialValue: Nullable<T>, context: C) => {
+            this.ensureNotDisposed();
+            return handler(initialValue, context);
+        };
     }
 
     public intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {
+        this.ensureNotDisposed();
         const key = name as unknown as string;
         if (!this._interceptorsByName.has(key)) {
             this._interceptorsByName.set(key, []);
@@ -128,12 +136,11 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        const generation = this._generation;
         let registration: T | undefined = interceptor;
         return () => {
             const current = registration;
             registration = undefined;
-            if (!current || generation !== this._generation) {
+            if (!current || this._disposed) {
                 return false;
             }
 
@@ -146,9 +153,9 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
         return this._interceptorPoints;
     }
 
-    public dispose() {
-        this._generation += 1;
+    public override dispose() {
         this._interceptorsByName.clear();
+        super.dispose();
     }
 }
 
@@ -211,12 +218,12 @@ export const composeAsyncInterceptors = <T, C>(
     };
 };
 
-export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<any, any>>> {
+export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<any, any>>> extends Disposable {
     private _asyncInterceptorsByName: Map<string, Array<IAsyncInterceptor<unknown, unknown>>> = new Map();
     private _asyncInterceptorPoints: P;
-    private _generation = 0;
 
     constructor(asyncInterceptorPoints: P) {
+        super();
         this._asyncInterceptorPoints = asyncInterceptorPoints;
     }
 
@@ -226,8 +233,10 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
      * @param filter A callback function to filter the interceptors.
      * @returns It will return a composed interceptor function. If you will perform the interceptor repeatedly,
      * you should cache the result instead of calling this function multiple times.
+     * A cached chain cannot start a new call after this manager is disposed.
      */
     public fetchThroughAsyncInterceptors<T, C>(name: IAsyncInterceptor<T, C>, filter?: (interceptor: IAsyncInterceptor<any, any>) => boolean) {
+        this.ensureNotDisposed();
         const key = name as unknown as string;
         let interceptors = this._asyncInterceptorsByName.get(key) as unknown as Array<typeof name>;
 
@@ -235,10 +244,15 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
             interceptors = interceptors.filter(filter);
         }
 
-        return composeAsyncInterceptors(interceptors || []);
+        const handler = composeAsyncInterceptors(interceptors || []);
+        return async (initialValue: Nullable<T>, context: C) => {
+            this.ensureNotDisposed();
+            return handler(initialValue, context);
+        };
     }
 
     public async interceptAsync<T extends IAsyncInterceptor<any, any>>(name: T, interceptor: T) {
+        this.ensureNotDisposed();
         const key = name as unknown as string;
         if (!this._asyncInterceptorsByName.has(key)) {
             this._asyncInterceptorsByName.set(key, []);
@@ -251,12 +265,11 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
             key,
             interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) // from large to small
         );
-        const generation = this._generation;
         let registration: T | undefined = interceptor;
         return () => {
             const current = registration;
             registration = undefined;
-            if (!current || generation !== this._generation) {
+            if (!current || this._disposed) {
                 return false;
             }
 
@@ -269,8 +282,8 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
         return this._asyncInterceptorPoints;
     }
 
-    public dispose() {
-        this._generation += 1;
+    public override dispose() {
         this._asyncInterceptorsByName.clear();
+        super.dispose();
     }
 }

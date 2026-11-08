@@ -283,6 +283,23 @@ describe('spreadsheet integration', () => {
         expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
     });
 
+    it.each(['invalidate', 'clear'])('rejects viewport reuse after a font metrics %s without font load events', (action) => {
+        const { spreadsheet, mainCanvas, scene, cacheCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas);
+        spreadsheet.render(mainCanvas.getContext(), info);
+        expect(spreadsheet.canReuseViewportCache()).toBe(true);
+
+        if (action === 'invalidate') {
+            FontCache.invalidateMetrics(() => false);
+        } else {
+            FontCache.clearFontMeasureCache('12px Arial');
+        }
+        expect(spreadsheet.canReuseViewportCache()).toBe(false);
+
+        spreadsheet.render(mainCanvas.getContext(), info);
+        expect(spreadsheet.canReuseViewportCache()).toBe(true);
+    });
+
     it.each([
         { reset: 'range', key: 't', row: 2, col: 3 },
         { reset: 'range', key: 'r', row: 3, col: 3 },

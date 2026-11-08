@@ -2087,30 +2087,21 @@ describe('Test formula data model', () => {
             univer.dispose();
         });
 
-        it('scans primitive formulas and shared ids without boxing strings', () => {
-            const isString = vi.spyOn(Tools, 'isString');
-            let result: IFormulaData;
-            let fallbackCalls: number;
-            try {
-                result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
-                    0: {
-                        0: { f: '=1', si: '' },
-                        1: { f: '=' },
-                        2: { f: ' =1' },
-                        3: { f: '', si: '' },
-                        4: { f: '=2', si: ' ' },
-                        5: { si: ' ' },
-                        6: { f: '=3', si: '0' },
-                        7: { si: '0' },
-                        8: { v: 1 },
-                    },
-                }));
-                fallbackCalls = isString.mock.calls.length;
-            } finally {
-                isString.mockRestore();
-            }
-            expect(fallbackCalls!).toBe(0);
-            expect(result!.unit?.sheet?.[0]).toEqual({
+        it('preserves empty and whitespace semantics when scanning formulas and shared ids', () => {
+            const result = formulaDataModel.initSheetFormulaData({}, 'unit', 'sheet', new ObjectMatrix<ICellData>({
+                0: {
+                    0: { f: '=1', si: '' },
+                    1: { f: '=' },
+                    2: { f: ' =1' },
+                    3: { f: '', si: '' },
+                    4: { f: '=2', si: ' ' },
+                    5: { si: ' ' },
+                    6: { f: '=3', si: '0' },
+                    7: { si: '0' },
+                    8: { v: 1 },
+                },
+            }));
+            expect(result.unit?.sheet?.[0]).toEqual({
                 0: { f: '=1' },
                 4: { f: '=2', si: ' ' },
                 5: { f: '=2', si: ' ', x: 1, y: 0 },

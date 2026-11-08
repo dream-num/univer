@@ -15,11 +15,11 @@
  */
 
 import type { IUnitRange, IWorkbookData } from '@univerjs/core';
-import type { ISheetData } from '../../../basics/common';
-import type { IFormulaDependencyTree } from '../../dependency/dependency-tree';
-
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { ISheetData } from '../../../basics/common';
+import type { IFormulaDependencyTree } from '../../dependency/dependency-tree';
+import { ErrorType } from '../../../basics/error-type';
 import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
 import { Let } from '../../../functions/logical/let';
@@ -213,11 +213,18 @@ describe('three-dimensional sheet reference', () => {
 
     it('sums the same cell from every sheet in the inclusive range', () => {
         expect(calculate('=SUM(Jan:Mar!B2)')).toBe(111);
-        expect(calculate("=SUM('Jan':'Mar'!B2)")).toBe(111);
+        expect(calculate("=SUM('Jan:Mar'!B2)")).toBe(111);
     });
 
     it('sums every cell from every sheet instead of only each area first cell', () => {
         expect(calculate('=SUM(Jan:Mar!B2:C3)')).toBe(1110);
+    });
+
+    it('accepts a quoted sheet span and rejects individually quoted endpoints', () => {
+        expect(calculate("=SUM('Jan:Mar'!B2)")).toBe(111);
+        expect(calculate("=SUM('Jan:Mar'!B2:C3)")).toBe(1110);
+        expect(calculate("=SUM('Jan':'Mar'!B2)")).toBe(ErrorType.NAME);
+        expect(calculate("=SUM('Jan:Feb:Mar'!B2)")).toBe(ErrorType.NAME);
     });
 
     it('calculates the combine-data sample formula with all 12 source rows', () => {

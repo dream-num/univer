@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import { describe, expect, it, vi } from 'vitest';
 import type { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
 import type { BaseValueObject } from '../../value-object/base-value-object';
-import { describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { ReferenceObjectType } from '../../utils/value-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
@@ -30,6 +30,7 @@ describe('ReferenceNode external range loading', () => {
         const load = vi.fn(async () => undefined);
         const currentConfig = {
             getSheetNameMap: () => ({}),
+            getSheetsInfo: () => ({ sheetOrder: [], sheetNameMap: {} }),
             getUnitData: () => ({}),
             getArrayFormulaCellData: () => ({}),
             getArrayFormulaRange: () => ({}),

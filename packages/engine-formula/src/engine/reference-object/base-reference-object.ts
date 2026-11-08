@@ -291,7 +291,13 @@ export class BaseReferenceObject extends ObjectClassType {
         if (!this._forcedSheetName) {
             return;
         }
-        this._forcedSheetId = sheetNameMap[this.getUnitId()]?.[this._forcedSheetName];
+        const names = sheetNameMap[this.getUnitId()];
+        this._forcedSheetId = names?.[this._forcedSheetName];
+        if (names && this._forcedSheetId == null) {
+            const name = this._forcedSheetName.toLocaleLowerCase();
+            const matchedName = Object.keys(names).find((candidate) => candidate.toLocaleLowerCase() === name);
+            this._forcedSheetId = matchedName == null ? undefined : names[matchedName];
+        }
     }
 
     setForcedSheetIdDirect(sheetId: string) {

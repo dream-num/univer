@@ -52,6 +52,24 @@ export class Index extends BaseFunction {
             return reference;
         }
 
+        let areas: (BaseReferenceObject | ErrorValueObject)[] | undefined;
+        if (reference.isReferenceObject()) {
+            if ((reference as BaseReferenceObject).isMultiArea()) {
+                areas = (reference as MultiAreaReferenceObject).getAreas().flat();
+            }
+        } else if ((reference as BaseValueObject).isCube()) {
+            areas = (reference as CubeValueObject).getCubeReferences();
+        }
+        if (areas) {
+            const first = areas.find((area) => area.isReferenceObject()) as BaseReferenceObject | undefined;
+            if (first && areas.some((area) => area.isReferenceObject() && (
+                (area as BaseReferenceObject).getUnitId() !== first.getUnitId() ||
+                (area as BaseReferenceObject).getSheetId() !== first.getSheetId()
+            ))) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+        }
+
         const referenceRowColumnCounts = this._getReferenceCounts(reference);
 
         let _rowNum = rowNum;

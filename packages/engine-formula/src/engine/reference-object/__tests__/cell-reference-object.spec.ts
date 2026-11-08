@@ -21,6 +21,20 @@ import { CellReferenceObject } from '../cell-reference-object';
 import { RangeReferenceObject } from '../range-reference-object';
 
 describe('CellReferenceObject', () => {
+    it('resolves sheet names without case sensitivity while preserving exact identities', () => {
+        const reference = new CellReferenceObject('JAN!A1');
+        reference.setDefaultUnitId('book');
+        reference.setDefaultSheetId('summary');
+        reference.setForcedSheetId({ book: { Jan: 'sheet-jan' } });
+        expect(reference.getSheetId()).toBe('sheet-jan');
+
+        reference.setForcedSheetId({ book: { Jan: 'sheet-jan', JAN: 'exact-sheet' } });
+        expect(reference.getSheetId()).toBe('exact-sheet');
+
+        reference.setForcedSheetId({ book: { Other: 'sheet-other' } });
+        expect(reference.getForcedSheetId()).toBeUndefined();
+    });
+
     it('distinguishes forced error-looking text from a calculated error', () => {
         const reference = new CellReferenceObject('A1');
         const text = reference.getCellValueObject({ v: '#REF!', t: CellValueType.FORCE_STRING });

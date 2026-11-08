@@ -38,6 +38,7 @@ import { LexerNode } from '../analysis/lexer-node';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
 import { prefixHandler } from '../utils/prefix-handler';
 import { splitTableStructuredRef } from '../utils/reference';
+import { expandSheetSpan } from '../utils/three-dimensional-reference';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -52,7 +53,7 @@ interface ITableReferenceDescriptor {
 
 type ReferenceNodeCurrentConfigService = Pick<
     IFormulaCurrentConfigService,
-    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getUnitData' | 'getUnitStylesData'
+    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getSheetsInfo' | 'getUnitData' | 'getUnitStylesData'
 >;
 
 type ReferenceNodeRuntimeService = Pick<
@@ -151,6 +152,14 @@ export class ReferenceNode extends BaseAstNode {
         }
 
         this._configureReferenceObject(referenceObject, currentConfigService, runtimeService);
+
+        if (!this._isPrepareMerge) {
+            const sheetRange = expandSheetSpan(referenceObject, currentConfigService);
+            if (sheetRange) {
+                this.setValue(sheetRange);
+                return;
+            }
+        }
 
         if (!this._isPrepareMerge && referenceObject.isExceedRange()) {
             this.setValue(ErrorValueObject.create(ErrorType.NAME));

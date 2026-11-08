@@ -24,7 +24,10 @@ import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { MultiAreaReferenceObject } from '../../../../engine/reference-object/multi-area-reference-object';
+import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
@@ -133,6 +136,13 @@ const getTestWorkbookData = (): IWorkbookData => {
                     },
                 },
             },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Other',
+                rowCount: 10,
+                columnCount: 10,
+                cellData: { 0: { 0: { v: 30, t: CellValueType.NUMBER } }, 1: { 0: { v: 31, t: CellValueType.NUMBER } } },
+            },
         },
         locale: LocaleType.ZH_CN,
         name: '',
@@ -141,6 +151,22 @@ const getTestWorkbookData = (): IWorkbookData => {
     };
 };
 describe('Test index', () => {
+    it.each(['another-sheet', 'another-workbook'])('rejects reference areas from %s', (different) => {
+        const first = new RangeReferenceObject({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }, 's1', 'book');
+        const second = new RangeReferenceObject(
+            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+            different === 'another-sheet' ? 's2' : 's1',
+            different === 'another-workbook' ? 'other' : 'book'
+        );
+        const reference = new MultiAreaReferenceObject('(A1:A2,A1:A2)', [[first, second]]);
+        const result = new Index(FUNCTION_NAMES_LOOKUP.INDEX).calculate(
+            reference,
+            NumberValueObject.create(1),
+            NumberValueObject.create(1),
+            NumberValueObject.create(2)
+        );
+        expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+    });
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -554,6 +580,15 @@ describe('Test index', () => {
 
             expect(result).toStrictEqual([[1], [3], [1]]);
         });
+    });
+
+    it('resolves case variants of the same source sheet through the formula parser', () => {
+        expect(calculate('=INDEX((Other!A1:A2,OTHER!A1:A2),2,1,2)')).toStrictEqual([[31]]);
+    });
+
+    it('rejects cross-sheet reference form through the formula parser', async () => {
+        expect(await calculate('=INDEX((A1:A2,Other!A1:A2),2,1,2)')).toBe(ErrorType.VALUE);
+        expect(await calculate('=INDEX((A1:A2,A1:A2),2,1,2)')).toEqual([[3]]);
     });
 
     describe('Multi rows and columns', () => {

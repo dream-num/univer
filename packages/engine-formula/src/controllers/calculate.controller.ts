@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type {
     ISetFormulaCalculationStartMutation,
@@ -30,6 +29,7 @@ import type {
 } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -167,6 +167,10 @@ export class CalculateController extends Disposable {
             result = await this._calculateFormulaService.getRangeDependents(unitRanges);
         }
 
+        if (this._disposed) {
+            return;
+        }
+
         this._commandService.executeCommand(
             SetQueryFormulaDependencyResultMutation.id,
             {
@@ -181,6 +185,9 @@ export class CalculateController extends Disposable {
     private async _queryFormulaDependencyAllJson(param: ISetQueryFormulaDependencyAllMutation) {
         const { unitRanges } = param;
         const result: IFormulaDependentsAndInRangeResults = await this._calculateFormulaService.getDependentsAndInRangeFormulas(unitRanges);
+        if (this._disposed) {
+            return;
+        }
         this._commandService.executeCommand(
             SetQueryFormulaDependencyAllResultMutation.id,
             {
@@ -194,6 +201,9 @@ export class CalculateController extends Disposable {
 
     private async _generateAllDependencyTreeJson() {
         const result = await this._calculateFormulaService.getAllDependencyJson();
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetFormulaDependencyCalculationResultMutation.id,
@@ -209,6 +219,9 @@ export class CalculateController extends Disposable {
     private async _generateCellDependencyTreeJson(param: ISetFormulaDependencyCalculationMutation) {
         const { unitId, sheetId, row, column } = param;
         const result = await this._calculateFormulaService.getCellDependencyJson(unitId, sheetId, row, column);
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetCellFormulaDependencyCalculationResultMutation.id,
@@ -226,6 +239,9 @@ export class CalculateController extends Disposable {
         const result = await this._calculateFormulaService.executeFormulas(
             formulas
         );
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetFormulaStringBatchCalculationResultMutation.id,
@@ -243,7 +259,7 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
+        this.disposeWithMe(this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
             const functionsExecutedState = data.functionsExecutedState;
             switch (functionsExecutedState) {
                 case FormulaExecutedStateType.NOT_EXECUTED:
@@ -268,12 +284,12 @@ export class CalculateController extends Disposable {
                     onlyLocal: true,
                 }
             );
-        });
+        }));
 
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
+        this.disposeWithMe(this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {
@@ -283,7 +299,7 @@ export class CalculateController extends Disposable {
                     onlyLocal: true,
                 }
             );
-        });
+        }));
     }
 
     private async _applyTreeResult(data: IAllRuntimeData) {

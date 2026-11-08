@@ -43,6 +43,7 @@ import {
     AstTreeBuilder,
     CalculateFormulaService,
     DefinedNamesService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
@@ -166,6 +167,7 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
+            injector.add([FormulaCacheService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);

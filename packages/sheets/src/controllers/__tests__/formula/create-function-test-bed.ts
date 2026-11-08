@@ -42,6 +42,7 @@ import {
     DefinedNamesService,
     DependencyManagerService,
     FeatureCalculationManagerService,
+    FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
@@ -206,6 +207,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);
+            injector.add([FormulaCacheService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
             injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);

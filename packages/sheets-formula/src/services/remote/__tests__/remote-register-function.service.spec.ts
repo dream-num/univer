@@ -15,12 +15,13 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
+import { FormulaCacheService, FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { describe, expect, it } from 'vitest';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from '../remote-register-function.service';
 
 function createService(): { service: IRemoteRegisterFunctionService; functionService: IFunctionService } {
     const injector = new Injector();
+    injector.add([FormulaCacheService]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([IRemoteRegisterFunctionService, { useClass: RemoteRegisterFunctionService }]);
     return {

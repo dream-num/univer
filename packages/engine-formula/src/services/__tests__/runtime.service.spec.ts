@@ -30,12 +30,12 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
+import { FormulaCacheService } from '../formula-cache.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../hyperlink-engine-formula.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from '../runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../sheet-row-filtered.service';
@@ -53,6 +53,7 @@ function createRuntimeService() {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([LocaleService]);
+    injector.add([FormulaCacheService]);
     injector.add([LexerTreeBuilder]);
     injector.add([FormulaDataModel]);
     injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
@@ -180,19 +181,19 @@ describe('FormulaRuntimeService', () => {
 
     it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
         const { injector, runtime } = createRuntimeService();
-        CELL_INVERTED_INDEX_CACHE.clear();
+        const index = runtime.getCalculationCache()!.invertedIndex;
         try {
             runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
             runtime.setRuntimeData(NumberValueObject.create(7));
-            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
+            index.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
             runtime.setRuntimeData(NullValueObject.create());
             expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBeNull();
-            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
+            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
             runtime.setCurrent(4, 3, 20, 20, 'sheet', 'unit');
             runtime.setRuntimeData(createNewArray([[NullValueObject.create()], [NumberValueObject.create(1)]], 2, 1));
-            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
+            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
         } finally {
-            CELL_INVERTED_INDEX_CACHE.clear();
+            index.clear();
             injector.dispose();
         }
     });

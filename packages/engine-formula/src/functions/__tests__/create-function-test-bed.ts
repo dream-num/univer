@@ -54,6 +54,7 @@ import {
     IFormulaExternalReferenceDataLoader,
     NoopFormulaExternalReferenceDataLoader,
 } from '../../services/external-reference-data-loader.service';
+import { FormulaCacheService } from '../../services/formula-cache.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
@@ -178,6 +179,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             const injector = this._injector;
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([Lexer]);
+            injector.add([FormulaCacheService]);
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

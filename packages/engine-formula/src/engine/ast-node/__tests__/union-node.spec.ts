@@ -227,6 +227,11 @@ describe('three-dimensional sheet reference', () => {
         expect(calculate("=SUM('Jan:Feb:Mar'!B2)")).toBe(ErrorType.NAME);
     });
 
+    it('returns the internal name error when either quoted sheet span endpoint is missing', () => {
+        expect(calculate("=SUM('Missing:Mar'!B2)")).toBe(ErrorType.NAME);
+        expect(calculate("=SUM('Jan:Missing'!B2:C3)")).toBe(ErrorType.NAME);
+    });
+
     it('calculates the combine-data sample formula with all 12 source rows', () => {
         expect(calculate('=LET(data,VSTACK(Sheet1:Sheet3!B5:E16),FILTER(data,CHOOSECOLS(data,1)<>""))')).toEqual([
             [45148, 'Red', 1, 9],

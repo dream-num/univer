@@ -679,6 +679,7 @@ export class BaseFunction {
 
         object.setForcedSheetName(reference.getForcedSheetName());
 
+        object.setCalculationCache(reference.getCalculationCache());
         object.setUnitData(reference.getUnitData());
         object.setRuntimeData(reference.getRuntimeData());
         object.setArrayFormulaCellData(reference.getArrayFormulaCellData());

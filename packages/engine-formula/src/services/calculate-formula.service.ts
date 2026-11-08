@@ -16,21 +16,6 @@
 
 import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import {
-    AsyncLock,
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    IConfigService,
-    Inject,
-    isFormulaId,
-    isFormulaString,
-    normalizeWorkbookCalculationSettings,
-    ObjectMatrix,
-    Rectangle,
-    requestImmediateMacroTask,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -54,17 +39,28 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
+import {
+    AsyncLock,
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    IConfigService,
+    Inject,
+    isFormulaId,
+    isFormulaString,
+    normalizeWorkbookCalculationSettings,
+    ObjectMatrix,
+    Rectangle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
-import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
 import { generateAstNode } from '../engine/utils/generate-ast-node';
-import { ErrorValueObjectCache } from '../engine/value-object/base-value-object';
-import { StringValueObjectCache } from '../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
@@ -183,7 +179,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             for (let i = 0; i < group.length; i++) {
                 if (iteration < (settings[i].iterativeCalculation ? settings[i].maxIterations : 1)) {
                     // Each member can change a range read by the next member in this round.
-                    FORMULA_REF_TO_ARRAY_CACHE.clear();
+                    this._runtimeService.getCalculationCache?.()?.references.clear();
                     yield { tree: group[i], preserve: !settings[i].iterativeCalculation, iteration };
                 }
             }
@@ -204,7 +200,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 break;
             }
         }
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
+        this._runtimeService.getCalculationCache?.()?.references.clear();
         this._runtimeService.recordCircularReferences(group.map((item, i) => ({
             unitId: item.unitId,
             sheetId: item.subUnitId,
@@ -244,14 +240,15 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     override dispose() {
+        if (this._disposed) {
+            return;
+        }
+        this._runtimeService.stopExecution();
+        this._runtimeService.releaseCalculationCache?.();
         super.dispose();
 
         this._executionInProgressListener$.complete();
         this._executionCompleteListener$.complete();
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
-        CELL_INVERTED_INDEX_CACHE.clear();
-        ErrorValueObjectCache.clear();
-        StringValueObjectCache.clear();
     }
 
     /**
@@ -277,7 +274,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
+        if (this._disposed) {
+            return;
+        }
         return this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
+            if (this._disposed) {
+                return;
+            }
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START);
             this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
@@ -289,19 +292,26 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             this._preserveCircularUnits = new Set(formulaDatasetConfig.preserveCircularUnits);
             this._runtimeService.beginCircularReferences();
             this._isCalculateTreeModel = formulaDatasetConfig.isCalculateTreeModel || false;
-            let completed = false;
             try {
-                await this._executeStep();
-                completed = !this._runtimeService.isStopExecution();
+                let completed = false;
+                try {
+                    await this._executeStep();
+                    completed = !this._runtimeService.isStopExecution();
+                } finally {
+                    this._formulaDependencyGenerator.finishReferenceContext?.(completed);
+                }
+                if (this._disposed) {
+                    return;
+                }
+                this._runtimeService.completeCircularReferences();
+                this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
+                this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
+                this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+                this._runtimeService.clearInvertedIndexCache?.();
+                this._runtimeService.reset();
             } finally {
-                this._formulaDependencyGenerator.finishReferenceContext?.(completed);
+                this._runtimeService.releaseCalculationCache?.();
             }
-            this._runtimeService.completeCircularReferences();
-            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
-            this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-            this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-            CELL_INVERTED_INDEX_CACHE.clear();
-            this._runtimeService.reset();
         });
     }
 
@@ -323,7 +333,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             return true;
         }
 
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
+        this._runtimeService.getCalculationCache?.()?.references.clear();
 
         this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
 
@@ -421,6 +431,9 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
         const treeList = await this._formulaDependencyGenerator.generate(this._isCalculateTreeModel);
+        if (this._disposed) {
+            return;
+        }
 
         const interpreter = this._interpreter;
 
@@ -528,6 +541,11 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     value = interpreter.execute(nodeData);
                 }
 
+                if (this._disposed) {
+                    node.resetCalculationState();
+                    return;
+                }
+
                 if (tree.formulaId != null) {
                     this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {
@@ -555,106 +573,116 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     }
 
     async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData) {
-        this._currentConfigService.loadDataLite(
-            rowData
-        );
+        if (this._disposed) {
+            return Object.create(null) as IFormulaExecuteResultMap;
+        }
+        try {
+            this._currentConfigService.loadDataLite(
+                rowData
+            );
 
-        const unitData = this._currentConfigService.getUnitData();
+            const unitData = this._currentConfigService.getUnitData();
 
-        this._runtimeService.reset();
+            this._runtimeService.reset();
 
-        const result: IFormulaExecuteResultMap = Object.create(null);
+            const result: IFormulaExecuteResultMap = Object.create(null);
 
-        for (const unitId of Object.keys(formulas)) {
-            const sheetFormulas = formulas[unitId];
-            if (sheetFormulas == null) continue;
+            for (const unitId of Object.keys(formulas)) {
+                const sheetFormulas = formulas[unitId];
+                if (sheetFormulas == null) continue;
 
-            result[unitId] = Object.create(null);
+                result[unitId] = Object.create(null);
 
-            for (const sheetId of Object.keys(sheetFormulas)) {
-                const rowFormulas = sheetFormulas[sheetId];
-                if (rowFormulas == null) continue;
+                for (const sheetId of Object.keys(sheetFormulas)) {
+                    const rowFormulas = sheetFormulas[sheetId];
+                    if (rowFormulas == null) continue;
 
-                const sheetItem = unitData[unitId]?.[sheetId];
+                    const sheetItem = unitData[unitId]?.[sheetId];
 
-                if (sheetItem == null) continue;
+                    if (sheetItem == null) continue;
 
-                result[unitId]![sheetId] = Object.create(null);
+                    result[unitId]![sheetId] = Object.create(null);
 
-                for (const rowString of Object.keys(rowFormulas)) {
-                    const row = Number.parseInt(rowString);
-                    result[unitId]![sheetId]![row] = Object.create(null);
+                    for (const rowString of Object.keys(rowFormulas)) {
+                        const row = Number.parseInt(rowString);
+                        result[unitId]![sheetId]![row] = Object.create(null);
 
-                    const cellData = rowFormulas[row];
-                    if (!cellData) continue;
+                        const cellData = rowFormulas[row];
+                        if (!cellData) continue;
 
-                    for (const columnString of Object.keys(cellData)) {
-                        const column = Number.parseInt(columnString);
-                        const formulaStrings = cellData[column];
-                        if (!formulaStrings) continue;
+                        for (const columnString of Object.keys(cellData)) {
+                            const column = Number.parseInt(columnString);
+                            const formulaStrings = cellData[column];
+                            if (!formulaStrings) continue;
 
-                        const rowCount = sheetItem.rowCount || 0;
-                        const columnCount = sheetItem.columnCount || 0;
+                            const rowCount = sheetItem.rowCount || 0;
+                            const columnCount = sheetItem.columnCount || 0;
 
-                        this._runtimeService.setCurrent(
-                            row,
-                            column,
-                            rowCount,
-                            columnCount,
-                            sheetId,
-                            unitId
-                        );
+                            this._runtimeService.setCurrent(
+                                row,
+                                column,
+                                rowCount,
+                                columnCount,
+                                sheetId,
+                                unitId
+                            );
 
-                        const item: IFormulaExecuteResultItem[] = [];
+                            const item: IFormulaExecuteResultItem[] = [];
 
-                        for (const formulaString of formulaStrings) {
-                            let resultCell = await this.calculate(formulaString);
-                            if (!resultCell) {
-                                item.push({
-                                    value: null,
-                                    formula: formulaString,
-                                });
-
-                                continue;
-                            }
-
-                            if (resultCell.isReferenceObject()) {
-                                resultCell = (resultCell as BaseReferenceObject).toArrayValueObject();
-                            }
-
-                            const resultRefObject = resultCell as BaseValueObject;
-
-                            if (resultRefObject.isArray()) {
-                                const resultRefArrayObject = resultRefObject as ArrayValueObject;
-                                if (resultRefArrayObject.getRowCount() === 1 && resultRefArrayObject.getColumnCount() === 1) {
+                            for (const formulaString of formulaStrings) {
+                                let resultCell = await this.calculate(formulaString);
+                                if (this._disposed) {
+                                    return Object.create(null) as IFormulaExecuteResultMap;
+                                }
+                                if (!resultCell) {
                                     item.push({
-                                        value: resultRefArrayObject.getFirstCell().getValue(),
+                                        value: null,
                                         formula: formulaString,
                                     });
+
+                                    continue;
+                                }
+
+                                if (resultCell.isReferenceObject()) {
+                                    resultCell = (resultCell as BaseReferenceObject).toArrayValueObject();
+                                }
+
+                                const resultRefObject = resultCell as BaseValueObject;
+
+                                if (resultRefObject.isArray()) {
+                                    const resultRefArrayObject = resultRefObject as ArrayValueObject;
+                                    if (resultRefArrayObject.getRowCount() === 1 && resultRefArrayObject.getColumnCount() === 1) {
+                                        item.push({
+                                            value: resultRefArrayObject.getFirstCell().getValue(),
+                                            formula: formulaString,
+                                        });
+                                        continue;
+                                    }
+
+                                    item.push({
+                                        value: resultRefArrayObject.toValue(),
+                                        formula: formulaString,
+                                    });
+
                                     continue;
                                 }
 
                                 item.push({
-                                    value: resultRefArrayObject.toValue(),
+                                    value: resultRefObject.getValue(),
                                     formula: formulaString,
                                 });
-
-                                continue;
                             }
 
-                            item.push({
-                                value: resultRefObject.getValue(),
-                                formula: formulaString,
-                            });
+                            result[unitId]![sheetId]![row]![column] = item;
                         }
-
-                        result[unitId]![sheetId]![row]![column] = item;
                     }
                 }
             }
-        }
 
-        return result;
+            return result;
+        } finally {
+            this._runtimeService.releaseCalculationCache?.();
+        }
     }
 
     async calculate(formulaString: string, transformSuffix = true, unitId?: string) {

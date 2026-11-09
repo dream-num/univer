@@ -45,6 +45,7 @@ import type {
     IDocumentLayoutColumnGroup,
     IDocumentLayoutCustomColumnGroup,
     IDocumentLayoutParagraph,
+    IDocumentLayoutRenderConfig,
     IDocumentLayoutSectionBreak,
     IDocumentLayoutSnapshot,
     IDocumentLayoutTextRun,
@@ -710,6 +711,10 @@ export class DocumentViewModel implements IDisposable {
 
     getParagraphWordWrap(paragraphStyle: IParagraphStyle): BooleanNumber | undefined {
         return paragraphStyle.wordWrap ?? BooleanNumber.FALSE;
+    }
+
+    getLayoutRenderConfig(config: IDocumentLayoutRenderConfig): IDocumentLayoutRenderConfig {
+        return config;
     }
 
     createLineBreaker(content: string, paragraphStyle: IParagraphStyle, start: number) {

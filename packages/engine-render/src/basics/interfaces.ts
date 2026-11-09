@@ -171,6 +171,7 @@ export interface IParagraphConfig {
 }
 
 export interface IFontCreateConfig {
+    stackedText?: boolean;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
     charSpace: number;

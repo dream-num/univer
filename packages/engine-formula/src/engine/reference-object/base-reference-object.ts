@@ -34,7 +34,6 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
@@ -53,10 +52,6 @@ export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject 
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 
-const FORMULA_CACHE_LRU_COUNT = 10000;
-
-/** @deprecated Engine calculations use the cache owned by IFormulaRuntimeService. Retained for legacy direct callers. */
-export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {
     private _calculationCache: FormulaCalculationCache | undefined;
 

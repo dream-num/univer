@@ -169,11 +169,7 @@ export { generateRandomDependencyTreeId } from './engine/dependency/formula-depe
 export { Interpreter } from './engine/interpreter/interpreter';
 export { BaseReferenceObject } from './engine/reference-object/base-reference-object';
 export type { FunctionVariantType } from './engine/reference-object/base-reference-object';
-export {
-    AsyncArrayObject,
-    AsyncObject,
-    FORMULA_REF_TO_ARRAY_CACHE,
-} from './engine/reference-object/base-reference-object';
+export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
 export { extractFormulaError } from './engine/utils/cell';

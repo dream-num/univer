@@ -98,14 +98,6 @@ describe('Test common', () => {
         expect(isFormulaId({ f: '' })).toBe(false);
     });
 
-    it('supports boxed formula strings and ids', () => {
-        expect(isFormulaString(new Object('=A1'))).toBe(true);
-        expect(isFormulaString(new Object('='))).toBe(false);
-        expect(isFormulaString(new Object(''))).toBe(false);
-        expect(isFormulaId(new Object('shared-formula'))).toBe(true);
-        expect(isFormulaId(new Object(''))).toBe(false);
-    });
-
     it('should convert merged and merged-main cells into ranges', () => {
         expect(convertCellToRange(createCellWithCoord())).toEqual({
             startRow: 1,

@@ -544,7 +544,10 @@ export function _createSkeletonWordOrLetter(
 
     if (config.stackedText) {
         // Layout runs along the future vertical axis; keep the ink width for upright painting.
-        width = streamType === DataStreamTreeTokenType.PARAGRAPH ? 0 : bBox.ba + bBox.bd;
+        // Zero-width glyphs must not reserve a vertical slot.
+        width = streamType === DataStreamTreeTokenType.PARAGRAPH || contentWidth === 0
+            ? 0
+            : bBox.ba + bBox.bd;
         xOffset = 0;
         if (contentWidth > bBox.ba + bBox.bd) {
             bBox.ba = contentWidth / 2;

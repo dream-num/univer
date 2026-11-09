@@ -108,10 +108,12 @@ describe('Cell layout and merged styles', () => {
         { merged: false, rowHeight: 65, padding: 0, columns: ['ABC', 'DEF', 'GHI', 'JKL'] },
         { merged: true, rowHeight: 65, padding: 0, columns: ['ABCDEF', 'GHIJKL'] },
         { merged: true, rowHeight: 1, padding: 4, columns: Array.from('ABCDEFGHIJKL') },
-    ])('wraps and measures stacked cells, including rows smaller than padding (merged: $merged, height: $rowHeight)', ({ merged, rowHeight, padding, columns }) => {
+        { merged: false, rowHeight: 40, padding: 0, content: 'A\u200BB', columns: ['A\u200BB'] },
+        { merged: false, rowHeight: 40, padding: 0, content: 'A\u2060B', columns: ['A\u2060B'] },
+    ])('wraps and measures stacked cells, including rows smaller than padding (merged: $merged, height: $rowHeight)', ({ merged, rowHeight, padding, columns, content = 'ABCDEFGHIJKL' }) => {
         const environment = setupRenderTestEnv();
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
-            width: text.length * 4,
+            width: text.replace(/[\u200B\u2060]/g, '').length * 4,
             fontBoundingBoxAscent: 16,
             fontBoundingBoxDescent: 4,
             actualBoundingBoxAscent: 14,
@@ -130,7 +132,7 @@ describe('Cell layout and merged styles', () => {
                 defaultColumnWidth: 30,
                 mergeData: merged ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [],
                 cellData: { 0: { 0: {
-                    v: 'ABCDEFGHIJKL',
+                    v: content,
                     s: { tr: { a: 0, v: BooleanNumber.TRUE }, tb: WrapStrategy.WRAP, pd: { t: padding, b: padding, l: padding, r: padding } },
                 } } },
             } },

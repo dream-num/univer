@@ -15,11 +15,11 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -307,16 +307,6 @@ export class LexerTreeBuilder extends Disposable {
 
         const newSequenceNodes = this.getSequenceNode(sequenceArray);
 
-        // let sequenceString = '';
-        // for (const node of newSequenceNodes) {
-        //     if (typeof node === 'string') {
-        //         sequenceString += node;
-        //     } else {
-        //         sequenceString += node.token;
-        //     }
-        // }
-        // console.log('sequenceString', sequenceString);
-
         FormulaSequenceNodeCache.set(formulaString, [...newSequenceNodes]);
 
         return newSequenceNodes;
@@ -499,7 +489,6 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    // eslint-disable-next-line complexity
     getSequenceNode(sequenceArray: ISequenceArray[]): (string | ISequenceNode)[] {
         const sequenceNodes: Array<ISequenceNode | string> = [];
 
@@ -521,7 +510,7 @@ export class LexerTreeBuilder extends Disposable {
                 continue;
             }
 
-            let preSegment = preItem?.segment || '';
+            let preSegment = preItem ? preItem.segment : '';
 
             const startIndex = i - preSegment.length;
 
@@ -983,12 +972,8 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    // eslint-disable-next-line complexity
     private _suffixExpressionHandler(lexerNode: LexerNode): boolean {
         const children = lexerNode.getChildren();
-        if (!children) {
-            return false;
-        }
         const childrenCount = children.length;
 
         const baseStack: Array<string | LexerNode> = []; // S2
@@ -1014,7 +999,7 @@ export class LexerTreeBuilder extends Disposable {
                         return false;
                     }
                     while (symbolStack.length > 0) {
-                        const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
+                        const lastSymbol = symbolStack[symbolStack.length - 1].trim();
                         if (!lastSymbol || lastSymbol === matchToken.OPEN_BRACKET) {
                             break;
                         }
@@ -1488,6 +1473,12 @@ export class LexerTreeBuilder extends Disposable {
 
         this._bracketState = []; // ()
 
+        this._openBracketNormalIndexStack = [];
+
+        this._squareBracketState = 0;
+
+        this._tableBracketState = false;
+
         this._bracesState = 0; // {}
 
         this._singleQuotationState = 0; // ''
@@ -1565,9 +1556,6 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    // NOTE@wzhudev: this method is over complex, need to refactor. Using recursive descend to parse the formula string
-    // without a standalone lexer phase
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
         // Editor may add a line break at the end of the formula string.
         // Keep internal line breaks because Excel table column names can contain them.
@@ -1587,145 +1575,103 @@ export class LexerTreeBuilder extends Disposable {
 
         let cur = 0;
         while (cur < charsCount) {
-            const currentString = formulaChars[cur];
-
             if (matchCurrentNodeIndex === cur) {
-                return [this._currentLexerNode, currentString];
+                return [this._currentLexerNode, formulaChars[cur]];
             }
+            const next = this._consumeToken(formulaChars, cur, sequenceArray);
+            if (typeof next !== 'number') {
+                return next;
+            }
+            cur = next;
+        }
 
-            if (currentString === suffixToken.POUND &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isBracesClose() &&
-                this.isSquareBracketClose() &&
-                this._checkIfErrorObject(cur, formulaChars)) {
-                const errorType = this._findErrorObject(cur, formulaChars);
-                if (errorType == null) {
-                    return ErrorType.VALUE;
+        this._pushNodeToChildren(this._segment);
+
+        if (this._checkErrorState()) {
+            return ErrorType.VALUE;
+        }
+    }
+
+    private _consumeToken(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        const currentString = formulaChars[cur];
+        if (this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            const enclosureEnd = this._consumeEnclosure(formulaChars, cur, sequenceArray);
+            if (enclosureEnd !== undefined) {
+                return enclosureEnd;
+            }
+            if (this.isSquareBracketClose()) {
+                if (currentString === matchToken.OPEN_BRACKET) {
+                    return this._consumeOpenBracket(formulaChars, cur, sequenceArray);
                 }
-                this._pushNodeToChildren(errorType);
-                for (let i = 0; i < errorType.length; i++) {
-                    const curStr = formulaChars[cur];
-                    this._pushSegment(curStr);
-                    this._addSequenceArray(sequenceArray, curStr, cur);
-                    cur++;
+                if (currentString === matchToken.CLOSE_BRACKET) {
+                    return this._consumeCloseBracket(formulaChars, cur, sequenceArray);
                 }
-                this._resetSegment();
-                // this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
-                // cur += errorType.length;
-                continue;
-            } else if (
-                currentString === matchToken.OPEN_BRACKET &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose()
-            ) {
-                if (this._segmentCount() > 0 || this.isLambdaOpen()) {
-                    if (this.isLambdaClose()) {
-                        this._newAndPushCurrentLexerNode(this._segment, cur);
-                        this._resetSegment();
+                if (this.isBracesClose()) {
+                    const tokenEnd = this._consumeFormulaToken(formulaChars, cur, sequenceArray);
+                    if (tokenEnd !== undefined) {
+                        return tokenEnd;
                     }
-
-                    this._openBracket(bracketType.FUNCTION);
-                    this._closeLambda();
-
-                    const nextCurrentString = formulaChars[cur + 1];
-                    if (nextCurrentString && nextCurrentString === matchToken.CLOSE_BRACKET) {
-                        // when function has not parameter, return to parentNode , e.g. row()
-                        if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
-                            return ErrorType.VALUE;
-                        }
-                        /**
-                         * https://github.com/dream-num/univer/issues/1769
-                         * Formula example: =IF(TODAY()>1,"TRUE", "FALSE")
-                         * Copy or auto-fill at complex formula get error formula offset
-                         */
-
-                        this._addSequenceArray(sequenceArray, currentString, cur);
-                        cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
-                        cur++;
-                        this._closeBracket();
-                        continue;
-                    } else if (nextCurrentString) {
-                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
-                    }
-                } else {
-                    this._pushNodeToChildren(currentString);
-                    this._openBracket(bracketType.NORMAL);
-                    this._openBracketNormalIndex();
-                    this._resetSegment();
                 }
-            } else if (
-                currentString === matchToken.CLOSE_BRACKET &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose()
-            ) {
-                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
-                    this._formalErrorOccurred();
-                }
+            }
+        }
+        if (currentString === matchToken.DOUBLE_QUOTATION && this.isSingleQuotationClose() && this.isSquareBracketClose()) {
+            return this._consumeDoubleQuotation(formulaChars, cur, sequenceArray);
+        }
+        if (currentString === matchToken.SINGLE_QUOTATION && this.isDoubleQuotationClose()) {
+            return this._consumeSingleQuotation(formulaChars, cur, sequenceArray);
+        }
+        // Ignore spaces before a segment starts.
+        if (this._segment !== '' || currentString !== ' ') {
+            this._pushSegment(currentString);
+        }
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
 
-                this._pushNodeToChildren(this._segment);
-                this._resetSegment();
-                const currentBracket = this._getCurrentBracket();
-                if (currentBracket === bracketType.NORMAL) {
-                    this._pushNodeToChildren(currentString);
-                } else if (currentBracket === bracketType.FUNCTION) {
-                    // function close
-                    const nextCurrentString = formulaChars[cur + 1];
-                    if (nextCurrentString && nextCurrentString === matchToken.OPEN_BRACKET) {
-                        // lambda handler, e.g. =lambda(x,y, x*y*x)(1,2)
-                        if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
-                            return ErrorType.VALUE;
-                        }
+    private _consumeFormulaToken(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType | undefined {
+        const currentString = formulaChars[cur];
+        if (currentString === suffixToken.POUND && this._checkIfErrorObject(cur, formulaChars)) {
+            return this._consumeErrorToken(formulaChars, cur, sequenceArray);
+        }
+        if (currentString === matchToken.COMMA) {
+            return this._consumeComma(formulaChars, cur, sequenceArray);
+        }
+        if (currentString === matchToken.COLON) {
+            return this._consumeColon(formulaChars, cur, sequenceArray);
+        }
+        if (SUFFIX_TOKEN_SET.has(currentString) && this._checkSimilarErrorToken(currentString, cur, formulaChars)) {
+            return this._consumeSuffix(formulaChars, cur, sequenceArray);
+        }
+        if (OPERATOR_TOKEN_SET.has(currentString)) {
+            return this._consumeOperator(formulaChars, cur, sequenceArray);
+        }
+    }
 
-                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, cur, true);
-                        this._openLambda();
-                    } else {
-                        if (!this._setAncestorCurrentLexerNode() && cur !== charsCount - 1) {
-                            return ErrorType.VALUE;
-                        }
-                    }
-                } else {
-                    return ErrorType.VALUE;
-                }
-                this._closeBracket();
-            } else if (
-                currentString === matchToken.OPEN_BRACES &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
-            ) {
+    private _consumeEnclosure(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType | undefined {
+        const currentString = formulaChars[cur];
+        switch (currentString) {
+            case matchToken.OPEN_BRACES:
                 this._pushSegment(currentString);
                 this._openBraces();
 
                 if (!this._formulaSpellCheck()) {
                     return ErrorType.VALUE;
                 }
-            } else if (
-                currentString === matchToken.CLOSE_BRACES &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
-            ) {
+                break;
+            case matchToken.CLOSE_BRACES:
                 this._pushSegment(currentString);
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();
                 this._closeBraces();
-            } else if (
-                currentString === matchToken.OPEN_SQUARE_BRACKET &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
-            ) {
+                break;
+            case matchToken.OPEN_SQUARE_BRACKET:
                 if (this._segment.length > 0) {
                     this._openTableBracket();
                 }
                 this._pushSegment(currentString);
                 this._openSquareBracket();
-            } else if (
-                currentString === matchToken.CLOSE_SQUARE_BRACKET &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
-            ) {
+                break;
+            case matchToken.CLOSE_SQUARE_BRACKET:
                 this._closeSquareBracket();
                 if (this.isSquareBracketClose()) {
                     this._pushSegment(currentString);
@@ -1737,324 +1683,415 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     this._pushSegment(currentString);
                 }
-            } else if (
-                currentString === matchToken.DOUBLE_QUOTATION &&
-                this.isSingleQuotationClose() &&
-                this.isSquareBracketClose()
-            ) {
-                if (this.isDoubleQuotationClose()) {
-                    this._openDoubleQuotation();
-                } else {
-                    const nextCurrentString = formulaChars[cur + 1];
-                    if (nextCurrentString && nextCurrentString === matchToken.DOUBLE_QUOTATION) {
-                        cur++;
-                    } else {
-                        this._closeDoubleQuotation();
-                    }
-                }
-                // this._pushNodeToChildren(currentString);
-                this._pushSegment(currentString);
-            } else if (currentString === matchToken.SINGLE_QUOTATION && this.isDoubleQuotationClose()) {
-                if (this.isSingleQuotationClose()) {
-                    this._openSingleQuotation();
+                break;
+            default:
+                return;
+        }
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
 
-                    // If the current segment is blank, reset the segment.
-                    // Process the space before the double single quotes of sheet name.
-                    // e.g. = 'dv-test'!C27
-                    if (this._segmentCount() === 0) {
-                        this._resetSegment();
-                    }
-                } else {
-                    const nextCurrentString = formulaChars[cur + 1];
-                    if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
-                        // handle 'Sheet'1'!A1
+    private _consumeErrorToken(formulaChars: string[], startIndex: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        let cur = startIndex;
+        const errorType = this._findErrorObject(cur, formulaChars);
+        if (errorType == null) {
+            return ErrorType.VALUE;
+        }
+        this._pushNodeToChildren(errorType);
+        for (let i = 0; i < errorType.length; i++) {
+            const curStr = formulaChars[cur];
+            this._pushSegment(curStr);
+            this._addSequenceArray(sequenceArray, curStr, cur);
+            cur++;
+        }
+        this._resetSegment();
+        return cur;
+    }
 
-                        // Add the first single quotation
-                        this._pushSegment(currentString);
-                        this._addSequenceArray(sequenceArray, currentString, cur);
-                        cur++;
-
-                        // Add the second single quotation
-                        this._pushSegment(nextCurrentString);
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
-                        cur++;
-                        continue;
-                    } else {
-                        this._closeSingleQuotation();
-                    }
-                }
-                // this._pushNodeToChildren(currentString);
-                this._pushSegment(currentString);
-            } else if (
-                currentString === matchToken.COMMA &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isBracesClose() &&
-                this.isSquareBracketClose()
-            ) {
-                if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
-                    this._formalErrorOccurred();
-                }
-
-                const currentBracket = this._getCurrentBracket();
-                /**
-                 * Handle the occurrence of commas, where in the formula,
-                 * the comma represents the parameters of the function
-                 * [currentBracket == null] is for the situation where [=A1:B1, B5:A10] occurs
-                 */
-                if (currentBracket === bracketType.FUNCTION || currentBracket == null) {
-                    this._pushNodeToChildren(this._segment);
-                    this._resetSegment();
-                    if (
-                        !this._setParentCurrentLexerNode() &&
-                        cur !== charsCount - 1 &&
-                        currentBracket != null
-                    ) {
-                        return ErrorType.VALUE;
-                    }
-
-                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
-                } else {
-                    /**
-                     * support cubeValueObject for =INDEX((A6:B6,C6:D7),1,1,2)
-                     */
-                    const cubeNode = new LexerNode();
-                    cubeNode.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
-                    const cubeParamNode = new LexerNode();
-                    cubeParamNode.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
-                    cubeParamNode.changeToParent(cubeNode);
-
-                    const colonNode = this._currentLexerNode.getParent();
-
-                    if (colonNode && colonNode.getToken() === matchToken.COLON) {
-                        const colonNodeParent = colonNode.getParent();
-                        if (!colonNodeParent) {
-                            return ErrorType.VALUE;
-                        }
-
-                        colonNode.changeToParent(cubeParamNode);
-                        colonNodeParent.setChildren([]);
-                        cubeNode.changeToParent(colonNodeParent);
-                    } else {
-                        return ErrorType.VALUE;
-                    }
-
-                    this._changeCurrentBracket(bracketType.FUNCTION);
-                    this._pushNodeToChildren(this._segment);
-                    this._resetSegment();
-                    this._currentLexerNode = cubeNode;
-                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
-                }
-            } else if (
-                currentString === matchToken.COLON &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isBracesClose() &&
-                this.isSquareBracketClose()
-            ) {
-                const subLexerNode_op = new LexerNode();
-                subLexerNode_op.setToken(currentString);
-
-                const subLexerNode_left = new LexerNode();
-                subLexerNode_left.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
-                subLexerNode_left.setParent(subLexerNode_op);
-
-                const subLexerNode_right = new LexerNode();
-                subLexerNode_right.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
-                subLexerNode_right.setParent(subLexerNode_op);
-
-                subLexerNode_op.getChildren().push(subLexerNode_left, subLexerNode_right);
-
-                let subLexerNode_main = subLexerNode_op;
-                let upLevel = 0;
-                if (this._segmentCount() > 0) {
-                    // e.g. A1:B5
-                    // -@A4:B5
-                    let subLexerNode_minus: Nullable<LexerNode>;
-                    let subLexerNode_at: Nullable<LexerNode>;
-                    let sliceLength = 0;
-                    const segmentTrim = this._segment.trim();
-                    const lastString = segmentTrim[0];
-                    const twoLastString = segmentTrim[1];
-
-                    // new RegExp(prefixToken.MINUS, 'g').test(this._segment)
-                    if (lastString === prefixToken.MINUS) {
-                        subLexerNode_minus = new LexerNode();
-                        subLexerNode_minus.setToken(prefixToken.MINUS);
-                        subLexerNode_minus.setIndex(cur - this._segment.length, cur - this._segment.length);
-                        sliceLength++;
-                    }
-
-                    // new RegExp(prefixToken.AT, 'g').test(this._segment)
-                    if (lastString === prefixToken.AT || twoLastString === prefixToken.AT) {
-                        subLexerNode_at = new LexerNode();
-                        subLexerNode_at.setToken(prefixToken.AT);
-                        const startIndex = cur - this._segment.length + sliceLength;
-                        subLexerNode_at.setIndex(startIndex, startIndex);
-
-                        if (subLexerNode_minus) {
-                            subLexerNode_minus.addChildren(subLexerNode_at);
-                            subLexerNode_at.setParent(subLexerNode_minus);
-                        }
-
-                        sliceLength++;
-                    }
-
-                    if (sliceLength > 0) {
-                        this._segment = segmentTrim.slice(sliceLength);
-                    }
-
-                    upLevel = sliceLength;
-
-                    if (subLexerNode_at) {
-                        subLexerNode_at.addChildren(subLexerNode_op);
-                        subLexerNode_op.setParent(subLexerNode_at);
-                        if (subLexerNode_at.getParent()) {
-                            const node = subLexerNode_at.getParent();
-                            if (node) {
-                                subLexerNode_main = node;
-                            }
-                        } else {
-                            subLexerNode_main = subLexerNode_at;
-                        }
-                    } else if (subLexerNode_minus) {
-                        subLexerNode_main = subLexerNode_minus;
-                        subLexerNode_minus.addChildren(subLexerNode_op);
-                        subLexerNode_op.setParent(subLexerNode_minus);
-                    }
-
-                    const subLexerNode_ref = new LexerNode();
-                    subLexerNode_ref.setToken(this._segment);
-                    subLexerNode_ref.setParent(subLexerNode_left);
-                    subLexerNode_ref.setIndex(cur - this._segment.length, cur - 1);
-
-                    subLexerNode_left.getChildren().push(subLexerNode_ref);
-                    this._resetSegment();
-                } else {
-                    // e.g. indirect("A5"):B10
-                    const lastChildNode = this._getLastChildCurrentLexerNode();
-                    if (lastChildNode) {
-                        lastChildNode.changeToParent(subLexerNode_left);
-                    }
-                }
-
-                this._setCurrentLexerNode(subLexerNode_main);
-                this._currentLexerNode = subLexerNode_right;
-                this._openColon(upLevel);
-            } else if (
-                SUFFIX_TOKEN_SET.has(currentString) &&
-                this._checkSimilarErrorToken(currentString, cur, formulaChars) &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose() &&
-                this.isBracesClose()
-            ) {
-                this._pushNodeToChildren(this._segment);
-
-                // this._pushNodeToChildren(currentString);
-
-                const subLexerNode = new LexerNode();
-                subLexerNode.setToken(currentString);
-                subLexerNode.setIndex(cur - 1, cur - 1);
-
-                const lastChildNode = this._getLastChildCurrent();
-                if (lastChildNode instanceof LexerNode) {
-                    lastChildNode.changeToParent(subLexerNode);
-                } else if (lastChildNode === matchToken.CLOSE_BRACKET) {
-                    const nodes = this._getNodesByCurrentBracketNormalIndex();
-                    subLexerNode.getChildren().push(...nodes);
-                } else if (lastChildNode !== false) {
-                    subLexerNode.getChildren().push(lastChildNode);
-                    this._removeLastChild();
-                }
-
-                this._pushNodeToChildren(subLexerNode);
-                subLexerNode.setParent(this._currentLexerNode);
-
+    private _consumeOpenBracket(formulaChars: string[], startIndex: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        let cur = startIndex;
+        const currentString = formulaChars[cur];
+        const charsCount = formulaChars.length;
+        if (this._segmentCount() > 0 || this.isLambdaOpen()) {
+            if (this.isLambdaClose()) {
+                this._newAndPushCurrentLexerNode(this._segment, cur);
                 this._resetSegment();
-            } else if (
-                OPERATOR_TOKEN_SET.has(currentString) &&
-                this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose() &&
-                this.isBracesClose()
-            ) {
-                let trimSegment = this._segment.trim();
-
-                if (currentString === operatorToken.MINUS && (trimSegment === '')) {
-                    // negative number
-                    const prevString = this._findPreviousToken(formulaChars, cur - 1) || '';
-                    const nextString = this._findNextToken(formulaChars, cur + 1) || '';
-                    if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
-                        this._pushNodeToChildren('0');
-                        this._pushNodeToChildren(operatorToken.MINUS);
-                        this._addSequenceArray(sequenceArray, currentString, cur);
-                        this._resetSegment();
-                        cur++;
-                        continue;
-                    } else if (this._unexpectedEndingToken(prevString)) {
-                        if (nextString === operatorToken.PLUS) {
-                            this._pushSegment(operatorToken.MINUS);
-                            // this._pushSegment(operatorToken.PLUS);
-                            this._addSequenceArray(sequenceArray, currentString, cur);
-                            this._addSequenceArray(sequenceArray, operatorToken.PLUS, cur + 1);
-                            cur += 2;
-                            continue;
-                        } else {
-                            this._pushSegment(operatorToken.MINUS);
-                            this._addSequenceArray(sequenceArray, currentString, cur);
-                            cur++;
-                            continue;
-                        }
-                    }
-                } else if (this._segment.length > 0 && this._isScientificNotation(formulaChars, cur, currentString)) {
-                    this._pushSegment(currentString);
-
-                    this._addSequenceArray(sequenceArray, currentString, cur);
-
-                    cur++;
-                    continue;
-                } else if (this._segment.length > 0 && trimSegment === '') {
-                    trimSegment = this._segment;
-                } else {
-                    this._pushNodeToChildren(this._segment);
-                    trimSegment = '';
-                }
-
-                if (currentString === operatorToken.LESS_THAN || currentString === operatorToken.GREATER_THAN) {
-                    const nextCurrentString = formulaChars[cur + 1];
-                    if (nextCurrentString && OPERATOR_TOKEN_SET.has(currentString + nextCurrentString)) {
-                        this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
-
-                        this._resetSegment();
-                        this._addSequenceArray(sequenceArray, currentString, cur);
-                        cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
-                        cur++;
-                        continue;
-                    } else {
-                        this._pushNodeToChildren(trimSegment + currentString);
-                    }
-                } else {
-                    this._pushNodeToChildren(trimSegment + currentString);
-                }
-                this._resetSegment();
-            } else {
-                // Do not push a space when the segment is empty, consuming useless spaces here.
-                if (this._segment !== '' || currentString !== ' ') {
-                    this._pushSegment(currentString);
-                }
             }
 
-            this._addSequenceArray(sequenceArray, currentString, cur);
-            cur++;
+            this._openBracket(bracketType.FUNCTION);
+            this._closeLambda();
+
+            const nextCurrentString = formulaChars[cur + 1];
+            if (nextCurrentString && nextCurrentString === matchToken.CLOSE_BRACKET) {
+                // when function has not parameter, return to parentNode , e.g. row()
+                if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
+                    return ErrorType.VALUE;
+                }
+                    /**
+                     * https://github.com/dream-num/univer/issues/1769
+                     * Formula example: =IF(TODAY()>1,"TRUE", "FALSE")
+                     * Copy or auto-fill at complex formula get error formula offset
+                     */
+
+                this._addSequenceArray(sequenceArray, currentString, cur);
+                cur++;
+                this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                cur++;
+                this._closeBracket();
+                return cur;
+            } else if (nextCurrentString) {
+                this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+            }
+        } else {
+            this._pushNodeToChildren(currentString);
+            this._openBracket(bracketType.NORMAL);
+            this._openBracketNormalIndex();
+            this._resetSegment();
+        }
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _consumeCloseBracket(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        const currentString = formulaChars[cur];
+        const charsCount = formulaChars.length;
+        if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
+            this._formalErrorOccurred();
         }
 
         this._pushNodeToChildren(this._segment);
+        this._resetSegment();
+        const currentBracket = this._getCurrentBracket();
+        if (currentBracket === bracketType.NORMAL) {
+            this._pushNodeToChildren(currentString);
+        } else if (currentBracket === bracketType.FUNCTION) {
+            // function close
+            const nextCurrentString = formulaChars[cur + 1];
+            if (nextCurrentString && nextCurrentString === matchToken.OPEN_BRACKET) {
+                // lambda handler, e.g. =lambda(x,y, x*y*x)(1,2)
+                if (!this._setParentCurrentLexerNode() && cur !== charsCount - 1) {
+                    return ErrorType.VALUE;
+                }
 
-        if (this._checkErrorState()) {
+                this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, cur, true);
+                this._openLambda();
+            } else {
+                if (!this._setAncestorCurrentLexerNode() && cur !== charsCount - 1) {
+                    return ErrorType.VALUE;
+                }
+            }
+        } else {
             return ErrorType.VALUE;
         }
+        this._closeBracket();
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _consumeDoubleQuotation(formulaChars: string[], startIndex: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        let cur = startIndex;
+        const currentString = formulaChars[cur];
+        if (this.isDoubleQuotationClose()) {
+            this._openDoubleQuotation();
+        } else {
+            const nextCurrentString = formulaChars[cur + 1];
+            if (nextCurrentString && nextCurrentString === matchToken.DOUBLE_QUOTATION) {
+                cur++;
+            } else {
+                this._closeDoubleQuotation();
+            }
+        }
+        this._pushSegment(currentString);
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _consumeSingleQuotation(formulaChars: string[], startIndex: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        let cur = startIndex;
+        const currentString = formulaChars[cur];
+        if (this.isSingleQuotationClose()) {
+            this._openSingleQuotation();
+
+                // If the current segment is blank, reset the segment.
+                // Process the space before the double single quotes of sheet name.
+            // e.g. = 'dv-test'!C27
+            if (this._segmentCount() === 0) {
+                this._resetSegment();
+            }
+        } else {
+            const nextCurrentString = formulaChars[cur + 1];
+            if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
+                    // handle 'Sheet'1'!A1
+
+                // Add the first single quotation
+                this._pushSegment(currentString);
+                this._addSequenceArray(sequenceArray, currentString, cur);
+                cur++;
+
+                // Add the second single quotation
+                this._pushSegment(nextCurrentString);
+                this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                cur++;
+                return cur;
+            } else {
+                this._closeSingleQuotation();
+            }
+        }
+        this._pushSegment(currentString);
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _consumeComma(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        const charsCount = formulaChars.length;
+        if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
+            this._formalErrorOccurred();
+        }
+
+        const currentBracket = this._getCurrentBracket();
+            /**
+             * Handle the occurrence of commas, where in the formula,
+             * the comma represents the parameters of the function
+             * [currentBracket == null] is for the situation where [=A1:B1, B5:A10] occurs
+             */
+        if (currentBracket === bracketType.FUNCTION || currentBracket == null) {
+            this._pushNodeToChildren(this._segment);
+            this._resetSegment();
+            if (
+                !this._setParentCurrentLexerNode() &&
+                    cur !== charsCount - 1 &&
+                    currentBracket != null
+            ) {
+                return ErrorType.VALUE;
+            }
+
+            this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+        } else {
+                /**
+                 * support cubeValueObject for =INDEX((A6:B6,C6:D7),1,1,2)
+                 */
+            const cubeNode = new LexerNode();
+            cubeNode.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
+            const cubeParamNode = new LexerNode();
+            cubeParamNode.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+            cubeParamNode.changeToParent(cubeNode);
+
+            const colonNode = this._currentLexerNode.getParent();
+
+            if (colonNode && colonNode.getToken() === matchToken.COLON) {
+                const colonNodeParent = colonNode.getParent();
+                if (!colonNodeParent) {
+                    return ErrorType.VALUE;
+                }
+
+                colonNode.changeToParent(cubeParamNode);
+                colonNodeParent.setChildren([]);
+                cubeNode.changeToParent(colonNodeParent);
+            } else {
+                return ErrorType.VALUE;
+            }
+
+            this._changeCurrentBracket(bracketType.FUNCTION);
+            this._pushNodeToChildren(this._segment);
+            this._resetSegment();
+            this._currentLexerNode = cubeNode;
+            this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+        }
+
+        this._addSequenceArray(sequenceArray, formulaChars[cur], cur);
+        return cur + 1;
+    }
+
+    private _consumeColon(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        const currentString = formulaChars[cur];
+        const subLexerNode_op = this._createColonLexerNode();
+        const [subLexerNode_left, subLexerNode_right] = subLexerNode_op.getChildren() as LexerNode[];
+
+        let subLexerNode_main = subLexerNode_op;
+        let upLevel = 0;
+        if (this._segmentCount() > 0) {
+                // e.g. A1:B5
+            // -@A4:B5
+            let subLexerNode_minus: Nullable<LexerNode>;
+            let subLexerNode_at: Nullable<LexerNode>;
+            let sliceLength = 0;
+            const segmentTrim = this._segment.trim();
+            const lastString = segmentTrim[0];
+            const twoLastString = segmentTrim[1];
+
+            if (lastString === prefixToken.MINUS) {
+                subLexerNode_minus = new LexerNode();
+                subLexerNode_minus.setToken(prefixToken.MINUS);
+                subLexerNode_minus.setIndex(cur - this._segment.length, cur - this._segment.length);
+                sliceLength++;
+            }
+
+            if (lastString === prefixToken.AT || twoLastString === prefixToken.AT) {
+                subLexerNode_at = new LexerNode();
+                subLexerNode_at.setToken(prefixToken.AT);
+                const startIndex = cur - this._segment.length + sliceLength;
+                subLexerNode_at.setIndex(startIndex, startIndex);
+
+                if (subLexerNode_minus) {
+                    subLexerNode_minus.addChildren(subLexerNode_at);
+                    subLexerNode_at.setParent(subLexerNode_minus);
+                }
+
+                sliceLength++;
+            }
+
+            if (sliceLength > 0) {
+                this._segment = segmentTrim.slice(sliceLength);
+            }
+
+            upLevel = sliceLength;
+
+            if (subLexerNode_at) {
+                subLexerNode_at.addChildren(subLexerNode_op);
+                subLexerNode_op.setParent(subLexerNode_at);
+                subLexerNode_main = subLexerNode_at.getParent() ?? subLexerNode_at;
+            } else if (subLexerNode_minus) {
+                subLexerNode_main = subLexerNode_minus;
+                subLexerNode_minus.addChildren(subLexerNode_op);
+                subLexerNode_op.setParent(subLexerNode_minus);
+            }
+
+            const subLexerNode_ref = new LexerNode();
+            subLexerNode_ref.setToken(this._segment);
+            subLexerNode_ref.setParent(subLexerNode_left);
+            subLexerNode_ref.setIndex(cur - this._segment.length, cur - 1);
+
+            subLexerNode_left.getChildren().push(subLexerNode_ref);
+            this._resetSegment();
+        } else {
+            // e.g. indirect("A5"):B10
+            const lastChildNode = this._getLastChildCurrentLexerNode();
+            if (lastChildNode) {
+                lastChildNode.changeToParent(subLexerNode_left);
+            }
+        }
+
+        this._setCurrentLexerNode(subLexerNode_main);
+        this._currentLexerNode = subLexerNode_right;
+        this._openColon(upLevel);
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _createColonLexerNode() {
+        const subLexerNode_op = new LexerNode();
+        subLexerNode_op.setToken(matchToken.COLON);
+
+        const subLexerNode_left = new LexerNode();
+        subLexerNode_left.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+        subLexerNode_left.setParent(subLexerNode_op);
+
+        const subLexerNode_right = new LexerNode();
+        subLexerNode_right.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+        subLexerNode_right.setParent(subLexerNode_op);
+
+        subLexerNode_op.getChildren().push(subLexerNode_left, subLexerNode_right);
+        return subLexerNode_op;
+    }
+
+    private _consumeSuffix(formulaChars: string[], cur: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        const currentString = formulaChars[cur];
+        this._pushNodeToChildren(this._segment);
+
+        const subLexerNode = new LexerNode();
+        subLexerNode.setToken(currentString);
+        subLexerNode.setIndex(cur - 1, cur - 1);
+
+        const lastChildNode = this._getLastChildCurrent();
+        if (lastChildNode instanceof LexerNode) {
+            lastChildNode.changeToParent(subLexerNode);
+        } else if (lastChildNode === matchToken.CLOSE_BRACKET) {
+            const nodes = this._getNodesByCurrentBracketNormalIndex();
+            subLexerNode.getChildren().push(...nodes);
+        } else if (lastChildNode !== false) {
+            subLexerNode.getChildren().push(lastChildNode);
+            this._removeLastChild();
+        }
+
+        this._pushNodeToChildren(subLexerNode);
+        subLexerNode.setParent(this._currentLexerNode);
+
+        this._resetSegment();
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
+    }
+
+    private _consumeOperator(formulaChars: string[], startIndex: number, sequenceArray?: ISequenceArray[]): number | ErrorType {
+        let cur = startIndex;
+        const currentString = formulaChars[cur];
+        let trimSegment = this._segment.trim();
+
+        if (currentString === operatorToken.MINUS && (trimSegment === '')) {
+            // negative number
+            const prevString = this._findPreviousToken(formulaChars, cur - 1) || '';
+            const nextString = this._findNextToken(formulaChars, cur + 1) || '';
+            if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
+                this._pushNodeToChildren('0');
+                this._pushNodeToChildren(operatorToken.MINUS);
+                this._addSequenceArray(sequenceArray, currentString, cur);
+                this._resetSegment();
+                cur++;
+                return cur;
+            } else if (this._unexpectedEndingToken(prevString)) {
+                if (nextString === operatorToken.PLUS) {
+                    this._pushSegment(operatorToken.MINUS);
+                    this._addSequenceArray(sequenceArray, currentString, cur);
+                    this._addSequenceArray(sequenceArray, operatorToken.PLUS, cur + 1);
+                    cur += 2;
+                    return cur;
+                } else {
+                    this._pushSegment(operatorToken.MINUS);
+                    this._addSequenceArray(sequenceArray, currentString, cur);
+                    cur++;
+                    return cur;
+                }
+            }
+        } else if (this._segment.length > 0 && this._isScientificNotation(formulaChars, cur, currentString)) {
+            this._pushSegment(currentString);
+
+            this._addSequenceArray(sequenceArray, currentString, cur);
+
+            cur++;
+            return cur;
+        } else if (this._segment.length > 0 && trimSegment === '') {
+            trimSegment = this._segment;
+        } else {
+            this._pushNodeToChildren(this._segment);
+            trimSegment = '';
+        }
+
+        if (currentString === operatorToken.LESS_THAN || currentString === operatorToken.GREATER_THAN) {
+            const nextCurrentString = formulaChars[cur + 1];
+            if (nextCurrentString && OPERATOR_TOKEN_SET.has(currentString + nextCurrentString)) {
+                this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
+
+                this._resetSegment();
+                this._addSequenceArray(sequenceArray, currentString, cur);
+                cur++;
+                this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                cur++;
+                return cur;
+            } else {
+                this._pushNodeToChildren(trimSegment + currentString);
+            }
+        } else {
+            this._pushNodeToChildren(trimSegment + currentString);
+        }
+        this._resetSegment();
+
+        this._addSequenceArray(sequenceArray, currentString, cur);
+        return cur + 1;
     }
 
     private _isScientificNotation(formulaStringArray: string[], cur: number, currentString: string) {
@@ -2102,49 +2139,13 @@ export class LexerTreeBuilder extends Disposable {
         return null;
     }
 
-    // eslint-disable-next-line complexity, max-lines-per-function
     private _generateNewFunctionString(lexerNode: LexerNode, formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean) {
         const token = lexerNode.getToken();
 
-        const tokenTrim = token.trim();
-        const tokenTrimUpper = tokenTrim.toUpperCase();
-
-        const tokenForFunction = this._clearFunctionString(tokenTrimUpper);
+        const tokenForFunction = this._clearFunctionString(token.trim().toUpperCase());
         const isFunctionNode = hasFunction(tokenForFunction);
 
-        let curNodeType = NewExcelFunctionNodeType.NORMAL;
-
-        if (token === DEFAULT_TOKEN_TYPE_ROOT) {
-            curNodeType = NewExcelFunctionNodeType.ROOT;
-        } else if (token === DEFAULT_TOKEN_TYPE_PARAMETER) {
-            curNodeType = NewExcelFunctionNodeType.PARAMETER;
-        } else if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
-            curNodeType = NewExcelFunctionNodeType.LAMBDA_PARAMETER;
-        } else if (NEW_EXCEL_FUNCTIONS.has(tokenForFunction)) {
-            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-        } else if (tokenTrimUpper === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
-            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-            curNodeType = NewExcelFunctionNodeType.LAMBDA;
-        } else if (tokenTrimUpper === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
-            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
-            this._hasNewExcelFunction = true;
-            curNodeType = NewExcelFunctionNodeType.LET;
-        } else if (tokenTrimUpper === matchToken.COLON) {
-            curNodeType = NewExcelFunctionNodeType.COLON;
-        } else if (SUFFIX_TOKEN_SET.has(tokenTrimUpper)) {
-            curNodeType = NewExcelFunctionNodeType.SUFFIX;
-        } else if (tokenTrimUpper === prefixToken.MINUS) {
-            // Check if brackets need to be added for minus sign, for example: -(a+b)
-            if (this._checkAddBracketForMinus(lexerNode)) {
-                curNodeType = NewExcelFunctionNodeType.MINUS;
-            }
-            formulaStrings.push(token);
-        } else {
-            formulaStrings.push(token);
-            curNodeType = NewExcelFunctionNodeType.OTHER;
-        }
+        let curNodeType = this._appendNewFunctionToken(lexerNode, formulaStrings, tokenForFunction);
 
         if (isFunctionNode) {
             if (curNodeType !== NewExcelFunctionNodeType.LAMBDA && curNodeType !== NewExcelFunctionNodeType.LET) {
@@ -2160,73 +2161,10 @@ export class LexerTreeBuilder extends Disposable {
 
         // The first child node of a LAMBDA expression holds the invocation arguments; process it after the parameters and wrap in parentheses. For example: LAMBDA(a,b,a*b)(x,y) -> x,y
         if (curNodeType === NewExcelFunctionNodeType.LAMBDA) {
-            const firstChild = children[0];
-            let firstIsInputIndex = 0;
-            if (firstChild instanceof LexerNode) {
-                const firstChildToken = firstChild.getToken();
-                if (firstChildToken === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
-                    firstIsInputIndex = 1;
-                }
-            }
-            for (let i = firstIsInputIndex; i < childrenCount - 1; i++) {
-                const item = children[i];
-                if (item instanceof LexerNode) {
-                    const varName = item.getChildren()[0];
-                    if (typeof varName === 'string') {
-                        if (this._lambdaFunctionParameterSet.has(varName)) {
-                            console.error(`Lambda parameter name "${varName}" is duplicated.`);
-                        }
-                        this._lambdaFunctionParameterSet.add(varName);
-
-                        formulaStrings.push(`${this._xlpmPrefix}${varName}`);
-                        this._hasNewExcelFunction = true;
-                    }
-                }
-                formulaStrings.push(',');
-            }
-
-            this._handleNewFunctionChild(children[childrenCount - 1], formulaStrings, hasFunction);
-
-            if (firstIsInputIndex === 1) {
-                formulaStrings.push(')');
-                formulaStrings.push('(');
-                this._generateNewFunctionString(firstChild as LexerNode, formulaStrings, hasFunction);
-                formulaStrings.push(')');
-            } else {
-                formulaStrings.push(')');
-            }
+            this._generateLambdaFunctionString(children, formulaStrings, hasFunction);
             return;
         } else if (curNodeType === NewExcelFunctionNodeType.LET) {
-            // Special handling for LET function: even positions are variable names, odd positions are values or other formulas, and the last one is the expression.
-            for (let i = 0; i < childrenCount - 1; i++) {
-                const item = children[i];
-
-                if (item instanceof LexerNode && i % 2 === 0) {
-                    const varName = item.getChildren()[0];
-                    if (typeof varName === 'string') {
-                        if (this._lambdaFunctionParameterSet.has(varName)) {
-                            console.error(`Let variable name "${varName}" is duplicated.`);
-                        }
-                        this._lambdaFunctionParameterSet.add(varName);
-                        formulaStrings.push(`${this._xlpmPrefix}${varName}`);
-                        this._hasNewExcelFunction = true;
-                        formulaStrings.push(',');
-                        continue;
-                    }
-                }
-
-                this._handleNewFunctionChild(item, formulaStrings, hasFunction);
-
-                if (item instanceof LexerNode) {
-                    const nextItem = children[i + 1];
-                    if (nextItem && nextItem instanceof LexerNode) {
-                        formulaStrings.push(',');
-                    }
-                }
-            }
-
-            this._handleNewFunctionChild(children[childrenCount - 1], formulaStrings, hasFunction);
-            formulaStrings.push(')');
+            this._generateLetFunctionString(children, formulaStrings, hasFunction);
             return;
         } else if (curNodeType === NewExcelFunctionNodeType.COLON) {
             // Special handling for colon nodes: only two children exist, and the colon node is promoted to parent level by the algorithm, so it needs special handling to insert it in the middle
@@ -2261,6 +2199,118 @@ export class LexerTreeBuilder extends Disposable {
         } else if (curNodeType === NewExcelFunctionNodeType.MINUS) {
             formulaStrings.push(')');
         }
+    }
+
+    private _appendNewFunctionToken(lexerNode: LexerNode, formulaStrings: (string | number | boolean)[], tokenForFunction: string): NewExcelFunctionNodeType {
+        const token = lexerNode.getToken();
+        const tokenTrim = token.trim();
+        const tokenTrimUpper = tokenTrim.toUpperCase();
+        let curNodeType = NewExcelFunctionNodeType.NORMAL;
+        if (token === DEFAULT_TOKEN_TYPE_ROOT) {
+            curNodeType = NewExcelFunctionNodeType.ROOT;
+        } else if (token === DEFAULT_TOKEN_TYPE_PARAMETER) {
+            curNodeType = NewExcelFunctionNodeType.PARAMETER;
+        } else if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+            curNodeType = NewExcelFunctionNodeType.LAMBDA_PARAMETER;
+        } else if (NEW_EXCEL_FUNCTIONS.has(tokenForFunction)) {
+            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
+            this._hasNewExcelFunction = true;
+        } else if (tokenTrimUpper === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
+            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
+            this._hasNewExcelFunction = true;
+            curNodeType = NewExcelFunctionNodeType.LAMBDA;
+        } else if (tokenTrimUpper === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
+            formulaStrings.push(`${this._xlfnPrefix}${tokenTrim}`);
+            this._hasNewExcelFunction = true;
+            curNodeType = NewExcelFunctionNodeType.LET;
+        } else if (tokenTrimUpper === matchToken.COLON) {
+            curNodeType = NewExcelFunctionNodeType.COLON;
+        } else if (SUFFIX_TOKEN_SET.has(tokenTrimUpper)) {
+            curNodeType = NewExcelFunctionNodeType.SUFFIX;
+        } else if (tokenTrimUpper === prefixToken.MINUS) {
+            // Check if brackets need to be added for minus sign, for example: -(a+b)
+            if (this._checkAddBracketForMinus(lexerNode)) {
+                curNodeType = NewExcelFunctionNodeType.MINUS;
+            }
+            formulaStrings.push(token);
+        } else {
+            formulaStrings.push(token);
+            curNodeType = NewExcelFunctionNodeType.OTHER;
+        }
+        return curNodeType;
+    }
+
+    private _generateLambdaFunctionString(children: (string | LexerNode)[], formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean) {
+        const childrenCount = children.length;
+        const firstChild = children[0];
+        let firstIsInputIndex = 0;
+        if (firstChild instanceof LexerNode) {
+            const firstChildToken = firstChild.getToken();
+            if (firstChildToken === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+                firstIsInputIndex = 1;
+            }
+        }
+        for (let i = firstIsInputIndex; i < childrenCount - 1; i++) {
+            const item = children[i];
+            if (item instanceof LexerNode) {
+                const varName = item.getChildren()[0];
+                if (typeof varName === 'string') {
+                    if (this._lambdaFunctionParameterSet.has(varName)) {
+                        console.error(`Lambda parameter name "${varName}" is duplicated.`);
+                    }
+                    this._lambdaFunctionParameterSet.add(varName);
+
+                    formulaStrings.push(`${this._xlpmPrefix}${varName}`);
+                    this._hasNewExcelFunction = true;
+                }
+            }
+            formulaStrings.push(',');
+        }
+
+        this._handleNewFunctionChild(children[childrenCount - 1], formulaStrings, hasFunction);
+
+        if (firstIsInputIndex === 1) {
+            formulaStrings.push(')');
+            formulaStrings.push('(');
+            this._generateNewFunctionString(firstChild as LexerNode, formulaStrings, hasFunction);
+            formulaStrings.push(')');
+        } else {
+            formulaStrings.push(')');
+        }
+    }
+
+    private _generateLetFunctionString(children: (string | LexerNode)[], formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean) {
+        const childrenCount = children.length;
+        // Special handling for LET function: even positions are variable names, odd positions are values or other formulas, and the last one is the expression.
+        for (let i = 0; i < childrenCount - 1; i++) {
+            const item = children[i];
+
+            if (item instanceof LexerNode && i % 2 === 0) {
+                const varName = item.getChildren()[0];
+                if (typeof varName === 'string') {
+                    if (this._lambdaFunctionParameterSet.has(varName)) {
+                        console.error(`Let variable name "${varName}" is duplicated.`);
+                    }
+                    this._lambdaFunctionParameterSet.add(varName);
+                    formulaStrings.push(`${this._xlpmPrefix}${varName}`);
+                    this._hasNewExcelFunction = true;
+                    formulaStrings.push(',');
+                    continue;
+                }
+            }
+
+            this._handleNewFunctionChild(item, formulaStrings, hasFunction);
+
+            if (item instanceof LexerNode) {
+                const nextItem = children[i + 1];
+                if (nextItem && nextItem instanceof LexerNode) {
+                    formulaStrings.push(',');
+                }
+            }
+        }
+
+        this._handleNewFunctionChild(children[childrenCount - 1], formulaStrings, hasFunction);
+        formulaStrings.push(')');
     }
 
     private _handleNewFunctionChild(item: string | LexerNode, formulaStrings: (string | number | boolean)[], hasFunction: (functionToken: IFunctionNames) => boolean) {
@@ -2347,7 +2397,7 @@ export class LexerTreeBuilder extends Disposable {
 
         let lexerNode = lexerNodeRoot;
 
-        if (lexerNode instanceof LexerNode && (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_ROOT || lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) && lexerNode.getChildren().length === 1) {
+        if ((lexerNode.getToken() === DEFAULT_TOKEN_TYPE_ROOT || lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) && lexerNode.getChildren().length === 1) {
             lexerNode = lexerNode.getChildren()[0] as LexerNode;
         }
 
@@ -2392,30 +2442,27 @@ export class LexerTreeBuilder extends Disposable {
             return newNode;
         } else if (curNodeType === NewExcelFunctionNodeType.COLON) {
             // Special handling for colon nodes: only two children exist, and the colon node is promoted to parent level by the algorithm, so it needs special handling to insert it in the middle
-            const firstNode = children[0];
-            if ((firstNode instanceof LexerNode)) {
-                const firstChildNode = firstNode.getChildren()[0];
-                if ((firstChildNode instanceof LexerNode)) {
-                    newNode.startIndex = firstChildNode.getStartIndex();
-                }
-            }
+            this._setExprTreeStartIndex(children[0], newNode);
 
             if (this._checkColonNodeForExprTree(lexerNode)) {
                 return newNode;
             }
         } else if (curNodeType === NewExcelFunctionNodeType.SUFFIX) {
-            const firstNode = children[0];
-            if ((firstNode instanceof LexerNode)) {
-                const firstChildNode = firstNode.getChildren()[0];
-                if ((firstChildNode instanceof LexerNode)) {
-                    newNode.startIndex = firstChildNode.getStartIndex();
-                }
-            }
+            this._setExprTreeStartIndex(children[0], newNode);
         }
 
         this._handleChildrenForExprTree(children, curNodeType, newNode, hasFunction, getDefinedNameName, getTable);
 
         return newNode;
+    }
+
+    private _setExprTreeStartIndex(firstNode: string | LexerNode, newNode: IExprTreeNode) {
+        if (firstNode instanceof LexerNode) {
+            const firstChildNode = firstNode.getChildren()[0];
+            if (firstChildNode instanceof LexerNode) {
+                newNode.startIndex = firstChildNode.getStartIndex();
+            }
+        }
     }
 
     private _handleChildrenForExprTree(children: (string | LexerNode)[], curNodeType: NewExcelFunctionNodeType, newNode: IExprTreeNode, hasFunction: (functionToken: IFunctionNames) => boolean, getDefinedNameName: (unitId: string, name: string) => Nullable<IDefinedNamesServiceParam>, getTable: (unitId: string, tableName: string) => Nullable<ISuperTable>) {

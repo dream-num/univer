@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { LexerNode } from '../lexer-node';
+import type { Injector, IWorkbookData, Univer } from '@univerjs/core';
 import { LocaleType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { BaseValueObject } from '../../value-object/base-value-object';
 import { FUNCTION_NAMES_DATE } from '../../../functions/date/function-names';
 import { Month } from '../../../functions/date/month';
+import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
+import { Sum } from '../../../functions/math/sum';
+import { Divided } from '../../../functions/meta/divided';
+import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
+import { Multiply } from '../../../functions/meta/multiply';
+import { Plus } from '../../../functions/meta/plus';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IDefinedNamesService } from '../../../services/defined-names.service';
 import { IFunctionService } from '../../../services/function.service';
+import { Interpreter } from '../../interpreter/interpreter';
 import { Lexer } from '../lexer';
+import { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
+import { AstTreeBuilder } from '../parser';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -68,39 +77,68 @@ describe('lexer test', () => {
     let univer: Univer;
     let lexer: Lexer;
     let get: Injector['get'];
-    let workbook: Workbook;
     let definedNamesService: IDefinedNamesService;
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let functionService: IFunctionService;
-    let lexerTreeBuilder: LexerTreeBuilder;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
         univer = testBed.univer;
-        workbook = testBed.sheet;
         get = testBed.get;
 
         definedNamesService = get(IDefinedNamesService);
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
         functionService = get(IFunctionService);
-        lexerTreeBuilder = get(LexerTreeBuilder);
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');
         formulaCurrentConfigService.setSheetNameMap({ test: { sheet1: 'sheetName1' } });
 
-        // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
-
-        lexer = new Lexer(
-            definedNamesService,
-            lexerTreeBuilder,
-            formulaCurrentConfigService,
-            functionService
-        );
+        lexer = get(Lexer);
     });
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it.each(['Hello [test]', '=C13]', '=Table1[[#All],[Column1]'])('calculates new formulas after editing %s', (text) => {
+        const reader = get(LexerTreeBuilder);
+        const parser = get(AstTreeBuilder);
+        const interpreter = get(Interpreter);
+        functionService.registerExecutors(
+            new Sum(FUNCTION_NAMES_MATH.SUM),
+            new Plus(FUNCTION_NAMES_META.PLUS),
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
+            new Divided(FUNCTION_NAMES_META.DIVIDED)
+        );
+
+        const calculate = (formula: string) => {
+            const node = lexer.treeBuilder(formula);
+            if (!(node instanceof LexerNode)) {
+                throw new TypeError('Expected a formula lexer tree');
+            }
+            const value = interpreter.execute({ node: parser.parse(node), refOffsetX: 0, refOffsetY: 0 }) as BaseValueObject;
+            return value.getValue();
+        };
+
+        expect(calculate('=8000*28')).toBe(224000);
+
+        for (let index = 1; index <= text.length; index++) {
+            reader.sequenceNodesBuilder(text.slice(0, index));
+        }
+        reader.checkIfAddBracket(text);
+        if (text.startsWith('=')) {
+            lexer.treeBuilder(text);
+        }
+
+        for (const [formula, expected] of [
+            ['=1+1', 2],
+            ['=4000*30+2000', 122000],
+            ['=SUM(1,2)', 3],
+            ['=(48000+8000)*25%', 14000],
+        ] as const) {
+            expect(calculate(formula)).toBe(expected);
+        }
     });
 
     describe('lexer definedName', () => {

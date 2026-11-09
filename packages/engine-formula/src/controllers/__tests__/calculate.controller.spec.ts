@@ -38,7 +38,6 @@ import {
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
-import { SetImageFormulaDataMutation } from '../../commands/mutations/set-image-formula-data.mutation';
 import { FormulaExecutedStateType, FormulaExecuteStageType } from '../../services/runtime.service';
 import { CalculateController } from '../calculate.controller';
 
@@ -230,14 +229,13 @@ describe('CalculateController', () => {
         );
     });
 
-    it.each([undefined, false, true])('should respect backend result ownership (%s)', async (alreadyEmitted) => {
+    it('emits one terminal notification without resubmitting results', async () => {
         const commandService = createCommandServiceMock();
         const executionCompleteListener$ = new Subject<any>();
         const executionInProgressListener$ = new Subject<any>();
         const calculateFormulaService = {
             executionCompleteListener$,
             executionInProgressListener$,
-            hasEmittedCalculationResult: alreadyEmitted === undefined ? undefined : vi.fn(() => alreadyEmitted),
             stopFormulaExecution: vi.fn(),
             execute: vi.fn(),
             executeFormulas: vi.fn(async () => ({})),
@@ -308,45 +306,9 @@ describe('CalculateController', () => {
         executionCompleteListener$.next(runtimeData);
         await Promise.resolve();
 
-        expect(formulaDataModel.clearPreviousArrayFormulaCellData).toHaveBeenCalled();
-        expect(formulaDataModel.mergeArrayFormulaCellData).toHaveBeenCalled();
-        expect(formulaDataModel.mergeArrayFormulaRange).toHaveBeenCalled();
-        expect(commandService.executeCommand).toHaveBeenCalledWith(
-            SetArrayFormulaDataMutation.id,
-            expect.anything(),
-            { onlyLocal: true, fromFormula: true }
-        );
-        expect(commandService.executeCommand).toHaveBeenCalledWith(
-            SetImageFormulaDataMutation.id,
-            expect.objectContaining({
-                imageFormulaData: expect.any(Array),
-            }),
-            { onlyLocal: true }
-        );
-        expect(commandService.executeCommand).toHaveBeenCalledWith(
-            SetFormulaDependencyCalculationResultMutation.id,
-            { result: [{ treeId: 100 }] },
-            { onlyLocal: true }
-        );
-        if (alreadyEmitted) {
-            expect(commandService.executeCommand).not.toHaveBeenCalledWith(
-                SetFormulaCalculationResultMutation.id,
-                expect.anything(),
-                { onlyLocal: true }
-            );
-            expect(forValue).not.toHaveBeenCalled();
-        } else {
-            expect(commandService.executeCommand).toHaveBeenCalledWith(
-                SetFormulaCalculationResultMutation.id,
-                expect.objectContaining({ unitData: { unit: { sheet: { 0: { 0: { v: 123 } } } } } }),
-                { onlyLocal: true }
-            );
-            expect(forValue).toHaveBeenCalledTimes(1);
-        }
-        if (calculateFormulaService.hasEmittedCalculationResult) {
-            expect(calculateFormulaService.hasEmittedCalculationResult).toHaveBeenCalledTimes(1);
-            expect(calculateFormulaService.hasEmittedCalculationResult).toHaveBeenCalledWith(runtimeData);
-        }
+        expect(commandService.executeCommand.mock.calls.filter(([id]) => id === SetFormulaCalculationResultMutation.id)).toHaveLength(0);
+        expect(formulaDataModel.mergeArrayFormulaCellData).not.toHaveBeenCalled();
+        expect(forValue).not.toHaveBeenCalled();
         expect(commandService.executeCommand).toHaveBeenLastCalledWith(
             SetFormulaCalculationNotificationMutation.id,
             { functionsExecutedState: FormulaExecutedStateType.SUCCESS },
@@ -363,7 +325,6 @@ describe('CalculateController', () => {
         const calculateFormulaService = {
             executionCompleteListener$,
             executionInProgressListener$,
-            hasEmittedCalculationResult: vi.fn(() => true),
             stopFormulaExecution: vi.fn(),
             execute: vi.fn(),
             executeFormulas: vi.fn(async () => ({})),
@@ -398,11 +359,6 @@ describe('CalculateController', () => {
         await Promise.resolve();
 
         expect(commandService.executeCommand).toHaveBeenCalledWith(
-            SetFormulaDependencyCalculationResultMutation.id,
-            { result: [{ treeId: 201 }] },
-            { onlyLocal: true }
-        );
-        expect(commandService.executeCommand).toHaveBeenCalledWith(
             SetFormulaCalculationNotificationMutation.id,
             { functionsExecutedState: FormulaExecutedStateType.NOT_EXECUTED },
             { onlyLocal: true }
@@ -418,7 +374,6 @@ describe('CalculateController', () => {
                 { onlyLocal: true }
             );
         }
-        expect(calculateFormulaService.hasEmittedCalculationResult).not.toHaveBeenCalled();
     });
 });
 
@@ -520,61 +475,5 @@ describe('CalculateController formula snapshot capability', () => {
         expect(call).toHaveBeenCalledWith('execute', [expect.objectContaining({ formulaData: data })]);
         expect(model.getFormulaData).toHaveBeenCalledTimes(1);
         expect(subscribe).not.toHaveBeenCalled();
-    });
-});
-
-describe('CalculateController local result ownership', () => {
-    const applyResult = (CalculateController.prototype as unknown as {
-        _applyResult(this: object, data: object): Promise<void>;
-    })._applyResult;
-
-    it('applies RPC completion normally without sending an unknown ownership request', async () => {
-        const call = vi.fn(async () => undefined);
-        const subscribe = vi.fn(() => new Subject());
-        const service = toModule({ call, subscribe } as never);
-        const commandService = createCommandServiceMock();
-        const matrix = new ObjectMatrix({ 0: { 0: { v: 42 } } });
-        const forValue = vi.spyOn(matrix, 'forValue');
-        const applyTreeResult = vi.fn();
-        const data = {
-            unitData: { book: { sheet: matrix } },
-            unitOtherData: {},
-            dependencyTreeModelData: [],
-        };
-        await applyResult.call({
-            _calculateFormulaService: service,
-            _commandService: commandService,
-            _applyTreeResult: applyTreeResult,
-        }, data);
-        expect(call).not.toHaveBeenCalled();
-        expect(subscribe).not.toHaveBeenCalled();
-        expect(applyTreeResult).toHaveBeenCalledWith(data);
-        expect(forValue).toHaveBeenCalledTimes(1);
-        expect(commandService.executeCommand).toHaveBeenCalledWith(
-            SetFormulaCalculationResultMutation.id,
-            expect.objectContaining({ unitData: { book: { sheet: { 0: { 0: { v: 42 } } } } } }),
-            { onlyLocal: true }
-        );
-    });
-
-    it('accepts an ordinary class prototype method for the exact locally emitted completion', async () => {
-        const matrix = new ObjectMatrix({ 0: { 0: { v: 42 } } });
-        const forValue = vi.spyOn(matrix, 'forValue');
-        const data = { unitData: { book: { sheet: matrix } }, unitOtherData: {}, dependencyTreeModelData: [] };
-        class LocalEngine {
-            hasEmittedCalculationResult(completion: object): boolean {
-                return completion === data;
-            }
-        }
-        const commandService = createCommandServiceMock();
-        const applyTreeResult = vi.fn();
-        await applyResult.call({
-            _calculateFormulaService: new LocalEngine(),
-            _commandService: commandService,
-            _applyTreeResult: applyTreeResult,
-        }, data);
-        expect(applyTreeResult).toHaveBeenCalledWith(data);
-        expect(forValue).not.toHaveBeenCalled();
-        expect(commandService.executeCommand).not.toHaveBeenCalled();
     });
 });

@@ -16,6 +16,21 @@
 
 import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import {
+    AsyncLock,
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    IConfigService,
+    Inject,
+    isFormulaId,
+    isFormulaString,
+    normalizeWorkbookCalculationSettings,
+    ObjectMatrix,
+    Rectangle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -39,21 +54,6 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
-import {
-    AsyncLock,
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    IConfigService,
-    Inject,
-    isFormulaId,
-    isFormulaString,
-    normalizeWorkbookCalculationSettings,
-    ObjectMatrix,
-    Rectangle,
-    requestImmediateMacroTask,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { Lexer } from '../engine/analysis/lexer';
@@ -63,7 +63,8 @@ import { Interpreter } from '../engine/interpreter/interpreter';
 import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
-import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
+import { FormulaResultService } from './formula-result.service';
+import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
 export const DEFAULT_INTERVAL_COUNT = 500;
 
@@ -78,13 +79,6 @@ export interface ICalculateFormulaService {
     executeWithFormulaDataSnapshot?(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): Promise<void>;
     readonly executionInProgressListener$: Observable<IExecutionInProgressParams>;
     readonly executionCompleteListener$: Observable<IAllRuntimeData>;
-    /**
-     * @experimental
-     * Whether this exact completion's unit and other-formula results have already been emitted through
-     * SetFormulaCalculationResultMutation. Model application can still be pending; application acknowledgements
-     * and completion notifications follow their normal flow.
-     */
-    hasEmittedCalculationResult?(data: IAllRuntimeData): boolean;
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
@@ -234,7 +228,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
         @IFormulaDependencyGenerator protected readonly _formulaDependencyGenerator: IFormulaDependencyGenerator,
         @Inject(Interpreter) protected readonly _interpreter: Interpreter,
-        @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder
+        @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
+        @Inject(FormulaResultService) protected readonly _formulaResultService: FormulaResultService
     ) {
         super();
     }
@@ -306,13 +301,24 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 this._runtimeService.completeCircularReferences();
                 this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
                 this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-                this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+                await this._completeExecution();
+            } finally {
                 this._runtimeService.clearInvertedIndexCache?.();
                 this._runtimeService.reset();
-            } finally {
                 this._runtimeService.releaseCalculationCache?.();
             }
         });
+    }
+
+    protected async _completeExecution(): Promise<void> {
+        const data = this._runtimeService.getAllRuntimeData();
+        if (data.functionsExecutedState === FormulaExecutedStateType.SUCCESS) {
+            await this._formulaResultService.applyResult(data);
+        } else if (data.functionsExecutedState === FormulaExecutedStateType.NOT_EXECUTED) {
+            await this._formulaResultService.applyTreeResult(data);
+        }
+        if (this._runtimeService.isStopExecution()) data.functionsExecutedState = FormulaExecutedStateType.STOP_EXECUTION;
+        if (!this._disposed) this._executionCompleteListener$.next(data);
     }
 
     protected async _executeStep() {

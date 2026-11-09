@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type {
     ISetFormulaCalculationStartMutation,
@@ -28,15 +29,11 @@ import type {
     IFormulaDependentsAndInRangeResults,
 } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
-import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetCellFormulaDependencyCalculationMutation,
     SetCellFormulaDependencyCalculationResultMutation,
     SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
     SetFormulaDependencyCalculationMutation,
@@ -48,10 +45,8 @@ import {
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -261,19 +256,6 @@ export class CalculateController extends Disposable {
          */
         this.disposeWithMe(this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
             const functionsExecutedState = data.functionsExecutedState;
-            switch (functionsExecutedState) {
-                case FormulaExecutedStateType.NOT_EXECUTED:
-                    this._applyTreeResult(data);
-                    break;
-                case FormulaExecutedStateType.STOP_EXECUTION:
-                    break;
-                case FormulaExecutedStateType.SUCCESS:
-                    this._applyResult(data);
-                    break;
-                case FormulaExecutedStateType.INITIAL:
-                    break;
-            }
-
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {
@@ -300,92 +282,5 @@ export class CalculateController extends Disposable {
                 }
             );
         }));
-    }
-
-    private async _applyTreeResult(data: IAllRuntimeData) {
-        const { dependencyTreeModelData } = data;
-        if (dependencyTreeModelData.length > 0) {
-            this._commandService.executeCommand(
-                SetFormulaDependencyCalculationResultMutation.id,
-                {
-                    result: dependencyTreeModelData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
-    }
-
-    private async _applyResult(data: IAllRuntimeData) {
-        const {
-            unitData,
-            sourceFormulaData,
-            unitOtherData,
-            arrayFormulaRange,
-            arrayFormulaCellData,
-            clearArrayFormulaCellData,
-            arrayFormulaEmbedded,
-            imageFormulaData,
-        } = data;
-
-        if (!unitData) {
-            this._applyTreeResult(data);
-            console.error('No sheetData from Formula Engine!');
-            return;
-        }
-
-        if (arrayFormulaRange || arrayFormulaEmbedded) {
-            this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
-            this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
-            this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
-
-            this._commandService.executeCommand(
-                SetArrayFormulaDataMutation.id,
-                {
-                    arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
-                    arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
-                    arrayFormulaEmbedded,
-                },
-                {
-                    onlyLocal: true,
-                    fromFormula: true,
-                }
-            );
-        }
-
-        // handle image formula data
-        if (imageFormulaData && imageFormulaData.length > 0) {
-            this._commandService.executeCommand(
-                SetImageFormulaDataMutation.id,
-                {
-                    imageFormulaData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
-
-        this._applyTreeResult(data);
-
-        // RPC modules synthesize functions for unknown property reads. Only an
-        // actual implementation can prove local ownership of this completion.
-        if ('hasEmittedCalculationResult' in this._calculateFormulaService &&
-            this._calculateFormulaService.hasEmittedCalculationResult?.(data) === true) {
-            return;
-        }
-
-        this._commandService.executeCommand(
-            SetFormulaCalculationResultMutation.id,
-            {
-                unitData: convertRuntimeToUnitData(unitData),
-                sourceFormulaData,
-                unitOtherData,
-            },
-            {
-                onlyLocal: true,
-            }
-        );
     }
 }

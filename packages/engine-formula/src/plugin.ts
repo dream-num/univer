@@ -15,7 +15,6 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
-import type { IUniverEngineFormulaConfig } from './config/config';
 import {
     IConfigService,
     Inject,
@@ -26,6 +25,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { IUniverEngineFormulaConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
 import { CalculateController } from './controllers/calculate.controller';
@@ -69,6 +69,7 @@ import {
 } from './services/feature-calculation-manager.service';
 import { FormulaCacheService } from './services/formula-cache.service';
 import { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
+import { FormulaResultService } from './services/formula-result.service';
 import { DescriptionService, IDescriptionService } from './services/formula/description.service';
 import { FormulaCalculationSessionService } from './services/formula/formula-calculation-session.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/formula/register-function.service';
@@ -178,6 +179,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
         if (shouldPerformComputing) {
             dependencies.push(
                 // Services
+                [FormulaResultService],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],

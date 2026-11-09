@@ -310,6 +310,7 @@ export { FormulaCalculationTriggerService, mergeDirtyData } from './services/for
 export { IFormulaChangesetCalculationService } from './services/formula-changeset-calculation.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaResultStatus } from './services/formula-common';
+export { FormulaResultService } from './services/formula-result.service';
 export { DescriptionService, IDescriptionService } from './services/formula/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/formula/description.service';
 export {
@@ -370,6 +371,7 @@ export {
     IFormulaUnitReferenceResolver,
     normalizeFormulaUnitName,
 } from './services/unit-reference-resolver.service';
+
 export type {
     FormulaUnitReferenceKind,
     IFormulaUnitReferenceResolution,

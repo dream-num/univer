@@ -177,7 +177,10 @@ const DialogDescription = forwardRef<
 >(({ className, ...props }, ref) => (
     <Description
         ref={ref}
-        className={clsx('univer-text-sm univer-text-gray-500', className)}
+        className={clsx(`
+          univer-text-sm univer-text-gray-500
+          dark:!univer-text-gray-300
+        `, className)}
         {...props}
     />
 ));

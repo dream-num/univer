@@ -299,6 +299,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
         <ConfigProvider
             locale={locale?.design}
             direction={direction}
+            density="touch"
             mountContainer={portalContainer}
             mobileKeyboardViewport={keyboardViewport}
         >

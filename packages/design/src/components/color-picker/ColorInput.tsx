@@ -79,7 +79,6 @@ function HexInput({ hsv, onChange }: IInputProps) {
             <input
                 className={clsx(`
                   univer-w-full univer-min-w-0 univer-px-2 !univer-pl-4 univer-uppercase
-                  focus:univer-border-primary-500 focus:univer-outline-none
                   rtl:!univer-pl-2 rtl:!univer-pr-4
                   dark:!univer-text-gray-0
                 `, borderClassName)}
@@ -167,7 +166,6 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
             className={`
               univer-flex univer-items-center univer-gap-2
               [&>input]:univer-w-11 [&>input]:univer-border-gray-200
-              [&>input]:focus:univer-border-primary-500
               dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-gray-0
             `}
         >
@@ -210,11 +208,15 @@ export function ColorInput({ hsv, alpha, format, onChange }: IColorInputProps) {
         <div
             className={`
               univer-flex univer-gap-2
+              [&_input:focus]:!univer-border-primary-600 [&_input:focus]:univer-ring-2
+              [&_input:focus]:univer-ring-primary-50
+              dark:[&_input:focus]:!univer-border-primary-300 dark:[&_input:focus]:!univer-ring-primary-900
               [&_input]:univer-box-border [&_input]:univer-flex [&_input]:univer-h-7 [&_input]:univer-items-center
-              [&_input]:univer-rounded [&_input]:univer-border [&_input]:univer-border-solid
-              [&_input]:univer-border-gray-200 [&_input]:univer-bg-transparent [&_input]:univer-px-1.5
+              [&_input]:univer-rounded-md [&_input]:univer-border [&_input]:univer-border-solid
+              [&_input]:univer-border-gray-200 [&_input]:univer-bg-gray-0 [&_input]:univer-px-1.5
               [&_input]:univer-text-sm [&_input]:univer-text-gray-700 [&_input]:univer-outline-none
-              dark:[&_input]:!univer-border-gray-600 dark:[&_input]:!univer-text-gray-0
+              dark:[&_input]:!univer-border-gray-600 dark:[&_input]:!univer-bg-gray-700
+              dark:[&_input]:!univer-text-gray-0
             `}
         >
             <div className="univer-relative univer-flex univer-flex-1 univer-gap-2">

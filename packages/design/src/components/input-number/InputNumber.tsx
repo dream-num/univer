@@ -32,6 +32,7 @@ export interface IInputNumberProps
     precision?: number;
     formatter?: (value: string | number | undefined) => string;
     parser?: (displayValue: string | undefined) => string;
+    /** Hidden by default in touch density unless an explicit size is supplied. */
     controls?: boolean;
     className?: string;
     inputClassName?: string;
@@ -48,14 +49,14 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         {
             value,
             defaultValue,
-            size = 'small',
+            size,
             min = Number.MIN_SAFE_INTEGER,
             max = Number.MAX_SAFE_INTEGER,
             step = 1,
             precision,
             formatter,
             parser,
-            controls = true,
+            controls,
             className,
             inputClassName,
             controlsClassName,
@@ -71,7 +72,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         },
         ref
     ) => {
-        const { locale } = useContext(ConfigContext);
+        const { locale, density } = useContext(ConfigContext);
+        const showControls = controls ?? (density !== 'touch' || Boolean(size));
         const [internalValue, setInternalValue] = useState<number | null>(
             () => {
                 if (value !== undefined) {
@@ -341,6 +343,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             <div className={clsx('univer-inline-block', className)}>
                 <div className="univer-relative univer-w-full">
                     <Input
+                        inputMode={min < 0 ? 'text' : 'decimal'}
                         {...inputProps}
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
@@ -354,7 +357,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         onKeyDown={handleKeyDown}
                     />
 
-                    {controls && (
+                    {showControls && (
                         <div
                             className={clsx(
                                 `

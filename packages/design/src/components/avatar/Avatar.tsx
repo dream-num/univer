@@ -24,7 +24,8 @@ type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 const avatarVariants = cva(
     `
       univer-relative univer-inline-block univer-overflow-hidden univer-whitespace-nowrap univer-bg-gray-200
-      univer-text-center univer-align-middle univer-text-gray-0
+      univer-text-center univer-align-middle univer-text-gray-700
+      dark:!univer-bg-gray-700 dark:!univer-text-gray-100
     `,
     {
         variants: {

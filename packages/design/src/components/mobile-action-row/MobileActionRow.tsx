@@ -15,7 +15,7 @@
  */
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { borderBottomClassName, resetButtonClassName } from '../../helper/class-utilities';
+import { borderBottomClassName, focusClassName, resetButtonClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 export interface IMobileActionRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'title' | 'value'> {
@@ -45,11 +45,13 @@ export function MobileActionRow(props: IMobileActionRowProps) {
     return (
         <button
             type={type}
-            className={clsx(resetButtonClassName, `
+            className={clsx(resetButtonClassName, focusClassName, `
               univer-flex univer-min-h-12 univer-w-full univer-items-center univer-gap-3 univer-rounded-xl univer-px-4
               univer-text-left univer-text-base univer-font-medium univer-text-gray-900
+              aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
               disabled:univer-opacity-40
               dark:!univer-text-gray-100
+              dark:aria-pressed:!univer-bg-primary-900 dark:aria-pressed:!univer-text-primary-100
               [&>svg]:univer-size-5
             `, {
                 'univer-bg-gray-0 active:univer-bg-gray-100 dark:!univer-bg-gray-800 dark:active:!univer-bg-gray-700': variant === 'surface',
@@ -72,7 +74,7 @@ export function MobileActionRow(props: IMobileActionRowProps) {
                 <span
                     className="
                       univer-max-w-32 univer-truncate univer-text-sm univer-font-normal univer-text-gray-500
-                      dark:!univer-text-gray-400
+                      dark:!univer-text-gray-300
                     "
                 >
                     {value}

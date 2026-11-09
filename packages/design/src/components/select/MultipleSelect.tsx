@@ -129,7 +129,9 @@ export function MultipleSelect(props: IMultipleSelectProps) {
             <div
                 data-u-comp="multiple-select"
                 aria-invalid={invalid || undefined}
-                className={clsx(selectClassName, size === 'large' && 'univer-h-auto univer-min-h-12', {
+                className={clsx(selectClassName, size === 'large'
+                    ? 'univer-h-auto univer-min-h-12 univer-text-base'
+                    : 'univer-text-sm', {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed univer-opacity-50': disabled,

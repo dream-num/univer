@@ -27,7 +27,14 @@ import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { MobileGradientColorPicker } from '../MobileGradientColorPicker';
 import '@testing-library/jest-dom/vitest';
 
-beforeEach(() => vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false }));
+beforeEach(() => {
+    vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false });
+    vi.stubGlobal('ResizeObserver', class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+    });
+});
 afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();

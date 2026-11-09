@@ -162,13 +162,12 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.input-values-placeholder')}
                                     value={conditionInfo.info.string}
                                     onChange={(value) => handleConditionInfo({ string: value })}
-                                    size="large"
-                                    inputClass="univer-text-base"
+                                    size="small"
                                 />
                             )
                             : (
                                 <Input
-                                    className="univer-h-7 univer-w-full"
+                                    className="univer-w-full"
                                     inputMode="decimal"
                                     value={numberDraft}
                                     aria-invalid={numberDraft !== '' && !Number.isFinite(Number(numberDraft))}
@@ -179,8 +178,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                             handleConditionInfo({ number: Number(value) });
                                         }
                                     }}
-                                    size="large"
-                                    inputClass="univer-text-base"
+                                    size="small"
                                 />
                             )}
                     </>
@@ -220,8 +218,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     handleConditionInfo({ numberRange: [Number(value), conditionInfo.info.numberRange?.[1]] });
                                 }
                             }}
-                            size="large"
-                            inputClass="univer-text-base"
+                            size="small"
                         />
                         <span> - </span>
                         <Input
@@ -236,8 +233,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], Number(value)] });
                                 }
                             }}
-                            size="large"
-                            inputClass="univer-text-base"
+                            size="small"
                         />
                     </div>
                 )}
@@ -247,6 +243,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                         value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         options={conditionDateOptions}
                         onChange={(value) => handleConditionInfo({ dateSelect: value })}
+                        size="small"
                     />
                 )}
             </div>

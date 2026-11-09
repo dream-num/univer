@@ -49,15 +49,15 @@ const MobileSettingNumber = forwardRef<HTMLInputElement, ComponentProps<typeof I
     <InputNumber
         {...props}
         ref={ref}
-        className={clsx(props.className, 'univer-h-12 univer-w-full')}
-        inputClassName={clsx(props.inputClassName, 'univer-text-base')}
-        size="large"
+        className={clsx(props.className, 'univer-w-full')}
+        inputClassName={clsx(props.inputClassName, '')}
+        size="small"
         controls={false}
     />
 ));
 
 function MobileSettingSelect(props: ComponentProps<typeof MobileSelect>) {
-    return <MobileSelect {...props} className={clsx(props.className, 'univer-h-12 univer-w-full')} />;
+    return <MobileSelect {...props} className={clsx(props.className, 'univer-w-full')} size="small" />;
 }
 
 function MobileParagraphNumber({ min = 0, max = 100, step = 0.1, precision = 1, onChange, ...props }: ComponentProps<NonNullable<IParagraphSettingProps['NumberComponent']>>) {
@@ -71,9 +71,9 @@ function MobileParagraphAlignmentButton({ label, selected, onClick, children }: 
             variant="text"
             aria-label={label}
             aria-pressed={selected}
-            className={clsx('univer-h-12 univer-w-full', { '!univer-bg-gray-200 dark:!univer-bg-gray-700': selected })}
+            className={clsx('univer-w-full', { '!univer-bg-gray-200 dark:!univer-bg-gray-700': selected })}
             onClick={onClick}
-            size="extra-large"
+            size="middle"
         >
             <span className="univer-flex univer-size-5 univer-items-center univer-justify-center univer-text-lg">
                 {children}
@@ -162,7 +162,7 @@ function MobileHeaderFooterOptions({ unitId }: { unitId: string }) {
             </div>
 
             <div className="univer-flex">
-                <Button className="univer-h-12 univer-w-full" onClick={closeHeaderFooter} size="extra-large">
+                <Button className="univer-w-full" onClick={closeHeaderFooter} size="middle">
                     {localeService.t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter')}
                 </Button>
             </div>

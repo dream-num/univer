@@ -149,6 +149,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     </div>
 
                     <MemoizedColorInput
+                        size="small"
                         hsv={hsv}
                         alpha={alpha}
                         format={format}
@@ -161,8 +162,8 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     />
 
                     <MobileActionRowGroup>
-                        <Button onClick={() => setVisible(false)} size="extra-large">{locale?.ColorPicker.cancel}</Button>
-                        <Button variant="primary" onClick={handleConfirmCustomColor} size="extra-large">{locale?.ColorPicker.confirm}</Button>
+                        <Button onClick={() => setVisible(false)} size="middle">{locale?.ColorPicker.cancel}</Button>
+                        <Button variant="primary" onClick={handleConfirmCustomColor} size="middle">{locale?.ColorPicker.confirm}</Button>
                     </MobileActionRowGroup>
                 </div>
             </MobileDialog>

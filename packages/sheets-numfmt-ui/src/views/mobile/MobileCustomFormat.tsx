@@ -50,8 +50,7 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 value={pattern}
                 placeholder={title}
                 onChange={setPattern}
-                size="large"
-                inputClass="univer-text-base"
+                size="small"
             />
             <MobileSelect
                 className="
@@ -61,6 +60,7 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 value={pattern || title}
                 options={options}
                 onChange={setPattern}
+                size="small"
             />
             <div
                 className="
@@ -71,7 +71,7 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormatDes')}
             </div>
             <MobileActionRowGroup className="univer-shrink-0">
-                <Button variant="primary" disabled={!pattern.trim()} onClick={() => onConfirm(pattern.trim())} size="extra-large">
+                <Button variant="primary" disabled={!pattern.trim()} onClick={() => onConfirm(pattern.trim())} size="middle">
                     {localeService.t<LocaleKey>('sheets-numfmt-ui.confirm')}
                 </Button>
             </MobileActionRowGroup>

@@ -62,8 +62,8 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
             <Button
                 aria-label={localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}
                 className="
-                  univer-min-h-11 univer-min-w-11 univer-shadow-sm
-                  [&_svg]:!univer-size-6
+                  [&_svg]:!
+                  univer-min-w-11 univer-shadow-sm
                 "
                 style={keyboard.visible
                     ? {
@@ -102,7 +102,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                 "
                             >
                                 <span>{localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}</span>
-                                <Button variant="text" className="univer-min-h-11" onClick={() => setOpen(false)} size="extra-large">
+                                <Button variant="text" onClick={() => setOpen(false)} size="middle">
                                     {localeService.t<LocaleKey>('docs-ui.mobile.done')}
                                 </Button>
                             </div>
@@ -120,12 +120,9 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                     aria-checked={state.mode === option.value}
                                     disabled={busy}
                                     variant="text"
-                                    className="
-                                      !univer-h-auto univer-min-h-11 univer-justify-start univer-whitespace-normal
-                                      univer-py-3 univer-text-start
-                                    "
+                                    className="univer-justify-start univer-whitespace-normal univer-text-start"
                                     onClick={() => changeMode(option.value)}
-                                    size="extra-large"
+                                    size="middle"
                                 >
                                     <span
                                         className="univer-inline-flex univer-size-5 univer-shrink-0 univer-items-center"

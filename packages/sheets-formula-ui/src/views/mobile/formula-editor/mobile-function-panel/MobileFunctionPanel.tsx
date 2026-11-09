@@ -252,8 +252,7 @@ export function MobileFunctionPanel(props: {
                                     aria-label={copy.search}
                                     placeholder={copy.search}
                                     onChange={setQuery}
-                                    size="large"
-                                    inputClass="univer-text-base"
+                                    size="small"
                                 />
                             </div>
                             {!query && (

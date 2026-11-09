@@ -43,8 +43,8 @@ export function MobileConfirm(props: IMobileConfirmProps) {
             maskClosable={false}
             footer={(
                 <MobileActionRowGroup>
-                    {closable && <Button onClick={onClose} size="extra-large">{cancelText ?? locale?.Confirm.cancel}</Button>}
-                    <Button variant="primary" onClick={onConfirm} size="extra-large">
+                    {closable && <Button onClick={onClose} size="middle">{cancelText ?? locale?.Confirm.cancel}</Button>}
+                    <Button variant="primary" onClick={onConfirm} size="middle">
                         {confirmText ?? locale?.Confirm.confirm}
                     </Button>
                 </MobileActionRowGroup>

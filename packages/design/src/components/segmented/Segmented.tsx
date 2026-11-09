@@ -33,7 +33,6 @@ interface ISegmentedProps<T extends ItemValue = ItemValue> {
     defaultValue?: T;
     onChange?: (value: T) => void;
     className?: string;
-    size?: 'small' | 'large';
     role?: 'group' | 'tablist';
     'aria-label'?: string;
 }
@@ -44,12 +43,11 @@ export function Segmented<T extends ItemValue = ItemValue>({
     defaultValue,
     onChange,
     className = '',
-    size = 'small',
     role = 'group',
     'aria-label': ariaLabel,
 }: ISegmentedProps<T>) {
     const { direction } = useContext(ConfigContext);
-    const padding = size === 'large' ? 2 : 4;
+    const padding = 4;
     const [internalValue, setInternalValue] = useState(defaultValue ?? items.find((item) => !item.disabled)?.value);
     const selectedItem = value ?? internalValue;
     const itemsRef = useRef<Map<T, HTMLButtonElement>>(new Map());
@@ -117,9 +115,9 @@ export function Segmented<T extends ItemValue = ItemValue>({
             ref={containerRef}
             className={clsx(`
               univer-relative univer-box-border univer-flex univer-min-w-0 univer-gap-1 univer-rounded-lg
-              univer-bg-gray-100
+              univer-bg-gray-100 univer-p-1
               dark:!univer-bg-gray-800
-            `, size === 'large' ? 'univer-p-0.5' : 'univer-p-1', className)}
+            `, className)}
         >
             <div
                 className={`
@@ -150,12 +148,10 @@ export function Segmented<T extends ItemValue = ItemValue>({
                     }}
                     className={clsx(`
                       univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer
-                      univer-border-none univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs univer-font-medium
-                      univer-transition-colors
+                      univer-truncate univer-border-none univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs
+                      univer-font-medium univer-transition-colors
                       disabled:univer-cursor-not-allowed disabled:univer-opacity-50
-                    `, focusClassName, size === 'large' && 'univer-min-h-11', role === 'tablist'
-                        ? 'univer-whitespace-normal univer-break-words'
-                        : 'univer-truncate', {
+                    `, focusClassName, {
                         'univer-text-gray-900 dark:!univer-text-gray-0': selectedItem === item.value,
                         'univer-text-gray-500 hover:univer-text-gray-900 dark:!univer-text-gray-300 dark:hover:!univer-text-gray-0': selectedItem !== item.value,
                     })}

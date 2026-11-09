@@ -171,12 +171,13 @@ export function Select(props: ISelectProps) {
             onOpenChange={handleOpenChange}
         >
             <Button
+                size={size === 'large' ? 'extra-large' : 'middle'}
                 {...triggerProps}
                 type="button"
                 disabled={disabled}
                 data-u-comp="select"
                 aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
-                className={clsx(selectClassName, size === 'large' && 'univer-h-auto univer-min-h-12', {
+                className={clsx(selectClassName, {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,
@@ -186,7 +187,7 @@ export function Select(props: ISelectProps) {
             >
                 <span
                     className={`
-                      univer-flex-1 univer-truncate univer-text-start univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-start univer-text-gray-500
                       dark:!univer-text-gray-0
                     `}
                 >

@@ -35,6 +35,7 @@ export type IMobileSelectProps = ISelectProps;
 export function MobileSelect(props: IMobileSelectProps) {
     const {
         className,
+        size = 'large',
         value,
         disabled = false,
         options = EMPTY_OPTIONS,
@@ -107,7 +108,7 @@ export function MobileSelect(props: IMobileSelectProps) {
                 aria-expanded={open}
                 data-u-comp="mobile-select"
                 aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
-                className={clsx(selectClassName, '!univer-h-auto !univer-min-h-12 univer-text-left', {
+                className={clsx(selectClassName, 'univer-text-left', size === 'large' && 'univer-h-auto univer-min-h-12', {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent': borderless,
                     'univer-cursor-not-allowed univer-opacity-50': disabled,

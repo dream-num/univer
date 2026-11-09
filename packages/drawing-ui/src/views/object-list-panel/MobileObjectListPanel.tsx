@@ -34,6 +34,7 @@ function MobileObjectListInput(props: ComponentProps<typeof Input>) {
             {...props}
             className={clsx(props.className, 'univer-h-12')}
             inputClass={clsx(props.inputClass, '!univer-text-base')}
+            size="large"
         />
     );
 }
@@ -120,6 +121,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                     aria-label={labels.search}
                     placeholder={labels.search}
                     onChange={setSearchQuery}
+                    size="large"
                 />
                 <div className="univer-flex univer-min-w-0 univer-gap-1">
                     {([

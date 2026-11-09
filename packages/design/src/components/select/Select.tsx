@@ -37,6 +37,7 @@ interface IOptionSeparator {
 
 export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onChange' | 'value'> {
     className?: string;
+    size?: 'small' | 'large';
 
     /**
      * The value of select
@@ -84,6 +85,7 @@ const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
 export function Select(props: ISelectProps) {
     const {
         className,
+        size = 'small',
         value,
         disabled = false,
         options = EMPTY_OPTIONS,
@@ -174,7 +176,7 @@ export function Select(props: ISelectProps) {
                 disabled={disabled}
                 data-u-comp="select"
                 aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
-                className={clsx(selectClassName, {
+                className={clsx(selectClassName, size === 'large' && 'univer-h-auto univer-min-h-12', {
                     '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,

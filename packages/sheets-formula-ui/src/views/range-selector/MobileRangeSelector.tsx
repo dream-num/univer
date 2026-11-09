@@ -17,14 +17,14 @@
 import type { IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { IRangeSelectorProps } from './index';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IRangeSelectorProps } from './index';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { parseRanges, stringifyRanges } from './index';
@@ -125,6 +125,8 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 <RichTextEditor
                     isSingle
                     {...props}
+                    defaultHeight={48}
+                    maxHeight={48}
                     className={className}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {

@@ -41,6 +41,7 @@ export interface IGradientValue {
 export interface IGradientColorPickerProps {
     className?: string;
     compact?: boolean;
+    size?: 'small' | 'large';
     value?: IGradientValue;
     onChange?: (value: IGradientValue) => void;
     types?: readonly GradientType[];
@@ -102,7 +103,7 @@ function getCssLinearGradientAngle(value: IGradientValue): number {
 }
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
-    const { className, compact = false, value = DEFAULT_VALUE, onChange } = props;
+    const { className, compact = false, size = 'small', value = DEFAULT_VALUE, onChange } = props;
     const { locale } = useContext(ConfigContext);
     const [draftValue, setDraftValue] = useState<IGradientValue>(value);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -247,75 +248,18 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
         >
-            {compact
-                ? (
-                    <div
-                        className="
-                          univer-flex univer-min-w-0 univer-items-center univer-gap-4 univer-border-b
-                          univer-border-gray-100
-                          dark:!univer-border-gray-700
-                        "
-                    >
-                        {[
-                            { label: locale?.GradientColorPicker.linear, value: 'linear' },
-                            { label: locale?.GradientColorPicker.radial, value: 'radial' },
-                            { label: locale?.GradientColorPicker.angular, value: 'angular' },
-                            { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ].filter((item) => !props.types || props.types.some((type) => type === item.value)).map((item) => {
-                            const selected = draftValue.type === item.value;
-
-                            return (
-                                <button
-                                    key={item.value}
-                                    type="button"
-                                    className={clsx(
-                                        `
-                                          univer-relative univer-min-w-0 univer-flex-1 univer-cursor-pointer
-                                          univer-truncate univer-border-none univer-bg-transparent univer-px-0
-                                          univer-pb-2 univer-pt-0 univer-text-xs univer-transition-colors
-                                        `,
-                                        selected
-                                            ? `
-                                              univer-font-medium univer-text-primary-600
-                                              dark:!univer-text-primary-300
-                                            `
-                                            : `
-                                              univer-text-gray-500
-                                              hover:univer-text-gray-900
-                                              dark:!univer-text-gray-300
-                                              dark:hover:!univer-text-gray-0
-                                            `
-                                    )}
-                                    onClick={() => handleTypeChange(item.value as GradientType)}
-                                >
-                                    {item.label}
-                                    {selected && (
-                                        <span
-                                            className="
-                                              univer-absolute univer-inset-x-2 -univer-bottom-px univer-h-0.5
-                                              univer-rounded-full univer-bg-primary-600
-                                              dark:!univer-bg-primary-300
-                                            "
-                                        />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )
-                : (
-                    <Segmented
-                        className="univer-w-full univer-min-w-0 univer-gap-1 univer-overflow-hidden"
-                        items={[
-                            { label: locale?.GradientColorPicker.linear, value: 'linear' },
-                            { label: locale?.GradientColorPicker.radial, value: 'radial' },
-                            { label: locale?.GradientColorPicker.angular, value: 'angular' },
-                            { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ].filter((item) => !props.types || props.types.some((type) => type === item.value))}
-                        value={draftValue.type}
-                        onChange={(v) => handleTypeChange(v as GradientType)}
-                    />
-                )}
+            <Segmented
+                size={size}
+                className="univer-w-full univer-min-w-0 univer-gap-1 univer-overflow-hidden"
+                items={[
+                    { label: locale?.GradientColorPicker.linear, value: 'linear' },
+                    { label: locale?.GradientColorPicker.radial, value: 'radial' },
+                    { label: locale?.GradientColorPicker.angular, value: 'angular' },
+                    { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
+                ].filter((item) => !props.types || props.types.some((type) => type === item.value))}
+                value={draftValue.type}
+                onChange={(v) => handleTypeChange(v as GradientType)}
+            />
 
             {showAngleEditor && (
                 <div
@@ -331,6 +275,8 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         {locale?.GradientColorPicker.angle}
                     </span>
                     <InputNumber
+                        size={size}
+                        controls={size !== 'large'}
                         className="univer-w-24"
                         value={getGradientAngle(draftValue)}
                         min={0}
@@ -429,6 +375,8 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         {locale?.GradientColorPicker.offset}
                     </div>
                     <InputNumber
+                        size={size}
+                        controls={size !== 'large'}
                         value={draftValue.stops[selectedIndex]?.offset}
                         min={0}
                         max={100}
@@ -445,6 +393,8 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         {locale?.GradientColorPicker.transparency}
                     </div>
                     <InputNumber
+                        size={size}
+                        controls={size !== 'large'}
                         value={Math.round((1 - getStopOpacity(draftValue.stops[selectedIndex])) * 100)}
                         min={0}
                         max={100}
@@ -457,6 +407,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                 <div className="univer-flex univer-gap-1">
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button
+                            size={size === 'large' ? 'extra-large' : 'middle'}
                             data-u-comp="gradient-color-picker-delete"
                             variant="danger"
                             onClick={handleRemoveStop}
@@ -471,7 +422,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             <div
                 className={clsx(
                     `
-                      univer-border-t univer-border-gray-100
+                      univer-flex univer-justify-center univer-border-t univer-border-gray-100
                       dark:!univer-border-gray-700
                     `,
                     compact ? 'univer-pt-3' : 'univer-pt-4'

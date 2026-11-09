@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, Input, resetButtonClassName, Tree } from '@univerjs/design';
 import { CloseIcon, SearchIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ByValuesModel, IFilterByValueWithTreeItem } from '../../services/sheets-filter-panel.service';
 import { statisticFilterByValueItems } from '../../models/utils';
 
 function extractCheckedKeys(items: IFilterByValueWithTreeItem[]): string[] {
@@ -65,6 +65,8 @@ export function MobileFilterByValue(props: { model: ByValuesModel }) {
                                 value={searchText}
                                 placeholder={searchLabel}
                                 onChange={(value) => model.setSearchString(value)}
+                                size="large"
+                                inputClass="univer-text-base"
                             />
                             <button
                                 type="button"

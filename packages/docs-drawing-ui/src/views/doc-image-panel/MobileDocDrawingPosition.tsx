@@ -15,13 +15,13 @@
  */
 
 import type { IObjectPositionH, IObjectPositionV } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IDocDrawingPositionProps } from './DocDrawingPosition';
 import { DocumentFlavor, LocaleService } from '@univerjs/core';
 import { InputNumber, MobileActionRow } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IDocDrawingPositionProps } from './DocDrawingPosition';
 import { useDocDrawingPosition } from './use-doc-drawing-position';
 
 interface IMobileDocDrawingPositionProps {
@@ -90,6 +90,7 @@ function MobileDocDrawingPositionControls(props: IMobileDocDrawingPositionProps)
                                     axis.onOffsetChange(value);
                                 }
                             }}
+                            size="large"
                         />
                     </label>
                     <div className="univer-grid univer-grid-cols-2 univer-gap-2" role="group" aria-label={localeService.t<LocaleKey>(axis.reference)}>

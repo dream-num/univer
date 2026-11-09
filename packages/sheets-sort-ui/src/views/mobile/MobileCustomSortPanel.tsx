@@ -15,14 +15,14 @@
  */
 
 import type { IOrderRule } from '@univerjs/sheets-sort';
-import type { LocaleKey } from '../../locale/types';
-import type { ISheetSortLocation } from '../../services/sheets-sort-ui.service';
 import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, MobileSelect } from '@univerjs/design';
 import { DeleteEmptyIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ISheetSortLocation } from '../../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../../services/sheets-sort-ui.service';
 
 export function MobileCustomSortPanel() {
@@ -82,7 +82,7 @@ function MobileCustomSortPanelContent({ location }: { location: ISheetSortLocati
                 <Checkbox checked={hasTitle} onChange={(value) => setTitle(Boolean(value))}>
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.first-row-check')}
                 </Checkbox>
-                <Button variant="text" disabled={!canAddCondition} onClick={addCondition}>
+                <Button variant="text" disabled={!canAddCondition} onClick={addCondition} size="extra-large">
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.add-condition')}
                 </Button>
             </div>

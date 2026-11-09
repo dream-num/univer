@@ -16,12 +16,12 @@
 
 import type { IConfirmChildrenProps } from '@univerjs/ui';
 import type { ComponentProps, ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { IParagraphAlignmentButtonProps, IParagraphSettingProps } from '../paragraph-setting/Setting';
 import { BooleanNumber, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, clsx, InputNumber, MobileSelect } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { forwardRef } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IParagraphAlignmentButtonProps, IParagraphSettingProps } from '../paragraph-setting/Setting';
 import { DocHeaderFooterPanel } from '../header-footer/panel/DocHeaderFooterPanel';
 import { useHeaderFooterOptions } from '../header-footer/panel/use-header-footer-options';
 import { PageSettings } from '../PageSettings';
@@ -51,6 +51,8 @@ const MobileSettingNumber = forwardRef<HTMLInputElement, ComponentProps<typeof I
         ref={ref}
         className={clsx(props.className, 'univer-h-12 univer-w-full')}
         inputClassName={clsx(props.inputClassName, 'univer-text-base')}
+        size="large"
+        controls={false}
     />
 ));
 
@@ -71,6 +73,7 @@ function MobileParagraphAlignmentButton({ label, selected, onClick, children }: 
             aria-pressed={selected}
             className={clsx('univer-h-12 univer-w-full', { '!univer-bg-gray-200 dark:!univer-bg-gray-700': selected })}
             onClick={onClick}
+            size="extra-large"
         >
             <span className="univer-flex univer-size-5 univer-items-center univer-justify-center univer-text-lg">
                 {children}
@@ -159,7 +162,7 @@ function MobileHeaderFooterOptions({ unitId }: { unitId: string }) {
             </div>
 
             <div className="univer-flex">
-                <Button className="univer-h-12 univer-w-full" onClick={closeHeaderFooter}>
+                <Button className="univer-h-12 univer-w-full" onClick={closeHeaderFooter} size="extra-large">
                     {localeService.t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter')}
                 </Button>
             </div>

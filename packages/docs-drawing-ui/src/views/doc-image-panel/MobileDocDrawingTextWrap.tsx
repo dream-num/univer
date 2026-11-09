@@ -15,14 +15,14 @@
  */
 
 import type { IDocDrawingBase } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IDocDrawingTextWrapProps } from './DocDrawingTextWrap';
 import { LocaleService, WrapTextType } from '@univerjs/core';
 import { InputNumber, MobileActionRow } from '@univerjs/design';
 import { TextWrappingStyle } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IDocDrawingTextWrapProps } from './DocDrawingTextWrap';
 import { useDocDrawingTextWrap } from './use-doc-drawing-text-wrap';
 
 const styles: { value: TextWrappingStyle; label: LocaleKey }[] = [
@@ -117,6 +117,7 @@ function MobileDocDrawingTextWrapControls(props: IMobileDocDrawingTextWrapProps)
                                     precision={1}
                                     value={props.distToText[key] ?? 0}
                                     onChange={(value) => props.onDistanceChange(value, key)}
+                                    size="large"
                                 />
                             </label>
                         ))}

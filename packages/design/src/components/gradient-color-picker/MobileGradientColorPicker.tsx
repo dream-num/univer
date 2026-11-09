@@ -26,7 +26,6 @@ import { InputNumber } from '../input-number/InputNumber';
 import { MobileActionRow } from '../mobile-action-row/MobileActionRow';
 
 const GRADIENT_TYPES: readonly GradientType[] = ['linear', 'radial', 'angular', 'diamond'];
-const NUMBER_CLASS = 'univer-w-full [&_input]:!univer-h-12 [&_input]:!univer-text-base';
 
 export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ color: '#ffffff', offset: 0 }, { color: '#000000', offset: 100 }], angle: 0 }, onChange, types = GRADIENT_TYPES, className }: IGradientColorPickerProps) {
     const { locale } = useContext(ConfigContext);
@@ -62,7 +61,7 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
             {(value.type === 'linear' || value.type === 'angular') && (
                 <label className="univer-grid univer-gap-2 univer-text-base">
                     {locale?.GradientColorPicker.angle}
-                    <InputNumber className={NUMBER_CLASS} controls={false} value={value.angle ?? 0} min={0} max={360} onChange={(angle) => onChange?.({ ...value, angle: angle ?? 0 })} />
+                    <InputNumber className="univer-w-full" controls={false} value={value.angle ?? 0} min={0} max={360} onChange={(angle) => onChange?.({ ...value, angle: angle ?? 0 })} size="large" inputClassName="univer-text-base" />
                 </label>
             )}
             <div className="univer-flex univer-flex-wrap univer-gap-2">
@@ -91,7 +90,7 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                         {`${stop.offset}%`}
                     </button>
                 ))}
-                <Button className="univer-size-12" aria-label={locale?.Accessibility.increment} onClick={addStop}><IncreaseIcon /></Button>
+                <Button className="univer-size-12" aria-label={locale?.Accessibility.increment} onClick={addStop} size="extra-large"><IncreaseIcon /></Button>
                 <Button
                     className="univer-size-12"
                     aria-label={locale?.GradientColorPicker.delete}
@@ -100,6 +99,7 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                         onChange?.({ ...value, stops: value.stops.filter((_, stopIndex) => stopIndex !== index) });
                         setSelectedIndex(0);
                     }}
+                    size="extra-large"
                 >
                     <DeleteIcon />
                 </Button>
@@ -109,11 +109,11 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                     <div className="univer-grid univer-grid-cols-2 univer-gap-3">
                         <label className="univer-grid univer-gap-2 univer-text-base">
                             {locale?.GradientColorPicker.offset}
-                            <InputNumber className={NUMBER_CLASS} controls={false} value={selectedStop.offset} min={0} max={100} onChange={(offset) => updateStop({ offset: offset ?? 0 })} />
+                            <InputNumber className="univer-w-full" controls={false} value={selectedStop.offset} min={0} max={100} onChange={(offset) => updateStop({ offset: offset ?? 0 })} size="large" inputClassName="univer-text-base" />
                         </label>
                         <label className="univer-grid univer-gap-2 univer-text-base">
                             {locale?.GradientColorPicker.transparency}
-                            <InputNumber className={NUMBER_CLASS} controls={false} value={Math.round((1 - (selectedStop.opacity ?? 1)) * 100)} min={0} max={100} onChange={(transparency) => updateStop({ opacity: 1 - (transparency ?? 0) / 100 })} />
+                            <InputNumber className="univer-w-full" controls={false} value={Math.round((1 - (selectedStop.opacity ?? 1)) * 100)} min={0} max={100} onChange={(transparency) => updateStop({ opacity: 1 - (transparency ?? 0) / 100 })} size="large" inputClassName="univer-text-base" />
                         </label>
                     </div>
                     <MobileColorPicker value={selectedStop.color} onChange={(color) => updateStop({ color })} />

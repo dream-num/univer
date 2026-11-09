@@ -30,6 +30,18 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 univer.registerPlugin(UniverDocsPlugin);
 ```
 
+## Worker usage
+
+On the main thread, import `UniverDocsLayoutWorkerPlugin` from `@univerjs/docs`. Register it alongside `UniverDocsPlugin` and set `workerFactory` to a function that creates the layout worker.
+
+In the worker entry, import `UniverDocsWorkerPlugin` from `@univerjs/docs/worker`:
+
+```ts
+import { UniverDocsWorkerPlugin } from '@univerjs/docs/worker';
+
+univer.registerPlugin(UniverDocsWorkerPlugin);
+```
+
 ## Heading collapse in Modern documents
 
 Modern documents (`DocumentFlavor.MODERN`) support collapsing Heading 1 through Heading 5.

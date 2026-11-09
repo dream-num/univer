@@ -21,6 +21,7 @@ export interface IStartSheetTabNameEditorParams {
     setEditMode: (editing: boolean) => void;
     beforeCommit: () => void;
     onCommit: (name: string, event: FocusEvent) => void;
+    onCancel: () => void;
 }
 
 interface ISheetTabNameEditorActions {
@@ -74,6 +75,7 @@ function createSheetTabNameEditorActions(
 ): ISheetTabNameEditorActions {
     let compositionFlag = true;
     let cleanup = () => { };
+    const originalName = getEditorText(input);
 
     const pasteAction = (event: ClipboardEvent) => {
         event.preventDefault();
@@ -95,10 +97,21 @@ function createSheetTabNameEditorActions(
         params.onCommit(getEditorText(input), focusEvent);
     };
 
+    const cancelAction = () => {
+        input.textContent = originalName;
+        params.setEditMode(false);
+        cleanup();
+        params.beforeCommit();
+        params.onCancel();
+    };
+
     const keydownAction = (event: KeyboardEvent) => {
         event.stopPropagation();
 
-        if (event.key === 'Enter') {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            cancelAction();
+        } else if (event.key === 'Enter') {
             input.blur();
             event.preventDefault();
         }

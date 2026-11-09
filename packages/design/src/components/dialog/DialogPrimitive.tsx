@@ -20,7 +20,6 @@ import { CloseIcon } from '@univerjs/icons';
 import { forwardRef, useContext } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import enUS from '../../locale/en-US';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
 const Dialog = Root;
@@ -107,7 +106,7 @@ const DialogContent = forwardRef<
                         }}
                     >
                         <CloseIcon className="univer-size-4 univer-text-gray-400" />
-                        <span className="univer-sr-only">{locale?.Accessibility.close ?? enUS.design.Accessibility.close}</span>
+                        <span className="univer-sr-only">{locale?.Accessibility.close}</span>
                     </Close>
                 )}
             </Content>

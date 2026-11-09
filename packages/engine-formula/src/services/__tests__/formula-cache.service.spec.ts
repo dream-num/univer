@@ -43,9 +43,7 @@ import { FormulaCacheService } from '../formula-cache.service';
 import { IFunctionService } from '../function.service';
 import { IFormulaRuntimeService } from '../runtime.service';
 
-type Client = ReturnType<typeof createCommandTestBed>;
-
-function dataset(client: Client, values: number[] = [1, 2], formula = '=SUM(A1:A2)'): IFormulaDatasetConfig {
+function dataset(client: ReturnType<typeof createCommandTestBed>, values: number[] = [1, 2], formula = '=SUM(A1:A2)'): IFormulaDatasetConfig {
     return {
         allUnitData: { [client.unitId]: { [client.sheetId]: {
             ...client.sheetData[client.sheetId],
@@ -65,18 +63,18 @@ function dataset(client: Client, values: number[] = [1, 2], formula = '=SUM(A1:A
     };
 }
 
-function initialize(client: Client) {
+function initialize(client: ReturnType<typeof createCommandTestBed>) {
     client.get(IFormulaCurrentConfigService).load(dataset(client));
     client.get(IFormulaRuntimeService).setCurrent(0, 2, 1, 1, client.sheetId, client.unitId);
 }
 
-function evaluate(client: Client, formula: string) {
+function evaluate(client: ReturnType<typeof createCommandTestBed>, formula: string) {
     const node = generateAstNode(client.unitId, formula, client.get(Lexer), client.get(AstTreeBuilder), client.get(IFormulaCurrentConfigService), client.sheetId);
     const value = client.get(Interpreter).execute(generateExecuteAstNodeData(node));
     return (value as BaseValueObject).getValue();
 }
 
-async function calculate(client: Client, values: number[], formula = '=SUM(A1:A2)') {
+async function calculate(client: ReturnType<typeof createCommandTestBed>, values: number[], formula = '=SUM(A1:A2)') {
     const service = client.get(ICalculateFormulaService);
     let result: IAllRuntimeData | undefined;
     const sub = service.executionCompleteListener$.subscribe((data) => {
@@ -88,7 +86,7 @@ async function calculate(client: Client, values: number[], formula = '=SUM(A1:A2
     } finally { sub.unsubscribe(); }
 }
 
-function registerCustom(client: Client, value: number) {
+function registerCustom(client: ReturnType<typeof createCommandTestBed>, value: number) {
     const executor = new CustomFunction('CUSTOM');
     executor.calculateCustom = () => value;
     client.get(IFunctionService).registerExecutors(executor);

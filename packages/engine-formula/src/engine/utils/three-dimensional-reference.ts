@@ -23,7 +23,7 @@ import { ErrorValueObject } from '../value-object/base-value-object';
 
 export function expandSheetSpan(
     source: BaseReferenceObject,
-    currentConfig: Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>
+    currentConfig: IFormulaCurrentConfigService
 ): MultiAreaReferenceObject | ErrorValueObject | undefined {
     const span = source.getForcedSheetName();
     if (!span?.includes(':') || source.getForcedSheetId()) {

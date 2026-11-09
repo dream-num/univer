@@ -15,7 +15,6 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
 import type { BaseValueObject } from '../../value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -77,7 +76,7 @@ describe('ReferenceNode external range loading', () => {
                 sheetNameMap: {},
                 sheetOrder: [],
             }),
-        } satisfies Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>);
+        } as never);
         left.setParent(union);
         right.setParent(union);
 

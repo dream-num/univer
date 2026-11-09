@@ -34,7 +34,7 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 export class UnionNode extends BaseAstNode {
     constructor(
         operatorString: string,
-        private readonly _currentConfigService: Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>
+        private readonly _currentConfigService: IFormulaCurrentConfigService
     ) {
         super(operatorString);
     }

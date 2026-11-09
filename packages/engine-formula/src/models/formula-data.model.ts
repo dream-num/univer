@@ -56,8 +56,6 @@ const SNAPSHOT_OUTPUT_METHODS = [
     '_setOriginValue',
 ].map((name) => [name, Object.getOwnPropertyDescriptor(ObjectMatrix.prototype, name)?.value] as const);
 
-type SnapshotProxyClassifier = (value: unknown) => boolean;
-
 interface ICompactFormulaChunk {
     coordinates: Uint32Array;
     formulas: string[];
@@ -109,7 +107,7 @@ class CompactFormulaDataSnapshot implements IFormulaDataSnapshot {
     }
 }
 
-function supportsCompactFormulaSnapshot(model: FormulaDataModel, isProxy?: SnapshotProxyClassifier): boolean {
+function supportsCompactFormulaSnapshot(model: FormulaDataModel, isProxy?: (value: unknown) => boolean): boolean {
     if (
         isProxy?.(model) || Object.getPrototypeOf(model) !== FormulaDataModel.prototype ||
         Object.getPrototypeOf(ObjectMatrix.prototype) !== Object.prototype
@@ -400,7 +398,7 @@ export class FormulaDataModel extends Disposable {
      * Reuse ordinary model traversal and metadata preparation, deferring per-formula DTO objects where possible.
      * The optional classifier is retained for cooperating engines that reject a proxied model before capture.
      */
-    tryCreateFormulaDataSnapshot(isProxy?: SnapshotProxyClassifier): IFormulaDataSnapshot | undefined {
+    tryCreateFormulaDataSnapshot(isProxy?: (value: unknown) => boolean): IFormulaDataSnapshot | undefined {
         if (!supportsCompactFormulaSnapshot(this, isProxy)) return undefined;
         const compactData: CompactFormulaData = Object.create(null);
         const formulaData = this._collectFormulaData(compactData);

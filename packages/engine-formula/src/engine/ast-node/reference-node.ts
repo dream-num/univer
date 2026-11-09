@@ -51,40 +51,17 @@ interface ITableReferenceDescriptor {
     columnStruct: string | undefined;
 }
 
-type ReferenceNodeCurrentConfigService = Pick<
-    IFormulaCurrentConfigService,
-    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getSheetsInfo' | 'getUnitData' | 'getUnitStylesData'
->;
-
-type ReferenceNodeRuntimeService = Pick<
-    IFormulaRuntimeService,
-    | 'markExternalReferenceUnavailable'
-    | 'currentColumn'
-    | 'currentRow'
-    | 'currentSubUnitId'
-    | 'currentUnitId'
-    | 'getRuntimeArrayFormulaCellData'
-    | 'getRuntimeFeatureCellData'
-    | 'getUnitArrayFormula'
-    | 'getUnitData'
-> & Partial<Pick<IFormulaRuntimeService, 'getCalculationCache'>>;
-
-type ReferenceNodeSuperTableService = Pick<
-    ISuperTableService,
-    'getTableMap' | 'getTableOptionMap'
->;
-
 export class ReferenceNode extends BaseAstNode {
     private _refOffsetX = 0;
     private _refOffsetY = 0;
 
     constructor(
-        private _currentConfigService: ReferenceNodeCurrentConfigService,
-        private _runtimeService: ReferenceNodeRuntimeService,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _runtimeService: IFormulaRuntimeService,
         operatorString: string,
         private _referenceObjectType: ReferenceObjectType,
         private _unitReferenceResolver: IFormulaUnitReferenceResolver,
-        private _superTableService: ReferenceNodeSuperTableService,
+        private _superTableService: ISuperTableService,
         private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader,
         private _isPrepareMerge: boolean = false,
         private _tableReference?: ITableReferenceDescriptor
@@ -233,8 +210,8 @@ export class ReferenceNode extends BaseAstNode {
 
     private _configureReferenceObject(
         referenceObject: BaseReferenceObject,
-        currentConfigService: ReferenceNodeCurrentConfigService,
-        runtimeService: ReferenceNodeRuntimeService
+        currentConfigService: IFormulaCurrentConfigService,
+        runtimeService: IFormulaRuntimeService
     ): void {
         referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);

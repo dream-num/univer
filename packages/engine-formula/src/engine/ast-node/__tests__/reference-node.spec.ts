@@ -62,12 +62,12 @@ describe('ReferenceNode external range loading', () => {
             getTableOptionMap: () => new Map(),
         };
         const left = new ReferenceNode(
-            currentConfig,
-            runtime,
+            currentConfig as never,
+            runtime as never,
             "'[Sales]Data'!A1",
             ReferenceObjectType.CELL,
             resolver,
-            superTableService,
+            superTableService as never,
             { load },
             true
         );

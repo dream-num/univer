@@ -345,6 +345,3 @@ export class InvertedIndexCache {
         columnMap.insert([min, max]);
     }
 }
-
-/** @deprecated Engine calculations use the cache owned by IFormulaRuntimeService. Retained for legacy direct callers. */
-export const CELL_INVERTED_INDEX_CACHE = new InvertedIndexCache();

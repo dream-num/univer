@@ -36,7 +36,9 @@ The formula plugin registers one `FormulaCacheService` per Univer injector. Pars
 
 Custom DI test beds that assemble the formula engine must register `FormulaCacheService` alongside the existing services. Standalone `LexerTreeBuilder` calls remain supported without an owner and parse without the expanded-tree cache. Custom runtime implementations may omit the optional calculation-cache hooks; references then compute without caching.
 
-`FORMULA_REF_TO_ARRAY_CACHE` and `CELL_INVERTED_INDEX_CACHE` remain exported for compatibility but are deprecated and no longer control engine calculations. Integrations that used these globals to invalidate the engine must use the owning runtime's `clearArrayObjectCache()` and `clearInvertedIndexCache()` hooks instead. Facade usage, workbook IDs, snapshots, and collaboration changesets are unchanged.
+`CELL_INVERTED_INDEX_CACHE` has been removed. Custom integrations that imported this obsolete global to invalidate comparison indexes must use the owning runtime's `clearInvertedIndexCache()` hook instead.
+
+`FORMULA_REF_TO_ARRAY_CACHE` remains exported but is deprecated and no longer controls engine calculations. Integrations that used it to invalidate range arrays must use the owning runtime's `clearArrayObjectCache()` hook instead. Facade usage, workbook IDs, snapshots, and collaboration changesets are unchanged.
 
 ## Calculation input and result ownership
 

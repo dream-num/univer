@@ -52,7 +52,6 @@ export { type ISheetFormulaError } from './basics/error-type';
 export { FunctionType } from './basics/function';
 export type { IFunctionInfo, IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
-export { CELL_INVERTED_INDEX_CACHE } from './basics/inverted-index-cache';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { matchRefDrawToken } from './basics/match-token';
 export { isReferenceString } from './basics/regex';

@@ -15,7 +15,15 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Optional, Tools } from '@univerjs/core';
+import {
+    AbsoluteRefType,
+    Disposable,
+    isValidRange,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    moveRangeByOffset,
+    Tools,
+} from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
@@ -49,7 +57,6 @@ import {
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
 import { NEW_EXCEL_FUNCTIONS } from '../../functions/new-excel-functions';
-import { FormulaCacheService } from '../../services/formula-cache.service';
 import {
     isReferenceStringWithEffectiveColumn,
     replaceRefPrefixString,
@@ -96,10 +103,6 @@ interface IInjectDefinedNameParam {
 }
 
 export class LexerTreeBuilder extends Disposable {
-    constructor(@Optional(FormulaCacheService) private readonly _cacheService?: FormulaCacheService) {
-        super();
-    }
-
     private _currentLexerNode: LexerNode = new LexerNode();
 
     private _upLevel = 0;
@@ -713,21 +716,6 @@ export class LexerTreeBuilder extends Disposable {
         transformSuffix = true,
         injectDefinedNameParam?: IInjectDefinedNameParam
     ) {
-        // Parsing LET/LAMBDA rewrites the lexer tree with runtime parameter bindings.
-        // Reusing that mutated tree would bind the next AST to the previous AST's nodes.
-        const isCacheable = !/\b(?:LET|LAMBDA)\s*\(/iu.test(formulaString);
-        const cacheKey = injectDefinedNameParam == null
-            ? formulaString
-            : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${injectDefinedNameParam.refOffsetX}\0${injectDefinedNameParam.refOffsetY}\0${formulaString}`;
-        if (transformSuffix === true && isCacheable) {
-            const lexerNode = this._cacheService?.getLexerTree(cacheKey);
-            const simpleCheckDefinedNameResult = injectDefinedNameParam
-                && this._simpleCheckDefinedName(formulaString, injectDefinedNameParam, lexerNode);
-            if (lexerNode && !simpleCheckDefinedNameResult) {
-                return lexerNode;
-            }
-        }
-
         this._resetCurrentLexerNode();
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
         const sequenceArray: ISequenceArray[] = [];
@@ -773,9 +761,6 @@ export class LexerTreeBuilder extends Disposable {
             const isValid = this._suffixExpressionHandler(this._currentLexerNode);
             if (!isValid) {
                 return ErrorType.VALUE;
-            }
-            if (isCacheable) {
-                this._cacheService?.setLexerTree(cacheKey, this._currentLexerNode, injectDefinedNameParam?.unitId ?? undefined);
             }
         }
 
@@ -942,27 +927,6 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         return this._handleDefinedName(sequenceArray, param);
-    }
-
-    private _simpleCheckDefinedName(
-        formulaString: string,
-        injectDefinedNameParam: IInjectDefinedNameParam,
-        lexerNode?: LexerNode
-    ) {
-        const { getDirtyDefinedNameMap, unitId } = injectDefinedNameParam;
-        const definedNameMap = getDirtyDefinedNameMap();
-        const executeUnitId = unitId;
-        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
-            const names = Object.keys(definedNameMap[executeUnitId]!);
-            for (let i = 0, len = names.length; i < len; i++) {
-                const name = names[i];
-                if (formulaString.indexOf(name) > -1 || lexerNode?.getDefinedNames().includes(name)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private _checkDefinedNameDirty(token: string, injectDefinedNameParam: IInjectDefinedNameParam) {

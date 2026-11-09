@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { ICommandService, Inject, Injector, ObjectMatrix, Plugin } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
 import type { IAllRuntimeData } from '../runtime.service';
-import { ICommandService, Inject, Injector, ObjectMatrix, Plugin } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
 import { SetArrayFormulaDataMutation } from '../../commands/mutations/set-array-formula-data.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
@@ -147,6 +147,22 @@ describe('FormulaCacheService calculation isolation', () => {
             names.registerDefinedName(client.unitId, { id: 'rate', name: 'LocalRate', formulaOrRefString: '20' });
             client.get(IFormulaCurrentConfigService).load({ ...dataset(client), dirtyDefinedNameMap: { [client.unitId]: { LocalRate: 'LocalRate' } } });
             expect(evaluate(client, '=LocalRate')).toBe(20);
+        } finally { client.univer.dispose(); }
+    });
+
+    it('refreshes a nested defined name absent from the outer formula text', () => {
+        const client = createCommandTestBed();
+        try {
+            initialize(client);
+            const names = client.get(IDefinedNamesService);
+            names.registerDefinedName(client.unitId, { id: 'inner', name: 'InnerRate', formulaOrRefString: '10' });
+            names.registerDefinedName(client.unitId, { id: 'outer', name: 'OuterRate', formulaOrRefString: 'InnerRate' });
+            expect(evaluate(client, '=OuterRate')).toBe(10);
+            names.registerDefinedName(client.unitId, { id: 'inner', name: 'InnerRate', formulaOrRefString: '20' });
+            client.get(IFormulaCurrentConfigService).load({ ...dataset(client), dirtyDefinedNameMap: { [client.unitId]: { InnerRate: 'InnerRate' } } });
+            expect(evaluate(client, '=OuterRate')).toBe(20);
+            client.get(IFormulaCurrentConfigService).load(dataset(client));
+            expect(evaluate(client, '=OuterRate')).toBe(20);
         } finally { client.univer.dispose(); }
     });
 

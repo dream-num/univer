@@ -34,7 +34,7 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 
 The formula plugin registers one `FormulaCacheService` per Univer injector. Parsed ASTs and expanded lexer trees belong to that instance. Range arrays and comparison indexes belong to a calculation context that is released on completion, failure, reset, or disposal. Closing a workbook invalidates only that workbook's entries. Disposing one Univer does not clear another instance's caches.
 
-Custom DI test beds that assemble the formula engine must register `FormulaCacheService` alongside the existing services. Standalone `LexerTreeBuilder` calls remain supported without an owner and parse without the expanded-tree cache. Custom runtime implementations may omit the optional calculation-cache hooks; references then compute without caching.
+Custom DI test beds that assemble the formula engine must register `FormulaCacheService` alongside the existing services. `Lexer` owns expanded-tree cache lookup and invalidation; direct `Lexer` construction must pass the owning cache service. `LexerTreeBuilder` has no service dependency and always builds a fresh tree. Standalone and editor callers can construct it directly. Custom runtime implementations may omit the optional calculation-cache hooks; references then compute without caching.
 
 `CELL_INVERTED_INDEX_CACHE` has been removed. Custom integrations that imported this obsolete global to invalidate comparison indexes must use the owning runtime's `clearInvertedIndexCache()` hook instead.
 

@@ -76,9 +76,10 @@ Saved rich-text documents and CRLF in plain string values remain unchanged. This
 also corrects `LEN` and `SEARCH` over rich-text references; recalculate existing
 formula caches to refresh affected results. Public models and mutations are unchanged.
 
-`PV` uses integer compounding for signed whole periods within the 32-bit range,
-preserving the factor before cancellation in small loan balances. Fractional and
-larger periods retain floating exponentiation. Last digits may change; formulas,
+`PV` uses integer compounding for whole periods with an absolute value no greater
+than 2,147,483,647, taking the reciprocal for negative periods. This preserves the
+factor before cancellation in small loan balances. Fractional and larger periods
+retain floating exponentiation. Last digits may change; formulas,
 Workbook models and snapshots require no migration. Pro and native integrations
 must use the matching correction. XIRR retains its current numerical precision;
 its result can differ from Excel's earlier stopping point.

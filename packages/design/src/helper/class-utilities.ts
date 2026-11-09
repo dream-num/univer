@@ -29,3 +29,22 @@ export const borderRightClassName = clsx(borderBasicClassName, 'univer-border-l-
 export const divideYClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-y univer-divide-x-0 univer-divide-solid';
 export const divideXClassName = 'univer-divide-gray-200 dark:!univer-divide-gray-600 univer-divide-x univer-divide-y-0 univer-divide-solid';
 export const resetButtonClassName = 'univer-m-0 univer-flex univer-appearance-none univer-items-center univer-justify-center univer-border-0 univer-bg-transparent univer-p-0 univer-leading-none univer-outline-none univer-cursor-pointer';
+
+export const focusClassName = 'focus:univer-outline focus:univer-outline-2 focus:univer-outline-offset-2 focus:univer-outline-primary-600 dark:focus:!univer-outline-primary-300';
+
+export const inputStateClassName = `
+  focus:!univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
+  dark:focus:!univer-border-primary-300 dark:focus:!univer-ring-primary-900
+  aria-[invalid=true]:!univer-border-red-600 aria-[invalid=true]:focus:!univer-border-red-600 aria-[invalid=true]:focus:univer-ring-red-50
+  dark:aria-[invalid=true]:!univer-border-red-400 dark:aria-[invalid=true]:focus:!univer-border-red-400 dark:aria-[invalid=true]:focus:!univer-ring-red-900
+`;
+
+export const notificationClassName = `
+  [&_[data-sonner-toast]]:!univer-rounded-lg [&_[data-sonner-toast]]:!univer-border-gray-200
+  [&_[data-sonner-toast]]:!univer-bg-gray-0 [&_[data-sonner-toast]]:!univer-shadow-md
+  dark:[&_[data-sonner-toast]]:!univer-border-gray-600 dark:[&_[data-sonner-toast]]:!univer-bg-gray-700
+  [&_[data-title]]:!univer-text-sm [&_[data-title]]:!univer-text-gray-900
+  dark:[&_[data-title]]:!univer-text-gray-0
+  [&_[data-description]]:!univer-text-sm [&_[data-description]]:!univer-text-gray-600
+  dark:[&_[data-description]]:!univer-text-gray-200
+`;

@@ -240,7 +240,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     : `
                       univer-flex univer-w-full univer-min-w-0 univer-max-w-80 univer-flex-col univer-gap-4
                       univer-rounded-lg univer-bg-gray-0 univer-p-4 univer-shadow-lg
-                      dark:!univer-bg-gray-800
+                      dark:!univer-bg-gray-700
                     `,
                 className
             )}
@@ -282,6 +282,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                                             : `
                                               univer-text-gray-500
                                               hover:univer-text-gray-900
+                                              dark:!univer-text-gray-300
                                               dark:hover:!univer-text-gray-0
                                             `
                                     )}
@@ -321,7 +322,14 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     data-u-comp="gradient-color-picker-angle"
                     className="univer-flex univer-items-center univer-justify-between univer-gap-3"
                 >
-                    <span className="univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.angle}</span>
+                    <span
+                        className="
+                          univer-text-xs univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        "
+                    >
+                        {locale?.GradientColorPicker.angle}
+                    </span>
                     <InputNumber
                         className="univer-w-24"
                         value={getGradientAngle(draftValue)}
@@ -412,7 +420,14 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
 
             <div className="univer-flex univer-items-end univer-gap-2">
                 <div className="univer-flex-1">
-                    <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">{locale?.GradientColorPicker.offset}</div>
+                    <div
+                        className="
+                          univer-mb-0.5 univer-text-xs univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        "
+                    >
+                        {locale?.GradientColorPicker.offset}
+                    </div>
                     <InputNumber
                         value={draftValue.stops[selectedIndex]?.offset}
                         min={0}
@@ -421,7 +436,12 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     />
                 </div>
                 <div className="univer-flex-1">
-                    <div className="univer-mb-0.5 univer-text-xs univer-text-gray-500">
+                    <div
+                        className="
+                          univer-mb-0.5 univer-text-xs univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        "
+                    >
                         {locale?.GradientColorPicker.transparency}
                     </div>
                     <InputNumber

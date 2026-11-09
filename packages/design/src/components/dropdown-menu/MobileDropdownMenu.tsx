@@ -15,8 +15,9 @@
  */
 
 import type { ReactNode } from 'react';
-import type { DropdownMenuType, IDropdownMenuProps } from './DropdownMenu';
 import { useState } from 'react';
+import type { DropdownMenuType, IDropdownMenuProps } from './DropdownMenu';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { MobileDropdownSurface } from '../dropdown/MobileDropdownSurface';
 
@@ -118,12 +119,36 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
         }
         return (
             <div key={index} className="univer-flex univer-flex-col univer-gap-2">
-                <div className="univer-px-4 univer-py-2 univer-text-sm univer-font-medium univer-text-gray-500">
+                <div
+                    className="
+                      univer-px-4 univer-py-2 univer-text-sm univer-font-medium univer-text-gray-500
+                      dark:!univer-text-gray-300
+                    "
+                >
                     {item.children}
                 </div>
                 {item.options?.map(renderMenuItem)}
             </div>
         );
+    }
+
+    function mobileRowClassName(active: boolean): string {
+        return clsx(focusClassName, `
+          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0 univer-px-4
+          univer-text-left univer-text-base univer-text-gray-900
+          active:univer-bg-gray-200
+          disabled:univer-opacity-40
+          dark:!univer-text-gray-0
+          dark:active:!univer-bg-gray-700
+        `, active
+            ? `
+              univer-bg-primary-50 univer-text-primary-600
+              dark:!univer-bg-primary-900 dark:!univer-text-primary-100
+            `
+            : `
+              univer-bg-gray-0
+              dark:!univer-bg-gray-800
+            `);
     }
 
     return (
@@ -136,23 +161,4 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
             {children}
         </MobileDropdownSurface>
     );
-}
-
-function mobileRowClassName(active: boolean): string {
-    return clsx(`
-      univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0 univer-px-4
-      univer-text-left univer-text-base univer-text-gray-900 univer-outline-none
-      active:univer-bg-gray-200
-      disabled:univer-opacity-40
-      dark:!univer-text-gray-0
-      dark:active:!univer-bg-gray-700
-    `, active
-        ? `
-          univer-bg-primary-50
-          dark:!univer-bg-gray-700
-        `
-        : `
-          univer-bg-gray-0
-          dark:!univer-bg-gray-800
-        `);
 }

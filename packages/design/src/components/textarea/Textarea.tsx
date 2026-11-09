@@ -15,9 +15,11 @@
  */
 
 import type { ChangeEvent, ComponentProps } from 'react';
-import { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
+import { forwardRef, useContext, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+import { borderClassName, inputStateClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 
 interface ITextareaProps extends ComponentProps<'textarea'> {
     className?: string;
@@ -30,6 +32,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
     const lastSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
     const { className, onResize, onValueChange, ...restProps } = props;
+    const invalid = useContext(FormLayoutContext);
+    const { density } = useContext(ConfigContext);
 
     useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement, []);
 
@@ -71,19 +75,22 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
             data-slot="textarea"
             className={clsx(
                 `
-                  univer-box-border univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-transparent
-                  univer-p-2 univer-text-base univer-text-gray-900 univer-outline-none
-                  univer-transition-[color,box-shadow]
-                  placeholder:univer-text-gray-200
+                  univer-box-border univer-flex univer-w-full univer-resize univer-rounded-md univer-bg-gray-0
+                  univer-p-2 univer-text-sm univer-text-gray-900 univer-transition-[color,box-shadow]
+                  placeholder:univer-text-gray-500
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-50
-                  dark:!univer-text-gray-0
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
+                  dark:placeholder:univer-text-gray-300
                 `,
                 borderClassName,
+                inputStateClassName,
+                density === 'touch' && 'univer-text-base',
                 scrollbarClassName,
                 className
             )}
             onChange={handleChange}
             {...restProps}
+            aria-invalid={restProps['aria-invalid'] ?? (invalid || undefined)}
         />
     );
 });

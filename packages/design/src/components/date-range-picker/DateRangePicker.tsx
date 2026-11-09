@@ -16,7 +16,7 @@
 
 import { CalendarIcon } from '@univerjs/icons';
 import { useState } from 'react';
-import { borderClassName } from '../../helper/class-utilities';
+import { borderClassName, focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { formatDateWithPattern } from '../../helper/date';
 import { Calendar } from '../calendar/Calendar';
@@ -82,11 +82,12 @@ export function DateRangePicker(props: IDateRangePickerProps) {
         >
             <button
                 className={clsx(`
-                  univer-flex univer-h-8 univer-items-center univer-justify-between univer-gap-2 univer-rounded-md
-                  univer-bg-transparent univer-px-2 univer-text-sm univer-text-gray-800 univer-transition-all
+                  univer-box-border univer-flex univer-h-8 univer-items-center univer-justify-between univer-gap-2
+                  univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-text-gray-800
+                  univer-transition-all
                   hover:univer-border-primary-600
-                  dark:!univer-text-gray-0
-                `, borderClassName, className)}
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
+                `, borderClassName, focusClassName, className)}
                 type="button"
             >
                 <span className="univer-flex univer-gap-1">

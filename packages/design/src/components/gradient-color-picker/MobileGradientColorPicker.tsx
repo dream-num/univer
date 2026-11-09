@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { GradientType, IGradientColorPickerProps, IGradientStop } from './GradientColorPicker';
 import { DeleteIcon, IncreaseIcon } from '@univerjs/icons';
 import { useContext, useState } from 'react';
+import type { GradientType, IGradientColorPickerProps, IGradientStop } from './GradientColorPicker';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { MobileColorPicker } from '../color-picker/MobileColorPicker';
@@ -53,7 +54,6 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                             key={type}
                             title={locale?.GradientColorPicker[type]}
                             aria-pressed={value.type === type}
-                            className={value.type === type ? '!univer-bg-primary-50 !univer-text-primary-600' : undefined}
                             onClick={() => onChange?.({ ...value, type })}
                         />
                     ))}
@@ -72,13 +72,19 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                         type="button"
                         aria-label={`${locale?.GradientColorPicker.offset} ${stop.offset}%`}
                         aria-pressed={index === stopIndex}
-                        className={clsx(`
+                        className={clsx(focusClassName, `
                           univer-flex univer-h-12 univer-min-w-12 univer-appearance-none univer-items-center
                           univer-justify-center univer-gap-2 univer-rounded-lg univer-border univer-border-solid
                           univer-bg-transparent univer-px-2 univer-text-sm
                         `, index === stopIndex
-                            ? 'univer-border-primary-600 univer-text-primary-600'
-                            : 'univer-border-gray-200')}
+                            ? `
+                              univer-border-primary-600 univer-text-primary-600
+                              dark:!univer-border-primary-300 dark:!univer-text-primary-300
+                            `
+                            : `
+                              univer-border-gray-200 univer-text-gray-700
+                              dark:!univer-border-gray-600 dark:!univer-text-gray-300
+                            `)}
                         onClick={() => setSelectedIndex(stopIndex)}
                     >
                         <span className="univer-size-6 univer-shrink-0 univer-rounded" style={{ backgroundColor: stop.color, opacity: stop.opacity ?? 1 }} />

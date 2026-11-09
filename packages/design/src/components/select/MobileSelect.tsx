@@ -15,12 +15,13 @@
  */
 
 import type { ReactNode } from 'react';
+import { MoreDownIcon } from '@univerjs/icons';
+import { useContext, useMemo, useState } from 'react';
 import type { IMobileDropdownMenuProps } from '../dropdown-menu/MobileDropdownMenu';
 import type { ISelectProps } from './Select';
-import { MoreDownIcon } from '@univerjs/icons';
-import { useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { MobileDropdownMenu } from '../dropdown-menu/MobileDropdownMenu';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 import { selectClassName } from './Select';
 
 interface IOptionSeparator {
@@ -44,6 +45,7 @@ export function MobileSelect(props: IMobileSelectProps) {
         ...triggerProps
     } = props;
     const [open, setOpen] = useState(false);
+    const invalid = useContext(FormLayoutContext);
     const items: IMobileDropdownMenuProps['items'] = useMemo(() => {
         const selectOptions: Array<IOptionSeparator | { label?: ReactNode; value: string; disabled?: boolean }> = [];
 
@@ -104,10 +106,11 @@ export function MobileSelect(props: IMobileSelectProps) {
                 disabled={disabled}
                 aria-expanded={open}
                 data-u-comp="mobile-select"
+                aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
                 className={clsx(selectClassName, '!univer-h-auto !univer-min-h-12 univer-text-left', {
-                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
+                    '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent': borderless,
-                    'univer-cursor-not-allowed': disabled,
+                    'univer-cursor-not-allowed univer-opacity-50': disabled,
                     'univer-cursor-pointer': !disabled,
                 }, className)}
             >

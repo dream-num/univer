@@ -17,6 +17,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { ErrorIcon, InfoIcon, LoadingMultiIcon, SuccessIcon, WarningIcon } from '@univerjs/icons';
 import { toast, Toaster } from 'sonner';
+import { notificationClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 export enum MessageType {
@@ -40,31 +41,59 @@ export type IMessagerProps = Omit<ComponentProps<typeof Toaster>, 'id' | 'positi
 const MESSAGE_TOASTER_ID = 'univer-message-toaster';
 const DEFAULT_MESSAGE_DURATION = 3000;
 const activeMessageIds = new Set<string>();
-const loadingIcon = <LoadingMultiIcon className="univer-animate-spin univer-text-violet-500" />;
+const loadingIcon = (
+    <LoadingMultiIcon
+        className="
+          univer-animate-spin univer-text-primary-600
+          dark:!univer-text-primary-300
+        "
+    />
+);
 
 let messageCount = 0;
 
 const iconMap: Record<MessageType, ReactNode> = {
-    [MessageType.Success]: <SuccessIcon className="univer-text-green-500" />,
+    [MessageType.Success]: (
+        <SuccessIcon
+            className="
+              univer-text-green-600
+              dark:!univer-text-green-400
+            "
+        />
+    ),
     [MessageType.Info]: (
         <InfoIcon
             className={`
-              univer-text-sky-500
-              dark:!univer-text-sky-400
+              univer-text-primary-600
+              dark:!univer-text-primary-300
             `}
         />
     ),
-    [MessageType.Warning]: <WarningIcon className="univer-text-amber-500" />,
-    [MessageType.Error]: <ErrorIcon className="univer-text-red-500" />,
+    [MessageType.Warning]: (
+        <WarningIcon
+            className="
+              univer-text-yellow-600
+              dark:!univer-text-yellow-400
+            "
+        />
+    ),
+    [MessageType.Error]: (
+        <ErrorIcon
+            className="
+              univer-text-red-600
+              dark:!univer-text-red-400
+            "
+        />
+    ),
     [MessageType.Loading]: loadingIcon,
 };
 
 const typeClassMap: Record<MessageType, string> = {
-    [MessageType.Success]: '[&_[data-icon]]:univer-text-green-500',
-    [MessageType.Info]: '[&_[data-icon]]:univer-text-sky-500',
-    [MessageType.Warning]: '[&_[data-icon]]:univer-text-amber-500',
-    [MessageType.Error]: '[&_[data-icon]]:univer-text-red-500',
-    [MessageType.Loading]: '[&_[data-icon]]:univer-text-violet-500',
+    [MessageType.Success]: '[&_[data-icon]]:univer-text-green-600 dark:[&_[data-icon]]:!univer-text-green-400',
+    [MessageType.Info]: '[&_[data-icon]]:univer-text-primary-600 dark:[&_[data-icon]]:!univer-text-primary-300',
+    [MessageType.Warning]: '[&_[data-icon]]:univer-text-yellow-600 dark:[&_[data-icon]]:!univer-text-yellow-400',
+    [MessageType.Error]: '[&_[data-icon]]:univer-text-red-600 dark:[&_[data-icon]]:!univer-text-red-400',
+    [MessageType.Loading]: '[&_[data-icon]]:univer-text-primary-600 dark:[&_[data-icon]]:!univer-text-primary-300',
 };
 
 const resolveToastMethod = (type: MessageType) => {
@@ -98,22 +127,12 @@ export const Messager = ({ className, ...props }: IMessagerProps) => (
         expand={false}
         icons={{ loading: loadingIcon }}
         offset={{ top: 16 }}
-        className={clsx(
-            `
-              [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
-              [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200
-              [&_[data-sonner-toast]]:univer-bg-gray-0
-              [&_[data-sonner-toast]]:univer-shadow-[0_16px_40px_-20px_rgba(15,23,42,0.55)]
-              [&_[data-sonner-toast]]:univer-backdrop-blur-sm
-              dark:[&_[data-sonner-toast]]:!univer-border-gray-600 dark:[&_[data-sonner-toast]]:!univer-bg-gray-800
-            `,
-            className
-        )}
+        className={clsx(notificationClassName, className)}
         toastOptions={{
             duration: DEFAULT_MESSAGE_DURATION,
             classNames: {
                 toast: `
-                  univer-group univer-min-h-0 univer-min-w-[320px] univer-max-w-[520px] univer-px-3.5 univer-py-3
+                  univer-group univer-min-h-0 univer-min-w-0 univer-max-w-[520px] univer-px-3.5 univer-py-3
                   univer-font-sans univer-transition-all univer-duration-300
                 `,
                 title: `

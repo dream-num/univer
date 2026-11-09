@@ -73,7 +73,10 @@ export function CommandEmpty({ className, ...props }: ComponentProps<typeof Comm
     return (
         <CommandPrimitive.Empty
             data-slot="command-empty"
-            className={clsx('univer-py-6 univer-text-center univer-text-sm univer-text-gray-500', className)}
+            className={clsx(`
+              univer-py-6 univer-text-center univer-text-sm univer-text-gray-500
+              dark:!univer-text-gray-300
+            `, className)}
             {...props}
         />
     );
@@ -88,6 +91,7 @@ export function CommandGroup({ className, ...props }: ComponentProps<typeof Comm
               [&_[cmdk-group-heading]]:univer-px-2 [&_[cmdk-group-heading]]:univer-py-1.5
               [&_[cmdk-group-heading]]:univer-text-xs [&_[cmdk-group-heading]]:univer-font-medium
               [&_[cmdk-group-heading]]:univer-text-gray-500
+              dark:[&_[cmdk-group-heading]]:!univer-text-gray-300
             `, className)}
             {...props}
         />

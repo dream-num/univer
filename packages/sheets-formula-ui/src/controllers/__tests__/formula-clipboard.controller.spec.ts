@@ -270,7 +270,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([SheetSkeletonService]);
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             const localeService = injector.get(LocaleService);
             localeService.load({});

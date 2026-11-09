@@ -132,7 +132,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([IRefSelectionsService, { useClass: SheetsSelectionsService }]);
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             this._injector.get(SheetInterceptorService);
             this._injector.get(WorkbookPermissionService);

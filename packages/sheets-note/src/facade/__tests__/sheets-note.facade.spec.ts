@@ -88,7 +88,7 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
             // Ensure undo/redo exists.
             this._injector.get(IUndoRedoService);
 
-            (dependencies ?? []).forEach((d) => this._injector.replace(d));
+            (dependencies ?? []).forEach((d) => this._injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             // Minimal set of dependencies required by Sheets facade classes.
             this._injector.add([SheetsSelectionsService]);

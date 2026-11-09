@@ -149,7 +149,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsSortUIService]);
             injector.add([FormulaReorderController]);
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {

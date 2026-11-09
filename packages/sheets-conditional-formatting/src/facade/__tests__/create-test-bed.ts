@@ -149,7 +149,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 injector.add(d);
             });
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             this._injector.get(SheetInterceptorService);
             this._injector.get(FormulaCalculationSessionController);

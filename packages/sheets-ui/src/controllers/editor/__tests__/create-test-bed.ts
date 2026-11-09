@@ -55,7 +55,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {}

@@ -99,7 +99,7 @@ export function createFormulaTestBed(workbookData?: IWorkbookData, dependencies?
 
             registerFormulaDependencies(injector);
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {}

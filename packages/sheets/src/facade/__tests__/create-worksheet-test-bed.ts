@@ -132,7 +132,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
                 injector.add(d);
             });
 
-            dependencies?.forEach((d) => injector.replace(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {

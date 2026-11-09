@@ -37,6 +37,7 @@ import {
     FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
+    FormulaResultService,
     FormulaRuntimeService,
     FunctionService,
     HyperlinkEngineFormulaService,
@@ -611,6 +612,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

@@ -312,6 +312,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     protected async _completeExecution(): Promise<void> {
         const data = this._runtimeService.getAllRuntimeData();
+        // Materialized results no longer need calculation caches while model application awaits.
+        this._runtimeService.releaseCalculationCache?.();
         if (data.functionsExecutedState === FormulaExecutedStateType.SUCCESS) {
             await this._formulaResultService.applyResult(data);
         } else if (data.functionsExecutedState === FormulaExecutedStateType.NOT_EXECUTED) {

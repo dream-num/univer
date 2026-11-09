@@ -47,6 +47,7 @@ import {
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
+    FormulaResultService,
     FormulaRuntimeService,
     FormulaUnitReferenceResolver,
     functionMath,
@@ -282,6 +283,7 @@ function createWorkbookData(): IWorkbookData {
 
 function createControllerTestBed() {
     const dependencies: Dependency[] = [
+        [FormulaResultService],
         [ICalculateFormulaService, { useClass: CalculateFormulaService }],
         [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
         [Lexer],

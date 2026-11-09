@@ -34,6 +34,7 @@ import {
     FormulaCacheService,
     FormulaCurrentConfigService,
     FormulaDataModel,
+    FormulaResultService,
     FormulaRuntimeService,
     HyperlinkEngineFormulaService,
     ICalculateFormulaService,
@@ -138,6 +139,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonService]);
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

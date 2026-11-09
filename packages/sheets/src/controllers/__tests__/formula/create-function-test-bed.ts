@@ -46,6 +46,7 @@ import {
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
+    FormulaResultService,
     FormulaRuntimeService,
     FormulaUnitReferenceResolver,
     FunctionNodeFactory,
@@ -198,6 +199,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([Lexer]);
             injector.add([LexerTreeBuilder]);

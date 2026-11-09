@@ -42,6 +42,7 @@ import {
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaDependencyGenerator,
+    FormulaResultService,
     FormulaRuntimeService,
     FunctionNodeFactory,
     FunctionService,
@@ -195,6 +196,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
+    injector.add([FormulaResultService]);
     injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
     injector.add([Lexer]);
     injector.add([LexerTreeBuilder]);

@@ -73,7 +73,7 @@ Value comparisons alone do not establish notification, worker-protocol, or Pro c
 
 Reference-form `INDEX` returns `#VALUE!` when its areas span different worksheets or workbooks. References that resolve to the same worksheet remain valid.
 
-Use whole-span quoting for quoted 3D ranges, such as `'Jan:Mar'!B2:C3`. Separately quoted endpoints, such as `'Jan':'Mar'!B2:C3`, return `#NAME?`. Adjust formulas that depend on these invalid forms or their previous incorrect results. Workbook/Worksheet models, persisted snapshots, and mutation formats require no migration.
+Use whole-span quoting for quoted 3D ranges, such as `'Jan:Mar'!B2:C3`. Separately quoted endpoints, such as `'Jan':'Mar'!B2:C3` and the Excel-saved `Jan:'Mar'!B2:C3` form, return `#NAME?` for both single-cell and rectangular references. Ordinary ranges such as `Jan!B2:'Jan'!C3` remain supported. Adjust formulas that depend on these invalid forms or their previous incorrect results. Workbook/Worksheet models, persisted snapshots, and mutation formats require no migration.
 
 ## Worker usage
 

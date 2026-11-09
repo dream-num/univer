@@ -357,7 +357,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                     <Input
                         autoFocus
                         disabled={renameDisabled}
-                        size="large"
+                        size="small"
                         value={renameValue}
                         onChange={(value) => {
                             setRenameValue(value);
@@ -368,7 +368,6 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                                 confirmRename();
                             }
                         }}
-                        inputClass="univer-text-base"
                     />
                     {renameError && (
                         <div

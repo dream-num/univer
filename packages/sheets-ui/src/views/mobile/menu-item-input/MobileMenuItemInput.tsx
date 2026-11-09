@@ -83,7 +83,6 @@ export function MobileMenuItemInput(props: IMenuItemInputProps) {
                     disabled={disabled}
                     onKeyDown={handleKeyDown}
                     onChange={handleChange}
-                    inputClassName="univer-text-base"
                 />
             </div>
             <span className="univer-min-w-0 univer-truncate univer-text-base univer-font-medium">
@@ -92,7 +91,7 @@ export function MobileMenuItemInput(props: IMenuItemInputProps) {
             <Button
                 type="button"
                 variant="primary"
-                size="large"
+                size="middle"
                 className="univer-shrink-0"
                 disabled={disabled || inputValue == null || !Number.isFinite(inputValue)}
                 onClick={handleConfirm}

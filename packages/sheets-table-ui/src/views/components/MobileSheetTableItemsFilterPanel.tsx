@@ -79,8 +79,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                 value={searchText}
                 placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.search-placeholder')}
                 onChange={setSearchText}
-                size="large"
-                inputClass="univer-text-base"
+                size="small"
             />
             <div
                 className="
@@ -95,7 +94,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                     "
                 >
                     <Checkbox
-                        className="univer-flex univer-min-h-12 univer-items-center"
+                        className="univer-flex univer-items-center"
                         checked={allDisplayedChecked}
                         indeterminate={!allDisplayedChecked && someDisplayedChecked}
                         disabled={displayItems.length === 0}
@@ -116,7 +115,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                             "
                         >
                             <Checkbox
-                                className="univer-flex univer-min-h-12 univer-items-center"
+                                className="univer-flex univer-items-center"
                                 checked={checkedItemSet.has(itemKey)}
                                 onChange={() => toggleItem(itemKey)}
                             >

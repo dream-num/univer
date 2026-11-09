@@ -61,7 +61,6 @@ export function MobileDropdownSurface(props: {
                   dark:!univer-bg-gray-900
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
                   [&_button[data-slot='close']]:!univer-size-10
-                  [&_button]:!univer-min-h-11
                 "
                 style={{
                     position: 'fixed',

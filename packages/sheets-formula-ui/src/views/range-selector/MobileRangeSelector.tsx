@@ -125,8 +125,6 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 <RichTextEditor
                     isSingle
                     {...props}
-                    defaultHeight={48}
-                    maxHeight={48}
                     className={className}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {

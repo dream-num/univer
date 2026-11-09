@@ -249,7 +249,6 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
             onPointerDown={(e) => e.stopPropagation()}
         >
             <Segmented
-                size={size}
                 className="univer-w-full univer-min-w-0 univer-gap-1 univer-overflow-hidden"
                 items={[
                     { label: locale?.GradientColorPicker.linear, value: 'linear' },

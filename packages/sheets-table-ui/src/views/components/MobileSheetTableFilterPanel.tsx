@@ -303,10 +303,10 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
                             "
                         >
                             <MobileActionRowGroup>
-                                <Button onClick={closeDetail} size="extra-large">
+                                <Button onClick={closeDetail} size="middle">
                                     {localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}
                                 </Button>
-                                <Button variant="primary" onClick={() => applyFilter().catch(() => undefined)} size="extra-large">
+                                <Button variant="primary" onClick={() => applyFilter().catch(() => undefined)} size="middle">
                                     {localeService.t<LocaleKey>('sheets-table-ui.filter.confirm')}
                                 </Button>
                             </MobileActionRowGroup>

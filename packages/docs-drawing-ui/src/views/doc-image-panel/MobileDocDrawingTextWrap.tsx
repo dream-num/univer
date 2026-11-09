@@ -92,7 +92,7 @@ function MobileDocDrawingTextWrapControls(props: IMobileDocDrawingTextWrapProps)
                                 variant="subtle"
                                 aria-pressed={props.wrapText === option.value}
                                 className="
-                                  univer-px-2 univer-text-center univer-text-sm
+                                  univer-px-2 univer-text-center
                                   aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
                                 "
                                 onClick={() => props.onWrapTextChange(option.value)}
@@ -109,15 +109,14 @@ function MobileDocDrawingTextWrapControls(props: IMobileDocDrawingTextWrapProps)
                             <label key={key} className="univer-grid univer-gap-2 univer-text-sm">
                                 {localeService.t<LocaleKey>(label)}
                                 <InputNumber
-                                    className="univer-h-12 univer-w-full"
-                                    inputClassName="[&_input]:!univer-h-12 [&_input]:!univer-text-base"
+                                    className="univer-w-full"
                                     controls={false}
                                     min={props.minMargin}
                                     max={props.maxMargin}
                                     precision={1}
                                     value={props.distToText[key] ?? 0}
                                     onChange={(value) => props.onDistanceChange(value, key)}
-                                    size="large"
+                                    size="small"
                                 />
                             </label>
                         ))}

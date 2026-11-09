@@ -65,8 +65,7 @@ export function MobileFilterByValue(props: { model: ByValuesModel }) {
                                 value={searchText}
                                 placeholder={searchLabel}
                                 onChange={(value) => model.setSearchString(value)}
-                                size="large"
-                                inputClass="univer-text-base"
+                                size="small"
                             />
                             <button
                                 type="button"
@@ -87,7 +86,7 @@ export function MobileFilterByValue(props: { model: ByValuesModel }) {
                     : (
                         <>
                             <Checkbox
-                                className="univer-min-h-12 univer-flex-1 univer-text-base"
+                                className="univer-flex-1"
                                 contentClassName="univer-flex univer-items-center univer-gap-1"
                                 indeterminate={indeterminate}
                                 disabled={items.length === 0}

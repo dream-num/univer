@@ -64,19 +64,19 @@ export function MobileDrawingArrange(props: IMobileDrawingArrangeProps) {
             </header>
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2">
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.forward)} size="extra-large">
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.forward)} size="middle">
                     <MoveUpIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.forward')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.backward)} size="extra-large">
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.backward)} size="middle">
                     <MoveDownIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.backward')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.front)} size="extra-large">
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.front)} size="middle">
                     <TopmostIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.front')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.back)} size="extra-large">
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.back)} size="middle">
                     <BottomIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.back')}
                 </Button>

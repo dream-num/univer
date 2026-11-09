@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { SidebarDocDrawingOperation } from '../../commands/operations/open-drawing-panel.operation';
 import { MobileDocDrawingPosition } from './MobileDocDrawingPosition';
 import { MobileDocDrawingTextWrap } from './MobileDocDrawingTextWrap';
@@ -48,7 +48,7 @@ export function MobileDocDrawingPanel() {
                         title={localeService.t<LocaleKey>(item.label)}
                         variant="subtle"
                         className="
-                          univer-min-w-0 univer-px-2 univer-text-center univer-text-sm
+                          univer-min-w-0 univer-px-2 univer-text-center
                           aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
                         "
                         onClick={() => setTab(item.value)}

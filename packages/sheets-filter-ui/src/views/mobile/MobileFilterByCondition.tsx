@@ -54,6 +54,7 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                     onChange={(nextOperator) => model.onConditionFormChange({
                         [name]: nextOperator as FilterOperator,
                     })}
+                    size="small"
                 />
                 {needsValue && (
                     <Input
@@ -62,8 +63,7 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                         onChange={(nextValue) => model.onConditionFormChange({
                             [name === 'operator1' ? 'val1' : 'val2']: nextValue,
                         })}
-                        size="large"
-                        inputClass="univer-text-base"
+                        size="small"
                     />
                 )}
             </div>
@@ -78,8 +78,7 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                         value={formParams!.val1 ?? ''}
                         placeholder={localeService.t<LocaleKey>('sheets-filter-ui.panel.input-values-placeholder')}
                         onChange={(value) => model.onConditionFormChange({ val1: value })}
-                        size="large"
-                        inputClass="univer-text-base"
+                        size="small"
                     />
                 )}
                 {condition!.numOfParameters >= 2 && renderSecondaryCondition(

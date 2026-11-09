@@ -198,10 +198,10 @@ describe('InputNumber', () => {
         expect(onPressEnter).toHaveBeenCalled();
     });
 
-    it('keeps numeric editing and bounds when a large input hides its stepper controls', () => {
+    it('keeps numeric editing and bounds when a compact input hides its stepper controls', () => {
         const onChange = vi.fn();
         const { getByRole, queryByRole } = render(
-            <InputNumber size="large" controls={false} defaultValue={12} min={0} max={19} onChange={onChange} />
+            <InputNumber size="small" controls={false} defaultValue={12} min={0} max={19} onChange={onChange} />
         );
         const input = getByRole('textbox');
         expect(queryByRole('button')).toBeNull();

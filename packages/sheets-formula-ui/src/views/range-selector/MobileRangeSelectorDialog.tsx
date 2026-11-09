@@ -139,15 +139,14 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
         return (
             <div key={index} className="univer-mb-2 univer-flex univer-items-center univer-gap-2">
                 <Input
-                    className={clsx('univer-box-border univer-h-10 univer-w-full', {
+                    className={clsx('univer-box-border univer-w-full', {
                         'univer-border-primary-600': focusIndex === index,
                     })}
                     placeholder={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.placeHolder')}
                     onFocus={() => setFocusIndex(index)}
                     value={text}
                     onChange={(value) => handleRangeInput(index, value)}
-                    size="large"
-                    inputClass="univer-text-base"
+                    size="small"
                 />
                 {ranges.length > 1 && (
                     <button
@@ -205,10 +204,10 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 footer={(
                     <footer className="univer-box-border univer-shrink-0 univer-p-4">
                         <MobileActionRowGroup>
-                            <Button onClick={onClose} size="extra-large">
+                            <Button onClick={onClose} size="middle">
                                 {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
                             </Button>
-                            <Button variant="primary" onClick={confirmRanges} size="extra-large">
+                            <Button variant="primary" onClick={confirmRanges} size="middle">
                                 {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
                             </Button>
                         </MobileActionRowGroup>
@@ -223,13 +222,13 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     {ranges.map(renderRangeInput)}
                     {ranges.length < maxRangeCount && (
                         <Button
-                            className="univer-h-10 univer-w-full"
+                            className="univer-w-full"
                             variant="link"
                             onClick={() => {
                                 setRanges([...ranges, '']);
                                 setFocusIndex(ranges.length);
                             }}
-                            size="large"
+                            size="middle"
                         >
                             <IncreaseIcon />
                             <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>

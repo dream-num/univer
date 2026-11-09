@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Pager } from '../Pager';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
+
+function TestConfigProvider({ children }: { children: ReactNode }) {
+    return <ConfigProvider locale={enUS.design} mountContainer={document.body}>{children}</ConfigProvider>;
+}
 
 describe('Pager', () => {
     let defaultProps: ComponentProps<typeof Pager>;
@@ -35,25 +40,25 @@ describe('Pager', () => {
     });
 
     it('renders correctly with default props', () => {
-        const { getByText } = render(<Pager {...defaultProps} />);
+        const { getByText } = render(<Pager {...defaultProps} />, { wrapper: TestConfigProvider });
         expect(getByText('1/5')).toBeTruthy();
     });
 
     it('renders correctly with custom text', () => {
         const props: ComponentProps<typeof Pager> = { ...defaultProps, text: 'Custom Text' };
-        const { getByText } = render(<Pager {...props} />);
+        const { getByText } = render(<Pager {...props} />, { wrapper: TestConfigProvider });
         expect(getByText('Custom Text')).toBeTruthy();
     });
 
     it('renders only text when total is 0', () => {
         const props: ComponentProps<typeof Pager> = { ...defaultProps, total: 0 };
-        const { getByText, queryByRole } = render(<Pager {...props} />);
+        const { getByText, queryByRole } = render(<Pager {...props} />, { wrapper: TestConfigProvider });
         expect(getByText('1/0')).toBeTruthy();
         expect(queryByRole('button')).not.toBeTruthy();
     });
 
     it('calls onChange with correct value when arrow is clicked', () => {
-        const { rerender } = render(<Pager {...defaultProps} />);
+        const { rerender } = render(<Pager {...defaultProps} />, { wrapper: TestConfigProvider });
         const rightArrow = screen.getByRole('button', { name: 'Next' });
 
         fireEvent.click(rightArrow);
@@ -67,8 +72,8 @@ describe('Pager', () => {
 
     it('loops to last page when clicking left arrow on first page', () => {
         const props: ComponentProps<typeof Pager> = { ...defaultProps, loop: true };
-        const { container } = render(<Pager {...props} />);
-        const leftArrow = container.querySelector('[data-u-comp="pager-left-arrow"]') as HTMLButtonElement;
+        render(<Pager {...props} />, { wrapper: TestConfigProvider });
+        const leftArrow = screen.getByRole('button', { name: 'Previous' });
 
         fireEvent.click(leftArrow);
         expect(props.onChange).toBeCalledWith(5);
@@ -76,8 +81,8 @@ describe('Pager', () => {
 
     it('loops to first page when clicking right arrow on last page', () => {
         const props: ComponentProps<typeof Pager> = { ...defaultProps, value: 5, loop: true };
-        const { container } = render(<Pager {...props} />);
-        const rightArrow = container.querySelector('[data-u-comp="pager-right-arrow"]') as HTMLButtonElement;
+        render(<Pager {...props} />, { wrapper: TestConfigProvider });
+        const rightArrow = screen.getByRole('button', { name: 'Next' });
 
         fireEvent.click(rightArrow);
         expect(props.onChange).toBeCalledWith(1);
@@ -85,7 +90,7 @@ describe('Pager', () => {
 
     it('does not loop when loop prop is false', () => {
         const props: ComponentProps<typeof Pager> = { ...defaultProps, value: 5, loop: false };
-        render(<Pager {...props} />);
+        render(<Pager {...props} />, { wrapper: TestConfigProvider });
         const rightArrow = screen.getByRole('button', { name: 'Next' });
 
         expect(rightArrow).toBeDisabled();

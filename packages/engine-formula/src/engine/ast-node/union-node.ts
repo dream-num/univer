@@ -58,7 +58,7 @@ export class UnionNode extends BaseAstNode {
 
         let result: FunctionVariantType;
         if (this.getToken() === matchToken.COLON) {
-            result = this._createThreeDimensionalReference(leftChild.getToken(), rightNode)
+            result = this._createThreeDimensionalReference(leftChild.getToken(), rightChild)
                 ?? this._unionFunction(leftNode, rightNode);
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
@@ -71,13 +71,19 @@ export class UnionNode extends BaseAstNode {
 
     private _createThreeDimensionalReference(
         firstSheetToken: string,
-        rightNode: FunctionVariantType
+        rightChild: BaseAstNode
     ): MultiAreaReferenceObject | ErrorValueObject | undefined {
+        const rightNode = rightChild.getValue();
         if (!(rightNode instanceof BaseReferenceObject)) {
             return;
         }
 
         const source = rightNode;
+        // Merged rectangular references lose their tokens; inspect the original endpoint.
+        let lastSheetNode = rightChild;
+        while (lastSheetNode.getToken() === matchToken.COLON) {
+            lastSheetNode = lastSheetNode.getChildren()[0];
+        }
         if (firstSheetToken.trim().startsWith("'") && firstSheetToken.trim().endsWith("'")) {
             return ErrorValueObject.create(ErrorType.NAME);
         }
@@ -87,12 +93,14 @@ export class UnionNode extends BaseAstNode {
             return;
         }
 
-        return createThreeDimensionalReference(
-            firstSheetName,
-            lastSheetName,
-            source,
-            this._currentConfigService.getSheetsInfo(source.getUnitId())
-        );
+        const sheetsInfo = this._currentConfigService.getSheetsInfo(source.getUnitId());
+        if (
+            lastSheetNode.getToken().trim().startsWith("'") &&
+            Object.values(sheetsInfo.sheetNameMap).some((name) => name.toLocaleLowerCase() === firstSheetName.toLocaleLowerCase())
+        ) {
+            return ErrorValueObject.create(ErrorType.NAME);
+        }
+        return createThreeDimensionalReference(firstSheetName, lastSheetName, source, sheetsInfo);
     }
 
     private _unionFunction(

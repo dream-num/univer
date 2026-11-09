@@ -224,7 +224,14 @@ describe('three-dimensional sheet reference', () => {
         expect(calculate("=SUM('Jan:Mar'!B2)")).toBe(111);
         expect(calculate("=SUM('Jan:Mar'!B2:C3)")).toBe(1110);
         expect(calculate("=SUM('Jan':'Mar'!B2)")).toBe(ErrorType.NAME);
+        expect(calculate("=SUM(Jan:'Mar'!B2)")).toBe(ErrorType.NAME);
+        expect(calculate("=SUM(Jan:'Mar'!B2:C3)")).toBe(ErrorType.NAME);
         expect(calculate("=SUM('Jan:Feb:Mar'!B2)")).toBe(ErrorType.NAME);
+    });
+
+    it('preserves ordinary ranges with quoted worksheet qualifiers', () => {
+        expect(calculate("=SUM(Jan!B2:'Jan'!C3)")).toBe(10);
+        expect(calculate("=SUM('Jan'!B2:'Jan'!C3)")).toBe(10);
     });
 
     it('returns the internal name error when either quoted sheet span endpoint is missing', () => {

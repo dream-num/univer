@@ -71,6 +71,18 @@ Value comparisons alone do not establish notification, worker-protocol, or Pro c
 
 ## Formula reference compatibility
 
+Formula reads convert rich-text paragraph separators to Excel's LF line breaks.
+Saved rich-text documents and CRLF in plain string values remain unchanged. This
+also corrects `LEN` and `SEARCH` over rich-text references; recalculate existing
+formula caches to refresh affected results. Public models and mutations are unchanged.
+
+`PV` uses integer compounding for signed whole periods within the 32-bit range,
+preserving the factor before cancellation in small loan balances. Fractional and
+larger periods retain floating exponentiation. Last digits may change; formulas,
+Workbook models and snapshots require no migration. Pro and native integrations
+must use the matching correction. XIRR retains its current numerical precision;
+its result can differ from Excel's earlier stopping point.
+
 Reference-form `INDEX` returns `#VALUE!` when its areas span different worksheets or workbooks. References that resolve to the same worksheet remain valid.
 
 Use whole-span quoting for quoted 3D ranges, such as `'Jan:Mar'!B2:C3`. Separately quoted endpoints, such as `'Jan':'Mar'!B2:C3` and the Excel-saved `Jan:'Mar'!B2:C3` form, return `#NAME?` for both single-cell and rectangular references. Ordinary ranges such as `Jan!B2:'Jan'!C3` remain supported. Adjust formulas that depend on these invalid forms or their previous incorrect results. Workbook/Worksheet models, persisted snapshots, and mutation formats require no migration.

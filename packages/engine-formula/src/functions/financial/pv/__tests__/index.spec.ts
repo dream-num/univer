@@ -41,6 +41,30 @@ describe('Test pv function', () => {
             expect(getObjectValue(result2, true)).toBe(-6017566.01568624);
         });
 
+        it('preserves Excel integer-period compounding before loan balance cancellation', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(0.05 / 12),
+                NumberValueObject.create(4),
+                NumberValueObject.create(-3000)
+            );
+            expect(result.getValue()).toBe(11876.03412150258);
+        });
+
+        it.each([
+            [0.05 / 12, -4, 1, -12227.199031605747],
+            [0.05 / 12, 1.5, 0, 4377.29766121263],
+            [0, 4, 1, 11900],
+        ])('preserves negative, fractional and zero-rate Excel cases: %s, %s', (rate, periods, type, expected) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(rate),
+                NumberValueObject.create(periods),
+                NumberValueObject.create(-3000),
+                NumberValueObject.create(100),
+                NumberValueObject.create(type)
+            );
+            expect(result.getValue()).toBe(expected);
+        });
+
         it('Value is error', () => {
             const rate = ErrorValueObject.create(ErrorType.NAME);
             const nper = NumberValueObject.create(20 * 12);

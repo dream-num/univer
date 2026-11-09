@@ -17,8 +17,6 @@
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet } from '@univerjs/sheets-conditional-formatting';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
-import type { LocaleKey } from '../../../locale/types';
-import type { IStyleEditorProps } from './type';
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType } from '@univerjs/core';
 import { borderClassName, Checkbox, clsx, Dropdown, Select } from '@univerjs/design';
 import { MoreDownIcon, SlashDoubleIcon } from '@univerjs/icons';
@@ -37,6 +35,8 @@ import {
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useObservable, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IStyleEditorProps } from './type';
 import { RuleNumberInput } from './RuleNumberInput';
 
 const getIcon = (iconType: IIconSetType, iconId: string | number) => {
@@ -111,13 +111,6 @@ const TextInput = (props: {
         </div>
     );
 };
-const createDefaultConfigItem = (iconType: IIconSetType, index: number, list: unknown[]): IIconSet['config'][number] => ({
-    operator: CFNumberOperator.greaterThan,
-    value: { type: CFValueType.num, value: (list.length - 1 - index) * 10 },
-    iconType,
-    iconId: String(index),
-});
-
 interface IIconGroupListProps {
     onClick: (iconType: IIconSetType) => void;
     iconType?: IIconSetType;
@@ -201,7 +194,7 @@ const IconGroupList = (props: IIconGroupListProps) => {
     );
 };
 
-const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string) => void; iconType?: IIconSetType; iconId: string }) => {
+const IconItemList = (props: { onClick: (iconType: IIconSetType, iconId: string) => void }) => {
     const { onClick } = props;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
@@ -386,7 +379,7 @@ const IconSetRuleEdit = (props: {
                             <DropdownComponent
                                 overlay={(
                                     <div className="univer-rounded-lg univer-p-4">
-                                        <IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />
+                                        <IconItemList onClick={handleIconClick} />
                                     </div>
                                 )}
                             >
@@ -396,7 +389,7 @@ const IconSetRuleEdit = (props: {
                                       univer-justify-between univer-rounded-md univer-bg-gray-0 univer-px-4 univer-py-2
                                       univer-text-xs univer-text-gray-600 univer-transition-all
                                       hover:univer-border-primary-600
-                                      dark:!univer-text-gray-200
+                                      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                                     `, borderClassName)}
                                 >
                                     {icon
@@ -417,7 +410,7 @@ const IconSetRuleEdit = (props: {
                             : (
                                 <div
                                     className={`
-                                      univer-mt-0 univer-text-sm univer-text-gray-600
+                                      univer-self-center univer-text-sm univer-text-gray-600
                                       dark:!univer-text-gray-200
                                     `}
                                 >
@@ -486,6 +479,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
     const [errorMap, setErrorMap] = useState<Record<string, string>>({});
+    const createDefaultConfigItem = (iconType: IIconSetType, index: number, list: unknown[]): IIconSet['config'][number] => ({
+        operator: CFNumberOperator.greaterThan,
+        value: { type: CFValueType.num, value: (list.length - 1 - index) * 10 },
+        iconType,
+        iconId: String(index),
+    });
     const [currentIconType, setCurrentIconType] = useState<IIconSetType>(() => {
         const defaultV = Object.keys(iconMap)[0] as IIconSetType;
         if (rule && rule.config.length) {
@@ -644,7 +643,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     };
     return (
         <div data-u-comp="cf-icon-set-editor" dir={direction}>
-            <div className="univer-mt-4 univer-text-sm univer-text-gray-600">
+            <div
+                className="
+                  univer-mt-4 univer-text-sm univer-text-gray-600
+                  dark:!univer-text-gray-200
+                "
+            >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
@@ -664,6 +668,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                           univer-justify-between univer-rounded-md univer-bg-gray-0 univer-px-4 univer-py-2
                           univer-text-xs univer-text-gray-600 univer-transition-all
                           hover:univer-border-primary-600
+                          dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                         `, borderClassName)}
                     >
                         {previewIcon}

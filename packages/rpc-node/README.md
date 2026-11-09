@@ -32,12 +32,21 @@ const workerSrc = fileURLToPath(new URL('./worker.js', import.meta.url));
 univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc });
 ```
 
-The referenced worker module must create its own Univer instance and register `UniverRPCNodeWorkerPlugin`; see the [Node.js worker example](../../examples/src/node/sdk/worker.ts).
-
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverRPCNodeMainPlugin`
-- `UniverRPCNodeWorkerPlugin`
+
+## Worker usage
+
+On the main thread, import `UniverRPCNodeMainPlugin` from `@univerjs/rpc-node`. Set `workerSrc` to the worker module path.
+
+In the worker entry, import `UniverRPCNodeWorkerPlugin` from `@univerjs/rpc-node/worker`:
+
+```ts
+import { UniverRPCNodeWorkerPlugin } from '@univerjs/rpc-node/worker';
+
+univer.registerPlugin(UniverRPCNodeWorkerPlugin);
+```
 
 ## Resources
 

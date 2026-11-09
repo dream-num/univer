@@ -71,6 +71,18 @@ Reference-form `INDEX` returns `#VALUE!` when its areas span different worksheet
 
 Use whole-span quoting for quoted 3D ranges, such as `'Jan:Mar'!B2:C3`. Separately quoted endpoints, such as `'Jan':'Mar'!B2:C3`, return `#NAME?`. Adjust formulas that depend on these invalid forms or their previous incorrect results. Workbook/Worksheet models, persisted snapshots, and mutation formats require no migration.
 
+## Worker usage
+
+On the main thread, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
+
+In the worker entry, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula/worker`:
+
+```ts
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula/worker';
+
+univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

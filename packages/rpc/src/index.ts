@@ -30,7 +30,3 @@ export { IRemoteSyncService } from './services/remote-instance/remote-instance.s
 export { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 export { ChannelClient, ChannelServer, fromModule, toModule } from './services/rpc/rpc.service';
 export type { IMessageProtocol } from './services/rpc/rpc.service';
-export {
-    /** @deprecated Import from '@univerjs/rpc/worker' instead. This root export will be removed in the next release. */
-    UniverRPCWorkerThreadPlugin,
-} from './worker';

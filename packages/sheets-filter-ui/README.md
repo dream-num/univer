@@ -34,11 +34,22 @@ univer.registerPlugin(UniverSheetsFilterUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverSheetsFilterUIPlugin`
 - `UniverSheetsFilterMobileUIPlugin`
-- `UniverSheetsFilterUIWorkerPlugin`
+
+## Worker usage
+
+On the main thread, import `UniverSheetsFilterUIPlugin` from `@univerjs/sheets-filter-ui`.
+
+In the worker entry, import `UniverSheetsFilterUIWorkerPlugin` from `@univerjs/sheets-filter-ui/worker`:
+
+```ts
+import { UniverSheetsFilterUIWorkerPlugin } from '@univerjs/sheets-filter-ui/worker';
+
+univer.registerPlugin(UniverSheetsFilterUIWorkerPlugin);
+```
 
 ## Resources
 

@@ -63,7 +63,7 @@ Completion no longer adds a duplicate result mutation, including for arrays, mul
 ### Consumer validation
 
 - Compare OSS and Pro values, types, errors, formula text, formats, shared formulas, arrays, circular references, and incremental edits with the cooperating versions.
-- Check Pro last-value persistence, external references, and other-formula results; persistence must run once for an applied session.
+- Check Pro last-value persistence, external references, and other-formula results; persistence must run once for each applied result batch.
 - Exercise formula replacement/removal, spill growth/shrinkage, blocked spills, undo/redo, and structural edits, checking mutation notifications as well as values.
 - Verify delayed, early, duplicate, and reentrant acknowledgements, stopped/failed calculations, disposal, independent instances, worker/RPC fallbacks, and collaboration consumers of mutation options or counts.
 

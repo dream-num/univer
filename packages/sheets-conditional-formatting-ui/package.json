@@ -88,6 +88,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/docs": "workspace:*",
         "postcss": "^8.5.32",
         "react": "18.3.1",
         "rxjs": "7.8.2",

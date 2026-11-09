@@ -66,7 +66,7 @@ export function Gallery(props: IGalleryProps) {
     const hasPagination = images.length > 1;
     const imageLabel = locale?.Accessibility.image
         ?.replace('{0}', String(activeImageIndex + 1))
-        .replace('{1}', String(images.length)) ?? `Image ${activeImageIndex + 1} of ${images.length}`;
+        .replace('{1}', String(images.length));
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -187,7 +187,7 @@ export function Gallery(props: IGalleryProps) {
             dir={direction}
             role="dialog"
             aria-modal="true"
-            aria-label={locale?.Accessibility.imageGallery ?? 'Image gallery'}
+            aria-label={locale?.Accessibility.imageGallery}
             tabIndex={-1}
             ref={dialogRef}
             className={clsx(
@@ -214,7 +214,7 @@ export function Gallery(props: IGalleryProps) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={locale?.Accessibility.close ?? 'Close'}
+                aria-label={locale?.Accessibility.close}
                 className={`
                   univer-absolute univer-right-4 univer-top-4 univer-z-10 univer-size-10 univer-rounded-full
                   !univer-border-gray-500 !univer-bg-gray-800 !univer-text-gray-0
@@ -269,8 +269,8 @@ export function Gallery(props: IGalleryProps) {
                         `}
                         value={activeImageIndex + 1}
                         total={images.length}
-                        previousButtonAriaLabel={locale?.Accessibility.previous ?? 'Previous'}
-                        nextButtonAriaLabel={locale?.Accessibility.next ?? 'Next'}
+                        previousButtonAriaLabel={locale?.Accessibility.previous}
+                        nextButtonAriaLabel={locale?.Accessibility.next}
                         onChange={(value) => setActiveImageIndex(value - 1)}
                     />
                 )}
@@ -278,7 +278,7 @@ export function Gallery(props: IGalleryProps) {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={locale?.Accessibility.zoomIn ?? 'Zoom in'}
+                    aria-label={locale?.Accessibility.zoomIn}
                     className={toolbarButtonClassName}
                     disabled={zoomLevel >= 2}
                     onClick={() => handleToggleZoom(0.25)}
@@ -289,7 +289,7 @@ export function Gallery(props: IGalleryProps) {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={locale?.Accessibility.zoomOut ?? 'Zoom out'}
+                    aria-label={locale?.Accessibility.zoomOut}
                     className={toolbarButtonClassName}
                     disabled={zoomLevel <= 0.5}
                     onClick={() => handleToggleZoom(-0.25)}
@@ -300,7 +300,7 @@ export function Gallery(props: IGalleryProps) {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={locale?.Accessibility.resetZoom ?? 'Reset zoom'}
+                    aria-label={locale?.Accessibility.resetZoom}
                     className={toolbarButtonClassName}
                     disabled={zoomLevel === 1}
                     onClick={() => handleToggleZoom('reset')}

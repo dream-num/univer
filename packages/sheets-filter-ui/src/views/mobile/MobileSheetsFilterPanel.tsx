@@ -15,12 +15,6 @@
  */
 
 import type { MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    ByColorsModel,
-    ByConditionsModel,
-    ByValuesModel,
-} from '../../services/sheets-filter-panel.service';
 import { ICommandService, IContextService, LocaleService, Tools } from '@univerjs/core';
 import {
     Button,
@@ -40,6 +34,12 @@ import {
 } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { map, of } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    ByColorsModel,
+    ByConditionsModel,
+    ByValuesModel,
+} from '../../services/sheets-filter-panel.service';
 import {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,
@@ -96,6 +96,7 @@ function MobileFilterSyncSwitch() {
                 </div>
             </div>
             <Switch
+                aria-label={localeService.t<LocaleKey>('sheets-filter-ui.sync.title')}
                 defaultChecked={enabled}
                 onChange={(checked) => {
                     filterSyncController.setEnabled(checked);

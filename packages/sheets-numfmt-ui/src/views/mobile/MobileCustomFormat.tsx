@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Button, Input, MobileActionRowGroup, MobileSelect } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface IMobileCustomFormatProps {
     patterns: string[];
@@ -50,6 +50,8 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 value={pattern}
                 placeholder={title}
                 onChange={setPattern}
+                size="large"
+                inputClass="univer-text-base"
             />
             <MobileSelect
                 className="
@@ -69,7 +71,7 @@ export function MobileCustomFormat(props: IMobileCustomFormatProps) {
                 {localeService.t<LocaleKey>('sheets-numfmt-ui.customFormatDes')}
             </div>
             <MobileActionRowGroup className="univer-shrink-0">
-                <Button variant="primary" disabled={!pattern.trim()} onClick={() => onConfirm(pattern.trim())}>
+                <Button variant="primary" disabled={!pattern.trim()} onClick={() => onConfirm(pattern.trim())} size="extra-large">
                     {localeService.t<LocaleKey>('sheets-numfmt-ui.confirm')}
                 </Button>
             </MobileActionRowGroup>

@@ -15,12 +15,12 @@
  */
 
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Input, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import {
     CloseFindDialogOperation,
@@ -239,6 +239,7 @@ function MobileFindReplaceBarContent() {
                         value={state.replaceString}
                         placeholder={localeService.t<LocaleKey>('find-replace.dialog.replace-placeholder')}
                         onChange={(value) => findReplaceService.changeReplaceString(value)}
+                        inputClass="univer-text-base"
                     />
                     <ActionButton
                         disabled={replaceDisabled}

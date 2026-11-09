@@ -15,15 +15,15 @@
  */
 
 import type { IPopupWithExtraProps, MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type { DocPasteMode } from '../../services/clipboard/paste-options';
-import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon, DocPasteOptionsIcon } from '@univerjs/icons';
 import { MobileDrawer, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { DocPasteMode } from '../../services/clipboard/paste-options';
+import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { DocChangePasteModeCommand } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../../services/clipboard/paste-options';
@@ -76,6 +76,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                     selection?.suspendMobileEditingInput();
                     setOpen(true);
                 }}
+                size="icon"
             >
                 <DocPasteOptionsIcon aria-hidden="true" />
             </Button>
@@ -101,7 +102,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                 "
                             >
                                 <span>{localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}</span>
-                                <Button variant="text" className="univer-min-h-11" onClick={() => setOpen(false)}>
+                                <Button variant="text" className="univer-min-h-11" onClick={() => setOpen(false)} size="extra-large">
                                     {localeService.t<LocaleKey>('docs-ui.mobile.done')}
                                 </Button>
                             </div>
@@ -124,6 +125,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                       univer-py-3 univer-text-start
                                     "
                                     onClick={() => changeMode(option.value)}
+                                    size="extra-large"
                                 >
                                     <span
                                         className="univer-inline-flex univer-size-5 univer-shrink-0 univer-items-center"

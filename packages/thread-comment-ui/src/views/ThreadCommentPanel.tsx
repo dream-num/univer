@@ -272,7 +272,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     );
 
     return (
-        <div className="univer-flex univer-min-h-full univer-flex-col univer-pb-3">
+        <div className="univer-box-border univer-flex univer-min-h-full univer-flex-col univer-pb-3">
             <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
                 {type === UniverInstanceType.UNIVER_SHEET
                     ? (

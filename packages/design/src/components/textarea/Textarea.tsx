@@ -18,11 +18,11 @@ import type { ChangeEvent, ComponentProps } from 'react';
 import { forwardRef, useContext, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import { borderClassName, inputStateClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
-import { ConfigContext } from '../config-provider/ConfigProvider';
 import { FormLayoutContext } from '../form-layout/FormLayout';
 
 interface ITextareaProps extends ComponentProps<'textarea'> {
     className?: string;
+    size?: 'small' | 'large';
     onResize?: (width: number, height: number) => void;
     onValueChange?: (value: string) => void;
 }
@@ -31,9 +31,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lastSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
-    const { className, onResize, onValueChange, ...restProps } = props;
+    const { className, size = 'small', onResize, onValueChange, ...restProps } = props;
     const invalid = useContext(FormLayoutContext);
-    const { density } = useContext(ConfigContext);
 
     useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement, []);
 
@@ -84,8 +83,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
                 `,
                 borderClassName,
                 inputStateClassName,
-                density === 'touch' && 'univer-text-base',
                 scrollbarClassName,
+                size === 'large' && 'univer-text-base',
                 className
             )}
             onChange={handleChange}

@@ -368,6 +368,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                                 confirmRename();
                             }
                         }}
+                        inputClass="univer-text-base"
                     />
                     {renameError && (
                         <div

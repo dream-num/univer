@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
 import {
     BuildTextUtils,
     ColorKit,
@@ -54,6 +53,7 @@ import {
 import { IEditorBridgeService, IMarkSelectionService } from '@univerjs/sheets-ui';
 import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { ISheetsHyperLinkPopupService } from '../services/popup.service';
@@ -448,12 +448,14 @@ export const MobileCellLinkEdit = () => {
                                     handleSubmit();
                                 }
                             }}
+                            size="large"
+                            inputClass="univer-text-base"
                         />
                     </FormLayout>
                 )
                 : null}
             <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.tooltip')}>
-                <Input value={tooltip} onChange={setTooltip} />
+                <Input value={tooltip} onChange={setTooltip} size="large" inputClass="univer-text-base" />
             </FormLayout>
             <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.type')}>
                 <MobileSelect
@@ -487,6 +489,8 @@ export const MobileCellLinkEdit = () => {
                                 handleSubmit();
                             }
                         }}
+                        size="large"
+                        inputClass="univer-text-base"
                     />
                 </FormLayout>
             )}
@@ -574,12 +578,14 @@ export const MobileCellLinkEdit = () => {
                         }
                         await commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
+                    size="extra-large"
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     onClick={handleSubmit}
+                    size="extra-large"
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.ok')}
                 </Button>

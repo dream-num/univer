@@ -15,8 +15,6 @@
  */
 
 import type { MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type { IRangeSelectorDialogProps } from './index';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, ConfigContext, Input, MobileActionRowGroup, scrollbarClassName } from '@univerjs/design';
 import {
@@ -30,6 +28,8 @@ import { DeleteIcon, IncreaseIcon } from '@univerjs/icons';
 import { MobileDrawer, useDependency } from '@univerjs/ui';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { LocaleKey } from '../../locale/types';
+import type { IRangeSelectorDialogProps } from './index';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import { rangePreProcess } from './utils/range-pre-process';
 
@@ -146,6 +146,8 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     onFocus={() => setFocusIndex(index)}
                     value={text}
                     onChange={(value) => handleRangeInput(index, value)}
+                    size="large"
+                    inputClass="univer-text-base"
                 />
                 {ranges.length > 1 && (
                     <button
@@ -203,10 +205,10 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 footer={(
                     <footer className="univer-box-border univer-shrink-0 univer-p-4">
                         <MobileActionRowGroup>
-                            <Button onClick={onClose}>
+                            <Button onClick={onClose} size="extra-large">
                                 {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
                             </Button>
-                            <Button variant="primary" onClick={confirmRanges}>
+                            <Button variant="primary" onClick={confirmRanges} size="extra-large">
                                 {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
                             </Button>
                         </MobileActionRowGroup>
@@ -227,6 +229,7 @@ export function MobileRangeSelectorDialog(props: IRangeSelectorDialogProps) {
                                 setRanges([...ranges, '']);
                                 setFocusIndex(ranges.length);
                             }}
+                            size="large"
                         >
                             <IncreaseIcon />
                             <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>

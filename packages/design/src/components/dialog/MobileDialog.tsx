@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDialogProps } from './Dialog';
 import { useContext, useRef } from 'react';
+import type { IDialogProps } from './Dialog';
 import { clsx } from '../../helper/clsx';
 import { useMobileKeyboardViewportLayout } from '../../hooks/use-mobile-keyboard-viewport';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
@@ -59,8 +59,8 @@ export function MobileDialog(props: IMobileDialogProps) {
     const footer = propFooter ?? (showOk || showCancel
         ? (
             <MobileActionRowGroup>
-                {showCancel && <Button onClick={onCancel}>{locale?.Confirm.cancel}</Button>}
-                {showOk && <Button variant="primary" onClick={onOk}>{locale?.Confirm.confirm}</Button>}
+                {showCancel && <Button onClick={onCancel} size="extra-large">{locale?.Confirm.cancel}</Button>}
+                {showOk && <Button variant="primary" onClick={onOk} size="extra-large">{locale?.Confirm.confirm}</Button>}
             </MobileActionRowGroup>
         )
         : null);

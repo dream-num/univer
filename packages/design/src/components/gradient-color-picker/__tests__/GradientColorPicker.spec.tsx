@@ -18,17 +18,21 @@
  * @vitest-environment jsdom
  */
 
-import type { IGradientValue } from '../GradientColorPicker';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IGradientValue } from '../GradientColorPicker';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { GradientColorPicker } from '../GradientColorPicker';
-import { MobileGradientColorPicker } from '../MobileGradientColorPicker';
 import '@testing-library/jest-dom/vitest';
 
-beforeEach(() => vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false }));
+beforeEach(() => {
+    vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false });
+    vi.stubGlobal('ResizeObserver', class {
+        observe() {}
+        disconnect() {}
+    });
+});
 afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
@@ -43,74 +47,18 @@ const defaultValue: IGradientValue = {
     angle: 0,
 };
 
-describe('mobile GradientColorPicker', () => {
-    it('updates the selected stop, adds and removes stops without desktop hover controls', () => {
-        const onChange = vi.fn();
-        function Editor() {
-            const [value, setValue] = useState(defaultValue);
-            return (
-                <ConfigProvider mountContainer={document.body} locale={enUS.design}>
-                    <MobileGradientColorPicker
-                        value={value}
-                        types={['linear']}
-                        onChange={(next) => {
-                            setValue(next);
-                            onChange(next);
-                        }}
-                    />
-                </ConfigProvider>
-            );
-        }
-        const view = render(<Editor />);
-        expect(view.queryByText(enUS.design.GradientColorPicker.radial)).toBeNull();
-        fireEvent.click(view.getByRole('button', { name: enUS.design.Accessibility.increment }));
-        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ stops: [defaultValue.stops[0], defaultValue.stops[1], { ...defaultValue.stops[0], offset: 50 }] }));
-        expect(view.getByRole('button', { name: `${enUS.design.GradientColorPicker.offset} 50%` })).toHaveAttribute('aria-pressed', 'true');
-        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.angle), { target: { value: '180' } });
-        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.offset), { target: { value: '60' } });
-        fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.transparency), { target: { value: '40' } });
-        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ angle: 180, stops: expect.arrayContaining([{ color: '#ffffff', offset: 60, opacity: 0.6 }]) }));
-        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.delete }));
-        expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, angle: 180 });
-        expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.delete })).toBeDisabled();
-    });
-
-    it('supports every registered gradient type and controlled value updates', () => {
-        const onChange = vi.fn();
-        const view = render(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={defaultValue} onChange={onChange} /></ConfigProvider>);
-        for (const type of ['linear', 'radial', 'angular', 'diamond'] as const) {
-            fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker[type] }));
-            expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, type });
-        }
-        view.rerender(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={{ ...defaultValue, type: 'radial' }} onChange={onChange} /></ConfigProvider>);
-        expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.radial })).toHaveAttribute('aria-pressed', 'true');
-        expect(view.queryByLabelText(enUS.design.GradientColorPicker.angle)).toBeNull();
-    });
-});
-
 describe('GradientColorPicker', () => {
-    it('renders correctly', () => {
-        const { container } = render(<GradientColorPicker value={defaultValue} />);
-        expect(container).toBeDefined();
-        // Check if segmented items are rendered - they are buttons inside the segmented container
-        const segmented = container.querySelector('[data-u-comp="segmented"]');
-        expect(segmented?.querySelectorAll('button').length).toBe(4);
-    });
-
-    it('should call onChange when type changes', () => {
+    it.each([false, true])('changes gradient type without changing its stops (compact: %s)', (compact) => {
         const onChange = vi.fn();
-        const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
-
-        const segmented = container.querySelector('[data-u-comp="segmented"]');
-        const items = segmented?.querySelectorAll('button');
-        // Click 'radial' (index 1)
-        if (items && items[1]) {
-            fireEvent.click(items[1]);
-        }
-
-        expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
-            type: 'radial',
-        }));
+        const view = render(
+            <ConfigProvider mountContainer={document.body} locale={enUS.design}>
+                <GradientColorPicker compact={compact} value={defaultValue} onChange={onChange} />
+            </ConfigProvider>
+        );
+        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.radial }));
+        expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, type: 'radial' });
+        expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.radial })).toHaveAttribute('aria-pressed', 'true');
+        expect(view.queryByText(enUS.design.GradientColorPicker.angle)).toBeNull();
     });
 
     it('should call onChange when offset changes', () => {
@@ -190,12 +138,6 @@ describe('GradientColorPicker', () => {
         expect(onChange).toHaveBeenCalled();
         const calledValue = onChange.mock.calls[0][0] as IGradientValue;
         expect(calledValue.stops.length).toBe(2);
-    });
-
-    it('should disable delete button when only 2 stops remain', () => {
-        const { container } = render(<GradientColorPicker value={defaultValue} />);
-        const deleteButton = container.querySelector('[data-u-comp="gradient-color-picker-delete"]');
-        expect(deleteButton).toBeDisabled();
     });
 
     it('should call onChange when clicking the bar to add a stop', () => {

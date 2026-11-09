@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { FilterOperator } from '../../models/conditions';
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { LocaleService } from '@univerjs/core';
 import { Input, MobileSelect, Radio, RadioGroup } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterOperator } from '../../models/conditions';
+import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { FilterConditionItems } from '../../models/conditions';
 
 export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
@@ -62,6 +62,8 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                         onChange={(nextValue) => model.onConditionFormChange({
                             [name === 'operator1' ? 'val1' : 'val2']: nextValue,
                         })}
+                        size="large"
+                        inputClass="univer-text-base"
                     />
                 )}
             </div>
@@ -76,6 +78,8 @@ export function MobileFilterByCondition(props: { model: ByConditionsModel }) {
                         value={formParams!.val1 ?? ''}
                         placeholder={localeService.t<LocaleKey>('sheets-filter-ui.panel.input-values-placeholder')}
                         onChange={(value) => model.onConditionFormChange({ val1: value })}
+                        size="large"
+                        inputClass="univer-text-base"
                     />
                 )}
                 {condition!.numOfParameters >= 2 && renderSecondaryCondition(

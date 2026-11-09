@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Button, FormLayout, Input } from '@univerjs/design';
 import { KeyCode, useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { useDocHyperLinkEdit } from './hyper-link-edit/use-doc-hyper-link-edit';
 import { isBlankInput } from './hyper-link-edit/utils';
 
@@ -63,6 +63,8 @@ export function MobileDocHyperLinkEdit() {
                                         handleConfirm();
                                     }
                                 }}
+                                size="large"
+                                inputClass="univer-text-base"
                             />
                         </FormLayout>
                     )
@@ -80,11 +82,13 @@ export function MobileDocHyperLinkEdit() {
                                 handleConfirm();
                             }
                         }}
+                        size="large"
+                        inputClass="univer-text-base"
                     />
                 </FormLayout>
             </div>
             <div className="univer-mt-5 univer-flex univer-gap-3">
-                <Button className="univer-h-12 univer-flex-1" onClick={handleCancel}>
+                <Button className="univer-h-12 univer-flex-1" onClick={handleCancel} size="extra-large">
                     {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
                 </Button>
                 <Button
@@ -92,6 +96,7 @@ export function MobileDocHyperLinkEdit() {
                     className="univer-h-12 univer-flex-1"
                     disabled={isBlankInput(link)}
                     onClick={handleConfirm}
+                    size="extra-large"
                 >
                     {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.confirm')}
                 </Button>

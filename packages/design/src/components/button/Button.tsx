@@ -82,6 +82,7 @@ export const buttonVariants = cva(
                 small: 'univer-h-6 univer-rounded-md univer-px-1.5 univer-text-xs',
                 middle: 'univer-h-8 univer-rounded-md univer-px-2 univer-text-sm',
                 large: 'univer-h-10 univer-rounded-md univer-px-3 univer-text-sm',
+                'extra-large': 'univer-h-auto univer-min-h-12 univer-rounded-md univer-px-3 univer-text-base',
             },
         },
         defaultVariants: {

@@ -180,7 +180,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                         {allowClear && value && !disabled && (
                             <button
                                 type="button"
-                                aria-label={locale?.Accessibility.clearInput ?? enUS.design.Accessibility.clearInput}
+                                aria-label={locale?.Accessibility?.clearInput ?? enUS.design.Accessibility.clearInput}
                                 onClick={handleClear}
                                 className={`
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center

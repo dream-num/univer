@@ -15,11 +15,11 @@
  */
 
 import type { IDocTextFill, IDocTextFillGradientStop, IScale, TabStopLeader } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
@@ -449,7 +449,7 @@ export class FontAndBaseLine extends docExtension {
         const isVertical = vertexAngle === VERTICAL_DEG && centerAngle === VERTICAL_DEG;
         const horizontalScale = getTextHorizontalScale(glyph.ts?.sa);
 
-        if (isVertical && !cjk.hasCJK(content)) {
+        if (isVertical && !renderConfig?.stackedText && !cjk.hasCJK(content)) {
             ctx.save();
             ctx.translate(spanStartPoint.x + centerPoint.x, spanStartPoint.y + centerPoint.y);
             ctx.rotate(Math.PI / 2);
@@ -477,7 +477,7 @@ export class FontAndBaseLine extends docExtension {
             } else {
                 let x_offset = 0;
                 let y_offset = 0;
-                if (isVertical) {
+                if (isVertical && !renderConfig?.stackedText) {
                     const fontHeight = glyph.bBox.aba - glyph.bBox.abd;
                     x_offset = (glyph.width - glyph.bBox.width) / 2;
                     y_offset = -(glyph.width - fontHeight) / 2;

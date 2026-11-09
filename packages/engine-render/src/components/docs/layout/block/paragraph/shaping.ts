@@ -754,7 +754,7 @@ export function shaping(
     }
 
     // Preserve the legacy default, but honor documents that explicitly disable mixed-script spacing.
-    if (sectionBreakConfig.spaceWidthEastAsian !== BooleanNumber.FALSE) {
+    if (!sectionBreakConfig.renderConfig?.stackedText && sectionBreakConfig.spaceWidthEastAsian !== BooleanNumber.FALSE) {
         addCJKLatinSpacing(shapedTextList);
     }
 

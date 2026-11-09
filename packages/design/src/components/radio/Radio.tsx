@@ -80,7 +80,7 @@ export function Radio(props: IRadioProps) {
             <span className="univer-relative univer-block">
                 <input
                     ref={inputRef}
-                    className="univer-absolute univer-size-0 univer-opacity-0"
+                    className="univer-peer univer-sr-only"
                     type="radio"
                     name={name}
                     checked={checked}
@@ -92,6 +92,9 @@ export function Radio(props: IRadioProps) {
                       univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
                       univer-justify-center univer-overflow-hidden univer-rounded-full univer-border univer-border-solid
                       univer-transition-colors
+                      peer-focus:univer-outline peer-focus:univer-outline-2 peer-focus:univer-outline-offset-2
+                      peer-focus:univer-outline-primary-600
+                      dark:peer-focus:!univer-outline-primary-300
                     `, {
                         'univer-opacity-50': disabled,
                         'univer-border-primary-600 univer-bg-primary-600 dark:!univer-bg-primary-600': checked,

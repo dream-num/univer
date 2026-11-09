@@ -98,7 +98,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
                       univer-font-medium univer-transition-colors
                     `, {
                         'univer-text-gray-900 dark:!univer-text-gray-0': selectedItem === item.value,
-                        'univer-text-gray-500 hover:univer-text-gray-900 dark:hover:!univer-text-gray-0': selectedItem !== item.value,
+                        'univer-text-gray-500 hover:univer-text-gray-900 dark:!univer-text-gray-300 dark:hover:!univer-text-gray-0': selectedItem !== item.value,
                     })}
                     type="button"
                     onClick={() => handleClick(item.value)}

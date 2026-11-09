@@ -16,6 +16,10 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { InputNumber } from '../../input-number/InputNumber';
+import { Input } from '../../input/Input';
+import { Select } from '../../select/Select';
+import { Textarea } from '../../textarea/Textarea';
 import { FormLayout } from '../FormLayout';
 import '@testing-library/jest-dom/vitest';
 
@@ -43,8 +47,6 @@ describe('FormLayout', () => {
         expect(screen.getByText('Description')).toBeInTheDocument();
         expect(screen.getByText('Invalid value')).toBeInTheDocument();
         expect(container.querySelector('[data-u-comp="input"]')).toBeInTheDocument();
-
-        expect(container.innerHTML).toContain('univer-border-red-500');
     });
 
     it('should keep content visible when not collapsable', () => {
@@ -56,5 +58,28 @@ describe('FormLayout', () => {
 
         fireEvent.click(screen.getByText('Always Visible'));
         expect(screen.getByText('Child Content')).toBeInTheDocument();
+    });
+
+    it('propagates validation to the editable controls and clears it when corrected', () => {
+        const fields = (
+            <>
+                <Input aria-label="Name" />
+                <InputNumber aria-label="Count" />
+                <Textarea aria-label="Description" />
+                <Select aria-label="Type" value="first" options={[{ value: 'first', label: 'First' }]} onChange={() => {}} />
+                <FormLayout><Input aria-label="Independent field" /></FormLayout>
+            </>
+        );
+        const { rerender } = render(<FormLayout error="Invalid value">{fields}</FormLayout>);
+        for (const name of ['Name', 'Count', 'Description', 'Type']) {
+            expect(screen.getByLabelText(name)).toHaveAttribute('aria-invalid', 'true');
+        }
+        expect(screen.getByLabelText('Independent field')).not.toHaveAttribute('aria-invalid');
+
+        rerender(<FormLayout>{fields}</FormLayout>);
+        for (const name of ['Name', 'Count', 'Description', 'Type']) {
+            expect(screen.getByLabelText(name)).not.toHaveAttribute('aria-invalid');
+        }
+        expect(screen.queryByText('Invalid value')).not.toBeInTheDocument();
     });
 });

@@ -192,7 +192,7 @@ export function Calendar(props: ICalendarProps) {
             dir={direction}
             className={clsx(`
               univer-mx-auto univer-max-w-xs univer-select-none univer-rounded univer-bg-gray-0 univer-text-gray-900
-              dark:!univer-bg-gray-900 dark:!univer-text-gray-0
+              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             `, className)}
         >
             <nav

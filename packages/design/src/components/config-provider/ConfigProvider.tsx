@@ -16,13 +16,15 @@
 
 import type { ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
-import { createContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
     children: ReactNode;
     locale?: any;
     direction?: 'ltr' | 'rtl';
+    /** Default field density. Explicit component sizes take precedence. */
+    density?: 'default' | 'touch';
     mountContainer: HTMLElement | null;
     mobileKeyboardViewport?: IMobileKeyboardViewport | null;
 }
@@ -39,7 +41,8 @@ export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale, mountContainer, direction, mobileKeyboardViewport } = props;
+    const parentConfig = useContext(ConfigContext);
+    const { children, locale, mountContainer, direction, mobileKeyboardViewport, density = parentConfig.density } = props;
 
     const value = useMemo(() => {
         return {
@@ -47,8 +50,9 @@ export function ConfigProvider(props: IConfigProviderProps) {
             direction,
             mountContainer,
             mobileKeyboardViewport,
+            density,
         };
-    }, [locale, direction, mobileKeyboardViewport, mountContainer]);
+    }, [locale, direction, mobileKeyboardViewport, mountContainer, density]);
 
     return (
         <ConfigContext.Provider value={value}>

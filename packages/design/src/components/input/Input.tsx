@@ -19,9 +19,10 @@ import type { InputHTMLAttributes } from 'react';
 import { CloseIcon } from '@univerjs/icons';
 import { cva } from 'class-variance-authority';
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
-import { borderClassName } from '../../helper/class-utilities';
+import { borderClassName, inputStateClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
@@ -29,10 +30,9 @@ export const inputVariants = cva(
     `
       univer-box-border univer-w-full univer-rounded-md univer-bg-gray-0 univer-text-gray-900 univer-transition-colors
       univer-duration-200
-      placeholder:univer-text-gray-400
-      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-50
+      placeholder:univer-text-gray-500
       dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-      dark:focus:!univer-ring-primary-900
+      dark:placeholder:univer-text-gray-300
     `,
     {
         variants: {
@@ -75,7 +75,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         type = 'text',
         placeholder,
         value,
-        size = 'small',
+        size,
         allowClear = false,
         disabled = false,
         onClick,
@@ -88,7 +88,9 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         inputStyle,
         ...props
     }, ref) => {
-        const { direction, locale } = useContext(ConfigContext);
+        const { direction, locale, density } = useContext(ConfigContext);
+        const invalid = useContext(FormLayoutContext);
+        const touchSize = !size && density === 'touch';
 
         const handleClear = (e: React.MouseEvent) => {
             e.stopPropagation();
@@ -146,8 +148,10 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     ref={ref}
                     type={type}
                     className={clsx(
-                        inputVariants({ size }),
+                        inputVariants({ size: size ?? (touchSize ? 'large' : 'small') }),
                         borderClassName,
+                        inputStateClassName,
+                        touchSize && 'univer-text-base',
                         disabled && `
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
                           dark:!univer-text-gray-500
@@ -166,6 +170,7 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     onBlur={onBlur}
                     style={mergedInputStyle}
                     {...props}
+                    aria-invalid={props['aria-invalid'] ?? (invalid || undefined)}
                 />
                 {hasSlotContent && (
                     <div

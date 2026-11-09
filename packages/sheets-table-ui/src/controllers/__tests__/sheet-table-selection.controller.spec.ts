@@ -27,30 +27,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    ActiveDirtyManagerService,
-    CalculateFormulaService,
-    DefinedNamesService,
-    FormulaCacheService,
-    FormulaCurrentConfigService,
-    FormulaDataModel,
-    FormulaResultService,
-    FormulaRuntimeService,
-    HyperlinkEngineFormulaService,
-    IActiveDirtyManagerService,
-    ICalculateFormulaService,
-    IDefinedNamesService,
-    IFormulaCurrentConfigService,
-    IFormulaRuntimeService,
-    IHyperlinkEngineFormulaService,
-    ISheetRowFilteredService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    RemoveSuperTableMutation,
-    SetSuperTableMutation,
-    SheetRowFilteredService,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { CalculateFormulaService, FormulaCurrentConfigService, FormulaResultService, FormulaRuntimeService, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, RemoveSuperTableMutation, SetSuperTableMutation, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
@@ -205,6 +182,11 @@ function createClipboardTestBed() {
     };
     const univer = new Univer();
     const injector = univer.__getInjector();
+
+    class TestPlugin extends UniverFormulaEnginePlugin {
+        override onReady(): void {}
+    }
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     injector.add([SheetsSelectionsService]);
     injector.add([SheetInterceptorService]);
     injector.add([RangeProtectionRuleModel]);
@@ -218,16 +200,8 @@ function createClipboardTestBed() {
     injector.add([SheetRangeThemeModel]);
     injector.add([SheetRangeThemeService]);
     injector.add([ZebraCrossingCacheController]);
-    injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
-    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
     injector.add([FormulaResultService]);
     injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
-    injector.add([FormulaDataModel]);
-    injector.add([LexerTreeBuilder]);
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
-    injector.add([FormulaCacheService]);
     injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

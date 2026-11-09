@@ -33,12 +33,9 @@ import {
     DataValidationType,
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     set,
     ThemeService,
     toDisposable,
@@ -46,22 +43,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { AddDataValidationMutation, DataValidationModel, DataValidatorRegistryService, UniverDataValidationPlugin } from '@univerjs/data-validation';
-import {
-    ActiveDirtyManagerService,
-    DefinedNamesService,
-    FormulaCacheService,
-    FormulaDataModel,
-    FunctionService,
-    IActiveDirtyManagerService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISheetRowFilteredService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    RegisterOtherFormulaService,
-    SheetRowFilteredService,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
@@ -403,18 +385,13 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'sheets-data-validation-ui-detail-behavior-test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
+            this._injector.replace([IDescriptionService, { useClass: TestDescriptionService }]);
             ([
                 [SheetsSelectionsService],
                 [SheetInterceptorService],
@@ -422,7 +399,6 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [ComponentManager],
                 [IDialogService, { useClass: TestDialogService }],
                 [IEditorService, { useClass: TestEditorService }],
-                [IDescriptionService, { useClass: TestDescriptionService }],
                 [ICanvasColorService, { useClass: CanvasColorService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService as never }],
                 [IPlatformService, { useClass: PlatformService }],
@@ -434,21 +410,12 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [WorksheetProtectionPointModel],
                 [WorksheetProtectionRuleModel],
                 [RangeProtectionRuleModel],
-                [FormulaDataModel],
-                [LexerTreeBuilder],
                 [RefRangeService],
-                [FormulaCacheService],
-                [IFunctionService, { useClass: FunctionService }],
-                [IDefinedNamesService, { useClass: DefinedNamesService }],
-                [ISuperTableService, { useClass: SuperTableService }],
                 [DataValidationCacheService],
                 [DataValidationListCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
                 [DataValidationFormulaController],
-                [RegisterOtherFormulaService],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
                 [SheetsDataValidationValidatorService],
                 [SheetDataValidationModel],
                 [IMarkSelectionService, { useClass: TestMarkSelectionService as never }],
@@ -459,6 +426,8 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
         }
+
+        override onReady(): void {}
     }
 
     injector.get(LocaleService).load({
@@ -522,7 +491,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
     themeService.setTheme(set(themeService.getCurrentTheme(), 'gray.1000', '#35322b'));
 
     univer.registerPlugin(UniverDataValidationPlugin);
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);

@@ -17,12 +17,6 @@
 import type { IDocumentData, IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import type {
-    ICellEditorLayout,
-    ICellEditorState,
-    IEditorBridgeServiceParam,
-    IEditorBridgeServiceVisibleParam,
-} from '../../../services/editor-bridge.service';
 import {
     CommandType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -37,17 +31,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import {
-    DefinedNamesService,
-    FormulaCacheService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AutoFillService,
@@ -75,6 +59,12 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type {
+    ICellEditorLayout,
+    ICellEditorState,
+    IEditorBridgeServiceParam,
+    IEditorBridgeServiceVisibleParam,
+} from '../../../services/editor-bridge.service';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
@@ -281,15 +271,14 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
     const univer = new Univer();
     const injector = univer.__getInjector();
 
+    class TestPlugin extends UniverFormulaEnginePlugin {
+        override onReady(): void {}
+    }
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
+
     injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
-    injector.add([FormulaCacheService]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([FormulaDataModel]);
-    injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([SheetsSelectionsService, { useClass: SheetsSelectionsService }]);

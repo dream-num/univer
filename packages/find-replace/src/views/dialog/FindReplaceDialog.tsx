@@ -88,7 +88,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
     const { findCompleted, findString, matchesCount, matchesPosition } = state;
 
     const revealReplace = useCallback(() => {
-        commandService.executeCommand(OpenReplaceDialogOperation.id);
+        return commandService.executeCommand(OpenReplaceDialogOperation.id);
     }, [commandService]);
 
     const onFindStringChange = useDebounceFn((findString: string) => {
@@ -108,15 +108,9 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                 onChange={onFindStringChange}
             />
             <div className="univer-mt-4 univer-text-center">
-                <a
-                    className={`
-                      univer-cursor-pointer univer-text-sm univer-text-primary-500 univer-transition-colors
-                      hover:univer-text-primary-500
-                    `}
-                    onClick={revealReplace}
-                >
+                <Button type="button" variant="link" size="small" onClick={revealReplace}>
                     {localeService.t<LocaleKey>('find-replace.dialog.advanced-finding')}
-                </a>
+                </Button>
             </div>
         </>
     );
@@ -307,7 +301,9 @@ export function FindReplaceDialog() {
     const dialogContainerRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const container = dialogContainerRef.current;
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         const disposable = layoutService.registerContainerElement(container);
         return () => disposable.dispose();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { awaitTime, ICommandService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, ICommandService, LocaleService, LocaleType, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -29,6 +29,7 @@ import {
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
 } from '../../../commands/operations/find-replace.operation';
+import enUS from '../../../locale/en-US';
 import {
     FindBy,
     FindDirection,
@@ -69,10 +70,10 @@ const INITIAL_ROWS: ICellText[] = [
     { id: 'A4', text: 'banana' },
 ];
 
-const FIND_LABEL = 'find-replace.dialog.find';
-const REPLACE_LABEL = 'find-replace.dialog.replace';
-const REPLACE_ALL_LABEL = 'find-replace.dialog.replace-all';
-const ADVANCED_LABEL = 'find-replace.dialog.advanced-finding';
+const FIND_LABEL = enUS['find-replace'].dialog.find;
+const REPLACE_LABEL = enUS['find-replace'].dialog.replace;
+const REPLACE_ALL_LABEL = enUS['find-replace'].dialog['replace-all'];
+const ADVANCED_LABEL = enUS['find-replace'].dialog['advanced-finding'];
 
 class TextFindModel extends FindModel {
     private readonly _matchesUpdate$ = new BehaviorSubject<FindMatch[]>([]);
@@ -275,6 +276,10 @@ function createDialogTestBed(capabilities?: FindCapabilities) {
         [TestFindReplaceProvider],
     ]);
 
+    const localeService = testBed.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
     const commandService = testBed.get(ICommandService);
     [
         OpenFindDialogOperation,
@@ -284,7 +289,9 @@ function createDialogTestBed(capabilities?: FindCapabilities) {
     ].forEach((command) => commandService.registerCommand(command));
 
     const provider = testBed.get(TestFindReplaceProvider);
-    if (capabilities) provider.capabilities = capabilities;
+    if (capabilities) {
+        provider.capabilities = capabilities;
+    }
     const findReplaceService = testBed.get(IFindReplaceService);
     findReplaceService.registerFindReplaceProvider(provider);
 
@@ -321,15 +328,6 @@ function getButton(container: HTMLElement, text: string): HTMLButtonElement {
     }
 
     return button as HTMLButtonElement;
-}
-
-function getLink(container: HTMLElement, text: string): HTMLElement {
-    const link = Array.from(container.querySelectorAll('a')).find((item) => item.textContent?.trim() === text);
-    if (!link) {
-        throw new Error(`Link "${text}" was not found.`);
-    }
-
-    return link as HTMLElement;
 }
 
 function setInputValue(input: HTMLInputElement, value: string): void {
@@ -388,7 +386,7 @@ describe('FindReplaceDialog', () => {
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 3, matchesPosition: 1 });
     });
 
-    it('reveals replace controls from the advanced link without restarting the session', async () => {
+    it('reveals replace controls from a focusable advanced action without restarting the session', async () => {
         const testBed = createDialogTestBed();
         await act(async () => {
             testBed.commandService.syncExecuteCommand(OpenFindDialogOperation.id);
@@ -399,7 +397,10 @@ describe('FindReplaceDialog', () => {
         container = rendered.container;
 
         await act(async () => {
-            getLink(container!, ADVANCED_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            const button = getButton(container!, ADVANCED_LABEL);
+            button.focus();
+            expect(document.activeElement).toBe(button);
+            button.click();
         });
 
         expect(testBed.findReplaceService.replaceRevealed).toBe(true);
@@ -426,10 +427,10 @@ describe('FindReplaceDialog', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(container.textContent).toContain('find-replace.dialog.case-sensitive');
-        expect(container.textContent).toContain('find-replace.dialog.match-the-whole-word');
-        expect(container.textContent).not.toContain('find-replace.dialog.find-direction.title');
-        expect(container.textContent).not.toContain('find-replace.dialog.match-the-whole-cell');
+        expect(container.textContent).toContain(enUS['find-replace'].dialog['case-sensitive']);
+        expect(container.textContent).toContain(enUS['find-replace'].dialog['match-the-whole-word']);
+        expect(container.textContent).not.toContain(enUS['find-replace'].dialog['find-direction'].title);
+        expect(container.textContent).not.toContain(enUS['find-replace'].dialog['match-the-whole-cell']);
     });
 
     it('replaces the selected result and then replaces all remaining results', async () => {
@@ -465,7 +466,7 @@ describe('FindReplaceDialog', () => {
         await flushSearch();
 
         expect(testBed.provider.rows.map((row) => row.text)).toEqual(['orange', 'orange', 'orange', 'banana']);
-        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe('find-replace.replace.all-success');
+        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe(testBed.get(LocaleService).t('find-replace.replace.all-success', '2'));
     });
 
     it('moves to the next result when finding the same replace dialog input again', async () => {
@@ -612,7 +613,7 @@ describe('FindReplaceDialog', () => {
         });
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 0, matchesPosition: 0 });
         expect(readCurrentMatch(testBed.findReplaceService)).toBeNull();
-        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe('find-replace.dialog.no-match');
+        expect((testBed.get(IMessageService) as unknown as { messages: Array<{ content: string }> }).messages.at(-1)?.content).toBe(enUS['find-replace'].dialog['no-match']);
         expect(getButton(container!, REPLACE_LABEL).disabled).toBe(true);
         expect(getButton(container!, REPLACE_ALL_LABEL).disabled).toBe(true);
         expect(testBed.provider.rows.map((row) => row.text)).toEqual(INITIAL_ROWS.map((row) => row.text));

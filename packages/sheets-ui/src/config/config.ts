@@ -109,6 +109,13 @@ export interface IUniverSheetsUIConfig {
         hidePasteOptions?: boolean;
     };
 
+    /**
+     * Whether to ask for confirmation before a dragged range overwrites existing cell content.
+     * Disabling the warning does not bypass move validation or undo/redo.
+     * @default true
+     */
+    warnBeforeDragOverwrite?: boolean;
+
     /** The config of the scroll bar. */
     scrollConfig?: IScrollBarProps;
 

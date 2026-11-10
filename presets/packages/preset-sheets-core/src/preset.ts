@@ -145,6 +145,7 @@ export function UniverSheetsCorePreset(config: Partial<IUniverSheetsCorePresetCo
                 maxAutoHeightCount: sheets?.maxAutoHeightCount,
                 enableFillHandle: sheets?.enableFillHandle,
                 clipboardConfig: sheets?.clipboardConfig,
+                warnBeforeDragOverwrite: sheets?.warnBeforeDragOverwrite,
                 scrollConfig: sheets?.scrollConfig,
                 protectedRangeShadow: sheets?.protectedRangeShadow ?? true,
                 protectedRangeUserSelector: sheets?.protectedRangeUserSelector,

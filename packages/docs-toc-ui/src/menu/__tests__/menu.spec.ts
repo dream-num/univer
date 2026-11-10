@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, UniverDocsPlugin } from '@univerjs/docs';
 import { MenuItemType } from '@univerjs/ui';
 import { firstValueFrom } from 'rxjs';
@@ -31,7 +31,7 @@ describe('table of contents menu factories', () => {
         univer = new Univer();
         univer.registerPlugin(UniverDocsPlugin);
         const accessor = univer.__getInjector();
-        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
             id: 'doc-1',
             body: {
                 dataStream: '\u001FContents\u001E\rBody\r\n',
@@ -45,7 +45,7 @@ describe('table of contents menu factories', () => {
                     properties: { fieldType: 'TOC', locked },
                 }],
             },
-            documentStyle: {},
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
         });
         accessor.get(IUniverInstanceService).focusUnit('doc-1');
         const selection = accessor.get(DocSelectionManagerService);
@@ -85,5 +85,18 @@ describe('table of contents menu factories', () => {
         select(11, 12);
         expect(await firstValueFrom(insertMenu.hidden$!)).toBe(false);
         expect(await firstValueFrom(insertMenu.disabled$!)).toBe(true);
+
+        doc.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        select(5);
+        const snapshot = Tools.deepClone(doc.getSnapshot());
+        expect(await firstValueFrom(insertMenu.hidden$!)).toBe(true);
+        expect(await firstValueFrom(insertMenu.disabled$!)).toBe(true);
+        expect(await Promise.all(manageHidden.map((state) => firstValueFrom(state!)))).toEqual([true, true]);
+        const commands = accessor.get(ICommandService);
+        if (locked !== BooleanNumber.TRUE) {
+            commands.registerCommand(OpenTableOfContentsDialogOperation);
+        }
+        expect(await commands.executeCommand(OpenTableOfContentsDialogOperation.id)).toBe(false);
+        expect(doc.getSnapshot()).toEqual(snapshot);
     });
 });

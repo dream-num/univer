@@ -88,9 +88,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         inputStyle,
         ...props
     }, ref) => {
-        const { direction, locale, density } = useContext(ConfigContext);
+        const { direction, locale } = useContext(ConfigContext);
         const invalid = useContext(FormLayoutContext);
-        const touchSize = !size && density === 'touch';
 
         const handleClear = (e: React.MouseEvent) => {
             e.stopPropagation();
@@ -148,10 +147,9 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                     ref={ref}
                     type={type}
                     className={clsx(
-                        inputVariants({ size: size ?? (touchSize ? 'large' : 'small') }),
+                        inputVariants({ size }),
                         borderClassName,
                         inputStateClassName,
-                        touchSize && 'univer-text-base',
                         disabled && `
                           univer-cursor-not-allowed univer-bg-gray-50 univer-text-gray-400
                           dark:!univer-text-gray-500

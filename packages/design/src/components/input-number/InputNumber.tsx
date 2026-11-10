@@ -16,6 +16,7 @@
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import type { IInputProps } from '../input/Input';
 import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -25,14 +26,13 @@ export interface IInputNumberProps
     extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
     defaultValue?: number;
-    size?: 'mini' | 'small';
+    size?: IInputProps['size'];
     min?: number;
     max?: number;
     step?: number;
     precision?: number;
     formatter?: (value: string | number | undefined) => string;
     parser?: (displayValue: string | undefined) => string;
-    /** Hidden by default in touch density unless an explicit size is supplied. */
     controls?: boolean;
     className?: string;
     inputClassName?: string;
@@ -56,7 +56,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             precision,
             formatter,
             parser,
-            controls,
+            controls = true,
             className,
             inputClassName,
             controlsClassName,
@@ -72,8 +72,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         },
         ref
     ) => {
-        const { locale, density } = useContext(ConfigContext);
-        const showControls = controls ?? (density !== 'touch' || Boolean(size));
+        const { locale } = useContext(ConfigContext);
         const [internalValue, setInternalValue] = useState<number | null>(
             () => {
                 if (value !== undefined) {
@@ -357,7 +356,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                         onKeyDown={handleKeyDown}
                     />
 
-                    {showControls && (
+                    {controls && (
                         <div
                             className={clsx(
                                 `

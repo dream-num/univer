@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDialogProps } from './Dialog';
 import { useContext, useRef } from 'react';
+import type { IDialogProps } from './Dialog';
 import { clsx } from '../../helper/clsx';
 import { useMobileKeyboardViewportLayout } from '../../hooks/use-mobile-keyboard-viewport';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
@@ -59,8 +59,8 @@ export function MobileDialog(props: IMobileDialogProps) {
     const footer = propFooter ?? (showOk || showCancel
         ? (
             <MobileActionRowGroup>
-                {showCancel && <Button onClick={onCancel}>{locale?.Confirm.cancel}</Button>}
-                {showOk && <Button variant="primary" onClick={onOk}>{locale?.Confirm.confirm}</Button>}
+                {showCancel && <Button onClick={onCancel} size="middle">{locale?.Confirm.cancel}</Button>}
+                {showOk && <Button variant="primary" onClick={onOk} size="middle">{locale?.Confirm.confirm}</Button>}
             </MobileActionRowGroup>
         )
         : null);
@@ -89,7 +89,6 @@ export function MobileDialog(props: IMobileDialogProps) {
                   !univer-translate-y-0 !univer-flex-col !univer-gap-4 !univer-overflow-hidden !univer-rounded-t-2xl
                   !univer-p-4
                   [&_[data-slot='dialog-footer']]:!univer-flex-row [&_[data-slot='dialog-footer']]:!univer-gap-3
-                  [&_[data-slot='dialog-footer']_button]:!univer-h-12
                   [&_[data-slot='dialog-footer']_button]:!univer-flex-1
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
                   [&_button[data-slot='close']]:!univer-size-10

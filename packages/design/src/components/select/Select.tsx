@@ -37,6 +37,7 @@ interface IOptionSeparator {
 
 export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onChange' | 'value'> {
     className?: string;
+    size?: 'small' | 'large';
 
     /**
      * The value of select
@@ -84,6 +85,7 @@ const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
 export function Select(props: ISelectProps) {
     const {
         className,
+        size = 'small',
         value,
         disabled = false,
         options = EMPTY_OPTIONS,
@@ -169,6 +171,7 @@ export function Select(props: ISelectProps) {
             onOpenChange={handleOpenChange}
         >
             <Button
+                size={size === 'large' ? 'extra-large' : 'middle'}
                 {...triggerProps}
                 type="button"
                 disabled={disabled}
@@ -184,7 +187,7 @@ export function Select(props: ISelectProps) {
             >
                 <span
                     className={`
-                      univer-flex-1 univer-truncate univer-text-start univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-start univer-text-gray-500
                       dark:!univer-text-gray-0
                     `}
                 >

@@ -15,12 +15,12 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableFilterItemList } from '../../types';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, Input } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableFilterItemList } from '../../types';
 
 interface IMobileSheetTableItemsFilterPanelProps {
     items: ITableFilterItemList;
@@ -79,6 +79,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                 value={searchText}
                 placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.search-placeholder')}
                 onChange={setSearchText}
+                size="small"
             />
             <div
                 className="
@@ -93,7 +94,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                     "
                 >
                     <Checkbox
-                        className="univer-flex univer-min-h-12 univer-items-center"
+                        className="univer-flex univer-items-center"
                         checked={allDisplayedChecked}
                         indeterminate={!allDisplayedChecked && someDisplayedChecked}
                         disabled={displayItems.length === 0}
@@ -114,7 +115,7 @@ export function MobileSheetTableItemsFilterPanel(props: IMobileSheetTableItemsFi
                             "
                         >
                             <Checkbox
-                                className="univer-flex univer-min-h-12 univer-items-center"
+                                className="univer-flex univer-items-center"
                                 checked={checkedItemSet.has(itemKey)}
                                 onChange={() => toggleItem(itemKey)}
                             >

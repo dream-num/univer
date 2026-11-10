@@ -51,7 +51,7 @@ export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) 
     };
 
     return (
-        <div className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-4">
+        <div className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-4">
             {isShowRuleEditor
                 ? (
                     <RuleEditComponent onCancel={handleCancel} rule={currentEditRule} />

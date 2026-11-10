@@ -69,8 +69,8 @@ export function MobileDialogPart() {
     const footer = options.footer ?? (options.showOk || options.showCancel
         ? (
             <>
-                {options.showCancel && <Button onClick={options.onCancel}>{locale?.Confirm.cancel}</Button>}
-                {options.showOk && <Button variant="primary" onClick={options.onOk}>{locale?.Confirm.confirm}</Button>}
+                {options.showCancel && <Button onClick={options.onCancel} size="middle">{locale?.Confirm.cancel}</Button>}
+                {options.showOk && <Button variant="primary" onClick={options.onOk} size="middle">{locale?.Confirm.confirm}</Button>}
             </>
         )
         : null);

@@ -16,15 +16,15 @@
 
 import type { ISelectProps } from '@univerjs/design';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import type { LocaleKey } from '../../locale/types';
-import type { ThreadCommentPanelSection } from '../thread-comment-panel/util';
-import type { IThreadCommentPanelProps } from '../ThreadCommentPanel';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Button, clsx, MobileActionRowGroup, resetButtonClassName } from '@univerjs/design';
+import { Button, MobileActionRowGroup, Segmented } from '@univerjs/design';
 import { IncreaseIcon, MoreLeftIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ThreadCommentPanelSection } from '../thread-comment-panel/util';
+import type { IThreadCommentPanelProps } from '../ThreadCommentPanel';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { getThreadCommentPanelItemKey, isSameThreadCommentTarget, shouldClearThreadCommentTarget } from '../thread-comment-panel/util';
@@ -37,31 +37,16 @@ interface IThreadCommentWithUsers extends IThreadComment {
 
 function MobileCommentFilter({ value, options = [], onChange }: ISelectProps) {
     return (
-        <div
-            className="
-              univer-flex univer-gap-1 univer-overflow-x-auto univer-rounded-xl univer-bg-gray-100 univer-p-1
-              dark:!univer-bg-gray-800
-            "
-        >
-            {options.flatMap((option) => option.options ?? [option]).map((option) => (
-                <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={option.value === value}
-                    className={clsx(resetButtonClassName, `
-                      univer-h-10 univer-shrink-0 univer-rounded-lg univer-px-3 univer-text-sm univer-text-gray-700
-                      active:univer-scale-95
-                      dark:!univer-text-gray-200
-                    `, option.value === value && `
-                      univer-bg-gray-0 univer-font-medium univer-text-primary-600 univer-shadow-sm
-                      dark:!univer-bg-gray-700 dark:!univer-text-primary-300
-                    `)}
-                    onClick={() => option.value != null && onChange?.(option.value)}
-                >
-                    {option.label}
-                </button>
-            ))}
-        </div>
+        <Segmented
+            className="univer-w-full"
+            value={value}
+            items={options.flatMap((option) => option.options ?? [option]).filter((option) => option.value != null).map((option) => ({
+                label: option.label,
+                value: option.value!,
+                disabled: option.disabled,
+            }))}
+            onChange={onChange}
+        />
     );
 }
 
@@ -76,21 +61,14 @@ function MobileCommentHeader({ comment: activeComment, displayRef }: { comment: 
               dark:!univer-border-gray-700
             "
         >
-            <button
-                type="button"
+            <Button
+                size="icon"
+                variant="text"
                 aria-label={localeService.t<LocaleKey>('thread-comment-ui.mobile.back')}
-                className={`
-                  ${resetButtonClassName}
-                  univer-flex univer-size-12 univer-shrink-0 univer-items-center univer-justify-center univer-rounded-xl
-                  univer-text-2xl univer-text-gray-700
-                  active:univer-bg-gray-100
-                  dark:!univer-text-gray-200
-                  dark:active:!univer-bg-gray-700
-                `}
                 onClick={() => commandService.executeCommand(SetActiveCommentOperation.id)}
             >
                 <MoreLeftIcon />
-            </button>
+            </Button>
             <div className="univer-min-w-0 univer-flex-1">
                 <div
                     className="
@@ -119,7 +97,7 @@ function MobileAddComment({ onAdd }: { onAdd: () => void }) {
     const localeService = useDependency(LocaleService);
     return (
         <MobileActionRowGroup className="univer-mt-3">
-            <Button className="univer-w-full" onClick={onAdd}>
+            <Button className="univer-w-full" onClick={onAdd} size="middle">
                 <IncreaseIcon className="univer-mr-1.5" />
                 {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
             </Button>
@@ -336,7 +314,7 @@ export function MobileThreadCommentPanel(props: IThreadCommentPanelProps) {
     );
 
     return (
-        <div className="univer-flex univer-min-h-full univer-flex-col univer-pb-3">
+        <div className="univer-box-border univer-flex univer-min-h-full univer-flex-col univer-pb-3">
             {activeComment && <MobileCommentHeader comment={activeComment} displayRef={formatRef?.(activeComment)} />}
             {!activeComment && (
                 <div className="univer-mt-3 univer-flex univer-flex-col univer-gap-2">
@@ -360,7 +338,7 @@ export function MobileThreadCommentPanel(props: IThreadCommentPanelProps) {
                         {isFiltering
                             ? (
                                 <MobileActionRowGroup className="univer-mt-2 univer-flex univer-flex-row">
-                                    <Button onClick={handleReset}>
+                                    <Button onClick={handleReset} size="middle">
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
                                 </MobileActionRowGroup>

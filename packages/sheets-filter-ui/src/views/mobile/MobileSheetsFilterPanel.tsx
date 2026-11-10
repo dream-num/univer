@@ -231,13 +231,14 @@ function MobileSheetsFilterPanelContent() {
                             "
                         >
                             <MobileActionRowGroup>
-                                <Button onClick={() => closePanel().catch(() => undefined)}>
+                                <Button onClick={() => closePanel().catch(() => undefined)} size="middle">
                                     {localeService.t<LocaleKey>('sheets-filter-ui.panel.cancel')}
                                 </Button>
                                 <Button
                                     variant="primary"
                                     disabled={!canApply || !filterByModel}
                                     onClick={() => applyFilter().catch(() => undefined)}
+                                    size="middle"
                                 >
                                     {localeService.t<LocaleKey>('sheets-filter-ui.panel.confirm')}
                                 </Button>
@@ -264,12 +265,14 @@ function MobileSheetsFilterPanelContent() {
                                     <Button
                                         disabled={!filterRange || col <= filterRange.startColumn}
                                         onClick={() => changeColumn(-1)}
+                                        size="middle"
                                     >
                                         {localeService.t<LocaleKey>('sheets-filter-ui.panel.mobile.previous-column')}
                                     </Button>
                                     <Button
                                         disabled={!filterRange || col >= filterRange.endColumn}
                                         onClick={() => changeColumn(1)}
+                                        size="middle"
                                     >
                                         {localeService.t<LocaleKey>('sheets-filter-ui.panel.mobile.next-column')}
                                     </Button>
@@ -312,7 +315,7 @@ function MobileSheetsFilterPanelContent() {
                             </div>
                             <MobileFilterSyncSwitch />
                             <Button
-                                size="large"
+                                size="middle"
                                 disabled={!hasCriteria || !filterByModel}
                                 onClick={() => clearFilter().catch(() => undefined)}
                             >

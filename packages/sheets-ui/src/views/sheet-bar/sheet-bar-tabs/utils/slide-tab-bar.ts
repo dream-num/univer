@@ -141,6 +141,9 @@ export class SlideTabItem {
                     this._slideTabBar.addListener();
                 }
             },
+            onCancel: () => {
+                this._slideTabBar.addListener();
+            },
         });
     }
 

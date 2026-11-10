@@ -440,9 +440,8 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                         className="
                           univer-w-full
                           [&>span]:univer-block [&>span]:univer-w-full
-                          [&_button]:!univer-h-12 [&_button]:!univer-w-full [&_button]:!univer-justify-start
-                          [&_button]:!univer-gap-3 [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
-                          [&_button]:!univer-text-base
+                          [&_button]:!univer-w-full [&_button]:!univer-justify-start [&_button]:!univer-gap-3
+                          [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
                         "
                         onClick={() => setMoreOpen(false)}
                     >
@@ -467,7 +466,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                 <div
                     className="
                       univer-flex univer-items-center univer-gap-1
-                      [&_button]:!univer-min-h-10 [&_button]:!univer-min-w-10 [&_button]:!univer-rounded-lg
+                      [&_button]:!univer-min-w-10 [&_button]:!univer-rounded-lg
                       [&_button_svg]:!univer-size-5
                     "
                 >

@@ -1016,7 +1016,7 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
             <div
                 className="
                   univer-flex univer-min-h-12 univer-items-center univer-justify-center
-                  [&_button]:!univer-min-h-12 [&_button]:!univer-w-full
+                  [&_button]:!univer-w-full
                 "
             >
                 <ToolbarItem {...item} grid />

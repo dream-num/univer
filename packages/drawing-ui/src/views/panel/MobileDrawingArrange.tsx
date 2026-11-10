@@ -15,11 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
 import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IconManager, useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
 interface IMobileDrawingArrangeProps {
@@ -64,19 +64,19 @@ export function MobileDrawingArrange(props: IMobileDrawingArrangeProps) {
             </header>
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2">
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.forward)}>
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.forward)} size="middle">
                     <MoveUpIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.forward')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.backward)}>
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.backward)} size="middle">
                     <MoveDownIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.backward')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.front)}>
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.front)} size="middle">
                     <TopmostIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.front')}
                 </Button>
-                <Button className="univer-h-12 univer-w-full" onClick={() => arrange(ArrangeTypeEnum.back)}>
+                <Button className="univer-w-full" onClick={() => arrange(ArrangeTypeEnum.back)} size="middle">
                     <BottomIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.back')}
                 </Button>

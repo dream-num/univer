@@ -15,13 +15,13 @@
  */
 
 import type { IAccessor, IObjectPermissionTarget } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IObjectPermissionButtonProps } from './ObjectPermissionButton';
 import { Injector, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
 import { Button, Input } from '@univerjs/design';
 import { ProtectIcon } from '@univerjs/icons';
 import { UnitObject } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IObjectPermissionButtonProps } from './ObjectPermissionButton';
 import { ISidebarService } from '../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../utils/di';
 import { ObjectPermissionButton } from './ObjectPermissionButton';
@@ -133,7 +133,11 @@ export function ObjectPermissionPanel({ unitId, getTargets, expandable }: IObjec
         items.push({ ...item, name });
     }
     return (
-        <div className="univer-flex univer-h-full univer-flex-col univer-gap-3 univer-p-4">
+        <div
+            className="
+              univer-box-border univer-flex univer-h-0 univer-min-h-full univer-flex-col univer-gap-3 univer-pt-4
+            "
+        >
             {expandable && <Button aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>{localeService.t<LocaleKey>(kinds[expandable] ?? 'ui.objectPermission.entity')}</Button>}
             {(!expandable || expanded) && (
                 <Input
@@ -146,7 +150,7 @@ export function ObjectPermissionPanel({ unitId, getTargets, expandable }: IObjec
                     aria-label={localeService.t<LocaleKey>('ui.objectPermission.search')}
                 />
             )}
-            <div className="univer-flex-1 univer-overflow-auto">
+            <div className="univer-min-h-0 univer-flex-1 univer-overflow-auto univer-pb-4">
                 {items.map((item) => (
                     <div
                         key={`${unitId}/${item.target.objectType}/${item.target.objectId}`}

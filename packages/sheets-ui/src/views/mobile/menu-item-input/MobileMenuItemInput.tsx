@@ -15,12 +15,12 @@
  */
 
 import type { KeyboardEvent } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { IMenuItemInputProps } from '../../menu-item-input/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, InputNumber } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { IMenuItemInputProps } from '../../menu-item-input/interface';
 
 export function MobileMenuItemInput(props: IMenuItemInputProps) {
     const {
@@ -91,7 +91,7 @@ export function MobileMenuItemInput(props: IMenuItemInputProps) {
             <Button
                 type="button"
                 variant="primary"
-                size="large"
+                size="middle"
                 className="univer-shrink-0"
                 disabled={disabled || inputValue == null || !Number.isFinite(inputValue)}
                 onClick={handleConfirm}

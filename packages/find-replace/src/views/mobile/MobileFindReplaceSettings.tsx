@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, MobileSelect } from '@univerjs/design';
 import { useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
 
 const FIND_SCOPE_OPTIONS: Array<{ label: LocaleKey; value: FindScope }> = [
@@ -157,7 +157,7 @@ function SettingSelect(props: ISettingSelectProps) {
             "
         >
             <span>{props.label}</span>
-            <MobileSelect value={props.value} options={props.options} onChange={props.onChange} />
+            <MobileSelect value={props.value} options={props.options} onChange={props.onChange} size="small" />
         </label>
     );
 }

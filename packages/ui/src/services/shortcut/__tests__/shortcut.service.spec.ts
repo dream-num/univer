@@ -173,6 +173,43 @@ describe('ShortcutService', () => {
         }
     });
 
+    it.each([
+        ['Enter', KeyCode.ENTER, false],
+        [' ', KeyCode.SPACE, false],
+        ['Tab', KeyCode.TAB, false],
+        ['Tab', KeyCode.TAB, true],
+    ] as const)('keeps native button %s (shift=%s) out of canvas shortcuts', (key, keyCode, shiftKey) => {
+        const injector = new Injector([
+            [ICommandService, { useClass: CommandService }],
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [ShortcutService],
+        ]);
+        try {
+            const service = injector.get(ShortcutService);
+            const binding = keyCode | (shiftKey ? MetaKeys.SHIFT : 0);
+            service.registerShortcut({ id: 'test.canvas-navigation', binding });
+            const button = document.createElement('button');
+            const event = new KeyboardEvent('button-navigation', { key, keyCode, shiftKey, cancelable: true });
+            button.dispatchEvent(event);
+            expect(service.dispatch(event)).toBeUndefined();
+            expect(event.defaultPrevented).toBe(false);
+            const canvas = document.createElement('canvas');
+            const canvasEvent = new KeyboardEvent('button-navigation', { key, keyCode, shiftKey });
+            canvas.dispatchEvent(canvasEvent);
+            expect(service.dispatch(canvasEvent)?.id).toBe('test.canvas-navigation');
+            service.registerShortcut({ id: 'test.modified', binding: binding | MetaKeys.CTRL_COMMAND });
+            const modifiedEvent = new KeyboardEvent('button-navigation', { key, keyCode, shiftKey, ctrlKey: true });
+            button.dispatchEvent(modifiedEvent);
+            expect(service.dispatch(modifiedEvent)?.id).toBe('test.modified');
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it.each([KeyCode.ENTER, KeyCode.SPACE, KeyCode.TAB, KeyCode.ESC, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.HOME, KeyCode.END])(
         'yields menu navigation key %s while retaining canvas shortcuts',
         (keyCode) => {

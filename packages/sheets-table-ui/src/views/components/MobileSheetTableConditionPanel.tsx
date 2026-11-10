@@ -15,13 +15,6 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    IConditionCompareTypeEnum,
-    IConditionExpect,
-    IConditionInfo,
-    ITableConditionTypeEnumWithoutLogic,
-} from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import {
     borderClassName,
@@ -37,6 +30,13 @@ import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    IConditionCompareTypeEnum,
+    IConditionExpect,
+    IConditionInfo,
+    ITableConditionTypeEnumWithoutLogic,
+} from './type';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
 
@@ -162,11 +162,12 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.input-values-placeholder')}
                                     value={conditionInfo.info.string}
                                     onChange={(value) => handleConditionInfo({ string: value })}
+                                    size="small"
                                 />
                             )
                             : (
                                 <Input
-                                    className="univer-h-7 univer-w-full"
+                                    className="univer-w-full"
                                     inputMode="decimal"
                                     value={numberDraft}
                                     aria-invalid={numberDraft !== '' && !Number.isFinite(Number(numberDraft))}
@@ -177,6 +178,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                             handleConditionInfo({ number: Number(value) });
                                         }
                                     }}
+                                    size="small"
                                 />
                             )}
                     </>
@@ -216,6 +218,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     handleConditionInfo({ numberRange: [Number(value), conditionInfo.info.numberRange?.[1]] });
                                 }
                             }}
+                            size="small"
                         />
                         <span> - </span>
                         <Input
@@ -230,6 +233,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], Number(value)] });
                                 }
                             }}
+                            size="small"
                         />
                     </div>
                 )}
@@ -239,6 +243,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                         value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         options={conditionDateOptions}
                         onChange={(value) => handleConditionInfo({ dateSelect: value })}
+                        size="small"
                     />
                 )}
             </div>

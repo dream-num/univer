@@ -15,43 +15,10 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import type {
-    ICustomBlock,
-    ICustomColumnGroup,
-    ICustomDecoration,
-    ICustomRange,
-    ICustomTable,
-    IDocumentBody,
-    IParagraph,
-    ISectionBreak,
-    ITextRun,
-} from '../../../../types/interfaces';
+import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { CustomDecorationType, CustomRangeType } from '../../../../types/interfaces';
-import { PresetListType } from '../../preset-list-type';
-import {
-    deleteBlockRanges,
-    deleteColumnGroups,
-    deleteCustomBlocks,
-    deleteDocxRawCustomBlocks,
-    deleteParagraphs,
-    deleteSectionBreaks,
-    deleteTables,
-    deleteTextRuns,
-    insertBlockRanges,
-    insertColumnGroups,
-    insertCustomBlocks,
-    insertDocxRawCustomBlocks,
-    insertParagraphs,
-    insertSectionBreaks,
-    insertTables,
-    insertTextRuns,
-    mergeContinuousDecorations,
-    mergeContinuousRanges,
-    normalizeTextRuns,
-    splitCustomDecoratesByIndex,
-    splitCustomRangesByIndex,
-} from './common';
+import { deleteBlockRanges, deleteColumnGroups, deleteCustomBlocks, deleteDocxRawCustomBlocks, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns, insertBlockRanges, insertColumnGroups, insertCustomBlocks, insertDocxRawCustomBlocks, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns, mergeContinuousDecorations, mergeContinuousRanges, normalizeTextRuns, splitCustomDecoratesByIndex, splitCustomRangesByIndex } from './common';
 
 export function updateAttribute(
     body: IDocumentBody,
@@ -93,12 +60,12 @@ function updateTextRuns(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
-    const { textRuns } = body;
     const { textRuns: updateTextRuns } = updateBody;
 
-    if (textRuns == null || updateTextRuns == null) {
+    if (updateTextRuns == null || (body.textRuns == null && !updateTextRuns.some((run) => run.sId || Object.keys(run.ts ?? {}).length))) {
         return;
     }
+    body.textRuns ??= [];
 
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
 
@@ -249,63 +216,35 @@ function updateParagraphs(
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];
         for (const updateParagraph of updateDataParagraphs) {
-            const {
-                startIndex: updateStartIndex,
-                paragraphId: updateParagraphId,
-                paragraphStyle: updateParagraphStyle,
-                bullet: updateBullet,
-            } = updateParagraph;
-
-            let splitUpdateParagraphs: IParagraph[] = [];
-
+            const { startIndex: updateStartIndex, paragraphId: updateParagraphId } = updateParagraph;
             for (const removeParagraph of removeParagraphs) {
-                const {
-                    startIndex: removeStartIndex,
-                    paragraphId: removeParagraphId,
-                    paragraphStyle: removeParagraphStyle,
-                    bullet: removeBullet,
-                } = removeParagraph;
-                let newParagraphStyle;
-                let newBullet;
-                const paragraphAttributes = coverType === UpdateDocsAttributeType.COVER
-                    ? { ...removeParagraph, ...updateParagraph }
-                    : { ...updateParagraph, ...removeParagraph };
-
-                if (coverType === UpdateDocsAttributeType.COVER) {
-                    newParagraphStyle = { ...removeParagraphStyle, ...updateParagraphStyle };
-                    newBullet = {
-                        listId: '',
-                        listType: PresetListType.BULLET_LIST,
-                        nestingLevel: 0,
-                        textStyle: {},
-                        ...removeBullet,
-                        ...updateBullet,
-                    };
+                if (updateStartIndex !== removeParagraph.startIndex) {
+                    continue;
+                }
+                const [lower, higher] = coverType === UpdateDocsAttributeType.COVER
+                    ? [removeParagraph, updateParagraph]
+                    : [updateParagraph, removeParagraph];
+                let bullet = lower.bullet == null ? lower.bullet : { ...lower.bullet };
+                if (higher.bullet === null) {
+                    bullet = null;
+                } else if (higher.bullet !== undefined) {
+                    bullet = { ...bullet, ...higher.bullet };
+                }
+                const paragraph: IParagraph = {
+                    ...lower,
+                    ...higher,
+                    startIndex: updateStartIndex,
+                    paragraphId: updateParagraphId ?? removeParagraph.paragraphId,
+                    paragraphStyle: { ...lower.paragraphStyle, ...higher.paragraphStyle },
+                };
+                if (bullet === undefined) {
+                    delete paragraph.bullet;
                 } else {
-                    newParagraphStyle = { ...updateParagraphStyle, ...removeParagraphStyle };
-                    newBullet = {
-                        listId: '',
-                        listType: PresetListType.BULLET_LIST,
-                        nestingLevel: 0,
-                        textStyle: {},
-                        ...updateBullet,
-                        ...removeBullet,
-                    };
+                    paragraph.bullet = bullet;
                 }
-
-                if (updateStartIndex === removeStartIndex) {
-                    splitUpdateParagraphs.push({
-                        ...paragraphAttributes,
-                        startIndex: updateStartIndex,
-                        paragraphId: updateParagraphId ?? removeParagraphId,
-                        paragraphStyle: newParagraphStyle,
-                        bullet: removeBullet == null && updateBullet == null ? undefined : newBullet,
-                    });
-                    break;
-                }
+                newUpdateParagraphs.push(paragraph);
+                break;
             }
-            newUpdateParagraphs.push(...splitUpdateParagraphs);
-            splitUpdateParagraphs = [];
         }
 
         updateBody.paragraphs = newUpdateParagraphs;
@@ -693,6 +632,9 @@ function updateCustomDecorations(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
+    if (body.customDecorations == null && !updateBody.customDecorations?.length) {
+        return;
+    }
     if (!body.customDecorations) {
         body.customDecorations = [];
     }

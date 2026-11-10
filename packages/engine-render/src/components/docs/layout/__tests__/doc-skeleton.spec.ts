@@ -15,41 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
-import {
-    BooleanNumber,
-    ColumnLayoutType,
-    ColumnResponsiveType,
-    ColumnSeparatorType,
-    createDocumentModelWithStyle,
-    CustomRangeType,
-    DashStyleType,
-    DataStreamTreeTokenType,
-    DocumentDataModel,
-    DocumentFlavor,
-    DrawingTypeEnum,
-    GridType,
-    HorizontalAlign,
-    LocaleService,
-    LocaleType,
-    NamedStyleType,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PageOrientType,
-    PositionedObjectLayoutType,
-    PresetListType,
-    SectionType,
-    SpacingRule,
-    TableAlignmentType,
-    TableRowHeightRule,
-    TableSizeType,
-    TableTextWrapType,
-    TabStopAlignment,
-    TabStopLeader,
-    Univer,
-    VerticalAlignmentType,
-    WrapStrategy,
-    WrapTextType,
-} from '@univerjs/core';
+import { BooleanNumber, ColumnLayoutType, ColumnResponsiveType, ColumnSeparatorType, createDocumentModelWithStyle, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocumentDataModel, DocumentFlavor, DrawingTypeEnum, GridType, HorizontalAlign, LocaleService, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PageOrientType, PositionedObjectLayoutType, PresetListType, SectionType, SpacingRule, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TabStopAlignment, TabStopLeader, TextX, Tools, Univer, VerticalAlignmentType, WrapStrategy, WrapTextType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
 import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';
@@ -57,6 +23,7 @@ import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../..
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
 import { registerDocumentLayoutPresentation } from '../../document-layout-presentation';
+import { registerDocumentReferenceLayoutResolver } from '../../document-reference-layout';
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
@@ -317,6 +284,7 @@ describe('doc skeleton', () => {
             univer.dispose();
         }
     });
+
     it('keeps the surviving line baseline when a deleted paragraph contributes its final mark', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
@@ -1652,99 +1620,6 @@ describe('doc skeleton', () => {
             expect(storyPage.marginLeft).toBe(0);
         } finally {
             skeleton.dispose();
-            univer.dispose();
-        }
-    });
-
-    it.each([{ firstPageNumber: 9, table: false }, { firstPageNumber: 99, table: false }, { firstPageNumber: 99, table: true }])('lays out repeated page fields at $firstPageNumber (table=$table) with per-page geometry and a final page count', ({ firstPageNumber, table }) => {
-        mockCanvasTextMetrics(11, 8);
-        const univer = new Univer();
-        const locale = univer.__getInjector().get(LocaleService);
-        locale.setLocale(LocaleType.EN_US);
-        const T = DataStreamTreeTokenType;
-        const text = 'x \u001F9\u001E z\r\n';
-        const story = table ? `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}\r\n` : text;
-        const offset = table ? 3 : 0;
-        const contentWidth = (String(firstPageNumber).length + 4) * 8;
-        const snapshot: IDocumentData = {
-            id: 'page-fields-layout',
-            tableSource: table
-                ? { table: {
-                    tableId: 'table',
-                    align: TableAlignmentType.START,
-                    indent: { v: 0 },
-                    textWrap: TableTextWrapType.NONE,
-                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
-                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
-                    size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } },
-                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
-                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
-                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } } }],
-                } }
-                : undefined,
-            body: { dataStream: 'A\rB\r\n', paragraphs: [
-                { paragraphId: 'p1', startIndex: 1 },
-                { paragraphId: 'p2', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
-            ] },
-            headers: { header: { headerId: 'header', body: {
-                dataStream: story,
-                paragraphs: [...story.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `hp-${index}`, startIndex: match.index })),
-                sectionBreaks: [...story.matchAll(/\n/g)].map((match, index) => ({ sectionId: `hs-${index}`, startIndex: match.index })),
-                tables: table ? [{ tableId: 'table', startIndex: 0, endIndex: story.length - 2 }] : [],
-                customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: offset + 2, endIndex: offset + 4, wholeEntity: false, properties: { fieldType: 'PAGE' } }],
-            } } },
-            footers: { footer: { footerId: 'footer', body: {
-                dataStream: '\u001F999\u001E\r\n',
-                paragraphs: [{ paragraphId: 'fp', startIndex: 5 }],
-                customRanges: [{ rangeId: 'count', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, wholeEntity: false, properties: { fieldType: 'NUMPAGES' } }],
-            } } },
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageNumberStart: firstPageNumber,
-                pageSize: { width: contentWidth + 32, height: 400 },
-                marginLeft: 16,
-                marginRight: 16,
-                marginTop: 60,
-                marginBottom: 60,
-                marginHeader: 5,
-                marginFooter: 5,
-                textStyle: { ff: 'Arial', fs: 11 },
-                defaultHeaderId: 'header',
-                defaultFooterId: 'footer',
-            },
-        };
-        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
-        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
-        try {
-            main.calculate();
-            const generation = incremental.startIncrementalLayout();
-            let steps = 0;
-            while (!incremental.stepIncrementalLayout(generation, 8, 1).complete) {
-                expect(++steps).toBeLessThan(100);
-            }
-            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(main.getSkeletonData()));
-            const data = main.getSkeletonData()!;
-            expect(data.pages).toHaveLength(2);
-            const pages = data.pages.map((page) => data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!);
-            expect(pages[0]).not.toBe(pages[1]);
-            const textPages = table ? pages.map((page) => [...page.skeTables.values()][0].rows[0].cells[0]) : pages;
-            const lines = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
-            expect(lines[0]).toHaveLength(1);
-            expect(lines[1]).toHaveLength(2);
-            const glyphs = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
-            expect(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))).toBeDefined();
-            const next = glyphs[1].find((glyph) => glyph.content === String(firstPageNumber + 1))!;
-            expect(next).toBeDefined();
-            expect(next.width).toBeGreaterThan(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))!.width);
-            expect(main.findNodeByCharIndex(offset + 3, 'header', 1)?.content).toBe(String(firstPageNumber + 1));
-            for (const page of data.pages) {
-                const footer = data.skeFooters.get('footer')!.get(page.footerLayoutKey!)!;
-                const contents = footer.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
-                expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe('2');
-            }
-        } finally {
-            main.dispose();
-            incremental.dispose();
             univer.dispose();
         }
     });
@@ -5895,6 +5770,7 @@ describe('doc skeleton', () => {
                         },
                         dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
                         size: { type: TableSizeType.SPECIFIED, width: { v: 320 } },
+                        cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
                         tableRows: rowHeights.map((height) => ({
                             tableCells: [
                                 { size: { type: TableSizeType.SPECIFIED, width: { v: 320 } } },
@@ -5942,115 +5818,6 @@ describe('doc skeleton', () => {
             univer.dispose();
         }
     );
-
-    it.each([false, true].flatMap((incremental) => [
-        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 0, padding: 0 },
-        { incremental, contextual: false, spaceBefore: 0, lastSpace: 12, height: 64, textTops: [0, 32], borderWidth: 0, padding: 0 },
-        { incremental, contextual: true, spaceBefore: 0, lastSpace: 12, height: 52, textTops: [0, 20], borderWidth: 0, padding: 0 },
-        { incremental, contextual: true, spaceBefore: 8, lastSpace: 12, height: 60, textTops: [8, 28], borderWidth: 0, padding: 0 },
-        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 0 },
-        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 8 },
-        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: null },
-    ].flatMap((testCase) => (testCase.borderWidth === 4 && testCase.padding === 0 ? [600, 60] : [600])
-        .map((pageHeight) => ({ ...testCase, pageHeight })))))('matches Word cell paragraph spacing (incremental: $incremental, contextual: $contextual, before: $spaceBefore, after: $lastSpace, border: $borderWidth, padding: $padding, page: $pageHeight)', ({ incremental, contextual, spaceBefore, lastSpace, height, textTops, borderWidth, padding, pageHeight }) => {
-        // Protobuf JSON omits numeric zero values in imported margin units.
-        const verticalPadding = padding === null ? JSON.parse('{}') : { v: padding };
-        const T = DataStreamTreeTokenType;
-        const cellStream = `${T.TABLE_CELL_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`;
-        const rowStream = `${T.TABLE_ROW_START}${cellStream}${T.TABLE_ROW_END}`;
-        const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
-        const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
-        const univer = new Univer();
-        const model = new DocumentDataModel({
-            id: 'contextual-table-spacing',
-            body: {
-                dataStream,
-                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
-                    ? [{
-                        startIndex,
-                        paragraphId: `p-${startIndex}`,
-                        styleId: 'List',
-                        paragraphStyle: {
-                            spacingRule: SpacingRule.EXACT,
-                            lineSpacing: 20,
-                            contextualSpacing: contextual ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-                            spaceAbove: { v: spaceBefore },
-                            spaceBelow: { v: dataStream[startIndex - 1] === 'A' ? 12 : lastSpace },
-                        },
-                    }]
-                    : []),
-                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
-                    ? [{
-                        startIndex,
-                        sectionId: `s-${startIndex}`,
-                    }]
-                    : []),
-                tables: [{ tableId: 'list-table', startIndex: 0, endIndex: tableStream.length }],
-            },
-            tableSource: {
-                'list-table': {
-                    tableId: 'list-table',
-                    align: TableAlignmentType.START,
-                    indent: { v: 0 },
-                    textWrap: TableTextWrapType.NONE,
-                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
-                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
-                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
-                    tableRows: [0, 1].map(() => ({
-                        tableCells: [{
-                            borderTop: { width: { v: borderWidth }, color: { rgb: '#000000' } },
-                            borderBottom: { width: { v: borderWidth }, color: { rgb: '#000000' } },
-                        }],
-                        trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO },
-                    })),
-                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
-                    cellMargin: { top: verticalPadding, bottom: verticalPadding, start: { v: 0 }, end: { v: 0 } },
-                },
-            },
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 400, height: pageHeight },
-                marginTop: 0,
-                marginBottom: 0,
-                marginLeft: 0,
-                marginRight: 0,
-            },
-        });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
-        try {
-            if (incremental) {
-                completeIncrementalLayout(skeleton);
-            } else {
-                skeleton.calculate();
-            }
-            const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
-            const rowHeight = height + borderWidth + (padding ?? 0) * 2;
-            expect(tables.map((table) => ({ height: table.height, rows: table.rows.map((row) => ({ index: row.index, height: row.height })) })))
-                .toEqual(pageHeight === 60
-                    ? [0, 1].map((index) => ({ height: rowHeight + borderWidth, rows: [{ index, height: rowHeight }] }))
-                    : [{ height: rowHeight * 2 + borderWidth, rows: [0, 1].map((index) => ({ index, height: rowHeight })) }]);
-            for (const table of tables) {
-                // Word reserves the outer halves outside the first/last row centreline.
-                expect(table.height).toBe(rowHeight * table.rows.length + borderWidth);
-                expect(table.height).toBeLessThanOrEqual(pageHeight);
-                expect(table.rows.map((row) => row.top)).toEqual(table.rows.map((_, index) => borderWidth / 2 + rowHeight * index));
-            }
-            expect(tables.flatMap((table) => table.rows.map((row) => row.index))).toEqual([0, 1]);
-            for (const row of tables.flatMap((table) => table.rows)) {
-                expect(row.height).toBe(rowHeight);
-                const cell = row.cells[0];
-                expect(cell.height).toBe(height);
-                expect(cell.marginTop).toBe((padding ?? 0) + borderWidth / 2);
-                expect(cell.marginBottom).toBe((padding ?? 0) + borderWidth / 2);
-                const lines = cell.sections[0].columns[0].lines;
-                expect(lines.map((line) => line.top + line.marginTop)).toEqual(textTops);
-                expect(lines.map((line) => line.spaceBelowApply)).toEqual([contextual ? 0 : 12, lastSpace]);
-            }
-        } finally {
-            skeleton.dispose();
-            univer.dispose();
-        }
-    });
 
     it.each([
         { top: 3, bottom: 3, padding: 0, pageHeight: 200, insets: [[1.5, 1.5], [1.5, 1.5]] },
@@ -6138,7 +5905,7 @@ describe('doc skeleton', () => {
                         const traditional = documentFlavor === DocumentFlavor.TRADITIONAL;
                         const [above, below] = traditional ? insets[row.index] : [0, 0];
                         const contentHeight = (row.index === 0 ? 60 : 40) + above + below;
-                        const minimumHeight = minimum + (traditional ? above + below - padding * 2 : 0);
+                        const minimumHeight = minimum + (traditional ? above + below : 0);
                         expect(row.height).toBe(Math.max(contentHeight, minimumHeight));
                         for (const [col, cell] of row.cells.entries()) {
                             expect(cell.pageHeight).toBe(row.height);
@@ -6153,152 +5920,6 @@ describe('doc skeleton', () => {
                     univer.dispose();
                 }
             }
-        }
-    });
-
-    it.each([false, true].flatMap((incremental) => [
-        ...[0, 40, 50, 80].map((minimum) => ({ incremental, minimum, repeatHeader: false, lineCount: 4 })),
-        ...[4, 8].map((lineCount) => ({ incremental, minimum: 0, repeatHeader: true, lineCount })),
-    ]))('reserves row minimum and continuation headers when splitting ($incremental/$minimum/$repeatHeader/$lineCount)', ({ incremental, minimum, repeatHeader, lineCount }) => {
-        mockCanvasTextMetrics();
-        const T = DataStreamTreeTokenType;
-        const rows = ['Before\r', Array.from({ length: lineCount }, (_, index) => `Line ${index + 1}\r`).join('')];
-        const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
-        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
-        const univer = new Univer();
-        const model = new DocumentDataModel({
-            id: 'row-start-minimum',
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 300, height: 60 },
-                marginTop: 0,
-                marginBottom: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                paragraphLineGapDefault: 0,
-            },
-            body: {
-                dataStream,
-                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
-                    ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: {
-                        lineSpacing: 20,
-                        spacingRule: SpacingRule.EXACT,
-                        widowControl: BooleanNumber.FALSE,
-                        spaceAbove: { v: 0 },
-                        spaceBelow: { v: 0 },
-                    } }]
-                    : []),
-                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
-                tables: [{ tableId: 'minimum', startIndex: 0, endIndex: stream.length }],
-            },
-            tableSource: {
-                minimum: {
-                    tableId: 'minimum',
-                    align: TableAlignmentType.START,
-                    indent: { v: 0 },
-                    textWrap: TableTextWrapType.NONE,
-                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
-                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
-                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
-                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
-                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
-                    tableRows: rows.map((_, index) => ({
-                        cantSplit: BooleanNumber.FALSE,
-                        repeatHeaderRow: repeatHeader && index === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-                        tableCells: [{}],
-                        trHeight: { val: { v: index === 0 ? 0 : minimum }, hRule: TableRowHeightRule.AT_LEAST },
-                    })),
-                },
-            },
-        });
-        const before = JSON.stringify(model.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
-        try {
-            if (incremental) {
-                completeIncrementalLayout(skeleton);
-            } else {
-                skeleton.calculate();
-            }
-            const fragments = skeleton.getSkeletonData()!.pages.flatMap((page, pageIndex) => [...page.skeTables.values()]
-                .flatMap((table) => table.rows.filter((row) => row.index === 1).map((row) => ({ page: pageIndex, height: row.height }))));
-            if (repeatHeader) {
-                expect(fragments).toEqual(Array.from({ length: lineCount / 2 }, (_, page) => ({ page, height: 40 })));
-                const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
-                expect(tables).toHaveLength(lineCount / 2);
-                for (const [index, table] of tables.entries()) {
-                    expect(table.rows.map((row) => row.index)).toEqual([0, 1]);
-                    expect(table.height).toBe(60);
-                    if (index > 0) {
-                        expect(table.rows[0].isRepeatRow).toBe(true);
-                    }
-                }
-                const cellText = tables.flatMap((table) => table.rows[1].cells.flatMap((cell) => cell.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))))))).join('');
-                expect(cellText).toBe(rows[1]);
-            } else {
-                expect(fragments).toEqual(minimum === 50
-                    ? [{ page: 1, height: 60 }, { page: 2, height: 50 }]
-                    : [{ page: 0, height: 40 }, { page: 1, height: Math.min(60, Math.max(40, minimum)) }]);
-            }
-            expect(JSON.stringify(model.getSnapshot())).toBe(before);
-        } finally {
-            skeleton.dispose();
-            univer.dispose();
-        }
-    });
-
-    it('keeps multi-column table hit-testing and logical caret indices aligned', () => {
-        const T = DataStreamTreeTokenType;
-        const texts = [['East', 'Name', '123456789', 'east@example.test'], ['Bank', 'Other', '987654321', 'bank@example.test']];
-        const stream = `${T.TABLE_START}${texts.map((row) => `${T.TABLE_ROW_START}${row.map((text) => `${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`).join('')}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
-        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
-        const widths = [113.4, 94.46666666666664, 151.2, 300.2];
-        const univer = new Univer();
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel({
-            id: 'multi-column-table-caret',
-            body: {
-                dataStream,
-                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: { lineSpacing: 16, spacingRule: SpacingRule.EXACT } }] : []),
-                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
-                tables: [{ tableId: 'contacts', startIndex: 0, endIndex: stream.length }],
-            },
-            tableSource: {
-                contacts: {
-                    tableId: 'contacts',
-                    align: TableAlignmentType.START,
-                    indent: { v: 0 },
-                    textWrap: TableTextWrapType.NONE,
-                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
-                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
-                    size: { type: TableSizeType.SPECIFIED, width: { v: widths.reduce((sum, width) => sum + width, 0) } },
-                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 7.2 }, end: { v: 7.2 } },
-                    tableColumns: widths.map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } })),
-                    tableRows: texts.map((row) => ({ tableCells: row.map(() => ({})), trHeight: { val: { v: 16 }, hRule: TableRowHeightRule.EXACT } })),
-                },
-            },
-            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 794, height: 1123 }, marginLeft: 53, marginRight: 53, marginTop: 87, marginBottom: 73 },
-        })), univer.__getInjector().get(LocaleService));
-        try {
-            skeleton.calculate();
-            const page = skeleton.getSkeletonData()!.pages[0];
-            const table = page.skeTables.get('contacts')!;
-            for (const [rowIndex, row] of table.rows.entries()) {
-                for (const [columnIndex, cell] of row.cells.entries()) {
-                    const section = cell.sections[0];
-                    const column = section.columns[0];
-                    const line = column.lines[0];
-                    const divide = line.divides[0];
-                    const glyph = divide.glyphGroup[1];
-                    const x = page.marginLeft + table.left + cell.left + cell.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + glyph.width / 4;
-                    const y = page.marginTop + table.top + row.top + cell.marginTop + section.top + line.top + line.lineHeight / 2;
-                    const hit = skeleton.findNodeByCoord(new Vector2(x, y), PageLayoutType.VERTICAL, 0, 0);
-                    expect(hit?.node === glyph, `cell ${rowIndex},${columnIndex}`).toBe(true);
-                    const position = skeleton.findPositionByGlyph(hit!.node, hit!.segmentPage)!;
-                    expect(skeleton.findCharIndexByPosition({ ...position, isBack: true })).toBe(dataStream.indexOf(texts[rowIndex][columnIndex]) + 1);
-                }
-            }
-        } finally {
-            skeleton.dispose();
-            univer.dispose();
         }
     });
 
@@ -7656,49 +7277,6 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
-    it('DOCX golden e2e preserves physical page parity when an even-and-odd section restarts numbering', () => {
-        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
-        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
-        const univer = new Univer();
-        const localeService = univer.__getInjector().get(LocaleService);
-        const documentModel = new DocumentDataModel({
-            id: 'section-page-number-parity',
-            body: {
-                dataStream: `${first}${second}`,
-                paragraphs: [
-                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
-                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
-                ],
-                sectionBreaks: [
-                    { sectionId: 'first-section', startIndex: first.length - 1 },
-                    {
-                        sectionId: 'second-section',
-                        startIndex: first.length + second.length - 1,
-                        sectionType: SectionType.NEXT_PAGE,
-                        pageNumberStart: 1,
-                        evenAndOddHeaders: 1,
-                    },
-                ],
-            },
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                pageSize: { width: 320, height: 400 },
-                marginTop: 20,
-                marginBottom: 20,
-                marginLeft: 20,
-                marginRight: 20,
-            },
-        });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
-
-        skeleton.calculate();
-
-        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2, 1]);
-
-        skeleton.dispose();
-        univer.dispose();
-    });
-
     it('starts a continuous section on a new page when its physical page changes', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
@@ -8027,6 +7605,2042 @@ describe('doc skeleton', () => {
         expect(skeleton.getSkeletonData()?.skeFooters.size).toBeGreaterThan(0);
 
         expectIncrementalSkeletonToEqualSynchronous(documentModel.getSnapshot(), localeService);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it.each(['header', 'footer'] as const)('retains %s ownership through overlapping table position lookups', (kind) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({ id: 'overlapping-story-tables', body: { dataStream: 'A\r\n' } });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        const body = createPage(DocumentSkeletonPageType.BODY, 0);
+        const stories = (['header', 'footer'] as const).map((name, index) => {
+            const story = createPage(name === 'header' ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER, 100);
+            story.page.segmentId = `${name}-seg`;
+            const cell = createPage(DocumentSkeletonPageType.CELL, 7 + index * 2, 'shared-table');
+            const row = { cells: [cell.page], parent: undefined as unknown };
+            const table = { tableId: 'shared-table', rows: [row], parent: story.page };
+            row.parent = table;
+            cell.page.parent = row;
+            story.page.skeTables.set('shared-table', table);
+            return { story, cell };
+        });
+        const data = {
+            pages: [body.page],
+            skeHeaders: new Map([['header-seg', new Map([[200, stories[0].story.page]])]]),
+            skeFooters: new Map([['footer-seg', new Map([[200, stories[1].story.page]])]]),
+        };
+        Reflect.set(skeleton, '_skeletonData', data);
+        body.page.parent = data;
+        for (const { story } of stories) {
+            story.page.parent = data;
+        }
+        const { cell } = stories[kind === 'header' ? 0 : 1];
+        try {
+            const fromGlyph = skeleton.findPositionByGlyph(cell.glyphs.glyphA, 0)!;
+            const fromOffset = skeleton.findNodePositionByCharIndex(cell.page.st + 1, true, `${kind}-seg`, 0)!;
+            for (const position of [fromGlyph, fromOffset]) {
+                expect(position.segmentId).toBe(`${kind}-seg`);
+                expect(skeleton.findGlyphByPosition({ ...position, isBack: true })).toBe(cell.glyphs.glyphA);
+                expect(skeleton.findCharIndexByPosition({ ...position, isBack: true })).toBe(cell.page.st + 1);
+            }
+        } finally {
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([
+        { cached: '1', rendered: '103AI', width: 200 },
+        { cached: '1', rendered: '103AI '.repeat(10).trim(), width: 100 },
+        { cached: '', rendered: '103AI', width: 200 },
+    ])('resolves the leading caret of expanded reference text ($cached, $width)', ({ cached, rendered, width }) => {
+        const metrics = mockCanvasTextMetrics();
+        const start = DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        const end = DataStreamTreeTokenType.CUSTOM_RANGE_END;
+        const dataStream = `${start}${cached}${end}\r\n`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'expanded-reference-source-boundaries',
+            body: {
+                dataStream,
+                paragraphs: [{ startIndex: dataStream.length - 2, paragraphId: 'reference' }],
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section' }],
+                customRanges: [{
+                    rangeId: 'reference',
+                    rangeType: CustomRangeType.FIELD,
+                    startIndex: 0,
+                    endIndex: cached.length + 1,
+                    properties: { fieldType: 'REF', instruction: 'REF target', cachedResult: cached },
+                }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width, height: 2000 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const registration = registerDocumentReferenceLayoutResolver(model, {
+            hasReferences: () => true,
+            project: (document) => document.body!.dataStream === `${start}${rendered}${end}\r\n`
+                ? undefined
+                : {
+                    ...document,
+                    body: TextX.apply(Tools.deepClone(document.body!), new TextX()
+                        .retain(1)
+                        .delete(cached.length)
+                        .insert(rendered.length, { dataStream: rendered })
+                        .serialize()),
+                },
+        });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const position = skeleton.findNodePositionByCharIndex(1, true)!;
+            expect(position).toBeDefined();
+            const page = skeleton.getSkeletonData()!.pages[position.page];
+            const line = page.sections[position.section].columns[position.column].lines[position.line];
+            expect(line.divides[position.divide].glyphGroup[position.glyph].content).toBe('1');
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            registration.dispose();
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+            metrics.mockRestore();
+        }
+    });
+
+    it.each(['footnote', 'endnote'] as const)('preserves measured %s ranges when reference results change the layout', (kind) => {
+        const metrics = mockCanvasTextMetrics();
+        const univer = new Univer();
+        const start = DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        const end = DataStreamTreeTokenType.CUSTOM_RANGE_END;
+        const dataStream = `${start}1${end}\uFFFC\r\n`;
+        const model = new DocumentDataModel({
+            id: 'projected-note-formula',
+            body: {
+                dataStream,
+                paragraphs: [{ startIndex: 4, paragraphId: 'body' }],
+                sectionBreaks: [{ startIndex: 5, sectionId: 'body' }],
+                customRanges: [
+                    { startIndex: 0, endIndex: 2, rangeId: 'field', rangeType: CustomRangeType.FIELD, properties: { fieldType: 'REF' } },
+                    { startIndex: 3, endIndex: 3, rangeId: 'note', rangeType: kind === 'footnote' ? CustomRangeType.FOOTNOTE : CustomRangeType.ENDNOTE, wholeEntity: true, properties: { noteId: 'note' } },
+                ],
+            },
+            notes: { note: {
+                noteId: 'note',
+                type: kind,
+                body: {
+                    dataStream: 'abc\r\n',
+                    paragraphs: [{ startIndex: 3, paragraphId: 'note' }],
+                    sectionBreaks: [{ startIndex: 4, sectionId: 'note' }],
+                    customRanges: [{ startIndex: 0, endIndex: 2, rangeId: 'formula', rangeType: CustomRangeType.CUSTOM, wholeEntity: true }],
+                },
+            } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 240, height: 300 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const view = new DocumentViewModel(model);
+        const noteView = view.getNoteTreeMap().get('note')!;
+        const interception = noteView.registerCustomRangeInterceptor({
+            getCustomRange: (index) => {
+                const range = noteView.getCustomRangeRaw(index);
+                return range && { ...range, show: false, glyphAscentEm: 1, glyphDescentEm: 0.2, glyphWidthEm: 2 };
+            },
+            getCustomDecoration: (index) => noteView.getCustomDecorationRaw(index),
+        });
+        const registration = registerDocumentReferenceLayoutResolver(model, {
+            hasReferences: () => true,
+            project: (document) => document.body!.dataStream === `${start}12${end}\uFFFC\r\n`
+                ? undefined
+                : {
+                    ...document,
+                    body: TextX.apply(Tools.deepClone(document.body!), new TextX().retain(1).delete(1).insert(2, { dataStream: '12' }).serialize()),
+                },
+        });
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const glyphs = skeleton.getSkeletonData()!.pages.flatMap((page) => page.notes ?? []).filter((note) => note.noteId === 'note').flatMap((note) => note.page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
+            expect(glyphs.find((glyph) => glyph.raw === 'abc')).toMatchObject({ content: '\u200B', count: 3, glyphType: GlyphType.PLACEHOLDER });
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            registration.dispose();
+            interception.dispose();
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+            metrics.mockRestore();
+        }
+    });
+
+    it('reuses a completed synchronous layout until it is invalidated', () => {
+        const univer = new Univer();
+        const model = createPresentationModel({
+            id: 'completed-synchronous-layout',
+            body: {
+                dataStream: 'A\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'completed-layout-paragraph' }],
+                sectionBreaks: [{ startIndex: 2, sectionId: 'completed-layout-section' }],
+            },
+            documentStyle: { pageSize: { width: 200, height: 200 } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const notifications: boolean[] = [];
+        const subscription = skeleton.dirty$.subscribe(() => notifications.push(skeleton.dirty));
+        try {
+            skeleton.calculate();
+            const complete = skeleton.getSkeletonData();
+            expect(skeleton.dirty).toBe(false);
+            skeleton.calculate();
+            expect(skeleton.getSkeletonData()).toBe(complete);
+            expect(notifications).toEqual([false]);
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            expect(skeleton.getSkeletonData()).not.toBe(complete);
+            expect(skeleton.dirty).toBe(false);
+            expect(notifications).toEqual([false, false]);
+        } finally {
+            subscription.unsubscribe();
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each(['header', 'footer'] as const)('retains paragraph borders in %s layout publications', (storyType) => {
+        const univer = new Univer();
+        const border = { color: { rgb: '#000000' }, width: 2 / 3, padding: 4 / 3, dashStyle: DashStyleType.SOLID };
+        const body = { dataStream: 'Header\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'story', paragraphStyle: { borderBottom: border, spaceAbove: { v: 8 } } }], sectionBreaks: [{ startIndex: 7, sectionId: 'story-section' }] };
+        const snapshot: IDocumentData = {
+            id: 'story-paragraph-border',
+            body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }], sectionBreaks: [{ startIndex: 5, sectionId: 'body-section' }] },
+            headers: storyType === 'header' ? { header: { headerId: 'header', body } } : {},
+            footers: storyType === 'footer' ? { footer: { footerId: 'footer', body } } : {},
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: 600 },
+                marginTop: 90,
+                marginBottom: 90,
+                marginLeft: 40,
+                marginRight: 40,
+                marginHeader: 30,
+                marginFooter: 30,
+                defaultHeaderId: storyType === 'header' ? 'header' : undefined,
+                defaultFooterId: storyType === 'footer' ? 'footer' : undefined,
+                textStyle: { ff: 'Times New Roman', fs: 10 },
+            },
+        };
+        const model = new DocumentDataModel(snapshot);
+        const source = JSON.stringify(model.getSnapshot());
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const storyLines = () => {
+            const data = skeleton.getSkeletonData()!;
+            const stories = storyType === 'header' ? data.skeHeaders : data.skeFooters;
+            return [...stories.get(storyType)!.values()][0].sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+        };
+        try {
+            skeleton.calculate();
+            expect(storyLines().at(-1)?.borderBottom).toEqual(border);
+            completeIncrementalLayout(skeleton);
+            expect(storyLines().at(-1)?.borderBottom).toEqual(border);
+            expect(JSON.stringify(model.getSnapshot())).toBe(source);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each((['header', 'footer'] as const).flatMap((storyType) => [40, 80].map((marginLeft) => ({ storyType, marginLeft }))))('positions page-anchored PAGE frames without displacing following text ($storyType/$marginLeft)', ({ storyType, marginLeft }) => {
+        mockCanvasTextMetrics(9, 6);
+        const univer = new Univer();
+        const body = {
+            dataStream: '\u001F1\u001E\rHeader label\r\n',
+            paragraphs: [3, 16].map((startIndex, index) => ({
+                startIndex,
+                paragraphId: `story-${index}`,
+                paragraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 16,
+                    spaceAbove: { v: 0 },
+                    spaceBelow: { v: 0 },
+                    ...(index === 0
+                        ? { paragraphFrame: {
+                            wrap: 'none',
+                            horizontalAnchor: 'page',
+                            verticalAnchor: 'text',
+                            x: '10380',
+                            yAlign: 'top',
+                        } }
+                        : {}),
+                },
+            })),
+            customRanges: [{
+                rangeId: 'page-number',
+                rangeType: CustomRangeType.FIELD,
+                startIndex: 0,
+                endIndex: 2,
+                properties: { fieldType: 'PAGE', instruction: ' PAGE ', cachedResult: '1' },
+            }],
+            sectionBreaks: [{ startIndex: 17, sectionId: 'story-section' }],
+        };
+        const snapshot: IDocumentData = {
+            id: 'page-anchored-reference-frame',
+            body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }], sectionBreaks: [{ startIndex: 5, sectionId: 'body-section' }] },
+            ...(storyType === 'header'
+                ? { headers: { story: { headerId: 'story', body } } }
+                : { footers: { story: { footerId: 'story', body } } }),
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 800, height: 600 },
+                marginTop: 40,
+                marginBottom: 40,
+                marginLeft,
+                marginRight: 40,
+                marginHeader: 20,
+                marginFooter: 20,
+                ...(storyType === 'header' ? { defaultHeaderId: 'story' } : { defaultFooterId: 'story' }),
+                textStyle: { ff: 'Arial', fs: 9 },
+            },
+        };
+        const model = new DocumentDataModel(snapshot);
+        const original = JSON.stringify(model.getSnapshot());
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        try {
+            skeleton.calculate();
+            const data = skeleton.getSkeletonData()!;
+            const page = data.pages[0];
+            const key = storyType === 'header' ? page.headerLayoutKey! : page.footerLayoutKey!;
+            const story = (storyType === 'header' ? data.skeHeaders : data.skeFooters).get('story')!.get(key)!;
+            const [frame, label] = story.sections[0].columns[0].lines;
+            expect(label.top).toBe(0);
+            expect(frame.top).toBe(label.top);
+            expect(story.height).toBe(16);
+            expect(frame.divides[0].left).toBeCloseTo(10380 / 15 - marginLeft, 8);
+            expect(skeleton.findNodeByCharIndex(1, 'story', 0)?.content).toBe('1');
+            const top = storyType === 'header' ? story.marginTop : 600 - story.height - story.marginBottom;
+            const hit = skeleton.findNodeByCoord(Vector2.create(10380 / 15 + 3, top + 8), PageLayoutType.VERTICAL, 0, 0);
+            expect(hit?.segmentId).toBe('story');
+            expect(hit?.node.content).toBe('1');
+            expect(JSON.stringify(model.getSnapshot())).toBe(original);
+            const geometry = normalizeSkeleton(story);
+            completeIncrementalLayout(skeleton);
+            const updated = skeleton.getSkeletonData()!;
+            const updatedPage = updated.pages[0];
+            const updatedKey = storyType === 'header' ? updatedPage.headerLayoutKey! : updatedPage.footerLayoutKey!;
+            expect(normalizeSkeleton((storyType === 'header' ? updated.skeHeaders : updated.skeFooters).get('story')!.get(updatedKey))).toEqual(geometry);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each((['header', 'footer'] as const).flatMap((storyType) => [0, 4, 8, 12, 16].flatMap((spaceBefore) => [false, true].map((prefix) => ({ storyType, spaceBefore, prefix })))))('preserves Word frame anchor spacing and later flow spacing ($storyType/$spaceBefore/$prefix)', ({ storyType, spaceBefore, prefix }) => {
+        mockCanvasTextMetrics(9, 6);
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const text = `${(prefix ? ['1', 'Prefix', 'Label'] : ['1', 'Label']).join('\r')}\r`;
+        const body = {
+            dataStream: `${text}\n`,
+            paragraphs: [...text.matchAll(/\r/g)].map((match, index) => ({
+                startIndex: match.index!,
+                paragraphId: `story-${index}`,
+                paragraphStyle: {
+                    spacingRule: SpacingRule.EXACT,
+                    lineSpacing: 16,
+                    spaceAbove: { v: match.index === text.length - 1 ? spaceBefore : 0 },
+                    spaceBelow: { v: 0 },
+                    ...(index === 0
+                        ? { paragraphFrame: {
+                            wrap: 'none',
+                            horizontalAnchor: 'page',
+                            verticalAnchor: 'text',
+                            x: '10380',
+                            yAlign: 'top',
+                        } }
+                        : {}),
+                },
+            })),
+            sectionBreaks: [{ startIndex: text.length, sectionId: 'story-section' }],
+        };
+        const snapshot: IDocumentData = {
+            id: 'frame-anchor-spacing',
+            body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }], sectionBreaks: [{ startIndex: 5, sectionId: 'body-section' }] },
+            ...(storyType === 'header'
+                ? { headers: { story: { headerId: 'story', body } } }
+                : { footers: { story: { footerId: 'story', body } } }),
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 800, height: 600 },
+                marginTop: 40,
+                marginBottom: 40,
+                marginLeft: 40,
+                marginRight: 40,
+                marginHeader: 20,
+                marginFooter: 20,
+                ...(storyType === 'header' ? { defaultHeaderId: 'story' } : { defaultFooterId: 'story' }),
+                textStyle: { ff: 'Arial', fs: 9 },
+            },
+        };
+        const model = new DocumentDataModel(snapshot);
+        const original = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        const storyGeometry = () => {
+            const data = skeleton.getSkeletonData()!;
+            const page = data.pages[0];
+            const key = (storyType === 'header' ? page.headerLayoutKey : page.footerLayoutKey) ?? page.pageWidth;
+            const story = (storyType === 'header' ? data.skeHeaders : data.skeFooters).get('story')!.get(key)!;
+            return { story, lines: story.sections[0].columns[0].lines };
+        };
+        try {
+            skeleton.calculate();
+            const { story, lines } = storyGeometry();
+            const label = lines[lines.length - 1];
+            // Word controls consume up to 6 pt at the frame anchor, but retain later flow spacing.
+            const labelTop = prefix ? 16 + spaceBefore : Math.max(0, spaceBefore - 8);
+            expect(lines[0].top).toBe(0);
+            expect(label.marginTop).toBe(spaceBefore);
+            expect(label.top + label.marginTop).toBe(labelTop);
+            expect(story.height).toBe(labelTop + 16);
+            expect(JSON.stringify(model.getSnapshot())).toBe(original);
+            const geometry = normalizeSkeleton(story);
+            completeIncrementalLayout(skeleton);
+            expect(normalizeSkeleton(storyGeometry().story)).toEqual(geometry);
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('moves a traditional body line when its text exceeds the page edge by less than two pixels', () => {
+        mockCanvasTextMetrics();
+        const univer = new Univer();
+        const snapshot: IDocumentData = {
+            id: 'word-body-edge-overflow',
+            body: {
+                dataStream: 'A\rB\rC\r\n',
+                paragraphs: [1, 3, 5].map((startIndex) => ({ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: {
+                    spacingRule: SpacingRule.AUTO,
+                    lineSpacing: 1.5,
+                    snapToGrid: BooleanNumber.FALSE,
+                    spaceAbove: { v: 0 },
+                    spaceBelow: { v: 0 },
+                } })),
+                sectionBreaks: [{ startIndex: 6, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 200, height: 24.5 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { ff: 'Word body-edge regression', fs: 11 },
+            },
+        };
+        const model = new DocumentDataModel(snapshot);
+        const original = JSON.stringify(model.getSnapshot());
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const { pages } = skeleton.getSkeletonData()!;
+            expect(pages).toHaveLength(3);
+            for (const page of pages) {
+                const lines = page.sections[0].columns[0].lines;
+                expect(lines).toHaveLength(1);
+                expect(lines[0].top + lines[0].contentHeight).toBeLessThanOrEqual(24.5);
+            }
+            const expected = normalizeSkeleton(skeleton.getSkeletonData());
+            completeIncrementalLayout(skeleton);
+            expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(expected);
+            expect(JSON.stringify(model.getSnapshot())).toBe(original);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([
+        { story: 'header', height: 0 },
+        { story: 'footer', height: 0 },
+        { story: 'header', height: 12 },
+        { story: 'footer', height: 12 },
+    ])('keeps $story column anchors independent of paragraph indentation with drawing height $height', ({ story, height }) => {
+        mockCanvasTextMetrics();
+        const univer = new Univer();
+        try {
+            for (const [indent, hanging] of [[0, 0], [48, 0], [48, 48], [96, 0], [96, 96]]) {
+                const model = new DocumentDataModel({
+                    id: 'story-column-anchor',
+                    body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }] },
+                    documentStyle: {
+                        documentFlavor: DocumentFlavor.TRADITIONAL,
+                        pageSize: { width: 816, height: 1056 },
+                        marginLeft: 96,
+                        marginRight: 96,
+                        marginTop: 112,
+                        marginBottom: 112,
+                        marginHeader: 40,
+                        marginFooter: 40,
+                        defaultHeaderId: story === 'header' ? 'story' : undefined,
+                        defaultFooterId: story === 'footer' ? 'story' : undefined,
+                    },
+                    [story === 'header' ? 'headers' : 'footers']: {
+                        story: {
+                            [story === 'header' ? 'headerId' : 'footerId']: 'story',
+                            body: {
+                                dataStream: '\bAnchor\r\n',
+                                paragraphs: [{ startIndex: 7, paragraphId: 'anchor', paragraphStyle: { indentStart: { v: indent }, hanging: { v: hanging } } }],
+                                customBlocks: [{ startIndex: 0, blockId: 'rule' }],
+                            },
+                        },
+                    },
+                    drawings: { rule: {
+                        unitId: 'story-column-anchor',
+                        subUnitId: 'story',
+                        drawingId: 'rule',
+                        drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                        layoutType: PositionedObjectLayoutType.WRAP_NONE,
+                        docTransform: {
+                            size: { width: 624, height },
+                            positionH: { relativeFrom: ObjectRelativeFromH.COLUMN, posOffset: 24 },
+                            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                            angle: 0,
+                        },
+                    } },
+                });
+                const view = new DocumentViewModel(model);
+                const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+                const before = JSON.stringify(model.getSnapshot());
+                try {
+                    for (let pass = 0; pass < 2; pass++) {
+                        skeleton.makeDirty(true);
+                        skeleton.calculate();
+                        const data = skeleton.getSkeletonData()!;
+                        const page = data.pages[0];
+                        const resources = story === 'header' ? data.skeHeaders : data.skeFooters;
+                        const key = story === 'header' ? page.headerLayoutKey : page.footerLayoutKey;
+                        const part = resources.get('story')!.get(key ?? page.pageWidth)!;
+                        const drawing = part.skeDrawings.get('rule')!;
+                        // Word COM places the 24px column offset at physical x=120 for every indent.
+                        expect(drawing.aLeft + page.marginLeft).toBe(120);
+                        expect(drawing.blockAnchorLeft).toBe(0);
+                    }
+                    expect(JSON.stringify(model.getSnapshot())).toBe(before);
+                } finally {
+                    skeleton.dispose();
+                    view.dispose();
+                    model.dispose();
+                }
+            }
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it('retains every paragraph of a repeated header across a section break', () => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const dataStream = 'FIRST BODY PAGE\rSECOND BODY PAGE\r\nTHIRD BODY PAGE\rFOURTH BODY PAGE\r\n';
+        const header = 'DEFAULT=\u001FLOCKED\u001E\rARABIC=\u001FLOCKED\u001E\rTAIL\r\n';
+        const starts = [...header.matchAll(/\u001F/g)].map((match) => match.index);
+        const model = new DocumentDataModel({
+            id: 'multi-paragraph-section-header',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                    paragraphId: `p${index}`,
+                    startIndex: match.index,
+                    paragraphStyle: { pageBreakBefore: index % 2 ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+                })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({
+                    startIndex: match.index,
+                    sectionId: `s${index}`,
+                    pageNumberStart: index ? 28 : 6,
+                    pageNumberFormat: index ? 'lowerLetter' : 'lowerRoman',
+                })),
+            },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: header,
+                paragraphs: [...header.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `h${index}`, startIndex: match.index })),
+                customRanges: starts.map((startIndex, index) => ({ rangeId: `f${index}`, rangeType: CustomRangeType.FIELD, startIndex, endIndex: startIndex + 7, properties: { fieldType: 'PAGE', instruction: index ? 'PAGE \\*ARABIC' : 'PAGE' } })),
+            } } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 600, height: 800 }, marginTop: 200, marginBottom: 50, marginLeft: 50, marginRight: 50, marginHeader: 10, defaultHeaderId: 'header', textStyle: { ff: 'Arial', fs: 11 } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const data = skeleton.getSkeletonData()!;
+            expect(data.pages).toHaveLength(4);
+            const labels = ['vi', 'vii', 'bb', 'cc'];
+            for (const [index, page] of data.pages.entries()) {
+                const story = data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                const lines = story.sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+                expect(lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/[\u001E\u001F\r\n]/g, '')))
+                    .toEqual([`DEFAULT=${labels[index]}`, `ARABIC=${index < 2 ? index + 6 : index + 26}`, 'TAIL']);
+            }
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([
+        { pages: 9, start: 1, restart: false, format: 'decimal', width: 40, lines: 1 },
+        { pages: 10, start: 1, restart: false, format: 'decimal', width: 40, lines: 2 },
+        { pages: 2, start: 9, restart: false, format: 'decimal', width: 40, lines: 2 },
+        { pages: 18, start: 1, restart: true, format: 'decimal', width: 40, lines: 1 },
+        { pages: 9, start: 1, restart: false, format: 'lowerRoman', width: 56, lines: 2 },
+    ])('reserves the widest printed PAGE value for the shared Word header (%j)', ({ pages, start, restart, format, width, lines }) => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const content = restart ? `${'B\r'.repeat(9)}\n${'B\r'.repeat(9)}\n` : `${'B\r'.repeat(pages)}\n`;
+        const model = new DocumentDataModel({
+            id: 'shared-header-page-width',
+            body: {
+                dataStream: content,
+                paragraphs: [...content.matchAll(/\r/g)].map((match, index) => ({
+                    paragraphId: `body-${index}`,
+                    startIndex: match.index!,
+                    paragraphStyle: { pageBreakBefore: index && !(restart && index === 9) ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+                })),
+                sectionBreaks: restart
+                    ? [{ startIndex: 18, sectionId: 'first', pageNumberStart: 1 }, { startIndex: content.length - 1, sectionId: 'second', pageNumberStart: 1, sectionType: SectionType.NEXT_PAGE }]
+                    : [{ startIndex: content.length - 1, sectionId: 'only', pageNumberStart: start, pageNumberFormat: format }],
+            },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: 'x \u001F197\u001E z\r\n',
+                paragraphs: [{ paragraphId: 'header-text', startIndex: 9 }],
+                sectionBreaks: [{ sectionId: 'header-section', startIndex: 10 }],
+                customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: 2, endIndex: 6, properties: { fieldType: 'PAGE' } }],
+            } } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: 15 },
+                pageSize: { width: width + 32, height: 400 },
+                marginLeft: 16,
+                marginRight: 16,
+                marginTop: 60,
+                marginBottom: 60,
+                marginHeader: 5,
+                defaultHeaderId: 'header',
+                textStyle: { ff: 'Arial', fs: 11 },
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        const incrementalModel = new DocumentDataModel(Tools.deepClone(model.getSnapshot()));
+        const incrementalViewModel = new DocumentViewModel(incrementalModel);
+        const incremental = DocumentSkeleton.create(incrementalViewModel, locale);
+        try {
+            skeleton.calculate();
+            const generation = incremental.startIncrementalLayout();
+            let steps = 0;
+            while (!incremental.stepIncrementalLayout(generation, 8, 1).complete) {
+                expect(++steps).toBeLessThan(200);
+            }
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(skeleton.getSkeletonData()));
+            const data = skeleton.getSkeletonData()!;
+            expect(data.pages).toHaveLength(pages);
+            for (const page of data.pages) {
+                const header = data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!;
+                expect(header.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))).toHaveLength(lines);
+            }
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            incremental.dispose();
+            incrementalViewModel.dispose();
+            incrementalModel.dispose();
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each<{ firstPageNumber: number; table: boolean; pageNumberFormat?: string; expected?: [string, string]; instruction?: string; locked?: boolean }>([
+        { firstPageNumber: 9, table: false },
+        { firstPageNumber: 99, table: false },
+        { firstPageNumber: 99, table: true },
+        { firstPageNumber: 7, table: false, pageNumberFormat: 'lowerRoman', expected: ['vii', 'viii'] },
+        { firstPageNumber: 7, table: true, pageNumberFormat: 'lowerRoman', expected: ['vii', 'viii'] },
+        { firstPageNumber: 26, table: false, pageNumberFormat: 'upperLetter', expected: ['Z', 'AA'] },
+        { firstPageNumber: 7, table: false, instruction: 'PAGE \\*roman', expected: ['vii', 'viii'] },
+        { firstPageNumber: 7, table: true, pageNumberFormat: 'lowerRoman', expected: ['vii', 'viii'], locked: true },
+    ])('shares PAGE line fitting at $firstPageNumber (table=$table) while retaining per-page text and final counts', ({ firstPageNumber, table, pageNumberFormat, expected, instruction, locked }) => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const T = DataStreamTreeTokenType;
+        const text = 'x \u001F9\u001E z\r\n';
+        const story = table ? `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}\r\n` : text;
+        const offset = table ? 3 : 0;
+        const labels = expected ?? [String(firstPageNumber), String(firstPageNumber + 1)];
+        const contentWidth = (labels[0].length + 4) * 8;
+        const snapshot: IDocumentData = {
+            id: 'page-fields-layout',
+            tableSource: table
+                ? { table: {
+                    tableId: 'table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } } }],
+                } }
+                : undefined,
+            body: { dataStream: 'A\rB\r\n', paragraphs: [
+                { paragraphId: 'p1', startIndex: 1 },
+                { paragraphId: 'p2', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+            ] },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: story,
+                paragraphs: [...story.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `hp-${index}`, startIndex: match.index })),
+                sectionBreaks: [...story.matchAll(/\n/g)].map((match, index) => ({ sectionId: `hs-${index}`, startIndex: match.index })),
+                tables: table ? [{ tableId: 'table', startIndex: 0, endIndex: story.length - 2 }] : [],
+                customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: offset + 2, endIndex: offset + 4, wholeEntity: false, properties: { fieldType: 'PAGE', instruction, locked: locked ? BooleanNumber.TRUE : BooleanNumber.FALSE } }],
+            } } },
+            footers: { footer: { footerId: 'footer', body: {
+                dataStream: '\u001F999\u001E\r\n',
+                paragraphs: [{ paragraphId: 'fp', startIndex: 5 }],
+                customRanges: [{ rangeId: 'count', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, wholeEntity: false, properties: { fieldType: 'NUMPAGES', locked: locked ? BooleanNumber.TRUE : BooleanNumber.FALSE } }],
+            } } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: 15 },
+                pageNumberStart: firstPageNumber,
+                pageNumberFormat,
+                pageSize: { width: contentWidth + 32, height: 400 },
+                marginLeft: 16,
+                marginRight: 16,
+                marginTop: 60,
+                marginBottom: 60,
+                marginHeader: 5,
+                marginFooter: 5,
+                textStyle: { ff: 'Arial', fs: 11 },
+                defaultHeaderId: 'header',
+                defaultFooterId: 'footer',
+            },
+        };
+        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        try {
+            main.calculate();
+            const generation = incremental.startIncrementalLayout();
+            let steps = 0;
+            while (!incremental.stepIncrementalLayout(generation, 8, 1).complete) {
+                expect(++steps).toBeLessThan(100);
+            }
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(main.getSkeletonData()));
+            const data = main.getSkeletonData()!;
+            expect(data.pages).toHaveLength(2);
+            const pages = data.pages.map((page) => data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!);
+            expect(pages[0]).not.toBe(pages[1]);
+            const textPages = table ? pages.map((page) => [...page.skeTables.values()][0].rows[0].cells[0]) : pages;
+            const lines = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines[0]).toHaveLength(2);
+            expect(lines[1]).toHaveLength(2);
+            const glyphs = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
+            const first = glyphs[0].find((glyph) => glyph.content === labels[0])!;
+            expect(first).toBeDefined();
+            expect(first.fieldLayoutContent).toBe(labels[1]);
+            const next = glyphs[1].find((glyph) => glyph.content === labels[1])!;
+            expect(next).toBeDefined();
+            expect(next.width).toBe(first.width);
+            expect(main.findNodeByCharIndex(offset + 3, 'header', 1)?.content).toBe(labels[1]);
+            for (const page of data.pages) {
+                const footer = data.skeFooters.get('footer')!.get(page.footerLayoutKey!)!;
+                const contents = footer.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe('2');
+            }
+        } finally {
+            main.dispose();
+            incremental.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each(['header', 'footer'] as const)('publishes completed %s decorations before body pagination finishes', (story) => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        const content = Array.from({ length: 80 }, (_, index) => `Body paragraph ${index}\r`).join('');
+        const border = { color: { rgb: '#000000' }, width: 2 / 3, padding: 4 / 3, dashStyle: DashStyleType.SOLID };
+        const body = {
+            dataStream: 'Rule\r\n',
+            paragraphs: [{ paragraphId: 'rule', startIndex: 4, paragraphStyle: { borderTop: border, shading: { backgroundColor: { rgb: '#DDDDDD' } } } }],
+        };
+        const model = new DocumentDataModel({
+            id: 'early-story-decoration',
+            body: { dataStream: `${content}\n`, paragraphs: [...content.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `body-${index}`, startIndex: match.index })) },
+            headers: story === 'header' ? { story: { headerId: 'story', body } } : undefined,
+            footers: story === 'footer' ? { story: { footerId: 'story', body } } : undefined,
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: 200 },
+                marginLeft: 20,
+                marginRight: 20,
+                marginTop: 40,
+                marginBottom: 40,
+                marginHeader: 5,
+                marginFooter: 5,
+                textStyle: { ff: 'Arial', fs: 11 },
+                defaultHeaderId: story === 'header' ? 'story' : undefined,
+                defaultFooterId: story === 'footer' ? 'story' : undefined,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        try {
+            const generation = skeleton.startIncrementalLayout();
+            let progress = skeleton.stepIncrementalLayout(generation, 0, 1);
+            let steps = 0;
+            while (!skeleton.getSkeletonData()?.pages.length && !progress.complete) {
+                expect(++steps).toBeLessThan(100);
+                progress = skeleton.stepIncrementalLayout(generation, 0, 1);
+            }
+            expect(progress.complete).toBe(false);
+            const data = skeleton.getSkeletonData()!;
+            const stories = story === 'header' ? data.skeHeaders : data.skeFooters;
+            const page = stories.get('story')!.values().next().value!;
+            const line = page.sections[0].columns[0].lines[0];
+            expect(line.borderTop).toEqual(border);
+            expect(line.backgroundColor).toEqual({ rgb: '#DDDDDD' });
+            const published = serializeDocumentSkeletonPage(page);
+            expect(published.sections[0].columns[0].lines[0].borderTop).toEqual(border);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('skips cold hyphenation dictionaries when document defaults suppress them (%s)', (documentFlavor) => {
+        mockCanvasTextMetrics(12);
+        const univer = new Univer();
+        const content = 'Este documento contiene información sobre la configuración y la administración de los servicios.';
+        const model = new DocumentDataModel({
+            id: 'inherited-hyphenation-suppression',
+            body: {
+                dataStream: `${content}\r\n`,
+                paragraphs: [{ startIndex: content.length, paragraphId: 'inherited-hyphenation-paragraph' }],
+                sectionBreaks: [{ startIndex: content.length + 1, sectionId: 'inherited-hyphenation-section' }],
+            },
+            documentStyle: {
+                documentFlavor,
+                pageSize: { width: 500, height: 600 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+                textStyle: { ff: 'Arial', fs: 12 },
+                autoHyphenation: BooleanNumber.TRUE,
+                defaultParagraphStyle: { suppressHyphenation: BooleanNumber.TRUE },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const hyphen = new Hyphen();
+        (skeleton as unknown as { _hyphen: Hyphen })._hyphen = hyphen;
+        const loader = vi.spyOn(PATTERN_LOADERS, Lang.Es);
+        try {
+            const before = JSON.stringify(model.getSnapshot());
+            const generation = skeleton.startIncrementalLayout({ waitForHyphenationPatterns: true });
+            skeleton.stepIncrementalLayout(generation, 8);
+            expect(loader).not.toHaveBeenCalled();
+            completeIncrementalLayout(skeleton);
+            expect(skeleton.getSkeletonData()?.pages.length).toBeGreaterThan(0);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            loader.mockRestore();
+            skeleton.dispose();
+            hyphen.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) =>
+        [60, 80].map((firstRowHeight) => ({ incremental, firstRowHeight }))))('keeps a caption before the first slice when its entire table moves to another page ($incremental/$firstRowHeight)', ({ incremental, firstRowHeight }) => {
+        const measureSpy = mockCanvasTextMetrics();
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const T = DataStreamTreeTokenType;
+        const prefix = 'Prefix\rHeading\rTabulka 8\r';
+        const table = `${T.TABLE_START}${['First', 'Second'].map((text) =>
+            `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}`
+        ).join('')}${T.TABLE_END}`;
+        const dataStream = `${prefix}${table}\r\n`;
+        const snapshot: Partial<IDocumentData> = {
+            id: 'caption-before-first-table-slice',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                    startIndex: match.index,
+                    paragraphId: `p-${index}`,
+                    paragraphStyle: {
+                        spacingRule: SpacingRule.EXACT,
+                        lineSpacing: index === 0 ? 60 : 10,
+                        snapToGrid: BooleanNumber.FALSE,
+                        ...([1, 2].includes(index) ? { keepNext: BooleanNumber.TRUE } : {}),
+                    },
+                })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
+                tables: [{ tableId: 'table', startIndex: prefix.length, endIndex: prefix.length + table.length }],
+            },
+            tableSource: { table: {
+                tableId: 'table',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 80 } },
+                cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                tableRows: [firstRowHeight, 40].map((height) => ({
+                    tableCells: [{}],
+                    cantSplit: BooleanNumber.TRUE,
+                    trHeight: { val: { v: height }, hRule: TableRowHeightRule.EXACT },
+                })),
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 80 } } }],
+            } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 120, height: 100 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        };
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), localeService);
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(3);
+            const first = skeleton.findNodePositionByCharIndex(dataStream.indexOf('First'))!;
+            const second = skeleton.findNodePositionByCharIndex(dataStream.indexOf('Second'))!;
+            expect(first.page).toBe(1);
+            expect(second.page).toBe(2);
+            for (const text of ['Heading', 'Tabulka 8']) {
+                const index = dataStream.indexOf(text);
+                const position = skeleton.findNodePositionByCharIndex(index)!;
+                expect(position?.page).toBe(firstRowHeight === 60 ? first.page : 0);
+                expect(skeleton.findCharIndexByPosition(position)).toBe(index);
+            }
+            expect([...pages[first.page].skeTables.values()][0].top).toBeCloseTo(firstRowHeight === 60 ? 20 : 0);
+            expect([...pages[second.page].skeTables.values()][0].top).toBeCloseTo(0);
+        } finally {
+            skeleton.dispose();
+            measureSpy.mockRestore();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [false, true].flatMap((paginated) => [
+        ...[undefined, 0, 6].flatMap((spacing) => [0, 1, 3].map((padding) => ({ spacing, padding, overrides: undefined }))),
+        { spacing: 6, padding: 1, overrides: [[3, 0], [0, 5]] },
+        { spacing: 6, padding: 1, overrides: [[3, 5], [0, 0]] },
+    ].map((testCase) => ({ incremental, paginated, ...testCase })))))('includes Word cell margins in minimum row height: %j', ({ incremental, paginated, spacing, padding, overrides }) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const cellStream = `${T.TABLE_CELL_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`;
+        const rowStream = `${T.TABLE_ROW_START}${cellStream.repeat(2)}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${rowStream.repeat(3)}${T.TABLE_END}`;
+        const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        // Word COM bibliography controls: 50px minimum, 2px borders, independent
+        // top/bottom maxima (including when they belong to different cells).
+        const verticalPadding = overrides ? 8 : padding * 2;
+        const rowHeight = 50 + verticalPadding + (spacing == null ? 2 : 4 + spacing * 2);
+        const outerHeight = spacing == null ? 2 : (spacing + 2) * 2;
+        const model = new DocumentDataModel({
+            id: 'word-minimum-row-margins',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{
+                        startIndex,
+                        paragraphId: `p-${startIndex}`,
+                        paragraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 20 },
+                    }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
+                    ? [{ startIndex, sectionId: `s-${startIndex}` }]
+                    : []),
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: {
+                table: {
+                    tableId: 'table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    ...(spacing == null ? {} : { cellSpacing: { v: spacing } }),
+                    cellMargin: { top: { v: padding }, bottom: { v: padding }, start: { v: 0 }, end: { v: 0 } },
+                    tableColumns: [0, 1].map(() => ({ size: { type: TableSizeType.SPECIFIED, width: { v: 100 } } })),
+                    tableRows: [0, 1, 2].map(() => ({
+                        tableCells: [0, 1].map((column) => ({
+                            ...(overrides
+                                ? { margin: {
+                                    top: { v: overrides[column][0] },
+                                    bottom: { v: overrides[column][1] },
+                                    start: { v: 0 },
+                                    end: { v: 0 },
+                                } }
+                                : {}),
+                            borderTop: { width: { v: 2 }, color: { rgb: '#000000' } },
+                            borderBottom: { width: { v: 2 }, color: { rgb: '#000000' } },
+                        })),
+                        trHeight: { val: { v: 50 }, hRule: TableRowHeightRule.AT_LEAST },
+                        cantSplit: BooleanNumber.TRUE,
+                    })),
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: paginated ? rowHeight * 2 + outerHeight + 1 : 1000 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), localeService);
+        const before = JSON.stringify(model.getSnapshot());
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+            expect(tables.map((table) => table.rows.length)).toEqual(paginated ? [2, 1] : [3]);
+            expect(tables.flatMap((table) => table.rows.map((row) => row.height))).toEqual([rowHeight, rowHeight, rowHeight]);
+            expect(tables.flatMap((table) => table.rows.map((row) => row.index))).toEqual([0, 1, 2]);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [99, 100, 101].map((height) => ({ incremental, height }))))('matches the Word cell boundary without overflowing a fragment ($incremental/$height)', ({ incremental, height }) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const rows = ['Before\r', 'Line1\vLine2\vLine3\vLine4\r'];
+        const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'cell-fit-boundary',
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height }, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0, paragraphLineGapDefault: 0 },
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: { lineSpacing: 20, spacingRule: SpacingRule.EXACT, widowControl: BooleanNumber.FALSE } }] : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'fit', startIndex: 0, endIndex: stream.length }],
+            },
+            tableSource: {
+                fit: {
+                    tableId: 'fit',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: rows.map((_, index) => ({ cantSplit: BooleanNumber.FALSE, tableCells: [{}], trHeight: { val: { v: index === 0 ? 21 : 0 }, hRule: index === 0 ? TableRowHeightRule.EXACT : TableRowHeightRule.AUTO } })),
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page, pageIndex) => [...page.skeTables.values()].flatMap((table) => table.rows.filter((row) => row.index === 1).flatMap((row) => row.cells.flatMap((cell) => cell.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.map((line) => ({ page: pageIndex + 1, text: line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('') }))))))));
+            expect(lines.filter((line) => line.text.startsWith('Line')).map((line) => line.page)).toEqual(height === 101 ? [1, 1, 1, 1] : [1, 1, 1, 2]);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 0, padding: 0 },
+        { incremental, contextual: false, spaceBefore: 0, lastSpace: 12, height: 64, textTops: [0, 32], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 12, height: 52, textTops: [0, 20], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 8, lastSpace: 12, height: 60, textTops: [8, 28], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 8 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: null },
+    ].flatMap((testCase) => (testCase.borderWidth === 4 && testCase.padding === 0 ? [600, 60] : [600])
+        .flatMap((pageHeight) => (testCase.contextual && testCase.spaceBefore === 0 && testCase.lastSpace === 0 && testCase.padding === 0
+            ? [undefined, 0, ...(pageHeight === 600 ? [6] : [])]
+            : [undefined])
+            .map((cellSpacing) => ({ ...testCase, pageHeight, cellSpacing }))))))('matches Word cell paragraph spacing (incremental: $incremental, contextual: $contextual, before: $spaceBefore, after: $lastSpace, border: $borderWidth, padding: $padding, page: $pageHeight, cell gap: $cellSpacing)', ({ incremental, contextual, spaceBefore, lastSpace, height, textTops, borderWidth, padding, pageHeight, cellSpacing }) => {
+        // Protobuf JSON omits numeric zero values in imported margin units.
+        const verticalPadding = padding === null ? JSON.parse('{}') : { v: padding };
+        const T = DataStreamTreeTokenType;
+        const cellStream = `${T.TABLE_CELL_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`;
+        const rowStream = `${T.TABLE_ROW_START}${cellStream}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
+        const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'contextual-table-spacing',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{
+                        startIndex,
+                        paragraphId: `p-${startIndex}`,
+                        styleId: 'List',
+                        paragraphStyle: {
+                            spacingRule: SpacingRule.EXACT,
+                            lineSpacing: 20,
+                            contextualSpacing: contextual ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                            spaceAbove: { v: spaceBefore },
+                            spaceBelow: { v: dataStream[startIndex - 1] === 'A' ? 12 : lastSpace },
+                        },
+                    }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
+                    ? [{
+                        startIndex,
+                        sectionId: `s-${startIndex}`,
+                    }]
+                    : []),
+                tables: [{ tableId: 'list-table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: {
+                'list-table': {
+                    tableId: 'list-table',
+                    ...(cellSpacing == null ? {} : { cellSpacing: { v: cellSpacing } }),
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    tableRows: [0, 1].map(() => ({
+                        tableCells: [{
+                            borderTop: { width: { v: borderWidth }, color: { rgb: '#000000' } },
+                            borderBottom: { width: { v: borderWidth }, color: { rgb: '#000000' } },
+                        }],
+                        trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO },
+                    })),
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    cellMargin: { top: verticalPadding, bottom: verticalPadding, start: { v: 0 }, end: { v: 0 } },
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: pageHeight },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const before = JSON.stringify(model.getSnapshot());
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+            const separated = cellSpacing != null;
+            const rowHeight = height + borderWidth * (separated ? 2 : 1) + (padding ?? 0) * 2 + (cellSpacing ?? 0) * 2;
+            const outerHeight = separated ? (cellSpacing + borderWidth) * 2 : borderWidth;
+            expect(tables.map((table) => ({ height: table.height, rows: table.rows.map((row) => ({ index: row.index, height: row.height })) })))
+                .toEqual(pageHeight === 60
+                    ? [0, 1].map((index) => ({ height: rowHeight + outerHeight, rows: [{ index, height: rowHeight }] }))
+                    : [{ height: rowHeight * 2 + outerHeight, rows: [0, 1].map((index) => ({ index, height: rowHeight })) }]);
+            for (const table of tables) {
+                // Word reserves the outer halves outside the first/last row centreline.
+                expect(table.height).toBe(rowHeight * table.rows.length + outerHeight);
+                expect(table.height).toBeLessThanOrEqual(pageHeight);
+                expect(table.rows.map((row) => row.top)).toEqual(table.rows.map((_, index) => outerHeight / 2 + rowHeight * index));
+            }
+            expect(tables.flatMap((table) => table.rows.map((row) => row.index))).toEqual([0, 1]);
+            for (const row of tables.flatMap((table) => table.rows)) {
+                expect(row.height).toBe(rowHeight);
+                const cell = row.cells[0];
+                expect(cell.height).toBe(height);
+                const inset = (padding ?? 0) + (separated ? cellSpacing + borderWidth : borderWidth / 2);
+                expect(cell.marginTop).toBe(inset);
+                expect(cell.marginBottom).toBe(inset);
+                const lines = cell.sections[0].columns[0].lines;
+                expect(lines.map((line) => line.top + line.marginTop)).toEqual(textTops);
+                expect(lines.map((line) => line.spaceBelowApply)).toEqual([contextual ? 0 : 12, lastSpace]);
+            }
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [
+        { pageHeight: 74, spaceAfter: 12, firstEnd: 72, labelHeight: 32, cellSpacing: 6, split: true },
+        { pageHeight: 90, spaceAfter: 12, firstEnd: 72, labelHeight: 32, cellSpacing: 6, split: true },
+        { pageHeight: 90, spaceAfter: 120, firstEnd: 90, labelHeight: 50, cellSpacing: 6, split: true },
+        { pageHeight: 70, spaceAfter: 12, firstEnd: 58, labelHeight: 32, cellSpacing: 6, split: false },
+        { pageHeight: 50, spaceAfter: 12, firstEnd: 34, labelHeight: 32, cellSpacing: 0, split: false },
+        { pageHeight: 52, spaceAfter: 12, firstEnd: 34, labelHeight: 32, cellSpacing: 0, split: false },
+    ].map((testCase) => ({ incremental, ...testCase }))))('fits completed and split cell paragraphs at the page edge ($incremental/$pageHeight/$spaceAfter/$cellSpacing/$split)', ({ incremental, pageHeight, spaceAfter, firstEnd, labelHeight, cellSpacing, split }) => {
+        const metrics = mockCanvasTextMetrics(11, 8);
+        const T = DataStreamTreeTokenType;
+        const row = `${T.TABLE_ROW_START}${['N', split ? 'AAAA BBBB' : 'AAAA'].map((text) => `${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`).join('')}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${row}${T.TABLE_END}`;
+        const dataStream = `Lead${T.PARAGRAPH}${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const model = new DocumentDataModel({
+            id: 'cell-trailing-space-at-page-edge',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{
+                        startIndex,
+                        paragraphId: `p-${startIndex}`,
+                        paragraphStyle: { lineSpacing: 20, spacingRule: SpacingRule.EXACT, snapToGrid: BooleanNumber.FALSE, widowControl: BooleanNumber.FALSE, keepLines: BooleanNumber.FALSE, spaceBelow: { v: startIndex === 4 ? 0 : spaceAfter } },
+                    }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'edge', startIndex: 5, endIndex: 5 + tableStream.length }],
+            },
+            tableSource: { edge: {
+                tableId: 'edge',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 100 } },
+                cellSpacing: { v: cellSpacing },
+                cellMargin: { start: { v: 1 }, end: { v: 1 }, top: { v: 1 }, bottom: { v: 1 } },
+                tableColumns: [40, 60].map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } })),
+                tableRows: [{ cantSplit: BooleanNumber.FALSE, trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [0, 1].map(() => ({ borderTop: noBorder, borderBottom: noBorder, borderLeft: noBorder, borderRight: noBorder })) }],
+            } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 100, height: pageHeight }, marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 0, textStyle: { ff: 'Arial', fs: 11 } },
+        });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        const before = JSON.stringify(model.getSnapshot());
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const fragments = skeleton.getSkeletonData()!.pages.flatMap((page, pageIndex) => [...page.skeTables.values()].map((table) => ({ pageIndex, table })));
+            expect(fragments.map((fragment) => fragment.pageIndex)).toEqual(split ? [0, 1] : [1]);
+            const first = fragments[0].table;
+            expect(first.top + first.height).toBeCloseTo(firstEnd);
+            expect(first.rows[0].cells[0].height).toBeCloseTo(labelHeight);
+            const authorLines = first.rows[0].cells[1].sections[0].columns[0].lines;
+            expect(authorLines).toHaveLength(1);
+            expect(first.rows[0].top).toBe(cellSpacing);
+            if (split) {
+                expect(fragments[1].table.rows[0].cells[1].sections[0].columns[0].lines).toHaveLength(1);
+                expect(fragments[1].table.rows[0].top).toBe(0);
+            }
+            expect(first.rows[0].cells[0].sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.raw))).join('')).toContain('N');
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            view.dispose();
+            univer.dispose();
+            metrics.mockRestore();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [
+        ...[0, 40, 50, 80].map((minimum) => ({ incremental, minimum, repeatHeader: false, lineCount: 4 })),
+        ...[4, 8].map((lineCount) => ({ incremental, minimum: 0, repeatHeader: true, lineCount })),
+    ].flatMap((testCase) => (testCase.repeatHeader ? [undefined, 6] : [undefined]).map((cellSpacing) => ({ ...testCase, cellSpacing })))))('reserves row minimum and continuation headers when splitting ($incremental/$minimum/$repeatHeader/$lineCount/$cellSpacing)', ({ incremental, minimum, repeatHeader, lineCount, cellSpacing }) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const rows = ['Before\r', Array.from({ length: lineCount }, (_, index) => `Line ${index + 1}\r`).join('')];
+        const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'row-start-minimum',
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 60 + (cellSpacing ?? 0) * 6 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                paragraphLineGapDefault: 0,
+            },
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: {
+                        lineSpacing: 20,
+                        spacingRule: SpacingRule.EXACT,
+                        widowControl: BooleanNumber.FALSE,
+                        spaceAbove: { v: 0 },
+                        spaceBelow: { v: 0 },
+                    } }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'minimum', startIndex: 0, endIndex: stream.length }],
+            },
+            tableSource: {
+                minimum: {
+                    tableId: 'minimum',
+                    ...(cellSpacing == null ? {} : { cellSpacing: { v: cellSpacing } }),
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: rows.map((_, index) => ({
+                        cantSplit: BooleanNumber.FALSE,
+                        repeatHeaderRow: repeatHeader && index === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                        tableCells: [{}],
+                        trHeight: { val: { v: index === 0 ? 0 : minimum }, hRule: TableRowHeightRule.AT_LEAST },
+                    })),
+                },
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const fragments = skeleton.getSkeletonData()!.pages.flatMap((page, pageIndex) => [...page.skeTables.values()]
+                .flatMap((table) => table.rows.filter((row) => row.index === 1).map((row) => ({ page: pageIndex, height: row.height }))));
+            if (repeatHeader) {
+                expect(fragments).toEqual(Array.from({ length: lineCount / 2 }, (_, page) => ({ page, height: 40 + (cellSpacing ?? 0) * 2 })));
+                const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+                expect(tables).toHaveLength(lineCount / 2);
+                for (const [index, table] of tables.entries()) {
+                    expect(table.rows.map((row) => row.index)).toEqual([0, 1]);
+                    expect(table.height).toBe(60 + (cellSpacing ?? 0) * (index < tables.length - 1 ? 5 : 6));
+                    expect(table.rows[0].top).toBe(cellSpacing ?? 0);
+                    if (index > 0) {
+                        expect(table.rows[0].isRepeatRow).toBe(true);
+                    }
+                }
+                const cellText = tables.flatMap((table) => table.rows[1].cells.flatMap((cell) => cell.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))))))).join('');
+                expect(cellText).toBe(rows[1]);
+            } else {
+                expect(fragments).toEqual(minimum === 50
+                    ? [{ page: 1, height: 60 }, { page: 2, height: 50 }]
+                    : [{ page: 0, height: 40 }, { page: 1, height: Math.min(60, Math.max(40, minimum)) }]);
+            }
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([undefined, 6])('keeps multi-column table hit-testing and logical caret indices aligned (cell spacing: %s)', (cellSpacing) => {
+        const T = DataStreamTreeTokenType;
+        const texts = [['East', 'Name', '123456789', 'east@example.test'], ['Bank', 'Other', '987654321', 'bank@example.test']];
+        const stream = `${T.TABLE_START}${texts.map((row) => `${T.TABLE_ROW_START}${row.map((text) => `${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`).join('')}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const widths = [113.4, 94.46666666666664, 151.2, 300.2];
+        const univer = new Univer();
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel({
+            id: 'multi-column-table-caret',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: { lineSpacing: 16, spacingRule: SpacingRule.EXACT } }] : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'contacts', startIndex: 0, endIndex: stream.length }],
+            },
+            tableSource: {
+                contacts: {
+                    tableId: 'contacts',
+                    ...(cellSpacing == null ? {} : { cellSpacing: { v: cellSpacing } }),
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: widths.reduce((sum, width) => sum + width, 0) } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 7.2 }, end: { v: 7.2 } },
+                    tableColumns: widths.map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } })),
+                    tableRows: texts.map((row) => ({ tableCells: row.map(() => ({})), trHeight: { val: { v: 16 }, hRule: TableRowHeightRule.EXACT } })),
+                },
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 794, height: 1123 }, marginLeft: 53, marginRight: 53, marginTop: 87, marginBottom: 73 },
+        })), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const table = page.skeTables.get('contacts')!;
+            for (const [rowIndex, row] of table.rows.entries()) {
+                for (const [columnIndex, cell] of row.cells.entries()) {
+                    const section = cell.sections[0];
+                    const column = section.columns[0];
+                    const line = column.lines[0];
+                    const divide = line.divides[0];
+                    const glyph = divide.glyphGroup[1];
+                    const x = page.marginLeft + table.left + cell.left + cell.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + glyph.width / 4;
+                    const y = page.marginTop + table.top + row.top + cell.marginTop + section.top + line.top + line.lineHeight / 2;
+                    const hit = skeleton.findNodeByCoord(new Vector2(x, y), PageLayoutType.VERTICAL, 0, 0);
+                    expect(hit?.node === glyph, `cell ${rowIndex},${columnIndex}`).toBe(true);
+                    const position = skeleton.findPositionByGlyph(hit!.node, hit!.segmentPage)!;
+                    expect(skeleton.findCharIndexByPosition({ ...position, isBack: true })).toBe(dataStream.indexOf(texts[rowIndex][columnIndex]) + 1);
+                }
+            }
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((sliced) => [undefined, 7].map((restart) => ({ sliced, restart }))))(
+        'selects the section first-page stories with continuing or restarted numbering ($sliced/$restart)',
+        ({ sliced, restart }) => {
+            mockCanvasTextMetrics();
+            const first = `Cover${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+            const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.PARAGRAPH}Third${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+            const dataStream = first + second;
+            const story = (text: string) => ({
+                dataStream: `${text}\r\n`,
+                paragraphs: [{ startIndex: text.length, paragraphId: `${text}-paragraph` }],
+                sectionBreaks: [{ startIndex: text.length + 1, sectionId: `${text}-section` }],
+            });
+            const univer = new Univer();
+            const localeService = univer.__getInjector().get(LocaleService);
+            const documentModel = new DocumentDataModel({
+                id: 'continued-section-first-page-stories',
+                body: {
+                    dataStream,
+                    paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({
+                        startIndex: match.index!,
+                        paragraphId: `paragraph-${index}`,
+                    })),
+                    sectionBreaks: [
+                        { sectionId: 'cover', startIndex: first.length - 1 },
+                        {
+                            sectionId: 'content',
+                            startIndex: dataStream.length - 1,
+                            sectionType: SectionType.NEXT_PAGE,
+                            ...(restart == null ? {} : { pageNumberStart: restart }),
+                            useFirstPageHeaderFooter: BooleanNumber.TRUE,
+                            firstPageHeaderId: 'first-header',
+                            firstPageFooterId: 'first-footer',
+                        },
+                    ],
+                },
+                headers: {
+                    'default-header': { headerId: 'default-header', body: story('Default header') },
+                    'first-header': { headerId: 'first-header', body: story('Section first header') },
+                },
+                footers: {
+                    'default-footer': { footerId: 'default-footer', body: story('Default footer') },
+                    'first-footer': { footerId: 'first-footer', body: story('Section first footer') },
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    pageNumberStart: 9,
+                    defaultHeaderId: 'default-header',
+                    defaultFooterId: 'default-footer',
+                    pageSize: { width: 320, height: 400 },
+                    marginTop: 40,
+                    marginBottom: 40,
+                    marginLeft: 20,
+                    marginRight: 20,
+                },
+            });
+            const snapshot = Tools.deepClone(documentModel.getSnapshot());
+            const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+            try {
+                if (sliced) {
+                    completeIncrementalLayout(skeleton);
+                } else {
+                    skeleton.calculate();
+                }
+                const start = restart ?? 10;
+                const assertStories = () => {
+                    const pages = skeleton.getSkeletonData()!.pages;
+                    expect(pages.map((page) => page.pageNumber)).toEqual([9, start, start + 1]);
+                    expect(pages.slice(1).map((page) => [page.headerId, page.footerId, page.pageNumberStart])).toEqual([
+                        ['first-header', 'first-footer', start],
+                        ['default-header', 'default-footer', start],
+                    ]);
+                };
+                assertStories();
+                for (const anchor of [first.length + 6, dataStream.length - 2]) {
+                    completeIncrementalLayout(skeleton, anchor);
+                    assertStories();
+                }
+                expect(documentModel.getSnapshot()).toEqual(snapshot);
+            } finally {
+                skeleton.dispose();
+                documentModel.dispose();
+                univer.dispose();
+            }
+        }
+    );
+
+    it.each([false, true])('applies continuous-section page numbering to an empty explicit-break page (sliced=%s)', (sliced) => {
+        const first = `Cover${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Question presented${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-section-after-page-break',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: 5, paragraphId: 'cover' },
+                    { startIndex: first.length - 2, paragraphId: 'page-boundary' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'question' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'cover-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'front-matter',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                        pageNumberStart: 1,
+                        pageNumberFormat: 'lowerRoman',
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const snapshot = Tools.deepClone(documentModel.getSnapshot());
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        if (sliced) {
+            completeIncrementalLayout(skeleton);
+        } else {
+            skeleton.calculate();
+        }
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages).toHaveLength(2);
+        expect(pages[0]).toMatchObject({ sectionId: 'cover-section', pageNumber: 1 });
+        expect(pages[1]).toMatchObject({ sectionId: 'front-matter', pageNumber: 1, pageNumberFormat: 'lowerRoman' });
+        expect(documentModel.getSnapshot()).toEqual(snapshot);
+        skeleton.dispose();
+        documentModel.dispose();
+        univer.dispose();
+    });
+
+    it.each([
+        { sliced: false, sectionType: SectionType.NEXT_PAGE },
+        { sliced: true, sectionType: SectionType.NEXT_PAGE },
+        { sliced: false, sectionType: SectionType.ODD_PAGE },
+        { sliced: true, sectionType: SectionType.ODD_PAGE },
+    ])('leaves section parity filler pages completely blank ($sectionType, sliced=$sliced)', ({ sliced, sectionType }) => {
+        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'section-page-number-parity',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType,
+                        pageNumberStart: sectionType === SectionType.NEXT_PAGE ? 1 : undefined,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                evenAndOddHeaders: BooleanNumber.TRUE,
+                defaultHeaderId: 'header',
+                evenPageHeaderId: 'header',
+                defaultFooterId: 'footer',
+                evenPageFooterId: 'footer',
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+            headers: { header: { headerId: 'header', body: { dataStream: 'Header\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'header-p' }] } } },
+            footers: { footer: { footerId: 'footer', body: { dataStream: 'Footer\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'footer-p' }] } } },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        if (sliced) {
+            completeIncrementalLayout(skeleton);
+        } else {
+            skeleton.calculate();
+        }
+
+        const pages = skeleton.getSkeletonData()!.pages;
+        expect(pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2, sectionType === SectionType.NEXT_PAGE ? 1 : 3]);
+        expect(pages[0]).toMatchObject({ headerId: 'header', footerId: 'footer' });
+        expect(pages[2]).toMatchObject({ headerId: 'header', footerId: 'footer' });
+        expect(pages[1].headerId).toBeFalsy();
+        expect(pages[1].footerId).toBeFalsy();
+        expect(pages[1].sections.flatMap((section) => section.columns.flatMap((column) => column.lines))).toHaveLength(0);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it.each([{ firstPageNumber: 9, table: false }, { firstPageNumber: 99, table: false }, { firstPageNumber: 99, table: true }])('lays out repeated page fields at $firstPageNumber (table=$table) with per-page geometry and a final page count', ({ firstPageNumber, table }) => {
+        mockCanvasTextMetrics(11, 8);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setLocale(LocaleType.EN_US);
+        const T = DataStreamTreeTokenType;
+        const text = 'x \u001F9\u001E z\r\n';
+        const story = table ? `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}\r\n` : text;
+        const offset = table ? 3 : 0;
+        const contentWidth = (String(firstPageNumber).length + 4) * 8;
+        const snapshot: IDocumentData = {
+            id: 'page-fields-layout',
+            tableSource: table
+                ? { table: {
+                    tableId: 'table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: [{ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO } }],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: contentWidth } } }],
+                } }
+                : undefined,
+            body: { dataStream: 'A\rB\r\n', paragraphs: [
+                { paragraphId: 'p1', startIndex: 1 },
+                { paragraphId: 'p2', startIndex: 3, paragraphStyle: { pageBreakBefore: BooleanNumber.TRUE } },
+            ] },
+            headers: { header: { headerId: 'header', body: {
+                dataStream: story,
+                paragraphs: [...story.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `hp-${index}`, startIndex: match.index })),
+                sectionBreaks: [...story.matchAll(/\n/g)].map((match, index) => ({ sectionId: `hs-${index}`, startIndex: match.index })),
+                tables: table ? [{ tableId: 'table', startIndex: 0, endIndex: story.length - 2 }] : [],
+                customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: offset + 2, endIndex: offset + 4, wholeEntity: false, properties: { fieldType: 'PAGE' } }],
+            } } },
+            footers: { footer: { footerId: 'footer', body: {
+                dataStream: '\u001F999\u001E\r\n',
+                paragraphs: [{ paragraphId: 'fp', startIndex: 5 }],
+                customRanges: [{ rangeId: 'count', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, wholeEntity: false, properties: { fieldType: 'NUMPAGES' } }],
+            } } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageNumberStart: firstPageNumber,
+                pageSize: { width: contentWidth + 32, height: 400 },
+                marginLeft: 16,
+                marginRight: 16,
+                marginTop: 60,
+                marginBottom: 60,
+                marginHeader: 5,
+                marginFooter: 5,
+                textStyle: { ff: 'Arial', fs: 11 },
+                defaultHeaderId: 'header',
+                defaultFooterId: 'footer',
+            },
+        };
+        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        try {
+            main.calculate();
+            const generation = incremental.startIncrementalLayout();
+            let steps = 0;
+            while (!incremental.stepIncrementalLayout(generation, 8, 1).complete) {
+                expect(++steps).toBeLessThan(100);
+            }
+            expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(main.getSkeletonData()));
+            const data = main.getSkeletonData()!;
+            expect(data.pages).toHaveLength(2);
+            const pages = data.pages.map((page) => data.skeHeaders.get('header')!.get(page.headerLayoutKey!)!);
+            expect(pages[0]).not.toBe(pages[1]);
+            const textPages = table ? pages.map((page) => [...page.skeTables.values()][0].rows[0].cells[0]) : pages;
+            const lines = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines[0]).toHaveLength(1);
+            expect(lines[1]).toHaveLength(2);
+            const glyphs = textPages.map((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
+            expect(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))).toBeDefined();
+            const next = glyphs[1].find((glyph) => glyph.content === String(firstPageNumber + 1))!;
+            expect(next).toBeDefined();
+            expect(next.width).toBeGreaterThan(glyphs[0].find((glyph) => glyph.content === String(firstPageNumber))!.width);
+            expect(main.findNodeByCharIndex(offset + 3, 'header', 1)?.content).toBe(String(firstPageNumber + 1));
+            for (const page of data.pages) {
+                const footer = data.skeFooters.get('footer')!.get(page.footerLayoutKey!)!;
+                const contents = footer.sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('');
+                expect(contents.replace(/[\u001E\u001F\r]/g, '')).toBe('2');
+            }
+        } finally {
+            main.dispose();
+            incremental.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 0, padding: 0 },
+        { incremental, contextual: false, spaceBefore: 0, lastSpace: 12, height: 64, textTops: [0, 32], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 12, height: 52, textTops: [0, 20], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 8, lastSpace: 12, height: 60, textTops: [8, 28], borderWidth: 0, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 0 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: 8 },
+        { incremental, contextual: true, spaceBefore: 0, lastSpace: 0, height: 40, textTops: [0, 20], borderWidth: 4, padding: null },
+    ].flatMap((testCase) => (testCase.borderWidth === 4 && testCase.padding === 0 ? [600, 60] : [600])
+        .map((pageHeight) => ({ ...testCase, pageHeight })))))('matches Word cell paragraph spacing (incremental: $incremental, contextual: $contextual, before: $spaceBefore, after: $lastSpace, border: $borderWidth, padding: $padding, page: $pageHeight)', ({ incremental, contextual, spaceBefore, lastSpace, height, textTops, borderWidth, padding, pageHeight }) => {
+        // Protobuf JSON omits numeric zero values in imported margin units.
+        const verticalPadding = padding === null ? JSON.parse('{}') : { v: padding };
+        const T = DataStreamTreeTokenType;
+        const cellStream = `${T.TABLE_CELL_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`;
+        const rowStream = `${T.TABLE_ROW_START}${cellStream}${T.TABLE_ROW_END}`;
+        const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
+        const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'contextual-table-spacing',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{
+                        startIndex,
+                        paragraphId: `p-${startIndex}`,
+                        styleId: 'List',
+                        paragraphStyle: {
+                            spacingRule: SpacingRule.EXACT,
+                            lineSpacing: 20,
+                            contextualSpacing: contextual ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                            spaceAbove: { v: spaceBefore },
+                            spaceBelow: { v: dataStream[startIndex - 1] === 'A' ? 12 : lastSpace },
+                        },
+                    }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK
+                    ? [{
+                        startIndex,
+                        sectionId: `s-${startIndex}`,
+                    }]
+                    : []),
+                tables: [{ tableId: 'list-table', startIndex: 0, endIndex: tableStream.length }],
+            },
+            tableSource: {
+                'list-table': {
+                    tableId: 'list-table',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    tableRows: [0, 1].map(() => ({
+                        tableCells: [{
+                            borderTop: { width: { v: borderWidth }, color: { rgb: '#000000' } },
+                            borderBottom: { width: { v: borderWidth }, color: { rgb: '#000000' } },
+                        }],
+                        trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO },
+                    })),
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    cellMargin: { top: verticalPadding, bottom: verticalPadding, start: { v: 0 }, end: { v: 0 } },
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: pageHeight },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+            const rowHeight = height + borderWidth + (padding ?? 0) * 2;
+            expect(tables.map((table) => ({ height: table.height, rows: table.rows.map((row) => ({ index: row.index, height: row.height })) })))
+                .toEqual(pageHeight === 60
+                    ? [0, 1].map((index) => ({ height: rowHeight + borderWidth, rows: [{ index, height: rowHeight }] }))
+                    : [{ height: rowHeight * 2 + borderWidth, rows: [0, 1].map((index) => ({ index, height: rowHeight })) }]);
+            for (const table of tables) {
+                // Word reserves the outer halves outside the first/last row centreline.
+                expect(table.height).toBe(rowHeight * table.rows.length + borderWidth);
+                expect(table.height).toBeLessThanOrEqual(pageHeight);
+                expect(table.rows.map((row) => row.top)).toEqual(table.rows.map((_, index) => borderWidth / 2 + rowHeight * index));
+            }
+            expect(tables.flatMap((table) => table.rows.map((row) => row.index))).toEqual([0, 1]);
+            for (const row of tables.flatMap((table) => table.rows)) {
+                expect(row.height).toBe(rowHeight);
+                const cell = row.cells[0];
+                expect(cell.height).toBe(height);
+                expect(cell.marginTop).toBe((padding ?? 0) + borderWidth / 2);
+                expect(cell.marginBottom).toBe((padding ?? 0) + borderWidth / 2);
+                const lines = cell.sections[0].columns[0].lines;
+                expect(lines.map((line) => line.top + line.marginTop)).toEqual(textTops);
+                expect(lines.map((line) => line.spaceBelowApply)).toEqual([contextual ? 0 : 12, lastSpace]);
+            }
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([false, true].flatMap((incremental) => [
+        ...[0, 40, 50, 80].map((minimum) => ({ incremental, minimum, repeatHeader: false, lineCount: 4 })),
+        ...[4, 8].map((lineCount) => ({ incremental, minimum: 0, repeatHeader: true, lineCount })),
+    ]))('reserves row minimum and continuation headers when splitting ($incremental/$minimum/$repeatHeader/$lineCount)', ({ incremental, minimum, repeatHeader, lineCount }) => {
+        mockCanvasTextMetrics();
+        const T = DataStreamTreeTokenType;
+        const rows = ['Before\r', Array.from({ length: lineCount }, (_, index) => `Line ${index + 1}\r`).join('')];
+        const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'row-start-minimum',
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 60 },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                paragraphLineGapDefault: 0,
+            },
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: {
+                        lineSpacing: 20,
+                        spacingRule: SpacingRule.EXACT,
+                        widowControl: BooleanNumber.FALSE,
+                        spaceAbove: { v: 0 },
+                        spaceBelow: { v: 0 },
+                    } }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'minimum', startIndex: 0, endIndex: stream.length }],
+            },
+            tableSource: {
+                minimum: {
+                    tableId: 'minimum',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+                    tableRows: rows.map((_, index) => ({
+                        cantSplit: BooleanNumber.FALSE,
+                        repeatHeaderRow: repeatHeader && index === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                        tableCells: [{}],
+                        trHeight: { val: { v: index === 0 ? 0 : minimum }, hRule: TableRowHeightRule.AT_LEAST },
+                    })),
+                },
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        try {
+            if (incremental) {
+                completeIncrementalLayout(skeleton);
+            } else {
+                skeleton.calculate();
+            }
+            const fragments = skeleton.getSkeletonData()!.pages.flatMap((page, pageIndex) => [...page.skeTables.values()]
+                .flatMap((table) => table.rows.filter((row) => row.index === 1).map((row) => ({ page: pageIndex, height: row.height }))));
+            if (repeatHeader) {
+                expect(fragments).toEqual(Array.from({ length: lineCount / 2 }, (_, page) => ({ page, height: 40 })));
+                const tables = skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeTables.values()]);
+                expect(tables).toHaveLength(lineCount / 2);
+                for (const [index, table] of tables.entries()) {
+                    expect(table.rows.map((row) => row.index)).toEqual([0, 1]);
+                    expect(table.height).toBe(60);
+                    if (index > 0) {
+                        expect(table.rows[0].isRepeatRow).toBe(true);
+                    }
+                }
+                const cellText = tables.flatMap((table) => table.rows[1].cells.flatMap((cell) => cell.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))))))).join('');
+                expect(cellText).toBe(rows[1]);
+            } else {
+                expect(fragments).toEqual(minimum === 50
+                    ? [{ page: 1, height: 60 }, { page: 2, height: 50 }]
+                    : [{ page: 0, height: 40 }, { page: 1, height: Math.min(60, Math.max(40, minimum)) }]);
+            }
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('keeps multi-column table hit-testing and logical caret indices aligned', () => {
+        const T = DataStreamTreeTokenType;
+        const texts = [['East', 'Name', '123456789', 'east@example.test'], ['Bank', 'Other', '987654321', 'bank@example.test']];
+        const stream = `${T.TABLE_START}${texts.map((row) => `${T.TABLE_ROW_START}${row.map((text) => `${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`).join('')}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const widths = [113.4, 94.46666666666664, 151.2, 300.2];
+        const univer = new Univer();
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel({
+            id: 'multi-column-table-caret',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: { lineSpacing: 16, spacingRule: SpacingRule.EXACT } }] : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ tableId: 'contacts', startIndex: 0, endIndex: stream.length }],
+            },
+            tableSource: {
+                contacts: {
+                    tableId: 'contacts',
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: widths.reduce((sum, width) => sum + width, 0) } },
+                    cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 7.2 }, end: { v: 7.2 } },
+                    tableColumns: widths.map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } })),
+                    tableRows: texts.map((row) => ({ tableCells: row.map(() => ({})), trHeight: { val: { v: 16 }, hRule: TableRowHeightRule.EXACT } })),
+                },
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 794, height: 1123 }, marginLeft: 53, marginRight: 53, marginTop: 87, marginBottom: 73 },
+        })), univer.__getInjector().get(LocaleService));
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const table = page.skeTables.get('contacts')!;
+            for (const [rowIndex, row] of table.rows.entries()) {
+                for (const [columnIndex, cell] of row.cells.entries()) {
+                    const section = cell.sections[0];
+                    const column = section.columns[0];
+                    const line = column.lines[0];
+                    const divide = line.divides[0];
+                    const glyph = divide.glyphGroup[1];
+                    const x = page.marginLeft + table.left + cell.left + cell.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + glyph.width / 4;
+                    const y = page.marginTop + table.top + row.top + cell.marginTop + section.top + line.top + line.lineHeight / 2;
+                    const hit = skeleton.findNodeByCoord(new Vector2(x, y), PageLayoutType.VERTICAL, 0, 0);
+                    expect(hit?.node === glyph, `cell ${rowIndex},${columnIndex}`).toBe(true);
+                    const position = skeleton.findPositionByGlyph(hit!.node, hit!.segmentPage)!;
+                    expect(skeleton.findCharIndexByPosition({ ...position, isBack: true })).toBe(dataStream.indexOf(texts[rowIndex][columnIndex]) + 1);
+                }
+            }
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('DOCX golden e2e preserves physical page parity when an even-and-odd section restarts numbering', () => {
+        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'section-page-number-parity',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.NEXT_PAGE,
+                        pageNumberStart: 1,
+                        evenAndOddHeaders: 1,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2, 1]);
 
         skeleton.dispose();
         univer.dispose();

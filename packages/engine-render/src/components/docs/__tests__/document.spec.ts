@@ -28,6 +28,7 @@ import {
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
+    SpacingRule,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
@@ -49,7 +50,7 @@ import {
 } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
-import { UniverRenderingContext } from '../../../context';
+import { UniverPrintingContext, UniverRenderingContext } from '../../../context';
 import { DrawingGroupObject } from '../../../drawing-group';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
@@ -62,6 +63,7 @@ import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
+import wordParagraphSeparators from '../layout/block/paragraph/__tests__/fixtures/word-paragraph-separator-spacing.json';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
 import { Liquid } from '../liquid';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
@@ -449,6 +451,81 @@ describe('documents render', () => {
         }
     });
 
+    it.each([1, 2])('renders text on a narrow translated print page at scale %s', (scale) => {
+        const bed = createParagraphLayoutTestBed('Visible text', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 240 }, marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 0 },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('narrow-print-page', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        try {
+            skeleton.calculate();
+            documents.transformByState({ left: 570, top: 20, scaleX: scale, scaleY: scale });
+            scene.addObject(documents, 1);
+            const ctx = canvas.getContext();
+            const text = vi.spyOn(ctx, 'fillText');
+            documents.render(ctx, { viewBound: { left: 570, top: 20, right: 570 + 300 * scale, bottom: 20 + 240 * scale }, diffBounds: [] });
+            expect(text.mock.calls.map(([value]) => String(value)).join('')).toContain('Visible text');
+            text.mockClear();
+            documents.render(ctx, { viewBound: { left: 0, top: 0, right: 100, bottom: 100 }, diffBounds: [] });
+            expect(text).not.toHaveBeenCalled();
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(['footnote', 'endnote'] as const)('%s note paragraph paints follow the note position', (type) => {
+        const borderColor = '#3ceb9d';
+        const backgroundColor = '#fff19a';
+        const bed = createParagraphLayoutTestBed('Quoted"\uFFFC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                customRanges: [{ rangeId: 'note', rangeType: type === 'footnote' ? CustomRangeType.FOOTNOTE : CustomRangeType.ENDNOTE, startIndex: 7, endIndex: 7, wholeEntity: true, properties: { noteId: 'note' } }],
+            },
+            notes: {
+                note: {
+                    noteId: 'note',
+                    type,
+                    body: {
+                        dataStream: 'Note text\r\n',
+                        paragraphs: [{ startIndex: 9, paragraphId: 'note-text', paragraphStyle: {
+                            borderLeft: { color: { rgb: borderColor }, width: 1, dashStyle: DashStyleType.SOLID },
+                            shading: { backgroundColor: { rgb: backgroundColor } },
+                        } }],
+                        sectionBreaks: [{ startIndex: 10, sectionId: 'note-section' }],
+                    },
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('note-paint-position', skeleton);
+        try {
+            skeleton.calculate();
+            const note = skeleton.getSkeletonData()!.pages.flatMap((page) => page.notes ?? []).find((note) => note.noteId === 'note')!;
+            expect(note.top).toBeGreaterThan(0);
+            const context = canvas.getContext();
+            const paints = documents as unknown as {
+                _drawParagraphBorders: (...args: unknown[]) => void;
+                _drawLineBackground: (...args: unknown[]) => void;
+            };
+            const borders = vi.spyOn(paints, '_drawParagraphBorders');
+            const background = vi.spyOn(paints, '_drawLineBackground');
+            documents.draw(context);
+            for (const paint of [borders, background]) {
+                const call = paint.mock.calls.find((args) => args[1] === note.page);
+                expect(call).toBeDefined();
+                expect(call![5]).toBe(note.top);
+            }
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it.each(['separator', 'continuationSeparator', 'continuationNotice'] as const)('renders each note kind with its own %s fields', (kind) => {
         const fieldBody = (fieldType: string) => ({
             dataStream: '\uFFFC\r\n',
@@ -704,6 +781,57 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('keeps a Word paragraph top border with its natural font box under minimum spacing', () => {
+        const positions = [8, 10, 13, 20].map((minimum) => {
+            const bed = createParagraphLayoutTestBed('', {
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    textStyle: { ff: 'Times New Roman', fs: 8 },
+                },
+                body: {
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            spacingRule: SpacingRule.AT_LEAST,
+                            lineSpacing: minimum * 4 / 3,
+                            snapToGrid: BooleanNumber.FALSE,
+                            borderTop: { color: { rgb: '#000000' }, width: 1, padding: 4 / 3 },
+                        },
+                    }],
+                },
+            });
+            const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+            const documents = new Documents('minimum-paragraph-border', skeleton);
+            const ctx = canvas.getContext();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const move = vi.spyOn(ctx, 'moveTo');
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            try {
+                skeleton.calculate();
+                const page = skeleton.getSkeletonData()!.pages[0];
+                const line = page.sections[0].columns[0].lines[0];
+                // Footer content is anchored from its bottom, independently of the minimum line height.
+                Reflect.set(documents, '_drawLiquid', {
+                    x: 0,
+                    y: 100 - line.lineHeight + line.marginTop + line.paddingTop - page.marginTop,
+                });
+                Reflect.get(documents, '_drawParagraphBorders').call(documents, ctx, page, line, 72);
+                expect(move).toHaveBeenCalledTimes(1);
+                expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+                return move.mock.calls[0][1];
+            } finally {
+                move.mockRestore();
+                documents.dispose();
+                skeleton.dispose();
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            }
+        });
+        for (const position of positions) {
+            expect(position).toBe(positions[0]);
+        }
+    });
+
     it.each([
         { a: 1, d: 1, e: 0, f: 0 },
         { a: 1.25, d: 1.25, e: 0.35, f: 0.7 },
@@ -729,7 +857,7 @@ describe('documents render', () => {
             for (const width of [2 / 3, 1, 2]) {
                 const border = { color: { rgb: '#000000' }, width: { v: width } };
                 for (const side of [BORDER_TYPE.TOP, BORDER_TYPE.RIGHT, BORDER_TYPE.BOTTOM, BORDER_TYPE.LEFT]) {
-                    (documents as any)._drawTableCellBorder(ctx, border, side, position);
+                    (documents as any)._drawBorder(ctx, border, side, position);
                     const horizontal = side === BORDER_TYPE.TOP || side === BORDER_TYPE.BOTTOM;
                     const scale = horizontal ? d : a;
                     const paintedWidth = widths[widths.length - 1] * scale;
@@ -772,7 +900,7 @@ describe('documents render', () => {
         const move = vi.spyOn(ctx, 'moveToByPrecision');
         const width = vi.spyOn(ctx, 'setLineWidthByPrecision');
         try {
-            (documents as any)._drawTableCellBorder(
+            (documents as any)._drawBorder(
                 ctx,
                 { width: { v: 2 / 3 } },
                 BORDER_TYPE.TOP,
@@ -1144,11 +1272,136 @@ describe('documents render', () => {
     });
 
     it.each([
+        { a: 1, d: 1, e: 0, f: 0 },
+        { a: 1.25, d: 1.25, e: 0.35, f: 0.7 },
+        { a: 2, d: 2, e: 1.1, f: 2.3 },
+    ])('paints thin Word paragraph borders with solid device-pixel edges at $a/$d scale', ({ a, d, e, f }) => {
+        const bed = createParagraphLayoutTestBed('Paragraph', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('pixel-paragraph-border', skeleton);
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        line.borderTop = { color: { rgb: '#000000' }, width: 2 / 3 };
+        line.borderBottom = undefined;
+        const border = { ...line.borderTop };
+        (documents as any)._drawLiquid = { x: 0.2, y: 0.3 };
+        const ctx = canvas.getContext();
+        ctx.setTransform(a, 0, 0, d, e, f);
+        const move = vi.spyOn(ctx, 'moveTo');
+        const end = vi.spyOn(ctx, 'lineTo');
+        let paintedWidth = 0;
+        vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+            paintedWidth = ctx.lineWidth * d;
+        });
+        try {
+            (documents as any)._drawParagraphBorders(ctx, page, line, 72);
+            expect(paintedWidth).toBeGreaterThanOrEqual(1);
+            expect(Math.abs(paintedWidth - border.width! * d)).toBeLessThanOrEqual(0.5);
+            const center = move.mock.calls[0][1] * d + f;
+            expect(center - paintedWidth / 2).toBeCloseTo(Math.round(center - paintedWidth / 2), 10);
+            expect(center + paintedWidth / 2).toBeCloseTo(Math.round(center + paintedWidth / 2), 10);
+            expect(end.mock.calls[0][1]).toBe(move.mock.calls[0][1]);
+            expect(line.borderTop).toEqual(border);
+            expect(ctx.getTransform()).toMatchObject({ a, b: 0, c: 0, d, e, f });
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL].flatMap((documentFlavor) =>
+        [false, true].flatMap((between) => [false, true].map((materializedAfter) => ({ documentFlavor, between, materializedAfter })))
+    ))('positions measured Word separator after paragraph spacing ($documentFlavor/$between/$materializedAfter)', ({ documentFlavor, between, materializedAfter }) => {
+        const bed = createParagraphLayoutTestBed('Paragraph', { documentStyle: { documentFlavor } });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('paragraph-separator-spacing', skeleton);
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        const border = { color: { rgb: '#000000' }, width: 1, padding: 4, dashStyle: DashStyleType.SOLID };
+        line.borderTop = line.borderLeft = line.borderRight = undefined;
+        line.borderBetween = between ? border : undefined;
+        line.borderBottom = between ? undefined : border;
+        line.marginTop = line.paddingTop = 0;
+        line.borderBottomSpace = 5;
+        Reflect.set(documents, '_drawLiquid', { x: 0, y: -page.marginTop });
+        const ctx = canvas.getContext();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        const end = vi.spyOn(ctx, 'lineTo');
+        try {
+            const positions = [0, 8].map((after) => {
+                line.spaceBelowApply = after;
+                line.marginBottom = materializedAfter ? after : 0;
+                line.lineHeight = 20 + line.marginBottom;
+                Reflect.get(documents, '_drawParagraphBorders').call(documents, ctx, page, line, 72);
+                return end.mock.calls[end.mock.calls.length - 1][1];
+            });
+            const expected = documentFlavor === DocumentFlavor.TRADITIONAL && between
+                ? wordParagraphSeparators.actualWordSeparatorAfterSpacingShiftPixels
+                : 0;
+            expect(Math.abs(positions[1] - positions[0] - expected)).toBeLessThan(wordParagraphSeparators.coordinateTolerancePixels);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('paints the thick stroke, gap and thin stroke of a Word compound paragraph border', () => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as unknown as DocumentSkeleton;
+        const documents = new Documents('compound-paragraph-border', skeleton);
+        const host = documents as unknown as {
+            _drawBorder: () => void;
+            _getDocumentFlavor: () => DocumentFlavor;
+        };
+        vi.spyOn(host, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
+        const draw = vi.spyOn(host, '_drawBorder').mockImplementation(() => undefined);
+        const page = createPage(DocumentSkeletonPageType.BODY, '');
+        const line = page.sections[0].columns[0].lines[1];
+        line.borderTop = line.borderLeft = line.borderRight = undefined;
+        line.borderBottom = {
+            color: { rgb: '#112233' },
+            width: 4,
+            padding: 4 / 3,
+            dashStyle: DashStyleType.SOLID,
+            style: 'thinThickSmallGap',
+        };
+        line.lineHeight = 28;
+        line.marginTop = line.paddingTop = line.marginBottom = 0;
+        line.borderBottomSpace = 6 + 4 / 3;
+        Reflect.set(documents, '_drawLiquid', { x: 0, y: -page.marginTop });
+        try {
+            Reflect.get(documents, '_drawParagraphBorders').call(documents, {}, page, line, 72);
+            expect(draw).toHaveBeenCalledTimes(2);
+            expect(draw).toHaveBeenNthCalledWith(
+                1,
+                {},
+                expect.objectContaining({ width: { v: 4 } }),
+                BORDER_TYPE.BOTTOM,
+                expect.objectContaining({ endY: 24 })
+            );
+            expect(draw).toHaveBeenNthCalledWith(
+                2,
+                {},
+                expect.objectContaining({ width: { v: 1 } }),
+                BORDER_TYPE.BOTTOM,
+                expect.objectContaining({ endY: 27.5 })
+            );
+        } finally {
+            documents.dispose();
+        }
+    });
+
+    it.each([
         { traditional: false, cleared: false },
         { traditional: false, cleared: true },
         { traditional: true, cleared: false },
         { traditional: true, cleared: true },
-    ])('draws paragraph borders with mode-specific clearance: %s', ({ traditional, cleared }) => {
+    ])('draws rotated paragraph borders with mode-specific clearance: %s', ({ traditional, cleared }) => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-paragraph-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
@@ -1195,6 +1448,7 @@ describe('documents render', () => {
 
         const strokeStyles: string[] = [];
         const ctx = {
+            getTransform: () => ({ a: 1, b: 1, c: 0, d: 1, e: 0, f: 0 }),
             save: vi.fn(),
             restore: vi.fn(),
             setLineWidthByPrecision: vi.fn(),
@@ -1237,7 +1491,7 @@ describe('documents render', () => {
         { sideWidth: undefined, left: 7.5, right: 84.5 },
         { sideWidth: 0, left: 8, right: 84 },
         { sideWidth: 8, left: 4, right: 88 },
-    ])('keeps Word paragraph clearance independent of the side stroke: %s', ({ sideWidth, left, right }) => {
+    ])('keeps rotated Word paragraph clearance independent of the side stroke: %s', ({ sideWidth, left, right }) => {
         const documents = new Documents('docs-paragraph-clearance', { getSkeletonData: () => ({ pages: [] }) } as any);
         vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
         const page = createPage(DocumentSkeletonPageType.BODY, '');
@@ -1249,6 +1503,7 @@ describe('documents render', () => {
         }
         (documents as any)._drawLiquid = { x: 0, y: 0 };
         const ctx = {
+            getTransform: () => ({ a: 1, b: 1, c: 0, d: 1, e: 0, f: 0 }),
             save: vi.fn(),
             restore: vi.fn(),
             setLineWidthByPrecision: vi.fn(),
@@ -1483,6 +1738,67 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it.each([0, 6])('paints separate cell borders and leaves the authored spacing unshaded (%s px)', (cellSpacing) => {
+        const T = DataStreamTreeTokenType;
+        const row = `${T.TABLE_ROW_START}${['A', 'B'].map((text) => `${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}`).join('')}${T.TABLE_ROW_END}`;
+        const stream = `${T.TABLE_START}${row}${row}${T.TABLE_END}`;
+        const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const univer = new Univer();
+        const border = { color: { rgb: '#112233' }, width: { v: 2 } };
+        const model = new DocumentDataModel({
+            id: 'separated-cell-ink',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream).flatMap((token, startIndex) => token === T.PARAGRAPH
+                    ? [{ startIndex, paragraphId: `p-${startIndex}`, paragraphStyle: { spacingRule: SpacingRule.EXACT, lineSpacing: 16 } }]
+                    : []),
+                sectionBreaks: Array.from(dataStream).flatMap((token, startIndex) => token === T.SECTION_BREAK ? [{ startIndex, sectionId: `s-${startIndex}` }] : []),
+                tables: [{ startIndex: 0, endIndex: stream.length, tableId: 'spaced' }],
+            },
+            tableSource: { spaced: {
+                tableId: 'spaced',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                cellSpacing: { v: cellSpacing },
+                cellMargin: { start: { v: 0 }, end: { v: 0 }, top: { v: 0 }, bottom: { v: 0 } },
+                tableColumns: [100, 100].map((width) => ({ size: { type: TableSizeType.SPECIFIED, width: { v: width } } })),
+                tableRows: [0, 1].map(() => ({
+                    trHeight: { hRule: TableRowHeightRule.EXACT, val: { v: 20 } },
+                    tableCells: [0, 1].map(() => ({ borderTop: border, borderBottom: border, borderLeft: border, borderRight: border, backgroundColor: { rgb: '#ffeecc' } })),
+                })),
+            } },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 300 }, marginLeft: 20, marginRight: 20, marginTop: 20, marginBottom: 20 },
+        });
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
+        const documents = new Documents('separated-cell-ink', skeleton, { pageLayoutType: PageLayoutType.VERTICAL, pageMarginLeft: 0, pageMarginTop: 0 });
+        const ctx = canvas.getContext();
+        const strokes = vi.spyOn(ctx, 'stroke');
+        const rectangles = vi.spyOn(ctx, 'rect');
+        const before = JSON.stringify(model.getSnapshot());
+        try {
+            skeleton.calculate();
+            documents.draw(ctx);
+            expect(strokes).toHaveBeenCalledTimes(20);
+            const backgrounds = rectangles.mock.calls.filter(([, , width, height]) => width === 97 - cellSpacing * 3 && height === 22);
+            expect(backgrounds).toHaveLength(4);
+            expect(backgrounds[1][0] - backgrounds[0][0] - backgrounds[0][2]).toBe(cellSpacing * 2 + 2);
+            expect(backgrounds[2][1] - backgrounds[0][1] - backgrounds[0][3]).toBe(cellSpacing * 2 + 2);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            rectangles.mockRestore();
+            strokes.mockRestore();
+            documents.dispose();
+            skeleton.dispose();
+            view.dispose();
+            univer.dispose();
+        }
+    });
+
     it('batches adjacent table cell backgrounds into a shared path', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         bodyPage.marginLeft = 0;
@@ -1585,6 +1901,76 @@ describe('documents render', () => {
         ]);
 
         documents.dispose();
+    });
+
+    it.each([
+        { pageType: DocumentSkeletonPageType.BODY, printing: true, hasViewport: true },
+        { pageType: DocumentSkeletonPageType.HEADER, printing: true, hasViewport: true },
+        { pageType: DocumentSkeletonPageType.FOOTER, printing: true, hasViewport: true },
+        { pageType: DocumentSkeletonPageType.BODY, printing: true, hasViewport: false },
+        { pageType: DocumentSkeletonPageType.HEADER, printing: true, hasViewport: false },
+        { pageType: DocumentSkeletonPageType.FOOTER, printing: true, hasViewport: false },
+        { pageType: DocumentSkeletonPageType.BODY, printing: false, hasViewport: true },
+        { pageType: DocumentSkeletonPageType.BODY, printing: false, hasViewport: false },
+    ])('keeps table editor viewports out of print: $pageType, printing=$printing, viewport=$hasViewport', ({ pageType, printing, hasViewport }) => {
+        const bed = createParagraphLayoutTestBed('Table', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = new Documents('print-table-viewport', skeleton);
+        const page = createPage(pageType, '');
+        attachTable(page);
+        const table = page.skeTables.get('table-1')!;
+        table.width = 260;
+        const cell = table.rows[0].cells[0];
+        cell.left = 0;
+        cell.pageWidth = 260;
+        cell.sections = [];
+        const provider = vi.fn(() => hasViewport
+            ? {
+                contentWidth: 260,
+                scrollLeft: 80,
+                viewportWidth: 120,
+            }
+            : null);
+        setDocsTableRenderViewportProvider(provider);
+        const ctx = printing
+            ? new UniverPrintingContext(canvas.getContext()._context)
+            : canvas.getContext();
+        const rect = vi.spyOn(ctx, 'rectByPrecision');
+        const stroke = vi.spyOn(ctx, 'stroke');
+        try {
+            (documents as any)._drawTable(
+                ctx,
+                page,
+                page.skeTables,
+                [],
+                null,
+                [],
+                [],
+                Vector2.create(0, 0),
+                0,
+                0,
+                {},
+                { scaleX: 1, scaleY: 1 }
+            );
+            const viewportWidth = hasViewport ? 120 : 168;
+            const editorClip = [20, 30, viewportWidth + 4, 64];
+            if (printing) {
+                expect(provider).not.toHaveBeenCalled();
+                expect(rect.mock.calls).not.toContainEqual(editorClip);
+                expect(rect.mock.calls).toContainEqual([22, 32, 260, 60]);
+            } else {
+                expect(provider).toHaveBeenCalledOnce();
+                expect(rect.mock.calls).toContainEqual(editorClip);
+                expect(rect.mock.calls).toContainEqual([hasViewport ? -58 : 22, 32, 260, 60]);
+            }
+            expect(stroke).toHaveBeenCalledTimes(4);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+        }
     });
 
     it('uses the document unit id to apply table horizontal viewport while drawing', () => {
@@ -2557,6 +2943,69 @@ describe('documents render', () => {
             }
         }
     );
+
+    it.each(['header', 'footer'] as const)('positions %s paragraph borders and shading at the same story origin as text', (story) => {
+        const univer = new Univer();
+        const border = { color: { rgb: '#000000' }, width: 2, padding: 4, dashStyle: DashStyleType.SOLID };
+        const body: IDocumentBody = {
+            dataStream: 'Header\r\n',
+            paragraphs: [{ startIndex: 6, paragraphId: 'story', paragraphStyle: {
+                spacingRule: SpacingRule.EXACT,
+                lineSpacing: 20,
+                spaceAbove: { v: 8 },
+                spaceBelow: { v: 0 },
+                borderBottom: border,
+                shading: { backgroundColor: { rgb: '#11aa22' } },
+            } }],
+            sectionBreaks: [{ startIndex: 7, sectionId: 'story-section' }],
+        };
+        const model = new DocumentDataModel({
+            id: 'story-decoration-origin',
+            body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }], sectionBreaks: [{ startIndex: 5, sectionId: 'body-section' }] },
+            headers: story === 'header' ? { header: { headerId: 'header', body } } : {},
+            footers: story === 'footer' ? { footer: { footerId: 'footer', body } } : {},
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 400, height: 600 },
+                marginTop: 90,
+                marginBottom: 90,
+                marginLeft: 40,
+                marginRight: 40,
+                marginHeader: 30,
+                marginFooter: 30,
+                defaultHeaderId: story === 'header' ? 'header' : undefined,
+                defaultFooterId: story === 'footer' ? 'footer' : undefined,
+                textStyle: { ff: 'Times New Roman', fs: 10 },
+            },
+        });
+        const original = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
+        const documents = new Documents(model.getUnitId(), skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        try {
+            skeleton.calculate();
+            const data = skeleton.getSkeletonData()!;
+            const stories = story === 'header' ? data.skeHeaders : data.skeFooters;
+            const page = [...stories.get(story)!.values()][0];
+            const storyTop = story === 'header' ? 30 : 600 - page.height - 30;
+            scene.addObject(documents, 1);
+            const ctx = canvas.getContext();
+            const borders = vi.spyOn(documents as any, '_drawBorder');
+            const backgrounds = vi.spyOn(ctx, 'fillRect');
+            documents.draw(ctx);
+            expect(borders.mock.calls).toHaveLength(1);
+            expect((borders.mock.calls[0][3] as { endY: number }).endY).toBeCloseTo(storyTop + page.height - border.width);
+            const background = backgrounds.mock.calls.find(([, , width, height]) => width === 320 && height === page.height);
+            expect(background?.[1]).toBeCloseTo(storyTop);
+            expect(JSON.stringify(model.getSnapshot())).toBe(original);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
 
     it.each(['header', 'footer'] as const)('renders live page fields inside nested %s tables without changing cached results', (story) => {
         const univer = new Univer();

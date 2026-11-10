@@ -14,38 +14,9 @@
  * limitations under the License.
  */
 
-import type {
-    IBullet,
-    IDocDrawingBase,
-    IDocStyles,
-    IDocumentBody,
-    IDocumentStyle,
-    IDrawings,
-    ILists,
-    IParagraph,
-    IParagraphStyle,
-    Nullable,
-} from '@univerjs/core';
-import {
-    BooleanNumber,
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
-    DocumentBlockRangeType,
-    DocxBreakType,
-    PositionedObjectLayoutType,
-    resolveDocumentParagraphStyle,
-    TableTextWrapType,
-} from '@univerjs/core';
-import type {
-    IDocumentSkeletonBullet,
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonTable,
-    IParagraphList,
-} from '../../../../../basics/i-document-skeleton-cached';
+import type { IBullet, IDocDrawingBase, IDocStyles, IDocumentBody, IDocumentData, IDocumentStyle, IDrawings, ILists, IParagraph, IParagraphStyle, LocaleService, Nullable } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeNodeType, DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DocumentBlockRangeType, DocxBreakType, ListGlyphType, PositionedObjectLayoutType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle, TableTextWrapType } from '@univerjs/core';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonColumn, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
@@ -53,12 +24,15 @@ import type { DocumentViewModel } from '../../../view-model/document-view-model'
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
 import { BreakType, DocumentSkeletonPageType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
+import { ptToPixel } from '../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import { getDocumentBorderWidth } from '../../../page-borders';
+import { parseDataStreamToTree } from '../../../view-model/document-view-model';
 import { BreakPointType } from '../../line-breaker/break';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { getFontCreateConfig, getLastNotFullColumnInfo, getLastSection, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
-import { dealWithBullet } from './bullet';
+import { dealWithBullet, generateOrderedListSymbol } from './bullet';
 import { isNonFlowFloatingAnchor, layoutParagraph } from './layout-ruler';
 
 const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
@@ -67,6 +41,11 @@ const BLOCK_LAYOUT_OUTER_SPACING_MAP = new Map([
     [DocumentBlockRangeType.QUOTE, 24],
 ]);
 const MAX_KEEP_NEXT_LOOKAHEAD = 32;
+
+function _isZeroWidthRangeMarker(glyph: IDocumentSkeletonGlyph): boolean {
+    return glyph.width === 0 &&
+        (glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START || glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_END);
+}
 
 function _endsWithToken(text: string, glyphs: IDocumentSkeletonGlyph[], token: DataStreamTreeTokenType): boolean {
     return text.endsWith(token) || glyphs[glyphs.length - 1]?.raw === token || glyphs[glyphs.length - 1]?.streamType === token;
@@ -241,17 +220,64 @@ function _isTopBottomCustomBlockGlyph(
     return customBlockDrawings.get(glyph.drawingId)?.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM;
 }
 
+function _getListCounterId(bullet: IBullet, lists?: ILists): string {
+    const ids = lists?.[bullet.listType]?.counterIds;
+    return ids?.includes(bullet.listId) ? ids[0] : bullet.listId;
+}
+
+function _dealWithListBullet(
+    bullet: IBullet | undefined,
+    lists: ILists | undefined,
+    cache: Map<string, IParagraphList[][]> | undefined,
+    localeService?: LocaleService,
+    compactSpacing = false,
+    paragraphTextStyle?: IParagraphStyle['textStyle'],
+    fontPolicy?: Pick<IDocumentStyle, 'fontFamilyClasses' | 'fontFamilyFallbacks'>,
+    documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
+): IDocumentSkeletonBullet | undefined {
+    if (!bullet) {
+        return;
+    }
+    let latest: IParagraphList | undefined;
+    for (const level of cache?.get(_getListCounterId(bullet, lists)) ?? []) {
+        const previous = level[level.length - 1];
+        if (previous && (!latest || previous.paragraph.startIndex > latest.paragraph.startIndex)) {
+            latest = previous;
+        }
+    }
+    const applied = latest?.bullet?.counterStartsApplied ?? [];
+    const start = lists?.[bullet.listType]?.counterStarts?.[bullet.listId]?.[bullet.nestingLevel];
+    const key = JSON.stringify([bullet.listId, bullet.nestingLevel]);
+    const firstStart = start !== undefined && !applied.includes(key);
+    const effective = firstStart && bullet.startNumber === undefined ? { ...bullet, startNumber: start } : bullet;
+    const skeleton = dealWithBullet(
+        effective,
+        lists,
+        _getListLevelAncestors(bullet, cache, lists),
+        localeService,
+        compactSpacing,
+        paragraphTextStyle,
+        fontPolicy,
+        documentCompatibilityPolicy
+    );
+    if (skeleton && (firstStart || applied.length > 0)) {
+        skeleton.counterStartsApplied = firstStart ? [...applied, key] : applied;
+    }
+    return skeleton;
+}
+
 function _getListLevelAncestors(
     bullet?: IBullet,
-    listLevel?: Map<string, IParagraphList[][]>
+    listLevel?: Map<string, IParagraphList[][]>,
+    lists?: ILists
 ): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
     if (!bullet || !listLevel) {
         return;
     }
 
-    const { listId, nestingLevel } = bullet;
+    const { nestingLevel } = bullet;
 
-    const sameList = listLevel?.get(listId);
+    const sameList = listLevel?.get(_getListCounterId(bullet, lists));
 
     let level = nestingLevel;
 
@@ -285,7 +311,8 @@ function _updateListLevelAncestors(
         return;
     }
 
-    const { listId, nestingLevel } = bullet;
+    const { nestingLevel } = bullet;
+    const listId = _getListCounterId(bullet, lists);
 
     const cacheItem: IParagraphList[][] = [...(listLevel?.get(listId) || [])];
 
@@ -318,6 +345,89 @@ function _updateListLevelAncestors(
     cacheItem.splice(nestingLevel + 1); // Document renders from top to bottom, if a level is updated, the startIndex of data below it needs to be reset
 
     listLevel?.set(listId, cacheItem);
+}
+
+interface IResolvedParagraphNumber {
+    label: string;
+    number: string;
+    context: Array<{ label: string; number: string; format: string; labelWithoutText: string; isImplicit: boolean }>;
+}
+
+function _getNumberingParagraphNodes(snapshot: Pick<IDocumentData, 'body' | 'tableSource'>): Map<number, DataStreamTreeNode> {
+    const result = new Map<number, DataStreamTreeNode>();
+    if (!snapshot.body) {
+        return result;
+    }
+    const { sectionList, tableNodeCache } = parseDataStreamToTree(snapshot.body.dataStream, snapshot.body.tables);
+    const tables = new Map([...tableNodeCache].map(([id, node]) => [node.table, snapshot.tableSource?.[id]]));
+    const visit = (node: DataStreamTreeNode) => {
+        if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
+            result.set(node.endIndex, node);
+        }
+        if (node.nodeType === DataStreamTreeNodeType.TABLE) {
+            const table = tables.get(node);
+            node.children.forEach((row, rowIndex) => row.children.forEach((cell, columnIndex) => {
+                const source = table?.tableRows[rowIndex]?.tableCells[columnIndex];
+                if (source?.rowSpan !== 0 && source?.columnSpan !== 0) {
+                    visit(cell);
+                }
+            }));
+            return;
+        }
+        node.children.forEach(visit);
+    };
+    sectionList.forEach(visit);
+    return result;
+}
+
+function _isNonNumberedBreakParagraph(body: Nullable<IDocumentBody>, endIndex: number, content: string): boolean {
+    return /^[\r\n]+$/.test(content) &&
+        body?.sectionBreaks?.some((section) => section.startIndex === endIndex + 1 && section.startIndex < body.dataStream.length - 1) === true;
+}
+
+/** Resolves labels with the same numbering state and restart rules as paragraph layout. */
+export function resolveDocumentParagraphNumbering(
+    snapshot: Pick<IDocumentData, 'body' | 'lists' | 'styles' | 'tableSource'> & Partial<Pick<IDocumentData, 'documentStyle'>>,
+    localeService?: LocaleService
+): Map<number, IResolvedParagraphNumber> {
+    const cache = new Map<string, IParagraphList[][]>();
+    const result = new Map<number, IResolvedParagraphNumber>();
+    const nodes = _getNumberingParagraphNodes(snapshot);
+    const compatibilityPolicy = getDocumentCompatibilityPolicy(snapshot.documentStyle?.documentFlavor);
+    for (const paragraph of [...snapshot.body?.paragraphs ?? []].sort((left, right) => left.startIndex - right.startIndex)) {
+        const bullet = resolveDocumentParagraphBullet(snapshot, paragraph);
+        const node = nodes.get(paragraph.startIndex);
+        if (!bullet || !node || _isNonNumberedBreakParagraph(snapshot.body, paragraph.startIndex, node.content ?? '')) {
+            continue;
+        }
+        const skeleton = _dealWithListBullet(bullet, snapshot.lists, cache, localeService, false, undefined, snapshot.documentStyle, compatibilityPolicy);
+        if (!skeleton) {
+            continue;
+        }
+        _updateListLevelAncestors(paragraph, bullet, skeleton, cache, snapshot.lists);
+        const level = snapshot.lists?.[bullet.listType]?.nestingLevel?.[bullet.nestingLevel];
+        if (level?.glyphType != null && level.glyphType !== ListGlyphType.NONE && !level.glyphSymbol) {
+            const levels = snapshot.lists![bullet.listType].nestingLevel;
+            const ancestors = _getListLevelAncestors(bullet, cache, snapshot.lists);
+            const entries = cache.get(_getListCounterId(bullet, snapshot.lists));
+            const context = levels.slice(0, bullet.nestingLevel + 1).map((nesting, index) => {
+                if (!nesting) {
+                    return { label: '', number: '', format: '', labelWithoutText: '', isImplicit: true };
+                }
+                const state = ancestors?.[index] ?? skeleton;
+                const render = (format: string) => generateOrderedListSymbol(format, index, levels, ancestors, state.startIndexItem - 1, state.startNumber ?? nesting.startNumber);
+                const previousParagraph = entries?.[index]?.[entries[index].length - 1]?.paragraph;
+                const isImplicit = previousParagraph == null || resolveDocumentParagraphBullet(snapshot, previousParagraph)?.nestingLevel !== index;
+                return { label: render(nesting.glyphFormat), number: render(`%${index + 1}`), format: nesting.glyphFormat, labelWithoutText: render(nesting.glyphFormat.replace(/[\p{L}\p{M}]+/gu, '').trim()), isImplicit };
+            });
+            result.set(paragraph.startIndex, {
+                label: skeleton.symbol,
+                number: context[bullet.nestingLevel].number,
+                context,
+            });
+        }
+    }
+    return result;
 }
 
 function _withMinSpacing(style: IParagraphStyle, key: 'spaceAbove' | 'spaceBelow', value: number) {
@@ -358,13 +468,16 @@ function _applyBlockRangeLayoutParagraphStyle(
     documentStyle: Nullable<IDocumentStyle>,
     useLegacyModernDefaults: boolean,
     styles: IDocStyles | undefined,
-    paragraphStyleId: string | undefined
+    paragraphStyleId: string | undefined,
+    lists: ILists | undefined
 ): IParagraphStyle {
     const blockRanges = body?.blockRanges;
     const resolveOptions = {
         useLegacyModernDefaults,
         styles,
         paragraphStyleId,
+        lists,
+        bullet: paragraph.bullet,
     };
 
     if (!blockRanges?.length) {
@@ -723,15 +836,22 @@ function _applyKeepNext(
     paragraphIndex: number,
     paragraphConfigCache: Map<number, IParagraphConfig>,
     metrics: ILayoutContext['paginationMetrics'],
-    validateMove?: () => boolean
+    validateMove?: () => boolean,
+    followingTable?: Nullable<IDocumentSkeletonTable>
 ): number {
     const refs = _getParagraphLineRefs(pages, paragraphIndex);
     if (metrics) {
         metrics.measuredLineCount += refs.length;
         metrics.peakCheckpointLineCount = Math.max(metrics.peakCheckpointLineCount, refs.length);
     }
-    const targetPages = [...new Set(refs.map(({ page }) => page))];
-    if (refs.length === 0 || targetPages.length !== 1 || targetPages[0] === originalPage ||
+    // A split table's anchor ends on its last slice; keep its caption with the first.
+    const tableId = followingTable?.tableSource?.tableId;
+    const firstTablePage = tableId == null
+        ? undefined
+        : pages.find((page) =>
+            [...page.skeTables.values()].some((table) => table.tableSource?.tableId === tableId));
+    const targetPages = firstTablePage ? [firstTablePage] : [...new Set(refs.map(({ page }) => page))];
+    if (targetPages.length !== 1 || targetPages[0] === originalPage ||
         targetPages[0].breakType === BreakType.PAGE ||
         targetPages[0].sections.some((section) => section.columns.length !== 1)) {
         return 0;
@@ -742,8 +862,8 @@ function _applyKeepNext(
     }
     const sourceSection = getLastSection(originalPage);
     const sourceColumn = sourceSection?.columns.findLast((column) => column.lines.length > 0);
-    const targetColumn = refs[0].column;
-    if (!sourceColumn || refs.some(({ column }) => column !== targetColumn)) {
+    const targetColumn = firstTablePage ? getLastSection(firstTablePage)?.columns[0] : refs[0]?.column;
+    if (!sourceColumn || !targetColumn || (!firstTablePage && refs.some(({ column }) => column !== targetColumn))) {
         return 0;
     }
 
@@ -786,10 +906,12 @@ function _applyKeepNext(
         return 0;
     }
     const targetFirstLine = targetColumn.lines[0];
-    const targetSpaceAbove = getNumberUnitValue(
-        paragraphConfigCache.get(targetFirstLine.paragraphIndex)?.paragraphStyle?.spaceAbove,
-        targetFirstLine.paddingTop + targetFirstLine.contentHeight + targetFirstLine.paddingBottom
-    );
+    const targetSpaceAbove = targetFirstLine == null
+        ? 0
+        : getNumberUnitValue(
+            paragraphConfigCache.get(targetFirstLine.paragraphIndex)?.paragraphStyle?.spaceAbove,
+            targetFirstLine.paddingTop + targetFirstLine.contentHeight + targetFirstLine.paddingBottom
+        );
     const movedLineCount = _prependLines(sourceColumn, targetColumn, sourceColumn.lines.slice(start), validateMove, targetSpaceAbove);
     if (metrics && movedLineCount > 0) {
         metrics.retryCount += 1;
@@ -859,6 +981,26 @@ function _hasSameParagraphStyle(paragraph: IParagraph, adjacent: IParagraph | un
         paragraph.paragraphStyle?.namedStyleType === adjacent.paragraphStyle?.namedStyleType;
 }
 
+function _applyAutomaticParagraphSpacing(
+    paragraphStyle: IParagraphStyle,
+    documentStyle: IDocumentStyle | undefined,
+    documentCompatibilityPolicy: IDocumentCompatibilityPolicy
+): void {
+    if ((!isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && documentCompatibilityPolicy.mode !== 'modern') ||
+        documentStyle?.compatibilityFlags?.doNotUseHTMLParagraphAutoSpacing === BooleanNumber.TRUE) {
+        return;
+    }
+
+    // Word's HTML automatic paragraph spacing is independent of the text's font size.
+    const automaticSpacing = { v: ptToPixel(14) };
+    if (paragraphStyle.beforeAutoSpacing === BooleanNumber.TRUE) {
+        paragraphStyle.spaceAbove = automaticSpacing;
+    }
+    if (paragraphStyle.afterAutoSpacing === BooleanNumber.TRUE) {
+        paragraphStyle.spaceBelow = automaticSpacing;
+    }
+}
+
 function _applyContextualParagraphSpacing(
     viewModel: DocumentViewModel,
     paragraph: IParagraph,
@@ -868,7 +1010,9 @@ function _applyContextualParagraphSpacing(
     documentCompatibilityPolicy: IDocumentCompatibilityPolicy
 ): void {
     const { endIndex, children } = paragraphNode;
-    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
+    const automaticModernSpacing = documentCompatibilityPolicy.mode === 'modern' &&
+        (resolvedParagraphStyle.beforeAutoSpacing === BooleanNumber.TRUE || resolvedParagraphStyle.afterAutoSpacing === BooleanNumber.TRUE);
+    if ((isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || automaticModernSpacing) &&
         resolvedParagraphStyle.contextualSpacing === BooleanNumber.TRUE && children.length === 0) {
         // Contextual spacing suppresses each paragraph's own spacing, not its neighbour's.
         // A following flow table contributes its first cell paragraph to Word's
@@ -919,14 +1063,15 @@ function _getParagraphBorderSpacing(
             documentStyle,
             shouldApplyDocumentDefaults,
             documentSnapshot?.styles,
-            nextParagraph.styleId
+            nextParagraph.styleId,
+            documentSnapshot?.lists
         );
 
     if (borderTop && !traditionalBorders) {
         _withMinSpacing(
             resolvedParagraphStyle,
             'spaceAbove',
-            Math.max(0, borderTop.padding ?? 0) + Math.max(0, borderTop.width ?? 1) / 2
+            Math.max(0, borderTop.padding ?? 0) + getDocumentBorderWidth(borderTop) / 2
         );
     }
 
@@ -936,14 +1081,14 @@ function _getParagraphBorderSpacing(
         ? borderBetween
         : borderBottom;
     const bottomBorderClearance = bottomBorder
-        ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1) / 2
+        ? Math.max(0, bottomBorder.padding ?? 0) + getDocumentBorderWidth(bottomBorder) / 2
         : 0;
     if (bottomBorderClearance > 0 && !traditionalBorders) {
         // Keep the stroke inside the paragraph's post-text region when spaceBelow is smaller.
         _withMinSpacing(resolvedParagraphStyle, 'spaceBelow', bottomBorderClearance);
     }
 
-    const previousBorderParagraph = traditionalBorders && borderTop
+    const previousBorderParagraph = traditionalBorders && (borderTop || borderBetween)
         ? viewModel.getParagraph(paragraphNode.startIndex - 1)
         : undefined;
     const previousParagraphStyle = previousBorderParagraph == null
@@ -955,16 +1100,19 @@ function _getParagraphBorderSpacing(
             documentStyle,
             shouldApplyDocumentDefaults,
             documentSnapshot?.styles,
-            previousBorderParagraph.styleId
+            previousBorderParagraph.styleId,
+            documentSnapshot?.lists
         );
-    const topBorderClearance = borderTop && (borderTop.width ?? 1) > 0 &&
-        (!previousParagraphStyle || !hasSameParagraphBorderSet(previousParagraphStyle, resolvedParagraphStyle))
-        ? Math.max(0, borderTop.padding ?? 0) + Math.max(0, borderTop.width ?? 1)
+    const matchingPreviousBorder = previousParagraphStyle &&
+        hasSameParagraphBorderSet(previousParagraphStyle, resolvedParagraphStyle);
+    const topBorder = matchingPreviousBorder ? borderBetween : borderTop;
+    const topBorderClearance = topBorder && getDocumentBorderWidth(topBorder) > 0
+        ? Math.max(0, topBorder.padding ?? 0) + (matchingPreviousBorder ? 0 : getDocumentBorderWidth(topBorder))
         : 0;
     return {
         borderTopSpace: traditionalBorders ? topBorderClearance : undefined,
-        borderBottomSpace: traditionalBorders && bottomBorder && (bottomBorder.width ?? 1) > 0
-            ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1)
+        borderBottomSpace: traditionalBorders && bottomBorder && getDocumentBorderWidth(bottomBorder) > 0
+            ? Math.max(0, bottomBorder.padding ?? 0) + getDocumentBorderWidth(bottomBorder)
             : undefined,
     };
 }
@@ -992,10 +1140,10 @@ function _prepareLineBreaking(
     const documentStyle = documentSnapshot?.documentStyle;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ??
         getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
-    // Keep list membership in the model; a page-break-only paragraph has no displayed item.
-    const bullet = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && /^\f+\r?$/.test(paragraphNode.content ?? '')
+    // Break-only paragraphs retain list metadata without consuming a displayed item.
+    const bullet = _isNonNumberedBreakParagraph(viewModel.getBody?.(), endIndex, paragraphNode.content ?? '')
         ? undefined
-        : paragraph.bullet;
+        : resolveDocumentParagraphBullet(documentSnapshot ?? {}, paragraph);
     const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
     const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
@@ -1018,8 +1166,10 @@ function _prepareLineBreaking(
         documentStyle,
         shouldApplyDocumentDefaults,
         documentSnapshot?.styles,
-        paragraph.styleId
+        paragraph.styleId,
+        documentSnapshot?.lists
     );
+    _applyAutomaticParagraphSpacing(resolvedParagraphStyle, documentStyle, documentCompatibilityPolicy);
     _applyContextualParagraphSpacing(viewModel, paragraph, paragraphNode, nextParagraphNode, resolvedParagraphStyle, documentCompatibilityPolicy);
     const borderSpacing = _getParagraphBorderSpacing(viewModel, paragraphNode, nextParagraphNode, resolvedParagraphStyle, documentCompatibilityPolicy);
 
@@ -1067,7 +1217,6 @@ function _prepareLineBreaking(
 
         paragraphConfig.bulletSkeleton = bulletSkeleton;
     } else {
-        const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // Get the cache of all levels of the list
         const markerTextStyle = bullet && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)
             ? {
                 ...getFontCreateConfig(endIndex - paragraphNode.contentStartIndex, viewModel, paragraphNode, sectionBreakConfig, {
@@ -1078,7 +1227,7 @@ function _prepareLineBreaking(
                 ul: { s: BooleanNumber.FALSE },
             }
             : undefined;
-        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService, false, markerTextStyle);
+        const bulletSkeleton = _dealWithListBullet(bullet, lists, skeListLevel, localeService, false, markerTextStyle, sectionBreakConfig, documentCompatibilityPolicy);
 
         _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel, lists); // Update the latest level cache list
 
@@ -1219,7 +1368,9 @@ function _layoutShapedTexts({
             );
 
             const nonFlowAnchor = isNonFlowFloatingAnchor(pendingGlyphs, paragraphNonInlineSkeDrawings);
-            const preserveParagraphStart = nonFlowAnchor && mergedShapedTextList.slice(shapedIndex + 1)
+            const leadingPageBreak = traditionalPagination &&
+                pendingGlyphs.every((glyph) => glyph.raw === DataStreamTreeTokenType.PAGE_BREAK);
+            const preserveParagraphStart = (nonFlowAnchor || leadingPageBreak) && mergedShapedTextList.slice(shapedIndex + 1)
                 .some(({ glyphs }) => glyphs.some((glyph) => glyph.width > 0 &&
                     glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH &&
                     glyph.streamType !== DataStreamTreeTokenType.SECTION_BREAK &&
@@ -1248,7 +1399,7 @@ function _layoutShapedTexts({
                 markerTextStyle ? { cl: markerTextStyle.cl, ul: markerTextStyle.ul } : undefined
             );
 
-            // Zero-height drawing anchors do not consume the visible first line.
+            // Drawing anchors and leading page breaks do not consume the visible first line or its list marker.
             if (!preserveParagraphStart) {
                 isParagraphFirstShapedText = false;
                 renderParagraphBullet = false;
@@ -1278,12 +1429,14 @@ function _layoutShapedTexts({
                     const tail = mergedShapedTextList[index];
                     if (index === mergedShapedTextList.length - 1 &&
                         _endsWithToken(tail.text, tail.glyphs, DataStreamTreeTokenType.PARAGRAPH) &&
-                        (tail.glyphs.every(({ raw }) => raw === DataStreamTreeTokenType.PARAGRAPH || raw === DataStreamTreeTokenType.SECTION_BREAK) ||
+                        (tail.glyphs.every((glyph) => glyph.raw === DataStreamTreeTokenType.PARAGRAPH ||
+                            glyph.raw === DataStreamTreeTokenType.SECTION_BREAK || _isZeroWidthRangeMarker(glyph)) ||
                             isNonFlowFloatingAnchor(tail.glyphs, paragraphNonInlineSkeDrawingsByBlockId))) {
                         terminalParagraphGlyphs = [...trailingGlyphs, ...tail.glyphs];
                         break;
                     }
-                    if (!isNonFlowFloatingAnchor(tail.glyphs, paragraphNonInlineSkeDrawingsByBlockId)) {
+                    if (!tail.glyphs.every(_isZeroWidthRangeMarker) &&
+                        !isNonFlowFloatingAnchor(tail.glyphs, paragraphNonInlineSkeDrawingsByBlockId)) {
                         break;
                     }
                     trailingGlyphs.push(...tail.glyphs);
@@ -1464,7 +1617,7 @@ function _applyPaginationConstraints({
         }
         const keepNextMoved = allPages.length > 1 &&
             (tableSkeleton == null || tableSkeleton.tableSource?.textWrap === TableTextWrapType.NONE)
-            ? _applyKeepNext(allPages, curPage, endIndex, segmentParagraphCache, ctx.paginationMetrics, validateMove)
+            ? _applyKeepNext(allPages, curPage, endIndex, segmentParagraphCache, ctx.paginationMetrics, validateMove, tableSkeleton)
             : 0;
         if (keepNextMoved > 0) {
             moved = true;

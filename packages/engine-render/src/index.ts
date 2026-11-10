@@ -41,6 +41,7 @@ export {
 } from './basics/drawing-effect';
 export type { IResolvedDrawingShadow } from './basics/drawing-effect';
 export { getOffsetRectForDom } from './basics/position';
+export { getFontStyleString } from './basics/tools';
 export * from './canvas';
 export * from './components/component';
 export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';
@@ -68,6 +69,10 @@ export type {
     IDocumentLayoutTextRun,
     IDocumentLayoutTextStyle,
 } from './components/docs/document-layout-presentation';
+export { hasDocumentReferenceLayout, registerDocumentReferenceLayoutResolver } from './components/docs/document-reference-layout';
+export type { DocumentHeaderFooterReferenceResolver, IDocumentHeaderFooterReferencePage } from './components/docs/header-footer-reference';
+export { hasDocumentHeaderFooterReferenceLayout, registerDocumentHeaderFooterReferenceResolver } from './components/docs/header-footer-reference';
+export { resolveDocumentParagraphNumbering } from './components/docs/layout/block/paragraph/linebreaking';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export {
     measureDocumentNoWrapTextRangeWidth,
@@ -90,7 +95,8 @@ export type {
     IDocumentLayoutProtectedPageRange,
     IDocumentLayoutProtectedRange,
 } from './components/docs/layout/document-layout-types';
-export { invalidateDocumentFontMetrics } from './components/docs/layout/shaping-engine/font-cache';
+export { formatNoteNumber, resolveNoteReferences } from './components/docs/layout/note-numbering';
+export { FontCache, invalidateDocumentFontMetrics } from './components/docs/layout/shaping-engine/font-cache';
 export {
     compareDocumentSkeletonNestedPagePathOrder,
     documentSkeletonLineIterator,
@@ -168,6 +174,7 @@ export * from './scene-viewer';
 export { type IChangeObserverConfig } from './scene.transformer';
 export * from './scroll-timer';
 export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from './services/canvas-color.service';
+
 export * from './shape';
 export * from './viewport';
 

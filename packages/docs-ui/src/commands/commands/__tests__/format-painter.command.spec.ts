@@ -43,6 +43,25 @@ const body = {
 };
 
 describe('text format painter', () => {
+    it('samples inherited list formatting as an independent editable list', () => {
+        const source: IDocumentBody = Tools.deepClone(body);
+        source.paragraphs![0].styleId = 'child';
+        const lists: Record<string, IListData> = { inherited: { listType: 'inherited', counterIds: ['counter'], nestingLevel: [{ bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', startNumber: 0, paragraphProperties: { textStyle: { fs: 20 } } }] } };
+        const format = captureTextFormat(source, { startOffset: 0, endOffset: 7 }, {}, lists, {
+            documentStyle: {},
+            styles: {
+                base: { name: 'Base', type: DocStyleType.paragraph, bullet: { listId: 'counter' } },
+                child: { name: 'Child', type: DocStyleType.paragraph, basedOn: 'base', bullet: { nestingLevel: 0 } },
+            },
+        });
+        expect(format.bullet).toEqual({ listId: 'counter', listType: 'inherited', nestingLevel: 0 });
+        expect(format.listDefinition).toEqual(lists.inherited);
+        expect(format.textStyle.fs).toBe(20);
+        expect(source.paragraphs![0].bullet).toBeUndefined();
+        lists.inherited.counterIds![0] = 'changed';
+        expect(format.listDefinition?.counterIds).toEqual(['counter']);
+    });
+
     it('takes paragraph formatting only when the paragraph mark is included and detaches the sample', () => {
         const source = Tools.deepClone(body);
         const character = captureTextFormat(source, { startOffset: 0, endOffset: 6 });

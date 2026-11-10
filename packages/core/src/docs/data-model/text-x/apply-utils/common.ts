@@ -104,9 +104,9 @@ export function insertTextRuns(
     textLength: number,
     currentIndex: number
 ) {
-    const { textRuns } = body;
+    const textRuns = body.textRuns ?? [];
 
-    if (textRuns == null) {
+    if (body.textRuns == null && !insertBody.textRuns?.some((run) => run.sId || Object.keys(run.ts ?? {}).length)) {
         return;
     }
 
@@ -740,6 +740,7 @@ export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIn
         range.rangeType !== CustomRangeType.FIELD &&
         range.rangeType !== CustomRangeType.SDT &&
         range.rangeType !== CustomRangeType.BOOKMARK &&
+        !(range.rangeType === CustomRangeType.CUSTOM && range.properties?.kind === 'docx-permission') &&
         range.startIndex < currentIndex &&
         range.endIndex >= currentIndex
     );
@@ -823,7 +824,8 @@ export function insertCustomRanges(
         if (
             (customRange.rangeType === CustomRangeType.FIELD ||
                 customRange.rangeType === CustomRangeType.SDT ||
-                customRange.rangeType === CustomRangeType.BOOKMARK) &&
+                customRange.rangeType === CustomRangeType.BOOKMARK ||
+                (customRange.rangeType === CustomRangeType.CUSTOM && customRange.properties?.kind === 'docx-permission')) &&
             startIndex < currentIndex &&
             customRange.endIndex >= currentIndex
         ) {

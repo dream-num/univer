@@ -15,9 +15,6 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
-import type { LocaleKey } from '../locale/types';
-import type { IInsertTableOfContentsDialogProps, IInsertTableOfContentsDialogValue } from '../views/InsertTableOfContentsDialog';
-import type { ITableOfContentsDialogProps } from '../views/TableOfContentsDialog';
 import {
     BooleanNumber,
     CommandType,
@@ -31,6 +28,9 @@ import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { countTableOfContentsHeadings, findTableOfContentsAtOffset, InsertTableOfContentsCommand, UpdateTableOfContentsCommand } from '@univerjs/docs-toc';
 import { IMessageService } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
+import type { IInsertTableOfContentsDialogProps, IInsertTableOfContentsDialogValue } from '../views/InsertTableOfContentsDialog';
+import type { ITableOfContentsDialogProps } from '../views/TableOfContentsDialog';
 import { INSERT_TABLE_OF_CONTENTS_DIALOG_COMPONENT } from '../views/InsertTableOfContentsDialog';
 import { TABLE_OF_CONTENTS_DIALOG_COMPONENT } from '../views/TableOfContentsDialog';
 
@@ -59,7 +59,7 @@ function showNoHeadingsMessage(accessor: IAccessor): void {
 async function insertTableOfContents(accessor: IAccessor, value: IInsertTableOfContentsDialogValue, title?: string): Promise<boolean> {
     const doc = accessor.get(IUniverInstanceService)
         .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    if (!doc || countTableOfContentsHeadings(doc.getBody(), value.levels) === 0) {
+    if (!doc || countTableOfContentsHeadings(doc.getBody(), value.levels, doc.getSnapshot().styles) === 0) {
         showNoHeadingsMessage(accessor);
         return false;
     }

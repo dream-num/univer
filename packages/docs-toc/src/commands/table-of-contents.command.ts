@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomRange, IDocumentBody, IParagraph, ITextRange, ITextRun } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IParagraph, ISpecialCharacterCustomRange, ITextRange, ITextRun } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
     BooleanNumber,
@@ -23,6 +23,7 @@ import {
     CommandType,
     createParagraphId,
     CustomRangeType,
+    DocStyleType,
     generateRandomId,
     getBodySlice,
     getPlainText,
@@ -32,7 +33,9 @@ import {
     IUniverInstanceService,
     JSONX,
     NamedStyleType,
+    resolveDocumentParagraphStyle,
     SliceBodyType,
+    SpecialCharacterKind,
     TabStopAlignment,
     TabStopLeader,
     TextX,
@@ -102,13 +105,19 @@ export interface IDeleteTableOfContentsCommandParams {
     rangeId?: string;
 }
 
-interface ITableOfContentsHeading {
+export interface ITableOfContentsHeading {
     bookmarkId?: string;
     headingId: string;
     level: number;
     paragraph: IParagraph;
     startOffset: number;
+    /** Printed label supplied by an embedded story whose anchor is in the main body. */
+    pageNumber?: number | string;
     text: string;
+    textRuns?: ITextRun[];
+    customBlocks?: ICustomBlock[];
+    specialCharacters?: ISpecialCharacterCustomRange[];
+    showPageNumber?: boolean;
 }
 
 export const UpdateTableOfContentsCommand: ICommand<IUpdateTableOfContentsCommandParams> = {
@@ -158,7 +167,7 @@ async function updateTableOfContents(
         };
         const replacement = params?.mode === 'pageNumbersOnly'
             ? buildPageNumberOnlyTableOfContentsBody(currentBody, currentToc, resolvePageNumber)
-            : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber);
+            : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber, undefined, { styles: doc.getSnapshot().styles });
         if (!replacement) {
             return false;
         }
@@ -264,7 +273,7 @@ export const InsertTableOfContentsCommand: ICommand<IInsertTableOfContentsComman
         const replacement = buildTableOfContentsBody(body, toc, (offset) => {
             const pageIndex = skeleton.findBodyPageIndexByCharIndex(offset);
             return skeleton.getSkeletonData()?.pages[pageIndex]?.pageNumber;
-        }, generateRandomId, { tabStopOffset: Math.max(72, (pageSize?.width ?? 594.3) - marginLeft - marginRight) });
+        }, generateRandomId, { tabStopOffset: Math.max(72, (pageSize?.width ?? 594.3) - marginLeft - marginRight), styles: doc.getSnapshot().styles });
         if (!replacement) {
             return false;
         }
@@ -350,7 +359,8 @@ async function waitForNextCompleteLayout(skeleton: DocumentSkeleton, generation:
 export function buildPageNumberOnlyTableOfContentsBody(
     body: IDocumentBody,
     toc: ICustomRange,
-    resolvePageNumber: (offset: number) => number | undefined
+    resolvePageNumber: (offset: number) => number | string | undefined,
+    resolvePageField?: (field: ICustomRange) => number | string | undefined
 ): IDocumentBody | null {
     if (toc.properties?.locked === BooleanNumber.TRUE) {
         return null;
@@ -366,7 +376,8 @@ export function buildPageNumberOnlyTableOfContentsBody(
     for (const pageField of pageFields) {
         const originalField = body.customRanges?.find((range) => range.rangeId === pageField.rangeId);
         const targetOffset = originalField && resolvePageReferenceOffset(body, originalField);
-        const pageNumber = targetOffset == null ? undefined : resolvePageNumber(targetOffset);
+        const pageNumber = (originalField && resolvePageField?.(originalField)) ??
+            (targetOffset == null ? undefined : resolvePageNumber(targetOffset));
         if (pageNumber == null) {
             return null;
         }
@@ -396,7 +407,7 @@ function resolvePageReferenceOffset(body: IDocumentBody, pageField: ICustomRange
         range.startIndex <= pageField.startIndex && pageField.endIndex <= range.endIndex
     );
     const headingId = link?.properties?.headingId;
-    return body.paragraphs?.find((paragraph) => paragraph.paragraphStyle?.headingId === headingId)?.startIndex;
+    return body.paragraphs?.find((paragraph) => paragraph.paragraphStyle?.headingId === headingId || paragraph.paragraphId === headingId)?.startIndex;
 }
 
 function replaceFieldResult(body: IDocumentBody, field: ICustomRange, value: string): void {
@@ -441,59 +452,104 @@ function shiftRuns(runs: ITextRun[] | undefined, start: number, end: number, del
 export function buildTableOfContentsBody(
     body: IDocumentBody,
     toc: ICustomRange,
-    resolvePageNumber: (offset: number) => number | undefined,
+    resolvePageNumber: (offset: number) => number | string | undefined,
     idFactory: () => string = generateRandomId,
-    options?: { tabStopOffset?: number }
+    options?: { tabStopOffset?: number; entries?: ITableOfContentsHeading[]; showPageNumbers?: boolean; styles?: IDocStyles; preserveLeadingParagraph?: boolean; resetEntryParagraphFormatting?: boolean; entryStyleName?: string }
 ): IDocumentBody | null {
     if (toc.properties?.locked === BooleanNumber.TRUE) {
         return null;
     }
     const instruction = String(toc.properties?.instruction ?? '');
-    if (/\\c\s+/i.test(instruction)) {
+    if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
     const [minLevel, maxLevel] = parseOutlineLevelRange(instruction);
-    const headings = collectHeadings(body, toc, minLevel, maxLevel);
+    const headings = options?.entries ?? collectHeadings(body, toc, minLevel, maxLevel, options?.styles);
     if (headings.length === 0) {
         return null;
     }
-    const showPageNumbers = toc.properties?.showPageNumbers !== false && !/\\n(?:\s|$)/i.test(instruction);
+    const showPageNumbers = options?.showPageNumbers ?? (toc.properties?.showPageNumbers !== false && !/\\n(?:\s|$)/i.test(instruction));
     const rightAlignPageNumbers = showPageNumbers && toc.properties?.rightAlignPageNumbers !== false && !/\\p\s+/i.test(instruction);
     const tabLeader = normalizeTabLeader(toc.properties?.tabLeader);
     const format = normalizeFormat(toc.properties?.format);
     const isExistingToc = body.customRanges?.some((range) => range.rangeId === toc.rangeId) ?? false;
     const oldParagraphs = isExistingToc
         ? body.paragraphs?.filter((paragraph) =>
-            paragraph.startIndex >= toc.startIndex && paragraph.startIndex <= toc.endIndex
+            paragraph.startIndex >= toc.startIndex && (paragraph.startIndex <= toc.endIndex ||
+                (paragraph.startIndex === toc.endIndex + 1 && body.dataStream[paragraph.startIndex] === '\r' && /^(toc[1-9]|tableoffigures)$/.test(getTocStyleName(paragraph, options?.styles))))
         ) ?? []
         : [];
     const title = typeof toc.properties?.title === 'string'
         ? toc.properties.title.trim()
-        : getExistingTableOfContentsTitle(body, oldParagraphs);
-    const result: IDocumentBody = { dataStream: FIELD_START, paragraphs: [], customRanges: [] };
+        : getExistingTableOfContentsTitle(body, oldParagraphs, toc.startIndex, options?.styles);
+    const result: IDocumentBody = { dataStream: '', paragraphs: [], customRanges: [] };
     const ranges = result.customRanges!;
-    const oldTitleParagraph = oldParagraphs.find((paragraph) => paragraph.styleId?.toLowerCase() === 'tocheading');
-    const oldEntryParagraphs = oldParagraphs.filter((paragraph) => paragraph !== oldTitleParagraph);
+    const oldTitleParagraph = oldParagraphs.find((paragraph) => getTocStyleName(paragraph, options?.styles) === 'tocheading');
+    const hasExternalTitle = isExistingToc && body.paragraphs?.some((paragraph) =>
+        paragraph.startIndex === toc.startIndex - 1 && getTocStyleName(paragraph, options?.styles) === 'tocheading');
+    const hasLeadingParagraph = isExistingToc && body.dataStream[toc.startIndex + 1] === '\r';
+    const oldLeadingParagraph = hasLeadingParagraph ? oldParagraphs.find((paragraph) => paragraph.startIndex === toc.startIndex + 1) : undefined;
+    const oldEntryParagraphs = oldParagraphs.filter((paragraph) => paragraph !== oldTitleParagraph && paragraph !== oldLeadingParagraph);
     const usedParagraphIds = new Set<string>();
     let cachedResult = '';
 
-    if (title) {
+    // Word replaces the entire field result; keep a newly authored title outside it.
+    if (!isExistingToc && title) {
+        result.dataStream = `${title}\r`;
+        result.paragraphs!.push(cloneParagraphWithId({
+            startIndex: result.dataStream.length - 1,
+            paragraphId: '',
+            styleId: 'TOCHeading',
+        }, usedParagraphIds));
+    }
+    const fieldStart = result.dataStream.length;
+    result.dataStream += FIELD_START;
+
+    if (options?.preserveLeadingParagraph === true || (hasLeadingParagraph && options?.preserveLeadingParagraph !== false)) {
+        result.dataStream += '\r';
+        cachedResult += '\r';
+        result.paragraphs!.push(cloneParagraphWithId({ ...Tools.deepClone(oldLeadingParagraph ?? { paragraphId: '', startIndex: 1 }), startIndex: result.dataStream.length - 1 }, usedParagraphIds));
+    }
+
+    if (title && isExistingToc && !hasExternalTitle) {
         result.dataStream += `${title}\r`;
         cachedResult += `${title}\r`;
         result.paragraphs!.push(cloneParagraphWithId({
+            ...Tools.deepClone(oldTitleParagraph ?? {}),
             startIndex: result.dataStream.length - 1,
             paragraphId: oldTitleParagraph?.paragraphId ?? '',
-            styleId: 'TOCHeading',
+            styleId: oldTitleParagraph?.styleId ?? 'TOCHeading',
         }, usedParagraphIds));
     }
 
     for (const [index, heading] of headings.entries()) {
-        const pageNumber = showPageNumbers ? resolvePageNumber(heading.startOffset) : undefined;
-        if (showPageNumbers && pageNumber == null) {
+        const showEntryPageNumber = showPageNumbers && heading.showPageNumber !== false;
+        const pageNumber = showEntryPageNumber ? heading.pageNumber ?? resolvePageNumber(heading.startOffset) : undefined;
+        if (showEntryPageNumber && pageNumber == null) {
             return null;
         }
         const entryStart = result.dataStream.length;
-        const separator = showPageNumbers ? (rightAlignPageNumbers ? '\t' : ' ') : '';
+        if (heading.specialCharacters?.length) {
+            ranges.push(...heading.specialCharacters.map((character) => ({
+                ...Tools.deepClone(character),
+                rangeId: idFactory(),
+                startIndex: entryStart + character.startIndex,
+                endIndex: entryStart + character.endIndex,
+            })));
+        }
+        if (heading.customBlocks?.length) {
+            result.customBlocks ??= [];
+            result.customBlocks.push(...heading.customBlocks.map((block) => ({ ...block, startIndex: entryStart + block.startIndex })));
+        }
+        if (heading.textRuns?.length) {
+            result.textRuns ??= [];
+            result.textRuns.push(...heading.textRuns.map((run) => ({
+                ...Tools.deepClone(run),
+                st: entryStart + run.st,
+                ed: entryStart + run.ed,
+            })));
+        }
+        const separator = showEntryPageNumber ? (rightAlignPageNumbers ? '\t' : ' ') : '';
         const visibleEntry = `${heading.text}${separator}${pageNumber ?? ''}`;
         result.dataStream += `${heading.text}${separator}`;
         const targetId = heading.bookmarkId ?? heading.headingId;
@@ -508,8 +564,10 @@ export function buildTableOfContentsBody(
                 textStyleMode: 'text',
             },
         };
-        ranges.push(link);
-        if (showPageNumbers) {
+        if (heading.text.length || showEntryPageNumber) {
+            ranges.push(link);
+        }
+        if (showEntryPageNumber) {
             const pageFieldStart = result.dataStream.length;
             result.dataStream += `${FIELD_START}${pageNumber}${FIELD_END}`;
             const pageFieldEnd = result.dataStream.length - 1;
@@ -536,15 +594,21 @@ export function buildTableOfContentsBody(
             heading.level,
             result.dataStream.length - 1,
             usedParagraphIds,
-            rightAlignPageNumbers ? options?.tabStopOffset : undefined,
-            tabLeader,
-            format
+            {
+                tabStopOffset: rightAlignPageNumbers ? options?.tabStopOffset : undefined,
+                tabLeader: toc.properties?.tabLeader == null ? undefined : tabLeader,
+                format,
+                styles: options?.styles,
+                refreshPageTab: rightAlignPageNumbers,
+                resetEntryParagraphFormatting: options?.resetEntryParagraphFormatting,
+                styleName: options?.entryStyleName,
+            }
         ));
     }
 
     result.dataStream += FIELD_END;
     ranges.push({
-        startIndex: 0,
+        startIndex: fieldStart,
         endIndex: result.dataStream.length - 1,
         rangeId: toc.rangeId,
         rangeType: CustomRangeType.FIELD,
@@ -556,30 +620,47 @@ export function buildTableOfContentsBody(
             cachedResult,
         },
     });
+    if (!isExistingToc) {
+        // A shared closing paragraph lets Word's directory update consume the next heading's bookmark.
+        result.dataStream += '\r';
+        result.paragraphs!.push(cloneParagraphWithId({
+            startIndex: result.dataStream.length - 1,
+            paragraphId: '',
+            paragraphStyle: { outlineLevel: 9 },
+        }, usedParagraphIds));
+    }
     ranges.sort((left, right) => left.startIndex - right.startIndex || right.endIndex - left.endIndex);
     return result;
 }
 
-function getExistingTableOfContentsTitle(body: IDocumentBody, paragraphs: IParagraph[]): string {
-    const titleParagraph = paragraphs.find((paragraph) => paragraph.styleId?.toLowerCase() === 'tocheading');
+function getTocStyleName(paragraph: IParagraph, styles?: IDocStyles): string {
+    const styleId = (paragraph.styleId ?? '').replace(/\s+/g, '').toLowerCase();
+    return /^toc(?:[1-9]|heading)$/.test(styleId)
+        ? styleId
+        : (styles?.[paragraph.styleId ?? '']?.name ?? styleId).replace(/\s+/g, '').toLowerCase();
+}
+
+function getExistingTableOfContentsTitle(body: IDocumentBody, paragraphs: IParagraph[], fieldStart: number, styles?: IDocStyles): string {
+    const titleParagraph = paragraphs.find((paragraph) => getTocStyleName(paragraph, styles) === 'tocheading');
     if (!titleParagraph) {
         return '';
     }
     const allParagraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
     const index = allParagraphs.findIndex((paragraph) => paragraph === titleParagraph || paragraph.paragraphId === titleParagraph.paragraphId);
     let start = index > 0 ? allParagraphs[index - 1].startIndex + 1 : 0;
+    start = Math.max(start, fieldStart + 1);
     while (body.dataStream[start] === FIELD_START || body.dataStream[start] === FIELD_END) {
         start += 1;
     }
     return getPlainText(body.dataStream.slice(start, titleParagraph.startIndex)).trim();
 }
 
-export function countTableOfContentsHeadings(body: IDocumentBody | null | undefined, levels = 3): number {
+export function countTableOfContentsHeadings(body: IDocumentBody | null | undefined, levels = 3, styles?: IDocStyles): number {
     if (!body) {
         return 0;
     }
     const maxLevel = Math.min(9, Math.max(1, Math.trunc(levels)));
-    return collectHeadings(body, undefined, 1, maxLevel).length;
+    return collectHeadings(body, undefined, 1, maxLevel, styles).length;
 }
 
 function parseOutlineLevelRange(instruction: string): [number, number] {
@@ -589,7 +670,7 @@ function parseOutlineLevelRange(instruction: string): [number, number] {
     return [min, max];
 }
 
-function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, minLevel: number, maxLevel: number): ITableOfContentsHeading[] {
+function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, minLevel: number, maxLevel: number, styles?: IDocStyles): ITableOfContentsHeading[] {
     const paragraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
     let paragraphStart = 0;
     return paragraphs.flatMap((paragraph) => {
@@ -598,13 +679,28 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
             startOffset += 1;
         }
         paragraphStart = paragraph.startIndex + 1;
-        const level = getOutlineLevel(paragraph);
-        const headingId = paragraph.paragraphStyle?.headingId;
+        const level = getOutlineLevel(paragraph, styles);
+        const headingId = paragraph.paragraphStyle?.headingId || paragraph.paragraphId;
         if (!headingId || level == null || level < minLevel || level > maxLevel ||
             (toc && startOffset >= toc.startIndex && paragraph.startIndex <= toc.endIndex)) {
             return [];
         }
-        const text = getPlainText(body.dataStream.slice(startOffset, paragraph.startIndex)).trim();
+        const characters = (body.customRanges ?? []).filter((range): range is ISpecialCharacterCustomRange =>
+            range.rangeType === CustomRangeType.CUSTOM && range.wholeEntity === true && range.startIndex === range.endIndex &&
+            range.startIndex >= startOffset && range.endIndex < paragraph.startIndex &&
+            ((range.properties?.kind === SpecialCharacterKind.NON_BREAKING_HYPHEN && body.dataStream[range.startIndex] === '\u2011') ||
+                (range.properties?.kind === SpecialCharacterKind.OPTIONAL_HYPHEN && body.dataStream[range.startIndex] === '\u00AD')));
+        const optionalHyphens = new Set(characters.filter((range) => range.properties.kind === SpecialCharacterKind.OPTIONAL_HYPHEN).map((range) => range.startIndex));
+        const offsets: number[] = [];
+        let content = '';
+        for (let index = startOffset; index < paragraph.startIndex; index++) {
+            offsets[index - startOffset] = content.length;
+            if (!optionalHyphens.has(index)) {
+                content += getPlainText(body.dataStream[index]);
+            }
+        }
+        const leading = content.length - content.trimStart().length;
+        const text = content.trim();
         if (!text) {
             return [];
         }
@@ -621,19 +717,35 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
             paragraph,
             startOffset,
             text,
+            specialCharacters: characters.filter((range) => range.properties.kind === SpecialCharacterKind.NON_BREAKING_HYPHEN).map((range) => ({
+                ...range,
+                startIndex: offsets[range.startIndex - startOffset] - leading,
+                endIndex: offsets[range.endIndex - startOffset] - leading,
+            })),
         }];
     });
 }
 
-function getOutlineLevel(paragraph: IParagraph): number | undefined {
-    const outlineLevel = paragraph.paragraphStyle?.outlineLevel;
-    if (outlineLevel != null && outlineLevel >= 0 && outlineLevel <= 8) {
-        return outlineLevel + 1;
+function getOutlineLevel(paragraph: IParagraph, styles?: IDocStyles): number | undefined {
+    const style = resolveDocumentParagraphStyle(undefined, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId });
+    const outlineLevel = style.outlineLevel;
+    if (outlineLevel != null) {
+        return outlineLevel >= 0 && outlineLevel <= 8 ? outlineLevel + 1 : undefined;
     }
-    const namedStyle = paragraph.paragraphStyle?.namedStyleType;
+    const namedStyle = style.namedStyleType;
     if (namedStyle != null && namedStyle >= NamedStyleType.HEADING_1 && namedStyle <= NamedStyleType.HEADING_5) {
         return namedStyle - NamedStyleType.HEADING_1 + 1;
     }
+}
+
+interface ITableOfContentsParagraphFormat {
+    tabStopOffset?: number;
+    tabLeader?: TableOfContentsTabLeader;
+    format?: TableOfContentsFormat;
+    styles?: IDocStyles;
+    refreshPageTab?: boolean;
+    resetEntryParagraphFormatting?: boolean;
+    styleName?: string;
 }
 
 function copyTocParagraph(
@@ -642,36 +754,80 @@ function copyTocParagraph(
     level: number,
     startIndex: number,
     usedParagraphIds: Set<string>,
-    tabStopOffset?: number,
-    tabLeader: TableOfContentsTabLeader = 'dots',
-    format: TableOfContentsFormat = 'fromTemplate'
+    options: ITableOfContentsParagraphFormat = {}
 ): IParagraph {
-    const byStyleLevel = oldParagraphs.find((paragraph) => paragraph.styleId?.match(/TOC(\d+)/i)?.[1] === String(level));
+    const { tabStopOffset, tabLeader, format = 'fromTemplate', styles, refreshPageTab = false, resetEntryParagraphFormatting = false } = options;
+    const styleName = options.styleName ?? `toc${level}`;
+    // Keep per-entry formatting, including the extra tab stop of numbered headings.
+    const byIndex = oldParagraphs[index];
+    const byStyleLevel = byIndex && getTocStyleName(byIndex, styles) === styleName
+        ? byIndex
+        : oldParagraphs.find((paragraph) => getTocStyleName(paragraph, styles) === styleName);
     const source = byStyleLevel ?? oldParagraphs[Math.min(index, oldParagraphs.length - 1)];
+    const defaultStyleId = styleName === 'tableoffigures' ? 'TableOfFigures' : `TOC${level}`;
+    const canonicalStyle = styles?.[defaultStyleId];
+    const styleId = canonicalStyle?.type === DocStyleType.paragraph &&
+        (canonicalStyle.name ?? defaultStyleId).replace(/\s+/g, '').toLowerCase() === styleName
+        ? defaultStyleId
+        : Object.keys(styles ?? {}).find((id) => styles![id].type === DocStyleType.paragraph &&
+            (styles![id].name ?? id).replace(/\s+/g, '').toLowerCase() === styleName);
+    const replaceSourceStyle = !source?.styleId || getTocStyleName(source, styles) === 'normal' ||
+        (resetEntryParagraphFormatting && getTocStyleName(source, styles) !== styleName);
+    let paragraphStyleId = source?.styleId;
+    if (replaceSourceStyle) {
+        paragraphStyleId = styleId ?? paragraphStyleId;
+        if (resetEntryParagraphFormatting && styleId == null) {
+            paragraphStyleId = defaultStyleId;
+        }
+    }
+    const namedTabs = resolveDocumentParagraphStyle(undefined, undefined, { styles, paragraphStyleId }).tabStops ?? [];
+    const oldTabs = source?.paragraphStyle?.tabStops ?? [];
+    const namedPageTabs = namedTabs.filter((tab) => tab.alignment === TabStopAlignment.END);
+    const pageOffset = tabStopOffset ?? oldTabs.filter((tab) => tab.alignment === TabStopAlignment.END).pop()?.offset;
+    const pageTabs = namedPageTabs.map((tab) => ({ ...tab, ...(tabLeader == null ? {} : { leader: getTabStopLeader(tabLeader) }) }));
+    if (!pageTabs.length && pageOffset != null) {
+        pageTabs.push({ offset: pageOffset, alignment: TabStopAlignment.END, leader: getTabStopLeader(tabLeader ?? 'dots') });
+    }
+    const tabStops = refreshPageTab && pageTabs.length
+        ? [...oldTabs.filter((tab) => tab.alignment !== TabStopAlignment.END), ...pageTabs]
+        : undefined;
     // A same-level paragraph is a formatting template, not the identity of every
     // entry. Keep distinct existing row IDs and allocate only for additional rows.
     if (source) {
+        let paragraphStyle = source.paragraphStyle;
+        if (resetEntryParagraphFormatting) {
+            const entryTabs = tabStops ?? oldTabs.filter((tab) => tab.alignment !== TabStopAlignment.END);
+            paragraphStyle = entryTabs.length ? { tabStops: entryTabs } : {};
+        } else if (tabStops) {
+            paragraphStyle = { ...paragraphStyle, tabStops };
+        }
         return cloneParagraphWithId({
             ...source,
+            ...(resetEntryParagraphFormatting || tabStops ? { paragraphStyle } : {}),
+            ...(replaceSourceStyle ? { styleId: paragraphStyleId } : {}),
             startIndex,
             paragraphId: oldParagraphs[index]?.paragraphId ?? '',
         }, usedParagraphIds);
     }
+    let paragraphStyle: IParagraph['paragraphStyle'] = {
+        indentStart: { v: Math.max(0, level - 1) * getFormatIndent(format) },
+    };
+    if (format === 'modern' || format === 'classic') {
+        paragraphStyle.spaceBelow = { v: format === 'modern' ? 4 : 2 };
+    }
+    if (tabStops) {
+        paragraphStyle.tabStops = tabStops;
+    } else if (tabStopOffset != null) {
+        paragraphStyle.tabStops = [{ offset: tabStopOffset, alignment: TabStopAlignment.END, leader: getTabStopLeader(tabLeader ?? 'dots') }];
+    }
+    if (resetEntryParagraphFormatting) {
+        paragraphStyle = tabStops?.length ? { tabStops } : {};
+    }
     return {
         startIndex,
         paragraphId: createParagraphId(usedParagraphIds),
-        styleId: `TOC${level}`,
-        paragraphStyle: {
-            indentStart: { v: Math.max(0, level - 1) * getFormatIndent(format) },
-            spaceBelow: format === 'modern' ? { v: 4 } : format === 'classic' ? { v: 2 } : undefined,
-            tabStops: tabStopOffset == null
-                ? undefined
-                : [{
-                    offset: tabStopOffset,
-                    alignment: TabStopAlignment.END,
-                    leader: getTabStopLeader(tabLeader),
-                }],
-        },
+        styleId: styleId ?? defaultStyleId,
+        paragraphStyle,
     };
 }
 

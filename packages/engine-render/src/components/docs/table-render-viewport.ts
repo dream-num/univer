@@ -15,8 +15,8 @@
  */
 
 import type { DocumentFlavor, ITable } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { TableTextWrapType } from '@univerjs/core';
+import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { DocumentSkeletonPageType } from '../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
 
@@ -30,8 +30,11 @@ export function getDocsTableLayoutViewportWidth(
     const { pageWidth, marginLeft = 0, marginRight = 0 } = page;
     const policy = getDocumentCompatibilityPolicy(documentFlavor);
     const allowMarginOverflow = shouldAllowImportedTableMarginOverflow(policy, tableSource);
+    // Header/footer widths already exclude the physical paper margins.
+    const isStoryContent = page.type === DocumentSkeletonPageType.HEADER || page.type === DocumentSkeletonPageType.FOOTER;
+    const overflowLeft = isStoryContent ? marginLeft + tableLeft : Math.max(0, marginLeft + tableLeft);
     const width = allowMarginOverflow
-        ? Math.max(0, pageWidth - Math.max(0, marginLeft + tableLeft))
+        ? Math.max(0, pageWidth - overflowLeft)
         : Math.max(0, pageWidth - marginLeft - marginRight - tableLeft);
     const table = tableSource as Partial<ITable> | undefined;
     if (allowMarginOverflow && page.type === DocumentSkeletonPageType.CELL && table?.textWrap === TableTextWrapType.WRAP) {

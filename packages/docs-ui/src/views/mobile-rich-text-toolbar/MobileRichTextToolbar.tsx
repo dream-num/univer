@@ -22,6 +22,7 @@ import {
     ICommandService,
     LocaleService,
     PresetListType,
+    resolveDocumentParagraphBullet,
     ThemeService,
 } from '@univerjs/core';
 import { Button, clsx, MobileColorPicker, MobileDropdown, resetButtonClassName } from '@univerjs/design';
@@ -90,7 +91,7 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
         const style: ITextStyle = getStyleInTextRange(body, range, {});
         const paragraphs = BuildTextUtils.range.getParagraphsInRanges([range], body.paragraphs ?? [], body.dataStream);
         const listTypes = paragraphs
-            .map((paragraph) => paragraph.bullet?.listType)
+            .map((paragraph) => resolveDocumentParagraphBullet(editor!.getDocumentData(), paragraph)?.listType)
             .filter((listType): listType is string => typeof listType === 'string');
         return {
             bold: style.bl === BooleanNumber.TRUE,

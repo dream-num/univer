@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
 import { DocumentDataModel } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
 import { DocumentViewModel } from '../../../../view-model/document-view-model';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from '../language-ruler';
 
@@ -67,6 +67,23 @@ function createSectionBreakConfig(): ISectionBreakConfig {
 
 describe('language-ruler', () => {
     describe('otherHandler', () => {
+        it.each(['\uFFFC', '\u0008'])('leaves the inline marker %s for the paragraph shaper', (marker) => {
+            const prefix = 'Word"';
+            const { viewModel, dataModel } = createViewModel(`${prefix}${marker}after`);
+            try {
+                const result = otherHandler(0, `${prefix}${marker}after`, viewModel, getParagraphNode(viewModel), createSectionBreakConfig(), getParagraph(viewModel));
+                expect(result.step).toBe(prefix.length);
+                expect(result.glyphGroup.map((glyph) => glyph.raw).join('')).toBe(prefix);
+                if (marker === '\uFFFC') {
+                    const fallback = otherHandler(prefix.length, marker, viewModel, getParagraphNode(viewModel), createSectionBreakConfig(), getParagraph(viewModel));
+                    expect(fallback.step).toBe(1);
+                }
+            } finally {
+                viewModel.dispose();
+                dataModel.dispose();
+            }
+        });
+
         it.each(['é', 'ä́'])('keeps the combining sequence %s in one cursor-addressable glyph', (cluster) => {
             const text = `${cluster}x`;
             const { viewModel } = createViewModel(text);

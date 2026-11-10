@@ -16,5 +16,7 @@
 
 import './global.css';
 
-export { DocsTocUIMenuSchema } from './menu/schema';
+export { OpenTableOfContentsDialogOperation } from './commands/table-of-contents-dialog.operation';
+export { InsertTableOfContentsMenuFactory } from './menu/menu';
+export { DOC_TABLE_OF_CONTENTS_RIBBON_GROUP, DOC_TABLE_OF_CONTENTS_RIBBON_TAB, DocsTocUIMenuSchema } from './menu/schema';
 export { UniverDocsTocUIPlugin } from './plugin';

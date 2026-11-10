@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { Nullable } from '../../shared';
 import type { ITextRangeParam } from '../../sheets/typedef';
 import type { LocaleType } from '../../types/enum';
@@ -27,7 +28,6 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
-import { BehaviorSubject } from 'rxjs';
 import { isInternalEditorID } from '../../common/const';
 import { mergeWith } from '../../common/lodash';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
@@ -474,7 +474,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         if (headers) {
             for (const headerId in headers) {
                 const header = headers[headerId];
-                this.headerModelMap.set(headerId, new DocumentDataModel(header));
+                this.headerModelMap.set(headerId, new DocumentDataModel({ ...header, documentStyle: this.snapshot.documentStyle, styles: this.snapshot.styles }));
                 this.headerModelMap.get(headerId)!.updateDocumentId(this.getUnitId());
             }
         }
@@ -482,7 +482,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         if (footers) {
             for (const footerId in footers) {
                 const footer = footers[footerId];
-                this.footerModelMap.set(footerId, new DocumentDataModel(footer));
+                this.footerModelMap.set(footerId, new DocumentDataModel({ ...footer, documentStyle: this.snapshot.documentStyle, styles: this.snapshot.styles }));
                 this.footerModelMap.get(footerId)!.updateDocumentId(this.getUnitId());
             }
         }

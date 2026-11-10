@@ -15,6 +15,7 @@
  */
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
+import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
@@ -26,7 +27,6 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../basics/interfaces';
 import type { IFloatObject } from '../tools';
-import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
@@ -156,7 +156,8 @@ export function calculateLineTopByDrawings(
     columnLeft: number = 0,
     columnWidth: number = 0,
     sectionTop: number = 0,
-    minimumTableWrapWidth: number = 0
+    minimumTableWrapWidth: number = 0,
+    paragraphAfterSpacing: number = 0
 ) {
     const absoluteLineTop = sectionTop + lineTop;
     let maxTop = absoluteLineTop;
@@ -175,7 +176,7 @@ export function calculateLineTopByDrawings(
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
             const top = _getLineTopWidthWrapTopBottom(
                 transformedDrawing,
-                lineHeight,
+                lineHeight + paragraphAfterSpacing,
                 absoluteLineTop,
                 columnLeft,
                 columnWidth
@@ -191,7 +192,7 @@ export function calculateLineTopByDrawings(
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
             const top = _getLineTopWidthWrapTopBottom(
                 transformedDrawing,
-                lineHeight,
+                lineHeight + paragraphAfterSpacing,
                 absoluteLineTop,
                 columnLeft,
                 columnWidth
@@ -203,7 +204,7 @@ export function calculateLineTopByDrawings(
     }
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, absoluteLineTop, columnLeft, columnWidth);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight + paragraphAfterSpacing, absoluteLineTop, columnLeft, columnWidth);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }

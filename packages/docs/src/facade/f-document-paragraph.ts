@@ -15,11 +15,11 @@
  */
 
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
-import type { FDocument } from './f-document';
-import type { IFDocumentTextRange } from './utils';
-import { getParagraphContentStartOffset, ICommandService, IPermissionService, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { getParagraphContentStartOffset, ICommandService, IPermissionService, PresetListType, regexp, resolveDocumentParagraphBullet, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { getDocumentParagraphParentPermissionObjectIds, getDocumentParagraphPermissionObjectId, UpdateDocumentParagraphStyleCommand } from '@univerjs/docs';
+import type { FDocument } from './f-document';
+import type { IFDocumentTextRange } from './utils';
 import { FDocumentObjectPermission } from './f-document-permission';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
@@ -415,7 +415,7 @@ export class FDocumentParagraph extends FBaseInitialable {
      */
     isListItem(): boolean {
         const { paragraph } = this.getInfo();
-        return Boolean(paragraph.bullet);
+        return Boolean(resolveDocumentParagraphBullet(this._document.getDocumentDataModel().getSnapshot(), paragraph));
     }
 
     /**
@@ -430,7 +430,7 @@ export class FDocumentParagraph extends FBaseInitialable {
      */
     isTask(): boolean {
         const { paragraph } = this.getInfo();
-        const listType = paragraph.bullet?.listType;
+        const listType = resolveDocumentParagraphBullet(this._document.getDocumentDataModel().getSnapshot(), paragraph)?.listType;
         return listType === PresetListType.CHECK_LIST || listType === PresetListType.CHECK_LIST_CHECKED;
     }
 
@@ -455,7 +455,7 @@ export class FDocumentParagraph extends FBaseInitialable {
         }
 
         const { paragraph, endOffset } = this.getInfo();
-        const bullet = paragraph.bullet!;
+        const bullet = paragraph.bullet;
 
         const updateBody: IDocumentBody = {
             dataStream: '',

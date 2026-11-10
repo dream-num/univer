@@ -56,9 +56,150 @@ describe('endnote pagination', () => {
     });
     afterEach(() => vi.restoreAllMocks());
 
+    it('keeps the final body paragraph after-spacing before the endnote separator', () => {
+        const heights = [0, 17].map((spaceBelow) => {
+            const data = snapshot('docEnd');
+            data.documentStyle.pageSize.height = 600;
+            Object.assign(data.body.paragraphs.at(-1)!, { paragraphStyle: { spaceBelow: { v: spaceBelow } } });
+            const bed = createParagraphLayoutTestBed('', data);
+            const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+            try {
+                skeleton.calculate();
+                return skeleton.getSkeletonData()!.pages.at(-1)!.noteDecorations!.find((decoration) => decoration.noteType === 'endnote')!.top;
+            } finally {
+                skeleton.dispose();
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            }
+        });
+        expect(heights[1] - heights[0]).toBeCloseTo(17);
+    });
+
+    it.each([false, true])('moves an overflowing first endnote fragment before placing its separator (incremental: %s)', (incremental) => {
+        const main = body('Body \uFFFC');
+        Object.assign(main.paragraphs[0], { paragraphStyle: { spaceBelow: { v: 135 } } });
+        const data = {
+            documentStyle: snapshot('docEnd').documentStyle,
+            body: {
+                ...main,
+                customRanges: [{
+                    rangeId: 'ref',
+                    rangeType: CustomRangeType.ENDNOTE,
+                    startIndex: 5,
+                    endIndex: 5,
+                    wholeEntity: true,
+                    properties: { noteId: 'endnote' },
+                }],
+            },
+            notes: {
+                endnote: {
+                    noteId: 'endnote',
+                    type: 'endnote',
+                    body: {
+                        ...body('Preface\r\b Endnote text'),
+                        customBlocks: [{ startIndex: 8, blockId: 'marker', noteType: 'endnote' }],
+                    },
+                },
+            },
+            noteSettings: { endnote: { position: 'docEnd' } },
+        } satisfies Partial<IDocumentData>;
+        const bed = createParagraphLayoutTestBed('', data);
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            if (incremental) {
+                const generation = skeleton.startIncrementalLayout();
+                let progress = skeleton.stepIncrementalLayout(generation, 0);
+                for (let i = 0; i < 1000 && !progress.complete; i++) {
+                    progress = skeleton.stepIncrementalLayout(generation, 0);
+                }
+                expect(progress.complete).toBe(true);
+            } else {
+                skeleton.calculate();
+            }
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(2);
+            expect(pages[0].notes ?? []).toHaveLength(0);
+            expect(pages[0].noteDecorations ?? []).toHaveLength(0);
+            expect(pages[1].notes).toHaveLength(1);
+            expect(pages[1].notes![0].continued).toBe(false);
+            expect(pages[1].noteDecorations!.map((decoration) => decoration.kind)).toEqual(['separator']);
+            const note = pages[1].notes![0];
+            const text = note.page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines
+                .flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.raw ?? glyph.content))))).join('');
+            expect(text).toContain('Preface');
+            expect(text).toContain('Endnote text');
+            expect(note.top + note.page.height).toBeLessThanOrEqual(pages[1].pageHeight - pages[1].marginBottom + 0.1);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it('numbers footnotes and endnotes independently', () => {
         const refs = [...resolveNoteReferences(snapshot('docEnd')).values()];
         expect(refs.map((ref) => ref.label)).toEqual(['i', '3', 'ii']);
+    });
+
+    it.each([false, true])('uses the continuation separator when a new endnote starts on a later note page (incremental: %s)', (incremental) => {
+        const main = body('References \uFFFC \uFFFC');
+        Object.assign(main.paragraphs[0], { paragraphStyle: { spaceBelow: { v: 100 } } });
+        const secondNote = body('A fresh second endnote');
+        Object.assign(secondNote, { textRuns: [{ st: 0, ed: secondNote.dataStream.length - 2, ts: { fs: 32 } }] });
+        const data = {
+            documentStyle: snapshot('docEnd').documentStyle,
+            body: {
+                ...main,
+                customRanges: [...main.dataStream.matchAll(/\uFFFC/g)].map((match, index) => ({
+                    rangeId: `reference-${index}`,
+                    rangeType: CustomRangeType.ENDNOTE,
+                    startIndex: match.index!,
+                    endIndex: match.index!,
+                    wholeEntity: true,
+                    properties: { noteId: `endnote-${index}` },
+                })),
+            },
+            notes: {
+                'endnote-0': { noteId: 'endnote-0', type: 'endnote', body: body('First endnote') },
+                'endnote-1': { noteId: 'endnote-1', type: 'endnote', body: secondNote },
+            },
+            noteSettings: { endnote: { position: 'docEnd' } },
+        } satisfies Partial<IDocumentData>;
+        const bed = createParagraphLayoutTestBed('', data);
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            if (incremental) {
+                const generation = skeleton.startIncrementalLayout();
+                let progress = skeleton.stepIncrementalLayout(generation, 0);
+                for (let index = 0; index < 1000 && !progress.complete; index++) {
+                    progress = skeleton.stepIncrementalLayout(generation, 0);
+                }
+                expect(progress.complete).toBe(true);
+            } else {
+                skeleton.calculate();
+            }
+            const pages = skeleton.getSkeletonData()!.pages;
+            const notePages = pages.filter((page) => page.notes?.some((note) => note.noteType === 'endnote'));
+            expect(notePages).toHaveLength(2);
+            expect(notePages.map((page) => page.notes!.map((note) => [note.noteId, note.continued]))).toEqual([
+                [['endnote-0', false]],
+                [['endnote-1', false]],
+            ]);
+            expect(notePages.map((page) => page.noteDecorations!.map((decoration) => decoration.kind))).toEqual([
+                ['separator'],
+                ['continuationSeparator'],
+            ]);
+            for (const [index, page] of notePages.entries()) {
+                const separator = page.noteDecorations![0].page;
+                const marker = separator.sections.flatMap((section) => section.columns.flatMap((column) => column.lines
+                    .flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))).find((glyph) => glyph.noteSeparator)!;
+                expect(marker.width).toBe(index === 0 ? 192 : page.pageWidth - page.marginLeft - page.marginRight);
+            }
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     it.each([false, true])('places section endnotes before the next section and document endnotes after it (incremental: %s)', (incremental) => {
@@ -83,6 +224,8 @@ describe('endnote pagination', () => {
                 expect(pages.flatMap((page) => page.notes ?? []).filter((note) => !note.continued).map((note) => note.noteId).sort()).toEqual(['note-0', 'note-1', 'note-2']);
                 if (position === 'sectEnd') {
                     expect(firstNote.pageIndex).toBeLessThan(secondSectionPage);
+                    expect(pages.flatMap((page) => page.noteDecorations ?? []).filter((decoration) => decoration.noteType === 'endnote')
+                        .map((decoration) => decoration.kind)).toEqual(['separator', 'separator']);
                 } else {
                     expect(firstNote.pageIndex).toBeGreaterThanOrEqual(secondSectionPage);
                 }

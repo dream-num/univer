@@ -842,7 +842,7 @@ describe('DocLayoutExecutorService', () => {
         unregister();
     });
 
-    it('serializes custom range presentations for the body, headers, and footers without range id collisions', async () => {
+    it('serializes custom range presentations for every story without range id collisions', async () => {
         const injector = univer.__getInjector();
         const service = injector.get(DocLayoutExecutorService);
         const executor = createExecutor();
@@ -896,6 +896,15 @@ describe('DocLayoutExecutorService', () => {
                 },
             },
         };
+        documentData.notes = Object.fromEntries((['footnote', 'endnote'] as const).map((type, index) => [type, {
+            noteId: type,
+            type,
+            body: {
+                dataStream: 'Note text\r\n',
+                paragraphs: [{ paragraphId: type, startIndex: 9 }],
+                customRanges: [{ startIndex: index + 3, endIndex: index + 3, rangeId: 'shared-range', rangeType: CustomRangeType.CUSTOM }],
+            },
+        }]));
         univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, documentData);
         await Promise.resolve();
 
@@ -918,6 +927,8 @@ describe('DocLayoutExecutorService', () => {
                     rangeId: 'shared-range',
                     presentation: { glyphWidthEm: 3 },
                 },
+                { segmentId: 'footnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 4 } },
+                { segmentId: 'endnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 5 } },
             ],
         }));
 
@@ -931,6 +942,8 @@ describe('DocLayoutExecutorService', () => {
             { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 10 } },
             { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 11 } },
             { segmentId: 'footer-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 12 } },
+            { segmentId: 'footnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 13 } },
+            { segmentId: 'endnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 14 } },
         ]);
 
         registration.dispose();
@@ -939,6 +952,8 @@ describe('DocLayoutExecutorService', () => {
             { segmentId: '', rangeId: 'shared-range' },
             { segmentId: 'header-1', rangeId: 'shared-range' },
             { segmentId: 'footer-1', rangeId: 'shared-range' },
+            { segmentId: 'footnote', rangeId: 'shared-range' },
+            { segmentId: 'endnote', rangeId: 'shared-range' },
         ]);
     });
 

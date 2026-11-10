@@ -18,28 +18,10 @@ import type { ICustomRangeForInterceptor } from '@univerjs/core';
 import type { IDocsCustomBlockRenderViewport } from '@univerjs/engine-render';
 import type { IMessageProtocol } from '@univerjs/rpc';
 import { DocumentDataModel, LocaleService, requestImmediateMacroTask, Tools } from '@univerjs/core';
-import {
-    DocumentLayoutSession,
-    FontCache,
-    setDocsCustomBlockRenderViewportProvider,
-} from '@univerjs/engine-render/worker';
+import { DocumentLayoutSession, FontCache, setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render/worker';
 import { ChannelService, fromModule } from '@univerjs/rpc';
-import { Observable, shareReplay } from 'rxjs';
-import type {
-    IDocLayoutCancelRequest,
-    IDocLayoutCreateSessionRequest,
-    IDocLayoutCustomRangePresentationEntry,
-    IDocLayoutDisposeMountRequest,
-    IDocLayoutDisposeSessionRequest,
-    IDocLayoutMountIdentity,
-    IDocLayoutPageRequest,
-    IDocLayoutPageResult,
-    IDocLayoutPerformanceMetrics,
-    IDocLayoutStartRequest,
-    IDocLayoutStartResult,
-    IDocLayoutStepRequest,
-    IDocLayoutStepResult,
-} from '../services/doc-layout-executor.service';
+import { Observable, share } from 'rxjs';
+import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutCustomRangePresentationEntry, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutMountIdentity, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
 import type { IDocsLayoutFontFace } from './config/config';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import { DocLayoutExecutorType, DocLayoutSessionStatus } from '../services/doc-layout-executor.service';
@@ -90,7 +72,7 @@ function createDocsLayoutWorkerMessageProtocol(
             const handler = (event: MessageEvent) => subscriber.next(event.data);
             addEventListener('message', handler);
             return () => removeEventListener('message', handler);
-        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
+        }).pipe(share()),
     };
 }
 
@@ -295,6 +277,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             ['', dataModel] as const,
             ...dataModel.headerModelMap,
             ...dataModel.footerModelMap,
+            ...dataModel.noteModelMap,
         ];
         for (const [segmentId, segmentModel] of segmentModels) {
             const rangeMap = new Map<string, ICustomRangeForInterceptor>();

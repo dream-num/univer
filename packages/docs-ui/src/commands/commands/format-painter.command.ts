@@ -38,6 +38,7 @@ import {
     IUniverInstanceService,
     JSONX,
     NAMED_STYLE_MAP,
+    resolveDocumentParagraphBullet,
     resolveDocumentParagraphStyle,
     TextX,
     TextXActionType,
@@ -64,6 +65,7 @@ export function captureTextFormat(
 ): ITextFormatPainterSnapshot {
     const offset = range.startOffset === range.endOffset ? Math.max(0, range.startOffset - 1) : range.startOffset;
     const paragraph = body.paragraphs?.find((item) => item.startIndex >= offset);
+    const bullet = paragraph && resolveDocumentParagraphBullet({ ...document, lists }, paragraph);
     const paragraphStyle = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
         styles: document.styles,
         paragraphStyleId: paragraph?.styleId,
@@ -86,9 +88,9 @@ export function captureTextFormat(
             smallCaps: false,
             ...document.documentStyle?.textStyle,
             ...defaultStyle,
-            ...getParagraphTextFormat(body, paragraph, paragraphStyle, offset, lists),
+            ...getParagraphTextFormat(body, paragraph, paragraphStyle, offset, lists, bullet),
         },
-        ...(includesParagraphMark ? { paragraphStyle, bullet: paragraph.bullet, listDefinition: paragraph.bullet ? lists[paragraph.bullet.listType] : undefined } : {}),
+        ...(includesParagraphMark ? { paragraphStyle, bullet, listDefinition: bullet ? lists[bullet.listType] : undefined } : {}),
     });
 }
 
@@ -97,7 +99,8 @@ function getParagraphTextFormat(
     paragraph: IParagraph | undefined,
     paragraphStyle: IParagraphStyle,
     offset: number,
-    lists: Record<string, IListData>
+    lists: Record<string, IListData>,
+    bullet: IBullet | undefined
 ): ITextStyle {
     const run = body.textRuns?.find((item) => item.st <= offset && item.ed > offset);
     const namedStyle = paragraphStyle.namedStyleType && !paragraph?.styleId ? NAMED_STYLE_MAP[paragraphStyle.namedStyleType] : null;
@@ -106,7 +109,7 @@ function getParagraphTextFormat(
         ...paragraphStyle.textStyle,
         ...run?.ts,
         ...(offset === paragraph?.startIndex ? paragraphStyle.paragraphMarkTextStyle : undefined),
-        ...(paragraph?.bullet ? lists[paragraph.bullet.listType]?.nestingLevel?.[0]?.paragraphProperties?.textStyle : undefined),
+        ...(bullet ? lists[bullet.listType]?.nestingLevel?.[bullet.nestingLevel]?.paragraphProperties?.textStyle : undefined),
     };
 }
 

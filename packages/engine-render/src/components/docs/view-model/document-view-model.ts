@@ -18,6 +18,7 @@ import type {
     DocumentDataModel,
     ICustomBlock,
     ICustomDecorationForInterceptor,
+    ICustomRange,
     ICustomRangeForInterceptor,
     ICustomTable,
     IDisposable,
@@ -565,6 +566,14 @@ export class DocumentViewModel implements IDisposable {
 
     private _lastTextRun: Nullable<IDocumentLayoutTextRun> = null;
 
+    private _customRangeLookup?: {
+        ranges: ICustomRange[];
+        revision: number;
+        lowerBound: number;
+        upperBound: number;
+        range?: ICustomRange;
+    };
+
     private _editArea: DocumentEditArea = DocumentEditArea.BODY;
 
     private readonly _editAreaChange$ = new BehaviorSubject<Nullable<DocumentEditArea>>(null);
@@ -617,6 +626,7 @@ export class DocumentViewModel implements IDisposable {
         this._headingSections = null;
         this._collapsedHeadingSections = null;
         this._lastTextRun = null;
+        this._customRangeLookup = undefined;
         // this._headerTreeMap.clear();
         this._noteTreeMap.forEach((viewModel) => viewModel.dispose());
         this._noteTreeMap.clear();
@@ -964,12 +974,33 @@ export class DocumentViewModel implements IDisposable {
             return;
         }
 
+        const revision = this._documentDataModel.getMutationRevision();
+        const cached = this._customRangeLookup;
+        if (cached?.ranges === customRanges && cached.revision === revision &&
+            index > cached.lowerBound && index < cached.upperBound &&
+            (!cached.range || (index >= cached.range.startIndex && index <= cached.range.endIndex))) {
+            return cached.range;
+        }
+
+        let lowerBound = -Infinity;
+        let upperBound = Infinity;
+        let range: ICustomRange | undefined;
         for (let i = 0, customRangesLen = customRanges.length; i < customRangesLen; i++) {
             const customRange = customRanges[i];
             if (index >= customRange.startIndex && index <= customRange.endIndex) {
-                return customRange;
+                range = customRange;
+                break;
+            }
+            // Earlier overlapping ranges keep their original array priority.
+            if (customRange.endIndex < index) {
+                lowerBound = Math.max(lowerBound, customRange.endIndex);
+            }
+            if (customRange.startIndex > index) {
+                upperBound = Math.min(upperBound, customRange.startIndex);
             }
         }
+        this._customRangeLookup = { ranges: customRanges, revision, lowerBound, upperBound, range };
+        return range;
     }
 
     getCustomRange(index: number): Nullable<ICustomRangeForInterceptor> {
@@ -1004,6 +1035,7 @@ export class DocumentViewModel implements IDisposable {
 
     private _buildAllCache() {
         this._metadataCachesDirty = false;
+        this._customRangeLookup = undefined;
         this._lastTextRun = null;
         this._buildTextRunsCache();
         this._buildParagraphCache();

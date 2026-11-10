@@ -18,10 +18,12 @@ import type { DocumentDataModel, ICustomRange, IDocumentBody, IDocumentData } fr
 import {
     BooleanNumber,
     CustomRangeType,
+    DocStyleType,
     getBodySlice,
     ICommandService,
     NamedStyleType,
     SliceBodyType,
+    SpecialCharacterKind,
     TabStopAlignment,
     TabStopLeader,
     Univer,
@@ -89,7 +91,284 @@ function createBody(): { body: IDocumentBody; toc: ICustomRange } {
     };
 }
 
+describe('canonical directory style selection', () => {
+    it.each([
+        { name: 'toc 1', canonical: 'TOC1', entryStyleName: undefined },
+        { name: 'Table of Figures', canonical: 'TableOfFigures', entryStyleName: 'tableoffigures' },
+    ].flatMap((entry) => [false, true].map((matchingName) => ({ ...entry, matchingName }))))('uses the matching canonical identity before duplicate names ($name/$matchingName)', ({ name, canonical, entryStyleName, matchingName }) => {
+        const { body, toc } = createBody();
+        body.paragraphs![0].styleId = 'Normal';
+        const styles = {
+            Alias: { name, type: DocStyleType.paragraph, textStyle: { bl: BooleanNumber.FALSE } },
+            [canonical]: { name: matchingName ? name : 'Other paragraph style', type: DocStyleType.paragraph, textStyle: { bl: BooleanNumber.TRUE } },
+        };
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'generated', { styles, entryStyleName, resetEntryParagraphFormatting: true })!;
+        expect(result.paragraphs![0].styleId).toBe(matchingName ? canonical : 'Alias');
+    });
+});
+
 describe('table of contents body builder', () => {
+    it.each([
+        { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011', marked: true },
+        { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011', marked: false },
+        { kind: SpecialCharacterKind.OPTIONAL_HYPHEN, character: '\u00AD', marked: true },
+        { kind: SpecialCharacterKind.OPTIONAL_HYPHEN, character: '\u00AD', marked: false },
+    ])('preserves literal characters and Word $kind objects when marked=$marked', ({ kind, character, marked }) => {
+        const dataStream = `\u001FOld\u001E\r  A😀${character}B  \r\n`;
+        const index = dataStream.indexOf(character);
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-3" \\n' } };
+        const body: IDocumentBody = {
+            dataStream,
+            paragraphs: [
+                { paragraphId: 'toc-row', startIndex: 5 },
+                { paragraphId: 'heading', startIndex: dataStream.lastIndexOf('\r'), paragraphStyle: { headingId: 'heading', outlineLevel: 0 } },
+            ],
+            customRanges: [toc, ...(marked ? [{ rangeId: 'character', rangeType: CustomRangeType.CUSTOM, startIndex: index, endIndex: index, wholeEntity: true, properties: { kind } }] : [])],
+        };
+        const before = structuredClone(body);
+        const result = buildTableOfContentsBody(body, toc, () => undefined, () => 'entry', { showPageNumbers: false })!;
+        const omitted = marked && kind === SpecialCharacterKind.OPTIONAL_HYPHEN;
+        expect(result.customRanges!.find((range) => range.rangeId === 'toc')!.properties!.cachedResult).toBe(`A😀${omitted ? '' : character}B\r`);
+        const characters = result.customRanges!.filter((range) => range.rangeType === CustomRangeType.CUSTOM);
+        expect(characters).toHaveLength(marked && !omitted ? 1 : 0);
+        if (characters.length) {
+            expect(characters[0]).toMatchObject({ startIndex: 4, endIndex: 4, wholeEntity: true, properties: { kind } });
+            expect(result.dataStream[characters[0].startIndex]).toBe(character);
+        }
+        expect(body).toEqual(before);
+    });
+
+    it('selects imported directory templates by style name without replacing their ids', () => {
+        const dataStream = '\u001FAlpha\rBeta\rGamma\r\u001E';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: dataStream.length - 1, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-3" \\n' } };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [
+                { startIndex: dataStream.indexOf('\r'), paragraphId: 'para_alpha', styleId: '12', paragraphStyle: { textStyle: { caps: true } } },
+                { startIndex: dataStream.indexOf('\r', dataStream.indexOf('\r') + 1), paragraphId: 'para_beta', styleId: '22', paragraphStyle: { textStyle: { smallCaps: true } } },
+                { startIndex: dataStream.lastIndexOf('\r'), paragraphId: 'para_gamma', styleId: '32', paragraphStyle: { textStyle: { fs: 10 } } },
+            ],
+        };
+        const before = structuredClone(body);
+        let identity = 0;
+        const result = buildTableOfContentsBody(body, toc, () => undefined, () => `entry-${identity++}`, {
+            showPageNumbers: false,
+            styles: {
+                12: { name: 'toc 1', type: DocStyleType.paragraph },
+                22: { name: 'toc 2', type: DocStyleType.paragraph },
+                32: { name: 'toc 3', type: DocStyleType.paragraph },
+            },
+            entries: [1, 1, 2, 3].map((level, index) => ({
+                text: `Heading ${index}`,
+                level,
+                headingId: `h${index}`,
+                startOffset: 100 + index,
+                paragraph: { paragraphId: `para_heading_${index}`, startIndex: 100 + index },
+            })),
+        })!;
+        expect(result.paragraphs!.map((paragraph) => paragraph.styleId)).toEqual(['12', '12', '22', '32']);
+        expect(result.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.textStyle)).toEqual([{ caps: true }, { caps: true }, { smallCaps: true }, { fs: 10 }]);
+        expect(body).toEqual(before);
+    });
+
+    it('applies the authored TOC style when replacing a Normal placeholder paragraph', () => {
+        const dataStream = '\u001FOLD\r\u001E';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: dataStream.length - 1, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1" \\n' } };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [{ startIndex: dataStream.indexOf('\r'), paragraphId: 'old', styleId: 'Normal', paragraphStyle: { spaceBelow: { v: 3 } } }],
+        };
+        const before = structuredClone(body);
+        const result = buildTableOfContentsBody(body, toc, () => undefined, () => 'entry', {
+            showPageNumbers: false,
+            styles: {
+                Normal: { name: 'Normal', type: DocStyleType.paragraph },
+                authored: { name: 'toc 1', type: DocStyleType.paragraph, textStyle: { caps: true } },
+            },
+            entries: [{ text: 'Mixed case', level: 1, headingId: 'heading', startOffset: 100, paragraph: { paragraphId: 'heading', startIndex: 110 } }],
+        })!;
+        expect(result.paragraphs![0].styleId).toBe('authored');
+        expect(result.paragraphs![0].paragraphStyle?.spaceBelow).toEqual({ v: 3 });
+        expect(body).toEqual(before);
+    });
+
+    it('preserves distinct tab stops of numbered and unnumbered entries at the same level', () => {
+        const dataStream = '\u001FIntroduction\t\u001F1\u001E\r1.\tChapter\t\u001F2\u001E\rConclusion\t\u001F3\u001E\r\u001E';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: dataStream.length - 1, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1"' } };
+        const pageTab = { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                startIndex: match.index,
+                paragraphId: `para_entry_${index}`,
+                styleId: 'TOC1',
+                paragraphStyle: { tabStops: index === 1 ? [{ offset: 22, alignment: TabStopAlignment.START }, pageTab] : [pageTab] },
+            })),
+        };
+        const before = structuredClone(body);
+        const build = (source: IDocumentBody): IDocumentBody => {
+            let identity = 0;
+            return buildTableOfContentsBody(source, source.customRanges!.find((range) => range.rangeId === 'toc')!, () => 4, () => `entry-${identity++}`, {
+                entries: ['Introduction', '1.\tChapter', 'Conclusion'].map((text, index) => ({
+                    text,
+                    level: 1,
+                    headingId: `heading-${index}`,
+                    startOffset: 100 + index,
+                    paragraph: { paragraphId: `para_heading_${index}`, startIndex: 100 + index },
+                })),
+            })!;
+        };
+        const first = build(body);
+        expect(first.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.tabStops)).toEqual(body.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.tabStops));
+        expect(build(first)).toEqual(first);
+        expect(body).toEqual(before);
+    });
+
+    it.each([
+        { namedLeader: TabStopLeader.HYPHEN, override: undefined, expected: TabStopLeader.HYPHEN },
+        { namedLeader: TabStopLeader.UNDERSCORE, override: undefined, expected: TabStopLeader.UNDERSCORE },
+        { namedLeader: TabStopLeader.HYPHEN, override: 'none', expected: TabStopLeader.NONE },
+    ] as const)('uses the named page-tab leader unless explicitly overridden ($namedLeader/$override)', ({ namedLeader, override, expected }) => {
+        const dataStream = '\u001FSTALE\u001E\r\n';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 6, properties: { instruction: 'TOC \\o "1-1"', ...(override == null ? {} : { tabLeader: override }) } };
+        const leftTab = { offset: 22, alignment: TabStopAlignment.START };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [{ startIndex: 7, paragraphId: 'cached', styleId: 'authored', paragraphStyle: { tabStops: [leftTab, { offset: 600, alignment: TabStopAlignment.END, leader: TabStopLeader.NONE }] } }],
+        };
+        const before = structuredClone(body);
+        const build = (source: IDocumentBody): IDocumentBody => {
+            let identity = 0;
+            return buildTableOfContentsBody(source, source.customRanges!.find((range) => range.rangeId === 'toc')!, () => 1, () => `entry-${identity++}`, {
+                tabStopOffset: 553,
+                styles: { authored: { name: 'toc 1', type: DocStyleType.paragraph, paragraphStyle: { tabStops: [{ offset: 600, alignment: TabStopAlignment.END, leader: namedLeader }] } } },
+                entries: [{ text: 'Heading', level: 1, headingId: 'heading', startOffset: 100, paragraph: { paragraphId: 'heading', startIndex: 100 } }],
+            })!;
+        };
+        const first = build(body);
+        expect(first.paragraphs![0].paragraphStyle?.tabStops).toEqual([leftTab, { offset: 600, alignment: TabStopAlignment.END, leader: expected }]);
+        expect(build(first)).toEqual(first);
+        expect(body).toEqual(before);
+    });
+
+    it.each([true, false])('keeps an object-only heading link valid when page labels are enabled: %s', (showPageNumbers) => {
+        const dataStream = '\u001FSTALE\u001E\r\n';
+        const body: IDocumentBody = { dataStream, customRanges: [{ rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 6, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1"' } }] };
+        let identity = 0;
+        const result = buildTableOfContentsBody(body, body.customRanges![0], () => 7, () => `entry-${identity++}`, {
+            showPageNumbers,
+            entries: [{ text: '', startOffset: 100, headingId: 'image-heading', level: 1, paragraph: { paragraphId: 'image-heading', startIndex: 101 } }],
+        })!;
+        expect(result.dataStream).toBe(showPageNumbers ? '\u001F\t\u001F7\u001E\r\u001E' : '\u001F\r\u001E');
+        const links = result.customRanges!.filter((range) => range.rangeType === CustomRangeType.HYPERLINK);
+        expect(links).toHaveLength(showPageNumbers ? 1 : 0);
+        expect(result.customRanges!.every((range) => range.startIndex <= range.endIndex)).toBe(true);
+    });
+
+    it('separates an authored host paragraph when the cached directory has no leading break', () => {
+        const dataStream = 'Page\u001FSTALE\u001E\rHeading\r\n';
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [{ rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 4, endIndex: 10, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1"' } }],
+            paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index, paragraphId: `para_${index}` })),
+        };
+        const before = structuredClone(body);
+        const build = (source: IDocumentBody): IDocumentBody => {
+            let identity = 0;
+            return buildTableOfContentsBody(source, source.customRanges!.find((range) => range.rangeId === 'toc')!, () => 7, () => `entry-${identity++}`, {
+                preserveLeadingParagraph: true,
+                entries: [{ text: 'Chapter', startOffset: 100, headingId: 'chapter', level: 1, paragraph: { paragraphId: 'chapter', startIndex: 107 } }],
+            })!;
+        };
+        const first = build(body);
+        expect(first.dataStream).toBe('\u001F\rChapter\t\u001F7\u001E\r\u001E');
+        expect(first.paragraphs).toHaveLength(2);
+        expect(build(first)).toEqual(first);
+        expect(body).toEqual(before);
+    });
+
+    it.each([true, false])('keeps the leading cached paragraph outside entry templates when preserved: %s', (preserveLeadingParagraph) => {
+        const dataStream = '\u001F\rAlpha\t\u001F1\u001E\rBeta\t\u001F1\u001E\r\u001E';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: dataStream.length - 1, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-2"' } };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [
+                { startIndex: 1, paragraphId: 'para_leading', styleId: 'Normal', paragraphStyle: { lineSpacing: 1.5 } },
+                { startIndex: dataStream.indexOf('\r', 2), paragraphId: 'para_alpha', styleId: '16', paragraphStyle: { lineSpacing: 1, textStyle: { caps: false } } },
+                { startIndex: dataStream.lastIndexOf('\r'), paragraphId: 'para_beta', styleId: '17', paragraphStyle: { lineSpacing: 1.15, textStyle: { caps: true } } },
+            ],
+        };
+        const before = structuredClone(body);
+        const build = (source: IDocumentBody): IDocumentBody => {
+            let identity = 0;
+            return buildTableOfContentsBody(source, source.customRanges!.find((range) => range.rangeId === 'toc')!, () => 1, () => `entry-${identity++}`, {
+                preserveLeadingParagraph,
+                entries: [
+                    { text: 'Alpha', startOffset: 100, headingId: 'heading-alpha', level: 1, paragraph: { paragraphId: 'para_heading_alpha', startIndex: 100 } },
+                    { text: 'Beta', startOffset: 200, headingId: 'heading-beta', level: 2, paragraph: { paragraphId: 'para_heading_beta', startIndex: 200 } },
+                ],
+            })!;
+        };
+        const first = build(body);
+        expect(first.paragraphs!.map((paragraph) => paragraph.paragraphId)).toEqual(preserveLeadingParagraph ? ['para_leading', 'para_alpha', 'para_beta'] : ['para_alpha', 'para_beta']);
+        expect(first.paragraphs!.map((paragraph) => paragraph.paragraphStyle)).toEqual(body.paragraphs!.slice(preserveLeadingParagraph ? 0 : 1).map((paragraph) => paragraph.paragraphStyle));
+        expect(build(first)).toEqual(first);
+        expect(body).toEqual(before);
+    });
+
+    it.each(['TOC1', '12', 'Normal'])('uses an adjacent TOC entry mark as a template without borrowing %s host formatting', (styleId) => {
+        const dataStream = '\u001FOld\u001E\rHeading\r\n';
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1" \\n' } };
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [toc],
+            paragraphs: [
+                { startIndex: 5, paragraphId: 'cached', styleId, paragraphStyle: { textStyle: { caps: true } } },
+                { startIndex: 13, paragraphId: 'heading', paragraphStyle: { headingId: 'heading', namedStyleType: NamedStyleType.HEADING_1 } },
+            ],
+        };
+        const before = structuredClone(body);
+        const result = buildTableOfContentsBody(body, toc, () => undefined, () => 'link', { styles: { 12: { name: 'toc 1', type: DocStyleType.paragraph } } })!;
+        expect(result.dataStream).toBe('\u001FHeading\r\u001E');
+        expect(result.paragraphs![0].styleId).toBe(styleId === 'TOC1' ? 'TOC1' : '12');
+        expect(result.paragraphs![0].paragraphStyle?.textStyle?.caps).toBe(styleId !== 'Normal' ? true : undefined);
+        expect(body).toEqual(before);
+    });
+
+    it.each(['TOCHeading', 'af7'])('preserves a leading paragraph break without copying the heading before the field (%s)', (styleId) => {
+        const { body, toc } = createBody();
+        const prefix = 'Contents';
+        body.dataStream = `${prefix}\u001F\rOld\r\u001EHeading One\r\n`;
+        toc.startIndex = prefix.length;
+        toc.endIndex = body.dataStream.indexOf('\u001E');
+        body.paragraphs = [
+            { startIndex: prefix.length + 1, paragraphId: 'title', styleId, paragraphStyle: { outlineLevel: 9 } },
+            { startIndex: toc.endIndex - 1, paragraphId: 'entry', styleId: 'TOC1' },
+            { startIndex: body.dataStream.lastIndexOf('\r'), paragraphId: 'heading', paragraphStyle: { headingId: 'heading', outlineLevel: 0 } },
+        ];
+        const result = buildTableOfContentsBody(body, toc, () => undefined, () => 'link', { showPageNumbers: false, styles: { af7: { name: 'TOC Heading', type: DocStyleType.paragraph } } })!;
+        expect(result.dataStream).toBe('\u001F\rHeading One\r\u001E');
+        expect(result.paragraphs![0]).toMatchObject({ startIndex: 1, styleId, paragraphStyle: { outlineLevel: 9 } });
+    });
+
+    it('builds supplied caption entries with printed page labels and supports a pageless directory', () => {
+        const { body, toc } = createBody();
+        toc.properties!.instruction = 'TOC \\c "Figure" \\h';
+        const entries = [{ text: 'Figure A.1: Results', textRuns: [{ st: 12, ed: 18, ts: { caps: true } }], startOffset: toc.endIndex + 1, level: 1, bookmarkId: '_Figure1', headingId: '_Figure1', paragraph: body.paragraphs![1] }];
+        let next = 0;
+        const paged = buildTableOfContentsBody(body, toc, () => 'iv', () => `caption-${next++}`, { entries });
+        expect(paged?.dataStream).toContain('Figure A.1: Results\t\u001Fiv\u001E');
+        expect(paged?.textRuns).toEqual([{ st: 13, ed: 19, ts: { caps: true } }]);
+        const pageless = buildTableOfContentsBody(body, toc, () => undefined, () => `caption-${next++}`, { entries, showPageNumbers: false });
+        expect(pageless?.dataStream).toBe('\u001FFigure A.1: Results\r\u001E');
+        expect(pageless?.textRuns).toEqual(paged?.textRuns);
+    });
+
     it('rejects a locked update before acquiring the layout renderer or modifying the document', async () => {
         const univer = new Univer();
         try {
@@ -240,7 +519,7 @@ describe('table of contents body builder', () => {
         }, {
             indentStart: { v: 18 },
             tabStops: [{ offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT }],
-        }]);
+        }, { outlineLevel: 9 }]);
     });
 
     it('does not create an empty field when no matching headings exist', () => {
@@ -257,6 +536,31 @@ describe('table of contents body builder', () => {
         };
 
         expect(countTableOfContentsHeadings(body, 3)).toBe(0);
+        expect(buildTableOfContentsBody(body, toc, () => 1)).toBeNull();
+    });
+
+    it('reads imported heading styles without rewriting heading IDs and honors outline exclusion', () => {
+        const body: IDocumentBody = {
+            dataStream: 'Imported heading\rExcluded heading\r\n',
+            paragraphs: [
+                { startIndex: 16, paragraphId: 'imported-heading', styleId: 'ImportedHeading' },
+                { startIndex: 33, paragraphId: 'excluded-heading', styleId: 'ImportedHeading', paragraphStyle: { outlineLevel: 9 } },
+            ],
+        };
+        const styles = { ImportedHeading: { name: 'Imported Heading', type: DocStyleType.paragraph, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } } };
+        const before = JSON.stringify(body);
+        const toc: ICustomRange = { startIndex: 0, endIndex: 0, rangeId: 'new-imported-toc', rangeType: CustomRangeType.FIELD, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-3" \\h' } };
+        expect(countTableOfContentsHeadings(body, 3, styles)).toBe(1);
+        const result = buildTableOfContentsBody(body, toc, () => 4, undefined, { styles })!;
+        expect(result.dataStream).toContain('Imported heading');
+        expect(result.dataStream).not.toContain('Excluded heading');
+        expect(result.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK)?.properties?.headingId).toBe('imported-heading');
+        expect(JSON.stringify(body)).toBe(before);
+    });
+
+    it('retains caption directories for their reference provider instead of replacing them with headings', () => {
+        const { body, toc } = createBody();
+        toc.properties!.instruction = 'TOC \\c "Figure" \\h';
         expect(buildTableOfContentsBody(body, toc, () => 1)).toBeNull();
     });
 
@@ -284,10 +588,20 @@ describe('table of contents body builder', () => {
 
         const result = buildTableOfContentsBody(body, toc, () => undefined, () => 'generated')!;
 
-        expect(result.dataStream).toBe('\u001FContents\rHeading One\r\u001E');
+        expect(result.dataStream).toBe('Contents\r\u001FHeading One\r\u001E\r');
         expect(result.paragraphs?.[0]).toEqual(expect.objectContaining({ styleId: 'TOCHeading' }));
         expect(result.customRanges?.some((range) => range.properties?.fieldType === 'PAGEREF')).toBe(false);
-        expect(result.customRanges?.find((range) => range.rangeId === 'new-toc')?.properties?.cachedResult).toBe('Contents\rHeading One\r');
+        const field = result.customRanges!.find((range) => range.rangeId === 'new-toc')!;
+        expect(field.properties?.cachedResult).toBe('Heading One\r');
+        expect(field.startIndex).toBe('Contents\r'.length);
+        expect(result.dataStream.slice(field.endIndex + 1)).toBe('\r');
+
+        const updated = buildTableOfContentsBody(result, field, () => undefined, () => 'regenerated', {
+            showPageNumbers: false,
+            entries: [{ headingId: 'heading-1', level: 1, startOffset: 0, text: 'Heading One', paragraph: body.paragraphs![0] }],
+        })!;
+        expect(updated.dataStream).toBe('\u001FHeading One\r\u001E');
+        expect(updated.paragraphs?.some((paragraph) => paragraph.styleId === 'TOCHeading')).toBe(false);
     });
 
     it('preserves an imported TOCHeading title when OOXML has no Univer title property', () => {
@@ -381,7 +695,7 @@ describe('table of contents body builder', () => {
 
         const result = buildTableOfContentsBody(body, toc, () => 4, () => 'generated', { tabStopOffset: 414 })!;
 
-        expect(result.dataStream).toBe('\u001FHeading One \u001F4\u001E\r\u001E');
+        expect(result.dataStream).toBe('\u001FHeading One \u001F4\u001E\r\u001E\r');
         expect(result.paragraphs?.[0].paragraphStyle?.tabStops).toBeUndefined();
     });
 

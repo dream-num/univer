@@ -14,11 +14,32 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, SpecialCharacterKind } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { getCustomRangeStyle } from '../custom-range';
 
 describe('custom range style', () => {
+    it.each(Object.values(SpecialCharacterKind))('keeps native character %s in its authored text style', (kind) => {
+        expect(getCustomRangeStyle({
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            properties: { kind },
+        } as never)).toBeNull();
+    });
+
+    it('keeps ordinary custom and hyperlink ranges styled when their properties resemble a character atom', () => {
+        for (const range of [
+            { rangeType: CustomRangeType.CUSTOM, wholeEntity: false, properties: { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN } },
+            { rangeType: CustomRangeType.HYPERLINK, wholeEntity: true, properties: { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN } },
+            { rangeType: CustomRangeType.CUSTOM, wholeEntity: true, properties: { kind: 'custom-chip' } },
+        ]) {
+            expect(getCustomRangeStyle(range as never)).toEqual({
+                ul: { s: BooleanNumber.TRUE },
+                cl: { rgb: 'blue.600' },
+            });
+        }
+    });
+
     it('renders hyperlink-like ranges with the theme blue token and an underline', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.HYPERLINK } as never)).toEqual({
             ul: { s: BooleanNumber.TRUE },

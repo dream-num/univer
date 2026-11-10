@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentDataModel,
+    DocumentFlavor,
+    LocaleService,
+    LocaleType,
+    PositionedObjectLayoutType,
+    Univer,
+} from '@univerjs/core';
 import {
     DocumentSkeleton,
     DocumentSkeletonPageType,
+    DocumentViewModel,
+    FontCache,
     PageLayoutType,
     setDocsTableRenderViewportProvider,
     Transform,
 } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -34,6 +45,193 @@ import {
 import { getAnchorBounding, getLineBounding } from '../text-range';
 
 describe('selection convert text range helpers', () => {
+    it.each(([undefined, 'hard', 'rendered'] as const).flatMap((pageBreak) => [false, true].map((collapsed) => ({ pageBreak, collapsed }))))('uses visible field metrics after a hidden boundary (page break: $pageBreak, collapsed: $collapsed)', ({ pageBreak, collapsed }) => {
+        const previousContext = Reflect.get(FontCache, '_context');
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText: (text: string) => ({
+                width: text.length * 8,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 2,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 2,
+            }),
+        } as unknown as CanvasRenderingContext2D);
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        const prefix = pageBreak
+            ? `${DataStreamTreeTokenType.CUSTOM_RANGE_START}Before\r${DataStreamTreeTokenType.PAGE_BREAK}`
+            : DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        const dataStream = `${prefix}i${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r\n`;
+        const model = new DocumentDataModel({
+            id: 'reference-marker-caret',
+            body: {
+                dataStream,
+                renderedPageBreaks: pageBreak === 'rendered' ? [prefix.length - 1] : undefined,
+                paragraphs: [
+                    ...(pageBreak ? [{ startIndex: prefix.indexOf('\r'), paragraphId: 'before' }] : []),
+                    { startIndex: dataStream.length - 2, paragraphId: 'reference' },
+                ],
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section' }],
+                customRanges: [{
+                    rangeId: 'reference',
+                    rangeType: CustomRangeType.FIELD,
+                    startIndex: 0,
+                    endIndex: prefix.length + 1,
+                    properties: pageBreak
+                        ? { fieldType: 'TOC', instruction: 'TOC \\o "1-3"', cachedResult: 'Before\r\fi' }
+                        : { fieldType: 'PAGE', instruction: 'PAGE', cachedResult: 'i' },
+                }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 300 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const view = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(view, locale);
+        try {
+            skeleton.calculate();
+            const positions = findDocRangeNodePositions(skeleton, prefix.length, prefix.length)!;
+            const start = positions.startPosition;
+            const glyph = skeleton.getSkeletonData()!.pages[start.page].sections[start.section].columns[start.column].lines[start.line].divides[start.divide].glyphGroup[start.glyph];
+            const converter = new NodePositionConvertToCursor({
+                docsLeft: 0,
+                docsTop: 0,
+                pageLayoutType: PageLayoutType.VERTICAL,
+                pageMarginLeft: 0,
+                pageMarginTop: 0,
+            } as never, skeleton);
+            const result = converter.getRangePointData(start, collapsed ? start : positions.endPosition);
+            const bounds = getAnchorBounding(result.contentBoxPointGroup);
+
+            expect(glyph.content).toBe('i');
+            expect(start.page).toBe(pageBreak === 'hard' ? 1 : 0);
+            expect(bounds.height).toBeGreaterThan(0);
+            expect(bounds.height).toBeCloseTo(
+                (glyph.bBox.fontAscent ?? glyph.bBox.ba) + (glyph.bBox.fontDescent ?? glyph.bBox.bd)
+            );
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            view.dispose();
+            model.dispose();
+            univer.dispose();
+            canvas.mockRestore();
+            Reflect.set(FontCache, '_context', previousContext);
+            FontCache.invalidateMetrics(() => true);
+        }
+    });
+
+    it.each((['header', 'footer'] as const).flatMap((kind) =>
+        ([undefined, 'editor', 'printing'] as const).flatMap((mode) =>
+            [false, true].map((outsideViewport) => ({ kind, mode, outsideViewport }))
+        )
+    ))('keeps $kind table geometry in its render mode ($mode, outside viewport: $outsideViewport)', ({ kind, mode, outsideViewport }) => {
+        const viewport = vi.fn(() => ({ contentWidth: 500, scrollLeft: 30, viewportWidth: 100 }));
+        setDocsTableRenderViewportProvider(viewport);
+        const glyphLeft = outsideViewport ? 250 : 50;
+        const createStory = (type: DocumentSkeletonPageType, sourceStart: number) => {
+            const cell = {
+                left: 0,
+                marginLeft: 0,
+                marginTop: 0,
+                sections: [{
+                    top: 0,
+                    columns: [{
+                        left: 0,
+                        lines: [{
+                            top: 0,
+                            asc: 10,
+                            lineHeight: 20,
+                            marginTop: 0,
+                            marginBottom: 0,
+                            paddingTop: 0,
+                            divides: [{
+                                st: sourceStart,
+                                left: 0,
+                                paddingLeft: 0,
+                                glyphGroup: [{ count: 1, glyphType: 'LETTER', left: glyphLeft, width: 10, bBox: { ba: 8, bd: 2 } }],
+                            }],
+                        }],
+                    }],
+                }],
+            };
+            const row = { cells: [cell], index: 0, top: 0, height: 20 };
+            const table = { tableId: 'shared-table', left: 7, top: 4, rows: [row] };
+            const story = {
+                type,
+                pageWidth: 420,
+                pageHeight: 100,
+                height: 20,
+                marginLeft: 0,
+                marginTop: type === DocumentSkeletonPageType.HEADER ? 12 : 0,
+                marginBottom: 30,
+                sections: [],
+                skeTables: new Map([['shared-table', table]]),
+            };
+            (cell as { parent?: unknown }).parent = row;
+            (row as { parent?: unknown }).parent = table;
+            (table as { parent?: unknown }).parent = story;
+            return story;
+        };
+        const header = createStory(DocumentSkeletonPageType.HEADER, 7);
+        const footer = createStory(DocumentSkeletonPageType.FOOTER, 9);
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [{ pageWidth: 600, pageHeight: 500, marginLeft: 50, marginTop: 100, headerId: 'header', footerId: 'footer', skeTables: new Map() }],
+                skeHeaders: new Map([['header', new Map([[600, header]])]]),
+                skeFooters: new Map([['footer', new Map([[600, footer]])]]),
+            }),
+            getViewModel: () => ({ getDataModel: () => ({ getUnitId: () => 'unit' }) }),
+        };
+        const position = {
+            page: 0,
+            pageType: DocumentSkeletonPageType.CELL,
+            segmentPage: 0,
+            segmentId: kind,
+            path: ['skeTables', 'shared-table', 'rows', 0, 'cells', 0],
+            section: 0,
+            column: 0,
+            line: 0,
+            divide: 0,
+            glyph: 0,
+        };
+        const converter = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            pageLayoutType: 0,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        } as never, skeleton as never, mode);
+
+        const result = converter.getRangePointData({ ...position, isBack: true }, { ...position, isBack: false });
+
+        expect(result.cursorList[0].startOffset).toBe(kind === 'header' ? 7 : 9);
+        expect(viewport).toHaveBeenCalledTimes(mode === 'printing' ? 0 : 1);
+        if (outsideViewport && mode !== 'printing') {
+            expect(result.contentBoxPointGroup).toEqual([]);
+            return;
+        }
+        expect(result.contentBoxPointGroup).toHaveLength(1);
+        const bounds = getAnchorBounding(result.contentBoxPointGroup);
+        expect(bounds.left).toBe(50 + 7 + glyphLeft - (mode === 'printing' ? 0 : 30));
+        if (kind === 'header') {
+            expect(bounds.top).toBeLessThan(100);
+        } else {
+            expect(bounds.top).toBeGreaterThan(400);
+        }
+    });
+
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
     });
@@ -130,7 +328,9 @@ describe('selection convert text range helpers', () => {
         ]);
     });
 
-    it.each([false, true])('projects cell cursors through the table viewport (vertical: %s)', (vertical) => {
+    it.each([false, true].flatMap((vertical) =>
+        ([undefined, 'printing'] as const).map((mode) => ({ vertical, mode }))
+    ))('projects body cell cursors in their render mode (vertical: $vertical, mode: $mode)', ({ vertical, mode }) => {
         setDocsTableRenderViewportProvider((unitId, tableId) => {
             if (unitId !== 'unit-1' || tableId !== 'table-1') {
                 return null;
@@ -230,15 +430,16 @@ describe('selection convert text range helpers', () => {
             pageLayoutType: 0,
             pageMarginLeft: 0,
             pageMarginTop: 0,
-        } as never, skeleton as never);
+        } as never, skeleton as never, mode);
 
         const result = convertor.getRangePointData(position, position);
 
         const bounds = getAnchorBounding(result.contentBoxPointGroup);
+        const scrollOffset = mode === 'printing' ? 50 : 0;
         if (vertical) {
-            expect(bounds).toMatchObject({ left: 78, top: 20, width: 10, height: 10 });
+            expect(bounds).toMatchObject({ left: 78 + scrollOffset, top: 20, width: 10, height: 10 });
         } else {
-            expect(bounds.left).toBe(70);
+            expect(bounds.left).toBe(70 + scrollOffset);
         }
     });
 

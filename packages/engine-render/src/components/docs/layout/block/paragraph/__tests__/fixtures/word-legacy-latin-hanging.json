@@ -1,0 +1,761 @@
+{
+    "actualWordObservationSha256": "036e98192b9b8bb780917305521c324b3850e9edd5d219a7f54af521d21db1b3",
+    "actualWordSessionSha256": "2ab33ffe5fd077410a959e57ea9123db620281cff39d3ef7fed64b44593cedf0",
+    "actualNativeModeProofSha256": "7fc52a2d88946f4d830aeccbc3219f31b82223d67ded3cbad4bb6b459fefcd0a",
+    "actualSourceGlyphObservationSha256": "214647e05851efe08b71b6110319907c684da47dfe212a07e2026ac4cb929d0a",
+    "actualSourceLayoutSha256": "36ece5d14bac7901fc88b841da4192dfeafdc55488cc89ae6cdf103bb5610368",
+    "actualCases": 8,
+    "cases": [
+        {
+            "field": "field-17",
+            "mode": 14,
+            "hanging": 0,
+            "actualSameLine": false,
+            "prefixText": "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+            "prefixWidth": 477.59765625000017,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": "p",
+                    "width": 7.705729166666666
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "c",
+                    "width": 6.201822916666666
+                },
+                {
+                    "content": "i",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "a",
+                    "width": 7.025390625
+                },
+                {
+                    "content": "l",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "Echeita, G. (2012). Competencias esenciales en la formación inicial de un profesorado inclusivo, un ",
+                "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+                "especiales. Tendencias Pedagógicas UAM. Núm. 19, 17. "
+            ],
+            "actualInputSha256": "985f613b50bf7e9e357b4876e361f6141e95b025b27ac980b9395bb338ddacac",
+            "actualWordPdfSha256": "fd6de7b0066ed8207e38a7a1a882a8a3b6726e5e9dbafadd375b71fc33cb61a6",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.705729166666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 3,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.297526041666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-17",
+            "mode": 14,
+            "hanging": 1,
+            "actualSameLine": true,
+            "prefixText": "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+            "prefixWidth": 477.59765625000017,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": "p",
+                    "width": 7.705729166666666
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "c",
+                    "width": 6.201822916666666
+                },
+                {
+                    "content": "i",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "a",
+                    "width": 7.025390625
+                },
+                {
+                    "content": "l",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "Echeita, G. (2012). Competencias esenciales en la formación inicial de un profesorado inclusivo, un ",
+                "proyecto de la agenda europea para el desarrollo de las necesidades educativas especiales. ",
+                "Tendencias Pedagógicas UAM. Núm. 19, 17. "
+            ],
+            "actualInputSha256": "70bb05df3463ebdd1b42d36db5bbfc854d140d541d488d6e70e325c679759020",
+            "actualWordPdfSha256": "97e4f2e9c32474d9e25c9651b20f9271a0d29e5aefbc99784fffd6593952ed5d",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.705729166666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 3,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.297526041666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-17",
+            "mode": 15,
+            "hanging": 0,
+            "actualSameLine": false,
+            "prefixText": "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+            "prefixWidth": 477.59765625000017,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": "p",
+                    "width": 7.705729166666666
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "c",
+                    "width": 6.201822916666666
+                },
+                {
+                    "content": "i",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "a",
+                    "width": 7.025390625
+                },
+                {
+                    "content": "l",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "Echeita, G. (2012). Competencias esenciales en la formación inicial de un profesorado inclusivo, un ",
+                "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+                "especiales. Tendencias Pedagógicas UAM. Núm. 19, 17. "
+            ],
+            "actualInputSha256": "4779af31df8090a3cede9c93483f03d730d340c87d15c08b07c28942a98db28c",
+            "actualWordPdfSha256": "3bd0c363dabd30f35d75f6997099ff2c36e85802bf654ae14525dcb9d36f8132",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.705729166666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 3,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.297526041666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-17",
+            "mode": 15,
+            "hanging": 1,
+            "actualSameLine": false,
+            "prefixText": "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+            "prefixWidth": 477.59765625000017,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": "p",
+                    "width": 7.705729166666666
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "c",
+                    "width": 6.201822916666666
+                },
+                {
+                    "content": "i",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "a",
+                    "width": 7.025390625
+                },
+                {
+                    "content": "l",
+                    "width": 3.3658854166666665
+                },
+                {
+                    "content": "e",
+                    "width": 7.297526041666666
+                },
+                {
+                    "content": "s",
+                    "width": 5.736328125
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "Echeita, G. (2012). Competencias esenciales en la formación inicial de un profesorado inclusivo, un ",
+                "proyecto de la agenda europea para el desarrollo de las necesidades educativas ",
+                "especiales. Tendencias Pedagógicas UAM. Núm. 19, 17. "
+            ],
+            "actualInputSha256": "0d8aa9892cc46a611195a310ed375c2ffb25069fd22ed5efe91545e2722da8fb",
+            "actualWordPdfSha256": "e2c6084a45048349a3a1354760ac9cc3d0bf4e193d4fd161331dd3031f4604e5",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.705729166666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 3,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.297526041666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 7,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-26",
+            "mode": 14,
+            "hanging": 0,
+            "actualSameLine": false,
+            "prefixText": "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+            "prefixWidth": 517.8665364583333,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "1",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "7",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "2",
+                    "width": 7.43359375
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "García, B. &. (2012). Los comienzos de la danza Contact Imprisation en España (1980-1990). ",
+                "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+                "172. "
+            ],
+            "actualInputSha256": "9441b562ad92060a3f53e2c1cba3df291a0f74a1a2013293479e1d98551e54dc",
+            "actualWordPdfSha256": "10d4175d8309bf40e45ef4887cd02cc6f7342d93da90b5def0605b589cfc9b56",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "italic normal 11pt Calibri, sans-serif",
+                    "fontString": "italic normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.963541666666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.43359375,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-26",
+            "mode": 14,
+            "hanging": 1,
+            "actualSameLine": true,
+            "prefixText": "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+            "prefixWidth": 517.8665364583333,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "1",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "7",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "2",
+                    "width": 7.43359375
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "García, B. &. (2012). Los comienzos de la danza Contact Imprisation en España (1980-1990). ",
+                "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., 172. "
+            ],
+            "actualInputSha256": "87b2c831a2155481d2d069d0eb7e5cad818caac42a5ecda395e6b81f3a7e6687",
+            "actualWordPdfSha256": "23fc382246f69e184ccdc665b42765513e8f227ecceef2fb2f1bb22cd4c837b4",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "italic normal 11pt Calibri, sans-serif",
+                    "fontString": "italic normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.963541666666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.43359375,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-26",
+            "mode": 15,
+            "hanging": 0,
+            "actualSameLine": false,
+            "prefixText": "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+            "prefixWidth": 517.8665364583333,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "1",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "7",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "2",
+                    "width": 7.43359375
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "García, B. &. (2012). Los comienzos de la danza Contact Imprisation en España (1980-1990). ",
+                "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+                "172. "
+            ],
+            "actualInputSha256": "c793a6ee2ab9fb09ae608851df6d3f4073f48730f56557ffa936d5db951e9556",
+            "actualWordPdfSha256": "74bfa431373b2ac125826e53982af8a0a65f9c55a79997d4a9c24f567c2da264",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "italic normal 11pt Calibri, sans-serif",
+                    "fontString": "italic normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.963541666666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.43359375,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        },
+        {
+            "field": "field-26",
+            "mode": 15,
+            "hanging": 1,
+            "actualSameLine": false,
+            "prefixText": "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+            "prefixWidth": 517.8665364583333,
+            "divideWidth": 541.2,
+            "lang": "es-CO",
+            "altLang": "en-US",
+            "glyphs": [
+                {
+                    "content": "1",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "7",
+                    "width": 7.43359375
+                },
+                {
+                    "content": "2",
+                    "width": 7.43359375
+                },
+                {
+                    "content": ".",
+                    "width": 3.702473958333333
+                }
+            ],
+            "actualWordLines": [
+                "García, B. &. (2012). Los comienzos de la danza Contact Imprisation en España (1980-1990). ",
+                "Revista Internacional de Medicina y Ciencias de la Actividad Física y el Deporte vol. 14., ",
+                "172. "
+            ],
+            "actualInputSha256": "c8418742e2867df1518cde312ce3f0bc8003ff8eff11a6047dd32e3cc433ddbd",
+            "actualWordPdfSha256": "df8bee3930b48ec2500c99f5bafdfa789db05e1ee36d8af863c06436d5738ed4",
+            "prefixMetrics": {
+                "fontStyle": {
+                    "fontCache": "italic normal 11pt Calibri, sans-serif",
+                    "fontString": "italic normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.963541666666666,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            },
+            "wordMetrics": {
+                "fontStyle": {
+                    "fontCache": "normal normal 11pt Calibri, sans-serif",
+                    "fontString": "normal normal 11pt Calibri, sans-serif, \"Helvetica Neue\", Helvetica, Arial, \"PingFang SC\", \"Hiragino Sans GB\", \"Heiti SC\", \"Microsoft YaHei\", \"WenQuanYi Micro Hei\", sans-serif ",
+                    "fontSize": 11,
+                    "originFontSize": 11,
+                    "fontFamily": "Calibri, sans-serif"
+                },
+                "bBox": {
+                    "width": 7.43359375,
+                    "ba": 13.96484375,
+                    "bd": 3.938802083333333,
+                    "aba": 9,
+                    "abd": 0,
+                    "sp": 9,
+                    "sbr": 0.6,
+                    "spr": 0.6,
+                    "sbo": 2.538,
+                    "spo": 7.2,
+                    "normalLineHeight": 17.907999999999998
+                }
+            }
+        }
+    ]
+}

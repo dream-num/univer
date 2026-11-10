@@ -14,36 +14,10 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    ICommand,
-    IDocumentBody,
-    IMutationInfo,
-    IParagraphBorder,
-    ITextRangeParam,
-} from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import {
-    BuildTextUtils,
-    CommandType,
-    DataStreamTreeTokenType,
-    DocumentFlavor,
-    getRichTextEditPath,
-    ICommandService,
-    IUniverInstanceService,
-    JSONX,
-    PresetListType,
-    TextX,
-    TextXActionType,
-    UniverInstanceType,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
-import {
-    DocSelectionManagerService,
-    generateParagraphs,
-    RichTextEditingMutation,
-    SetHeadingCollapsedCommand,
-} from '@univerjs/docs';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, DocumentFlavor, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, resolveDocumentParagraphBullet, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { DocSelectionManagerService, generateParagraphs, RichTextEditingMutation, SetHeadingCollapsedCommand } from '@univerjs/docs';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { getTextRunAtPosition, isTopLevelStructuralGap } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -219,7 +193,8 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         }
 
         const preserveEmptyParagraphStyle = collapsed && isAtParagraphEnd;
-        const resetParagraphType = prevParagraph?.bullet?.listType === PresetListType.CHECK_LIST_CHECKED ||
+        const previousBullet = prevParagraph && resolveDocumentParagraphBullet(docDataModel.getSnapshot(), prevParagraph);
+        const resetParagraphType = previousBullet?.listType === PresetListType.CHECK_LIST_CHECKED ||
             prevParagraph?.paragraphStyle?.headingId;
 
         if (prevParagraph && (preserveEmptyParagraphStyle || resetParagraphType)) {
@@ -249,6 +224,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
                             paragraphs: [
                                 {
                                     ...prevParagraph,
+                                    styleId: isAtParagraphEnd && prevParagraph.paragraphStyle?.headingId ? undefined : prevParagraph.styleId,
                                     paragraphStyle: {
                                         ...prevParagraph.paragraphStyle,
                                         ...isAtParagraphEnd

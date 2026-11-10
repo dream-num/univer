@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { BooleanNumber, DocumentFlavor, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
@@ -45,6 +45,18 @@ function createTopBottomDrawing(top: number, height: number, angle = 0) {
 }
 
 describe('line model', () => {
+    it('includes legacy paragraph spacing only in top-bottom drawing collisions', () => {
+        const drawing = createTopBottomDrawing(60, 80);
+        const page = { skeDrawings: new Map([['picture', drawing]]), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(16, 32, page, null, null, 0, 100)).toBe(32);
+        expect(calculateLineTopByDrawings(16, 32, page, null, null, 0, 100, 0, 0, 16)).toBe(142);
+        const tablePage = {
+            skeDrawings: new Map(),
+            skeTables: new Map([['table', { left: 0, top: 60, width: 100, height: 80, tableSource: { textWrap: TableTextWrapType.NONE } }]]),
+        } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(16, 32, tablePage, null, null, 0, 100, 0, 0, 16)).toBe(32);
+    });
+
     it.each([
         { flavor: DocumentFlavor.TRADITIONAL, left: -10, right: 0, expectedLeft: -10, expectedRight: 100 },
         { flavor: DocumentFlavor.TRADITIONAL, left: 0, right: -15, expectedLeft: 0, expectedRight: 115 },

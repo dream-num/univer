@@ -348,7 +348,14 @@ export class DocDrawingAddRemoveController extends Disposable {
 
         const { subUnitId, redo: op, objects } = jsonOp;
 
-        drawingManagerService.applyJson1(unitId, subUnitId, op);
+        // Readonly reference layout can already own these IDs in the render cache.
+        for (const drawing of drawings) {
+            const registered = { ...drawing, unitId, subUnitId };
+            const renderOp = (drawingManagerService.getDrawingByParam(registered)
+                ? drawingManagerService.getBatchUpdateOp([registered])
+                : drawingManagerService.getBatchAddOp([registered])) as IDrawingJsonUndo1;
+            drawingManagerService.applyJson1(unitId, subUnitId, renderOp.redo);
+        }
         docDrawingService.applyJson1(unitId, subUnitId, op);
 
         drawingManagerService.addNotification(objects as IDrawingSearch[]);

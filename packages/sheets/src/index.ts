@@ -244,6 +244,7 @@ export type {
     IStyleTypeValue,
 } from './commands/commands/set-style.command';
 export { SetTabColorCommand } from './commands/commands/set-tab-color.command';
+export { SetWorkbookCalculationSettingsCommand } from './commands/commands/set-workbook-calculation-settings.command';
 export { SetWorkbookNameCommand } from './commands/commands/set-workbook-name.command';
 export type { ISetWorkbookNameCommandParams } from './commands/commands/set-workbook-name.command';
 export { SetWorksheetActivateCommand } from './commands/commands/set-worksheet-activate.command';
@@ -412,6 +413,8 @@ export type {
 } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export type { ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';
+export { SetWorkbookCalculationSettingsMutation } from './commands/mutations/set-workbook-calculation-settings.mutation';
+export type { ISetWorkbookCalculationSettingsMutationParams } from './commands/mutations/set-workbook-calculation-settings.mutation';
 export { SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export type { ISetWorkbookNameMutationParams } from './commands/mutations/set-workbook-name.mutation';
 export {
@@ -642,7 +645,7 @@ export {
 export type { MutationsAffectRange } from './services/ref-range/util';
 export * from './services/selections';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
-export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
+export { InterceptCellContentPriority, INTERCEPTOR_POINT, RangeThemeInterceptorId } from './services/sheet-interceptor/interceptor-const';
 export {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,

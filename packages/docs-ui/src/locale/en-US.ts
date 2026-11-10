@@ -54,6 +54,8 @@ const locale = {
             recovering: 'Restoring document layout…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Fullscreen',
             font: 'Font',
             fontSize: 'Font size',
             bold: 'Bold',
@@ -181,6 +183,7 @@ const locale = {
                 sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
+                wordWrap: 'Allow Latin text to wrap in the middle of a word',
                 alignment: 'Alignment',
                 indentation: 'Indentation',
                 left: 'Left',
@@ -239,6 +242,10 @@ const locale = {
             decreaseIndent: 'Decrease indent',
             defaultTextColor: 'Default text color',
             noBackground: 'No background',
+        },
+        heading: {
+            collapse: 'Collapse',
+            expand: 'Expand',
         },
         'page-settings': {
             'document-setting': 'Page Setup',

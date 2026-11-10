@@ -27,6 +27,99 @@ describe('Test unique function', () => {
     const testFunction = new Unique(FUNCTION_NAMES_LOOKUP.UNIQUE);
 
     describe('Unique', () => {
+        it('deduplicates text case-insensitively and preserves the first spelling and order', () => {
+            const array = ArrayValueObject.createByArray([
+                ['Apfel'],
+                ['apfel'],
+                ['Birne'],
+                ['Kiwi'],
+                ['Apfel'],
+            ]);
+
+            expect(getObjectValue(testFunction.calculate(array))).toStrictEqual([
+                ['Apfel'],
+                ['Birne'],
+                ['Kiwi'],
+            ]);
+        });
+
+        it.each([false, true])('compares every cell in a row or column case-insensitively (byCol=%s)', (byCol) => {
+            const values = [
+                ['Apfel', 'Rot'],
+                ['apfel', 'rot'],
+                ['APFEL', 'Grün'],
+                ['Birne', 'ROT'],
+            ];
+            const expected = byCol
+                ? [['Apfel', 'APFEL', 'Birne'], ['Rot', 'Grün', 'ROT']]
+                : [['Apfel', 'Rot'], ['APFEL', 'Grün'], ['Birne', 'ROT']];
+            const array = ArrayValueObject.createByArray(values);
+
+            const result = testFunction.calculate(byCol ? array.transpose() : array, BooleanValueObject.create(byCol));
+
+            expect(getObjectValue(result)).toStrictEqual(expected);
+        });
+
+        it.each([false, true])('excludes all case variants when exactlyOnce is true (byCol=%s)', (byCol) => {
+            const array = ArrayValueObject.createByArray([
+                ['Apfel'],
+                ['apfel'],
+                ['Birne'],
+                ['Kiwi'],
+                ['Apfel'],
+            ]);
+
+            const result = testFunction.calculate(
+                byCol ? array.transpose() : array,
+                BooleanValueObject.create(byCol),
+                BooleanValueObject.create(true)
+            );
+
+            expect(getObjectValue(result)).toStrictEqual(byCol ? [['Birne', 'Kiwi']] : [['Birne'], ['Kiwi']]);
+        });
+
+        it('returns CALC when every value has a case-insensitive duplicate and exactlyOnce is true', () => {
+            const array = ArrayValueObject.createByArray([['Apfel'], ['apfel']]);
+
+            const result = testFunction.calculate(array, BooleanValueObject.create(false), BooleanValueObject.create(true));
+
+            expect(getObjectValue(result)).toBe(ErrorType.CALC);
+        });
+
+        it('treats wildcard characters as literal text when deduplicating', () => {
+            const array = ArrayValueObject.createByArray([
+                ['A*'],
+                ['a*'],
+                ['Apfel'],
+                ['A?'],
+                ['a?'],
+                ['Ab'],
+            ]);
+
+            expect(getObjectValue(testFunction.calculate(array))).toStrictEqual([
+                ['A*'],
+                ['Apfel'],
+                ['A?'],
+                ['Ab'],
+            ]);
+        });
+
+        it('uses shared text normalization while retaining accent distinctions', () => {
+            const array = ArrayValueObject.createByArray([
+                ['Straße'],
+                ['STRASSE'],
+                ['É'],
+                ['e\u0301'],
+                ['e'],
+            ]);
+
+            expect(getObjectValue(testFunction.calculate(array))).toStrictEqual([
+                ['Straße'],
+                ['É'],
+                ['e'],
+            ]);
+        });
+
         it('Value is normal', async () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

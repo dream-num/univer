@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: '문서 레이아웃을 복구하는 중…',
         },
         toolbar: {
+            zoom: '확대/축소',
+            fullscreen: '전체 화면',
             font: '글꼴',
             fontSize: '글꼴 크기',
             bold: '굵게',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: '구역 설정',
             },
             paragraphSetting: {
+                wordWrap: '영어 단어 잘림 허용',
                 alignment: '정렬',
                 indentation: '들여쓰기',
                 left: '왼쪽',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: '들여쓰기 줄이기',
             defaultTextColor: '기본 텍스트 색상',
             noBackground: '배경 없음',
+        },
+        heading: {
+            collapse: '접기',
+            expand: '펼치기',
         },
         'page-settings': {
             'document-setting': '문서 설정',

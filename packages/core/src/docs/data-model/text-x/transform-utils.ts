@@ -260,9 +260,7 @@ function transformCustomRanges(
     }
 }
 
-// At present, only the two properties of paragraphStyle and bullet are handled,
-// paragraphStyle is treated separately, while bullet is treated as a whole because
-// the properties in bullet are related
+// Paragraph styles merge property-by-property; numbering and other paragraph metadata remain atomic.
 
 // eslint-disable-next-line complexity, max-lines-per-function
 function transformParagraph(
@@ -358,6 +356,24 @@ function transformParagraph(
                     paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
                 }
             }
+        }
+    }
+
+    for (const key of ['headingCollapsed', 'styleId', 'sourceBullet', 'directBullet'] as const) {
+        const origin = originParagraph[key];
+        const target = targetParagraph[key];
+        let value: IParagraph[typeof key];
+        if (originCoverType === UpdateDocsAttributeType.REPLACE && targetCoverType === UpdateDocsAttributeType.REPLACE) {
+            value = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED ? origin : target;
+        } else if (origin === undefined) {
+            value = target;
+        } else if (originCoverType === UpdateDocsAttributeType.REPLACE || targetCoverType === UpdateDocsAttributeType.REPLACE) {
+            value = transformType === TextXTransformType.COVER && target !== undefined ? target : origin;
+        } else if (transformType === TextXTransformType.COVER) {
+            value = target;
+        }
+        if (value !== undefined) {
+            Object.assign(paragraph, { [key]: Tools.deepClone(value) });
         }
     }
 

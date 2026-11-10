@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -28,20 +27,20 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IDescriptionService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
+import { IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsFormulaBaseConfig } from './config/config';
 import pkg from '../package.json';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginBaseConfig,
-    defaultPluginRemoteConfig,
     PLUGIN_CONFIG_KEY_BASE,
-    PLUGIN_CONFIG_KEY_REMOTE,
 } from './config/config';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
+import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { ImageFormulaCellInterceptorController } from './controllers/image-formula-cell-interceptor.controller';
 import {
@@ -55,41 +54,8 @@ import { UpdateFormulaController } from './controllers/update-formula.controller
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import {
     IRemoteRegisterFunctionService,
-    RemoteRegisterFunctionService,
     RemoteRegisterFunctionServiceName,
 } from './services/remote/remote-register-function.service';
-
-@DependentOn(UniverFormulaEnginePlugin)
-export class UniverRemoteSheetsFormulaPlugin extends Plugin {
-    static override pluginName = 'SHEET_FORMULA_REMOTE_PLUGIN';
-    static override packageName = pkg.name;
-    static override version = pkg.version;
-    static override type = UniverInstanceType.UNIVER_SHEET;
-
-    constructor(
-        private readonly _config: Partial<IUniverSheetsFormulaRemoteConfig> = defaultPluginRemoteConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
-    ) {
-        super();
-
-        // Manage the plugin configuration.
-        const { ...rest } = merge(
-            {},
-            defaultPluginRemoteConfig,
-            this._config
-        );
-        this._configService.setConfig(PLUGIN_CONFIG_KEY_REMOTE, rest);
-    }
-
-    override onStarting(): void {
-        this._injector.add([RemoteRegisterFunctionService]);
-        this._injector.get(IRPCChannelService).registerChannel(
-            RemoteRegisterFunctionServiceName,
-            fromModule(this._injector.get(RemoteRegisterFunctionService))
-        );
-    }
-}
 
 @DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
@@ -129,6 +95,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateDefinedNameController],
             [SuperTableController],
             [FormulaAutoFillController],
+            [FormulaReorderController],
             [UnitQualifierRenameController],
         ];
 
@@ -137,7 +104,9 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         if (this._config.notExecuteFormula) {
             const rpcChannelService = j.get(IRPCChannelService);
             dependencies.push([IRemoteRegisterFunctionService, {
-                useFactory: () => toModule<IRemoteRegisterFunctionService>(rpcChannelService.requestChannel(RemoteRegisterFunctionServiceName)),
+                useFactory: function createChannelService() {
+                    return toModule<IRemoteRegisterFunctionService>(rpcChannelService.requestChannel(RemoteRegisterFunctionServiceName));
+                },
             }]);
         }
 
@@ -157,6 +126,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [UpdateDefinedNameController],
             [FormulaAutoFillController],
+            [FormulaReorderController],
             [UnitQualifierRenameController],
             [SheetFormulaCalculationResultApplyController],
         ]);

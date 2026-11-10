@@ -15,8 +15,8 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverEngineFormulaConfig } from './config/config';
 import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
+import type { IUniverEngineFormulaConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
 import { CalculateController } from './controllers/calculate.controller';
@@ -48,12 +48,12 @@ import { FormulaDataModel } from './models/formula-data.model';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
+import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
+import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import {
     IFormulaExternalReferenceDataLoader,
     NoopFormulaExternalReferenceDataLoader,
 } from './services/external-reference-data-loader.service';
-import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
-import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,

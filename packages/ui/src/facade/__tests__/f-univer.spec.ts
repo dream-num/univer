@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IMenuSchema } from '@univerjs/ui';
 import {
     CommandType,
     ICommandService,
@@ -28,38 +27,29 @@ import {
 import { FUniver } from '@univerjs/core/facade';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import {
-    BuiltInUIPart,
-    ComponentManager,
-    CopyCommand,
-    DesktopDialogService,
-    DesktopMessageService,
-    DesktopRibbonService,
-    DesktopSidebarService,
-    FontService,
-    IDialogService,
-    IFontService,
-    IMenuManagerService,
-    IMessageService,
-    IPlatformService,
-    IRibbonService,
-    IShortcutService,
-    ISidebarService,
-    IUIPartsService,
-    IUIRuntimeScopeService,
-    KeyCode,
-    MenuManagerService,
-    PasteCommand,
-    PlatformService,
-    RibbonStartGroup,
-    ShortcutService,
-    UI_PLUGIN_CONFIG_KEY,
-    UIPartsService,
-    UIRuntimeScopeService,
-} from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IMenuSchema } from '../../services/menu/menu-manager.service';
+import { ComponentManager } from '../../common/component-manager';
+import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { CopyCommand, PasteCommand } from '../../services/clipboard/clipboard.command';
+import { DesktopDialogService } from '../../services/dialog/desktop-dialog.service';
+import { IDialogService } from '../../services/dialog/dialog.service';
+import { FontCategory, FontService, IFontService } from '../../services/font.service';
+import { IMenuManagerService, MenuManagerService } from '../../services/menu/menu-manager.service';
+import { RibbonStartGroup } from '../../services/menu/types';
+import { DesktopMessageService } from '../../services/message/desktop-message.service';
+import { IMessageService } from '../../services/message/message.service';
+import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../services/parts/parts.service';
+import { IPlatformService, PlatformService } from '../../services/platform/platform.service';
+import { DesktopRibbonService, IRibbonService } from '../../services/ribbon/ribbon.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../services/runtime-scope/ui-runtime-scope.service';
+import { KeyCode } from '../../services/shortcut/keycode';
+import { IShortcutService, ShortcutService } from '../../services/shortcut/shortcut.service';
+import { DesktopSidebarService } from '../../services/sidebar/desktop-sidebar.service';
+import { ISidebarService } from '../../services/sidebar/sidebar.service';
 import { FShortcut } from '../f-shortcut';
-import '@univerjs/ui/facade';
+import '../f-enum';
+import '../f-univer';
 
 class FakeShortcutService {
     static dispatched: KeyboardEvent[] = [];
@@ -293,15 +283,39 @@ describe('ui facade', () => {
         const component = () => null;
 
         const disposable = univerAPI.registerComponent('custom-component', component);
-        univerAPI.addFonts([{ value: 'CustomSans', label: 'Custom Sans', category: 'sans-serif' }]);
+        univerAPI.addFonts([{ value: 'CustomSans', label: 'Custom Sans', category: FontCategory.SANS_SERIF }]);
 
         expect(univerAPI.getURL().href).toBe(window.location.href);
         expect(univerAPI.getComponentManager()).toBe(componentManager);
         expect(componentManager.get('custom-component')).toBe(component);
-        expect(fontService.getFontByValue('CustomSans')).toMatchObject({ label: 'Custom Sans' });
+        expect(fontService.getFontByValue('CustomSans')).toMatchObject({ label: 'Custom Sans', category: FontCategory.SANS_SERIF });
 
         disposable.dispose();
         expect(componentManager.get('custom-component')).toBeUndefined();
+    });
+
+    it.each([undefined, {}, { framework: 'react' }, { override: undefined }])('defaults facade registrations to overrides with options %j', (options) => {
+        const manager = univer.__getInjector().get(ComponentManager);
+        const HostPanel = () => null;
+        const BuiltInPanel = () => null;
+        const override = univerAPI.registerComponent('panel', HostPanel, options);
+        manager.register('panel', BuiltInPanel);
+
+        expect(manager.get('panel')).toBe(HostPanel);
+        override.dispose();
+        expect(manager.get('panel')).toBe(BuiltInPanel);
+    });
+
+    it('honors an explicit false override option in facade registrations', () => {
+        const manager = univer.__getInjector().get(ComponentManager);
+        const HostPanel = () => null;
+        const BuiltInPanel = () => null;
+        const override = univerAPI.registerComponent('panel', HostPanel);
+        univerAPI.registerComponent('panel', BuiltInPanel, { override: false });
+
+        expect(manager.get('panel')).toBe(HostPanel);
+        override.dispose();
+        expect(manager.get('panel')).toBe(BuiltInPanel);
     });
 
     it('triggers shortcuts through the active workbook render canvas', () => {

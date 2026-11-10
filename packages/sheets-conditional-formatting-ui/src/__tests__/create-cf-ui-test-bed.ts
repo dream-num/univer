@@ -42,6 +42,7 @@ import {
     RemoveOtherFormulaMutation,
     SetOtherFormulaMutation,
 } from '@univerjs/engine-formula';
+import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
 import {
     BorderStyleManagerService,
     RangeProtectionRuleModel,
@@ -319,6 +320,7 @@ export function createCfUiTestBed() {
     const commandService = get(ICommandService);
     const selectionsService = get(SheetsSelectionsService);
 
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([RegisterOtherFormulaService]);
     injector.add([ConditionalFormattingRuleModel]);

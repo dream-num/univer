@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: '文字の回転',
             },
             toggleGridlines: 'グリッド線の表示/非表示',
+            zoom: 'ズーム',
             fullscreen: '全画面表示',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: '確認',
             cancel: 'キャンセル',
+        },
+        borderStyle: {
+            thin: '細線',
+            hair: '極細線',
+            dotted: '点線',
+            dashed: '破線',
+            dashDot: '一点鎖線',
+            dashDotDot: '二点鎖線',
+            medium: '中太線',
+            mediumDashed: '中太の破線',
+            mediumDashDot: '中太の一点鎖線',
+            mediumDashDotDot: '中太の二点鎖線',
+            thick: '太線',
+            double: '二重線',
         },
         borderLine: {
             borderTop: '上',

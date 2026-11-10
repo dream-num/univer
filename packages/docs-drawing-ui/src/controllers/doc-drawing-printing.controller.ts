@@ -53,7 +53,7 @@ export class DocDrawingPrintingController extends Disposable {
                                 }
                                 const drawing = subUnitData.data[id];
                                 if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
-                                    this._drawingRenderService.renderDrawing(drawing, scene);
+                                    this._drawingRenderService.renderDrawing(drawing, scene, { interactive: false });
                                 }
                             });
                         }

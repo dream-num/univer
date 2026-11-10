@@ -20,7 +20,7 @@ import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, Checkbox, clsx, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import { borderClassName, Checkbox, clsx, Radio, RadioGroup, Select } from '@univerjs/design';
 import {
     CFRuleType,
     CFValueType,
@@ -32,7 +32,8 @@ import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../ColorPicker';
-import { Preview } from '../../Preview';
+import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
+import { RuleNumberInput } from './RuleNumberInput';
 import { previewClassName } from './styles';
 
 const createOptionItem = (text: CFValueType): { label: LocaleKey; value: CFValueType } => ({
@@ -104,7 +105,7 @@ const InputText = (props: {
         );
     }
     return (
-        <InputNumber
+        <RuleNumberInput
             className={className}
             value={Number(value) || 0}
             disabled={disabled}
@@ -287,7 +288,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className={previewClassName}>
-                <Preview
+                <ConditionalFormattingRulePreview
                     rule={getResult({
                         isGradient,
                         minValue,

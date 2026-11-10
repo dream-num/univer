@@ -15,12 +15,14 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import {
     DeleteDirection,
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    NamedStyleType,
     RANGE_DIRECTION,
     RedoCommand,
     UndoCommand,
@@ -35,15 +37,17 @@ import {
     DocStateChangeManagerService,
     DocStateEmitService,
     RichTextEditingMutation,
+    UniverDocsPlugin,
     UpdateTextCommand,
 } from '@univerjs/docs';
 import {
+    CanvasColorService,
+    ICanvasColorService,
     IRenderManagerService,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     RenderManagerService,
 } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-
 import { DocMoveCursorController } from '../../../controllers/doc-move-cursor.controller';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
 import { MoveSelectionOperation } from '../../operations/doc-cursor.operation';
@@ -209,6 +213,46 @@ describe('boundary deletion', () => {
             refresh.unsubscribe();
         } finally {
             skeletonManager?.dispose();
+            univer.dispose();
+        }
+    });
+});
+
+describe('folded heading deletion boundaries', () => {
+    it.each([
+        { command: DeleteRightCommand, offset: 3 },
+        { command: DeleteLeftCommand, offset: 9 },
+    ])('$command.id expands hidden content before deleting', async ({ command, offset }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        univer.registerPlugin(UniverDocsPlugin);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'fold-delete',
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            body: { dataStream: 'One\rText\rTwo\rTail\r\n', paragraphs: [
+                { startIndex: 3, paragraphId: 'one', headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+                { startIndex: 8, paragraphId: 'text' },
+                { startIndex: 12, paragraphId: 'two', paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+                { startIndex: 17, paragraphId: 'tail' },
+            ] },
+        });
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        try {
+            injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
+            const commands = injector.get(ICommandService);
+            commands.registerCommand(command);
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: model.getUnitId(), subUnitId: model.getUnitId() });
+            selections.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true }]);
+            const before = model.getBody()!.dataStream;
+            expect(await commands.executeCommand(command.id)).toBe(true);
+            expect(model.getBody()!.dataStream).toBe(before);
+            expect(model.getBody()!.paragraphs![0].headingCollapsed).toBe(false);
+        } finally {
             univer.dispose();
         }
     });

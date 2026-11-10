@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'ارجاع دوری',
+            title: 'گزینه‌های محاسبه',
+            enable: 'فعال‌سازی محاسبه تکراری',
+            iterations: 'حداکثر تکرار (1–{0})',
+            change: 'حداکثر تغییر',
+            workbook: 'این تنظیمات برای کارپوشه فعلی اعمال می‌شوند.',
+            invalidIterations: 'حداکثر تکرار باید عددی صحیح از 1 تا {0} باشد.',
+            invalidChange: 'حداکثر تغییر باید عددی مثبت و متناهی باشد.',
+            cancel: 'لغو',
+            confirm: 'تأیید',
+            circular: 'این فرمول ارجاع دوری دارد. برای فعال‌سازی محاسبه تکراری گزینه‌های محاسبه را باز کنید.',
+            action: 'محاسبه تکراری',
+        },
+
         shortcut: {
             'quick-sum': 'جمع سریع',
         },

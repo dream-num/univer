@@ -15,15 +15,20 @@
  */
 
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
     createInternalEditorID,
+    CustomDecorationType,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
+    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
     DocumentDataModel,
+    DrawingTypeEnum,
     EDITOR_ACTIVATED,
     FOCUSING_SHAPE_TEXT_EDITOR,
     ICommandService,
@@ -32,6 +37,9 @@ import {
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
     RedoCommand,
     SliceBodyType,
     Tools,
@@ -39,6 +47,7 @@ import {
     Univer,
     UniverInstanceType,
     validateDocBodyStructure,
+    validateDocumentStructure,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -53,6 +62,7 @@ import { UnitAction } from '@univerjs/protocol';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
 import { DocMenuStyleService } from '../../doc-menu-style.service';
@@ -69,10 +79,12 @@ import {
 } from '../doc-paste-mutation-adapter.service';
 import { HtmlToUDMService } from '../html-to-udm/converter';
 import {
+    createInternalClipboardDocData,
     createInternalClipboardFragment,
     DOC_INTERNAL_FRAGMENT_MIME,
     parseInternalClipboardFragment,
 } from '../internal-fragment';
+import { getBodySliceHtml } from '../udm-to-html/convertor';
 import { DocHtmlExportService } from '../udm-to-html/doc-html-export.service';
 
 class TestClipboardInterfaceService {
@@ -257,6 +269,125 @@ describe('DocClipboardService table copy helpers', () => {
         expect(slice.paragraphs?.[0].startIndex).toBe(4);
     });
 
+    it('preserves hyperlinks and inline images in a copied cell and its clipboard exports', () => {
+        const tokens = DataStreamTreeTokenType;
+        const prefix = `Intro\r${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}`;
+        const cellStart = prefix.length;
+        const cellContent = `link${tokens.CUSTOM_BLOCK}\r\n`;
+        const body: IDocumentBody = {
+            dataStream: `${prefix}${cellContent}${tokens.TABLE_CELL_END}${tokens.TABLE_CELL_START}Other\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`,
+            paragraphs: [{ paragraphId: 'linked-cell', startIndex: cellStart + 5 }],
+            sectionBreaks: [{ sectionId: 'linked-cell-section', startIndex: cellStart + 6 }],
+            customRanges: [{
+                rangeId: 'cell-link',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: cellStart,
+                endIndex: cellStart + 3,
+                properties: { url: 'https://univer.ai/' },
+            }],
+            customBlocks: [{ blockId: 'cell-image', startIndex: cellStart + 4 }],
+            customDecorations: [{ id: 'cell-comment', type: CustomDecorationType.COMMENT, startIndex: cellStart, endIndex: cellStart + 3 }],
+        };
+        const original = Tools.deepClone(body);
+        const slice = getTableClipboardBodySlice(body, {
+            startOffset: cellStart,
+            endOffset: cellStart + 5,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.RECT,
+            tableId: 'table-1',
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+            spanEntireRow: false,
+            spanEntireColumn: false,
+            spanEntireTable: false,
+        });
+        const image: IDocImage = {
+            drawingId: 'cell-image',
+            unitId: 'copied-cell',
+            subUnitId: '',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType: ImageSourceType.URL,
+            source: 'https://univer.ai/image.png',
+            layoutType: PositionedObjectLayoutType.INLINE,
+            docTransform: {
+                size: { width: 20, height: 10 },
+                angle: 0,
+                positionH: { relativeFrom: ObjectRelativeFromH.CHARACTER, posOffset: 0 },
+                positionV: { relativeFrom: ObjectRelativeFromV.LINE, posOffset: 0 },
+            },
+        };
+        const doc: IDocumentData = {
+            id: 'copied-cell',
+            body: slice,
+            documentStyle: {},
+            drawings: { 'cell-image': image },
+        };
+
+        expect(slice.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(slice.customBlocks?.[0].startIndex).toBe(7);
+        expect(slice.dataStream[slice.customBlocks![0].startIndex]).toBe(tokens.CUSTOM_BLOCK);
+        expect(slice.customDecorations?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(slice.sectionBreaks?.[0].startIndex).toBe(9);
+        expect(slice.dataStream[slice.sectionBreaks![0].startIndex]).toBe('\n');
+
+        const html = new DOMParser().parseFromString(getBodySliceHtml(doc, 3, 8), 'text/html');
+        expect(html.querySelector('a')?.getAttribute('href')).toBe('https://univer.ai/');
+        expect(html.querySelector('a')?.textContent).toBe('link');
+        expect(html.body.textContent?.trim()).toBe('link');
+        expect(html.querySelector('img')?.getAttribute('src')).toBe('https://univer.ai/image.png');
+
+        const internalDoc = parseInternalClipboardFragment(createInternalClipboardFragment(createInternalClipboardDocData(doc)));
+        expect(internalDoc?.body?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 6 });
+        expect(internalDoc?.body?.customBlocks?.[0].startIndex).toBe(7);
+        expect(internalDoc?.drawings?.[internalDoc.body!.customBlocks![0].blockId]).toMatchObject({ source: 'https://univer.ai/image.png' });
+        expect(body).toEqual(original);
+    });
+
+    it('keeps structural and imported metadata anchored to the wrapped cell content', () => {
+        const tokens = DataStreamTreeTokenType;
+        const prefix = `${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}`;
+        const cellContent = `${tokens.BLOCK_START}${tokens.COLUMN_GROUP_START}${tokens.COLUMN_START}${tokens.CUSTOM_BLOCK}${tokens.PAGE_BREAK}\r${tokens.COLUMN_END}${tokens.COLUMN_GROUP_END}${tokens.BLOCK_END}\r\n`;
+        const cellStart = prefix.length;
+        const body: IDocumentBody = {
+            dataStream: `${prefix}${cellContent}${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`,
+            blockRanges: [{ blockId: 'quote', blockType: DocumentBlockRangeType.QUOTE, startIndex: cellStart, endIndex: cellStart + 8 }],
+            columnGroups: [{ columnGroupId: 'columns', startIndex: cellStart + 1, endIndex: cellStart + 7 }],
+            docxRawCustomBlocks: [{ blockId: 'opaque-run', startIndex: cellStart + 3, docxRawXml: '<w:r/>' }],
+            docxRawBlocks: [{ startIndex: cellStart + 3, xml: '<w:p/>' }],
+            docxExportExcludedRanges: [{ start: cellStart + 3, end: cellStart + 4 }],
+            renderedPageBreaks: [cellStart + 4],
+        };
+        const slice = getTableClipboardBodySlice(body, {
+            startOffset: cellStart,
+            endOffset: cellStart + cellContent.length - 2,
+            collapsed: false,
+            rangeType: DOC_RANGE_TYPE.RECT,
+            tableId: 'table-1',
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+            spanEntireRow: false,
+            spanEntireColumn: false,
+            spanEntireTable: false,
+        });
+
+        expect(slice.blockRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 11 });
+        expect(slice.dataStream[slice.blockRanges![0].startIndex]).toBe(tokens.BLOCK_START);
+        expect(slice.dataStream[slice.blockRanges![0].endIndex]).toBe(tokens.BLOCK_END);
+        expect(slice.columnGroups?.[0]).toMatchObject({ startIndex: 4, endIndex: 10 });
+        expect(slice.dataStream[slice.columnGroups![0].startIndex]).toBe(tokens.COLUMN_GROUP_START);
+        expect(slice.dataStream[slice.columnGroups![0].endIndex]).toBe(tokens.COLUMN_GROUP_END);
+        expect(slice.docxRawCustomBlocks?.[0]).toMatchObject({ startIndex: 6, docxRawXml: '<w:r/>' });
+        expect(slice.dataStream[slice.docxRawCustomBlocks![0].startIndex]).toBe(tokens.CUSTOM_BLOCK);
+        expect(slice.docxRawBlocks?.[0]).toEqual({ startIndex: 6, xml: '<w:p/>' });
+        expect(slice.docxExportExcludedRanges).toEqual([{ start: 6, end: 7 }]);
+        expect(slice.renderedPageBreaks).toEqual([7]);
+        expect(slice.dataStream[slice.renderedPageBreaks![0]]).toBe(tokens.PAGE_BREAK);
+    });
+
     it('copies the selected document text as plain text, html, and internal clipboard data', async () => {
         const documentData: IDocumentData = {
             id: 'copy-doc',
@@ -409,6 +540,39 @@ describe('DocClipboardService table copy helpers', () => {
             }])).toBe(true);
             const wholeTable = parseInternalClipboardFragment(clipboard.writes[1].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
             expect(wholeTable?.body?.tables).toEqual(documentData.body!.tables);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
+    it.each([SliceBodyType.copy, SliceBodyType.cut])('copies column text without recreating its containing group (%s)', async (sliceType) => {
+        const tokens = DataStreamTreeTokenType;
+        const columnStream = `${tokens.COLUMN_GROUP_START}${tokens.COLUMN_START}Alpha\r${tokens.COLUMN_END}${tokens.COLUMN_GROUP_END}`;
+        const documentData: IDocumentData = {
+            id: 'copy-column-text',
+            documentStyle: {},
+            body: {
+                dataStream: `${columnStream}\r\n`,
+                paragraphs: [{ paragraphId: 'column-alpha', startIndex: 7 }],
+                columnGroups: [{ columnGroupId: 'columns', startIndex: 0, endIndex: columnStream.length - 1 }],
+            },
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        try {
+            const service = testBed.get(IDocClipboardService);
+            const clipboard = testBed.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await service.copy(sliceType, [{
+                startOffset: 2,
+                endOffset: 7,
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const fragment = parseInternalClipboardFragment(clipboard.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(fragment?.body?.dataStream).toBe('Alpha');
+            expect(fragment?.body?.columnGroups ?? []).toEqual([]);
         } finally {
             testBed.univer.dispose();
         }
@@ -858,6 +1022,86 @@ describe('DocClipboardService table copy helpers', () => {
         expect(documentModel.getBody()?.dataStream).toBe(`${blockStream}Pasted${tokens.PARAGRAPH}Quote${tokens.PARAGRAPH}${tokens.SECTION_BREAK}`);
 
         testBed.univer.dispose();
+    });
+
+    it.each([false, true])('keeps collaboration structure valid when pasting callout content into code (paragraph: %s)', async (includeParagraph) => {
+        const tokens = DataStreamTreeTokenType;
+        const code = `${tokens.BLOCK_START}Code${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const callout = `${tokens.BLOCK_START}Callout${tokens.PARAGRAPH}${tokens.BLOCK_END}`;
+        const clipboardInterface = new TestClipboardInterfaceService();
+        const testBed = createCommandTestBed({
+            id: 'callout-into-code',
+            documentStyle: {},
+            body: {
+                dataStream: `${code}${callout}\r\n`,
+                customBlocks: [],
+                customDecorations: [],
+                customRanges: [],
+                paragraphs: [
+                    { startIndex: code.length - 2, paragraphId: 'code-paragraph' },
+                    { startIndex: code.length + callout.length - 2, paragraphId: 'callout-paragraph' },
+                    { startIndex: code.length + callout.length, paragraphId: 'root-paragraph' },
+                ],
+                sectionBreaks: [{ startIndex: code.length + callout.length + 1, sectionId: 'root-section' }],
+                blockRanges: [
+                    { startIndex: 0, endIndex: code.length - 1, blockId: 'code', blockType: DocumentBlockRangeType.CODE },
+                    { startIndex: code.length, endIndex: code.length + callout.length - 1, blockId: 'callout', blockType: DocumentBlockRangeType.CALLOUT },
+                ],
+            },
+        }, [
+            [IClipboardInterfaceService, { useValue: clipboardInterface }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const before = Tools.deepClone(testBed.doc.getSnapshot());
+        const remote = new DocumentDataModel(Tools.deepClone(before));
+        const commands = testBed.get(ICommandService);
+        const listener = commands.onMutationExecutedForCollab((command) => {
+            if (command.id === RichTextEditingMutation.id) {
+                remote.apply((command.params as IRichTextEditingMutationParams).actions);
+            }
+        });
+        try {
+            [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation]
+                .forEach((command) => commands.registerCommand(command));
+            const selections = testBed.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: testBed.doc.getUnitId(), subUnitId: '' });
+            const clipboard = testBed.get(IDocClipboardService);
+            expect(validateDocumentStructure(testBed.doc.getSnapshot())).toEqual([]);
+            expect(await clipboard.copy(SliceBodyType.copy, [{
+                startOffset: code.length + 1,
+                endOffset: code.length + callout.length - (includeParagraph ? 1 : 2),
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const copied = parseInternalClipboardFragment(clipboardInterface.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(copied?.body?.blockRanges ?? []).toEqual([]);
+            selections.__TEST_ONLY_add([{
+                startOffset: 2,
+                endOffset: 2,
+                collapsed: true,
+                isActive: true,
+                segmentId: '',
+            }]);
+
+            expect(await clipboard.paste()).toBe(true);
+            const inserted = includeParagraph ? 'Callout\r' : 'Callout';
+            expect(testBed.doc.getBody()?.dataStream).toBe(`${code.slice(0, 2)}${inserted}${code.slice(2)}${callout}\r\n`);
+            expect(testBed.doc.getBody()?.blockRanges?.map((block) => block.blockId)).toEqual(['code', 'callout']);
+            expect(validateDocumentStructure(testBed.doc.getSnapshot())).toEqual([]);
+            const after = Tools.deepClone(testBed.doc.getSnapshot());
+            expect(remote.getSnapshot()).toEqual(after);
+
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(testBed.doc.getSnapshot()).toEqual(before);
+            expect(remote.getSnapshot()).toEqual(before);
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(testBed.doc.getSnapshot()).toEqual(after);
+            expect(remote.getSnapshot()).toEqual(after);
+        } finally {
+            listener.dispose();
+            remote.dispose();
+            testBed.univer.dispose();
+        }
     });
 
     it('copies and pastes a complete block range after itself', async () => {
@@ -1932,6 +2176,114 @@ describe('DocClipboardService paste options', () => {
             });
             await expect(bed.clipboard.changePasteMode('text')).rejects.toThrow('Rejected paste');
             expect(bed.doc.getBody()).toEqual(snapshot);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('comment editor plain-text paste', () => {
+    function setup() {
+        const unitId = `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_cell_host_sheet_comment`;
+        const bed = createCommandTestBed({
+            id: unitId,
+            body: {
+                dataStream: 'Before selected after\r\n',
+                customBlocks: [],
+                customDecorations: [],
+                customRanges: [],
+                paragraphs: [{ startIndex: 21, paragraphId: 'comment-target' }],
+                textRuns: [],
+            },
+            documentStyle: {},
+        }, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commands = bed.get(ICommandService);
+        [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation].forEach((command) => commands.registerCommand(command));
+        const selection = bed.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: '' });
+        selection.__TEST_ONLY_add([{ startOffset: 7, endOffset: 15, collapsed: false, isActive: true, segmentId: '' }]);
+        return { ...bed, unitId, commands, clipboard: bed.get(IDocClipboardService) };
+    }
+
+    it.each(['clipboard text', 'HTML', 'internal fragment'] as const)('discards dark-mode formatting from %s and preserves undo/redo', async (source) => {
+        const bed = setup();
+        const html = '<span style="background-color: #202020; color: #ffffff; font-size: 28px; font-weight: bold">中文🙂 café</span>';
+        const internalJson = createInternalClipboardFragment({
+            body: {
+                dataStream: '中文🙂 café',
+                textRuns: [{ st: 0, ed: 9, ts: { bl: BooleanNumber.TRUE, fs: 28, bg: { rgb: '#202020' }, cl: { rgb: '#ffffff' } } }],
+            },
+        });
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            const payload = { unitId: bed.unitId, files: [], mode: 'source' as const };
+            const content = source === 'HTML' ? { html } : { internalJson };
+            const text = '中文🙂 café\n第二段\t文字\nhttps://univer.ai';
+            expect(await bed.clipboard.legacyPaste({
+                ...payload,
+                ...content,
+                ...(source === 'clipboard text' ? { html, text } : {}),
+            })).toBe(true);
+
+            const after = Tools.deepClone(bed.doc.getBody())!;
+            const expectedText = source === 'clipboard text' ? text.replace(/\n/g, '\r') : '中文🙂 café';
+            expect(after.dataStream).toBe(`Before ${expectedText} after\r\n`);
+            expect(after.textRuns ?? []).toEqual([]);
+            expect(after.paragraphs?.some((paragraph) => Object.keys(paragraph.paragraphStyle ?? {}).length)).toBe(false);
+            expect(after.customRanges ?? []).toEqual([]);
+            expect(after.customBlocks ?? []).toEqual([]);
+            expect(await firstValueFrom(bed.clipboard.pasteOptions$)).toBeNull();
+            expect(validateDocBodyStructure(after)).toEqual([]);
+            expect(await bed.commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(await bed.commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(bed.doc.getBody()).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('flattens an internal table fragment to text without inserting table resources', async () => {
+        const bed = setup();
+        const token = DataStreamTreeTokenType;
+        const row = (cells: string[]) => token.TABLE_ROW_START
+            + cells.map((text) => `${token.TABLE_CELL_START}${text}\r\n${token.TABLE_CELL_END}`).join('')
+            + token.TABLE_ROW_END;
+        const dataStream = token.TABLE_START + row(['A', 'B']) + row(['C', 'D']) + token.TABLE_END;
+        try {
+            expect(await bed.clipboard.legacyPaste({
+                unitId: bed.unitId,
+                internalJson: createInternalClipboardFragment({
+                    body: {
+                        dataStream,
+                        tables: [{ startIndex: 0, endIndex: dataStream.length, tableId: 'copied-table' }],
+                    },
+                    tableSource: {},
+                }),
+                files: [],
+            })).toBe(true);
+            expect(bed.doc.getBody()?.dataStream).toBe('Before A\tB\rC\tD after\r\n');
+            expect(bed.doc.getBody()?.tables ?? []).toEqual([]);
+            expect(bed.doc.getBody()?.textRuns ?? []).toEqual([]);
+            expect(Object.keys(bed.doc.getSnapshot().tableSource ?? {})).toEqual([]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('ignores image-only clipboard content without replacing selected comment text', async () => {
+        const bed = setup();
+        try {
+            const before = Tools.deepClone(bed.doc.getBody());
+            expect(await bed.clipboard.legacyPaste({
+                unitId: bed.unitId,
+                files: [new File(['image'], 'comment.png', { type: 'image/png' })],
+            })).toBe(false);
+            expect(bed.doc.getBody()).toEqual(before);
+            expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId).undos).toBe(0);
         } finally {
             bed.univer.dispose();
         }

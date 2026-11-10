@@ -33,7 +33,6 @@ import type {
     ITextSelectionStyle,
 } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import type { RectRange } from './rect-range';
 import {
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
@@ -45,6 +44,7 @@ import {
     isInternalEditorID,
     IUniverInstanceService,
     Optional,
+    RANGE_DIRECTION,
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -60,6 +60,7 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
+import type { RectRange } from './rect-range';
 import {
     DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     IDocEmbedInteractionBoundaryService,
@@ -181,6 +182,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return this._input === this._getOwnerDocument().activeElement;
     }
 
+    get inputElement(): HTMLDivElement {
+        return this._input;
+    }
+
+    get selectionContainer(): HTMLDivElement {
+        return this._container;
+    }
+
     get isEditing() {
         return this._textSelectionInner$.value?.isEditing === true;
     }
@@ -188,7 +197,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     get canFocusing() {
         const ownerDocument = this._getOwnerDocument();
         const activeElement = ownerDocument.activeElement;
-        return !this._shouldPreserveExternalFocus() && !this._isAnotherEditorFocused() && (
+        return !this._isInUnfocusedFrame() && !this._shouldPreserveExternalFocus() && !this._isAnotherEditorFocused() && (
             this.isFocusing ||
             activeElement === ownerDocument.body ||
             activeElement === null ||
@@ -437,7 +446,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         };
 
         for (const range of ranges) {
-            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range;
+            const { rangeType } = range;
+            let { startOffset, endOffset, startNodePosition, endNodePosition } = range;
+            // Published ranges use sorted offsets. Keep their anchor and focus
+            // when rebuilding a backward selection after layout or zoom changes.
+            if (rangeType !== DOC_RANGE_TYPE.RECT && range.direction === RANGE_DIRECTION.BACKWARD && startOffset < endOffset) {
+                [startOffset, endOffset] = [endOffset, startOffset];
+                [startNodePosition, endNodePosition] = [endNodePosition, startNodePosition];
+            }
             const rangeStyle = range.style ?? style;
 
             if (rangeType !== DOC_RANGE_TYPE.RECT && startOffset === endOffset) {
@@ -605,6 +621,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     focus(): void {
+        // The layout may mount after the input; keep focus inside its owning modal.
+        this._ensureHostContainer();
         if (!this._input.hasAttribute('tabindex')) {
             this._input.tabIndex = -1;
         }
@@ -1284,7 +1302,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const anchor = activeRangeInstance?.getAnchor();
 
         if (!anchor || (anchor && !anchor.visible) || this.activeViewPort == null) {
-            if (preserveFocus || this._shouldPreserveExternalFocus() || (!forceFocus && this._isAnotherEditorFocused())) {
+            if (preserveFocus || this._shouldPreserveExternalFocus() ||
+                (!forceFocus && (this._isInUnfocusedFrame() || this._isAnotherEditorFocused()))) {
                 return;
             }
             this.focus();
@@ -1829,6 +1848,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         return this._embedInteractionBoundaryService?.hasRecentInteractionFor?.(currentEmbedOwner, ownerDocument) === true;
+    }
+
+    private _isInUnfocusedFrame(): boolean {
+        const ownerDocument = this._getOwnerDocument();
+        const ownerWindow = ownerDocument.defaultView;
+        return ownerWindow != null && ownerWindow.parent !== ownerWindow && !ownerDocument.hasFocus();
     }
 
     private _isAnotherEditorFocused(): boolean {

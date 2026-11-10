@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { Disposable, Inject, LRUMap, merge } from '@univerjs/core';
 import type { IConditionFormattingRule, IHighlightCell } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { Disposable, Inject, LRUMap, merge } from '@univerjs/core';
 import { CFRuleType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH, ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
@@ -70,7 +70,7 @@ export class ConditionalFormattingStyleComposer extends Disposable {
 
             matchedRules.push({ rule, cacheItem });
 
-            if (stopIfTrueIndex === -1 && rule.stopIfTrue && this._isRuleMatched(rule, cacheItem.result)) {
+            if (stopIfTrueIndex === -1 && rule.stopIfTrue && cacheItem.matched) {
                 stopIfTrueIndex = matchedRules.length - 1;
             }
         }
@@ -131,13 +131,5 @@ export class ConditionalFormattingStyleComposer extends Disposable {
                 result.isShowValue = ruleCache.isShowValue;
             }
         }
-    }
-
-    private _isRuleMatched(rule: IConditionFormattingRule, ruleResult: unknown) {
-        if (rule.rule.type === CFRuleType.highlightCell) {
-            return !!ruleResult && typeof ruleResult === 'object' && Object.keys(ruleResult as object).length > 0;
-        }
-
-        return !!ruleResult;
     }
 }

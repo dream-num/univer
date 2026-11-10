@@ -15,18 +15,6 @@
  */
 
 import type { INumberUnit, ITable, ITableCell, ITableRow, Nullable } from '@univerjs/core';
-import type {
-    IDocumentSkeletonPage,
-    IDocumentSkeletonRow,
-    IDocumentSkeletonTable,
-    IParagraphList,
-} from '../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
-import type { DocumentFootnoteLayout } from '../footnote-layout';
-import type { ICellSkeletonBuildState } from '../model/page';
-import type { ILayoutContext } from '../tools';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
@@ -39,8 +27,24 @@ import {
     TableSizeType,
     VerticalAlignmentType,
 } from '@univerjs/core';
+import type {
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    IParagraphList,
+} from '../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../view-model/document-view-model';
+import type { DocumentFootnoteLayout } from '../footnote-layout';
+import type { ICellSkeletonBuildState } from '../model/page';
+import type { ILayoutContext } from '../tools';
 import { DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
-import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
+import {
+    getDocumentCompatibilityPolicy,
+    isTraditionalDocumentCompatibility,
+    shouldAllowImportedTableMarginOverflow,
+} from '../../document-compatibility';
 import {
     createNullCellPage,
     createSkeletonCellPages,
@@ -342,7 +346,8 @@ function _finishTableSkeletonBuild(state: ITableSkeletonBuildState): void {
         pageWidth - marginLeft - marginRight,
         state.tableWidth,
         table.align,
-        table.indent
+        table.indent,
+        shouldAllowImportedTableMarginOverflow(state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(), table)
     );
     state.complete = true;
 }
@@ -679,7 +684,7 @@ export function cachePrecomputedSlicedTableSkeletons(
 }
 
 function _finishTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): void {
-    updateTableSkeletonsPosition(state.createCache, state.curPage, state.skeTables, state.table);
+    updateTableSkeletonsPosition(state.createCache, state.curPage, state.skeTables, state.table, state.sectionBreakConfig);
     state.skeTables.forEach((table) => applyTableOuterBorderSpacing(table, state.sectionBreakConfig));
     const policy =
         state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
@@ -783,7 +788,7 @@ export function createTableSkeletons(
         } while (cellPageHeights);
     }
 
-    updateTableSkeletonsPosition(createCache, curPage, skeTables, table);
+    updateTableSkeletonsPosition(createCache, curPage, skeTables, table, sectionBreakConfig);
     skeTables.forEach((table) => applyTableOuterBorderSpacing(table, sectionBreakConfig));
 
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
@@ -801,11 +806,18 @@ function updateTableSkeletonsPosition(
     cache: ICreateTableCache,
     curPage: IDocumentSkeletonPage,
     skeTables: IDocumentSkeletonTable[],
-    table: ITable
+    table: ITable,
+    sectionBreakConfig: ISectionBreakConfig
 ) {
     const { pageWidth, marginLeft = 0, marginRight = 0 } = curPage;
     const { tableWidth } = cache;
-    const tableLeft = getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
+    const tableLeft = getTableLeft(
+        pageWidth - marginLeft - marginRight,
+        tableWidth,
+        table.align,
+        table.indent,
+        shouldAllowImportedTableMarginOverflow(sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(), table)
+    );
     const rowFragments = new Map<number, number>();
     for (const part of skeTables) {
         for (const row of part.rows) {
@@ -1455,16 +1467,22 @@ export function resolveTableLayoutColumns(table: ITable, availableWidth: number,
     };
 }
 
-export function getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {
+export function getTableLeft(
+    pageWidth: number,
+    tableWidth: number,
+    align: TableAlignmentType,
+    indent: INumberUnit = { v: 0 },
+    allowMarginOverflow = false
+) {
     switch (align) {
         case TableAlignmentType.START: {
             return indent.v;
         }
         case TableAlignmentType.END: {
-            return Math.max(0, pageWidth - tableWidth);
+            return allowMarginOverflow ? pageWidth - tableWidth : Math.max(0, pageWidth - tableWidth);
         }
         case TableAlignmentType.CENTER: {
-            return Math.max(0, (pageWidth - tableWidth) / 2);
+            return allowMarginOverflow ? (pageWidth - tableWidth) / 2 : Math.max(0, (pageWidth - tableWidth) / 2);
         }
         default: {
             throw new Error('Unknown table alignment type');

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'تدوير النص',
             },
             toggleGridlines: 'تبديل خطوط الشبكة',
+            zoom: 'التكبير والتصغير',
             fullscreen: 'ملء الشاشة',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'موافق',
             cancel: 'إلغاء',
+        },
+        borderStyle: {
+            thin: 'رفيع',
+            hair: 'رفيع جدًا',
+            dotted: 'منقّط',
+            dashed: 'متقطّع',
+            dashDot: 'شرطة ونقطة',
+            dashDotDot: 'شرطة ونقطتان',
+            medium: 'متوسط',
+            mediumDashed: 'متقطّع متوسط',
+            mediumDashDot: 'شرطة ونقطة متوسط',
+            mediumDashDotDot: 'شرطة ونقطتان متوسط',
+            thick: 'سميك',
+            double: 'مزدوج',
         },
         borderLine: {
             borderTop: 'الحد العلوي',

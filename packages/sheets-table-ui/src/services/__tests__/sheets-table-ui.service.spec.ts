@@ -15,9 +15,10 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ITableRecordFilterItem } from '@univerjs/sheets-table';
+import type { ITableManualFilterItem, ITableRecordFilterItem } from '@univerjs/sheets-table';
 import {
     FilterSelectionMode,
+    getRecordValueKey,
     ICommandService,
     Inject,
     Injector,
@@ -34,7 +35,6 @@ import {
 } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
-    getTableRecordValueKey,
     SetSheetTableFilterCommand,
     SetSheetTableFilterMutation,
     SheetTableService,
@@ -255,11 +255,59 @@ describe('SheetsTableUiService', () => {
 
         expect(items.allItemsCount).toBe(2);
         expect(items.data).toEqual([
-            { title: 12, key: '1_1', leaf: true },
-            { title: 8, key: '1_3', leaf: true },
+            { title: '12', key: '1_1', leaf: true },
+            { title: '8', key: '1_3', leaf: true },
         ]);
-        expect(items.itemsCountMap.get(12 as unknown as string)).toBe(1);
-        expect(items.itemsCountMap.get(8 as unknown as string)).toBe(1);
+        expect(items.itemsCountMap.get('12')).toBe(1);
+        expect(items.itemsCountMap.get('8')).toBe(1);
+    });
+
+    it('filters numeric candidates using the same keys as the list and restores them through undo and redo', async () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+        const unitId = testBed.workbook.getUnitId();
+        testBed.get(IUniverInstanceService).focusUnit(unitId);
+        const sheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        const commands = testBed.get(ICommandService);
+        await service.setTableFilter(unitId, 'table-orders', 0, undefined);
+        const items = service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 1);
+        expect(items.data.map((item) => item.title)).toEqual(['12', '8']);
+        expect(items.itemsCountMap.get('12')).toBe(2);
+        expect(service.createItemFilter(unitId, 'table-orders', 1, items, new Set(['12', '8']), false))
+            .toBeUndefined();
+
+        const filter = service.createItemFilter(unitId, 'table-orders', 1, items, new Set(['12']), false);
+        expect(filter).toEqual({ filterType: TableColumnFilterTypeEnum.manual, values: ['12'] });
+        expect(await service.setTableFilter(unitId, 'table-orders', 1, filter)).toBe(true);
+        const table = testBed.get(TableManager).getTable(unitId, 'table-orders')!;
+        const filteredRows = () => [...table.getTableFilters().doFilter(sheet, table.getTableFilterRange())];
+        expect(filteredRows()).toEqual([3]);
+        expect(service.getTableFilterCheckedItems(unitId, 'table-orders', 1)).toEqual(['12']);
+
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(filteredRows()).toEqual([]);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(filteredRows()).toEqual([3]);
+    });
+
+    it('reopens numeric manual filters saved before value keys were normalized', async () => {
+        testBed = createTestBed();
+        const service = testBed.get(SheetsTableUiService);
+        const unitId = testBed.workbook.getUnitId();
+        await service.setTableFilter(unitId, 'table-orders', 0, undefined);
+        const table = testBed.get(TableManager).getTable(unitId, 'table-orders')!;
+        table.getTableFilters().fromJSON({
+            tableColumnFilterList: [undefined, {
+                filterType: TableColumnFilterTypeEnum.manual,
+                values: [12],
+            } as unknown as ITableManualFilterItem],
+        });
+
+        expect(service.getTableFilterCheckedItems(unitId, 'table-orders', 1)).toEqual(['12']);
+        expect([...table.getTableFilters().doFilter(
+            testBed.workbook.getSheetBySheetId('sheet1')!,
+            table.getTableFilterRange()
+        )]).toEqual([3]);
     });
 
     it('refreshes cached candidates when table data changes inside the filter range', async () => {
@@ -268,8 +316,8 @@ describe('SheetsTableUiService', () => {
         const commandService = testBed.get(ICommandService);
 
         expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data).toEqual([
-            { title: 12, key: '1_1', leaf: true },
-            { title: 8, key: '1_3', leaf: true },
+            { title: '12', key: '1_1', leaf: true },
+            { title: '8', key: '1_3', leaf: true },
         ]);
 
         await commandService.executeCommand(SetRangeValuesMutation.id, {
@@ -283,8 +331,8 @@ describe('SheetsTableUiService', () => {
         });
 
         expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data).toEqual([
-            { title: 15, key: '1_1', leaf: true },
-            { title: 8, key: '1_3', leaf: true },
+            { title: '15', key: '1_1', leaf: true },
+            { title: '8', key: '1_3', leaf: true },
         ]);
     });
 
@@ -347,9 +395,9 @@ describe('SheetsTableUiService', () => {
             ],
         });
         const items = service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 1);
-        const numberKey = getTableRecordValueKey({ type: RecordValueType.Number, value: 12 });
-        const stringKey = getTableRecordValueKey({ type: RecordValueType.String, value: '12' });
-        const eightKey = getTableRecordValueKey({ type: RecordValueType.Number, value: 8 });
+        const numberKey = getRecordValueKey({ type: RecordValueType.Number, value: 12 });
+        const stringKey = getRecordValueKey({ type: RecordValueType.String, value: '12' });
+        const eightKey = getRecordValueKey({ type: RecordValueType.Number, value: 8 });
         expect(items.data.map((item) => ({ title: item.title, valueKey: item.valueKey }))).toEqual([
             { title: '12', valueKey: numberKey },
             { title: '12', valueKey: stringKey },
@@ -397,8 +445,8 @@ describe('SheetsTableUiService', () => {
             'table-orders'
         );
 
-        expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data[0].title).toBe(12);
-        expect(service.getTableFilterItems(secondWorkbook.getUnitId(), 'sheet1', 'table-orders', 1).data[0].title).toBe(99);
+        expect(service.getTableFilterItems(testBed.workbook.getUnitId(), 'sheet1', 'table-orders', 1).data[0].title).toBe('12');
+        expect(service.getTableFilterItems(secondWorkbook.getUnitId(), 'sheet1', 'table-orders', 1).data[0].title).toBe('99');
     });
 
     it('keeps the legacy behavior of clearing a manual whitelist when every current candidate is selected', () => {
@@ -451,7 +499,7 @@ describe('SheetsTableUiService', () => {
             values: [{ type: RecordValueType.String, value: 'book' }],
         });
         expect(service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 0).data[0].valueKey).toBe(
-            getTableRecordValueKey({ type: RecordValueType.String, value: 'book' })
+            getRecordValueKey({ type: RecordValueType.String, value: 'book' })
         );
 
         await commandService.executeCommand(UndoCommand.id);
@@ -459,7 +507,7 @@ describe('SheetsTableUiService', () => {
 
         await commandService.executeCommand(RedoCommand.id);
         expect(service.getTableFilterItems(unitId, 'sheet1', 'table-orders', 0).data[0].valueKey).toBe(
-            getTableRecordValueKey({ type: RecordValueType.String, value: 'book' })
+            getRecordValueKey({ type: RecordValueType.String, value: 'book' })
         );
     });
 });

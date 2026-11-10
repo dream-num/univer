@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Spalte',
         tablePrefix: 'Tabelle',
+        moveTableOverlapError: 'Der Zielbereich überschneidet sich mit einer anderen Tabelle.',
         tableNameError: 'Tabellenname darf keine Leerzeichen enthalten, darf nicht mit einer Zahl beginnen und darf nicht mit einem vorhandenen Tabellennamen identisch sein',
     },
 };

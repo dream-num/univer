@@ -21,7 +21,12 @@ import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
 import type { ISaveCellImagesOptions } from './f-range';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    ISheetDrawingService,
+    SetSheetDrawingCommand,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
 import { FileNamePart, IBatchSaveImagesService, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -424,19 +429,31 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
     override getFloatDomById(id: string): Nullable<IFCanvasFloatDomResult> {
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const info = floatDomService.getFloatDomInfo(id);
-        if (!info) return null;
+        return info ? this._getFloatDomResult(info) : null;
+    }
 
-        const { unitId, subUnitId } = info;
-        const { rect } = info;
-        const state = rect.getState();
-        const { left = 0, top = 0, width = 0, height = 0, flipX = false, flipY = false, angle = 0, skewX = 0, skewY = 0 } = state;
-        const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
-            drawingId: info.id,
+    override getAllFloatDoms(): IFCanvasFloatDomResult[] {
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        return floatDomService.getFloatDomsBySubUnitId(unitId, subUnitId)
+            .map((info) => this._getFloatDomResult(info))
+            .filter((dom): dom is IFCanvasFloatDomResult => dom != null);
+    }
+
+    private _getFloatDomResult(info: ICanvasFloatDomInfo): Nullable<IFCanvasFloatDomResult> {
+        const { unitId, subUnitId, id, rect, runtimeMetadata } = info;
+        const metadata = runtimeMetadata ?? (this._injector.get(ISheetDrawingService).getDrawingByParam({
+            drawingId: id,
             unitId,
             subUnitId,
-        })! as ISheetFloatDom;
+        }) as ISheetFloatDom | undefined);
+        if (!metadata) {
+            return null;
+        }
 
-        if (!drawingParm) return null;
+        const { left = 0, top = 0, width = 0, height = 0, flipX = false, flipY = false, angle = 0, skewX = 0, skewY = 0 } = rect.getState();
 
         return {
             position: {
@@ -450,50 +467,11 @@ export class FWorksheetDrawingUIMixin extends FWorksheet implements IFWorksheetD
                 skewX,
                 skewY,
             },
-            componentKey: drawingParm.componentKey,
-            allowTransform: drawingParm.allowTransform,
-            data: drawingParm.data,
-            id: info.id,
+            componentKey: metadata.componentKey,
+            allowTransform: metadata.allowTransform,
+            data: metadata.data,
+            id,
         };
-    }
-
-    override getAllFloatDoms(): IFCanvasFloatDomResult[] {
-        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
-        const unitId = this._workbook.getUnitId();
-        const subUnitId = this._worksheet.getSheetId();
-
-        return Array.from(floatDomService.getFloatDomsBySubUnitId(unitId, subUnitId).values())
-            .map((info): IFCanvasFloatDomResult | null => {
-                const { rect } = info;
-                const drawingParm = this._injector.get(ISheetDrawingService).getDrawingByParam({
-                    drawingId: info.id,
-                    unitId,
-                    subUnitId,
-                })! as ISheetFloatDom;
-
-                if (!drawingParm) return null;
-
-                const { left, top, width, height, flipX, flipY, angle, skewX, skewY } = rect.getState();
-
-                return {
-                    position: {
-                        left,
-                        top,
-                        width,
-                        height,
-                        flipX,
-                        flipY,
-                        angle,
-                        skewX,
-                        skewY,
-                    },
-                    componentKey: drawingParm.componentKey,
-                    allowTransform: drawingParm.allowTransform,
-                    data: drawingParm.data,
-                    id: info.id,
-                };
-            })
-            .filter((dom): dom is IFCanvasFloatDomResult => dom != null);
     }
 
     override updateFloatDom(id: string, config: Partial<Omit<IFCanvasFloatDomResult, 'id'>>): this {

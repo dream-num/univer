@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
 import { CommandType, ICommandService, Univer } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDirtyConversionManagerParams } from '../active-dirty-manager.service';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -67,6 +67,84 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('batches reference context changes and preserves explicit full calculation on restart', async () => {
+        const bed = createTestBed();
+        bed.conversions.set('structure', {
+            commandId: 'structure',
+            getDirtyData: (command) => command.params as ReturnType<IDirtyConversionManagerParams['getDirtyData']>,
+        });
+        try {
+            bed.emit({ id: 'structure', params: { dirtyReferenceUnits: ['first'] } });
+            bed.emit({ id: 'structure', params: { dirtyReferenceUnits: ['first', 'second'] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[0].params).toMatchObject({ dirtyReferenceUnits: ['first', 'second'], forceCalculation: false, dirtyRanges: [] });
+            bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: { forceCalculation: true } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[1].id).toBe(SetFormulaCalculationStopMutation.id);
+            bed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: { functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[2].params).toMatchObject({ dirtyReferenceUnits: ['first', 'second'], forceCalculation: true });
+        } finally { bed.service.dispose(); }
+    });
+
+    it('batches iteration settings changes and preserves them when restarting an active calculation', async () => {
+        const bed = createTestBed();
+        bed.conversions.set('iteration-settings', {
+            commandId: 'iteration-settings',
+            getDirtyData: (command) => command.params as ReturnType<IDirtyConversionManagerParams['getDirtyData']>,
+        });
+        try {
+            bed.emit({ id: 'iteration-settings', params: { dirtyIterationUnits: ['first'] } });
+            bed.emit({ id: 'iteration-settings', params: { dirtyIterationUnits: ['first', 'second'] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[0].params).toMatchObject({ dirtyIterationUnits: ['first', 'second'], dirtyRanges: [] });
+            bed.emit({ id: SetTriggerFormulaCalculationStartMutation.id, params: { dirtyRanges: [{
+                unitId: 'first',
+                sheetId: 'sheet',
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            }] } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[1].id).toBe(SetFormulaCalculationStopMutation.id);
+            bed.emit({ id: SetFormulaCalculationNotificationMutation.id, params: {
+                functionsExecutedState: FormulaExecutedStateType.STOP_EXECUTION,
+            } });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(bed.executed[2].params).toMatchObject({ dirtyIterationUnits: ['first', 'second'] });
+        } finally {
+            bed.service.dispose();
+        }
+    });
+
+    it('does not debounce reconstructed snapshot inputs and resumes for subsequent local edits', async () => {
+        const testBed = createTestBed();
+        try {
+            testBed.service.runWithoutTriggering(() => testBed.emit({
+                id: SetTriggerFormulaCalculationStartMutation.id,
+                params: { forceCalculation: true },
+            }));
+            await vi.advanceTimersByTimeAsync(10);
+            expect(testBed.executed).toEqual([]);
+            expect(() => testBed.service.runWithoutTriggering(() => {
+                throw new Error('load failed');
+            })).toThrow('load failed');
+            testBed.emit({
+                id: SetTriggerFormulaCalculationStartMutation.id,
+                params: { dirtyRanges: [{ unitId: 'unit', sheetId: 'sheet', range: {
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 1,
+                    endColumn: 1,
+                } }] },
+            });
+            await vi.advanceTimersByTimeAsync(10);
+            expect(testBed.executed).toHaveLength(1);
+            expect(testBed.executed[0].params).toMatchObject({ dirtyRanges: [{ unitId: 'unit' }] });
+            expect(testBed.executed[0].params).not.toHaveProperty('preserveCircularUnits');
+        } finally {
+            testBed.service.dispose();
+        }
     });
 
     it('batches formula registrations without changing payloads or completed session maps', async () => {

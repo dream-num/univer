@@ -15,11 +15,12 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
 import { ICommandService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
+import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
+import { filterPartial } from './icons';
 
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
@@ -47,6 +48,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
     private _hoverIconColor = '#202124';
 
     private _hovered = false;
+    private _filteredIconPath: Path2D | null = null;
 
     constructor(
         key: string,
@@ -119,7 +121,18 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
             ctx.restore();
         }
 
-        this._drawChevron(ctx, this._hovered ? this._hoverIconColor : this._iconColor);
+        const iconColor = this._hovered ? this._hoverIconColor : this._iconColor;
+        const buttonState = this._filterParams?.buttonState;
+        const hasFilter = buttonState === SheetsTableButtonStateEnum.FilteredSortNone
+            || buttonState === SheetsTableButtonStateEnum.FilteredSortAsc
+            || buttonState === SheetsTableButtonStateEnum.FilteredSortDesc;
+        if (hasFilter) {
+            this._filteredIconPath ??= new Path2D(filterPartial[0]);
+            ctx.fillStyle = iconColor;
+            ctx.fill(this._filteredIconPath);
+        } else {
+            this._drawChevron(ctx, iconColor);
+        }
         ctx.restore();
     }
 

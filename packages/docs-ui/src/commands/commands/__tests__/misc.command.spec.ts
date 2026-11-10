@@ -921,7 +921,7 @@ describe('misc document commands', () => {
                 expect.objectContaining({ startOffset: 10, endOffset: 11 }),
                 expect.objectContaining({ startOffset: 14, endOffset: 15 }),
             ],
-            options: { wholeDocument: true },
+            options: { wholeDocument: true, preserveInputStyle: false },
         }));
 
         subscription.unsubscribe();

@@ -61,6 +61,7 @@ export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
 export * from './docs';
+export { resolveDocumentParagraphWordWrap } from './docs/data-model/paragraph-style';
 export { getSdtBindingKey, getSdtBindingValue } from './docs/sdt-binding';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';
@@ -167,6 +168,8 @@ export { RBush, RTree } from './shared/r-tree';
 export type { BBox, IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';
 export { getIntersectRange } from './shared/range';
+export { getRecordValueKey } from './shared/record-value';
+export type { RecordSelection, RecordValue } from './shared/record-value';
 export {
     afterTime,
     bufferDebounceTime,
@@ -176,7 +179,11 @@ export {
 } from './shared/rxjs';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
+export { cssPxToEmu, EMU_PER_CSS_PX, emuToCssPx } from './shared/units';
 export * from './sheets';
+export type { IWorkbookCalculationSettings } from './sheets/calculation-settings';
+export { MAX_ITERATION_COUNT, normalizeWorkbookCalculationSettings } from './sheets/calculation-settings';
+export { isValidColumnDimensions, isValidRowDimensions, isValidSheetDimension } from './sheets/sheet-dimensions';
 export { Skeleton } from './skeleton';
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';
@@ -188,8 +195,10 @@ export { DataValidationRenderMode } from './types/enum/data-validation-render-mo
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { FilterSelectionMode, RecordValueType } from './types/enum/record-filter';
+
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
+
 export type {
     IDataValidationRule,
     IDataValidationRuleBase,
@@ -197,6 +206,5 @@ export type {
     IDataValidationRuleOptions,
     ISheetDataValidationRule,
 } from './types/interfaces/i-data-validation';
-
 export { Univer } from './univer';
 export type { IUniverConfig } from './univer';

@@ -19,8 +19,6 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import {
     BooleanNumber,
     CustomRangeType,
@@ -30,6 +28,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -44,6 +43,7 @@ import {
     DocStateEmitService,
     InsertTextCommand,
     RichTextEditingMutation,
+    SetHeadingCollapsedCommand,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import {
@@ -54,6 +54,8 @@ import {
     RenderManagerService,
 } from '@univerjs/engine-render';
 import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { AfterSpaceCommand } from '../../../commands/commands/auto-format.command';
@@ -350,6 +352,56 @@ describe('DocRenderController bounded input publication', () => {
             await Promise.resolve();
             expect(editor.model.getBody()!.dataStream.startsWith('HelloZ world')).toBe(true);
             expect(editor.model.getSnapshot().notes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('preserves a scrolled Modern viewport across heading reversals while Worker initialization is pending', async () => {
+        let elapsed = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => ++elapsed);
+        const editor = createEditor(100, true, false, DocumentFlavor.MODERN);
+        try {
+            await vi.dynamicImportSettled();
+            editor.commands.registerCommand(SetHeadingCollapsedCommand);
+            const paragraphs = editor.model.getBody()!.paragraphs!;
+            const parent = paragraphs[41];
+            parent.paragraphStyle = { namedStyleType: NamedStyleType.HEADING_1 };
+            paragraphs[81].paragraphStyle = { namedStyleType: NamedStyleType.HEADING_1 };
+            editor.skeleton.getViewModel().reset(editor.model);
+            editor.skeleton.makeDirty(true);
+            editor.skeleton.calculate();
+            expect(editor.skeleton.getSkeletonData()!.pages[0].skeDrawings.size).toBe(1);
+            const viewport = editor.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
+            const docsComponent = editor.render.mainComponent as Documents;
+            const parentLine = editor.skeleton.getSkeletonData()!.pages[0].sections.flatMap((section) => section.columns.flatMap((column) => column.lines)).find((line) => line.paragraphIndex === parent.startIndex)!;
+            viewport.scrollToViewportPos({ viewportScrollY: parentLine.top + docsComponent.getOffsetConfig().docsTop - 40 });
+            const minimumHeight = viewport.calcViewportInfo().viewBound.bottom - docsComponent.getOffsetConfig().docsTop;
+            expect(minimumHeight).toBeGreaterThan(0);
+            const publishedHeights: number[] = [];
+            const subscription = editor.skeleton.layoutProgress$.subscribe((progress) => {
+                if (progress.didPublish && !progress.complete && progress.reason === 'edit') {
+                    publishedHeights.push(editor.skeleton.getSkeletonData()!.pages[0].height);
+                }
+            });
+            try {
+                for (const collapsed of [true, false, true, false]) {
+                    expect(editor.commands.syncExecuteCommand(SetHeadingCollapsedCommand.id, {
+                        unitId: editor.unitId,
+                        paragraphId: parent.paragraphId,
+                        collapsed,
+                    })).toBe(true);
+                    expect(editor.skeleton.getSkeletonData()!.pages[0].height).toBeGreaterThanOrEqual(minimumHeight);
+                    await vi.advanceTimersByTimeAsync(1_000);
+                    expect(editor.model.getBody()!.customBlocks).toEqual([{ blockId: 'inline-drawing', startIndex: 12 }]);
+                }
+                expect(publishedHeights.length).toBeGreaterThan(0);
+                expect(publishedHeights.every((height) => height >= minimumHeight)).toBe(true);
+                expect(editor.skeleton.findNodePositionByCharIndex(parent.startIndex)).toBeDefined();
+                expect(editor.skeleton.getSkeletonData()!.pages.flatMap((page) => [...page.skeDrawings.keys()])).toEqual(['inline-drawing']);
+            } finally {
+                subscription.unsubscribe();
+            }
         } finally {
             editor.dispose();
         }

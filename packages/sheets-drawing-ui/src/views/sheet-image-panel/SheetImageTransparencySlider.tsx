@@ -227,7 +227,7 @@ export function SheetImageTransparencySlider(props: ISheetImageTransparencySlide
                     >
                         <div
                             className={clsx(`
-                              univer-bg-primary-500/60 univer-absolute univer-top-0 univer-h-full univer-rounded-full
+                              univer-absolute univer-top-0 univer-h-full univer-rounded-full univer-bg-primary-500
                             `, isRtl ? 'univer-right-0' : 'univer-left-0')}
                             style={{ width: `${sliderOffset}%` }}
                         />
@@ -293,6 +293,16 @@ function SheetImageTransparencyInput(props: ISheetImageTransparencyInputProps) {
             setInputValue(`${value}%`);
         }
     }, [value]);
+
+    function parseTransparency(rawValue: string): number | null {
+        const normalizedValue = rawValue.trim().replace(/%$/, '').trim();
+        if (normalizedValue === '') {
+            return null;
+        }
+
+        const parsedValue = Number(normalizedValue);
+        return Number.isFinite(parsedValue) ? normalizeTransparency(parsedValue) : null;
+    }
 
     function emitValue(nextValue: number) {
         const normalizedValue = normalizeTransparency(nextValue);
@@ -410,16 +420,6 @@ function SheetImageTransparencyInput(props: ISheetImageTransparencyInputProps) {
             </DropdownMenu>
         </div>
     );
-}
-
-function parseTransparency(rawValue: string): number | null {
-    const normalizedValue = rawValue.trim().replace(/%$/, '').trim();
-    if (normalizedValue === '') {
-        return null;
-    }
-
-    const parsedValue = Number(normalizedValue);
-    return Number.isFinite(parsedValue) ? normalizeTransparency(parsedValue) : null;
 }
 
 function normalizeTransparency(value: number): number {

@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Predvolený štýl {0}',
+        customStyleNumber: 'Vlastný štýl {0}',
+        removeCustomStyle: 'Odstrániť vlastný štýl {0}',
         calculatedColumn: 'Vypočítaný stĺpec',
         columnFormula: 'Vzorec',
         columnFormulaHint: 'Okamžite nahradí {0} dátových buniek bez hlavičky a súhrnu. Zastavenie zachová existujúce bunky. Zmenu možno vrátiť späť.',

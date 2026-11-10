@@ -174,7 +174,7 @@ describe('ConfirmPart', () => {
         });
 
         expect(await screen.findByText('Mobile confirmation')).toBeTruthy();
-        expect(screen.getByRole('dialog').classList.contains('!univer-bottom-0')).toBe(true);
+        expect(screen.getByRole('dialog').style.bottom).toBe('0px');
 
         rendered.dispose();
     });

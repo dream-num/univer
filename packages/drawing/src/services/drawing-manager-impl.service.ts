@@ -15,6 +15,7 @@
  */
 
 import type {
+    ICommandInfo,
     IDrawingGroupNestedIds,
     IDrawingGroupNestedParam,
     IDrawingParam,
@@ -22,6 +23,17 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import {
+    Disposable,
+    DrawingTypeEnum,
+    JSON1,
+    normalizeDrawingOrderIndex,
+    remove,
+    sortRules,
+    sortRulesByDesc,
+    toDisposable,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDrawingGroupUpdateParam,
     IDrawingMap,
@@ -32,8 +44,6 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, JSON1, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
-import { Subject } from 'rxjs';
 
 type JSONOp = JSON1.JSONOp;
 type JSONOpList = JSON1.JSONOpList;
@@ -200,12 +210,14 @@ function validateDrawingData<T extends IDrawingParam>(data: IDrawingSubunitMap<T
 
 interface IDrawingRefreshMetadata {
     behindText?: unknown;
+    sheetTransform?: unknown;
+    axisAlignSheetTransform?: unknown;
 }
 
 /**
  * unitId -> subUnitId -> drawingId -> drawingParam
  */
-export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawingService<T> {
+export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadata> extends Disposable implements IUnitDrawingService<T> {
     drawingManagerData: IDrawingMap<T> = {};
 
     private _oldDrawingManagerData: IDrawingMap<T> = {};
@@ -263,7 +275,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private _visible: boolean = true;
     private _editable: boolean = true;
 
-    dispose(): void {
+    override dispose(): void {
+        super.dispose();
         this._remove$.complete();
         this._add$.complete();
         this._update$.complete();
@@ -290,6 +303,13 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
 
             param.transform = updateParam.transform;
+            // Cell anchors must describe the same bounds as the refreshed pixel transform.
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'sheetTransform')) {
+                param.sheetTransform = updateParam.sheetTransform;
+            }
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'axisAlignSheetTransform')) {
+                param.axisAlignSheetTransform = updateParam.axisAlignSheetTransform;
+            }
             if (Object.prototype.hasOwnProperty.call(updateParam, 'transforms')) {
                 param.transforms = updateParam.transforms;
             }
@@ -298,7 +318,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
 
             if ('behindText' in updateParam) {
-                (param as T & IDrawingRefreshMetadata).behindText = (updateParam as T & IDrawingRefreshMetadata).behindText;
+                param.behindText = updateParam.behindText;
             }
             if ('hidden' in updateParam) {
                 param.hidden = updateParam.hidden;
@@ -1151,4 +1171,15 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 }
 
-export class DrawingManagerService extends UnitDrawingService<IDrawingParam> { }
+export class DrawingManagerService extends UnitDrawingService<IDrawingParam> {
+    private readonly _commandChecks: Array<(command: ICommandInfo) => boolean> = [];
+
+    registerCommandCheck(check: (command: ICommandInfo) => boolean) {
+        this._commandChecks.push(check);
+        return this.disposeWithMe(toDisposable(() => remove(this._commandChecks, check)));
+    }
+
+    canExecuteCommand(command: ICommandInfo): boolean {
+        return this._commandChecks.every((check) => check(command));
+    }
+}

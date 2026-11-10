@@ -17,20 +17,39 @@
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, ImageSourceType, RedoCommandId, Tools, UndoCommandId } from '@univerjs/core';
+import {
+    BooleanNumber,
+    Disposable,
+    DrawingTypeEnum,
+    ILogService,
+    ImageSourceType,
+    IUndoRedoService,
+    LogLevel,
+    mergeWorksheetSnapshotWithDefault,
+    RedoCommandId,
+    Tools,
+    UndoCommandId,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { RemoveColByRangeCommand, RemoveRowByRangeCommand, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    InsertSheetCommand,
+    RemoveColByRangeCommand,
+    RemoveRowByRangeCommand,
+    SetWorksheetActiveOperation,
+    SheetSkeletonService,
+} from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
     drawingPositionToTransform,
     getSheetDrawingPlacement,
     InsertSheetDrawingCommand,
     ISheetDrawingService,
+    SetSheetDrawingPlacementCommand,
     SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetDrawingActiveRenderController } from '../sheet-drawing-active-render.controller';
 
@@ -38,13 +57,16 @@ function createTestBed() {
     const bed = createSheetsDrawingUiTestBed();
     const activated$ = new BehaviorSubject(false);
     const context = { unit: bed.workbook, unitId: bed.unitId, activated$ } as unknown as IRenderContext<Workbook>;
-    bed.injector.add([SheetDrawingActiveRenderController, {
-        useFactory: () => bed.injector.createInstance(SheetDrawingActiveRenderController, context),
-    }]);
+    const createController = () => bed.injector.createInstance(SheetDrawingActiveRenderController, context);
+    bed.injector.add([SheetDrawingActiveRenderController, { useFactory: createController }]);
     return { ...bed, activated$ };
 }
 
-async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: SheetDrawingAnchorType | undefined) {
+async function insertDrawing(
+    bed: ReturnType<typeof createTestBed>,
+    anchorType: SheetDrawingAnchorType | undefined,
+    position?: { left: number; top: number }
+) {
     const sheetTransform = {
         from: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
         to: { row: 6, column: 6, rowOffset: 0, columnOffset: 0 },
@@ -61,7 +83,7 @@ async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: 
         anchorType,
         sheetTransform,
         axisAlignSheetTransform: sheetTransform,
-        transform: { left, top, width, height },
+        transform: { left, top, width, height, ...position },
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
         unitId: bed.unitId,
@@ -73,6 +95,260 @@ async function insertDrawing(bed: ReturnType<typeof createTestBed>, anchorType: 
 describe('SheetDrawingActiveRenderController', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
+
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_CHART])(
+        'removes old drawings before the target sheet can restore its viewport (%s)',
+        async (drawingType) => {
+            const bed = createTestBed();
+            const subscriptions = new Disposable();
+            try {
+                expect(bed.commandService.syncExecuteCommand(InsertSheetCommand.id, {
+                    unitId: bed.unitId,
+                    sheet: mergeWorksheetSnapshotWithDefault({ id: 'sheet2', name: 'Sheet2' }),
+                })).toBe(true);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                const image = await insertDrawing(bed, SheetDrawingAnchorType.None);
+                const drawing: ISheetDrawing = { ...image, drawingType };
+                const sheetService = bed.get(ISheetDrawingService);
+                const manager = bed.get(IDrawingManagerService);
+                const store = {
+                    [bed.subUnitId]: { data: { [drawing.drawingId]: drawing }, order: [drawing.drawingId] },
+                };
+                sheetService.registerDrawingData(bed.unitId, Tools.deepClone(store));
+                manager.registerDrawingData(bed.unitId, Tools.deepClone(store));
+                bed.get(SheetDrawingActiveRenderController);
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                const events: string[] = [];
+                subscriptions.disposeWithMe(sheetService.remove$.subscribe((drawings) => {
+                    if (drawings.some(({ drawingId }) => drawingId === drawing.drawingId)) {
+                        events.push('sheet-remove');
+                    }
+                }));
+                subscriptions.disposeWithMe(manager.remove$.subscribe((drawings) => {
+                    if (drawings.some(({ drawingId }) => drawingId === drawing.drawingId)) {
+                        events.push('manager-remove');
+                    }
+                }));
+                subscriptions.disposeWithMe(bed.workbook.activeSheet$.subscribe((sheet) => {
+                    if (sheet?.getSheetId() === 'sheet2') {
+                        events.push('target-sheet');
+                    }
+                }));
+
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: 'sheet2',
+                })).toBe(true);
+                expect(events).toEqual(['sheet-remove', 'manager-remove', 'target-sheet']);
+                vi.runOnlyPendingTimers();
+                expect(events).toEqual(['sheet-remove', 'manager-remove', 'target-sheet']);
+                expect(manager.getDrawingByParam(drawing)).toEqual(drawing);
+                expect(sheetService.getDrawingByParam(drawing)).toEqual(drawing);
+
+                const added = vi.fn();
+                subscriptions.disposeWithMe(manager.add$.subscribe(added));
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: 'sheet2',
+                })).toBe(true);
+                vi.runOnlyPendingTimers();
+                expect(added).toHaveBeenCalledExactlyOnceWith([]);
+                expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                })).toBe(true);
+                vi.runOnlyPendingTimers();
+                expect(added).toHaveBeenLastCalledWith([drawing]);
+            } finally {
+                subscriptions.dispose();
+                bed.univer.dispose();
+                bed.activated$.complete();
+            }
+        }
+    );
+
+    it('preserves pending activation for invalid targets and other workbooks', async () => {
+        const bed = createTestBed();
+        const subscriptions = new Disposable();
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.None);
+            bed.univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                ...Tools.deepClone(bed.workbook.getSnapshot()),
+                id: 'other-workbook',
+            });
+            const manager = bed.get(IDrawingManagerService);
+            manager.registerDrawingData(bed.unitId, Tools.deepClone(
+                bed.get(ISheetDrawingService).getDrawingDataForUnit(bed.unitId)
+            ));
+            bed.get(SheetDrawingActiveRenderController);
+            bed.activated$.next(true);
+            const removed = vi.fn();
+            const added = vi.fn();
+            subscriptions.disposeWithMe(manager.remove$.subscribe(removed));
+            subscriptions.disposeWithMe(manager.add$.subscribe(added));
+            expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId: bed.unitId,
+                subUnitId: 'missing-sheet',
+            })).toBe(false);
+            expect(bed.commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                unitId: 'other-workbook',
+                subUnitId: bed.subUnitId,
+            })).toBe(true);
+            expect(removed).not.toHaveBeenCalled();
+            vi.runOnlyPendingTimers();
+            expect(added).toHaveBeenCalledExactlyOnceWith([drawing]);
+        } finally {
+            subscriptions.dispose();
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
+
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both])(
+        'isolates failed geometry and retries repaired drawings on activation (%s)',
+        async (anchorType) => {
+            const bed = createTestBed();
+            const subscriptions = new Disposable();
+            const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+            try {
+                const base = await insertDrawing(bed, anchorType);
+                const sheetService = bed.get(ISheetDrawingService);
+                const manager = bed.get(IDrawingManagerService);
+                bed.get(ILogService).setLogLevel(LogLevel.ERROR);
+                const valid = { ...base, drawingId: 'before', transform: { ...base.transform, left: -100, top: -100 } };
+                const invalid = {
+                    ...base,
+                    drawingId: 'invalid',
+                    transform: { ...base.transform, width: -1 },
+                    sheetTransform: { ...base.sheetTransform, to: { ...base.sheetTransform.from, columnOffset: -2 } },
+                };
+                const secondInvalid = { ...invalid, drawingId: 'second-invalid' };
+                const last = { ...valid, drawingId: 'after' };
+                const drawings = [valid, invalid, secondInvalid, last];
+                const snapshot = {
+                    [bed.subUnitId]: {
+                        data: Object.fromEntries(drawings.map((drawing) => [drawing.drawingId, drawing])),
+                        order: drawings.map((drawing) => drawing.drawingId),
+                    },
+                };
+                sheetService.registerDrawingData(bed.unitId, Tools.deepClone(snapshot));
+                manager.registerDrawingData(bed.unitId, Tools.deepClone(snapshot));
+                const beforeHistory = bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId);
+                const notifications = [sheetService, manager].map((service) => {
+                    const added = vi.fn();
+                    const removed = vi.fn();
+                    subscriptions.disposeWithMe(service.add$.subscribe(added));
+                    subscriptions.disposeWithMe(service.remove$.subscribe(removed));
+                    return { added, removed };
+                });
+                bed.get(SheetDrawingActiveRenderController);
+                bed.activated$.next(true);
+                expect(() => vi.runOnlyPendingTimers()).not.toThrow();
+                for (const { added, removed } of notifications) {
+                    expect(added.mock.calls.at(-1)![0].map((drawing: ISheetDrawing) => drawing.drawingId))
+                        .toEqual([valid.drawingId, last.drawingId]);
+                    expect(removed).toHaveBeenLastCalledWith([invalid, secondInvalid]);
+                }
+                for (const drawing of drawings) {
+                    expect(manager.getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
+                }
+                for (const drawing of [valid, last]) {
+                    expect(sheetService.getDrawingByParam(drawing)?.transform).toMatchObject({
+                        left: base.transform!.left,
+                        top: base.transform!.top,
+                    });
+                }
+                expect(sheetService.getDrawingByParam(invalid)).toEqual(invalid);
+                expect(sheetService.getDrawingByParam(secondInvalid)).toEqual(secondInvalid);
+                expect(bed.get(IUndoRedoService).getUndoRedoStatus(bed.unitId)).toEqual(beforeHistory);
+                expect(logged).toHaveBeenCalledTimes(1);
+                expect(logged.mock.calls[0][1]).toMatchObject({
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                    failures: [invalid, secondInvalid].map(({ drawingId, drawingType }) => ({
+                        drawingId,
+                        drawingType,
+                        anchorType,
+                        error: expect.objectContaining({
+                            width: anchorType === SheetDrawingAnchorType.Both ? -2 : -1,
+                            height: anchorType === SheetDrawingAnchorType.Both ? 0 : base.transform!.height,
+                        }),
+                    })),
+                });
+                expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
+                    unitId: bed.unitId,
+                    subUnitId: bed.subUnitId,
+                    drawings: [invalid, secondInvalid].map(({ drawingId }) => ({
+                        drawingId,
+                        placement: getSheetDrawingPlacement(base),
+                    })),
+                })).toBe(true);
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                for (const { added } of notifications) {
+                    expect(added.mock.calls.at(-1)![0].map((drawing: ISheetDrawing) => drawing.drawingId))
+                        .toEqual(drawings.map((drawing) => drawing.drawingId));
+                }
+                expect(logged).toHaveBeenCalledTimes(1);
+            } finally {
+                subscriptions.dispose();
+                logged.mockRestore();
+                bed.univer.dispose();
+                bed.activated$.complete();
+            }
+        }
+    );
+
+    it.each(['row', 'column'] as const)('reactivates an image after initially hidden %ss become visible', async (axis) => {
+        const bed = createTestBed();
+        const subscriptions = new Disposable();
+        try {
+            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.Both);
+            const sheetService = bed.get(ISheetDrawingService);
+            const before = Tools.deepClone(sheetService.getDrawingByParam(drawing));
+            const worksheet = bed.workbook.getActiveSheet();
+            const data = axis === 'row' ? worksheet.getRowManager().getRowData() : worksheet.getColumnManager().getColumnData();
+            for (let index = 3; index < 6; index++) {
+                data[index] = { ...data[index], hd: BooleanNumber.TRUE };
+            }
+            const skeleton = bed.get(SheetSkeletonService).getSkeleton(bed.unitId, bed.subUnitId)!;
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            const added = vi.fn();
+            const removed = vi.fn();
+            subscriptions.disposeWithMe(sheetService.add$.subscribe(added));
+            subscriptions.disposeWithMe(sheetService.remove$.subscribe(removed));
+            bed.get(SheetDrawingActiveRenderController);
+            bed.activated$.next(true);
+            expect(() => vi.runOnlyPendingTimers()).not.toThrow();
+            expect(removed).toHaveBeenLastCalledWith([drawing]);
+            expect(added).toHaveBeenLastCalledWith([]);
+            expect(sheetService.getDrawingByParam(drawing)?.sheetTransform).toEqual(before!.sheetTransform);
+            expect(sheetService.getDrawingByParam(drawing)?.transform?.[axis === 'row' ? 'height' : 'width']).toBe(0);
+            for (let index = 3; index < 6; index++) {
+                data[index]!.hd = BooleanNumber.FALSE;
+            }
+            skeleton.makeDirty(true);
+            skeleton.calculate();
+            bed.activated$.next(true);
+            vi.runOnlyPendingTimers();
+            expect(added.mock.calls.at(-1)![0]).toHaveLength(1);
+            expect(sheetService.getDrawingByParam(drawing)?.transform).toEqual(before!.transform);
+            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(sheetService.getDrawingByParam(drawing));
+        } finally {
+            subscriptions.dispose();
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
 
     it.each([
         ['row', SheetDrawingAnchorType.Both],
@@ -119,15 +395,99 @@ describe('SheetDrawingActiveRenderController', () => {
         }
     });
 
-    it('preserves unanchored geometry during activation', async () => {
+    it.each([
+        [SheetDrawingAnchorType.Both, 0, 81.9],
+        [SheetDrawingAnchorType.Position, 0, 81.9],
+        [SheetDrawingAnchorType.None, 0, 81.9],
+        [SheetDrawingAnchorType.Both, 81.9, 0],
+        [SheetDrawingAnchorType.Position, 81.9, 0],
+        [SheetDrawingAnchorType.None, 81.9, 0],
+    ] as const)('reactivates a line and preserves movement undo/redo (%s, %s, %s)', async (anchorType, width, height) => {
         const bed = createTestBed();
         try {
-            const drawing = await insertDrawing(bed, SheetDrawingAnchorType.None);
+            const from = { row: 3, column: 3, rowOffset: 0, columnOffset: 0 };
+            const sheetTransform = { from, to: { ...from, rowOffset: height, columnOffset: width } };
+            const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
+            const drawing: ISheetDrawing = {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawingId: 'line',
+                drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                anchorType,
+                sheetTransform,
+                axisAlignSheetTransform: sheetTransform,
+                transform: drawingPositionToTransform(sheetTransform, skeleton),
+            };
+            expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+                unitId: bed.unitId,
+                drawings: [drawing],
+            })).toBe(true);
+            bed.get(SheetDrawingActiveRenderController);
+            const sheetService = bed.get(ISheetDrawingService);
+            const manager = bed.get(IDrawingManagerService);
+            manager.registerDrawingData(bed.unitId, Tools.deepClone(sheetService.getDrawingDataForUnit(bed.unitId)));
+            const reactivate = () => {
+                bed.activated$.next(false);
+                vi.runOnlyPendingTimers();
+                bed.activated$.next(true);
+                vi.runOnlyPendingTimers();
+                const current = Tools.deepClone(sheetService.getDrawingByParam(drawing)!);
+                expect(current.transform).toMatchObject({ width, height });
+                expect(manager.getDrawingByParam(drawing)).toEqual(current);
+                return current;
+            };
+            const before = reactivate();
+            expect(reactivate()).toEqual(before);
+            expect(await bed.commandService.executeCommand(SetSheetDrawingPlacementCommand.id, {
+                unitId: bed.unitId,
+                subUnitId: bed.subUnitId,
+                drawings: [{ drawingId: drawing.drawingId, placement: {
+                    kind: anchorType,
+                    bounds: {
+                        left: before.transform!.left! + 10,
+                        top: before.transform!.top! + 10,
+                        width,
+                        height,
+                    },
+                } }],
+            })).toBe(true);
+            const after = reactivate();
+            expect(after.transform!.left).toBeCloseTo(before.transform!.left! + 10);
+            expect(after.transform!.top).toBeCloseTo(before.transform!.top! + 10);
+            expect(bed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+            expect(reactivate()).toEqual(before);
+            expect(bed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+            expect(reactivate()).toEqual(after);
+        } finally {
+            bed.univer.dispose();
+            bed.activated$.complete();
+        }
+    });
+
+    it.each([SheetDrawingAnchorType.None, undefined])('activates absolute or legacy cell-anchored geometry (%s)', async (anchorType) => {
+        const bed = createTestBed();
+        try {
+            const drawing = await insertDrawing(bed, anchorType, { left: 1000, top: 2000 });
             bed.get(SheetDrawingActiveRenderController);
             bed.activated$.next(true);
             vi.runOnlyPendingTimers();
-            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(drawing);
-            expect(bed.get(ISheetDrawingService).getDrawingByParam(drawing)).toEqual(drawing);
+            const current = bed.get(ISheetDrawingService).getDrawingByParam(drawing)!;
+            expect(bed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(current);
+            if (anchorType === SheetDrawingAnchorType.None) {
+                expect(current).toEqual(drawing);
+            } else {
+                const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
+                const position = drawingPositionToTransform(drawing.sheetTransform, skeleton)!;
+                expect(current.transform).toMatchObject({
+                    left: position.left,
+                    top: position.top,
+                    width: drawing.transform!.width,
+                    height: drawing.transform!.height,
+                });
+                expect(current.transform?.left).not.toBe(1000);
+                expect(current.transform?.top).not.toBe(2000);
+                expect(getSheetDrawingPlacement(current).kind).toBe(SheetDrawingAnchorType.Position);
+            }
         } finally {
             bed.univer.dispose();
             bed.activated$.complete();

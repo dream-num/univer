@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { UniverPrintingContext, UniverRenderingContext2D } from '../context';
 
 function createNativeContext() {
@@ -44,6 +43,12 @@ function createNativeContext() {
         direction: 'inherit',
         font: '10px serif',
         fontKerning: 'auto',
+        fontStretch: 'condensed',
+        fontVariantCaps: 'small-caps',
+        lang: 'inherit',
+        letterSpacing: '1px',
+        textRendering: 'optimizeLegibility',
+        wordSpacing: '2px',
         textAlign: 'start',
         textBaseline: 'alphabetic',
         getTransform: vi.fn(() => ({ a: 2, b: 0, c: 0, d: 4, e: 1, f: 1 })),
@@ -78,6 +83,7 @@ function createNativeContext() {
         isPointInPath: vi.fn(() => false),
         isPointInStroke: vi.fn(() => false),
         lineTo: vi.fn(),
+        measureText: vi.fn(() => ({ width: 42 })),
         moveTo: vi.fn(),
         putImageData: vi.fn(),
         quadraticCurveTo: vi.fn(),
@@ -100,7 +106,9 @@ function createNativeContext() {
     return ctx as any as CanvasRenderingContext2D;
 }
 
-describe('context extra', () => {
+describe('canvas context', () => {
+    afterEach(() => vi.restoreAllMocks());
+
     it('forwards style and basic drawing calls', () => {
         const nativeCtx = createNativeContext();
         const renderCtx = new UniverRenderingContext2D(nativeCtx, {
@@ -212,43 +220,157 @@ describe('context extra', () => {
         expect((renderCtx as any).createImageData({ width: 2, height: 2 })).toBeTruthy();
         expect((renderCtx as any).createImageData(3, 4, { colorSpace: 'srgb' })).toBeTruthy();
 
-        const browserSpy = vi.spyOn(Tools, 'getBrowserType').mockReturnValue('Chrome' as any);
-        const systemSpy = vi.spyOn(Tools, 'getSystemType').mockReturnValue('Mac' as any);
+        const userAgentSpy = vi.spyOn(navigator, 'userAgent', 'get')
+            .mockReturnValue('Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36');
+        vi.spyOn(navigator, 'platform', 'get').mockReturnValue('MacIntel');
         renderCtx.closePathByEnv();
         expect(nativeCtx.closePath).not.toHaveBeenCalled();
-        browserSpy.mockReturnValue('Firefox' as any);
-        (renderCtx as any)._browserType = '';
-        renderCtx.closePathByEnv();
+        userAgentSpy.mockReturnValue('Mozilla/5.0 (Macintosh; Intel Mac OS X) Gecko/20100101 Firefox/130.0');
+        new UniverRenderingContext2D(nativeCtx).closePathByEnv();
         expect(nativeCtx.closePath).toHaveBeenCalledTimes(1);
-        systemSpy.mockRestore();
-        browserSpy.mockRestore();
     });
 
-    it('falls back when the native context does not support roundRect', () => {
+    it('forwards text language in both directions', () => {
+        const nativeCtx = createNativeContext();
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
+
+        nativeCtx.lang = 'ja';
+        expect(renderCtx.lang).toBe('ja');
+
+        renderCtx.lang = 'zh-CN';
+        expect(nativeCtx.lang).toBe('zh-CN');
+    });
+
+    it('inherits text language when the native context has no language property', () => {
+        const nativeCtx = createNativeContext();
+        delete (nativeCtx as Partial<CanvasRenderingContext2D>).lang;
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
+
+        expect(renderCtx.lang).toBe('inherit');
+
+        renderCtx.lang = 'zh-CN';
+        expect(renderCtx.lang).toBe('zh-CN');
+        expect(nativeCtx.lang).toBe('zh-CN');
+    });
+
+    it.each([
+        { radius: 4, expectedRadius: 4 },
+        { radius: 100, expectedRadius: 10 },
+    ])('draws rounded corners with radius $radius without native roundRect on Chrome 88', ({ radius, expectedRadius }) => {
         const nativeCtx = createNativeContext();
         delete (nativeCtx as Partial<CanvasRenderingContext2D>).roundRect;
         const renderCtx = new UniverRenderingContext2D(nativeCtx);
 
-        renderCtx.roundRect(10, 20, 40, 20, 4);
+        renderCtx.roundRect(10, 20, 40, 20, radius);
 
-        expect(nativeCtx.moveTo).toHaveBeenCalledWith(14, 20);
-        expect(nativeCtx.quadraticCurveTo).toHaveBeenNthCalledWith(1, 50, 20, 50, 24);
+        expect(nativeCtx.moveTo).toHaveBeenCalledWith(10 + expectedRadius, 20);
+        expect(vi.mocked(nativeCtx.quadraticCurveTo).mock.calls).toEqual([
+            [50, 20, 50, 20 + expectedRadius],
+            [50, 40, 50 - expectedRadius, 40],
+            [10, 40, 10, 40 - expectedRadius],
+            [10, 20, 10 + expectedRadius, 20],
+        ]);
         expect(nativeCtx.closePath).toHaveBeenCalledTimes(1);
-        expect(nativeCtx.rect).not.toHaveBeenCalled();
     });
 
-    it('covers fallback line dash branches and printing context', () => {
-        const nativeCtx = createNativeContext() as any;
-        delete nativeCtx.setLineDash;
-        nativeCtx.mozDash = [];
-        const renderCtx = new UniverRenderingContext2D(nativeCtx as CanvasRenderingContext2D);
-        renderCtx.setLineDash([4, 1]);
-        expect(nativeCtx.mozDash).toEqual([4, 1]);
+    it.each([undefined, 0])('draws a rectangle with radius %s without native roundRect on Chrome 88', (radius) => {
+        const nativeCtx = createNativeContext();
+        delete (nativeCtx as Partial<CanvasRenderingContext2D>).roundRect;
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
 
-        const printingCtx = new UniverPrintingContext(createNativeContext());
+        renderCtx.roundRect(10, 20, 40, 20, radius);
+
+        expect(nativeCtx.rect).toHaveBeenCalledWith(10, 20, 40, 20);
+        expect(nativeCtx.quadraticCurveTo).not.toHaveBeenCalled();
+    });
+
+    it('forwards native rounded rectangles and line dashes', () => {
+        const nativeCtx = createNativeContext();
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
+        const radii = [{ x: 4, y: 2 }, 8];
+
+        renderCtx.roundRect(10, 20, 40, 20, radii);
+        renderCtx.setLineDash([4, 1]);
+
+        expect(nativeCtx.roundRect).toHaveBeenCalledWith(10, 20, 40, 20, radii);
+        expect(nativeCtx.setLineDash).toHaveBeenCalledWith([4, 1]);
+    });
+
+    it('clears the printing context without changing its compositing mode', () => {
+        const nativeCtx = createNativeContext();
+        const printingCtx = new UniverPrintingContext(nativeCtx);
         printingCtx.clearRect(1, 2, 3, 4);
         printingCtx.clearRectForTexture(1, 2, 3, 4);
         printingCtx.setGlobalCompositeOperation('lighter');
         expect(printingCtx.__mode).toBe('printing');
+        expect(nativeCtx.fillRect).toHaveBeenCalledTimes(1);
+        expect(nativeCtx.clearRect).not.toHaveBeenCalled();
+        expect(nativeCtx.save).toHaveBeenCalledTimes(1);
+        expect(nativeCtx.restore).toHaveBeenCalledTimes(1);
+        expect(nativeCtx.globalCompositeOperation).toBe('source-over');
+    });
+
+    it('reads proxied state and helper factories from the native context', () => {
+        const nativeCtx = createNativeContext();
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
+
+        expect(renderCtx.globalAlpha).toBe(1);
+        expect(renderCtx.globalCompositeOperation).toBe('source-over');
+        expect(renderCtx.fillStyle).toBe('#000000');
+        expect(renderCtx.strokeStyle).toBe('#000000');
+        expect(renderCtx.filter).toBe('none');
+        expect(renderCtx.imageSmoothingEnabled).toBe(true);
+        expect(renderCtx.imageSmoothingQuality).toBe('low');
+        expect(renderCtx.lineCap).toBe('butt');
+        expect(renderCtx.lineDashOffset).toBe(0);
+        expect(renderCtx.lineJoin).toBe('miter');
+        expect(renderCtx.lineWidth).toBe(1);
+        expect(renderCtx.miterLimit).toBe(10);
+        expect(renderCtx.shadowBlur).toBe(0);
+        expect(renderCtx.shadowColor).toBe('#000000');
+        expect(renderCtx.shadowOffsetX).toBe(0);
+        expect(renderCtx.shadowOffsetY).toBe(0);
+        expect(renderCtx.direction).toBe('inherit');
+        expect(renderCtx.font).toBe('10px serif');
+        nativeCtx.font = '12px serif';
+        expect(renderCtx.font).toBe('10px serif');
+        renderCtx.font = '14px serif';
+        expect(renderCtx.font).toBe('14px serif');
+        expect(renderCtx.fontKerning).toBe('auto');
+        expect(renderCtx.fontStretch).toBe('condensed');
+        expect(renderCtx.fontVariantCaps).toBe('small-caps');
+        expect(renderCtx.letterSpacing).toBe('1px');
+        expect(renderCtx.textRendering).toBe('optimizeLegibility');
+        expect(renderCtx.wordSpacing).toBe('2px');
+        expect(renderCtx.textAlign).toBe('start');
+        expect(renderCtx.textBaseline).toBe('alphabetic');
+
+        renderCtx.fontStretch = 'expanded';
+        renderCtx.fontVariantCaps = 'all-small-caps';
+        renderCtx.letterSpacing = '3px';
+        renderCtx.textRendering = 'geometricPrecision';
+        renderCtx.wordSpacing = '4px';
+        expect(nativeCtx.fontStretch).toBe('expanded');
+        expect(nativeCtx.fontVariantCaps).toBe('all-small-caps');
+        expect(nativeCtx.letterSpacing).toBe('3px');
+        expect(nativeCtx.textRendering).toBe('geometricPrecision');
+        expect(nativeCtx.wordSpacing).toBe('4px');
+
+        expect(renderCtx.getScale()).toEqual({ scaleX: 2, scaleY: 4 });
+        expect(renderCtx.createConicGradient(0, 1, 2)).toBeTruthy();
+        expect(renderCtx.createLinearGradient(0, 0, 1, 1)).toBeTruthy();
+        expect(renderCtx.createPattern(document.createElement('canvas'), 'repeat')).toBeTruthy();
+        expect(renderCtx.createRadialGradient(0, 0, 1, 2, 2, 3)).toBeTruthy();
+        expect(renderCtx.measureText('abc')).toEqual({ width: 42 });
+
+        renderCtx.resetTransform();
+        renderCtx.reset();
+        renderCtx.fillText('with width', 1, 2, 3);
+        renderCtx.fillTextPrecision('without width', 1, 2);
+        renderCtx.stroke(new Path2D());
+        expect(nativeCtx.resetTransform).toHaveBeenCalled();
+        expect(nativeCtx.reset).toHaveBeenCalled();
+        expect(nativeCtx.fillText).toHaveBeenCalledWith('with width', 1, 2, 3);
+        expect(nativeCtx.stroke).toHaveBeenCalledWith(expect.any(Path2D));
     });
 });

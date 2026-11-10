@@ -23,17 +23,23 @@ export const ToggleFullscreenOperation: IOperation = {
     type: CommandType.OPERATION,
     handler: (accessor) => {
         const root = accessor.get(ILayoutService).rootContainerElement;
-        if (!root) return false;
+        if (!root) {
+            return false;
+        }
 
         const document = root.ownerDocument;
 
         try {
             if (document.fullscreenElement) {
-                if (!document.exitFullscreen) return false;
-                void document.exitFullscreen().catch(() => {});
+                if (!document.exitFullscreen) {
+                    return false;
+                }
+                document.exitFullscreen().catch(() => {});
             } else {
-                if (!root.requestFullscreen) return false;
-                void root.requestFullscreen().catch(() => {});
+                if (!root.requestFullscreen) {
+                    return false;
+                }
+                root.requestFullscreen().catch(() => {});
             }
 
             return true;

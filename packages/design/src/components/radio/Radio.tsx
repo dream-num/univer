@@ -20,6 +20,8 @@ import { clsx } from '../../helper/clsx';
 
 export interface IRadioProps {
     children?: ReactNode;
+    className?: string;
+    name?: string;
 
     /**
      * Used for setting the currently selected value
@@ -48,14 +50,16 @@ export interface IRadioProps {
  * Radio Component
  */
 export function Radio(props: IRadioProps) {
-    const { children, checked, value, disabled = false, onChange } = props;
+    const { children, className, name, checked, value, disabled = false, onChange } = props;
 
     const inputRef = useRef<HTMLInputElement>(null!);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         e.stopPropagation();
 
-        if (!onChange || disabled) return;
+        if (!onChange || disabled) {
+            return;
+        }
 
         if (typeof value !== 'undefined') {
             onChange && onChange(value);
@@ -71,13 +75,14 @@ export function Radio(props: IRadioProps) {
             className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
                 'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-gray-0': !disabled,
                 'univer-text-gray-400': disabled,
-            })}
+            }, className)}
         >
             <span className="univer-relative univer-block">
                 <input
                     ref={inputRef}
-                    className="univer-absolute univer-size-0 univer-opacity-0"
+                    className="univer-peer univer-sr-only"
                     type="radio"
+                    name={name}
                     checked={checked}
                     disabled={disabled}
                     onChange={handleChange}
@@ -87,6 +92,9 @@ export function Radio(props: IRadioProps) {
                       univer-relative univer-box-border univer-flex univer-size-4 univer-items-center
                       univer-justify-center univer-overflow-hidden univer-rounded-full univer-border univer-border-solid
                       univer-transition-colors
+                      peer-focus:univer-outline peer-focus:univer-outline-2 peer-focus:univer-outline-offset-2
+                      peer-focus:univer-outline-primary-600
+                      dark:peer-focus:!univer-outline-primary-300
                     `, {
                         'univer-opacity-50': disabled,
                         'univer-border-primary-600 univer-bg-primary-600 dark:!univer-bg-primary-600': checked,

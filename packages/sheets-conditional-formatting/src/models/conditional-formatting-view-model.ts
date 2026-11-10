@@ -15,11 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { BaseCalculateUnit, IContext } from './calculate-unit-v2/base-calculate-unit';
-import type { IConditionFormattingRule } from './type';
 import { Disposable, Inject, Injector, IUniverInstanceService, LRUMap } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
+import type { BaseCalculateUnit, IContext } from './calculate-unit-v2/base-calculate-unit';
+import type { IConditionFormattingRule } from './type';
 import { CFRuleType, CFSubRuleType } from '../base/const';
 import { ConditionalFormattingFormulaService } from '../services/conditional-formatting-formula.service';
 import { ColorScaleCalculateUnit } from './calculate-unit-v2/color-scale-calculate-unit';
@@ -38,7 +38,7 @@ export class ConditionalFormattingViewModel extends Disposable {
     /**
      * 1nd-level cache
      */
-    private _cellCache = new LRUMap<string, { cfId: string; result: any; priority: number }[]>(CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH);
+    private _cellCache = new LRUMap<string, { cfId: string; result: any; matched: boolean; priority: number }[]>(CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH);
 
     private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string; isImmediately?: boolean }>();
     private _cacheClear$ = new Subject<void>();
@@ -98,10 +98,16 @@ export class ConditionalFormattingViewModel extends Disposable {
             if (!calculateUnit) {
                 return null;
             }
-            return {
-                cfId: rule.cfId,
-                result: calculateUnit.getCell(row, col),
-            };
+            const result = calculateUnit.getCell(row, col);
+            if (rule.rule.type === CFRuleType.highlightCell) {
+                const matched = result === true;
+                let style = result;
+                if (result != null) {
+                    style = matched ? rule.rule.style : {};
+                }
+                return { cfId: rule.cfId, result: style, matched };
+            }
+            return { cfId: rule.cfId, result, matched: !!result };
         }).filter((e) => !!e).map((e, index) => ({ ...e, priority: index }));
         return result;
     }

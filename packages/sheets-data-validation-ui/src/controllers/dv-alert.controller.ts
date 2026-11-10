@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import type { BaseDataValidator } from '@univerjs/data-validation';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { IHoverCellPosition } from '@univerjs/sheets-ui';
 import type { LocaleKey } from '../locale/types';
 import {
     DataValidationStatus,
@@ -23,21 +25,25 @@ import {
     Inject,
     IUniverInstanceService,
     LocaleService,
+    Rectangle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { DataValidationCacheService, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
-import { debounceTime, of, switchMap } from 'rxjs';
+import { auditTime, debounceTime, filter, of, switchMap, tap } from 'rxjs';
 
 const ALERT_KEY = 'SHEET_DATA_VALIDATION_ALERT';
 
 export class DataValidationAlertController extends Disposable {
+    private _hoveredCell: Nullable<IHoverCellPosition> = null;
+
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
         super();
         this._init();
@@ -50,57 +56,119 @@ export class DataValidationAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
             switchMap((workbook) => workbook?.activeSheet$ ?? of(null))
-        ).subscribe(() => this._cellAlertManagerService.removeAlert(ALERT_KEY)));
-
-        this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
-            if (cellPos) {
-                const workbook = this._univerInstanceService.getUnit<Workbook>(cellPos.location.unitId, UniverInstanceType.UNIVER_SHEET);
-                if (!workbook || workbook.getActiveSheet()?.getSheetId() !== cellPos.location.subUnitId) {
-                    this._cellAlertManagerService.removeAlert(ALERT_KEY);
-                    return;
-                }
-                const worksheet = workbook.getSheetBySheetId(cellPos.location.subUnitId);
-                if (!worksheet) return;
-                const rule = this._dataValidationModel.getRuleByLocation(cellPos.location.unitId, cellPos.location.subUnitId, cellPos.location.row, cellPos.location.col);
-                if (!rule) {
-                    this._cellAlertManagerService.removeAlert(ALERT_KEY);
-                    return;
-                }
-
-                const validStatus = this._dataValidationModel.validator(rule, { ...cellPos.location, workbook, worksheet });
-                if (validStatus === DataValidationStatus.INVALID) {
-                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
-                    const currentLoc = currentAlert?.alert?.location;
-                    if (
-                        currentLoc &&
-                        currentLoc.row === cellPos.location.row &&
-                        currentLoc.col === cellPos.location.col &&
-                        currentLoc.subUnitId === cellPos.location.subUnitId &&
-                        currentLoc.unitId === cellPos.location.unitId
-                    ) {
-                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
-                        return;
-                    }
-
-                    const validator = this._dataValidationModel.getValidator(rule.type) as BaseDataValidator;
-                    if (!validator) {
-                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
-                        return;
-                    }
-                    this._cellAlertManagerService.showAlert({
-                        type: CellAlertType.ERROR,
-                        title: this._localeService.t<LocaleKey>('sheets-data-validation-ui.error.title'),
-                        message: validator?.getRuleFinalError(rule, cellPos.location),
-                        location: cellPos.location,
-                        width: 200,
-                        height: 74,
-                        key: ALERT_KEY,
-                    });
-                    return;
-                }
-            }
-
+        ).subscribe(() => {
+            this._hoveredCell = null;
             this._cellAlertManagerService.removeAlert(ALERT_KEY);
         }));
+
+        this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(
+            tap(() => {
+                this._hoveredCell = null;
+                this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            }),
+            debounceTime(100)
+        ).subscribe((cellPos) => {
+            this._hoveredCell = cellPos;
+            this._refreshAlert();
+        }));
+
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe((change) => {
+            if (this._affectsHoveredCell(change, [...change.rule.ranges, ...change.oldRule?.ranges ?? []])) {
+                this._refreshAlert();
+            }
+        }));
+
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(
+            filter((change) => this._affectsHoveredCell(change, change.ranges)),
+            tap(() => this._cellAlertManagerService.removeAlert(ALERT_KEY)),
+            // Rule updates invalidate caches before their location matrix has finished updating.
+            auditTime(0)
+        ).subscribe(() => this._refreshAlert()));
+
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe((change) => {
+            if (this._isHoveredLocation(change)) {
+                const rule = this._dataValidationModel.getRuleByLocation(change.unitId, change.subUnitId, change.row, change.col);
+                if (rule?.uid === change.ruleId) {
+                    this._updateAlert(change.status);
+                }
+            }
+        }));
+
+        this.disposeWithMe(() => {
+            this._hoveredCell = null;
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+        });
+    }
+
+    private _isHoveredLocation(location: ISheetLocationBase) {
+        const current = this._hoveredCell?.location;
+        return current?.unitId === location.unitId && current?.subUnitId === location.subUnitId &&
+            current?.row === location.row && current?.col === location.col;
+    }
+
+    private _affectsHoveredCell(location: Pick<ISheetLocationBase, 'unitId' | 'subUnitId'>, ranges: IRange[]) {
+        const current = this._hoveredCell?.location;
+        return current?.unitId === location.unitId && current?.subUnitId === location.subUnitId &&
+            ranges.some((range) => Rectangle.contains(range, {
+                startRow: current.row,
+                endRow: current.row,
+                startColumn: current.col,
+                endColumn: current.col,
+            }));
+    }
+
+    private _getHoveredContext() {
+        const location = this._hoveredCell?.location;
+        if (!location) {
+            return;
+        }
+        const workbook = this._univerInstanceService.getUnit<Workbook>(location.unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getActiveSheet();
+        if (!workbook || !worksheet || worksheet.getSheetId() !== location.subUnitId) {
+            return;
+        }
+        const rule = this._dataValidationModel.getRuleByLocation(location.unitId, location.subUnitId, location.row, location.col);
+        if (rule) {
+            return { location, workbook, worksheet, rule };
+        }
+    }
+
+    private _refreshAlert() {
+        const context = this._getHoveredContext();
+        if (!context) {
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            return;
+        }
+        const { location, workbook, worksheet, rule } = context;
+        this._updateAlert(this._dataValidationModel.validator(rule, { ...location, workbook, worksheet }));
+    }
+
+    private _updateAlert(status: DataValidationStatus) {
+        const context = this._getHoveredContext();
+        if (!context || status !== DataValidationStatus.INVALID) {
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            return;
+        }
+        const { location, rule } = context;
+        const validator = this._dataValidationModel.getValidator(rule.type) as BaseDataValidator;
+        if (!validator) {
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            return;
+        }
+        const title = this._localeService.t<LocaleKey>('sheets-data-validation-ui.error.title');
+        const message = validator.getRuleFinalError(rule, location);
+        const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY)?.alert;
+        if (currentAlert && this._isHoveredLocation(currentAlert.location) && currentAlert.title === title && currentAlert.message === message) {
+            return;
+        }
+        this._cellAlertManagerService.showAlert({
+            type: CellAlertType.ERROR,
+            title,
+            message,
+            location,
+            width: 200,
+            height: 74,
+            key: ALERT_KEY,
+        });
     }
 }

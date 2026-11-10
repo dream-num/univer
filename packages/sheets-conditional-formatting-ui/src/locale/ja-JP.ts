@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '≤',
         },
         panel: {
+            stopIfTrue: '条件を満たす場合は停止',
             createRule: '新しいルール',
             clear: 'ルールのクリア',
             range: '適用先',

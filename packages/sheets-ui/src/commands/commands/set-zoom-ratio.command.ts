@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { BooleanNumber, ICommand } from '@univerjs/core';
 import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
-
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -24,6 +23,8 @@ import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
 
 export interface ISetZoomRatioCommandParams {
     zoomRatio: number;
+    /** Omission is a manual request, preserving historical callers; TRUE enters CHART continuous fit. */
+    zoomToFit?: BooleanNumber;
     unitId: string;
     subUnitId: string;
 }
@@ -46,7 +47,9 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet, subUnitId, unitId } = target;
         const { delta, reset } = params;
@@ -58,7 +61,9 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         const zoomRatio = zoom / 100;
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const state = editorBridgeService.isVisible();
-        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) return false;
+        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) {
+            return false;
+        }
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,
@@ -76,15 +81,18 @@ export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
             return false;
         }
 
-        const { unitId, subUnitId, zoomRatio } = params;
+        const { unitId, subUnitId, zoomRatio, zoomToFit } = params;
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const state = editorBridgeService.isVisible();
-        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) return false;
+        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) {
+            return false;
+        }
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,
             subUnitId,
             zoomRatio,
+            ...(zoomToFit === undefined ? {} : { zoomToFit }),
         });
     },
 };

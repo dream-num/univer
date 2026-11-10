@@ -15,10 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { normalizeTextForComparison } from '../../../engine/utils/compare';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
@@ -203,8 +204,8 @@ export class Unique extends BaseFunction {
 
             if (valueObject.isNull()) {
                 value = null;
-            } else if (valueObject.isString() && isRealNum(value as number)) {
-                value = +value;
+            } else if (valueObject.isString()) {
+                value = isRealNum(value as number) ? +value : normalizeTextForComparison(value as string);
             }
 
             if (!valueMap.has(value)) {

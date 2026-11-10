@@ -15,12 +15,11 @@
  */
 
 import type { ComponentType, ReactNode } from 'react';
+import { LocaleService, throttle } from '@univerjs/core';
+import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, divideXClassName } from '@univerjs/design';
+import { Fragment, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { LocaleService, throttle } from '@univerjs/core';
-import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, divideXClassName, Dropdown } from '@univerjs/design';
-import { MoreVerticalIcon } from '@univerjs/icons';
-import { Fragment, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
@@ -30,7 +29,7 @@ import { ClassicMenu } from './ribbon-menu/ClassicMenu';
 import { DefaultMenu } from './ribbon-menu/DefaultMenu';
 import { RibbonGridMenu } from './ribbon-menu/RibbonGridMenu';
 import { RibbonGrid } from './RibbonGrid';
-import { toolbarButtonClassName } from './ToolbarButton';
+import { RibbonOverflow } from './RibbonOverflow';
 import { ToolbarItem } from './ToolbarItem';
 import { ToolbarDropdownProvider } from './TooltipButtonWrapper';
 
@@ -292,6 +291,7 @@ export function Ribbon(props: IRibbonProps) {
 
             {!hideToolbar && ribbonType === 'grid' && (
                 <RibbonGrid
+                    key={effectiveActivatedTab}
                     {...embedRibbonOverrideAttributes}
                     groups={activeGroup.allGroups}
                     title={activatedTabTitle}
@@ -356,54 +356,7 @@ export function Ribbon(props: IRibbonProps) {
                                       rtl:univer-pr-2
                                     `}
                                 >
-                                    <Dropdown
-                                        collisionPadding={{ right: 12, left: 12 }}
-                                        onOpenAutoFocus={(e) => e.preventDefault()}
-                                        overlay={(
-                                            <div
-                                                className={`
-                                                  univer-box-border univer-grid
-                                                  univer-max-w-[--radix-popper-available-width] univer-gap-2 univer-p-2
-                                                `}
-                                            >
-                                                {activeGroup.hiddenGroups.map((groupItem) => (
-                                                    <div
-                                                        key={groupItem.key}
-                                                        className="univer-flex univer-items-center univer-gap-2"
-                                                    >
-                                                        <div className="univer-flex univer-flex-wrap univer-gap-2">
-                                                            {groupItem.children
-                                                                ? groupItem.children?.map((child) => (
-                                                                    child.item && (
-                                                                        <ToolbarItem
-                                                                            key={child.key}
-                                                                            {...child.item}
-                                                                            preserveStrokeWidth
-                                                                        />
-                                                                    )
-                                                                ))
-                                                                : (
-                                                                    groupItem.item && (
-                                                                        <ToolbarItem
-                                                                            key={groupItem.key}
-                                                                            {...groupItem.item}
-                                                                            preserveStrokeWidth
-                                                                        />
-                                                                    )
-                                                                )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    >
-                                        <button
-                                            type="button"
-                                            className={toolbarButtonClassName}
-                                        >
-                                            <MoreVerticalIcon preserveStrokeWidth />
-                                        </button>
-                                    </Dropdown>
+                                    <RibbonOverflow groups={activeGroup.hiddenGroups} />
                                 </div>
                             )}
                         </ToolbarDropdownProvider>

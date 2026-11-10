@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Stile predefinito {0}',
+        customStyleNumber: 'Stile personalizzato {0}',
+        removeCustomStyle: 'Elimina lo stile personalizzato {0}',
         calculatedColumn: 'Colonna calcolata',
         columnFormula: 'Formula',
         columnFormulaHint: 'Sostituisce subito {0} celle dati, escluse intestazione e totali. Arrestare mantiene le celle esistenti. È possibile annullare.',

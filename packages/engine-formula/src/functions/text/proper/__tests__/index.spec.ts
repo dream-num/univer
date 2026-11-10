@@ -32,6 +32,46 @@ describe('Test proper function', () => {
             expect(getObjectValue(result)).toStrictEqual('Univer');
         });
 
+        it.each([
+            ['hans müller-lüdenscheidt', 'Hans Müller-Lüdenscheidt'],
+            ['müller', 'Müller'],
+            ['mu\u0308ller', 'Mu\u0308Ller'],
+            ['élise', 'Élise'],
+            ['e\u0301lise', 'E\u0301Lise'],
+            ['中文abc', '中文abc'],
+            ['abc中文def', 'Abc中文def'],
+            ['ü', 'Ü'],
+            ['straße', 'Straße'],
+            ['αβγ', 'Αβγ'],
+            ['привет', 'Привет'],
+            ['a1b', 'A1B'],
+            ['2-way street', '2-Way Street'],
+            ['o\'NEILL', 'O\'Neill'],
+        ])('Uses Excel letter boundaries for %s', (input, expected) => {
+            const result = testFunction.calculate(StringValueObject.create(input));
+            expect(getObjectValue(result)).toStrictEqual(expected);
+        });
+
+        it('Capitalizes Unicode text in arrays', () => {
+            const text = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['müller', 'élise'],
+                    ['ü', '中文abc'],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['Müller', 'Élise'],
+                ['Ü', '中文abc'],
+            ]);
+        });
+
         it('Value is array', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

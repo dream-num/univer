@@ -31,8 +31,8 @@ export class SheetTableRangeController extends Disposable {
     private _initRangeListener() {
         this.disposeWithMe(
             this._tableManager.tableRangeChanged$.subscribe((event) => {
-                const { range, tableId, unitId, subUnitId } = event;
-                this._exclusiveRangeService.clearExclusiveRangesByGroupId(unitId, subUnitId, FEATURE_TABLE_ID, tableId);
+                const { range, tableId, unitId, subUnitId, oldSubUnitId = subUnitId } = event;
+                this._exclusiveRangeService.clearExclusiveRangesByGroupId(unitId, oldSubUnitId, FEATURE_TABLE_ID, tableId);
                 this._exclusiveRangeService.addExclusiveRange(unitId, subUnitId, FEATURE_TABLE_ID, [{
                     range: { ...range },
                     groupId: tableId,

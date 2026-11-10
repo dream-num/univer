@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link",
-    "version": "1.0.3",
+    "version": "1.4.0",
     "private": false,
     "description": "Hyperlink model and commands for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -75,9 +75,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -91,8 +91,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "rxjs": "^7.8.2",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.0"
+        "rxjs": "7.8.2",
+        "tsrs": "0.20.1-ts7.1.0-beta",
+        "vitest": "^5.0.5"
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { ICustomRange, IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
 import { createParagraphId, createSectionId, CustomRangeType, getBodySlice } from '@univerjs/core';
 
@@ -32,6 +32,10 @@ export type TextNode = {
 } | {
     type: 'mention';
     content: IThreadCommentMention;
+} | {
+    type: 'hyperlink';
+    content: string;
+    range: ICustomRange;
 };
 
 const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
@@ -48,13 +52,14 @@ const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
                 content: dataStream.slice(lastIndex, range.startIndex),
             });
         }
-        textNodes.push({
-            type: 'mention',
-            content: {
-                label: dataStream.slice(range.startIndex, range.endIndex + 1),
-                id: range.rangeId,
-            },
-        });
+        const content = dataStream.slice(range.startIndex, range.endIndex + 1);
+        if (range.rangeType === CustomRangeType.MENTION) {
+            textNodes.push({ type: 'mention', content: { label: content, id: range.rangeId } });
+        } else if (range.rangeType === CustomRangeType.HYPERLINK) {
+            textNodes.push({ type: 'hyperlink', content, range });
+        } else {
+            textNodes.push({ type: 'text', content });
+        }
         lastIndex = range.endIndex + 1;
     });
 
@@ -99,6 +104,12 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
                     properties: {},
                     wholeEntity: true,
                 });
+                break;
+            }
+            case 'hyperlink': {
+                const startIndex = str.length;
+                str += node.content;
+                customRanges.push({ ...node.range, startIndex, endIndex: str.length - 1 });
                 break;
             }
 

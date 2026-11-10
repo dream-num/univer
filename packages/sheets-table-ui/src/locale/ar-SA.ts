@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'النمط الافتراضي {0}',
+        customStyleNumber: 'النمط المخصص {0}',
+        removeCustomStyle: 'حذف النمط المخصص {0}',
         calculatedColumn: 'عمود محسوب',
         columnFormula: 'الصيغة',
         columnFormulaHint: 'يستبدل فورًا {0} خلية بيانات دون الرأس والإجمالي. إيقاف التعبئة يحافظ على الخلايا الحالية. يمكن التراجع.',

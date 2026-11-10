@@ -39,6 +39,7 @@ import {
     UIRuntimeScopeService,
 } from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import {
     createFakeEngine,
     createFakeScene,
@@ -336,6 +337,21 @@ describe('BaseSelectionRenderService', () => {
         expect(service.getSelectionControls()).toHaveLength(1);
         expect(service.isSelectionDisabled()).toBe(true);
         expect(service.inRefSelectionMode()).toBe(false);
+    });
+
+    it.each([undefined, true, false])('keeps selection updates working with enableFillHandle=%s', (enableFillHandle) => {
+        const { injector, service } = createSelectionRenderService();
+        injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { enableFillHandle });
+        service.changeRuntimeForTest();
+
+        service.resetSelectionsByModelData([selections[0]]);
+        expect(service.getActiveSelectionControl()!.fillControl.visible).toBe(enableFillHandle !== false);
+
+        service.resetSelectionsByModelData([selections[1]]);
+        const control = service.getActiveSelectionControl()!;
+        expect(control.getRange()).toMatchObject(selections[1].range);
+        expect(control.selectionShape.visible).toBe(true);
+        expect(control.fillControl.visible).toBe(enableFillHandle !== false);
     });
 
     it('chooses the visible viewport for frozen row and column selections', () => {

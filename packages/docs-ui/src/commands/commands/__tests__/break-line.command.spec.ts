@@ -15,9 +15,33 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector } from '@univerjs/core';
-import { awaitTime, CustomRangeType, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, PresetListType, Univer, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import {
+    awaitTime,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentBlockRangeType,
+    DocumentFlavor,
+    ICommandService,
+    IUniverInstanceService,
+    NamedStyleType,
+    PresetListType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocSelectionManagerService,
+    DocStateChangeManagerService,
+    DocStateEmitService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+    UniverDocsPlugin,
+} from '@univerjs/docs';
+import {
+    IRenderManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
@@ -442,3 +466,42 @@ describe('break line command', () => {
         expect(selectionManager.getActiveTextRange()?.startOffset).toBe(tableEnd + 2);
     });
 });
+
+it.each([
+    NamedStyleType.HEADING_1,
+    NamedStyleType.NORMAL_TEXT,
+    NamedStyleType.TITLE,
+    NamedStyleType.SUBTITLE,
+].flatMap((namedStyleType) => [2, 3].map((offset) => ({ namedStyleType, offset }))))(
+    'allows Enter at $offset when a snapshot retains a fold flag on named style $namedStyleType',
+    ({ namedStyleType, offset }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        univer.registerPlugin(UniverDocsPlugin);
+        injector.add([DocMenuStyleService]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'fold-enter',
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            body: { dataStream: 'One\rText\r\n', paragraphs: [
+                { paragraphId: 'one', startIndex: 3, headingCollapsed: true, paragraphStyle: { namedStyleType, headingId: 'heading-one' } },
+                { paragraphId: 'text', startIndex: 8 },
+            ] },
+        });
+        try {
+            injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
+            const commands = injector.get(ICommandService);
+            commands.registerCommand(BreakLineCommand);
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: model.getUnitId(), subUnitId: model.getUnitId() });
+            selections.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true }]);
+            expect(commands.syncExecuteCommand(BreakLineCommand.id)).toBe(true);
+            expect(model.getBody()?.dataStream).toBe(offset === 3 ? 'One\r\rText\r\n' : 'On\re\rText\r\n');
+            if (namedStyleType === NamedStyleType.HEADING_1) {
+                expect(model.getBody()?.paragraphs?.some((paragraph) => paragraph.headingCollapsed === true)).toBe(false);
+            }
+        } finally {
+            univer.dispose();
+        }
+    }
+);

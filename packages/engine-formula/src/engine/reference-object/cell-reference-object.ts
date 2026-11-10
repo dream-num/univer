@@ -15,9 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-
 import { ErrorType } from '../../basics/error-type';
-
 import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
@@ -122,7 +120,11 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setArrayFormulaCellData(this.getArrayFormulaCellData());
 
+        rangeReferenceObject.setArrayFormulaRange(this.getArrayFormulaRange());
+
         rangeReferenceObject.setRuntimeArrayFormulaCellData(this.getRuntimeArrayFormulaCellData());
+
+        rangeReferenceObject.setRuntimeArrayFormulaRange(this.getRuntimeArrayFormulaRange());
 
         rangeReferenceObject.setRuntimeFeatureCellData(this.getRuntimeFeatureCellData());
 

@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { createIdentifier, DisposableCollection, toDisposable } from '@univerjs/core';
 
 export const FORMULA_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE = 'data-embed-interaction-boundary-owner';
@@ -57,6 +58,7 @@ export const IFormulaEmbedInteractionBoundaryService = createIdentifier<IFormula
 interface IRegisterFormulaEditorRuntimePortalOptions {
     embedId: string;
     editorId: string;
+    editorService: IEditorService;
     ownerDocument?: Document;
     interactionBoundaryService?: IFormulaEmbedInteractionBoundaryService;
     focusCoordinator?: IFormulaEmbedRuntimeFocusCoordinator;
@@ -81,7 +83,8 @@ export function registerFormulaEditorRuntimePortal(options: IRegisterFormulaEdit
             return;
         }
 
-        const portalRoot = resolveFormulaEditorPortalRoot(options.editorId, ownerDocument);
+        const selection = options.editorService.getEditor(options.editorId)?.docSelectionRenderService;
+        const portalRoot = selection?.selectionContainer.isConnected ? selection.selectionContainer : null;
         if (portalRoot === registeredPortalRoot) {
             return;
         }
@@ -89,12 +92,12 @@ export function registerFormulaEditorRuntimePortal(options: IRegisterFormulaEdit
         portalRegistration?.dispose();
         portalRegistration = undefined;
         registeredPortalRoot = null;
-        if (!portalRoot) {
+        if (!portalRoot || !selection) {
             return;
         }
 
         registeredPortalRoot = portalRoot;
-        portalRegistration = registerFormulaEditorPortalRoot(options, ownerDocument, portalRoot);
+        portalRegistration = registerFormulaEditorPortalRoot(options, selection);
     };
 
     const scheduleRetry = (remaining: number) => {
@@ -138,19 +141,12 @@ export function registerFormulaEditorRuntimePortal(options: IRegisterFormulaEdit
     return collection;
 }
 
-function resolveFormulaEditorPortalRoot(editorId: string, ownerDocument: Document): HTMLElement | null {
-    return (ownerDocument.getElementById(`univer-doc-selection-container-${editorId}`) as HTMLElement | null)
-        ?? (ownerDocument.getElementById(`__editor_${editorId}`) as HTMLElement | null);
-}
-
 function registerFormulaEditorPortalRoot(
     options: IRegisterFormulaEditorRuntimePortalOptions,
-    ownerDocument: Document,
-    portalRoot: HTMLElement
+    selection: DocSelectionRenderService
 ): IDisposable {
     const collection = new DisposableCollection();
-    const editorElement = ownerDocument.getElementById(`__editor_${options.editorId}`) as HTMLElement | null;
-    const elements = editorElement && editorElement !== portalRoot ? [portalRoot, editorElement] : [portalRoot];
+    const elements = [selection.selectionContainer, selection.inputElement];
 
     elements.forEach((element) => {
         if (options.interactionBoundaryService) {

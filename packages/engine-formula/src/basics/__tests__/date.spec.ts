@@ -22,11 +22,48 @@ import {
     formatDateDefault,
     getDateSerialNumberByObject,
     getTwoDateDaysByBasis,
+    getWeekendArray,
     isValidDateStr,
+    isValidWeekend,
 } from '../date';
 import { ErrorType } from '../error-type';
 
 describe('Test date', () => {
+    it.each(['', '1', '000001', '00000110', '00000001', '00000|1', '0000011x', '11111111', '0000011\n'])('rejects invalid weekend mask %j', (weekend) => {
+        expect(isValidWeekend(weekend)).toBe(false);
+        expect(getWeekendArray(weekend)).toEqual([]);
+    });
+
+    it.each<[string, number[]]>([
+        ['0000011', [6, 0]],
+        ['1000000', [1]],
+        ['0000000', []],
+        ['1111111', [1, 2, 3, 4, 5, 6, 0]],
+    ])('decodes valid weekend mask %s', (weekend, expected) => {
+        expect(isValidWeekend(weekend)).toBe(true);
+        expect(getWeekendArray(weekend)).toEqual(expected);
+    });
+
+    it.each<[number, number[]]>([
+        [1, [6, 0]],
+        [2, [0, 1]],
+        [3, [1, 2]],
+        [4, [2, 3]],
+        [5, [3, 4]],
+        [6, [4, 5]],
+        [7, [5, 6]],
+        [11, [0]],
+        [12, [1]],
+        [13, [2]],
+        [14, [3]],
+        [15, [4]],
+        [16, [5]],
+        [17, [6]],
+    ])('decodes valid numeric weekend code %i', (weekend, expected) => {
+        expect(isValidWeekend(weekend)).toBe(true);
+        expect(getWeekendArray(weekend)).toEqual(expected);
+    });
+
     it('Function excelDateSerial', () => {
         expect(excelDateSerial(new Date(Date.UTC(1900, 1, 28)))).toBe(59);
         expect(excelDateSerial(new Date(Date.UTC(1900, 1, 29)))).toBe(61);

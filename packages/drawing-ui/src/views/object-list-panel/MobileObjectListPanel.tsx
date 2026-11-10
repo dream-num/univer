@@ -15,10 +15,10 @@
  */
 
 import type { ComponentProps } from 'react';
-import type { IObjectListPanelBaseProps, IObjectListRowProps } from './ObjectListPanelBase';
 import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon, EyelashIcon, LocateFixedIcon, LockIcon, MoreDownIcon, UnlockIcon } from '@univerjs/icons';
-import { hasCapability, ObjectDetailsEditor, useObjectListPanel, useObjectListRow } from './ObjectListPanelBase';
+import type { IObjectListPanelBaseProps, IObjectListRowProps } from './ObjectListPanelBase';
+import { hasCapability, ObjectDetailsEditor, useObjectListPanel } from './ObjectListPanelBase';
 
 const mobileIconButtonClassName = `
   univer-flex univer-size-11 univer-shrink-0 univer-items-center univer-justify-center univer-rounded-xl
@@ -32,8 +32,9 @@ function MobileObjectListInput(props: ComponentProps<typeof Input>) {
     return (
         <Input
             {...props}
-            className={clsx(props.className, 'univer-h-12')}
-            inputClass={clsx(props.inputClass, '!univer-text-base')}
+            className={clsx(props.className, '')}
+            inputClass={clsx(props.inputClass, '')}
+            size="small"
         />
     );
 }
@@ -54,7 +55,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
             <div className="univer-flex univer-min-w-0 univer-flex-col univer-gap-2">
                 <div className="univer-flex univer-w-full univer-min-w-0 univer-gap-2">
                     <Button
-                        className="univer-h-12 univer-flex-1"
+                        className="univer-flex-1"
                         size="middle"
                         disabled={visibilityItems.length === 0}
                         onClick={() => onSetVisible(visibilityItems.map((item) => item.id), !allVisible)}
@@ -64,7 +65,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                     {onSetSelectable && (
                         <Button
                             size="middle"
-                            className="univer-h-12 univer-flex-1"
+                            className="univer-flex-1"
                             disabled={selectableItems.length === 0}
                             onClick={() => onSetSelectable(selectableItems.map((item) => item.id), allLocked)}
                         >
@@ -114,12 +115,11 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
 
             <div className="univer-flex univer-shrink-0 univer-flex-col univer-gap-2">
                 <Input
-                    className="univer-h-12"
-                    inputClass="!univer-text-base"
                     value={searchQuery}
                     aria-label={labels.search}
                     placeholder={labels.search}
                     onChange={setSearchQuery}
+                    size="small"
                 />
                 <div className="univer-flex univer-min-w-0 univer-gap-1">
                     {([
@@ -139,9 +139,8 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                 'univer-h-11 univer-text-sm',
                                 filterMode === mode
                                     ? `
-                                      dark:!univer-bg-primary-900/30
                                       univer-border-primary-500 univer-bg-primary-50 univer-text-primary-600
-                                      dark:!univer-text-primary-200
+                                      dark:!univer-bg-primary-900 dark:!univer-text-primary-200
                                     `
                                     : clsx(`
                                       univer-border-gray-200 univer-bg-gray-0 univer-text-gray-600
@@ -231,7 +230,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                             labels={labels}
                                             permissionAction={renderPermissionAction?.(item)}
                                             showLock={!!onToggleSelectable && hasCapability(capabilities, item, 'selectable')}
-                                            showName={hasCapability(capabilities, item, 'name')}
+
                                             showVisible={hasCapability(capabilities, item, 'visible')}
                                             draggable={canReorder && hasCapability(capabilities, item, 'reorder') && !item.disabled && item.canReorder !== false}
                                             dragging={draggingId === item.id}
@@ -239,7 +238,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                             onToggleExpanded={() => onToggleExpanded?.(item.id)}
                                             onToggleVisible={() => onSetVisible([item.id], !item.visible)}
                                             onToggleSelectable={() => onToggleSelectable?.(item.id)}
-                                            onCommitName={(value) => onCommitName(item.id, value)}
+
                                             onDragStart={() => setDraggingId(item.id)}
                                             onDragEnd={() => setDraggingId(null)}
                                             onDrop={() => handleDrop(item.id)}
@@ -266,8 +265,10 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
 }
 
 function MobileObjectListRow(props: IObjectListRowProps) {
-    const { item, selected, labels, showLock, showName, showVisible, permissionAction, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable } = props;
-    const { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown } = useObjectListRow(props);
+    const { item, selected, labels, showLock, showVisible, permissionAction, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable } = props;
+    const disabled = item.disabled === true;
+    const level = item.level ?? 0;
+    const locked = item.selectable === false;
     return (
         <div
             className={clsx(`
@@ -303,25 +304,21 @@ function MobileObjectListRow(props: IObjectListRowProps) {
                     </button>
                 )
                 : <span className="univer-w-2 univer-shrink-0" />}
-            {showName
-                ? (
-                    <MobileObjectListInput
-                        className="univer-w-0 univer-min-w-0 univer-flex-1"
-                        value={draftName}
-                        disabled={disabled}
-                        aria-label={labels.nameInput}
-                        onChange={setDraftName}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            if (!disabled) {
-                                onSelect(false);
-                            }
-                        }}
-                    />
-                )
-                : <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-text-sm">{item.name}</span>}
+            <button
+                type="button"
+                className="
+                  univer-min-h-10 univer-min-w-0 univer-flex-1 univer-truncate univer-border-0 univer-bg-transparent
+                  univer-px-1 univer-text-start univer-text-base univer-text-inherit
+                "
+                disabled={disabled}
+                aria-pressed={selected}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(false);
+                }}
+            >
+                {item.name}
+            </button>
             {permissionAction}
             {showLock && (
                 <StateIconButton

@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { DocumentDataModel, ICommandService, IContextService, IUniverInstanceService } from '@univerjs/core';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
 import type { IKeyboardEventConfig } from './use-keyboard-event';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 export interface IExecuteEditorUndoRedoCommandOptions {
     commandId: string;
     commandService: ICommandService;
     editorUnitId: string;
     univerInstanceService: IUniverInstanceService;
+    contextService?: IContextService;
+    preserveHostFocus?: boolean;
 }
 
 export interface ICreateEditorUndoRedoKeyboardConfigOptions {
     commandService: ICommandService;
     univerInstanceService: IUniverInstanceService;
     editorUnitId: string;
+    contextService?: IContextService;
+    preserveHostFocus?: boolean;
     keyCodes?: IKeyboardEventConfig['keyCodes'];
     handler?: IKeyboardEventConfig['handler'];
 }
@@ -44,7 +54,7 @@ function isSheetFormulaEditor(editorUnitId: string, univerInstanceService: IUniv
 }
 
 export function executeEditorUndoRedoCommand(options: IExecuteEditorUndoRedoCommandOptions): void {
-    const { commandId, commandService, editorUnitId, univerInstanceService } = options;
+    const { commandId, commandService, contextService, editorUnitId, preserveHostFocus, univerInstanceService } = options;
     const shouldUseSheetEditorContext =
         editorUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ||
         editorUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
@@ -61,14 +71,28 @@ export function executeEditorUndoRedoCommand(options: IExecuteEditorUndoRedoComm
     }
 
     commandService.executeCommand(commandId).finally(() => {
-        if (shouldRestoreFocus) {
+        if (!shouldRestoreFocus || univerInstanceService.getFocusedUnit()?.getUnitId() !== editorUnitId) {
+            return;
+        }
+
+        if (!preserveHostFocus || !contextService) {
             univerInstanceService.focusUnit(previousFocusedUnitId);
+            return;
+        }
+
+        // Restore the host context without moving input focus out of its embedded editor.
+        const previousDisableAutoFocus = contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY);
+        contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
+        try {
+            univerInstanceService.focusUnit(previousFocusedUnitId);
+        } finally {
+            contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, previousDisableAutoFocus);
         }
     });
 }
 
 export function createEditorUndoRedoKeyboardConfig(options: ICreateEditorUndoRedoKeyboardConfigOptions): IKeyboardEventConfig {
-    const { commandService, editorUnitId, handler, keyCodes = [], univerInstanceService } = options;
+    const { commandService, contextService, editorUnitId, handler, keyCodes = [], preserveHostFocus, univerInstanceService } = options;
     const ctrlCommand = MetaKeys.CTRL_COMMAND;
     const ctrlCommandShift = MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT;
 
@@ -85,11 +109,25 @@ export function createEditorUndoRedoKeyboardConfig(options: ICreateEditorUndoRed
 
             switch (shortcut) {
                 case `${KeyCode.Z}:${ctrlCommand}`:
-                    executeEditorUndoRedoCommand({ commandId: UndoCommand.id, commandService, editorUnitId, univerInstanceService });
+                    executeEditorUndoRedoCommand({
+                        commandId: UndoCommand.id,
+                        commandService,
+                        contextService,
+                        editorUnitId,
+                        preserveHostFocus,
+                        univerInstanceService,
+                    });
                     return;
                 case `${KeyCode.Y}:${ctrlCommand}`:
                 case `${KeyCode.Z}:${ctrlCommandShift}`:
-                    executeEditorUndoRedoCommand({ commandId: RedoCommand.id, commandService, editorUnitId, univerInstanceService });
+                    executeEditorUndoRedoCommand({
+                        commandId: RedoCommand.id,
+                        commandService,
+                        contextService,
+                        editorUnitId,
+                        preserveHostFocus,
+                        univerInstanceService,
+                    });
                     return;
             }
 

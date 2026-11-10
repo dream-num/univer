@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'ドキュメントのレイアウトを復元しています…',
         },
         toolbar: {
+            zoom: 'ズーム',
+            fullscreen: '全画面表示',
             font: 'フォント',
             fontSize: 'フォントサイズ',
             bold: '太字',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'セクション設定',
             },
             paragraphSetting: {
+                wordWrap: '英単語の途中で改行する',
                 alignment: '配置',
                 indentation: 'インデント',
                 left: '左',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'インデントを減らす',
             defaultTextColor: 'デフォルトの文字色',
             noBackground: '背景なし',
+        },
+        heading: {
+            collapse: '折りたたむ',
+            expand: '展開する',
         },
         'page-settings': {
             'document-setting': '文書設定',

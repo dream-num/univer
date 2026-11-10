@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonGlyph,
-} from '../../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     AlignTypeH,
     BooleanNumber,
@@ -44,6 +39,11 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
+} from '../../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
@@ -62,6 +62,111 @@ import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed
 import issue1207Snapshot from './fixtures/issue-1207-bullet-style.snapshot.json';
 
 describe('layout-ruler', () => {
+    it('lays out a long unbroken Korean run without losing glyphs or overflowing the call stack', () => {
+        const content = '한'.repeat(20000);
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 100 + 2 * MODERN_DOCUMENT_DEFAULT_MARGIN, height: 800 },
+                renderConfig: { zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            const text = lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join(''));
+            expect(text.join('')).toBe(`${content}\r`);
+            expect(lines.length).toBeGreaterThan(1000);
+            expect(lines.every((line) => line.divides.every((divide) => divide.glyphGroup.every((glyph) => glyph.left + glyph.width <= divide.width + 3)))).toBe(true);
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('retains mixed-font continuation heights when emergency wrapping a long word', () => {
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text, font) => {
+            const size = Number(font.match(/([\d.]+)(?:pt|px)/)?.[1] ?? 12);
+            return { width: text.length * 10, fontBoundingBoxAscent: size, fontBoundingBoxDescent: 0, actualBoundingBoxAscent: size, actualBoundingBoxDescent: 0 };
+        });
+        const content = '한'.repeat(40);
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 50 + 2 * MODERN_DOCUMENT_DEFAULT_MARGIN, height: 800 },
+                renderConfig: { zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+            body: { textRuns: [{ st: 0, ed: 20, ts: { fs: 12 } }, { st: 20, ed: 40, ts: { fs: 30 } }] },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))).join('')).toBe(`${content}\r`);
+            expect(lines.length).toBeGreaterThan(4);
+            expect(lines.slice(1).map((line) => line.contentHeight)).toEqual(lines.slice(1).map(() => lines[0].contentHeight));
+        } finally {
+            measure.mockRestore();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('keeps an oversized word out of narrow divides beside a floating picture in traditional documents', () => {
+        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}\r${'한'.repeat(60)}`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 300, height: 800 },
+                marginLeft: 0,
+                marginRight: 0,
+                marginTop: 0,
+                marginBottom: 0,
+            },
+            body: {
+                paragraphs: [{ startIndex: 1, paragraphId: 'anchor' }, { startIndex: content.length, paragraphId: 'text' }],
+                customBlocks: [{ startIndex: 0, blockId: 'float' }],
+            },
+            drawings: {
+                float: {
+                    drawingId: 'float',
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    behindDoc: BooleanNumber.FALSE,
+                    distL: 0,
+                    distR: 0,
+                    distT: 0,
+                    distB: 0,
+                    docTransform: {
+                        size: { width: 140, height: 70 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 60 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                        angle: 0,
+                    },
+                },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        try {
+            skeleton.calculate();
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            const besidePicture = lines.filter((line) => line.paragraphIndex === content.length && line.top < 70);
+            expect(besidePicture.length).toBeGreaterThan(1);
+            for (const line of besidePicture) {
+                const textDivides = line.divides.filter((divide) => divide.glyphGroup.some((glyph) => glyph.content === '한'));
+                expect(textDivides).toHaveLength(1);
+                expect(textDivides[0].left).toBeGreaterThanOrEqual(200);
+            }
+        } finally {
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it('does not skip a fixed tab stop after preceding text crosses it', () => {
         const tab = createGlyph(DataStreamTreeTokenType.TAB, 36);
         tab.glyphType = GlyphType.TAB;
@@ -2829,7 +2934,7 @@ describe('layout-ruler', () => {
         section.columns = [column];
         column.lines = [line];
 
-        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), '', 80);
+        updateInlineDrawingPosition(line, new Map([['image-1', drawing]]), '', 80, undefined, undefined, 32, true);
 
         expect(page.skeDrawings.get('old-image')).toEqual({ drawingId: 'old-image' });
         expect(page.skeDrawings.get('image-1')).toMatchObject({
@@ -2842,6 +2947,8 @@ describe('layout-ruler', () => {
             lineTop: 226,
             columnLeft: 40,
             blockAnchorTop: 206,
+            blockAnchorLeft: 32,
+            normalizeTraditionalColumnAnchor: true,
             lineHeight: 24,
         });
     });
@@ -2900,6 +3007,39 @@ describe('layout-ruler', () => {
         __testing.avoidNonOverlappingFloatingTables(table, page);
 
         expect(table.top).toBe(1029);
+    });
+
+    it.each(
+        [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN, DocumentFlavor.UNSPECIFIED, undefined].flatMap((flavor) =>
+            [TableAlignmentType.CENTER, TableAlignmentType.END].flatMap((align) =>
+                [false, true].map((hasWidth) => ({ flavor, align, hasWidth }))
+            )
+        )
+    )('retains the table overflow policy during final paragraph placement ($flavor, $align, width: $hasWidth)', ({ flavor, align, hasWidth }) => {
+        const table = {
+            tableId: 'imported-table',
+            tableSource: {
+                align,
+                ...(hasWidth ? { size: { type: TableSizeType.SPECIFIED, width: { v: 612 } } } : {}),
+                textWrap: TableTextWrapType.NONE,
+            },
+            top: 0,
+            left: 0,
+            width: 612,
+            height: 100,
+        } as any;
+        const page = { skeDrawings: new Map(), skeTables: new Map() } as any;
+        const column = { left: 17, width: 554 } as any;
+        const section = { top: 0, height: 900 } as any;
+        const cache = [{ table, tableId: table.tableId, hasPositioned: false, isSlideTable: false, tableNode: {} }] as any;
+        const source = JSON.stringify(table.tableSource);
+        const sectionBreakConfig = flavor != null ? { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(flavor) } : {};
+        __testing.updateAndPositionTable({} as any, 0, 14, page, [page], column, section, cache, 0, sectionBreakConfig as any);
+        const alignmentLeft = align === TableAlignmentType.CENTER ? -29 : -58;
+        const offset = flavor === DocumentFlavor.TRADITIONAL && hasWidth ? alignmentLeft : 0;
+        expect(table.left).toBe(17 + offset);
+        expect(page.skeTables.get(table.tableId)).toBe(table);
+        expect(JSON.stringify(table.tableSource)).toBe(source);
     });
 
     it('positions a sliced table continuation in its current column', () => {

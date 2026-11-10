@@ -42,6 +42,7 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { FontService, IFontService } from '../../../../services/font.service';
 import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
@@ -49,6 +50,7 @@ import { IPlatformService, PlatformService } from '../../../../services/platform
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { connectInjector } from '../../../../utils/di';
+import { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from '../../../font-family/FontFamilyItem';
 import {
     DropdownMenuLabel,
     DropdownMenuWrapper,
@@ -115,6 +117,7 @@ afterEach(() => {
     cleanup();
     testInjectors.forEach((injector) => injector.dispose());
     testInjectors.length = 0;
+    vi.restoreAllMocks();
 });
 
 describe('ToolbarTooltip', () => {
@@ -482,6 +485,41 @@ describe('DropdownMenuWrapper', () => {
 
         fireEvent.click(option);
         await waitFor(() => expect(disposeShortcutEscape).toHaveBeenCalledOnce());
+    });
+
+    it('uses only the shared menu padding around the font list and selects its font value', async () => {
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+        const onOptionSelect = vi.fn();
+        const { findByRole, getByRole, queryByRole, injector } = renderWithDependencies(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="font-family">
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{
+                            label: {
+                                name: FONT_FAMILY_ITEM_COMPONENT,
+                                hoverable: false,
+                                selectable: false,
+                            },
+                        }]}
+                        onOptionSelect={onOptionSelect}
+                    >
+                        <button type="button">Open fonts</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>
+        );
+        injector.add([IFontService, { useClass: FontService }]);
+        injector.get(ComponentManager).register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
+
+        fireEvent.pointerDown(getByRole('button', { name: 'Open fonts' }), { button: 0, ctrlKey: false });
+        const option = await findByRole('button', { name: 'Courier New' });
+        expect(option.closest('[data-slot="dropdown-menu-item"]')?.className).toContain('!univer-p-0');
+        expect(getByRole('menu').className).not.toContain('!univer-p-0');
+
+        fireEvent.click(option);
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ value: 'Courier New' }));
+        await waitFor(() => expect(queryByRole('menu')).toBeNull());
     });
 
     it('keeps padding around a non-embedded custom panel', async () => {

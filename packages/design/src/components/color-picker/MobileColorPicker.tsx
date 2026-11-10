@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IColorPickerProps } from './ColorPicker';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import type { IColorPickerProps } from './ColorPicker';
 import { isBrowser } from '../../helper/is-browser';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
@@ -42,10 +42,12 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
     const closeMobileDropdown = useContext(MobileDropdownCloseContext);
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
+    const [hasSelectedColor, setHasSelectedColor] = useState(Boolean(value));
     const [visible, setVisible] = useState(false);
     const getRgb = useCallback((h: number, s: number, v: number) => hsvToRgb(h, s, v), []);
 
     useEffect(() => {
+        setHasSelectedColor(Boolean(value));
         try {
             const actualValue = value || (format === 'hex' ? '#000000' : 'rgba(0, 0, 0, 1)');
             if (format === 'hex') {
@@ -70,6 +72,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
     }
 
     function handleColorChanged(h: number, s: number, v: number, a: number = alpha) {
+        setHasSelectedColor(true);
         if (format === 'hex') {
             onChange?.(rgbToHex(...getRgb(h, s, v)));
         } else {
@@ -94,7 +97,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
             onClick={(event) => event.stopPropagation()}
         >
             <MemoizedMobileColorPresets
-                value={hsvToHex(...hsv)}
+                value={hasSelectedColor && alpha === 1 ? hsvToHex(...hsv) : undefined}
                 onSelect={(color) => {
                     const [h, s, v] = hexToHsv(color);
                     handleColorChange(h, s, v);
@@ -103,12 +106,13 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                 }}
             />
 
-            <div className="univer-flex univer-h-12 univer-items-center">
-                <button
+            <div className="univer-flex univer-items-center">
+                <Button
+                    size="middle"
                     type="button"
                     className="
-                      univer-h-11 univer-w-full univer-cursor-pointer univer-rounded-xl univer-border-0
-                      univer-bg-gray-100 univer-text-sm univer-font-medium univer-text-gray-900
+                      univer-w-full univer-cursor-pointer univer-rounded-xl univer-border-0 univer-bg-gray-100
+                      univer-font-medium univer-text-gray-900
                       active:univer-bg-gray-200
                       dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                       dark:active:!univer-bg-gray-700
@@ -116,7 +120,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     onClick={() => setVisible(true)}
                 >
                     {locale?.ColorPicker.more}
-                </button>
+                </Button>
             </div>
 
             <MobileDialog
@@ -146,6 +150,7 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     </div>
 
                     <MemoizedColorInput
+                        size="small"
                         hsv={hsv}
                         alpha={alpha}
                         format={format}
@@ -158,8 +163,8 @@ export function MobileColorPicker({ format = 'hex', value, onChange }: IMobileCo
                     />
 
                     <MobileActionRowGroup>
-                        <Button onClick={() => setVisible(false)}>{locale?.ColorPicker.cancel}</Button>
-                        <Button variant="primary" onClick={handleConfirmCustomColor}>{locale?.ColorPicker.confirm}</Button>
+                        <Button onClick={() => setVisible(false)} size="middle">{locale?.ColorPicker.cancel}</Button>
+                        <Button variant="primary" onClick={handleConfirmCustomColor} size="middle">{locale?.ColorPicker.confirm}</Button>
                     </MobileActionRowGroup>
                 </div>
             </MobileDialog>

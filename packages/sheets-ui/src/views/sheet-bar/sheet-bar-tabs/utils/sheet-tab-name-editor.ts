@@ -21,6 +21,7 @@ export interface IStartSheetTabNameEditorParams {
     setEditMode: (editing: boolean) => void;
     beforeCommit: () => void;
     onCommit: (name: string, event: FocusEvent) => void;
+    onCancel: () => void;
 }
 
 interface ISheetTabNameEditorActions {
@@ -52,10 +53,16 @@ export function keepLastTextIndex(inputHtml: HTMLElement) {
 export function keepTextSelected(inputHtml: HTMLElement) {
     setTimeout(() => {
         const selection = window.getSelection();
-        if (!selection) return;
+        if (!selection) {
+            return;
+        }
 
         const range = document.createRange();
         range.selectNodeContents(inputHtml);
+        // An empty contenteditable can retain a <br>, which must not become a non-collapsed selection.
+        if (!getEditorText(inputHtml)) {
+            range.collapse(true);
+        }
 
         selection.removeAllRanges();
         selection.addRange(range);
@@ -68,6 +75,7 @@ function createSheetTabNameEditorActions(
 ): ISheetTabNameEditorActions {
     let compositionFlag = true;
     let cleanup = () => { };
+    const originalName = getEditorText(input);
 
     const pasteAction = (event: ClipboardEvent) => {
         event.preventDefault();
@@ -89,10 +97,21 @@ function createSheetTabNameEditorActions(
         params.onCommit(getEditorText(input), focusEvent);
     };
 
+    const cancelAction = () => {
+        input.textContent = originalName;
+        params.setEditMode(false);
+        cleanup();
+        params.beforeCommit();
+        params.onCancel();
+    };
+
     const keydownAction = (event: KeyboardEvent) => {
         event.stopPropagation();
 
-        if (event.key === 'Enter') {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            cancelAction();
+        } else if (event.key === 'Enter') {
             input.blur();
             event.preventDefault();
         }

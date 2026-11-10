@@ -16,9 +16,6 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
-import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
-import type { IEditorRuntimeConfig } from '../services/editor/editor-runtime-config';
-import type { IKeyboardEventConfig } from './rich-text-editor/hooks/use-keyboard-event';
 import {
     BuildTextUtils,
     createInternalEditorID,
@@ -26,6 +23,7 @@ import {
     getPlainText,
     HorizontalAlign,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     LocaleService,
     RichTextBuilder,
@@ -37,6 +35,9 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map, merge, startWith } from 'rxjs';
+import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
+import type { IEditorRuntimeConfig } from '../services/editor/editor-runtime-config';
+import type { IKeyboardEventConfig } from './rich-text-editor/hooks/use-keyboard-event';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { createEditorUndoRedoKeyboardConfig } from './rich-text-editor/hooks/editor-undo-redo-keyboard';
 import { useEditor } from './rich-text-editor/hooks/use-editor';
@@ -123,6 +124,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     } = props;
 
     const commandService = useDependency(ICommandService);
+    const contextService = useDependency(IContextService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
     const onFocusChange = useEvent(_onFocusChange);
@@ -226,11 +228,13 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
 
     const resolvedKeyboardEventConfig = useMemo(() => createEditorUndoRedoKeyboardConfig({
         commandService,
+        contextService,
         univerInstanceService,
         editorUnitId: editorId,
+        preserveHostFocus,
         keyCodes: keyboardEventConfig?.keyCodes,
         handler: keyboardEventConfig?.handler,
-    }), [commandService, editorId, keyboardEventConfig, univerInstanceService]);
+    }), [commandService, contextService, editorId, keyboardEventConfig, preserveHostFocus, univerInstanceService]);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     // Undo can restore a non-collapsed selection without blurring the editor.

@@ -15,7 +15,14 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
-import { BuiltInUIPart, connectInjector, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import {
+    BuiltInUIPart,
+    connectInjector,
+    ContextMenuPosition,
+    ILayoutService,
+    IMenuManagerService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../../commands/operations/doc-header-footer-panel.operation';
 import { OpenDocParagraphPermissionOperation } from '../../commands/operations/paragraph-permission.operation';
@@ -57,8 +64,11 @@ export class DocMobileUIController extends Disposable {
     }
 
     private _initMenus(): void {
+        const { [ContextMenuPosition.MAIN_AREA]: mainAreaMenu, ...rootMenus } = mobileMenuSchema;
         this._menuManagerService.mergeMenu(menuSchema);
-        this._menuManagerService.appendRootMenu(mobileMenuSchema);
+        // A duplicate main-area root would shadow the shared Sheets/Docs context menu.
+        this._menuManagerService.mergeMenu({ [ContextMenuPosition.MAIN_AREA]: mainAreaMenu });
+        this._menuManagerService.appendRootMenu(rootMenus);
     }
 
     private _initFocusHandler(): void {

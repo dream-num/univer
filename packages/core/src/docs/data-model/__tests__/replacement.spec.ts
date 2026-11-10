@@ -15,8 +15,10 @@
  */
 
 import type { IDocumentBody } from '../../../types/interfaces';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BooleanNumber } from '../../../types/enum/text-style';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
+import { DocumentDataModel } from '../document-data-model';
 import { replaceInDocumentBody } from '../replacement';
 
 function getTestDocumentBody() {
@@ -92,6 +94,58 @@ function getTestDocumentBody() {
 }
 
 describe('test case in replaceInDocumentBody utils', () => {
+    it.each([
+        { input: 'cat cat', query: 'cat', target: 'cat', caseSensitive: true, expected: 'cat cat' },
+        { input: 'cat cat', query: 'cat', target: 'cats', caseSensitive: true, expected: 'cats cats' },
+        { input: 'cat CAT', query: 'cat', target: 'Cat', caseSensitive: false, expected: 'Cat Cat' },
+        { input: 'cat CAT', query: 'CAT', target: 'dog', caseSensitive: false, expected: 'dog dog' },
+        { input: 'İcat cat', query: 'CAT', target: 'dog', caseSensitive: false, expected: 'İdog dog' },
+        { input: 'cat CAT', query: 'cat', target: 'dog', caseSensitive: true, expected: 'dog CAT' },
+        { input: 'aaaa', query: 'aa', target: 'a', caseSensitive: true, expected: 'aa' },
+        { input: 'catcat dog cat', query: 'cat', target: '', caseSensitive: true, expected: ' dog ' },
+        { input: 'a.b a+b', query: 'a.b', target: '$&', caseSensitive: true, expected: '$& a+b' },
+    ])('replaces original matches once: $input / $query -> $target ($caseSensitive)', ({ input, query, target, caseSensitive, expected }) => {
+        const originalApply = DocumentDataModel.prototype.apply;
+        let replacements = 0;
+        const applySpy = vi.spyOn(DocumentDataModel.prototype, 'apply').mockImplementation(function (this: DocumentDataModel, actions) {
+            // Bound the old non-terminating implementation so regressions fail without hanging Vitest.
+            if (++replacements > 20) throw new Error('Replacement did not advance past inserted text');
+            return originalApply.call(this, actions);
+        });
+
+        try {
+            const body = { dataStream: `${input}\r\n` };
+            expect(replaceInDocumentBody(body, query, target, caseSensitive).dataStream).toBe(`${expected}\r\n`);
+        } finally {
+            applySpy.mockRestore();
+        }
+    });
+
+    it('preserves styles and hyperlinks while replacing multiple matches', () => {
+        const body: IDocumentBody = {
+            dataStream: 'cat cat\r\n',
+            textRuns: [{ st: 0, ed: 7, ts: { bl: BooleanNumber.TRUE } }],
+            customRanges: [{
+                startIndex: 0,
+                endIndex: 2,
+                rangeId: 'link-1',
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: { url: 'https://univer.ai' },
+            }],
+        };
+
+        const result = replaceInDocumentBody(body, 'cat', 'doggy', true);
+        expect(result.dataStream).toBe('doggy doggy\r\n');
+        expect(result.textRuns).toEqual([{ st: 0, ed: 11, ts: { bl: BooleanNumber.TRUE } }]);
+        expect(result.customRanges).toEqual([{
+            startIndex: 0,
+            endIndex: 4,
+            rangeId: 'link-1',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { url: 'https://univer.ai' },
+        }]);
+    });
+
     it('Should replace all `query` to `target`', () => {
         const documentBody = getTestDocumentBody();
         const expectedBody = {

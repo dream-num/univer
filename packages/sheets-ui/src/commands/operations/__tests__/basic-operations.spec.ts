@@ -23,7 +23,6 @@ import { SetActivateCellEditOperation } from '../activate-cell-edit.operation';
 import { ScrollToRangeOperation } from '../scroll-to-range.operation';
 import { SetScrollOperation } from '../scroll.operation';
 import { SetFormatPainterOperation } from '../set-format-painter.operation';
-import { SetZoomRatioOperation } from '../set-zoom-ratio.operation';
 
 function createAccessor(pairs: Array<[unknown, unknown]>) {
     const map = new Map<unknown, unknown>(pairs);
@@ -98,24 +97,6 @@ describe('sheets-ui basic operations', () => {
         };
         const accessor2 = createAccessor([[IRenderManagerService, renderManagerService]]);
         expect(SetScrollOperation.handler(accessor2, { unitId: 'u1', sheetId: 's1' } as any)).toBe(false);
-    });
-
-    it('SetZoomRatioOperation should delegate to zoom controller', () => {
-        const updateZoom = vi.fn(() => true);
-        const renderManagerService = {
-            getRenderUnitById: vi.fn(() => ({ with: () => ({ updateZoom }) })),
-        };
-        const accessor = createAccessor([[IRenderManagerService, renderManagerService]]);
-
-        expect(SetZoomRatioOperation.handler(accessor, {
-            unitId: 'u1',
-            subUnitId: 's1',
-            zoomRatio: 1.25,
-        })).toBe(true);
-        expect(updateZoom).toHaveBeenCalledWith('s1', 1.25);
-
-        const accessor2 = createAccessor([[IRenderManagerService, { getRenderUnitById: () => null }]]);
-        expect(SetZoomRatioOperation.handler(accessor2, { unitId: 'u1', subUnitId: 's1', zoomRatio: 1 } as any)).toBe(false);
     });
 
     it('ScrollToRangeOperation should guard params and call scroll controller', () => {

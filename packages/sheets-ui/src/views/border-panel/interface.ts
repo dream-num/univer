@@ -105,51 +105,51 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        label: BorderStyleTypes.THIN,
+        label: 'sheets-ui.borderStyle.thin',
         value: BorderStyleTypes.THIN,
     },
     {
-        label: BorderStyleTypes.HAIR,
+        label: 'sheets-ui.borderStyle.hair',
         value: BorderStyleTypes.HAIR,
     },
     {
-        label: BorderStyleTypes.DOTTED,
+        label: 'sheets-ui.borderStyle.dotted',
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: BorderStyleTypes.DASHED,
+        label: 'sheets-ui.borderStyle.dashed',
         value: BorderStyleTypes.DASHED,
     },
     {
-        label: BorderStyleTypes.DASH_DOT,
+        label: 'sheets-ui.borderStyle.dashDot',
         value: BorderStyleTypes.DASH_DOT,
     },
     {
-        label: BorderStyleTypes.DASH_DOT_DOT,
+        label: 'sheets-ui.borderStyle.dashDotDot',
         value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
-        label: BorderStyleTypes.MEDIUM,
+        label: 'sheets-ui.borderStyle.medium',
         value: BorderStyleTypes.MEDIUM,
     },
     {
-        label: BorderStyleTypes.MEDIUM_DASHED,
+        label: 'sheets-ui.borderStyle.mediumDashed',
         value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
-        label: BorderStyleTypes.MEDIUM_DASH_DOT,
+        label: 'sheets-ui.borderStyle.mediumDashDot',
         value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
-        label: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+        label: 'sheets-ui.borderStyle.mediumDashDotDot',
         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
-        label: BorderStyleTypes.THICK,
+        label: 'sheets-ui.borderStyle.thick',
         value: BorderStyleTypes.THICK,
     },
     {
-        label: BorderStyleTypes.DOUBLE,
+        label: 'sheets-ui.borderStyle.double',
         value: BorderStyleTypes.DOUBLE,
     },
-];
+] satisfies Array<{ label: LocaleKey; value: BorderStyleTypes }>;

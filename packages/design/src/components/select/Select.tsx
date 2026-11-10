@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
-import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { MoreDownIcon } from '@univerjs/icons';
-import { useMemo, useState } from 'react';
-import { borderClassName } from '../../helper/class-utilities';
+import { useContext, useMemo, useState } from 'react';
+import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
+import { borderClassName, focusClassName, inputStateClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { Button } from '../button/Button';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 
 interface IOption {
     label?: string | ReactNode;
@@ -33,8 +35,9 @@ interface IOptionSeparator {
     type: 'separator';
 }
 
-export interface ISelectProps {
+export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onChange' | 'value'> {
     className?: string;
+    size?: 'small' | 'large';
 
     /**
      * The value of select
@@ -73,23 +76,28 @@ export interface ISelectProps {
 
 export const selectClassName = clsx(`
   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center univer-justify-between
-  univer-gap-2 univer-rounded-lg univer-bg-gray-0 univer-px-2.5 univer-transition-colors univer-duration-200
+  univer-gap-2 univer-rounded-md univer-bg-gray-0 univer-px-2.5 univer-transition-colors univer-duration-200
   dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-`, borderClassName);
+`, borderClassName, focusClassName, inputStateClassName);
+
+const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
 
 export function Select(props: ISelectProps) {
     const {
         className,
+        size = 'small',
         value,
         disabled = false,
-        options = [],
+        options = EMPTY_OPTIONS,
         borderless = false,
         side,
         avoidCollisions,
         onChange,
+        ...triggerProps
     } = props;
 
     const [open, setOpen] = useState(false);
+    const invalid = useContext(FormLayoutContext);
 
     function handleOpenChange(open: boolean) {
         setOpen(open);
@@ -122,13 +130,12 @@ export function Select(props: ISelectProps) {
         return [{
             type: 'radio',
             value,
-            hideIndicator: true,
             options: selectOptions,
             onSelect: (item) => {
                 onChange(item);
             },
         }];
-    }, [options]);
+    }, [onChange, options, value]);
 
     const displayValue = useMemo(() => {
         let label = null;
@@ -163,31 +170,36 @@ export function Select(props: ISelectProps) {
             avoidCollisions={avoidCollisions}
             onOpenChange={handleOpenChange}
         >
-            <div
+            <Button
+                size={size === 'large' ? 'extra-large' : 'middle'}
+                {...triggerProps}
+                type="button"
+                disabled={disabled}
                 data-u-comp="select"
+                aria-invalid={triggerProps['aria-invalid'] ?? (invalid || undefined)}
                 className={clsx(selectClassName, {
-                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
+                    '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,
                     'hover:univer-border-primary-600': !disabled && !borderless,
                     'univer-cursor-pointer': !disabled && !open,
                 }, className)}
             >
-                <div
+                <span
                     className={`
-                      univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-start univer-text-gray-500
                       dark:!univer-text-gray-0
                     `}
                 >
                     {displayValue}
-                </div>
+                </span>
                 <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
                       dark:!univer-text-gray-0
                     `}
                 />
-            </div>
+            </Button>
         </DropdownMenu>
     );
 }

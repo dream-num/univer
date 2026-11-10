@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Восстановление макета документа…',
         },
         toolbar: {
+            zoom: 'Масштаб',
+            fullscreen: 'Полноэкранный режим',
             font: 'Шрифт',
             fontSize: 'Размер шрифта',
             bold: 'Полужирный',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Параметры раздела',
             },
             paragraphSetting: {
+                wordWrap: 'Разрешить перенос английского текста в середине слова',
                 alignment: 'Выравнивание',
                 indentation: 'Отступ',
                 left: 'Левый',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Уменьшить отступ',
             defaultTextColor: 'Цвет текста по умолчанию',
             noBackground: 'Без фона',
+        },
+        heading: {
+            collapse: 'Свернуть',
+            expand: 'Развернуть',
         },
         'page-settings': {
             'document-setting': 'Настройки документа',

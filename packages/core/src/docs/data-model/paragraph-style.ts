@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../shared';
-import type { IDocStyles, IDocumentStyle, IParagraphStyle } from '../../types/interfaces';
-import { Tools } from '../../shared';
+import type { Nullable } from '../../shared/types';
+import type { IDocStyles, IDocumentData, IDocumentStyle, IParagraph, IParagraphStyle } from '../../types/interfaces/i-document-data';
+import { Tools } from '../../shared/tools';
 import {
     DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
     DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
     NAMED_STYLE_SPACE_MAP,
-} from '../../types/const';
-import { BooleanNumber } from '../../types/enum';
-import { DocStyleType, DocumentFlavor } from '../../types/interfaces';
+} from '../../types/const/const';
+import { BooleanNumber } from '../../types/enum/text-style';
+import { DocStyleType, DocumentFlavor } from '../../types/interfaces/i-document-data';
 
 export interface IResolveDocumentParagraphStyleOptions {
     /** Exclude document-level outer spacing while retaining all other defaults. */
@@ -121,4 +121,14 @@ export function resolveDocumentParagraphStyle(
         ...referencedParagraphStyle,
         ...definedParagraphStyle,
     });
+}
+
+/** Resolves word splitting without materializing inherited defaults in the snapshot. */
+export function resolveDocumentParagraphWordWrap(document: IDocumentData, paragraph?: IParagraph): BooleanNumber {
+    const { documentStyle } = document;
+    const { wordWrap } = resolveDocumentParagraphStyle(documentStyle, paragraph?.paragraphStyle, {
+        styles: document.styles,
+        paragraphStyleId: paragraph?.styleId,
+    });
+    return wordWrap ?? BooleanNumber.FALSE;
 }

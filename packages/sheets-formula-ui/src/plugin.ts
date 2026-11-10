@@ -44,7 +44,6 @@ import { FormulaAlertRenderController } from './controllers/formula-alert-render
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
-import { FormulaReorderController } from './controllers/formula-reorder.controller';
 import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
 import { FormulaUIController } from './controllers/ui.controller';
 import { FormulaMenuController } from './menu/formula-menu.controller';
@@ -100,7 +99,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
-            [FormulaReorderController],
             [ImageFormulaRenderController],
         ]);
 
@@ -130,10 +128,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaRenderManagerController],
             [ImageFormulaRenderController],
         ]);
-    }
-
-    override onSteady(): void {
-        this._injector.get(FormulaReorderController);
     }
 
     private _initUIPart(): void {

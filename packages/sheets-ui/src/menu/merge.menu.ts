@@ -17,25 +17,37 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, UniverInstanceType } from '@univerjs/core';
+import {
+    FOCUSING_COMMON_DRAWINGS,
+    ICommandService,
+    IContextService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeMutation,
     AddWorksheetMergeVerticalCommand,
     RangeProtectionPermissionEditPoint,
     RemoveWorksheetMergeCommand,
+    RemoveWorksheetMergeMutation,
+    SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, combineLatestWith, map, startWith } from 'rxjs';
+import { combineLatest, combineLatestWith, distinctUntilChanged, map, Observable, startWith } from 'rxjs';
 import { getSheetSelectionsDisabled$ } from '../controllers/utils/selections-tools';
-import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
+import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<LocaleKey> {
+    const commandService = accessor.get(ICommandService);
+    const instanceService = accessor.get(IUniverInstanceService);
+    const selectionService = accessor.get(SheetsSelectionsService);
     const editDisabled$ = getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, {
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],
@@ -48,7 +60,24 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         icon: 'MergeAllIcon',
         tooltip: 'sheets-ui.toolbar.mergeCell.main',
         type: MenuItemType.SUBITEMS,
-        // selections: [...MERGE_CHILDREN],
+        activated$: deriveStateFromActiveSheet$(instanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
+            const update = () => {
+                const primary = selectionService.getCurrentLastSelection()?.primary;
+                subscriber.next(!!primary && !!worksheet.getMergedCell(primary.actualRow, primary.actualColumn));
+            };
+            const selectionSubscription = selectionService.selectionChanged$.subscribe(update);
+            const commandDisposable = commandService.onCommandExecuted((command) => {
+                if (command.id === AddWorksheetMergeMutation.id || command.id === RemoveWorksheetMergeMutation.id) {
+                    update();
+                }
+            });
+            update();
+
+            return () => {
+                selectionSubscription.unsubscribe();
+                commandDisposable.dispose();
+            };
+        })).pipe(distinctUntilChanged()),
         hidden$: combineLatest([
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
             accessor.get(IContextService).subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false)),

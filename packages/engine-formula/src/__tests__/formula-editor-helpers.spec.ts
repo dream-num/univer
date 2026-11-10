@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { FunctionType, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { FunctionType } from '../basics/function';
+import { matchToken } from '../basics/token';
+import { sequenceNodeType } from '../engine/utils/sequence';
 import {
+    buildFormulaTextRuns,
     findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
     getFormulaReplaceResult,
@@ -127,5 +130,55 @@ describe('formula editor helpers', () => {
             startIndex: 4,
             endIndex: 30,
         }]);
+    });
+});
+
+describe('engine-formula regression scenarios', () => {
+    it('preserves incomplete formula editor text while applying token highlights', () => {
+        expect(getFormulaHighlightDataStream('=', [
+            'SUM(',
+            { token: 'D37', nodeType: sequenceNodeType.REFERENCE, startIndex: 4, endIndex: 6 },
+            ',',
+            { token: 'F40', nodeType: sequenceNodeType.REFERENCE, startIndex: 8, endIndex: 10 },
+        ], 'SUM(D37,F40,J36,J42')).toBe('=SUM(D37,F40,J36,J42\r\n');
+    });
+
+    it('builds colored text runs for references, numbers, strings, arrays, defined names, and plain text', () => {
+        const result = buildFormulaTextRuns(
+            { hasDefinedNameDescription: vi.fn((token: string) => token === 'SalesTotal') } as never,
+            {
+                formulaRefColors: ['#ff0000', '#00ff00'],
+                numberColor: '#0000ff',
+                stringColor: '#ff00ff',
+                plainTextColor: '#111111',
+            },
+            [
+                'SUM(',
+                { token: 'A1', nodeType: sequenceNodeType.REFERENCE, startIndex: 4, endIndex: 5 },
+                ',',
+                { token: '42', nodeType: sequenceNodeType.NUMBER, startIndex: 7, endIndex: 8 },
+                { token: '"ok"', nodeType: sequenceNodeType.STRING, startIndex: 9, endIndex: 12 },
+                { token: '{1,2}', nodeType: sequenceNodeType.ARRAY, startIndex: 13, endIndex: 17 },
+                { token: 'SalesTotal', nodeType: sequenceNodeType.DEFINED_NAME, startIndex: 18, endIndex: 27 },
+                { token: '+', nodeType: sequenceNodeType.NORMAL, startIndex: 28, endIndex: 28 },
+                { token: 'A1', nodeType: sequenceNodeType.REFERENCE, startIndex: 29, endIndex: 30 },
+            ]
+        );
+
+        expect(result.refSelections).toEqual([
+            expect.objectContaining({ token: 'A1', themeColor: '#ff0000', refIndex: 1, index: 0 }),
+            expect.objectContaining({ token: 'A1', themeColor: '#ff0000', refIndex: 8, index: 1 }),
+        ]);
+        expect(result.textRuns.map((run) => run.ts?.cl?.rgb)).toEqual([
+            '#111111',
+            '#ff0000',
+            '#111111',
+            '#0000ff',
+            '#ff00ff',
+            '#ff00ff',
+            '#111111',
+            '#111111',
+            '#ff0000',
+        ]);
     });
 });

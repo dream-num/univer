@@ -19,6 +19,7 @@ import { BorderStyleTypes } from '@univerjs/core';
 import { BorderDashDot } from './icons/BorderDashDot';
 import { BorderDashDotDot } from './icons/BorderDashDotDot';
 import { BorderDashed } from './icons/BorderDashed';
+import { BorderDotted } from './icons/BorderDotted';
 import { BorderDouble } from './icons/BorderDouble';
 import { BorderHair } from './icons/BorderHair';
 import { BorderMedium } from './icons/BorderMedium';
@@ -43,6 +44,8 @@ export function BorderLine(props: IBorderLineProps) {
             return <BorderDashDotDot className={className} />;
         case BorderStyleTypes.DASHED:
             return <BorderDashed className={className} />;
+        case BorderStyleTypes.DOTTED:
+            return <BorderDotted className={className} />;
         case BorderStyleTypes.HAIR:
             return <BorderHair className={className} />;
         case BorderStyleTypes.MEDIUM:

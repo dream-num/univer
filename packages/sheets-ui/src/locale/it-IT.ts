@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotazione testo',
             },
             toggleGridlines: 'Mostra/Nascondi griglia',
+            zoom: 'Zoom',
             fullscreen: 'Schermo intero',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Annulla',
+        },
+        borderStyle: {
+            thin: 'Sottile',
+            hair: 'Sottilissimo',
+            dotted: 'Punteggiato',
+            dashed: 'Tratteggiato',
+            dashDot: 'Tratto-punto',
+            dashDotDot: 'Tratto-punto-punto',
+            medium: 'Medio',
+            mediumDashed: 'Tratteggiato medio',
+            mediumDashDot: 'Tratto-punto medio',
+            mediumDashDotDot: 'Tratto-punto-punto medio',
+            thick: 'Spesso',
+            double: 'Doppio',
         },
         borderLine: {
             borderTop: 'bordoSuperiore',

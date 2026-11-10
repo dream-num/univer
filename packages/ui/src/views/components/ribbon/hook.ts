@@ -15,21 +15,19 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { useMemo } from 'react';
 import { EMPTY, map, merge, of, startWith } from 'rxjs';
+import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { isMenuButtonSelectorItem } from '../../../services/menu/menu';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
 export interface IToolbarItemStatus {
     disabled: boolean;
-    // eslint-disable-next-line ts/no-explicit-any
-    value: any;
+    value: string | number | undefined;
     activated: boolean;
     hidden: boolean;
-    // eslint-disable-next-line ts/no-explicit-any
-    selectionsValue: any;
+    selectionsValue: string | number | undefined;
 }
 
 /**
@@ -40,8 +38,7 @@ export interface IToolbarItemStatus {
 export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): IToolbarItemStatus {
     const { disabled$, hidden$, activated$, value$ } = menuItem;
 
-    // eslint-disable-next-line ts/no-explicit-any
-    let selectionsValue$: Observable<any> | undefined;
+    let selectionsValue$: Observable<string | number | undefined> | undefined;
 
     if (isMenuButtonSelectorItem(menuItem)) {
         const { selections } = menuItem;

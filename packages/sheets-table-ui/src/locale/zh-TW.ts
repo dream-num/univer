@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: '預設樣式 {0}',
+        customStyleNumber: '自訂樣式 {0}',
+        removeCustomStyle: '刪除自訂樣式 {0}',
         calculatedColumn: '計算欄',
         columnFormula: '公式',
         columnFormulaHint: '套用後立即覆寫此欄的 {0} 個資料儲存格，不含標題和合計列。停止自動填入會保留現有儲存格。操作可復原。',

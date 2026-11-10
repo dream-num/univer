@@ -15,9 +15,9 @@
  */
 
 import type { Injector, Univer, Workbook, Worksheet } from '@univerjs/core';
-import type { ICopySheetCommandInterceptorParams } from '../copy-worksheet.command';
-import { ICommandService, IConfigService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IConfigService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, SheetTypes, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ICopySheetCommandInterceptorParams } from '../copy-worksheet.command';
 import { SHEETS_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
@@ -58,6 +58,34 @@ describe('Test copy worksheet commands', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it.each([undefined, BooleanNumber.FALSE, BooleanNumber.TRUE])('retains optional worksheet fit metadata %s through the real copy command and history', async (zoomToFit) => {
+        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook.addWorksheet('fit-field', 1, {
+            id: 'fit-field',
+            name: 'Fit field',
+            type: SheetTypes.CHART,
+            zoomRatio: 0.75,
+            ...(zoomToFit === undefined ? {} : { zoomToFit }),
+        });
+        const beforeIds = new Set(workbook.getSheetOrders());
+        expect(await commandService.executeCommand(CopySheetCommand.id, { unitId: workbook.getUnitId(), subUnitId: 'fit-field' })).toBe(true);
+        const copiedId = workbook.getSheetOrders().find((id) => !beforeIds.has(id))!;
+        const assertCopy = () => {
+            const snapshot = workbook.getSheetBySheetId(copiedId)!.getSnapshot();
+            expect(snapshot.zoomRatio).toBe(0.75);
+            if (zoomToFit === undefined) {
+                expect(snapshot).not.toHaveProperty('zoomToFit');
+            } else {
+                expect(snapshot.zoomToFit).toBe(zoomToFit);
+            }
+        };
+        assertCopy();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(workbook.getSheetBySheetId(copiedId)).toBeUndefined();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        assertCopy();
     });
 
     describe('copy sheet', () => {

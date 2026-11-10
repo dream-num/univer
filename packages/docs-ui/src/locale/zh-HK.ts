@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: '正在恢復文件排版…',
         },
         toolbar: {
+            zoom: '縮放',
+            fullscreen: '全螢幕',
             font: '字型',
             fontSize: '字號',
             bold: '粗體',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: '節設定',
             },
             paragraphSetting: {
+                wordWrap: '允許英文字元在字中換行',
                 alignment: '對齊',
                 indentation: '縮排',
                 left: '左',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: '減少縮進',
             defaultTextColor: '預設文字顏色',
             noBackground: '無背景色',
+        },
+        heading: {
+            collapse: '收合',
+            expand: '展開',
         },
         'page-settings': {
             'document-setting': '文件設定',

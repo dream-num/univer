@@ -14,10 +14,37 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    IDocumentBody,
+    IMutationInfo,
+    IParagraphBorder,
+    ITextRangeParam,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, generateParagraphs, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    BuildTextUtils,
+    CommandType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    getRichTextEditPath,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    PresetListType,
+    TextX,
+    TextXActionType,
+    UniverInstanceType,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
+import {
+    DocSelectionManagerService,
+    generateParagraphs,
+    RichTextEditingMutation,
+    SetHeadingCollapsedCommand,
+} from '@univerjs/docs';
+import { DocumentViewModel } from '@univerjs/engine-render';
 import { getTextRunAtPosition, isTopLevelStructuralGap } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
@@ -75,7 +102,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const docDataModel = params?.unitId
             ? univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC)
             : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
+        let originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
 
         if (docDataModel == null || originBody == null) {
             return false;
@@ -89,12 +116,32 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const isBareStructuralGap = isTopLevelStructuralGap(originBody.dataStream, startOffset) &&
             originBody.dataStream[startOffset] !== DataStreamTreeTokenType.PARAGRAPH;
         const insertsAtStructuralGap = insertionMode === BreakLineInsertionMode.InsertGap || isBareStructuralGap;
-        const prevParagraph = insertsAtStructuralGap
+        let prevParagraph = insertsAtStructuralGap
             ? undefined
             : paragraphs.find((p) => p.startIndex >= startOffset);
 
         if (!prevParagraph && !insertsAtStructuralGap) {
             return false;
+        }
+        if (!segmentId && prevParagraph?.headingCollapsed &&
+            docDataModel.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN) {
+            const paragraphId = prevParagraph.paragraphId;
+            const viewModel = new DocumentViewModel(docDataModel);
+            try {
+                const isHeading = viewModel.getHeadingSections().some((section) => section.paragraphId === paragraphId);
+                if (isHeading) {
+                    if (!commandService.syncExecuteCommand(SetHeadingCollapsedCommand.id, { unitId, paragraphId, collapsed: false })) {
+                        return false;
+                    }
+                    originBody = docDataModel.getBody();
+                    prevParagraph = originBody?.paragraphs?.find((paragraph) => paragraph.startIndex >= startOffset);
+                    if (!originBody || !prevParagraph) {
+                        return false;
+                    }
+                }
+            } finally {
+                viewModel.dispose();
+            }
         }
         const isAtParagraphEnd = startOffset === prevParagraph?.startIndex;
         const prevParagraphIndex = prevParagraph?.startIndex;

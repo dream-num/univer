@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Colonna',
         tablePrefix: 'Tabella',
+        moveTableOverlapError: 'La destinazione si sovrappone a un’altra tabella.',
         tableNameError: 'Il nome della tabella non può contenere spazi, non può iniziare con un numero e non può essere identico a un nome di tabella esistente',
     },
 };

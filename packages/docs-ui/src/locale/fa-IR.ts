@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'در حال بازیابی صفحه‌آرایی سند…',
         },
         toolbar: {
+            zoom: 'بزرگ‌نمایی',
+            fullscreen: 'تمام‌صفحه',
             font: 'فونت',
             fontSize: 'اندازه فونت',
             bold: 'پررنگ',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'تنظیمات بخش',
             },
             paragraphSetting: {
+                wordWrap: 'اجازه شکستن متن لاتین در میانهٔ کلمه',
                 alignment: 'تراز',
                 indentation: 'تورفتگی',
                 left: 'چپ',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'کاهش تورفتگی',
             defaultTextColor: 'رنگ پیش‌فرض متن',
             noBackground: 'بدون پس‌زمینه',
+        },
+        heading: {
+            collapse: 'جمع کردن',
+            expand: 'باز کردن',
         },
         'page-settings': {
             'document-setting': 'تنظیمات سند',

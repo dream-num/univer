@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotação de texto',
             },
             toggleGridlines: 'Mostrar/Ocultar linhas de grade',
+            zoom: 'Zoom',
             fullscreen: 'Tela cheia',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Cancelar',
+        },
+        borderStyle: {
+            thin: 'Fina',
+            hair: 'Muito fina',
+            dotted: 'Pontilhada',
+            dashed: 'Tracejada',
+            dashDot: 'Traço e ponto',
+            dashDotDot: 'Traço e dois pontos',
+            medium: 'Média',
+            mediumDashed: 'Tracejada média',
+            mediumDashDot: 'Traço e ponto médio',
+            mediumDashDotDot: 'Traço e dois pontos médio',
+            thick: 'Grossa',
+            double: 'Dupla',
         },
         borderLine: {
             borderTop: 'borda superior',

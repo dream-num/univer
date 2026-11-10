@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Memulihkan tata letak dokumen…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Layar penuh',
             font: 'Font',
             fontSize: 'Ukuran font',
             bold: 'Tebal',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Pengaturan bagian',
             },
             paragraphSetting: {
+                wordWrap: 'Perbolehkan teks Latin untuk dibungkus di tengah kata',
                 alignment: 'Perataan',
                 indentation: 'Indentasi',
                 left: 'Kiri',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Kurangi inden',
             defaultTextColor: 'Warna teks default',
             noBackground: 'Tanpa latar belakang',
+        },
+        heading: {
+            collapse: 'Ciutkan',
+            expand: 'Perluas',
         },
         'page-settings': {
             'document-setting': 'Pengaturan Dokumen',

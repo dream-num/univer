@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CellAlertManagerService, CellAlertType } from '../cell-alert-manager.service';
+import { CellPopupManagerService } from '../cell-popup-manager.service';
 
 function createAlert(key: string) {
     return {
@@ -35,6 +38,15 @@ function createAlert(key: string) {
 }
 
 describe('CellAlertManagerService', () => {
+    let injector: Injector;
+
+    beforeEach(() => {
+        injector = new Injector();
+        injector.add([CellAlertManagerService]);
+    });
+
+    afterEach(() => injector.dispose());
+
     it('adds/replaces/removes alerts and emits current list', () => {
         const oldPopupDispose = { dispose: vi.fn() };
         const newPopupDispose = { dispose: vi.fn() };
@@ -42,10 +54,9 @@ describe('CellAlertManagerService', () => {
             .fn()
             .mockReturnValueOnce(oldPopupDispose)
             .mockReturnValueOnce(newPopupDispose);
-        const service = new CellAlertManagerService(
-            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never,
-            { showPopup } as never
-        );
+        injector.add([IRenderManagerService, { useValue: { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never }]);
+        injector.add([CellPopupManagerService, { useValue: { showPopup } as never }]);
+        const service = injector.get(CellAlertManagerService);
 
         const emitted: Array<Array<[string, unknown]>> = [];
         service.currentAlert$.subscribe((value) => emitted.push(value));
@@ -65,9 +76,11 @@ describe('CellAlertManagerService', () => {
         expect(service.currentAlert.size).toBe(1);
         expect(emitted.at(-1)?.map(([key]) => key)).toEqual(['alert-1']);
 
-        service.showAlert({ ...first, message: 'updated' } as never);
-        expect(oldPopupDispose.dispose).toHaveBeenCalled();
-        expect(service.currentAlert.get('alert-1')?.alert.message).toBe('message');
+        const updated = { ...first, message: 'updated' };
+        service.showAlert(updated);
+        expect(oldPopupDispose.dispose).toHaveBeenCalledTimes(1);
+        expect(service.currentAlert.get('alert-1')?.alert.message).toBe('updated');
+        expect(showPopup).toHaveBeenLastCalledWith(updated.location, expect.objectContaining({ extraProps: { alert: updated } }));
         expect(emitted.at(-1)?.map(([key]) => key)).toEqual(['alert-1']);
 
         service.removeAlert('alert-1');
@@ -84,7 +97,9 @@ describe('CellAlertManagerService', () => {
         const renderManager = {
             getRenderUnitById: vi.fn(() => currentRender),
         };
-        const service = new CellAlertManagerService(renderManager as never, { showPopup } as never);
+        injector.add([IRenderManagerService, { useValue: renderManager as never }]);
+        injector.add([CellPopupManagerService, { useValue: { showPopup } as never }]);
+        const service = injector.get(CellAlertManagerService);
 
         service.showAlert(createAlert('a') as never);
         service.showAlert(createAlert('b') as never);
@@ -105,10 +120,9 @@ describe('CellAlertManagerService', () => {
 
     it('anchors actionable alerts to the left of the cell', () => {
         const showPopup = vi.fn(() => ({ dispose: vi.fn() }));
-        const service = new CellAlertManagerService(
-            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never,
-            { showPopup } as never
-        );
+        injector.add([IRenderManagerService, { useValue: { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never }]);
+        injector.add([CellPopupManagerService, { useValue: { showPopup } as never }]);
+        const service = injector.get(CellAlertManagerService);
         const alert = {
             ...createAlert('action-alert'),
             menu: [{ label: 'Text to Number', onSelect: vi.fn() }],

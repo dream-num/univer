@@ -20,6 +20,7 @@ const locale: typeof enUS = {
     'sheets-table': {
         columnPrefix: 'Столбец',
         tablePrefix: 'Таблица',
+        moveTableOverlapError: 'Диапазон назначения пересекается с другой таблицей.',
         tableNameError: 'Имя таблицы не может содержать пробелы, не может начинаться с цифры и не может совпадать с именем существующей таблицы',
     },
 };

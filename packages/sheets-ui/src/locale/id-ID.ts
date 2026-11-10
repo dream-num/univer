@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Putar teks',
             },
             toggleGridlines: 'Alihkan garis kisi',
+            zoom: 'Zoom',
             fullscreen: 'Layar penuh',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Batal',
+        },
+        borderStyle: {
+            thin: 'Tipis',
+            hair: 'Sangat tipis',
+            dotted: 'Titik-titik',
+            dashed: 'Putus-putus',
+            dashDot: 'Garis-titik',
+            dashDotDot: 'Garis-dua titik',
+            medium: 'Sedang',
+            mediumDashed: 'Putus-putus sedang',
+            mediumDashDot: 'Garis-titik sedang',
+            mediumDashDotDot: 'Garis-dua titik sedang',
+            thick: 'Tebal',
+            double: 'Ganda',
         },
         borderLine: {
             borderTop: 'Batas atas',

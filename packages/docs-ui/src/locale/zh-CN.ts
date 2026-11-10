@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: '正在恢复文档排版…',
         },
         toolbar: {
+            zoom: '缩放',
+            fullscreen: '全屏',
             font: '字体',
             fontSize: '字号',
             bold: '粗体',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: '节设置',
             },
             paragraphSetting: {
+                wordWrap: '允许西文在单词中间换行',
                 alignment: '对齐方式',
                 indentation: '缩进',
                 left: '左边距',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: '减少缩进',
             defaultTextColor: '默认文字颜色',
             noBackground: '无背景色',
+        },
+        heading: {
+            collapse: '收起',
+            expand: '展开',
         },
         'page-settings': {
             'document-setting': '页面设置',

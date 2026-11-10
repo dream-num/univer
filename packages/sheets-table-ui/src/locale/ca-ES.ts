@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Estil predeterminat {0}',
+        customStyleNumber: 'Estil personalitzat {0}',
+        removeCustomStyle: 'Suprimeix l’estil personalitzat {0}',
         calculatedColumn: 'Columna calculada',
         columnFormula: 'Fórmula',
         columnFormulaHint: 'Substitueix immediatament les {0} cel·les de dades, sense capçalera ni totals. Aturar conserva les cel·les existents. Es pot desfer.',

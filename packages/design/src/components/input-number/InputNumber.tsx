@@ -16,6 +16,7 @@
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import type { IInputProps } from '../input/Input';
 import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -25,7 +26,7 @@ export interface IInputNumberProps
     extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
     defaultValue?: number;
-    size?: 'mini' | 'small';
+    size?: IInputProps['size'];
     min?: number;
     max?: number;
     step?: number;
@@ -48,7 +49,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         {
             value,
             defaultValue,
-            size = 'small',
+            size,
             min = Number.MIN_SAFE_INTEGER,
             max = Number.MAX_SAFE_INTEGER,
             step = 1,
@@ -67,20 +68,24 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             onBlur,
             allowEmpty = false,
             allowClear = false,
+            ...inputProps
         },
         ref
     ) => {
         const { locale } = useContext(ConfigContext);
         const [internalValue, setInternalValue] = useState<number | null>(
-            value !== undefined ? value : defaultValue !== undefined ? defaultValue : null
+            () => {
+                if (value !== undefined) {
+                    return value;
+                }
+                return defaultValue ?? null;
+            }
         );
         const lastValidValueRef = useRef<number | null>(internalValue);
         const [inputValue, setInputValue] = useState<string>(() => formatValue(internalValue));
         const inputRef = useRef<HTMLInputElement>(null);
-        const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-        const longPressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-        const mergedRef = (node: HTMLInputElement) => {
+        const mergedRef = (node: HTMLInputElement | null) => {
             if (ref) {
                 if (typeof ref === 'function') {
                     ref(node);
@@ -107,20 +112,10 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             }
         }, [internalValue]);
 
-        // Clean up timers when component unmounts
-        useEffect(() => {
-            return () => {
-                if (longPressTimerRef.current) {
-                    clearTimeout(longPressTimerRef.current);
-                }
-                if (longPressIntervalRef.current) {
-                    clearInterval(longPressIntervalRef.current);
-                }
-            };
-        }, []);
-
         function formatValue(val: number | null): string {
-            if (val === null || val === undefined) return '';
+            if (val === null || val === undefined) {
+                return '';
+            }
 
             let formattedValue: string | number = val;
 
@@ -138,7 +133,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         }
 
         function parseNumberValue(val: string): number | null {
-            if (!val) return null;
+            if (!val) {
+                return null;
+            }
 
             let parsedValue = val;
 
@@ -183,13 +180,15 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                 }
 
                 return result;
-            } catch (e) {
+            } catch {
                 return null;
             }
         }
 
         function clampValue(val: number | null): number | null {
-            if (val === null) return null;
+            if (val === null) {
+                return null;
+            }
 
             if (max !== undefined && val > max) {
                 return max;
@@ -199,10 +198,6 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             }
 
             return val;
-        }
-
-        function parseValue(val: string): number | null {
-            return clampValue(parseNumberValue(val));
         }
 
         function handleInputChange(value: string) {
@@ -273,7 +268,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         }
 
         function handleStep(isUp: boolean) {
-            if (disabled) return;
+            if (disabled) {
+                return;
+            }
 
             const stepValue = isUp ? step : -step;
 
@@ -299,7 +296,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                 newValue = min;
             }
             // If we've hit a limit, don't change the value
-            if (newValue === currentValue) return;
+            if (newValue === currentValue) {
+                return;
+            }
             setInternalValue(newValue);
             lastValidValueRef.current = newValue;
             setInputValue(formatValue(newValue));
@@ -309,7 +308,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
         // Handle key down events for arrow keys
         function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-            if (disabled) return;
+            if (disabled) {
+                return;
+            }
 
             onKeyDown?.(e);
 
@@ -325,7 +326,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         }
 
         function handleClick(isUp: boolean) {
-            if (disabled) return;
+            if (disabled) {
+                return;
+            }
 
             handleStep(isUp);
 
@@ -339,6 +342,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             <div className={clsx('univer-inline-block', className)}>
                 <div className="univer-relative univer-w-full">
                     <Input
+                        inputMode={min < 0 ? 'text' : 'decimal'}
+                        {...inputProps}
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
                         size={size}

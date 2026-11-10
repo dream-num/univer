@@ -17,15 +17,19 @@
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
+    IConfigService,
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
+    SHEET_TEXT_LINE_GAP,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation } from '@univerjs/engine-render';
+import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation, SheetCellDocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocLayoutExecutorService } from './doc-layout-executor.service';
 
@@ -51,7 +55,8 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         private readonly _context: Pick<IRenderContext<DocumentDataModel>, 'type' | 'unit' | 'unitId'>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocLayoutExecutorService) private readonly _docLayoutExecutorService: DocLayoutExecutorService
+        @Inject(DocLayoutExecutorService) private readonly _docLayoutExecutorService: DocLayoutExecutorService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
@@ -71,12 +76,6 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        // this._currentViewModel$.complete();
-
-        // this._docViewModel?.dispose();
-
-        //@ts-ignore
-        // delete this._docViewModel;
     }
 
     getSkeleton(): DocumentSkeleton {
@@ -153,10 +152,16 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     }
 
     private _buildSkeleton(documentViewModel: DocumentViewModel) {
-        return DocumentSkeleton.create(documentViewModel, this._localeService);
+        const isSheetEditor = this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY ||
+            this._context.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        return DocumentSkeleton.create(documentViewModel, this._localeService, {
+            lineGap: isSheetEditor ? this._configService.getConfig<number>(SHEET_TEXT_LINE_GAP) : undefined,
+        });
     }
 
     private _buildDocViewModel(documentDataModel: DocumentDataModel) {
-        return new DocumentViewModel(documentDataModel);
+        return this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || this._context.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            ? new SheetCellDocumentViewModel(documentDataModel)
+            : new DocumentViewModel(documentDataModel);
     }
 }

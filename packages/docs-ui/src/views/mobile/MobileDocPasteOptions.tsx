@@ -15,15 +15,15 @@
  */
 
 import type { IPopupWithExtraProps, MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type { DocPasteMode } from '../../services/clipboard/paste-options';
-import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon, DocPasteOptionsIcon } from '@univerjs/icons';
 import { MobileDrawer, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { DocPasteMode } from '../../services/clipboard/paste-options';
+import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import { DocChangePasteModeCommand } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DOC_PASTE_OPTIONS } from '../../services/clipboard/paste-options';
@@ -62,8 +62,8 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
             <Button
                 aria-label={localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}
                 className="
-                  univer-min-h-11 univer-min-w-11 univer-shadow-sm
-                  [&_svg]:!univer-size-6
+                  [&_svg]:!
+                  univer-min-w-11 univer-shadow-sm
                 "
                 style={keyboard.visible
                     ? {
@@ -76,6 +76,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                     selection?.suspendMobileEditingInput();
                     setOpen(true);
                 }}
+                size="icon"
             >
                 <DocPasteOptionsIcon aria-hidden="true" />
             </Button>
@@ -101,7 +102,7 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                 "
                             >
                                 <span>{localeService.t<LocaleKey>('docs-ui.pasteOptions.title')}</span>
-                                <Button variant="text" className="univer-min-h-11" onClick={() => setOpen(false)}>
+                                <Button variant="text" onClick={() => setOpen(false)} size="middle">
                                     {localeService.t<LocaleKey>('docs-ui.mobile.done')}
                                 </Button>
                             </div>
@@ -119,11 +120,9 @@ export function MobileDocPasteOptions({ popup }: { popup: IPopupWithExtraProps<{
                                     aria-checked={state.mode === option.value}
                                     disabled={busy}
                                     variant="text"
-                                    className="
-                                      !univer-h-auto univer-min-h-11 univer-justify-start univer-whitespace-normal
-                                      univer-py-3 univer-text-start
-                                    "
+                                    className="univer-justify-start univer-whitespace-normal univer-text-start"
                                     onClick={() => changeMode(option.value)}
+                                    size="middle"
                                 >
                                     <span
                                         className="univer-inline-flex univer-size-5 univer-shrink-0 univer-items-center"

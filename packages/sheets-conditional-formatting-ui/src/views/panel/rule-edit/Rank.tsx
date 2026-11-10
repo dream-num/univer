@@ -26,8 +26,8 @@ import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import { ConditionalFormattingRulePreview } from '../../ConditionalFormattingRulePreview';
 import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
-import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 type IRankRuleType = 'isNotBottom' | 'isBottom' | 'greaterThanAverage' | 'lessThanAverage';
@@ -196,7 +196,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 </div>
             )}
             <div className={previewClassName}>
-                <Preview
+                <ConditionalFormattingRulePreview
                     rule={getResult({
                         type,
                         isPercent,

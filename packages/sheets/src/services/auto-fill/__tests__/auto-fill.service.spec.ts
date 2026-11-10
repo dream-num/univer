@@ -15,11 +15,11 @@
  */
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import type { IAutoFillRule } from '../type';
 import { Direction, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
+import type { IAutoFillRule } from '../type';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../__tests__/util';
+import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
 import { SheetsSelectionsService } from '../../selections/selection.service';
 import { AutoFillService } from '../auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../type';
@@ -138,6 +138,34 @@ describe('AutoFillService', () => {
     it('should return false when filling without location', () => {
         service.autoFillLocation = null;
         expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(false);
+    });
+
+    it('should select hooks using the requested type and commit it only after preparation', () => {
+        service.autoFillLocation = {
+            unitId,
+            subUnitId,
+            source: { rows: [0], cols: [0] },
+            target: { rows: [1], cols: [0] },
+        };
+        service.applyType = AUTO_FILL_APPLY_TYPE.ONLY_FORMAT;
+        const observedTypes: AUTO_FILL_APPLY_TYPE[] = [];
+        service.addHook({
+            id: 'copy-only',
+            disable: (_location, _direction, applyType) => applyType !== AUTO_FILL_APPLY_TYPE.COPY,
+            onPrepareFillData: (_location, _direction, applyType) => {
+                expect(applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+                observedTypes.push(service.applyType);
+                return () => {
+                    observedTypes.push(service.applyType);
+                    return { undos: [], redos: [] };
+                };
+            },
+        });
+
+        expect(service.getActiveHooks()).toEqual([]);
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        expect(observedTypes).toEqual([AUTO_FILL_APPLY_TYPE.ONLY_FORMAT, AUTO_FILL_APPLY_TYPE.COPY]);
+        expect(service.applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
     });
 
     it('should trigger auto fill and set direction for expansion', async () => {

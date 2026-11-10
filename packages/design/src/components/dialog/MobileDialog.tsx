@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDialogProps } from './Dialog';
 import { useContext, useRef } from 'react';
+import type { IDialogProps } from './Dialog';
 import { clsx } from '../../helper/clsx';
+import { useMobileKeyboardViewportLayout } from '../../hooks/use-mobile-keyboard-viewport';
+import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import {
@@ -51,14 +53,15 @@ export function MobileDialog(props: IMobileDialogProps) {
         onCancel,
     } = props;
     const contentRef = useRef<HTMLDivElement>(null);
+    const keyboardLayout = useMobileKeyboardViewportLayout(contentRef);
     const { locale, mountContainer, direction } = useContext(ConfigContext);
     const maxHeight = globalThis.CSS?.supports('height', '1dvh') ? '80dvh' : '80vh';
     const footer = propFooter ?? (showOk || showCancel
         ? (
-            <div className="univer-flex univer-justify-end univer-gap-2">
-                {showCancel && <Button onClick={onCancel}>{locale?.Confirm.cancel}</Button>}
-                {showOk && <Button variant="primary" onClick={onOk}>{locale?.Confirm.confirm}</Button>}
-            </div>
+            <MobileActionRowGroup>
+                {showCancel && <Button onClick={onCancel} size="middle">{locale?.Confirm.cancel}</Button>}
+                {showOk && <Button variant="primary" onClick={onOk} size="middle">{locale?.Confirm.confirm}</Button>}
+            </MobileActionRowGroup>
         )
         : null);
 
@@ -82,11 +85,10 @@ export function MobileDialog(props: IMobileDialogProps) {
         <DialogProvider open={open} onOpenChange={handleOpenChange} modal={mask !== false}>
             <DialogContent
                 className={clsx(`
-                  !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-flex !univer-max-w-none
-                  !univer-translate-x-0 !univer-translate-y-0 !univer-flex-col !univer-gap-4 !univer-overflow-hidden
-                  !univer-rounded-t-2xl !univer-p-4
+                  !univer-left-0 !univer-right-0 !univer-top-auto !univer-flex !univer-max-w-none !univer-translate-x-0
+                  !univer-translate-y-0 !univer-flex-col !univer-gap-4 !univer-overflow-hidden !univer-rounded-t-2xl
+                  !univer-p-4
                   [&_[data-slot='dialog-footer']]:!univer-flex-row [&_[data-slot='dialog-footer']]:!univer-gap-3
-                  [&_[data-slot='dialog-footer']_button]:!univer-h-12
                   [&_[data-slot='dialog-footer']_button]:!univer-flex-1
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
                   [&_button[data-slot='close']]:!univer-size-10
@@ -101,9 +103,9 @@ export function MobileDialog(props: IMobileDialogProps) {
                     position: 'fixed',
                     insetInline: 0,
                     top: 'auto',
-                    bottom: 0,
+                    bottom: keyboardLayout?.bottom ?? 0,
                     width: '100%',
-                    maxHeight,
+                    maxHeight: keyboardLayout ? `min(${maxHeight}, ${keyboardLayout.availableHeight}px)` : maxHeight,
                     maxWidth: 'none',
                     margin: 0,
                     transform: 'none',

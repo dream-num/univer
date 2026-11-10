@@ -16,8 +16,16 @@
 
 import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
+import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
@@ -124,6 +132,31 @@ describe('Test commands used for change selections', () => {
 
             const config = getFreeze();
             expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
+        });
+
+        it.each(['D12', '$D$12', 'D12:F15'])('freezes a parsed reference %s and supports undo and redo', async (reference) => {
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet();
+            const { range } = deserializeRangeWithSheet(reference);
+            const originalFreeze = { ...worksheet.getFreeze() };
+            commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
+                selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
+            });
+
+            expect(selectionManagerService.getCurrentLastSelectionPrimaryCell()).toMatchObject({
+                actualRow: 11,
+                actualColumn: 3,
+            });
+            await expect(commandService.executeCommand(SetSelectionFrozenCommand.id)).resolves.toBe(true);
+            const expectedFreeze = { startRow: 11, startColumn: 3, xSplit: 3, ySplit: 11 };
+            expect(getFreeze()).toEqual(expectedFreeze);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getFreeze()).toEqual(originalFreeze);
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getFreeze()).toEqual(expectedFreeze);
         });
 
         it('Should keep default freeze config when selection is invalid', async () => {

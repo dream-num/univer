@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/naming-convention */
-
 import type { Nullable } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import type { ILineBreakRule } from './rule';
 import { Break, BreakPointType } from './break';
-import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
+import { AI, AL, BA, BK, CJ, CR, H2, H3, HL, HY, ID, JL, JT, JV, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
 import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
 import { Rule } from './rule';
 import data from './trie-data';
@@ -69,15 +68,15 @@ export interface IBreakPoints {
 }
 
 export class LineBreaker implements IBreakPoints {
-    private _pos: number = 0;
+    protected _pos: number = 0;
     private _lastPos: number = 0;
     private _curClass: Nullable<number> = null;
-    private _codePoint: Nullable<number> = null;
-    private _lastCodePoint: Nullable<number> = null;
+    protected _codePoint: Nullable<number> = null;
+    protected _lastCodePoint: Nullable<number> = null;
     private _nextClass: Nullable<number> = null;
-    private _LB8a: boolean = false;
-    private _LB21a: boolean = false;
-    private _LB30a: number = 0;
+    private _lb8a: boolean = false;
+    private _lb21a: boolean = false;
+    private _lb30a: number = 0;
     private _rule: Rule = new Rule();
 
     constructor(public content: string) {}
@@ -100,8 +99,8 @@ export class LineBreaker implements IBreakPoints {
             const firstClass = this._nextCharClass();
             this._curClass = mapFirst(firstClass);
             this._nextClass = firstClass;
-            this._LB8a = firstClass === ZWJ;
-            this._LB30a = 0;
+            this._lb8a = firstClass === ZWJ;
+            this._lb30a = 0;
         }
 
         while (this._pos < this.content.length) {
@@ -126,8 +125,8 @@ export class LineBreaker implements IBreakPoints {
                 shouldBreak = this._getPairTableBreak(lastClass!);
             }
 
-            // Rule _LB8a
-            this._LB8a = this._nextClass === ZWJ;
+            // Rule LB8a
+            this._lb8a = this._nextClass === ZWJ;
 
             if (shouldBreak) {
                 return new Break(this._lastPos);
@@ -142,7 +141,7 @@ export class LineBreaker implements IBreakPoints {
         return null;
     }
 
-    private _getNextCodePoint() {
+    protected _getNextCodePoint() {
         const code = this.content.charCodeAt(this._pos++);
         const next = this.content.charCodeAt(this._pos);
 
@@ -155,14 +154,11 @@ export class LineBreaker implements IBreakPoints {
         return code;
     }
 
-    private _nextCharClass() {
+    protected _nextCharClass() {
         const nextCodePoint = this._getNextCodePoint();
-        const rawClass = classTrie.get(nextCodePoint);
-
         this._lastCodePoint = this._codePoint;
         this._codePoint = nextCodePoint;
-
-        return mapClass(rawClass);
+        return mapClass(classTrie.get(nextCodePoint));
     }
 
     private _getSimpleBreak() {
@@ -216,31 +212,61 @@ export class LineBreaker implements IBreakPoints {
                 break;
         }
 
-        if (this._LB8a) {
+        if (this._lb8a) {
             shouldBreak = false;
         }
 
-        // Rule _LB21a
-        if (this._LB21a && (this._curClass === HY || this._curClass === BA)) {
+        // Rule LB21a
+        if (this._lb21a && (this._curClass === HY || this._curClass === BA)) {
             shouldBreak = false;
-            this._LB21a = false;
+            this._lb21a = false;
         } else {
-            this._LB21a = this._curClass === HL;
+            this._lb21a = this._curClass === HL;
         }
 
-        // Rule _LB30a
+        // Rule LB30a
         if (this._curClass === RI) {
-            this._LB30a++;
-            if (this._LB30a === 2 && this._nextClass === RI) {
+            this._lb30a++;
+            if (this._lb30a === 2 && this._nextClass === RI) {
                 shouldBreak = true;
-                this._LB30a = 0;
+                this._lb30a = 0;
             }
         } else {
-            this._LB30a = 0;
+            this._lb30a = 0;
         }
 
         this._curClass = this._nextClass;
 
         return shouldBreak;
+    }
+}
+
+export class DocumentLineBreaker extends LineBreaker {
+    constructor(
+        content: string,
+        private readonly _wordWrap: BooleanNumber,
+        private readonly _languageAt?: (offset: number) => string | undefined,
+        private readonly _inferKorean = true
+    ) {
+        super(content);
+    }
+
+    protected override _nextCharClass() {
+        const offset = this._pos;
+        const nextCodePoint = this._getNextCodePoint();
+        const rawClass = classTrie.get(nextCodePoint);
+        this._lastCodePoint = this._codePoint;
+        this._codePoint = nextCodePoint;
+
+        if (this._wordWrap === BooleanNumber.FALSE) {
+            if ((rawClass === H2 || rawClass === H3 || rawClass === JL || rawClass === JV || rawClass === JT)
+                && (this._inferKorean || /^ko(?:-|$)/i.test(this._languageAt?.(offset) ?? ''))) {
+                return AL;
+            }
+        } else if (rawClass === AL && /\p{Script=Latin}/u.test(String.fromCodePoint(nextCodePoint))
+            && !/^ko(?:-|$)/i.test(this._languageAt?.(offset) ?? '')) {
+            return ID;
+        }
+        return mapClass(rawClass);
     }
 }

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: '文本旋转',
             },
             toggleGridlines: '切换网格线',
+            zoom: '缩放',
             fullscreen: '全屏',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: '确定',
             cancel: '取消',
+        },
+        borderStyle: {
+            thin: '细实线',
+            hair: '极细线',
+            dotted: '点线',
+            dashed: '虚线',
+            dashDot: '点划线',
+            dashDotDot: '双点划线',
+            medium: '中等实线',
+            mediumDashed: '中等虚线',
+            mediumDashDot: '中等点划线',
+            mediumDashDotDot: '中等双点划线',
+            thick: '粗实线',
+            double: '双线',
         },
         borderLine: {
             borderTop: '上框线',

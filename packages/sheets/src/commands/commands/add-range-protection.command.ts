@@ -15,11 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import type { IRangeProtectionRule } from '../../models/range-protection-rule.model';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { AddRangeProtectionMutation } from '../mutations/add-range-protection.mutation';
-import { DeleteRangeProtectionMutation } from '../mutations/delete-range-protection.mutation';
 
 export interface IAddRangeProtectionCommandParams {
     permissionId: string;
@@ -33,7 +32,6 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionCommandParam
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
         const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
         const { rule, permissionId } = params;
 
@@ -56,16 +54,6 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionCommandParam
             rules,
         });
 
-        if (result) {
-            const redoMutations = [{ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules } }];
-            const undoMutations = [{ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: rules.map((rule) => rule.id) } }];
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                redoMutations,
-                undoMutations,
-            });
-        }
-
-        return true;
+        return result;
     },
 };

@@ -17,11 +17,18 @@
 import type { IRange } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { Root } from 'react-dom/client';
-import { BooleanNumber, createIdentifier, LocaleService, LocaleType } from '@univerjs/core';
+import { BooleanNumber, createIdentifier, LocaleService, LocaleType, RedoCommand, UndoCommand } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { AddCfCommand, CFNumberOperator, CFRuleType, CFSubRuleType, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
+import {
+    AddCfCommand,
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    createDefaultRule,
+    SetCfCommand,
+} from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { IDialogService, IShortcutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -31,7 +38,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../__tests__/create-cf-ui-test-bed';
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
 import { ConditionFormattingPanel } from '../ConditionFormattingPanel';
-import { RuleEdit } from '../panel/RuleEdit';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -147,6 +153,7 @@ function createPanelTestBed() {
                     styleRule: 'Style rule',
                     submit: 'Submit',
                     cancel: 'Cancel',
+                    stopIfTrue: 'Stop If True',
                 },
                 operator: {
                     containsText: 'Contains text',
@@ -175,6 +182,9 @@ function createPanelTestBed() {
                 },
                 ruleType: {
                     highlightCell: 'Highlight cell',
+                    dataBar: 'Data bar',
+                    colorScale: 'Color scale',
+                    iconSet: 'Icon set',
                 },
                 preview: {
                     describe: {
@@ -189,6 +199,8 @@ function createPanelTestBed() {
             },
         },
     });
+    testBed.get(LocaleService).setLocale(LocaleType.ZH_CN);
+    testBed.get(LocaleService).setDirection('ltr');
     testBed.setSelection(ACTIVE_RANGE);
 
     return testBed;
@@ -225,19 +237,20 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         currentTestBed = undefined;
     });
 
-    it('adds a text highlight rule to the active selection from the rule editor', async () => {
+    it.each([false, true])('adds a text highlight rule with stopIfTrue=%s only after submission', async (stopIfTrue) => {
         currentTestBed = createPanelTestBed();
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        let cancelRequests = 0;
+        let editorExitRequests = 0;
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <RuleEdit
-                        onCancel={() => {
-                            cancelRequests += 1;
+                    <ConditionFormattingPanel
+                        rule={createDefaultRule()}
+                        onEditorExit={() => {
+                            editorExitRequests += 1;
                         }}
                     />
                 </RediContext.Provider>
@@ -246,11 +259,19 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         });
 
         const textInput = container.querySelector('input[type="text"]') as HTMLInputElement;
+        const stopCheckbox = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+            .find((input) => input.closest('label')?.textContent === 'Stop If True');
+        expect(stopCheckbox?.checked).toBe(false);
 
         await act(async () => {
             writeInput(textInput, 'overdue');
+            if (stopIfTrue) {
+                stopCheckbox!.click();
+            }
             await Promise.resolve();
         });
+
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId) ?? []).toEqual([]);
 
         await act(async () => {
             clickButton(container!, 'Submit');
@@ -261,7 +282,7 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([
             expect.objectContaining({
                 ranges: [expect.objectContaining(ACTIVE_RANGE)],
-                stopIfTrue: false,
+                stopIfTrue,
                 rule: expect.objectContaining({
                     type: CFRuleType.highlightCell,
                     subType: CFSubRuleType.text,
@@ -269,7 +290,8 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
                 }),
             }),
         ]);
-        expect(cancelRequests).toBe(1);
+        expect(editorExitRequests).toBe(1);
+        expect(container.textContent).toContain('Show');
     });
 
     it('keeps the rule editor open and does not add a rule when the required condition input is empty', async () => {
@@ -277,14 +299,15 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        let cancelRequests = 0;
+        let editorExitRequests = 0;
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <RuleEdit
-                        onCancel={() => {
-                            cancelRequests += 1;
+                    <ConditionFormattingPanel
+                        rule={createDefaultRule()}
+                        onEditorExit={() => {
+                            editorExitRequests += 1;
                         }}
                     />
                 </RediContext.Provider>
@@ -299,7 +322,7 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         });
 
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId) ?? []).toEqual([]);
-        expect(cancelRequests).toBe(0);
+        expect(editorExitRequests).toBe(0);
         expect(container.textContent).toContain('Style rule');
     });
 
@@ -317,15 +340,15 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        let cancelRequests = 0;
+        let editorExitRequests = 0;
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <RuleEdit
+                    <ConditionFormattingPanel
                         rule={originalRule}
-                        onCancel={() => {
-                            cancelRequests += 1;
+                        onEditorExit={() => {
+                            editorExitRequests += 1;
                         }}
                     />
                 </RediContext.Provider>
@@ -338,11 +361,17 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         if (!numberInput) {
             throw new Error('Number condition input was not rendered');
         }
+        const stopCheckbox = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+            .find((input) => input.closest('label')?.textContent === 'Stop If True');
+        expect(stopCheckbox?.checked).toBe(true);
 
         await act(async () => {
             writeInput(numberInput, '25');
+            stopCheckbox!.click();
             await Promise.resolve();
         });
+
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)?.[0]).toEqual(originalRule);
 
         await act(async () => {
             clickButton(container!, 'Submit');
@@ -354,7 +383,7 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
             expect.objectContaining({
                 cfId: 'cf-active',
                 ranges: [expect.objectContaining(ACTIVE_RANGE)],
-                stopIfTrue: true,
+                stopIfTrue: false,
                 rule: expect.objectContaining({
                     type: CFRuleType.highlightCell,
                     subType: CFSubRuleType.number,
@@ -363,10 +392,79 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
                 }),
             }),
         ]);
-        expect(cancelRequests).toBe(1);
+        expect(editorExitRequests).toBe(1);
+        expect(container.textContent).toContain('Show');
+        expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(false);
+
+        await act(async () => {
+            expect(await currentTestBed!.commandService.executeCommand(UndoCommand.id)).toBe(true);
+            await new Promise((resolve) => setTimeout(resolve, 32));
+        });
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)?.[0]).toEqual(originalRule);
+        expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(true);
+
+        await act(async () => {
+            expect(await currentTestBed!.commandService.executeCommand(RedoCommand.id)).toBe(true);
+            await new Promise((resolve) => setTimeout(resolve, 32));
+        });
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)?.[0]).toEqual(
+            expect.objectContaining({ stopIfTrue: false, rule: expect.objectContaining({ value: 25 }) })
+        );
+        expect(container.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(false);
     });
 
-    it('opens the clicked worksheet rule for editing and returns to the manager without changing it', async () => {
+    it.each([
+        ['Data bar', CFRuleType.dataBar],
+        ['Color scale', CFRuleType.colorScale],
+        ['Icon set', CFRuleType.iconSet],
+    ])('hides stopIfTrue when converting a highlight rule to %s and clears it on submission', async (optionText, type) => {
+        currentTestBed = createPanelTestBed();
+        const originalRule = { ...createNumberHighlightRule('cf-active', 10), stopIfTrue: true };
+        await currentTestBed.commandService.executeCommand(AddCfCommand.id, {
+            unitId: currentTestBed.unitId,
+            subUnitId: currentTestBed.subUnitId,
+            rule: originalRule,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <ConditionFormattingPanel rule={originalRule} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            container!.querySelector('[data-u-comp="select"]')!
+                .dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+            await Promise.resolve();
+        });
+        const option = Array.from(document.querySelectorAll('[data-slot="dropdown-menu-radio-item"]'))
+            .find((element) => element.textContent === optionText)!;
+        expect(option).toBeDefined();
+        await act(async () => {
+            option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+        });
+
+        expect(container.textContent).not.toContain('Stop If True');
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)?.[0]).toEqual(originalRule);
+        await act(async () => {
+            clickButton(container!, 'Submit');
+            await Promise.resolve();
+        });
+        expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)?.[0]).toEqual(
+            expect.objectContaining({ stopIfTrue: false, rule: expect.objectContaining({ type }) })
+        );
+        expect(container.textContent).toContain('Show');
+        expect(container.textContent).not.toContain('Stop If True');
+    });
+
+    it.each([true, false])('returns to the manager without saving with an editor-exit callback: %s', async (withCallback) => {
         currentTestBed = createPanelTestBed();
         await currentTestBed.commandService.executeCommand(AddCfCommand.id, {
             unitId: currentTestBed.unitId,
@@ -376,11 +474,17 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
+        let editorExitRequests = 0;
+        const onEditorExit = withCallback
+            ? () => {
+                editorExitRequests += 1;
+            }
+            : undefined;
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <ConditionFormattingPanel />
+                    <ConditionFormattingPanel onEditorExit={onEditorExit} />
                 </RediContext.Provider>
             );
             await Promise.resolve();
@@ -400,6 +504,14 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
 
         expect(container.textContent).toContain('Range');
         expect(container.textContent).toContain('Style type');
+        expect(editorExitRequests).toBe(0);
+
+        await act(async () => {
+            const stopCheckbox = Array.from(container!.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+                .find((input) => input.closest('label')?.textContent === 'Stop If True');
+            stopCheckbox!.click();
+            await Promise.resolve();
+        });
 
         await act(async () => {
             clickButton(container!, 'Cancel');
@@ -408,9 +520,11 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
 
         expect(container.textContent).toContain('Show');
         expect(container.textContent).toContain('A1');
+        expect(editorExitRequests).toBe(withCallback ? 1 : 0);
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([
             expect.objectContaining({
                 cfId: 'cf-active',
+                stopIfTrue: false,
                 rule: expect.objectContaining({
                     type: CFRuleType.highlightCell,
                     subType: CFSubRuleType.number,
@@ -431,15 +545,15 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
-        let cancelRequests = 0;
+        let editorExitRequests = 0;
 
         await act(async () => {
             root!.render(
                 <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
-                    <RuleEdit
+                    <ConditionFormattingPanel
                         rule={originalRule}
-                        onCancel={() => {
-                            cancelRequests += 1;
+                        onEditorExit={() => {
+                            editorExitRequests += 1;
                         }}
                     />
                 </RediContext.Provider>
@@ -466,7 +580,8 @@ describe('ConditionFormattingPanel and RuleEdit', () => {
             await Promise.resolve();
         });
 
-        expect(cancelRequests).toBe(1);
+        expect(editorExitRequests).toBe(1);
+        expect(container.textContent).toContain('Show');
         expect(currentTestBed.ruleModel.getSubunitRules(currentTestBed.unitId, currentTestBed.subUnitId)).toEqual([
             expect.objectContaining({
                 cfId: 'cf-active',

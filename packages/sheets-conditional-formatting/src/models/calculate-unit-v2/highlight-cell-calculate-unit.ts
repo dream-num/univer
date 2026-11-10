@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { IStyleData, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
+import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import type {
     IAverageHighlightCell,
     IFormulaHighlightCell,
@@ -25,8 +27,6 @@ import type {
     ITimePeriodHighlightCell,
 } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { CellValueType, dateKit, Range, Tools } from '@univerjs/core';
-import { ERROR_TYPE_SET, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
@@ -54,7 +54,7 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
     return a.startColumn - b.startColumn;
 });
 
-export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, Nullable<IStyleData>> {
+export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, boolean> {
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
         const ruleConfig = context.rule.rule as IHighlightCell;
@@ -150,19 +150,21 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
                     switch (subRuleConfig.operator) {
                         case CFTimePeriodOperator.last7Days: {
+                            const today = dateKit().startOf('day');
                             return {
                                 value: {
-                                    start: dateKit().subtract(7, 'day').valueOf(),
-                                    end: dateKit().valueOf(),
+                                    start: today.subtract(6, 'day').valueOf(),
+                                    end: today.endOf('day').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.lastMonth: {
+                            const month = dateKit().startOf('month').subtract(1, 'month');
                             return {
                                 value: {
-                                    start: dateKit().startOf('month').subtract(1, 'month').valueOf(),
-                                    end: dateKit().endOf('month').subtract(1, 'month').valueOf(),
+                                    start: month.valueOf(),
+                                    end: month.endOf('month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -177,10 +179,11 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             };
                         }
                         case CFTimePeriodOperator.nextMonth: {
+                            const month = dateKit().startOf('month').add(1, 'month');
                             return {
                                 value: {
-                                    start: dateKit().startOf('month').add(1, 'month').valueOf(),
-                                    end: dateKit().endOf('month').add(1, 'month').valueOf(),
+                                    start: month.valueOf(),
+                                    end: month.endOf('month').valueOf(),
                                 },
                                 type: ruleConfig.subType,
                             };
@@ -427,7 +430,6 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                 }
             }
         };
-        const result = run();
-        return result ? ruleConfig.style : {};
+        return !!run();
     }
 }

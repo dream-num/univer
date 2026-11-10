@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../models/table-manager';
 import { SheetTableService } from '../../../services/table.service';
@@ -45,31 +47,36 @@ function accessorForTableManager(tableManager: TableManager) {
 }
 
 describe('sheets-table mutations', () => {
-    it('AddSheetTableMutation should delegate to SheetTableService.addTable', () => {
-        const service = {
-            addTable: vi.fn(),
-        } as unknown as SheetTableService;
-
-        const result = AddSheetTableMutation.handler(accessorForService(service), {
-            unitId: 'u1',
-            subUnitId: 's1',
-            tableId: 't1',
-            name: 'Table',
-            header: ['A'],
-            range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
-            options: { showHeader: true },
-        });
-
-        expect(result).toBe(true);
-        expect(service.addTable).toHaveBeenCalledWith(
-            'u1',
-            's1',
-            'Table',
-            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
-            ['A'],
-            't1',
-            { showHeader: true }
-        );
+    it('AddSheetTableMutation preserves table metadata through the real service and model', () => {
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([TableManager]);
+            injector.add([SheetTableService]);
+            univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                id: 'u1',
+                name: 'Tables',
+                appVersion: '1.0.0',
+                locale: LocaleType.EN_US,
+                sheetOrder: ['s1'],
+                styles: {},
+                sheets: { s1: { id: 's1', name: 'Sheet', rowCount: 10, columnCount: 4, cellData: {} } },
+            });
+            const meta = { _xlsx: { options: { dataDxfStyle: { n: { pattern: '0.00' } } } } };
+            expect(AddSheetTableMutation.handler(injector, {
+                unitId: 'u1',
+                subUnitId: 's1',
+                tableId: 't1',
+                name: 'Table',
+                header: ['A', 'B'],
+                range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
+                options: { showHeader: true },
+                meta,
+            })).toBe(true);
+            expect(injector.get(TableManager).getTable('u1', 't1')!.toJSON().meta).toEqual(meta);
+        } finally {
+            univer.dispose();
+        }
     });
 
     it('DeleteSheetTableMutation should delegate to SheetTableService.deleteTable', () => {

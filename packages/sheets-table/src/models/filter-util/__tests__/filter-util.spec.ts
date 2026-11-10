@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { CellValueType, DateSystem, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, DateSystem, excelDateTimeSerial, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     TableColumnFilterTypeEnum,
@@ -24,6 +24,7 @@ import {
     TableNumberCompareTypeEnum,
     TableStringCompareTypeEnum,
 } from '../../../types/enum';
+import { TableFilters } from '../../table-filter';
 import {
     excelSerialToDateTime,
     getCellValueWithConditionType,
@@ -50,6 +51,7 @@ import {
     dateQ3,
     dateQ4,
     getDateFilterExecuteFunc,
+    lastMonth,
     lastQuarter,
     lastWeek,
     lastYear,
@@ -131,6 +133,8 @@ describe('table filter utilities', () => {
         expect(lastWeek(new Date(2024, 5, 5), anchor)).toBe(true);
         expect(nextWeek(new Date(2024, 5, 17), anchor)).toBe(true);
         expect(thisMonth(new Date(2024, 5, 1), anchor)).toBe(true);
+        expect(lastMonth(new Date(2024, 4, 1), anchor)).toBe(true);
+        expect(lastMonth(new Date(2024, 5, 1), anchor)).toBe(false);
         expect(nextMonth(new Date(2024, 6, 1), anchor)).toBe(true);
         expect(nextMonth(new Date(2024, 7, 1), anchor)).toBe(false);
         expect(thisQuarter(new Date(2024, 3, 1), anchor)).toBe(true);
@@ -141,6 +145,116 @@ describe('table filter utilities', () => {
         expect(nextYear(new Date(2025, 0, 1), anchor)).toBe(true);
         expect(yearToDate(new Date(2024, 2, 1), anchor)).toBe(true);
         expect(yearToDate(new Date(2024, 5, 13), anchor)).toBe(false);
+    });
+
+    it.each([
+        {
+            compareType: TableDateCompareTypeEnum.LastMonth,
+            anchor: new Date(2026, 9, 15, 12),
+            start: new Date(2026, 8, 1),
+            end: new Date(2026, 9, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.NextMonth,
+            anchor: new Date(2026, 9, 15, 12),
+            start: new Date(2026, 10, 1),
+            end: new Date(2026, 11, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.LastMonth,
+            anchor: new Date(2024, 0, 31, 12),
+            start: new Date(2023, 11, 1),
+            end: new Date(2024, 0, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.NextMonth,
+            anchor: new Date(2023, 11, 31, 12),
+            start: new Date(2024, 0, 1),
+            end: new Date(2024, 1, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.LastMonth,
+            anchor: new Date(2024, 2, 31, 12),
+            start: new Date(2024, 1, 1),
+            end: new Date(2024, 2, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.NextMonth,
+            anchor: new Date(2024, 0, 31, 12),
+            start: new Date(2024, 1, 1),
+            end: new Date(2024, 2, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.LastQuarter,
+            anchor: new Date(2024, 5, 12, 12),
+            start: new Date(2024, 0, 1),
+            end: new Date(2024, 3, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.NextQuarter,
+            anchor: new Date(2024, 5, 12, 12),
+            start: new Date(2024, 6, 1),
+            end: new Date(2024, 9, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.LastQuarter,
+            anchor: new Date(2024, 0, 31, 12),
+            start: new Date(2023, 9, 1),
+            end: new Date(2024, 0, 1),
+        },
+        {
+            compareType: TableDateCompareTypeEnum.NextQuarter,
+            anchor: new Date(2023, 11, 31, 12),
+            start: new Date(2024, 0, 1),
+            end: new Date(2024, 3, 1),
+        },
+    ])('uses complete calendar boundaries for $compareType with anchor $anchor', ({ compareType, anchor, start, end }) => {
+        const anchorTime = anchor.getTime();
+        const matches = getDateFilterExecuteFunc({
+            conditionType: TableConditionTypeEnum.Date,
+            compareType,
+            anchorTime,
+        });
+        const lastDay = new Date(end);
+        lastDay.setDate(lastDay.getDate() - 1);
+
+        expect(matches(new Date(start.getTime() - 1))).toBe(false);
+        expect(matches(start)).toBe(true);
+        expect(matches(lastDay)).toBe(true);
+        expect(matches(new Date(end.getTime() - 1))).toBe(true);
+        expect(matches(end)).toBe(false);
+        expect(anchor.getTime()).toBe(anchorTime);
+    });
+
+    it('filters real worksheet rows using previous and next calendar months', () => {
+        const data = createWorkbookData();
+        const dates = [
+            new Date(Date.UTC(2026, 8, 15)),
+            new Date(Date.UTC(2026, 9, 15)),
+            new Date(Date.UTC(2026, 10, 1)),
+            new Date(Date.UTC(2026, 10, 30, 23, 59, 59)),
+        ];
+        data.sheets['sheet-1'].cellData = Object.fromEntries(dates.map((date, row) => [row, {
+            0: { v: excelDateTimeSerial(date), t: CellValueType.NUMBER },
+        }]));
+        univer = new Univer();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
+        const worksheet = workbook.getSheetBySheetId('sheet-1')!;
+        const filters = new TableFilters();
+        const range = { startRow: 0, endRow: 3, startColumn: 0, endColumn: 0 };
+        const anchorTime = new Date(2026, 9, 15, 12).getTime();
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.condition,
+            filterInfo: { conditionType: TableConditionTypeEnum.Date, compareType: TableDateCompareTypeEnum.LastMonth, anchorTime },
+        });
+        expect(Array.from(filters.doFilter(worksheet, range))).toEqual([1, 2, 3]);
+
+        filters.setColumnFilter(0, {
+            filterType: TableColumnFilterTypeEnum.condition,
+            filterInfo: { conditionType: TableConditionTypeEnum.Date, compareType: TableDateCompareTypeEnum.NextMonth, anchorTime },
+        });
+        expect(Array.from(filters.doFilter(worksheet, range))).toEqual([0, 1]);
     });
 
     it('matches date month and quarter presets used by table filter menus', () => {
@@ -265,7 +379,7 @@ describe('table filter utilities', () => {
             conditionType: TableConditionTypeEnum.Date,
             compareType: TableDateCompareTypeEnum.LastMonth,
             anchorTime: anchor,
-        })(onJuneTen)).toBe(true);
+        })(new Date(2024, 4, 10))).toBe(true);
         expect(getDateFilterExecuteFunc({
             conditionType: TableConditionTypeEnum.Date,
             compareType: TableDateCompareTypeEnum.NextMonth,

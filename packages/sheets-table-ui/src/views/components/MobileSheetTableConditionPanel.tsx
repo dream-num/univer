@@ -15,13 +15,6 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    IConditionCompareTypeEnum,
-    IConditionExpect,
-    IConditionInfo,
-    ITableConditionTypeEnumWithoutLogic,
-} from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import {
     borderClassName,
@@ -30,7 +23,6 @@ import {
     DatePicker,
     DateRangePicker,
     Input,
-    InputNumber,
     MobileDropdown,
     MobileSelect,
 } from '@univerjs/design';
@@ -38,6 +30,13 @@ import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    IConditionCompareTypeEnum,
+    IConditionExpect,
+    IConditionInfo,
+    ITableConditionTypeEnumWithoutLogic,
+} from './type';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
 
@@ -55,6 +54,25 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
     const { conditionInfo, onChange } = props;
     const localeService = useDependency(LocaleService);
     const injector = useDependency(Injector);
+    const [numberDraftState, setNumberDraftState] = useState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.number ?? '') });
+    if (!Object.is(numberDraftState.value, conditionInfo.info.number) || numberDraftState.type !== conditionInfo.type || numberDraftState.compare !== conditionInfo.compare) {
+        setNumberDraftState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.number ?? '') });
+    }
+    const numberDraft = numberDraftState.text;
+    const setNumberDraft = (text: string) => setNumberDraftState({ value: conditionInfo.info.number, type: conditionInfo.type, compare: conditionInfo.compare, text });
+    const [minDraftState, setMinDraftState] = useState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[0] ?? '') });
+    if (!Object.is(minDraftState.value, conditionInfo.info.numberRange?.[0]) || minDraftState.type !== conditionInfo.type || minDraftState.compare !== conditionInfo.compare) {
+        setMinDraftState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[0] ?? '') });
+    }
+    const minDraft = minDraftState.text;
+    const setMinDraft = (text: string) => setMinDraftState({ value: conditionInfo.info.numberRange?.[0], type: conditionInfo.type, compare: conditionInfo.compare, text });
+    const [maxDraftState, setMaxDraftState] = useState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[1] ?? '') });
+    if (!Object.is(maxDraftState.value, conditionInfo.info.numberRange?.[1]) || maxDraftState.type !== conditionInfo.type || maxDraftState.compare !== conditionInfo.compare) {
+        setMaxDraftState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text: String(conditionInfo.info.numberRange?.[1] ?? '') });
+    }
+    const maxDraft = maxDraftState.text;
+    const setMaxDraft = (text: string) => setMaxDraftState({ value: conditionInfo.info.numberRange?.[1], type: conditionInfo.type, compare: conditionInfo.compare, text });
+
     const [conditionVisible, setConditionVisible] = useState(false);
     const [defaultDate] = useState(() => new Date());
     const cascaderOptions = getCascaderListOptions(injector);
@@ -144,18 +162,23 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                                     placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.input-values-placeholder')}
                                     value={conditionInfo.info.string}
                                     onChange={(value) => handleConditionInfo({ string: value })}
+                                    size="small"
                                 />
                             )
                             : (
-                                <InputNumber
-                                    className="univer-h-7 univer-w-full"
-                                    value={conditionInfo.info.number}
-                                    controls={false}
+                                <Input
+                                    className="univer-w-full"
+                                    inputMode="decimal"
+                                    value={numberDraft}
+                                    aria-invalid={numberDraft !== '' && !Number.isFinite(Number(numberDraft))}
+                                    onBlur={() => setNumberDraft(String(conditionInfo.info.number ?? ''))}
                                     onChange={(value) => {
-                                        if (value !== null) {
-                                            handleConditionInfo({ number: value });
+                                        setNumberDraft(value);
+                                        if (value.trim() !== '' && Number.isFinite(Number(value))) {
+                                            handleConditionInfo({ number: Number(value) });
                                         }
                                     }}
+                                    size="small"
                                 />
                             )}
                     </>
@@ -183,26 +206,34 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                 )}
                 {subComponentType === ConditionSubComponentEnum.Inputs && (
                     <div className="univer-flex univer-items-center univer-gap-2">
-                        <InputNumber
+                        <Input
                             className="univer-w-full"
-                            value={conditionInfo.info.numberRange?.[0]}
-                            controls={false}
+                            inputMode="decimal"
+                            value={minDraft}
+                            aria-invalid={minDraft !== '' && !Number.isFinite(Number(minDraft))}
+                            onBlur={() => setMinDraft(String(conditionInfo.info.numberRange?.[0] ?? ''))}
                             onChange={(value) => {
-                                if (value !== null) {
-                                    handleConditionInfo({ numberRange: [value, conditionInfo.info.numberRange?.[1]] });
+                                setMinDraft(value);
+                                if (value.trim() !== '' && Number.isFinite(Number(value))) {
+                                    handleConditionInfo({ numberRange: [Number(value), conditionInfo.info.numberRange?.[1]] });
                                 }
                             }}
+                            size="small"
                         />
                         <span> - </span>
-                        <InputNumber
+                        <Input
                             className="univer-w-full"
-                            value={conditionInfo.info.numberRange?.[1]}
-                            controls={false}
+                            inputMode="decimal"
+                            value={maxDraft}
+                            aria-invalid={maxDraft !== '' && !Number.isFinite(Number(maxDraft))}
+                            onBlur={() => setMaxDraft(String(conditionInfo.info.numberRange?.[1] ?? ''))}
                             onChange={(value) => {
-                                if (value !== null) {
-                                    handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], value] });
+                                setMaxDraft(value);
+                                if (value.trim() !== '' && Number.isFinite(Number(value))) {
+                                    handleConditionInfo({ numberRange: [conditionInfo.info.numberRange?.[0], Number(value)] });
                                 }
                             }}
+                            size="small"
                         />
                     </div>
                 )}
@@ -212,6 +243,7 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                         value={conditionInfo.info.dateSelect ?? conditionDateOptions[0].value}
                         options={conditionDateOptions}
                         onChange={(value) => handleConditionInfo({ dateSelect: value })}
+                        size="small"
                     />
                 )}
             </div>

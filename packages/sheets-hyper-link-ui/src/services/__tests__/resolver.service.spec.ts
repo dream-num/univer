@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
+import type { IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import { ICommandService, IConfigService, Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import {
+    ICommandService,
+    IConfigService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RANGE_TYPE,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import {
+    getPrimaryForRange,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { IMessageService } from '@univerjs/ui';
-import { afterEach, describe, expect, it } from 'vitest';
+import { DesktopMessageService, IMessageService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import { afterEach, describe, expect, it, onTestFinished } from 'vitest';
 import { SheetsHyperLinkResolverService } from '../resolver.service';
 
 class TestCommandService {
@@ -91,6 +108,9 @@ function createWorksheet(sheetId: string, options?: { hidden?: boolean }) {
     return {
         getSheetId: () => sheetId,
         getMergeData: () => [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 }],
+        getMergedCell: (row: number, col: number) => row === 1 && col >= 1 && col <= 2
+            ? { startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 }
+            : null,
         getMaxColumns: () => 10,
         getMaxRows: () => 10,
         isSheetHidden: () => !!options?.hidden,
@@ -134,15 +154,82 @@ function createResolver() {
 const originalOpen = window.open;
 const waitForNavigationJobs = () => new Promise((resolve) => setTimeout(resolve));
 
+function createSelectionResolverTestBed() {
+    const univer = new Univer({ locale: LocaleType.EN_US });
+    onTestFinished(() => univer.dispose());
+    const injector = univer.__getInjector();
+    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+    injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IMessageService, { useClass: DesktopMessageService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([SheetsSelectionsService]);
+    injector.add([SheetsHyperLinkResolverService]);
+    const merge = { startRow: 2, endRow: 7, startColumn: 3, endColumn: 6 };
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'link-workbook',
+        sheetOrder: ['sheet1'],
+        sheets: { sheet1: { id: 'sheet1', rowCount: 20, columnCount: 20, mergeData: [merge] } },
+    });
+    const commands = injector.get(ICommandService);
+    commands.registerCommand(SetSelectionsOperation);
+    commands.registerCommand(ScrollToRangeOperation);
+    commands.syncExecuteCommand(SetSelectionsOperation.id, {
+        unitId: workbook.getUnitId(),
+        subUnitId: 'sheet1',
+        selections: [{ range: merge, primary: workbook.getActiveSheet().getCellInfoInMergeData(2, 3) }],
+    });
+    return { injector, workbook, merge };
+}
+
 describe('SheetsHyperLinkResolverService', () => {
     afterEach(() => {
         window.open = originalOpen;
+    });
+
+    it.each([undefined, RANGE_TYPE.NORMAL])(
+        'restores the merged selection when cancel navigates to its top-left cell with range type %s',
+        async (rangeType) => {
+            const { injector, workbook, merge } = createSelectionResolverTestBed();
+            const resolver = injector.get(SheetsHyperLinkResolverService);
+            const range: IRange = { startRow: 2, endRow: 2, startColumn: 3, endColumn: 3 };
+            if (rangeType !== undefined) {
+                range.rangeType = rangeType;
+            }
+
+            await resolver.navigateToRange(workbook.getUnitId(), 'sheet1', range, true);
+
+            expect(injector.get(SheetsSelectionsService).getCurrentLastSelection()?.range).toEqual({
+                ...merge,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+            expect(workbook.getActiveSheet().getMergeData()).toEqual([merge]);
+            expect(injector.get(SheetsSelectionsService).getCurrentLastSelection()?.primary).toEqual(
+                expect.objectContaining({ ...merge, actualRow: 2, actualColumn: 3, isMerged: true, isMergedMainCell: true })
+            );
+        }
+    );
+
+    it.each([
+        { startRow: 2, endRow: 2, startColumn: 0, endColumn: 19, rangeType: RANGE_TYPE.ROW },
+        { startRow: 0, endRow: 19, startColumn: 3, endColumn: 3, rangeType: RANGE_TYPE.COLUMN },
+        { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9 },
+    ])('preserves row, column and unmerged target ranges: %j', async (range) => {
+        const { injector, workbook } = createSelectionResolverTestBed();
+        const resolver = injector.get(SheetsHyperLinkResolverService);
+
+        await resolver.navigateToRange(workbook.getUnitId(), 'sheet1', range);
+
+        expect(injector.get(SheetsSelectionsService).getCurrentLastSelection()?.range).toEqual({
+            ...range,
+            rangeType: range.rangeType ?? RANGE_TYPE.NORMAL,
+        });
     });
 
     it('should navigate to sheet ranges and execute selection and scroll commands', async () => {
         const { resolver, commandService, univerInstanceService } = createResolver();
         const targetSheet = createWorksheet('sheet-2');
         univerInstanceService.currentUnit = createWorkbook({ targetSheet });
+        const targetRange = { startRow: 1, endRow: 9, startColumn: 1, endColumn: 9, rangeType: RANGE_TYPE.NORMAL };
 
         await resolver.navigateToRange('unit-1', 'sheet-2', { startRow: 1, endRow: 20, startColumn: 1, endColumn: 20 }, true);
 
@@ -153,12 +240,12 @@ describe('SheetsHyperLinkResolverService', () => {
                 params: {
                     unitId: 'unit-1',
                     subUnitId: 'sheet-2',
-                    selections: [{ range: { startRow: 1, endRow: 9, startColumn: 1, endColumn: 9 }, primary: null }],
+                    selections: [{ range: targetRange, primary: getPrimaryForRange(targetRange, targetSheet) }],
                 },
             },
             {
                 id: ScrollToRangeOperation.id,
-                params: { range: { startRow: 1, endRow: 9, startColumn: 1, endColumn: 9 }, forceTop: true },
+                params: { range: targetRange, forceTop: true },
             },
         ]);
     });

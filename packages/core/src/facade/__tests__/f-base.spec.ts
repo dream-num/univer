@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Injector as IInjector } from '@univerjs/core';
 import { Inject, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { FBase, FBaseInitialable } from '../f-base';
@@ -34,7 +33,7 @@ describe('FBase', () => {
         class InitSourceA {
             static initSource = 'a';
 
-            _initialize(injector: IInjector) {
+            _initialize(injector: Injector) {
                 const current = initLog.get(this) ?? [];
                 current.push(`a:${Boolean(injector)}`);
                 initLog.set(this, current);
@@ -60,7 +59,7 @@ describe('FBase', () => {
         class AutoInitialable extends FBaseInitialable {
             steps: string[] = [];
 
-            constructor(@Inject(Injector) injector: IInjector) {
+            constructor(@Inject(Injector) injector: Injector) {
                 super(injector);
             }
         }
@@ -68,7 +67,7 @@ describe('FBase', () => {
         class ManualInitialable extends FBaseInitialable {
             steps: string[] = [];
 
-            constructor(@Inject(Injector) injector: IInjector) {
+            constructor(@Inject(Injector) injector: Injector) {
                 super(injector);
             }
 
@@ -76,7 +75,7 @@ describe('FBase', () => {
                 this._enableManualInit();
             }
 
-            runManualInitializers(injector: IInjector) {
+            runManualInitializers(injector: Injector) {
                 this._runInitializers(injector);
             }
         }
@@ -114,13 +113,13 @@ describe('FBase', () => {
         class AccessorInitialable extends FBaseInitialable {
             value = 'instance';
 
-            constructor(@Inject(Injector) injector: IInjector) {
+            constructor(@Inject(Injector) injector: Injector) {
                 super(injector);
             }
         }
 
         class AccessorSourceA {
-            _initialize(injector: IInjector) {
+            _initialize(injector: Injector) {
                 const current = initLog.get(this) ?? [];
                 current.push(`a:${Boolean(injector)}`);
                 initLog.set(this, current);
@@ -167,7 +166,7 @@ describe('FBase', () => {
         class FallbackInitialable extends FBaseInitialable {
             value = 'fallback';
 
-            constructor(@Inject(Injector) injector: IInjector) {
+            constructor(@Inject(Injector) injector: Injector) {
                 super(injector);
             }
         }

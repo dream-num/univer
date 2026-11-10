@@ -51,6 +51,7 @@ const locale = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Stop If True',
             createRule: 'Create Rule',
             clear: 'Clear All Rules',
             range: 'Apply Range',

@@ -20,6 +20,8 @@ import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IColumnData, IRange, IWorksheetData } from './typedef';
 import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
+import { isValidSheetDimension, normalizeSheetDimension } from './sheet-dimensions';
+import { DEFAULT_WORKSHEET_COLUMN_WIDTH } from './sheet-snapshot-utils';
 import { RANGE_TYPE } from './typedef';
 
 /**
@@ -183,7 +185,9 @@ export class ColumnManager {
      * @returns {number} width of column
      */
     getColumnWidth(columnPos: number): number {
-        return this._columnData[columnPos]?.w ?? this._config.defaultColumnWidth;
+        const defaultWidth = normalizeSheetDimension(this._config.defaultColumnWidth, DEFAULT_WORKSHEET_COLUMN_WIDTH, false);
+        const width = this._columnData[columnPos]?.w;
+        return width === undefined ? defaultWidth : normalizeSheetDimension(width, 0);
     }
 
     /**
@@ -192,6 +196,9 @@ export class ColumnManager {
      * @param width width of column
      */
     setColumnWidth(columnPos: number, width: number) {
+        if (!isValidSheetDimension(width)) {
+            return;
+        }
         const column = this._columnData[columnPos];
 
         // To prevent data redundancy, we only set the width when it is different from the default column width.
@@ -241,6 +248,9 @@ export class ColumnManager {
             const columnData = columnDataInfo?.[c - startColumn];
             if (columnData !== undefined && columnData !== null && Object.keys(columnData).length > 0) {
                 this._columnData[c] = { ...columnData };
+                if (columnData.w !== undefined && !isValidSheetDimension(columnData.w)) {
+                    this._columnData[c].w = 0;
+                }
             }
         }
     }

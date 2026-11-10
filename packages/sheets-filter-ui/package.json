@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter-ui",
-    "version": "1.0.3",
+    "version": "1.4.0",
     "private": false,
     "description": "Filtering menus and panels for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -27,7 +27,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./worker": "./src/worker.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -45,6 +46,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./worker": {
+                "import": "./lib/es/worker.js",
+                "require": "./lib/cjs/worker.js",
+                "types": "./lib/types/worker.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",
@@ -64,9 +70,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -77,7 +83,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.43.1",
+        "@univerjs/icons": "1.47.0",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
@@ -86,11 +92,11 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "postcss": "^8.5.28",
+        "postcss": "^8.5.32",
         "react": "18.3.1",
-        "rxjs": "^7.8.2",
+        "rxjs": "7.8.2",
         "tailwindcss": "3.4.18",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.0"
+        "tsrs": "0.20.1-ts7.1.0-beta",
+        "vitest": "^5.0.5"
     }
 }

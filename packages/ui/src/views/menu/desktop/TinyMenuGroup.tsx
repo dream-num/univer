@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
 import { LocaleService } from '@univerjs/core';
 import { cva } from '@univerjs/design';
 import { useMemo } from 'react';
 import { combineLatest, map, of, startWith } from 'rxjs';
-import { IconManager } from '../../../common';
+import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import type { TinyMenuLayoutVariant, TinyMenuSizeVariant } from './DesignTinyMenuGroup';
+import { IconManager } from '../../../common/icon-manager';
 import { useDependency, useObservable } from '../../../utils/di';
 import { DesignTinyMenuGroup } from './DesignTinyMenuGroup';
 
@@ -112,7 +112,8 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
         return null;
     }
 
-    const Icon = menuItem.icon ? iconManager.get(menuItem.icon as string) : null;
+    const { icon } = menuItem;
+    const Icon = icon ? iconManager.get(icon as string) : null;
     const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
     return (
@@ -177,7 +178,8 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     const items = visibleChildren
         .map((child) => {
-            const Icon = child.item?.icon ? iconManager.get(child.item.icon as string) : undefined;
+            const { icon } = child.item ?? {};
+            const Icon = icon ? iconManager.get(icon as string) : undefined;
 
             if (!Icon) {
                 return null;
@@ -196,7 +198,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                     });
                 },
                 className: '',
-                iconClassName: child.item?.icon === 'TextTypeIcon'
+                iconClassName: icon === 'TextTypeIcon'
                     ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
                     : undefined,
                 Icon,
@@ -225,7 +227,7 @@ export function UIQuickTileMenuGroup(props: IUIQuickMenuGroupProps) {
     }
 
     return (
-        <div className="univer-item-center univer-grid univer-grid-cols-3 univer-gap-1.5 univer-py-1">
+        <div className="univer-grid univer-grid-cols-3 univer-items-center univer-gap-1.5 univer-py-1">
             {getVisibleTinyMenuChildren(item.children, hiddenItemIds).map((menuSchema) => (
                 <QuickTileMenuItem
                     key={menuSchema.key}

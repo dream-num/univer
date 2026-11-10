@@ -89,9 +89,9 @@ describe('SheetTableFormulaController', () => {
             }),
         }), { onlyLocal: true });
 
-        const titleMap = executeCommand.mock.calls[0][1].reference.titleMap as Map<string, number>;
-        expect(titleMap.get('id')).toBe(0);
-        expect(titleMap.get('amount')).toBe(1);
+        const params = executeCommand.mock.calls[0][1];
+        expect(params.reference.titleMap).toEqual({ id: 0, amount: 1 });
+        expect(JSON.parse(JSON.stringify(params))).toEqual(params);
 
         tableRangeChanged$.next({ unitId: 'u1', tableId: 't1' });
         expect(executeCommand).toHaveBeenCalledTimes(2);

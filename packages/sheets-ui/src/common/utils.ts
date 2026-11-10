@@ -136,22 +136,26 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn, false);
     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
     const freezeWidth = endSheetView.startX - startSheetView.startX;
-    const freezeHeight = endSheetView.startY - startSheetView.startY;
+    // Match the frozen viewport, which includes the leading gap when freezing from the first row.
+    const freezeStartY = ySplit > 0 && startRow === ySplit ? 0 : startSheetView.startY;
+    const freezeHeight = endSheetView.startY - freezeStartY;
 
     const { top, left, viewportScrollX, viewportScrollY } = viewMain;
+    const viewportLeft = left / scaleX;
+    const viewportTop = top / scaleY;
     let offsetX: number;
     // viewMain or viewTop
-    if (x > left) {
+    if (x > viewportLeft) {
         offsetX = (x - viewportScrollX) * scaleX;
     } else {
-        offsetX = ((freezeWidth + rowHeaderWidth) - (left - x)) * scaleX;
+        offsetX = ((freezeWidth + rowHeaderWidth) - (viewportLeft - x)) * scaleX;
     }
 
     let offsetY: number;
-    if (y > top) {
+    if (y > viewportTop) {
         offsetY = (y - viewportScrollY) * scaleY;
     } else {
-        offsetY = ((freezeHeight + columnHeaderHeight) - (top - y)) * scaleX;
+        offsetY = ((freezeHeight + columnHeaderHeight) - (viewportTop - y)) * scaleY;
     }
 
     return {

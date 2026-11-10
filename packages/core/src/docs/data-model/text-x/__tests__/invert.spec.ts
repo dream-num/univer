@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../../types/interfaces';
-import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import type { TextXAction } from '../action-types';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
-import { BooleanNumber } from '../../../../types/enum';
+import { Tools } from '../../../../shared/tools';
+import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
@@ -138,6 +139,8 @@ describe('test TextX static methods invert and makeInvertible', () => {
     it('test TextX static method makeInvertible when `retain` action occur', () => {
         const docBody: IDocumentBody = {
             dataStream: 'hello\r\n',
+            customRanges: [],
+            customDecorations: [],
             textRuns: [
                 {
                     st: 0,
@@ -163,6 +166,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
         }, UpdateDocsAttributeType.COVER);
 
         TextX.makeInvertible(textX.serialize(), docBody);
+        const original = Tools.deepClone(docBody);
 
         const expectedActions = [{
             t: TextXActionType.RETAIN,
@@ -179,8 +183,6 @@ describe('test TextX static methods invert and makeInvertible', () => {
             },
             oldBody: {
                 dataStream: '',
-                paragraphs: undefined,
-                sectionBreaks: [],
                 textRuns: [{
                     st: 0,
                     ed: 3,
@@ -188,14 +190,14 @@ describe('test TextX static methods invert and makeInvertible', () => {
                         bl: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
-                customBlocks: undefined,
             },
             coverType: UpdateDocsAttributeType.COVER,
         }];
 
         expect(textX.serialize()).toEqual(expectedActions);
+        TextX.apply(docBody, textX.serialize());
+        TextX.apply(docBody, TextX.invert(textX.serialize()));
+        expect(docBody).toEqual(original);
     });
 
     it('test TextX static method makeInvertible when `delete` action occur', () => {

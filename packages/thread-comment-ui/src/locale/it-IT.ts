@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: 'Salva',
         },
         item: {
+            markResolved: 'Segna come risolto',
+            markUnresolved: 'Segna come non risolto',
             edit: 'Modifica',
             delete: 'Elimina questo commento',
             more: 'Altro',

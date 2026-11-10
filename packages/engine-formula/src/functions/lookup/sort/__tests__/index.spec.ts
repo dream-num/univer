@@ -26,6 +26,27 @@ describe('Test sort function', () => {
     const testFunction = new Sort(FUNCTION_NAMES_LOOKUP.SORT);
 
     describe('Sort', () => {
+        it.each([
+            { sortOrder: 1, expected: [[1, 'a'], [2, 'b'], [3, 'c'], [3, 'c'], [5, 'e']] },
+            { sortOrder: -1, expected: [[5, 'e'], [3, 'c'], [3, 'c'], [2, 'b'], [1, 'a']] },
+        ])('preserves the input rows when sorting with order $sortOrder', ({ sortOrder, expected }) => {
+            const inputValues = [[3, 'c'], [1, 'a'], [2, 'b'], [3, 'c'], [5, 'e']];
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject(inputValues),
+                rowCount: inputValues.length,
+                columnCount: inputValues[0].length,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const result = testFunction.calculate(array, NumberValueObject.create(1), NumberValueObject.create(sortOrder));
+
+            expect(getObjectValue(result)).toStrictEqual(expected);
+            expect(getObjectValue(array)).toStrictEqual(inputValues);
+        });
+
         it('Value is normal', async () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

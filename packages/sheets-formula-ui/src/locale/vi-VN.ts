@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Tham chiếu vòng',
+            title: 'Tùy chọn tính toán',
+            enable: 'Bật tính toán lặp',
+            iterations: 'Số lần lặp tối đa (1–{0})',
+            change: 'Mức thay đổi tối đa',
+            workbook: 'Các thiết lập áp dụng cho sổ làm việc hiện tại.',
+            invalidIterations: 'Số lần lặp tối đa phải là số nguyên từ 1 đến {0}.',
+            invalidChange: 'Mức thay đổi tối đa phải là số dương hữu hạn.',
+            cancel: 'Hủy',
+            confirm: 'OK',
+            circular: 'Công thức chứa tham chiếu vòng. Mở tùy chọn tính toán để bật tính toán lặp.',
+            action: 'Tính toán lặp',
+        },
+
         shortcut: {
             'quick-sum': 'Tổng nhanh',
         },

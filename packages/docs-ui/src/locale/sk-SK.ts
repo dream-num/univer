@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Obnovuje sa rozloženie dokumentu…',
         },
         toolbar: {
+            zoom: 'Priblíženie',
+            fullscreen: 'Celá obrazovka',
             font: 'Písmo',
             fontSize: 'Veľkosť písma',
             bold: 'Tučné',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Nastavenia sekcie',
             },
             paragraphSetting: {
+                wordWrap: 'Povoliť zalamovanie textu v latinke v strede slova',
                 alignment: 'Zarovnanie',
                 indentation: 'Odsadenie',
                 left: 'Vľavo',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Zmenšiť odsadenie',
             defaultTextColor: 'Predvolená farba textu',
             noBackground: 'Bez pozadia',
+        },
+        heading: {
+            collapse: 'Zbaliť',
+            expand: 'Rozbaliť',
         },
         'page-settings': {
             'document-setting': 'Nastavenia dokumentu',

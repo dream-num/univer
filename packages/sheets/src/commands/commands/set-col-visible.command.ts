@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
+    Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
+import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
@@ -33,6 +35,10 @@ import {
     SetColVisibleMutation,
     SetColVisibleUndoMutationFactory,
 } from '../mutations/set-col-visible.mutation';
+import {
+    SetWorksheetColWidthMutation,
+    SetWorksheetColWidthMutationFactory,
+} from '../mutations/set-worksheet-col-width.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -54,13 +60,40 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const instanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(instanceService, { unitId, subUnitId });
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const { worksheet } = target;
+        const zeroWidthRanges: IRange[] = [];
+        for (const range of ranges) {
+            for (let column = range.startColumn; column <= range.endColumn; column++) {
+                if (worksheet.getColVisible(column) && worksheet.getColumnWidth(column) === 0) {
+                    zeroWidthRanges.push({ ...range, startColumn: column, endColumn: column });
+                }
+            }
+        }
+        const widthRanges = Rectangle.mergeRanges(zeroWidthRanges);
+        const visibilityRanges = widthRanges.length ? getHiddenColRanges(worksheet, ranges) : ranges;
+        const widthRedos: IMutationInfo[] = [];
+        const widthUndos: IMutationInfo[] = [];
+        if (widthRanges.length) {
+            const widthParams: ISetWorksheetColWidthMutationParams = {
+                unitId,
+                subUnitId,
+                ranges: widthRanges,
+                colWidth: worksheet.getConfig().defaultColumnWidth,
+            };
+            widthRedos.push({ id: SetWorksheetColWidthMutation.id, params: widthParams });
+            widthUndos.push({
+                id: SetWorksheetColWidthMutation.id,
+                params: SetWorksheetColWidthMutationFactory(widthParams, worksheet),
+            });
+        }
         const redoMutationParams: ISetColVisibleMutationParams = {
             unitId,
             subUnitId,
-            ranges,
+            ranges: visibilityRanges,
         };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
             unitId,
@@ -81,11 +114,21 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             })),
         };
 
+        const visibilityRedos: IMutationInfo[] = visibilityRanges.length
+            ? [{ id: SetColVisibleMutation.id, params: redoMutationParams }]
+            : [];
+        const visibilityUndos: IMutationInfo[] = visibilityRanges.length
+            ? [{ id: SetColHiddenMutation.id, params: undoMutationParams }]
+            : [];
         const result = sequenceExecute([
-            { id: SetColVisibleMutation.id, params: redoMutationParams },
+            ...visibilityRedos,
+            ...widthRedos,
             { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
         ], commandService);
 
+        if (!result.result) {
+            return false;
+        }
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificColsVisibleCommand.id,
             params,
@@ -104,14 +147,16 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetColHiddenMutation.id, params: undoMutationParams },
+                    ...widthUndos,
+                    ...visibilityUndos,
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),
                     ...afterInterceptors.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
-                    { id: SetColVisibleMutation.id, params: redoMutationParams },
+                    ...visibilityRedos,
+                    ...widthRedos,
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                     ...intercepted.redos,
                     ...afterInterceptors.redos,

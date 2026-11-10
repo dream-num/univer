@@ -16,6 +16,7 @@
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ISheetRowFilteredService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../services/__tests__/util';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -28,10 +29,17 @@ describe('SheetRangeThemeModel', () => {
     let model: SheetRangeThemeModel;
     let unitId: string;
     let subUnitId: string;
+    let filteredRows: Set<number>;
 
     beforeEach(() => {
+        filteredRows = new Set();
         const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
             [SheetInterceptorService],
+            [ISheetRowFilteredService, {
+                useValue: {
+                    getRowFiltered: (_unitId: string, _subUnitId: string, row: number) => filteredRows.has(row),
+                },
+            }],
             [SheetRangeThemeModel],
         ]);
 
@@ -119,6 +127,23 @@ describe('SheetRangeThemeModel', () => {
         model.removeRangeThemeRule('zebra-theme', { unitId, subUnitId, range });
         model.refreshZebraCrossingCacheBySheet(unitId, subUnitId);
         expect((model as any)._zebraCrossingCacheMap.get(unitId)?.get(subUnitId)?.size).toBe(0);
+    });
+
+    it('should apply the last row style to the last visible row after filtering', () => {
+        const customTheme = new RangeThemeStyle('filtered-last-row-theme', {
+            wholeStyle: { bg: { rgb: '#f5f5f5' } as any },
+            lastRowStyle: { bd: { b: { s: 1, cl: { rgb: '#000000' } } } as any },
+        });
+        model.registerRangeThemeStyle(unitId, customTheme);
+
+        const range: IRange = { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 };
+        model.registerRangeThemeRule('filtered-last-row-theme', { unitId, subUnitId, range });
+        filteredRows.add(3);
+        model.refreshSheetRowVisibleFuncSet(unitId, subUnitId);
+        model.refreshZebraCrossingCacheBySheet(unitId, subUnitId);
+
+        expect(model.getCellStyle(unitId, subUnitId, 2, 0)?.bd?.b).toBeDefined();
+        expect(model.getCellStyle(unitId, subUnitId, 3, 0)?.bd?.b).toBeUndefined();
     });
 
     it('should serialize/deserialize and remove unit resources', () => {

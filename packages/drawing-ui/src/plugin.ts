@@ -28,6 +28,7 @@ import { ImageUpdateController } from './controllers/image-update.controller';
 import { DrawingUIController } from './controllers/ui.controller';
 import { DrawingImageClipService } from './services/drawing-image-clip.service';
 import { DrawingRenderService } from './services/drawing-render.service';
+import { OleUIService } from './services/ole-ui.service';
 
 @DependentOn(UniverDrawingPlugin, UniverRenderEnginePlugin)
 export class UniverDrawingUIPlugin extends Plugin {
@@ -71,6 +72,7 @@ export class UniverDrawingUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DrawingImageClipService],
             [DrawingRenderService],
+            [OleUIService],
             [DrawingUpdateController],
             [DrawingUIController],
             [ImageCropperController],

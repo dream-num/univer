@@ -18,5 +18,6 @@ import type { IDrawingParam } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 
 export function isSheetDrawing(drawing: IDrawingParam | undefined): drawing is ISheetDrawing {
-    return Boolean(drawing && 'sheetTransform' in drawing && 'axisAlignSheetTransform' in drawing);
+    // Imported drawings can omit the axis alignment data used for Excel export.
+    return Boolean(drawing && 'sheetTransform' in drawing && drawing.sheetTransform);
 }

@@ -15,12 +15,12 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
-import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -49,6 +49,7 @@ export class FormulaCalculationTriggerService extends Disposable {
     private _executionInProgress = false;
     private _hasPendingCalculation = false;
     private _stopRequested = false;
+    private _suppressed = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -66,6 +67,17 @@ export class FormulaCalculationTriggerService extends Disposable {
 
         this._started = true;
         this._scheduleFlush();
+    }
+
+    /** Snapshot reconstruction calculates these synchronous mutations in its isolated runtime. */
+    runWithoutTriggering<T>(operation: () => T): T {
+        const previous = this._suppressed;
+        this._suppressed = true;
+        try {
+            return operation();
+        } finally {
+            this._suppressed = previous;
+        }
     }
 
     override dispose(): void {
@@ -89,7 +101,7 @@ export class FormulaCalculationTriggerService extends Disposable {
             }
 
             const conversion = this._activeDirtyManagerService.get(command.id);
-            if (!conversion) {
+            if (!conversion || this._suppressed) {
                 return;
             }
             if (conversion.shouldTrigger?.(command, options) === false) {
@@ -213,7 +225,7 @@ function createEmptyDirtyData(): IFormulaDirtyData {
     };
 }
 
-function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyData>): IFormulaDirtyData {
+export function mergeDirtyData(left: Partial<IFormulaDirtyData>, right: Partial<IFormulaDirtyData>): IFormulaDirtyData {
     const result = createEmptyDirtyData();
     const rangeKeys = new Set<string>();
     appendDirtyData(result, left, rangeKeys);
@@ -223,6 +235,12 @@ function mergeDirtyData(left: IFormulaDirtyData, right: Partial<IFormulaDirtyDat
 
 // The accumulator owns its nested maps; command payloads and running sessions stay unchanged.
 function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirtyData>, rangeKeys: Set<string>): void {
+    if (source.dirtyIterationUnits?.length) {
+        target.dirtyIterationUnits = Array.from(new Set([...(target.dirtyIterationUnits ?? []), ...source.dirtyIterationUnits]));
+    }
+    if (source.dirtyReferenceUnits?.length) {
+        target.dirtyReferenceUnits = Array.from(new Set([...(target.dirtyReferenceUnits ?? []), ...source.dirtyReferenceUnits]));
+    }
     mergeDirtyRanges(target.dirtyRanges, source.dirtyRanges ?? [], rangeKeys);
     mergeDirtyUnitStringMap(target.dirtyNameMap, source.dirtyNameMap);
     mergeDirtyUnitStringMap(target.dirtyDefinedNameMap, source.dirtyDefinedNameMap);
@@ -264,6 +282,8 @@ function mergeDirtyUnitNestedMap(target: IDirtyUnitFeatureMap, right?: IDirtyUni
 
 function hasDirtyData(dirtyData: IFormulaDirtyData): boolean {
     return dirtyData.forceCalculation ||
+        Boolean(dirtyData.dirtyIterationUnits?.length) ||
+        Boolean(dirtyData.dirtyReferenceUnits?.length) ||
         dirtyData.dirtyRanges.length > 0 ||
         hasNestedValue(dirtyData.dirtyNameMap) ||
         hasNestedValue(dirtyData.dirtyDefinedNameMap) ||
@@ -284,7 +304,7 @@ function hasNestedValue(value: unknown): boolean {
 }
 
 function dirtyDataIntersects(left: IFormulaDirtyData, right: IFormulaDirtyData): boolean {
-    if (left.forceCalculation || right.forceCalculation) {
+    if (left.forceCalculation || right.forceCalculation || left.dirtyReferenceUnits?.length || right.dirtyReferenceUnits?.length || left.dirtyIterationUnits?.length || right.dirtyIterationUnits?.length) {
         return true;
     }
 

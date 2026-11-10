@@ -116,7 +116,21 @@ const importRules: Partial<Rules> = {
             memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         },
     ],
-    'perfectionist/sort-imports': 'warn',
+    'perfectionist/sort-imports': ['warn', {
+        groups: [
+            ['type-builtin', 'type-external'],
+            ['value-builtin', 'value-external'],
+            'type-internal',
+            'value-internal',
+            ['type-parent', 'type-sibling', 'type-index'],
+            ['value-parent', 'value-sibling', 'value-index'],
+            'side-effect',
+            'ts-equals-import',
+            'unknown',
+        ],
+        newlinesBetween: 0,
+        newlinesInside: 0,
+    }],
     'perfectionist/sort-named-imports': 'off',
     'perfectionist/sort-named-exports': 'warn',
 

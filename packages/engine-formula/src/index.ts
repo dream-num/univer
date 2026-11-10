@@ -45,7 +45,7 @@ export type {
 
 export { BooleanValue } from './basics/common';
 export { type IOtherFormulaData } from './basics/common';
-export type { IExprTreeNode, ISuperTable, IUnitRowData } from './basics/common';
+export type { IExprTreeNode, ISuperTable, ISuperTableData, IUnitRowData } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { type ISheetFormulaError } from './basics/error-type';
@@ -134,8 +134,6 @@ export type {
     ISetSuperTableMutationSearchParam,
 } from './commands/mutations/set-super-table.mutation';
 export {
-    DEFAULT_CYCLE_REFERENCE_COUNT,
-    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_PLUGIN_CONFIG_KEY,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
 } from './config/config';
@@ -306,7 +304,8 @@ export {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
-export { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
+export { FormulaCalculationTriggerService, mergeDirtyData } from './services/formula-calculation-trigger.service';
+export { IFormulaChangesetCalculationService } from './services/formula-changeset-calculation.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaResultStatus } from './services/formula-common';
 export { DescriptionService, IDescriptionService } from './services/formula/description.service';
@@ -360,6 +359,7 @@ export {
     IFormulaRuntimeService,
 } from './services/runtime.service';
 export type { IAllRuntimeData, IExecutionInProgressParams } from './services/runtime.service';
+export type { ICircularReference } from './services/runtime.service';
 export { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';

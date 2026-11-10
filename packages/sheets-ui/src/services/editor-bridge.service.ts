@@ -29,6 +29,7 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
+    SheetTypes,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -174,11 +175,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             this._currentEditCell = null;
         }));
 
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
             if (unit.getUnitId() === this._currentEditCellState?.unitId) {
                 this._clearCurrentEditCellState();
             }
-        });
+        }));
     }
 
     refreshEditCellState() {
@@ -198,21 +199,32 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     refreshEditCellPosition(resetSizeOnly?: boolean) {
-        if (!this._currentEditCell || !this._currentEditCellState) return;
+        if (!this._currentEditCell || !this._currentEditCellState) {
+            return;
+        }
 
-        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const { unitId, sheetId, primary: selectedCell, scene, engine } = this._currentEditCell;
         const workbook = this._getWorkbookForEditUnit(unitId);
-        if (!workbook || workbook.getUnitId() !== unitId) return;
+        if (!workbook || workbook.getUnitId() !== unitId) {
+            return;
+        }
 
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
+        if (!worksheet || worksheet.getSheetId() !== sheetId) {
+            return;
+        }
 
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
-        if (!renderUnit) return;
+        if (!renderUnit) {
+            return;
+        }
 
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
+        const primary = worksheet.getCellInfoInMergeData(selectedCell.actualRow, selectedCell.actualColumn);
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
@@ -221,7 +233,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const viewport = getViewportByCell(primary.startRow, primary.startColumn, scene, worksheet);
-        if (!viewport) return;
+        if (!viewport) {
+            return;
+        }
         const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
@@ -251,6 +265,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     setEditCell(param: ICurrentEditCellParam) {
+        const workbook = this._getWorkbookForEditUnit(param.unitId);
+        if (this._getSheetType(workbook) === SheetTypes.CHART ||
+            workbook?.getSheetBySheetId(param.sheetId)?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
         this._currentEditCell = param;
 
         /**
@@ -326,21 +345,33 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     getLatestEditCellState() {
-        if (!this._currentEditCell) return;
+        if (!this._currentEditCell) {
+            return;
+        }
 
-        const { unitId, sheetId, primary, scene, engine } = this._currentEditCell;
+        const { unitId, sheetId, primary: selectedCell, scene, engine } = this._currentEditCell;
         const workbook = this._getWorkbookForEditUnit(unitId);
-        if (!workbook || workbook.getUnitId() !== unitId) return;
+        if (!workbook || workbook.getUnitId() !== unitId) {
+            return;
+        }
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet || worksheet.getSheetId() !== sheetId) return;
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (!worksheet || workbook.getActiveSheet() !== worksheet ||
+            (worksheet.getConfig().type ?? SheetTypes.GRID) !== SheetTypes.GRID) {
+            return;
+        }
 
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
-        if (!renderUnit) return;
+        if (!renderUnit) {
+            return;
+        }
 
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
-        if (!skeleton) return;
+        if (!skeleton) {
+            return;
+        }
 
+        const primary = worksheet.getCellInfoInMergeData(selectedCell.actualRow, selectedCell.actualColumn);
         const { startRow, startColumn } = primary;
         const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
@@ -350,7 +381,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const viewport = getViewportByCell(startRow, startColumn, scene, worksheet);
-        if (!viewport) return;
+        if (!viewport) {
+            return;
+        }
         const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
@@ -440,6 +473,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         };
     }
 
+    private _getSheetType(workbook: Nullable<Workbook>): SheetTypes | undefined {
+        return workbook?.getActiveSheet()?.getConfig().type;
+    }
+
     private _getWorkbookForEditUnit(unitId: string): Nullable<Workbook> {
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET) ??
             this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -450,6 +487,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(params: IEditorBridgeServiceVisibleParam) {
+        if (params.visible && this._getSheetType(this._getWorkbookForEditUnit(params.unitId)) === SheetTypes.CHART) {
+            return;
+        }
         this._visibleParams = params;
 
         // Reset the dirty status when the editor is visible.

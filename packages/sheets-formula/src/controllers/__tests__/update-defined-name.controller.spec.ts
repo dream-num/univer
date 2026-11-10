@@ -15,13 +15,25 @@
  */
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
-import { LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import { ErrorType, IDefinedNamesService, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { MoveRangeCommand, RemoveDefinedNameCommand, RemoveSheetCommand, SetDefinedNameCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    MoveRangeCommand,
+    RemoveDefinedNameCommand,
+    RemoveSheetCommand,
+    SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
+    SetDefinedNameCommand,
+    SetWorksheetNameCommand,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { UpdateDefinedNameController } from '../update-defined-name.controller';
+import '@univerjs/engine-formula/facade';
+import '@univerjs/sheets/facade';
+import '../../facade';
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -68,21 +80,21 @@ describe('UpdateDefinedNameController', () => {
                 id: 'range-name',
                 name: 'RANGE_NAME',
                 formulaOrRefString: 'Sheet1!$A$1:$B$2',
-                localSheetId: 'AllDefaultWorkbook',
+                localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
                 comment: '',
             },
             rowsName: {
                 id: 'rows-name',
                 name: 'ROWS_NAME',
                 formulaOrRefString: 'Sheet1!$1:$3',
-                localSheetId: 'AllDefaultWorkbook',
+                localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
                 comment: '',
             },
             otherSheetName: {
                 id: 'other-sheet-name',
                 name: 'OTHER_SHEET_NAME',
                 formulaOrRefString: 'Sheet2!$C$3',
-                localSheetId: 'AllDefaultWorkbook',
+                localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
                 comment: '',
             },
         });
@@ -104,7 +116,7 @@ describe('UpdateDefinedNameController', () => {
                 id: 'temp',
                 name: 'TEMP_NAME',
                 formulaOrRefString: 'Sheet1!$A$1',
-                localSheetId: 'AllDefaultWorkbook',
+                localSheetId: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
             },
         });
         const removeDefinedNameResult = interceptorService.onCommandExecute({
@@ -215,5 +227,87 @@ describe('UpdateDefinedNameController', () => {
             }),
         });
         expect(result.redos.find((mutation) => (mutation.params as { name?: string } | undefined)?.name === 'OTHER_SHEET_NAME')).toBeUndefined();
+    });
+});
+
+describe('defined name recalculation after sheet rename', () => {
+    const instances: Univer[] = [];
+
+    async function createCalculationTestBed() {
+        const univer = new Univer({
+            locale: LocaleType.EN_US,
+            locales: { [LocaleType.EN_US]: {} },
+            logLevel: LogLevel.SILENT,
+        });
+        instances.push(univer);
+        const localeService = univer.__getInjector().get(LocaleService);
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const workbook = api.createWorkbook(createWorkbookData());
+        const main = workbook.getSheetByName('Sheet1')!;
+        const rates = workbook.getSheetByName('Sheet2')!;
+        rates.getRange('A1').setValue(5);
+        workbook.insertDefinedName('Q', 'Sheet2!$A$1');
+        workbook.insertDefinedName('Alias', '=Q');
+        main.getRange('D2:E2').setFormulas([['=q+1', '=alias+1']]);
+        const settle = () => api.getFormula().onCalculationResultApplied(10_000);
+        await settle();
+        expect(main.getRange('D2:E2').getValues()).toEqual([[6, 6]]);
+        return { api, workbook, main, rates, settle };
+    }
+
+    afterEach(() => {
+        instances.forEach((univer) => univer.dispose());
+        instances.length = 0;
+    });
+
+    it('keeps direct and nested names calculating through rename, undo, redo and reload', async () => {
+        const { api, workbook, main, rates, settle } = await createCalculationTestBed();
+        rates.setName('Rates2');
+        await settle();
+        expect(workbook.getDefinedName('Q')!.getFormulaOrRefString()).toBe('Rates2!$A$1');
+        expect(main.getRange('D2:E2').getValues()).toEqual([[6, 6]]);
+
+        workbook.undo();
+        await settle();
+        expect(rates.getSheetName()).toBe('Sheet2');
+        expect(workbook.getDefinedName('Q')!.getFormulaOrRefString()).toBe('Sheet2!$A$1');
+
+        workbook.redo();
+        await settle();
+        expect(rates.getSheetName()).toBe('Rates2');
+        rates.getRange('A1').setValue(9);
+        await settle();
+        expect(main.getRange('D2:E2').getValues()).toEqual([[10, 10]]);
+
+        const snapshot = workbook.save();
+        api.disposeUnit(workbook.getId());
+        const restored = api.createWorkbook(snapshot);
+        await settle();
+        const restoredMain = restored.getSheetByName('Sheet1')!;
+        expect(restored.getDefinedName('Q')!.getFormulaOrRefString()).toBe('Rates2!$A$1');
+        expect(restoredMain.getRange('D2:E2').getValues()).toEqual([[10, 10]]);
+        restored.getSheetByName('Rates2')!.getRange('A1').setValue(12);
+        await settle();
+        expect(restoredMain.getRange('D2:E2').getValues()).toEqual([[13, 13]]);
+    });
+
+    it('rebuilds direct and nested cached formulas when a renamed name is retargeted', async () => {
+        const { workbook, main, rates, settle } = await createCalculationTestBed();
+        rates.setName('Rates2');
+        await settle();
+        rates.getRange('A2').setValue(8);
+        workbook.getDefinedName('Q')!.setRef('Rates2!$A$2');
+        await settle();
+        expect(main.getRange('D2:E2').getValues()).toEqual([[9, 9]]);
+
+        rates.getRange('A2').setValue(11);
+        await settle();
+        expect(main.getRange('D2:E2').getValues()).toEqual([[12, 12]]);
+        workbook.getDefinedName('Alias')!.setRef('=Q*2');
+        await settle();
+        expect(main.getRange('D2:E2').getValues()).toEqual([[12, 23]]);
     });
 });

@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Đang khôi phục bố cục tài liệu…',
         },
         toolbar: {
+            zoom: 'Thu phóng',
+            fullscreen: 'Toàn màn hình',
             font: 'Phông chữ',
             fontSize: 'Cỡ chữ',
             bold: 'In đậm',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Cài đặt phần',
             },
             paragraphSetting: {
+                wordWrap: 'Cho phép ngắt dòng văn bản Latinh ở giữa từ',
                 alignment: 'Căn chỉnh',
                 indentation: 'Thụt lề',
                 left: 'Trái',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Giảm thụt lề',
             defaultTextColor: 'Màu văn bản mặc định',
             noBackground: 'Không có nền',
+        },
+        heading: {
+            collapse: 'Thu gọn',
+            expand: 'Mở rộng',
         },
         'page-settings': {
             'document-setting': 'Cài đặt tài liệu',

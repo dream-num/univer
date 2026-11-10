@@ -31,6 +31,9 @@ import { DocDrawingPrintingController } from './controllers/doc-drawing-printing
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocFloatDomController } from './controllers/doc-float-dom.controller';
 import {
+    DocDrawingAnchorRenderController,
+} from './controllers/render-controllers/doc-drawing-anchor.render-controller';
+import {
     DocDrawingTransformUpdateController,
 } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import {
@@ -93,6 +96,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         ([
             [DocDrawingUpdateRenderController],
             [DocDrawingTransformUpdateController],
+            [DocDrawingAnchorRenderController],
         ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
 
         this._injector.get(DocDrawingAddRemoveController);

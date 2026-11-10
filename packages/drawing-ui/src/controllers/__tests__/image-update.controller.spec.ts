@@ -230,7 +230,7 @@ describe('ImageUpdateController', () => {
         controller.dispose();
     });
 
-    it('applies refreshed transform, clip bounds, and behind-text layer to existing images', () => {
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_OLE])('updates geometry while loading bitmap sources only for images (type: %s)', (drawingType) => {
         const add$ = new Subject();
         const update$ = new Subject<Array<{ unitId: string; subUnitId: string; drawingId: string }>>();
         const transform = {
@@ -244,7 +244,7 @@ describe('ImageUpdateController', () => {
         const imageParam = {
             behindText: true,
             drawingId: 'shape-3',
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            drawingType,
             imageSourceType: ImageSourceType.BASE64,
             source: 'data:image/png;base64,Zm9v',
             opacity: 0.4,
@@ -307,6 +307,7 @@ describe('ImageUpdateController', () => {
         });
         expect(imageShape.setClipBounds).toHaveBeenCalledWith(transform.clipBounds);
         expect(imageShape.setOpacity).toHaveBeenCalledWith(0.4);
+        expect(imageShape.changeSource.mock.calls).toEqual(drawingType === DrawingTypeEnum.DRAWING_IMAGE ? [[imageParam.source]] : []);
         expect(scene.removeObject).toHaveBeenCalledWith(imageShape);
         expect(scene.addObject).toHaveBeenCalledWith(imageShape, DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX);
     });

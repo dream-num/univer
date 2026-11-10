@@ -22,7 +22,9 @@ import designEnUS from '@univerjs/design/locale/en-US';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager, IconManager } from '../../../../common';
+import type { IMobileDialogPartMethodOptions } from '../MobileDialogPart';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
@@ -43,6 +45,7 @@ function renderWithDependencies(element: ReactElement, mobileService = false, ke
     injector.add([LocaleService]);
     injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    injector.get(LocaleService).setDirection('ltr');
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 
@@ -95,9 +98,11 @@ describe('MobileDialogPart', () => {
     afterEach(() => {
         cleanup();
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
-    it('renders the latest active dialog as an 80 percent bottom drawer', () => {
+    it('fits the latest active dialog to its content and preserves its title and footer', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
         const rendered = renderWithDependencies(<MobileDialogPart />);
         const dialogService = rendered.injector.get(IDialogService);
 
@@ -112,25 +117,43 @@ describe('MobileDialogPart', () => {
         });
 
         const drawer = screen.getByRole('dialog');
-        expect(drawer.getAttribute('data-snap')).toBe('expanded');
+        expect(drawer.style.height).toBe('auto');
+        expect(drawer.style.maxHeight).toBe('60vh');
+        expect(screen.queryByRole('button', { name: 'Resize sidebar' })).toBeNull();
         expect(screen.queryByText('First')).toBeNull();
         expect(screen.getByText('Range selector')).toBeTruthy();
         expect(screen.getByText('Second')).toBeTruthy();
         expect(screen.getByText('Actions')).toBeTruthy();
     });
 
-    it('keeps the active dialog anchored while the mobile keyboard is visible', () => {
+    it('keeps the dialog and its confirmation action above the mobile keyboard', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
         vi.stubGlobal('innerHeight', 768);
         const rendered = renderWithDependencies(<MobileDialogPart />, false, true);
         const dialogService = rendered.injector.get(IDialogService);
 
         act(() => {
-            dialogService.open({ id: 'keyboard-aware', children: { title: <input aria-label="Value" /> } });
+            dialogService.open({ id: 'keyboard-aware', children: { title: <input aria-label="Value" /> }, showOk: true });
         });
 
         const drawer = screen.getByRole('dialog');
-        expect(drawer.style.bottom).toBe('');
-        expect(drawer.style.maxHeight).toBe('');
+        expect(drawer.style.bottom).toBe('320px');
+        expect(drawer.style.maxHeight).toBe('min(60vh, 448px)');
+        expect(screen.getByRole('button', { name: 'ok' })).toBeTruthy();
+    });
+
+    it('preserves the resizable drawer for canvas editing panels', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
+        const rendered = renderWithDependencies(<MobileDialogPart />);
+        const options: IMobileDialogPartMethodOptions = {
+            id: 'canvas-editor',
+            layout: 'canvas',
+            children: { title: <input aria-label="Formula" /> },
+        };
+        act(() => rendered.injector.get(IDialogService).open(options));
+        expect(screen.getByRole('dialog').style.height).toBe('40vh');
+        expect(screen.getByRole('dialog').style.maxHeight).toBe('');
+        expect(screen.getByRole('dialog').getAttribute('aria-modal')).toBeNull();
     });
 
     it('closes with the close button and invokes dialog callbacks', () => {

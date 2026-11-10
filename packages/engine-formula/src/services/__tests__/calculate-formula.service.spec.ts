@@ -15,10 +15,10 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import type { IFormulaDatasetConfig } from '../../basics/common';
-import type { IAllRuntimeData } from '../runtime.service';
 import { IConfigService, Injector, ObjectMatrix } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IFormulaDatasetConfig } from '../../basics/common';
+import type { IAllRuntimeData } from '../runtime.service';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { Lexer } from '../../engine/analysis/lexer';
@@ -60,11 +60,16 @@ function createService() {
         getDirtyData: vi.fn(() => ({})),
         getDirtyDefinedNameMap: vi.fn(() => ({})),
         getExecuteUnitId: vi.fn(() => 'unit'),
+        getArrayFormulaRange: vi.fn(() => ({})),
     };
     const runtimeService = {
         setFormulaExecuteStage: vi.fn(),
         getRuntimeState: vi.fn(() => ({ stage: FormulaExecuteStageType.IDLE })),
         reset: vi.fn(),
+        beginCircularReferences: vi.fn(),
+        completeCircularReferences: vi.fn(),
+        clearCircularReferenceCells: vi.fn(),
+        recordCircularReferences: vi.fn(),
         setFormulaCycleIndex: vi.fn(),
         isCycleDependency: vi.fn(() => false),
         setRuntimeFeatureCellData: vi.fn(),
@@ -83,6 +88,7 @@ function createService() {
             runtimeFeatureCellData: {},
             dependencyTreeModelData: [],
         })),
+        getUnitData: vi.fn(() => ({})),
         setTotalArrayFormulasToCalculate: vi.fn(),
         setTotalFormulasToCalculate: vi.fn(),
         setCompletedArrayFormulasCount: vi.fn(),
@@ -131,18 +137,24 @@ function createService() {
         getDirtyData = currentConfigService.getDirtyData;
         getDirtyDefinedNameMap = currentConfigService.getDirtyDefinedNameMap;
         getExecuteUnitId = currentConfigService.getExecuteUnitId;
+        getArrayFormulaRange = currentConfigService.getArrayFormulaRange;
     }
 
     class TestRuntimeService {
         setFormulaExecuteStage = runtimeService.setFormulaExecuteStage;
         getRuntimeState = runtimeService.getRuntimeState;
         reset = runtimeService.reset;
+        beginCircularReferences = runtimeService.beginCircularReferences;
+        completeCircularReferences = runtimeService.completeCircularReferences;
+        clearCircularReferenceCells = runtimeService.clearCircularReferenceCells;
+        recordCircularReferences = runtimeService.recordCircularReferences;
         setFormulaCycleIndex = runtimeService.setFormulaCycleIndex;
         isCycleDependency = runtimeService.isCycleDependency;
         setRuntimeFeatureCellData = runtimeService.setRuntimeFeatureCellData;
         setRuntimeFeatureRange = runtimeService.setRuntimeFeatureRange;
         stopExecution = runtimeService.stopExecution;
         getAllRuntimeData = runtimeService.getAllRuntimeData;
+        getUnitData = runtimeService.getUnitData;
         setTotalArrayFormulasToCalculate = runtimeService.setTotalArrayFormulasToCalculate;
         setTotalFormulasToCalculate = runtimeService.setTotalFormulasToCalculate;
         setCompletedArrayFormulasCount = runtimeService.setCompletedArrayFormulasCount;
@@ -391,14 +403,12 @@ describe('CalculateFormulaService', () => {
             dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
-            maxIteration: 3,
+            calculationSettings: { unit: { iterativeCalculation: true, maxIterations: 3, maxChange: 0.001 } },
         } as never);
         await completedPromise;
 
-        expect(executeStepSpy).toHaveBeenCalledTimes(2);
+        expect(executeStepSpy).toHaveBeenCalledTimes(1);
         expect(mocks.currentConfigService.load).toHaveBeenCalledTimes(1);
-        expect(mocks.runtimeService.setFormulaCycleIndex).toHaveBeenCalledWith(0);
-        expect(mocks.runtimeService.setFormulaCycleIndex).toHaveBeenCalledWith(1);
         expect(mocks.runtimeService.setFormulaExecuteStage).toHaveBeenCalledWith(FormulaExecuteStageType.CALCULATION_COMPLETED);
         expect(progress.length).toBeGreaterThanOrEqual(2);
         expect(complete.length).toBe(1);
@@ -658,7 +668,7 @@ describe('CalculateFormulaService', () => {
         const completed: unknown[] = [];
         service.executionCompleteListener$.subscribe((item) => completed.push(item));
 
-        await service.execute({ maxIteration: 3 } as never);
+        await service.execute({} as never);
         await vi.waitFor(() => expect(mocks.runtimeService.reset).toHaveBeenCalledTimes(2));
 
         expect(completed).toHaveLength(1);

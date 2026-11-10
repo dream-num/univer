@@ -16,8 +16,16 @@
 
 import type { IPermissionPoint, Workbook, Worksheet } from '@univerjs/core';
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-
+import {
+    ILogService,
+    Inject,
+    Injector,
+    IPermissionService,
+    IResourceManagerService,
+    IUniverInstanceService,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
 import { RangeProtectionRuleModel } from '../../../models/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';

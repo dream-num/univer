@@ -88,7 +88,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
             scrollToX = 0;
         }
 
-        if (engineHeight > docsHeight) {
+        if (engineHeight > (docsHeight + pageMarginTop * 2) * viewScale) {
             sceneHeight = (engineHeight - pageMarginTop * 2) / viewScale;
         } else {
             sceneHeight = docsHeight + pageMarginTop * 2;

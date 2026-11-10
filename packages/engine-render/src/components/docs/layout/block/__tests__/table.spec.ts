@@ -15,7 +15,6 @@
  */
 
 import type { ITable } from '@univerjs/core';
-import type { ILayoutContext } from '../../tools';
 import {
     BooleanNumber,
     DocumentFlavor,
@@ -28,6 +27,7 @@ import {
     VerticalAlignmentType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ILayoutContext } from '../../tools';
 import { BreakType, DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
@@ -224,6 +224,18 @@ describe('table utilities', () => {
     });
 
     describe('getTableLeft', () => {
+        it.each([TableAlignmentType.CENTER, TableAlignmentType.END])('allows margin overflow only when requested (alignment: %s)', (align) => {
+            const expected = align === TableAlignmentType.CENTER ? -29 : -58;
+            expect(getTableLeft(554, 612, align, { v: 0 }, true)).toBe(expected);
+            expect(getTableLeft(554, 612, align)).toBe(0);
+            expect(getTableLeft(554, 612, align, { v: 0 }, false)).toBe(0);
+        });
+
+        it.each([TableAlignmentType.START, TableAlignmentType.CENTER, TableAlignmentType.END])('preserves tables that fit the column (alignment: %s)', (align) => {
+            expect(getTableLeft(554, 120, align, { v: 8 }, true))
+                .toBe(getTableLeft(554, 120, align, { v: 8 }));
+        });
+
         it('centers a table within the supplied column width', () => {
             expect(getTableLeft(243, 243, TableAlignmentType.CENTER)).toBe(0);
             expect(261 + getTableLeft(243, 120, TableAlignmentType.CENTER)).toBe(322.5);
@@ -311,6 +323,51 @@ describe('docs table layout', () => {
         expect(tables[0].width).toBe(160);
         const secondRow = tables.flatMap((table) => table.rows).find((row) => row.index === 1)!;
         expect(secondRow.cells[0].left).toBe(0);
+        expect(JSON.stringify(tableSource)).toBe(source);
+    });
+
+    it.each(
+        [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN, DocumentFlavor.UNSPECIFIED, undefined].flatMap((flavor) =>
+            [TableAlignmentType.CENTER, TableAlignmentType.END].flatMap((align) =>
+                [false, true].flatMap((sliced) => [false, true].map((incremental) => ({ flavor, align, sliced, incremental })))
+            )
+        )
+    )('positions oversized tables with the compatibility policy ($flavor, $align, sliced: $sliced, incremental: $incremental)', ({ flavor, align, sliced, incremental }) => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        curPage.pageWidth = 100;
+        tableSource.align = align;
+        tableSource.size = { type: TableSizeType.SPECIFIED, width: { v: 120 } };
+        if (flavor != null) {
+            sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(flavor);
+        }
+        const source = JSON.stringify(tableSource);
+        let tables;
+        if (sliced) {
+            if (incremental) {
+                const state = startTableSkeletonsBuild(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 35)!;
+                while (!stepTableSkeletonsBuild(state)) {
+                    // Complete the resumable pagination path.
+                }
+                tables = state.result!.skeTables;
+            } else {
+                tables = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 35).skeTables;
+            }
+        } else if (incremental) {
+            const state = startTableSkeletonBuild(ctx, curPage, viewModel, tableNode, sectionBreakConfig)!;
+            while (!stepTableSkeletonBuild(state)) {
+                // Complete the resumable single-table path.
+            }
+            tables = [state.tableSkeleton];
+        } else {
+            tables = [createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig)!];
+        }
+        expect(tables.length).toBeGreaterThanOrEqual(sliced ? 2 : 1);
+        const alignmentLeft = align === TableAlignmentType.CENTER ? -20 : -40;
+        const expectedLeft = flavor === DocumentFlavor.TRADITIONAL ? alignmentLeft : 0;
+        for (const table of tables) {
+            expect(table.width).toBe(120);
+            expect(table.left).toBe(expectedLeft);
+        }
         expect(JSON.stringify(tableSource)).toBe(source);
     });
 

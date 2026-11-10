@@ -27,7 +27,7 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../types/interfaces/i-document-data';
-import type { DocumentDataModel } from '../../data-model';
+import type { DocumentDataModel } from '../document-data-model';
 import type { IRetainAction } from './action-types';
 import { merge } from '../../../common/lodash';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
@@ -45,9 +45,9 @@ export enum SliceBodyType {
 }
 
 export enum SliceStructuralRangeMode {
-    // General copy/slice behavior: keep the intersecting portion for backward compatibility.
+    // General slices keep the intersecting portion of each structural range.
     intersect,
-    // Mutation builders: only emit metadata for structural ranges fully carried by this action body.
+    // Mutation and clipboard bodies only carry complete structural ranges.
     contained,
     // ActionIterator splits: keep metadata on the chunk that carries the structural range end.
     ending,
@@ -166,15 +166,19 @@ export function getBlockRangeSlice(
     const newBlockRanges: IDocumentBlockRange[] = [];
 
     for (const blockRange of blockRanges) {
-        const clonedBlockRange = Tools.deepClone(blockRange);
-        const { startIndex, endIndex } = clonedBlockRange;
+        const { startIndex, endIndex } = blockRange;
+        const included = mode === SliceStructuralRangeMode.contained
+            ? startIndex >= startOffset && endIndex < endOffset
+            : hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode);
 
-        if (hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode)) {
-            newBlockRanges.push({
-                ...clonedBlockRange,
-                ...getSlicedStructuralRange(startIndex, endIndex, startOffset, endOffset, mode),
-            });
+        if (!included) {
+            continue;
         }
+
+        newBlockRanges.push({
+            ...blockRange,
+            ...getSlicedStructuralRange(startIndex, endIndex, startOffset, endOffset, mode),
+        });
     }
 
     return newBlockRanges;

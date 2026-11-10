@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Przywracanie układu dokumentu…',
         },
         toolbar: {
+            zoom: 'Powiększenie',
+            fullscreen: 'Pełny ekran',
             font: 'Czcionka',
             fontSize: 'Rozmiar czcionki',
             bold: 'Pogrubienie',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Ustawienia sekcji',
             },
             paragraphSetting: {
+                wordWrap: 'Zezwalaj na zawijanie tekstu łacińskiego w środku wyrazu',
                 alignment: 'Wyrównanie',
                 indentation: 'Wcięcie',
                 left: 'Lewe',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Zmniejsz wcięcie',
             defaultTextColor: 'Domyślny kolor tekstu',
             noBackground: 'Brak tła',
+        },
+        heading: {
+            collapse: 'Zwiń',
+            expand: 'Rozwiń',
         },
         'page-settings': {
             'document-setting': 'Ustawienia dokumentu',

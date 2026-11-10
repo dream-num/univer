@@ -14,12 +14,45 @@
  * limitations under the License.
  */
 
+import type { ITableJson } from '../../types/type';
 import { FilterSelectionMode, RecordValueType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { TableColumnFilterTypeEnum } from '../../types/enum';
 import { Table } from '../table';
+import { TableColumn } from '../table-column';
 
 describe('Table', () => {
+    it.each([
+        { position: 'first', index: 0, ids: ['tax', 'quantity', 'price', 'total'] },
+        { position: 'middle', index: 1, ids: ['quantity', 'tax', 'price', 'total'] },
+        { position: 'last', index: 3, ids: ['quantity', 'price', 'total', 'tax'] },
+    ])('preserves column order and metadata after inserting the $position column and reloading', ({ index, ids }) => {
+        const range = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 };
+        const table = new Table('table-1', 'Orders', range, ['Quantity', 'Price', 'Total'], {
+            columns: [
+                new TableColumn('quantity', 'Quantity'),
+                new TableColumn('price', 'Price'),
+                new TableColumn('total', 'Total'),
+            ].map((column) => column.toJSON()),
+        });
+        const totalColumn = table.getColumn('total')!;
+        totalColumn.formula = '=[@Quantity]*[@Price]';
+        totalColumn.style = { bg: { rgb: '#C5D9F1' } };
+        const taxColumn = new TableColumn('tax', 'Tax');
+        taxColumn.formula = '=[@Total]*0.1';
+        taxColumn.style = { cl: { rgb: '#FF0000' } };
+        table.insertColumn(index, taxColumn);
+        table.setRange({ ...range, endColumn: 3 });
+
+        const expectedColumns = table.getTableInfo().columns;
+        const snapshot: ITableJson = JSON.parse(JSON.stringify(table.toJSON()));
+        expect(snapshot.columns.map((column) => column.id)).toEqual(ids);
+
+        const restored = new Table('placeholder', 'Placeholder', range, []);
+        restored.fromJSON(snapshot);
+        expect(restored.getTableInfo().columns).toEqual(expectedColumns);
+    });
+
     it('round-trips compact record filters without sharing snapshot values', () => {
         const table = new Table(
             'table-1',

@@ -16,12 +16,16 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    BooleanNumber,
     BorderStyleTypes,
     DataStreamTreeTokenType,
     DocumentFlavor,
     HorizontalAlign,
+    IConfigService,
+    LocaleService,
     LocaleType,
     RANGE_TYPE,
+    SHEET_TEXT_LINE_GAP,
     Tools,
     Univer,
     UniverInstanceType,
@@ -30,8 +34,11 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
+import { DocSimpleSkeleton } from '../../docs/layout/doc-simple-skeleton';
+import { DocumentSkeleton } from '../../docs/layout/doc-skeleton';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
-import { getCustomNumberDisplayText, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+import { DocumentViewModel } from '../../docs/view-model/document-view-model';
+import { getCustomNumberDisplayText, getDocsSkeletonPageSize, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
 describe('Rich-text render snapshot isolation', () => {
     it.each(['font cache', 'row height', 'column width'])(
@@ -97,6 +104,227 @@ describe('Rich-text render snapshot isolation', () => {
 });
 
 describe('Cell layout and merged styles', () => {
+    it.each([
+        { merged: false, rowHeight: 65, padding: 0, columns: ['ABC', 'DEF', 'GHI', 'JKL'] },
+        { merged: true, rowHeight: 65, padding: 0, columns: ['ABCDEF', 'GHIJKL'] },
+        { merged: true, rowHeight: 1, padding: 4, columns: Array.from('ABCDEFGHIJKL') },
+        { merged: false, rowHeight: 40, padding: 0, content: 'A\u200BB', columns: ['A\u200BB'] },
+        { merged: false, rowHeight: 40, padding: 0, content: 'A\u2060B', columns: ['A\u2060B'] },
+    ])('wraps and measures stacked cells, including rows smaller than padding (merged: $merged, height: $rowHeight)', ({ merged, rowHeight, padding, columns, content = 'ABCDEFGHIJKL' }) => {
+        const environment = setupRenderTestEnv();
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.replace(/[\u200B\u2060]/g, '').length * 4,
+            fontBoundingBoxAscent: 16,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 14,
+            actualBoundingBoxDescent: 2,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'wrapped-stack',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                name: 'Sheet',
+                rowCount: 5,
+                columnCount: 5,
+                defaultRowHeight: rowHeight,
+                defaultColumnWidth: 30,
+                mergeData: merged ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [],
+                cellData: { 0: { 0: {
+                    v: content,
+                    s: { tr: { a: 0, v: BooleanNumber.TRUE }, tb: WrapStrategy.WRAP, pd: { t: padding, b: padding, l: padding, r: padding } },
+                } } },
+            } },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const document = skeleton.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!;
+            const renderedColumns = document.getSkeletonData()!.pages[0].sections[0].columns[0].lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup)
+                .filter((glyph) => glyph.content && glyph.content !== '\r')
+                .map((glyph) => glyph.content)
+                .join(''));
+            expect(renderedColumns.filter((column) => column.length > 0)).toEqual(columns);
+            const size = getDocsSkeletonPageSize(document, 90)!;
+            expect(size.height).toBeLessThanOrEqual(Math.max(20, rowHeight * (merged ? 2 : 1)));
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 30)).toBeCloseTo(size.width + padding * 2);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+            environment.restore();
+        }
+    });
+
+    it.each([false, true])('stacks mixed scripts by font height without splitting graphemes or changing stored data (rich text: %s)', (richText) => {
+        const environment = setupRenderTestEnv();
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 4,
+            fontBoundingBoxAscent: 16,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 14,
+            actualBoundingBoxDescent: 2,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const content = 'Ai（）ー한é👩‍💻';
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'stacked-cell',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                name: 'Sheet',
+                rowCount: 10,
+                columnCount: 10,
+                defaultColumnWidth: 100,
+                defaultRowHeight: 80,
+                cellData: { 0: { 0: {
+                    v: content,
+                    s: { tr: { a: 0, v: BooleanNumber.TRUE }, pd: { t: 0, b: 0, l: 0, r: 0 }, tb: WrapStrategy.CLIP },
+                    p: richText
+                        ? {
+                            id: 'rich-stack',
+                            documentStyle: {},
+                            body: {
+                                dataStream: `${content}\r\n`,
+                                paragraphs: [{ startIndex: content.length, paragraphId: 'stacked-paragraph' }],
+                                textRuns: [{ st: 0, ed: content.length, ts: { bl: BooleanNumber.TRUE } }],
+                            },
+                        }
+                        : undefined,
+                } } },
+            } },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const injector = univer.__getInjector();
+        const skeleton = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            const before = Tools.deepClone(workbook.getSnapshot());
+            skeleton.calculate();
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const documentSkeleton = skeleton.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!;
+            const glyphs = documentSkeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)).filter((glyph) => glyph.content && glyph.content !== '\r');
+            expect(glyphs.map((glyph) => glyph.content)).toEqual(['A', 'i', '（', '）', 'ー', '한', 'é', '👩‍💻']);
+            expect(glyphs.reduce((count, glyph) => count + glyph.count, 0)).toBe(content.length);
+            expect(glyphs.map((glyph) => glyph.width)).toEqual(new Array(8).fill(20));
+            const size = getDocsSkeletonPageSize(documentSkeleton, 90)!;
+            expect(size.height).toBeCloseTo(160);
+            expect(skeleton.calculateAutoHeightForCell(0, 0)).toBeCloseTo(size.height);
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 100)).toBeCloseTo(size.width);
+
+            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(65);
+            documentSkeleton.getViewModel().getDataModel().updateDocumentRenderConfig({ wrapStrategy: WrapStrategy.WRAP });
+            documentSkeleton.makeDirty(true);
+            documentSkeleton.calculate();
+            const columns = documentSkeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup)
+                .filter((glyph) => glyph.content && glyph.content !== '\r'));
+            expect(columns.map((column) => column.map((glyph) => glyph.content).join(''))).toEqual(['Ai（', '）ー한', 'é👩‍💻']);
+            expect(getDocsSkeletonPageSize(documentSkeleton, 90)!.height).toBeLessThanOrEqual(65);
+
+            const editor = worksheet.getCellDocumentModelWithFormula(cell, 0, 0)!.documentModel!;
+            const editorSkeleton = DocumentSkeleton.create(new DocumentViewModel(editor), injector.get(LocaleService));
+            try {
+                editorSkeleton.calculate();
+                const editorGlyph = editorSkeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
+                expect(editorGlyph.width).toBe(4);
+            } finally {
+                editorSkeleton.dispose();
+                editor.dispose();
+            }
+            expect(workbook.getSnapshot()).toEqual(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+            environment.restore();
+        }
+    });
+
+    it.each([
+        { documentFlavor: undefined, wordWrap: undefined },
+        ...[DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) => [undefined, BooleanNumber.FALSE, BooleanNumber.TRUE].map((wordWrap) => ({ documentFlavor, wordWrap }))),
+    ])('keeps Korean syllable wrapping in cells, including rich text from Docs: $documentFlavor, $wordWrap', ({ documentFlavor, wordWrap }) => {
+        const environment = setupRenderTestEnv();
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 10,
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const content = '오늘 전략을';
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'korean-cell-wrapping',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 50,
+                    cellData: { 0: { 0: {
+                        v: content,
+                        s: { tb: WrapStrategy.WRAP, pd: { t: 0, b: 0, l: 0, r: 0 } },
+                        p: documentFlavor == null
+                            ? undefined
+                            : {
+                                id: 'korean-rich-cell',
+                                documentStyle: { documentFlavor, textStyle: { lang: 'ko-KR' } },
+                                body: {
+                                    dataStream: `${content}\r\n`,
+                                    paragraphs: [{ startIndex: content.length, paragraphId: 'korean-cell-paragraph', paragraphStyle: { wordWrap } }],
+                                },
+                            },
+                    } } },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            skeleton.calculate();
+            const before = Tools.deepClone(workbook.getSnapshot());
+            const cell = worksheet.getCellRaw(0, 0)!;
+            const style = worksheet.getComposedCellStyleByCellData(0, 0, cell);
+            skeleton._setFontStylesCache(0, 0, cell, style, true);
+            const cache = skeleton.stylesCache.fontMatrix.getValue(0, 0)!;
+            let lines: string[];
+            let renderedHeight: number;
+            if (cache.documentSkeleton) {
+                const document = cache.documentSkeleton.getViewModel().getDataModel();
+                document.updateDocumentDataPageSize(50);
+                cache.documentSkeleton.makeDirty(true);
+                cache.documentSkeleton.calculate();
+                const pages = cache.documentSkeleton.getSkeletonData()!.pages;
+                const layoutLines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+                lines = layoutLines
+                    .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
+                renderedHeight = layoutLines.reduce((height, line) => Math.max(height, line.top + line.marginTop + line.lineHeight), 0);
+            } else {
+                const simple = new DocSimpleSkeleton(content, cache.fontString, true, 50, Infinity, skeleton.textLineGap);
+                lines = simple.calculate().map((line) => line.text);
+                renderedHeight = simple.getTotalHeight();
+            }
+            expect(lines).toEqual(['오늘 전략', '을']);
+            expect(skeleton.calculateAutoHeightForCell(0, 0)).toBeCloseTo(renderedHeight);
+            expect(skeleton._getMeasuredWidthByCell(cell, 0, 0, 50)).toBeCloseTo(50);
+            expect(workbook.getSnapshot()).toEqual(before);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+            environment.restore();
+        }
+    });
+
     it('renders justified plain text using the cell width', () => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });
@@ -320,5 +548,77 @@ describe('Custom number display', () => {
 
         expect(getCustomNumberDisplayText('2022-11-01 0:00:00', '13.33px SimSun', 66)).toBe('#########');
         expect(getCustomNumberDisplayText('10/1/2022', '13.33px SimSun', 70)).toBe('10/1/2022');
+    });
+});
+
+describe('Configured cell text line gap', () => {
+    it.each([false, true])('keeps saved cells intact and includes inter-line gaps in auto height (rich: %s)', (rich) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'line-gap',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 10,
+                    columnCount: 10,
+                    defaultColumnWidth: 200,
+                    rowData: { 0: { h: 30 }, 1: { h: 15 } },
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 'one\ntwo\nthree',
+                                s: { fs: 12, tb: WrapStrategy.WRAP },
+                                ...(rich
+                                    ? {
+                                        p: {
+                                            id: 'rich-lines',
+                                            documentStyle: {},
+                                            body: {
+                                                dataStream: 'one\rtwo\rthree\r\n',
+                                                paragraphs: [{ startIndex: 3, paragraphId: 'one' }, { startIndex: 7, paragraphId: 'two' }, { startIndex: 13, paragraphId: 'three' }],
+                                                sectionBreaks: [{ startIndex: 14, sectionId: 'section' }],
+                                            },
+                                        },
+                                    }
+                                    : {}),
+                            },
+                        },
+                        1: { 0: { v: 'one', s: { fs: 12, tb: WrapStrategy.WRAP } } },
+                    },
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        const baseline = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        injector.get(IConfigService).setConfig(SHEET_TEXT_LINE_GAP, 2);
+        const spaced = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        try {
+            baseline.calculate();
+            spaced.calculate();
+            const saved = Tools.deepClone(workbook.getSnapshot());
+            expect(spaced.calculateAutoHeightForCell(0, 0)).toBeCloseTo(baseline.calculateAutoHeightForCell(0, 0)! + 4);
+            expect(spaced.calculateAutoHeightForCell(1, 0)).toBe(baseline.calculateAutoHeightForCell(1, 0));
+            expect(worksheet.getRowHeight(0)).toBe(30);
+            if (rich) {
+                const cell = worksheet.getCellRaw(0, 0)!;
+                baseline._setFontStylesCache(0, 0, cell, {}, false);
+                spaced._setFontStylesCache(0, 0, cell, {}, false);
+                const oldLines = baseline.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                const newLines = spaced.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                expect(newLines).toHaveLength(oldLines.length);
+                newLines.forEach((line, index) => {
+                    expect(line.top + line.marginTop - oldLines[index].top - oldLines[index].marginTop).toBeCloseTo(index * 2);
+                });
+            }
+            expect(workbook.getSnapshot()).toEqual(saved);
+        } finally {
+            baseline.dispose();
+            spaced.dispose();
+            univer.dispose();
+            environment.restore();
+        }
     });
 });

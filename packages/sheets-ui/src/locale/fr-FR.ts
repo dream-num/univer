@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Rotation du texte',
             },
             toggleGridlines: 'Activer/désactiver le quadrillage',
+            zoom: 'Zoom',
             fullscreen: 'Plein écran',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Annuler',
+        },
+        borderStyle: {
+            thin: 'Fin',
+            hair: 'Très fin',
+            dotted: 'Pointillé',
+            dashed: 'Tirets',
+            dashDot: 'Tiret-point',
+            dashDotDot: 'Tiret-point-point',
+            medium: 'Moyen',
+            mediumDashed: 'Tirets moyens',
+            mediumDashDot: 'Tiret-point moyen',
+            mediumDashDotDot: 'Tiret-point-point moyen',
+            thick: 'Épais',
+            double: 'Double',
         },
         borderLine: {
             borderTop: 'bordureHaut',

@@ -35,6 +35,7 @@ import {
     SheetCopyFormulaOnlyCommand,
     SheetOnlyPasteFormulaCommand,
 } from '../commands/commands/formula-clipboard.command';
+import { CalculationOptionsOperation } from '../commands/operations/calculation-options.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
@@ -52,6 +53,14 @@ type FunctionCategoryKey =
 
 type EnsureLocaleKey<T extends LocaleKey> = T;
 type FunctionCategoryLocaleKey = EnsureLocaleKey<`sheets-formula-ui.functionType.${FunctionCategoryKey}`>;
+
+function getInsertFunctionDisabled$(accessor: IAccessor) {
+    return getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookEditablePermission],
+        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+        rangeTypes: [RangeProtectionPermissionEditPoint],
+    });
+}
 
 export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     const commonFunctions = ['SUMIF', 'SUM', 'AVERAGE', 'IF', 'COUNT', 'SIN', 'MAX'];
@@ -87,6 +96,7 @@ export function InsertCommonFunctionMenuItemFactory(accessor: IAccessor): IMenuI
         icon: 'FunctionIcon',
         type: MenuItemType.SELECTOR,
         selections,
+        disabled$: getInsertFunctionDisabled$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -122,6 +132,7 @@ function createInsertFunctionCategoryMenuItemFactory(
             icon,
             type: MenuItemType.SELECTOR,
             selections,
+            disabled$: getInsertFunctionDisabled$(accessor),
             hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         };
     };
@@ -146,11 +157,7 @@ export function AllFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem<Loca
         tooltip: 'sheets-formula-ui.insert.tooltip',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }),
+        disabled$: getInsertFunctionDisabled$(accessor),
     };
 }
 
@@ -183,6 +190,17 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem<Loca
             })),
             map(([d1, d2]) => d1 || d2)
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+export function CalculationOptionsMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
+    return {
+        id: CalculationOptionsOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'CalculationOptionsIcon',
+        title: 'sheets-formula-ui.calculation.title',
+        tooltip: 'sheets-formula-ui.calculation.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

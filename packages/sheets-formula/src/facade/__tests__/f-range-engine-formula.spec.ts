@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { ICommandInfo, Injector, IWorkbookData } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, LocaleType } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { ICommandService, LocaleType, UndoCommand } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -287,5 +288,38 @@ describe('Test FRangeEngineFormulaMixin', () => {
         expect(errorsByType[ErrorType.NAME]).toBe(1);
         expect(errorsByType[ErrorType.NUM]).toBe(1);
         expect(errorsByType[ErrorType.VALUE]).toBe(1);
+    });
+
+    it('should carry a replaced formula removal in the collaboration changeset', async () => {
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const durableMutations: ICommandInfo[] = [];
+        commandService.onMutationExecutedForCollab((command, options) => {
+            if (options?.onlyLocal !== true) {
+                durableMutations.push(command);
+            }
+        });
+
+        worksheet.getRange('C1').setValue({ v: 300 });
+
+        expect(worksheet.getRange('C1').getCellData()).toMatchObject({ v: 300 });
+        expect(worksheet.getRange('C1').getCellData()?.f).toBeUndefined();
+
+        // Replicas and the collaboration server only receive mutations without `onlyLocal`, so the
+        // removal has to travel with the write instead of relying on the formula controller.
+        expect(durableMutations).toHaveLength(1);
+        expect((durableMutations[0].params as ISetRangeValuesMutationParams).cellValue).toMatchObject({
+            0: { 2: { v: 300, f: null, si: null } },
+        });
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(worksheet.getRange('C1').getCellData()).toMatchObject({ f: '=SUM(A1:B1)', v: 3 });
+    });
+
+    it('should keep the formula when only style is written', () => {
+        const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+
+        worksheet.getRange('C1').setValue({ s: { bg: { rgb: '#ff0000' } } });
+
+        expect(worksheet.getRange('C1').getCellData()?.f).toBe('=SUM(A1:B1)');
     });
 });

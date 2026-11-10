@@ -24,16 +24,20 @@ import {
     ILogService,
     Injector,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    toDisposable,
+    Univer,
     UniverInstanceService,
 } from '@univerjs/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import { MenuItemType } from '../../menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../menu/types';
 import { DesktopRibbonService, IRibbonService } from '../ribbon.service';
 
-function createService(univerInstanceService?: { focused$: BehaviorSubject<string | null> }) {
+function createInjector(univerInstanceService?: { focused$: BehaviorSubject<string | null> }) {
     const injector = new Injector();
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
@@ -43,15 +47,175 @@ function createService(univerInstanceService?: { focused$: BehaviorSubject<strin
         : [IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
     injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
-    return {
-        service: injector.get(IRibbonService),
-        menuManagerService: injector.get(IMenuManagerService),
-    };
+    onTestFinished(() => injector.dispose());
+    return injector;
 }
 
 describe('DesktopRibbonService', () => {
+    it('finishes global disposal when a later owner hides an active contextual tab', () => {
+        const univer = new Univer({ locales: { [LocaleType.EN_US]: { title: 'Tools' } }, locale: LocaleType.EN_US, direction: 'ltr' });
+        const injector = univer.__getInjector();
+        injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+        injector.add([IRibbonService, { useClass: DesktopRibbonService }]);
+        const service = injector.get(IRibbonService);
+        injector.get(IMenuManagerService).appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                tools: {
+                    contextual: true,
+                    group: {
+                        command: {
+                            menuItemFactory: (accessor) => ({ id: 'tools', type: MenuItemType.BUTTON, title: accessor.get(LocaleService).t('title') }),
+                        },
+                    },
+                },
+            },
+        });
+        service.showContextualTab('tools', { activate: true });
+        injector.add(['contextual-tab-owner', { useValue: toDisposable(() => service.hideContextualTab('tools')) }]);
+        injector.get('contextual-tab-owner');
+        let completed = false;
+        injector.onDispose(() => completed = true);
+
+        expect(() => univer.dispose()).not.toThrow();
+        expect(completed).toBe(true);
+    });
+
+    it('does not rebuild menus or acquire hidden subscriptions during or after disposal', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService) as DesktopRibbonService;
+        const menu = injector.get(IMenuManagerService);
+        let factories = 0;
+        let subscriptions = 0;
+        let unsubscriptions = 0;
+        const hidden$ = new Observable<boolean>((subscriber) => {
+            subscriptions += 1;
+            subscriber.next(false);
+            return () => unsubscriptions += 1;
+        });
+        menu.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                tools: {
+                    contextual: true,
+                    group: {
+                        command: {
+                            menuItemFactory: () => {
+                                factories += 1;
+                                return { id: 'tools', type: MenuItemType.BUTTON, hidden$ };
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        service.showContextualTab('tools');
+        const factoryCount = factories;
+        const subscription = service.ribbon$.subscribe((tabs) => {
+            if (tabs.length === 0) {
+                service.showContextualTab('tools');
+            }
+        });
+
+        service.dispose();
+        service.showContextualTab('tools', { activate: true });
+        service.hideContextualTab('tools');
+        service.hideAllContextualTabs();
+        menu.updateMenuConfig({});
+        service.dispose();
+
+        expect(factories).toBe(factoryCount);
+        expect(subscriptions).toBe(unsubscriptions);
+        subscription.unsubscribe();
+    });
+
+    it('keeps UI state unchanged when teardown observers invoke setters during or after disposal', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService) as DesktopRibbonService;
+        const activated: string[] = [];
+        const collapsed: string[][] = [];
+        const fakeToolbarVisible: boolean[] = [];
+        const completed: string[] = [];
+        service.activatedTab$.subscribe({
+            next: (tab) => activated.push(tab),
+            complete: () => completed.push('activated'),
+        });
+        service.collapsedIds$.subscribe({
+            next: (ids) => collapsed.push(ids),
+            complete: () => completed.push('collapsed'),
+        });
+        service.fakeToolbarVisible$.subscribe({
+            next: (visible) => fakeToolbarVisible.push(visible),
+            complete: () => completed.push('fakeToolbar'),
+        });
+        service.setActivatedTab(RibbonPosition.INSERT);
+        service.setCollapsedIds(['format']);
+        service.setFakeToolbarVisible(true);
+        const previousActivated = [...activated];
+        const previousCollapsed = [...collapsed];
+        const previousFakeToolbarVisible = [...fakeToolbarVisible];
+        let disposing = false;
+        let teardownNotifications = 0;
+        service.ribbon$.subscribe((tabs) => {
+            if (disposing && tabs.length === 0) {
+                teardownNotifications += 1;
+                service.setActivatedTab(RibbonPosition.START);
+                service.setCollapsedIds([]);
+                service.setFakeToolbarVisible(false);
+            }
+        });
+
+        disposing = true;
+        service.dispose();
+        service.setActivatedTab(RibbonPosition.START);
+        service.setCollapsedIds([]);
+        service.setFakeToolbarVisible(false);
+        service.dispose();
+
+        expect(teardownNotifications).toBe(1);
+        expect(activated).toEqual(previousActivated);
+        expect(collapsed).toEqual(previousCollapsed);
+        expect(fakeToolbarVisible).toEqual(previousFakeToolbarVisible);
+        expect(completed.sort()).toEqual(['activated', 'collapsed', 'fakeToolbar']);
+    });
+
+    it('releases hidden subscriptions when disposed synchronously by a ribbon observer', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService) as DesktopRibbonService;
+        let subscriptions = 0;
+        let unsubscriptions = 0;
+        const hidden$ = new Observable<boolean>((subscriber) => {
+            subscriptions += 1;
+            subscriber.next(false);
+            return () => unsubscriptions += 1;
+        });
+        injector.get(IMenuManagerService).appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                tools: {
+                    contextual: true,
+                    group: {
+                        command: {
+                            menuItemFactory: () => ({ id: 'tools', type: MenuItemType.BUTTON, hidden$ }),
+                        },
+                    },
+                },
+            },
+        });
+        const subscription = service.ribbon$.subscribe((tabs) => {
+            if (tabs.some((tab) => tab.key === 'tools')) {
+                service.dispose();
+            }
+        });
+
+        service.showContextualTab('tools');
+
+        expect(subscriptions).toBeGreaterThan(0);
+        expect(unsubscriptions).toBe(subscriptions);
+        subscription.unsubscribe();
+    });
+
     it('shows contextual ribbon tabs only when requested and restores the last regular tab when hidden', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const ribbons: string[][] = [];
         const activated: string[] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon.map((item) => item.key)));
@@ -80,7 +244,8 @@ describe('DesktopRibbonService', () => {
     });
 
     it('publishes collapsed group ids and fake toolbar visibility changes', () => {
-        const { service } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
         const collapsed: string[][] = [];
         const fakeToolbarVisible: boolean[] = [];
         const collapsedSub = service.collapsedIds$.subscribe((ids) => collapsed.push(ids));
@@ -96,7 +261,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('filters hidden ribbon commands and restores activation when contextual tabs disappear', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const hidden$ = new BehaviorSubject(false);
         const ribbons: IMenuSchema[][] = [];
         const activated: string[] = [];
@@ -153,7 +320,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('does not republish the ribbon when hidden states emit unchanged values', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const hidden$ = new BehaviorSubject(false);
         const ribbons: IMenuSchema[][] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
@@ -186,7 +355,9 @@ describe('DesktopRibbonService', () => {
     });
 
     it('filters a hidden command even when another hidden state has not emitted', () => {
-        const { service, menuManagerService } = createService();
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const silentHidden$ = new Subject<boolean>();
         const hidden$ = new BehaviorSubject(true);
         let latestRibbon: IMenuSchema[] = [];
@@ -224,7 +395,9 @@ describe('DesktopRibbonService', () => {
 
     it('does not republish the ribbon when focus emits the same unit id', () => {
         const focused$ = new BehaviorSubject<string | null>('unit-1');
-        const { service, menuManagerService } = createService({ focused$ });
+        const injector = createInjector({ focused$ });
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         const ribbons: IMenuSchema[][] = [];
         const ribbonSub = service.ribbon$.subscribe((ribbon) => ribbons.push(ribbon));
 
@@ -255,8 +428,58 @@ describe('DesktopRibbonService', () => {
         ribbonSub.unsubscribe();
     });
 
+    it('keeps visibility independent when groups contain the same command', () => {
+        const injector = createInjector();
+        const service = injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
+        const docHidden$ = new BehaviorSubject(true);
+        const slideHidden$ = new BehaviorSubject(false);
+        let latestRibbon: IMenuSchema[] = [];
+        const subscription = service.ribbon$.subscribe((ribbon) => latestRibbon = ribbon);
+        onTestFinished(() => subscription.unsubscribe());
+
+        menuManagerService.appendRootMenu({
+            [MenuManagerPosition.RIBBON]: {
+                [RibbonPosition.VIEW]: {
+                    'doc-display': {
+                        order: 0,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON, hidden$: docHidden$ }),
+                        },
+                    },
+                    'slide-display': {
+                        order: 1,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON, hidden$: slideHidden$ }),
+                        },
+                    },
+                    'global-display': {
+                        order: 2,
+                        fullscreen: {
+                            order: 0,
+                            menuItemFactory: () => ({ id: 'fullscreen', type: MenuItemType.BUTTON }),
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(latestRibbon.find((tab) => tab.key === RibbonPosition.VIEW)?.children?.map((group) => group.key))
+            .toEqual(['slide-display', 'global-display']);
+
+        docHidden$.next(false);
+        slideHidden$.next(true);
+
+        expect(latestRibbon.find((tab) => tab.key === RibbonPosition.VIEW)?.children?.map((group) => group.key))
+            .toEqual(['doc-display', 'global-display']);
+    });
+
     it('unsubscribes hidden states that are no longer in the ribbon', () => {
-        const { menuManagerService } = createService();
+        const injector = createInjector();
+        injector.get(IRibbonService);
+        const menuManagerService = injector.get(IMenuManagerService);
         let subscriptions = 0;
         let unsubscriptions = 0;
         const hidden$ = new Observable<boolean>(() => {

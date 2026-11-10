@@ -20,3 +20,4 @@ overrides:
 minimumReleaseAgeExclude:
     - '@amamo/*'
     - '@univerjs/*'
+    - javascript-obfuscator@5.9.1

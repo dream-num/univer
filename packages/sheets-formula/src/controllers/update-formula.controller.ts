@@ -23,15 +23,12 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
-import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
     ICommandService,
@@ -56,11 +53,28 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
+
+interface IFormulaReferenceMoveContext {
+    unitId: string;
+    sheetId: string;
+    unitSheetNameMap: IUnitSheetNameMap;
+    params: IFormulaReferenceMoveParam;
+    modifiedSharedFormulaIds: string[];
+}
+
+interface ICrossSheetCutFormula {
+    fromRow: number;
+    fromColumn: number;
+    formulaString: string;
+}
 
 /**
  * Update formula process
@@ -129,6 +143,22 @@ export class UpdateFormulaController extends Disposable {
             .subscribe((unitId) => this._handleWorkbookDisposed(unitId)));
     }
 
+    private _getEditedArrayFormulaDirtyRanges(params: ISetRangeValuesMutationParams): IUnitRange[] {
+        const { subUnitId: sheetId, unitId, cellValue } = params;
+        const previousRanges = this._formulaDataModel.getArrayFormulaRange()[unitId]?.[sheetId];
+        const dirtyRanges: IUnitRange[] = [];
+        if (previousRanges) {
+            new ObjectMatrix(cellValue).forValue((row, column) => {
+                const range = previousRanges[row]?.[column];
+                if (range && (range.startRow !== range.endRow || range.startColumn !== range.endColumn)) {
+                    dirtyRanges.push({ unitId, sheetId, range });
+                }
+            });
+        }
+
+        return dirtyRanges;
+    }
+
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
@@ -136,9 +166,14 @@ export class UpdateFormulaController extends Disposable {
             return;
         }
 
+        const dirtyRanges = this._getEditedArrayFormulaDirtyRanges(params);
         const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
         const arrayFormulaCellDataChanged = this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         const arrayFormulaRangeChanged = this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+
+        if (dirtyRanges.length > 0) {
+            this._commandService.syncExecuteCommand(SetTriggerFormulaCalculationStartMutation.id, { dirtyRanges }, { onlyLocal: true });
+        }
 
         if (Object.keys(newSheetFormulaData).length === 0) {
             if (arrayFormulaCellDataChanged || arrayFormulaRangeChanged) {
@@ -355,21 +390,19 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (!Tools.isDefine(formulaData)) return { newFormulaData: {} };
+        if (!Tools.isDefine(formulaData)) {
+            return { newFormulaData: {} };
+        }
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return { newFormulaData: {} };
+        if (formulaDataKeys.length === 0) {
+            return { newFormulaData: {} };
+        }
 
         const newFormulaData: IFormulaData = Object.create(null);
 
-        const { unitId: fromUnitId, sheetId: fromSheetId, sheetName: fromSheetName, targetUnitId, targetSheetId, type, from, to } = formulaReferenceMoveParam;
-
-        const inCrossSheetCutRangeNewFormulas: Array<{
-            fromRow: number;
-            fromColumn: number;
-            formulaString: string;
-        }> = [];
+        const inCrossSheetCutRangeNewFormulas: ICrossSheetCutFormula[] = [];
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
@@ -388,274 +421,19 @@ export class UpdateFormulaController extends Disposable {
                 const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const shouldModifySi: string[] = [];
+                const context: IFormulaReferenceMoveContext = {
+                    unitId,
+                    sheetId,
+                    unitSheetNameMap,
+                    params: formulaReferenceMoveParam,
+                    modifiedSharedFormulaIds: shouldModifySi,
+                };
 
                 matrixData.forValue((row, column, formulaDataItem) => {
-                    if (!formulaDataItem) return true;
-
-                    const { f: formulaString, x, y, si } = formulaDataItem;
-
-                    if (type === FormulaReferenceMoveType.SetUnitName) {
-                        const { oldUnitName, unitName } = formulaReferenceMoveParam;
-                        if (!oldUnitName || !unitName) return true;
-                        const nextFormula = refactorFormulaUnitQualifier(formulaString, oldUnitName, unitName);
-                        if (nextFormula !== formulaString) newFormulaDataItem.setValue(row, column, { f: nextFormula });
-                        return true;
+                    const formula = this._getMovedFormula(formulaDataItem, row, column, context, inCrossSheetCutRangeNewFormulas);
+                    if (formula != null) {
+                        newFormulaDataItem.setValue(row, column, { f: formula });
                     }
-
-                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
-
-                    if (sequenceNodes == null) {
-                        return true;
-                    }
-
-                    let shouldModify = false;
-                    const refChangeIds: number[] = [];
-
-                    // Whether the formula cell is in the moved range and the move is a cross-worksheet cut operation
-                    const inCrossSheetCutRange = type === FormulaReferenceMoveType.MoveRange &&
-                        (targetUnitId !== fromUnitId || targetSheetId !== fromSheetId) &&
-                        unitId === fromUnitId &&
-                        sheetId === fromSheetId &&
-                        from &&
-                        from.startRow <= row &&
-                        row <= from.endRow &&
-                        from.startColumn <= column &&
-                        column <= from.endColumn;
-                    const inCrossSheetCutRangeSequenceNodes = [...sequenceNodes];
-
-                    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
-                        const node = sequenceNodes[i];
-
-                        if (typeof node === 'string') {
-                            continue;
-                        }
-
-                        const { token, nodeType } = node;
-
-                        // The impact of defined name changes on formula calculation
-                        // 1. ref range only changes formulaOrRefString to trigger recalculation
-                        // 2. set defined name command, change name to trigger formula update, otherwise trigger recalculation
-                        // 3. remove defined name command, change name to #REF! to trigger formula update
-                        // 4. insert defined name No processing required
-                        // 5. remove sheet,  trigger recalculation
-                        // FIXME: Why is the node type of defined name 3?
-                        if ((type === FormulaReferenceMoveType.SetDefinedName || type === FormulaReferenceMoveType.RemoveDefinedName) && (nodeType === sequenceNodeType.DEFINED_NAME || nodeType === sequenceNodeType.FUNCTION)) {
-                            const { definedNameId, definedName } = formulaReferenceMoveParam;
-                            if (definedNameId === undefined || definedName === undefined) {
-                                continue;
-                            }
-
-                            const oldDefinedName = this._definedNamesService.getValueById(unitId, definedNameId);
-                            if (oldDefinedName === undefined || oldDefinedName === null) {
-                                continue;
-                            }
-
-                            // Make sure the current token is the defined name to be updated.
-                            if (oldDefinedName.name !== token) {
-                                continue;
-                            }
-
-                            // Update the defined name in the formula, if the defined name is removed, update the token to #REF!
-                            sequenceNodes[i] = {
-                                ...node,
-                                token: type === FormulaReferenceMoveType.SetDefinedName ? definedName : ErrorType.REF,
-                            };
-                            shouldModify = true;
-                            refChangeIds.push(i);
-
-                            continue;
-                        } else if ((type === FormulaReferenceMoveType.SetSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableColumn) && (nodeType === sequenceNodeType.TABLE || nodeType === sequenceNodeType.FUNCTION)) {
-                            const { oldTableName, tableName, tableColumnNames } = formulaReferenceMoveParam;
-                            if (oldTableName === undefined || (type === FormulaReferenceMoveType.SetSuperTableName && tableName === undefined)) {
-                                continue;
-                            }
-
-                            const { tableName: tokenTableName, columnStruct = '' } = splitTableStructuredRef(token);
-                            if (tokenTableName !== oldTableName) {
-                                continue;
-                            }
-
-                            if (type === FormulaReferenceMoveType.RemoveSuperTableColumn && !tableReferenceContainsColumn(columnStruct, tableColumnNames)) {
-                                continue;
-                            }
-
-                            sequenceNodes[i] = {
-                                ...node,
-                                token: type === FormulaReferenceMoveType.SetSuperTableName ? `${tableName}${columnStruct}` : ErrorType.REF,
-                            };
-                            const nextNode = sequenceNodes[i + 1];
-                            if ((type === FormulaReferenceMoveType.RemoveSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableColumn) && typeof nextNode === 'string' && nextNode.startsWith(']')) {
-                                sequenceNodes[i + 1] = nextNode.slice(1);
-                            }
-                            shouldModify = true;
-                            refChangeIds.push(i);
-
-                            continue;
-                        } else if (nodeType !== sequenceNodeType.REFERENCE) {
-                            continue;
-                        }
-
-                        const sequenceGrid = deserializeRangeWithSheetWithCache(token);
-
-                        const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
-
-                        const mapUnitId =
-                            sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
-
-                        const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName] || '';
-
-                        if (
-                            !checkIsSameUnitAndSheet(
-                                formulaReferenceMoveParam.unitId,
-                                formulaReferenceMoveParam.sheetId,
-                                unitId,
-                                sheetId,
-                                sequenceUnitId,
-                                sequenceSheetId
-                            )
-                        ) {
-                            continue;
-                        }
-
-                        const sequenceUnitRangeWidthOffset: IUnitRangeWithOffset = {
-                            range,
-                            sheetId: sequenceSheetId,
-                            unitId: sequenceUnitId,
-                            sheetName,
-                            refOffsetX: x || 0,
-                            refOffsetY: y || 0,
-                        };
-
-                        let newRefString: Nullable<string> = null;
-
-                        if (type === FormulaReferenceMoveType.SetName) {
-                            const {
-                                unitId: userUnitId,
-                                sheetId: userSheetId,
-                                sheetName: newSheetName,
-                            } = formulaReferenceMoveParam;
-                            if (newSheetName == null) {
-                                continue;
-                            }
-
-                            if (sequenceSheetId == null || sequenceSheetId.length === 0) {
-                                continue;
-                            }
-
-                            if (userSheetId !== sequenceSheetId) {
-                                continue;
-                            }
-
-                            newRefString = serializeRangeToRefString({
-                                range,
-                                sheetName: newSheetName,
-                                unitId: sequenceUnitId,
-                            });
-                        } else if (type === FormulaReferenceMoveType.RemoveSheet) {
-                            const {
-                                unitId: userUnitId,
-                                sheetId: userSheetId,
-                                sheetName: newSheetName,
-                            } = formulaReferenceMoveParam;
-
-                            if (sequenceSheetId == null || sequenceSheetId.length === 0) {
-                                continue;
-                            }
-
-                            if (userSheetId !== sequenceSheetId) {
-                                continue;
-                            }
-
-                            newRefString = ErrorType.REF;
-                        } else if (type !== FormulaReferenceMoveType.SetDefinedName) {
-                            newRefString = getNewRangeByMoveParam(
-                                sequenceUnitRangeWidthOffset,
-                                formulaReferenceMoveParam,
-                                unitId,
-                                sheetId,
-                                {
-                                    inCrossSheetCutRange,
-                                }
-                            );
-                        }
-
-                        if (newRefString != null) {
-                            sequenceNodes[i] = {
-                                ...node,
-                                token: newRefString,
-                            };
-                            shouldModify = true;
-                            refChangeIds.push(i);
-                            // newRefString = ErrorType.REF;
-
-                            // If the formula cell has an si, it means the formula cell is source of other same si cells, so the si cells needs to be updated.
-                            if (si && (x ?? 0) === 0 && (y ?? 0) === 0) shouldModifySi.push(si);
-                        }
-
-                        /**
-                         * If the reference sequence range is not affected by the move, and the move is a cross-worksheet cut operation, it may be necessary to rewrite the sheet name in the ref string after move, to make sure the ref still works after move.
-                         * For example, if a formula cell is `=SUM(A1:A5)` in Sheet1, and formula cell cut to Sheet2, the formula should be rewritten to `=SUM(Sheet1!A1:A5)`, otherwise it will become `=SUM(A1:A5)` and reference the wrong range in Sheet2.
-                         */
-                        if (inCrossSheetCutRange) {
-                            if (newRefString != null) {
-                                inCrossSheetCutRangeSequenceNodes[i] = {
-                                    ...node,
-                                    token: newRefString,
-                                };
-                            } else if ((!sequenceUnitId || sequenceUnitId === fromUnitId) && (!sequenceSheetId || sequenceSheetId === fromSheetId)) {
-                                /**
-                                 * Only the reference range is in the from worksheet need to rewrite the sheet name, otherwise the ref string will be rewritten unnecessarily when moving between other worksheets.
-                                 * For example, if a formula cell is `=SUM(Sheet3!A1:A5)` in Sheet1, and formula cell cut to Sheet2, the formula should not be rewritten, otherwise it will become `=SUM(Sheet1!A1:A5)` and reference the wrong range in Sheet1, while the original ref is referencing Sheet3 and should not be affected by the move between Sheet1 and Sheet2.
-                                 */
-                                const sequenceRange = Rectangle.moveOffset(range, x || 0, y || 0);
-                                inCrossSheetCutRangeSequenceNodes[i] = {
-                                    ...node,
-                                    token: serializeRangeToRefString({
-                                        range: sequenceRange,
-                                        sheetName: fromSheetName || sheetName,
-                                        unitId: targetUnitId !== fromUnitId ? fromUnitId : '',
-                                    }),
-                                };
-                                shouldModify = true;
-                            }
-                        }
-                    }
-
-                    if (!shouldModify) {
-                        /**
-                         * If the operation is a move type, and the formula cell has si and is the same as the current shouldModifySi, unpack the si to f.
-                         * Or the source formula cell is in the moved range.
-                         * This is to ensure that the si formula can be recalculated correctly after the move.
-                         */
-                        if (
-                            si &&
-                            [FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols, FormulaReferenceMoveType.MoveRange].includes(type)
-                        ) {
-                            if (from && from.startRow <= row && row <= from.endRow && from.startColumn <= column && column <= from.endColumn) {
-                                if ((x ?? 0) === 0 && (y ?? 0) === 0) shouldModifySi.push(si);
-                            } else if (!shouldModifySi.includes(si)) {
-                                return true;
-                            }
-                        } else {
-                            return true;
-                        }
-                    }
-
-                    if (inCrossSheetCutRange) {
-                        const newSequenceNodes = updateRefOffset(inCrossSheetCutRangeSequenceNodes, refChangeIds, x, y);
-                        inCrossSheetCutRangeNewFormulas.push({
-                            fromRow: row,
-                            fromColumn: column,
-                            formulaString: `=${generateStringWithSequence(newSequenceNodes)}`,
-                        });
-                        return true;
-                    }
-
-                    const newSequenceNodes = updateRefOffset(sequenceNodes, refChangeIds, x, y);
-
-                    newFormulaDataItem.setValue(row, column, {
-                        f: `=${generateStringWithSequence(newSequenceNodes)}`,
-                    });
                 });
 
                 if (newFormulaData[unitId]) {
@@ -664,32 +442,262 @@ export class UpdateFormulaController extends Disposable {
             }
         }
 
-        if (inCrossSheetCutRangeNewFormulas.length > 0 && targetUnitId && targetSheetId) {
-            if (!newFormulaData[targetUnitId]) {
-                newFormulaData[targetUnitId] = Object.create(null);
-            }
-
-            if (!newFormulaData[targetUnitId]![targetSheetId]) {
-                newFormulaData[targetUnitId]![targetSheetId] = Object.create(null);
-            }
-
-            for (const newFormula of inCrossSheetCutRangeNewFormulas) {
-                const { fromRow, fromColumn, formulaString } = newFormula;
-                const targetRow = fromRow + ((to?.startRow ?? 0) - (from?.startRow ?? 0));
-                const targetColumn = fromColumn + ((to?.startColumn ?? 0) - (from?.startColumn ?? 0));
-
-                if (!newFormulaData[targetUnitId]![targetSheetId]![targetRow]) {
-                    newFormulaData[targetUnitId]![targetSheetId]![targetRow] = Object.create(null);
-                }
-
-                newFormulaData[targetUnitId]![targetSheetId]![targetRow][targetColumn] = {
-                    f: formulaString,
-                };
-            }
-        }
+        appendCrossSheetCutFormulas(newFormulaData, inCrossSheetCutRangeNewFormulas, formulaReferenceMoveParam);
 
         return { newFormulaData };
     }
+
+    private _getMovedFormula(
+        item: Nullable<IFormulaDataItem>,
+        row: number,
+        column: number,
+        context: IFormulaReferenceMoveContext,
+        crossSheetFormulas: ICrossSheetCutFormula[]
+    ): Nullable<string> {
+        if (!item) {
+            return null;
+        }
+        const { f: formulaString, x, y } = item;
+        const { unitId, sheetId, params, modifiedSharedFormulaIds } = context;
+        if (params.type === FormulaReferenceMoveType.SetUnitName) {
+            const { oldUnitName, unitName } = params;
+            if (!oldUnitName || !unitName) {
+                return null;
+            }
+            const nextFormula = refactorFormulaUnitQualifier(formulaString, oldUnitName, unitName);
+            return nextFormula !== formulaString ? nextFormula : null;
+        }
+
+        const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+        if (sequenceNodes == null) {
+            return null;
+        }
+        const refChangeIds: number[] = [];
+        const inCrossSheetCutRange = isInCrossSheetCutRange(unitId, sheetId, row, column, params);
+        const crossSheetNodes = [...sequenceNodes];
+        const shouldModify = this._updateFormulaReferenceNodes(sequenceNodes, item, context, refChangeIds, inCrossSheetCutRange ? crossSheetNodes : null);
+        if (!shouldModify && !shouldUnpackSharedFormula(item, row, column, params, modifiedSharedFormulaIds)) {
+            return null;
+        }
+
+        const newSequenceNodes = updateRefOffset(inCrossSheetCutRange ? crossSheetNodes : sequenceNodes, refChangeIds, x, y);
+        const formula = `=${generateStringWithSequence(newSequenceNodes)}`;
+        if (inCrossSheetCutRange) {
+            crossSheetFormulas.push({ fromRow: row, fromColumn: column, formulaString: formula });
+            return null;
+        }
+        return formula;
+    }
+
+    private _updateFormulaReferenceNodes(
+        sequenceNodes: Array<string | ISequenceNode>,
+        item: IFormulaDataItem,
+        context: IFormulaReferenceMoveContext,
+        refChangeIds: number[],
+        crossSheetNodes: Nullable<Array<string | ISequenceNode>>
+    ): boolean {
+        const { unitId, sheetId, params, modifiedSharedFormulaIds } = context;
+        const { x, y, si } = item;
+        let shouldModify = false;
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+
+            const definedNameToken = this._getDefinedNameReferenceToken(node, unitId, params);
+            if (definedNameToken != null) {
+                sequenceNodes[i] = { ...node, token: definedNameToken };
+                shouldModify = true;
+                refChangeIds.push(i);
+                continue;
+            }
+            if (updateTableReference(sequenceNodes, i, node, params)) {
+                shouldModify = true;
+                refChangeIds.push(i);
+                continue;
+            }
+            if (node.nodeType !== sequenceNodeType.REFERENCE) {
+                continue;
+            }
+
+            const reference = getReferenceWithOffset(node.token, item, context);
+            if (reference == null) {
+                continue;
+            }
+            const newRefString = getMovedReferenceToken(reference, params, unitId, sheetId, crossSheetNodes != null);
+            if (newRefString != null) {
+                sequenceNodes[i] = { ...node, token: newRefString };
+                shouldModify = true;
+                refChangeIds.push(i);
+                // Shared followers must be unpacked after their anchor reference changes.
+                if (si && (x ?? 0) === 0 && (y ?? 0) === 0) {
+                    modifiedSharedFormulaIds.push(si);
+                }
+            }
+            if (crossSheetNodes != null) {
+                const movedNode = getCrossSheetCutReference(node, reference, newRefString, params);
+                if (movedNode != null) {
+                    crossSheetNodes[i] = movedNode;
+                    shouldModify = true;
+                }
+            }
+        }
+        return shouldModify;
+    }
+
+    private _getDefinedNameReferenceToken(node: ISequenceNode, unitId: string, params: IFormulaReferenceMoveParam): Nullable<string> {
+        const { type, definedNameId, definedName } = params;
+        if (type !== FormulaReferenceMoveType.SetDefinedName && type !== FormulaReferenceMoveType.RemoveDefinedName) {
+            return null;
+        }
+        if (node.nodeType !== sequenceNodeType.DEFINED_NAME && node.nodeType !== sequenceNodeType.FUNCTION) {
+            return null;
+        }
+        if (definedNameId === undefined || definedName === undefined) {
+            return null;
+        }
+
+        const oldDefinedName = this._definedNamesService.getValueById(unitId, definedNameId);
+        if (oldDefinedName == null || oldDefinedName.name !== node.token) {
+            return null;
+        }
+
+        return type === FormulaReferenceMoveType.SetDefinedName ? definedName : ErrorType.REF;
+    }
+}
+
+function getReferenceWithOffset(token: string, item: IFormulaDataItem, context: IFormulaReferenceMoveContext): Nullable<IUnitRangeWithOffset> {
+    const { unitId, sheetId, unitSheetNameMap, params } = context;
+    const { range, sheetName, unitId: sequenceUnitId } = deserializeRangeWithSheetWithCache(token);
+    const mapUnitId = sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
+    const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName] || '';
+    if (!checkIsSameUnitAndSheet(params.unitId, params.sheetId, unitId, sheetId, sequenceUnitId, sequenceSheetId)) {
+        return null;
+    }
+    return {
+        range,
+        sheetId: sequenceSheetId,
+        unitId: sequenceUnitId,
+        sheetName,
+        refOffsetX: item.x || 0,
+        refOffsetY: item.y || 0,
+    };
+}
+
+function appendCrossSheetCutFormulas(data: IFormulaData, formulas: ICrossSheetCutFormula[], params: IFormulaReferenceMoveParam): void {
+    const { targetUnitId, targetSheetId, from, to } = params;
+    if (formulas.length === 0 || !targetUnitId || !targetSheetId) {
+        return;
+    }
+    if (!data[targetUnitId]) {
+        data[targetUnitId] = Object.create(null);
+    }
+    if (!data[targetUnitId]![targetSheetId]) {
+        data[targetUnitId]![targetSheetId] = Object.create(null);
+    }
+    for (const { fromRow, fromColumn, formulaString } of formulas) {
+        const targetRow = fromRow + ((to?.startRow ?? 0) - (from?.startRow ?? 0));
+        const targetColumn = fromColumn + ((to?.startColumn ?? 0) - (from?.startColumn ?? 0));
+        if (!data[targetUnitId]![targetSheetId]![targetRow]) {
+            data[targetUnitId]![targetSheetId]![targetRow] = Object.create(null);
+        }
+        data[targetUnitId]![targetSheetId]![targetRow][targetColumn] = { f: formulaString };
+    }
+}
+
+function isInCrossSheetCutRange(unitId: string, sheetId: string, row: number, column: number, params: IFormulaReferenceMoveParam): boolean {
+    const { type, unitId: fromUnitId, sheetId: fromSheetId, targetUnitId, targetSheetId, from } = params;
+    return type === FormulaReferenceMoveType.MoveRange &&
+        (targetUnitId !== fromUnitId || targetSheetId !== fromSheetId) &&
+        unitId === fromUnitId && sheetId === fromSheetId &&
+        from != null && from.startRow <= row && row <= from.endRow &&
+        from.startColumn <= column && column <= from.endColumn;
+}
+
+function updateTableReference(sequenceNodes: Array<string | ISequenceNode>, index: number, node: ISequenceNode, params: IFormulaReferenceMoveParam): boolean {
+    const { type, oldTableName, tableName, tableColumnNames } = params;
+    if (type !== FormulaReferenceMoveType.SetSuperTableName && type !== FormulaReferenceMoveType.RemoveSuperTableName && type !== FormulaReferenceMoveType.RemoveSuperTableColumn) {
+        return false;
+    }
+    if (node.nodeType !== sequenceNodeType.TABLE && node.nodeType !== sequenceNodeType.FUNCTION) {
+        return false;
+    }
+    if (oldTableName === undefined || (type === FormulaReferenceMoveType.SetSuperTableName && tableName === undefined)) {
+        return false;
+    }
+
+    const { tableName: tokenTableName, columnStruct = '' } = splitTableStructuredRef(node.token);
+    if (tokenTableName !== oldTableName) {
+        return false;
+    }
+    if (type === FormulaReferenceMoveType.RemoveSuperTableColumn && !tableReferenceContainsColumn(columnStruct, tableColumnNames)) {
+        return false;
+    }
+
+    sequenceNodes[index] = {
+        ...node,
+        token: type === FormulaReferenceMoveType.SetSuperTableName ? `${tableName}${columnStruct}` : ErrorType.REF,
+    };
+    const nextNode = sequenceNodes[index + 1];
+    if ((type === FormulaReferenceMoveType.RemoveSuperTableName || type === FormulaReferenceMoveType.RemoveSuperTableColumn) && typeof nextNode === 'string' && nextNode.startsWith(']')) {
+        sequenceNodes[index + 1] = nextNode.slice(1);
+    }
+    return true;
+}
+
+function getMovedReferenceToken(reference: IUnitRangeWithOffset, params: IFormulaReferenceMoveParam, unitId: string, sheetId: string, inCrossSheetCutRange: boolean): Nullable<string> {
+    const { type, sheetId: affectedSheetId, sheetName } = params;
+    if (type === FormulaReferenceMoveType.SetName || type === FormulaReferenceMoveType.RemoveSheet) {
+        if (!reference.sheetId || affectedSheetId !== reference.sheetId) {
+            return null;
+        }
+        if (type === FormulaReferenceMoveType.RemoveSheet) {
+            return ErrorType.REF;
+        }
+        if (sheetName == null) {
+            return null;
+        }
+        return serializeRangeToRefString({ range: reference.range, sheetName, unitId: reference.unitId });
+    }
+    if (type === FormulaReferenceMoveType.SetDefinedName) {
+        return null;
+    }
+    return getNewRangeByMoveParam(reference, params, unitId, sheetId, { inCrossSheetCutRange });
+}
+
+function getCrossSheetCutReference(node: ISequenceNode, reference: IUnitRangeWithOffset, newRefString: Nullable<string>, params: IFormulaReferenceMoveParam): Nullable<ISequenceNode> {
+    if (newRefString != null) {
+        return { ...node, token: newRefString };
+    }
+    const { unitId, sheetId, targetUnitId, sheetName } = params;
+    if ((reference.unitId && reference.unitId !== unitId) || (reference.sheetId && reference.sheetId !== sheetId)) {
+        return null;
+    }
+    // Unaffected references to the source sheet need an explicit qualifier after a cross-sheet cut.
+    return {
+        ...node,
+        token: serializeRangeToRefString({
+            range: Rectangle.moveOffset(reference.range, reference.refOffsetX || 0, reference.refOffsetY || 0),
+            sheetName: sheetName || reference.sheetName,
+            unitId: targetUnitId !== unitId ? unitId : '',
+        }),
+    };
+}
+
+function shouldUnpackSharedFormula(item: IFormulaDataItem, row: number, column: number, params: IFormulaReferenceMoveParam, modifiedIds: string[]): boolean {
+    const { si, x, y } = item;
+    const { type, from } = params;
+    if (!si || ![FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols, FormulaReferenceMoveType.MoveRange].includes(type)) {
+        return false;
+    }
+    if (from && from.startRow <= row && row <= from.endRow && from.startColumn <= column && column <= from.endColumn) {
+        if ((x ?? 0) === 0 && (y ?? 0) === 0) {
+            modifiedIds.push(si);
+        }
+        return true;
+    }
+    return modifiedIds.includes(si);
 }
 
 /**

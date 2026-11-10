@@ -161,6 +161,11 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
 
     // eslint-disable-next-line complexity
     const calculateSelectingType = useEvent(() => {
+        // Hidden editors still receive selection events before their previous input is replaced.
+        if (!isFocus) {
+            return;
+        }
+
         const currentWorkbook = resolveFormulaSelectionWorkbook(
             univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET),
             workbook

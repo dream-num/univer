@@ -15,12 +15,12 @@
  */
 
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Input, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
+import { Button, Input, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import {
     CloseFindDialogOperation,
@@ -188,7 +188,7 @@ function MobileFindReplaceBarContent() {
                     />
                     <Input
                         ref={inputRef}
-                        size="middle"
+                        size="small"
                         allowClear
                         value={findValue}
                         placeholder={localeService.t<LocaleKey>('find-replace.dialog.find-placeholder')}
@@ -234,7 +234,7 @@ function MobileFindReplaceBarContent() {
             {state.replaceRevealed && (
                 <div className="univer-flex univer-gap-1 univer-pl-9">
                     <Input
-                        size="middle"
+                        size="small"
                         className="univer-min-w-0 univer-flex-1"
                         value={state.replaceString}
                         placeholder={localeService.t<LocaleKey>('find-replace.dialog.replace-placeholder')}
@@ -267,22 +267,17 @@ interface IIconButtonProps {
 
 function IconButton(props: IIconButtonProps) {
     return (
-        <button
+        <Button
             type="button"
             aria-label={props.label}
             disabled={props.disabled}
-            className={clsx(resetButtonClassName, `
-              univer-flex univer-size-9 univer-flex-none univer-items-center univer-justify-center univer-rounded-full
-              univer-text-lg univer-text-gray-700
-              active:univer-bg-gray-100
-              disabled:univer-opacity-35
-              dark:!univer-text-gray-200
-              dark:active:!univer-bg-gray-700
-            `)}
+            variant="text"
+            size="icon"
+            className="univer-flex-none univer-rounded-full"
             onClick={props.onClick}
         >
             {props.children}
-        </button>
+        </Button>
     );
 }
 
@@ -294,19 +289,15 @@ interface IActionButtonProps {
 
 function ActionButton(props: IActionButtonProps) {
     return (
-        <button
+        <Button
             type="button"
             disabled={props.disabled}
-            className={clsx(resetButtonClassName, `
-              univer-h-10 univer-flex-none univer-whitespace-nowrap univer-rounded-lg univer-bg-primary-600 univer-px-3
-              univer-text-sm univer-font-medium univer-text-gray-0
-              active:univer-bg-primary-700
-              disabled:univer-bg-gray-100 disabled:univer-text-gray-400
-              dark:disabled:!univer-bg-gray-700 dark:disabled:!univer-text-gray-500
-            `)}
+            variant="primary"
+            size="middle"
+            className="univer-flex-none"
             onClick={props.onClick}
         >
             {props.children}
-        </button>
+        </Button>
     );
 }

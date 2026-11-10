@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Zirkelbezug',
+            title: 'Berechnungsoptionen',
+            enable: 'Iterative Berechnung aktivieren',
+            iterations: 'Maximale Iterationen (1–{0})',
+            change: 'Maximale Änderung',
+            workbook: 'Diese Einstellungen gelten für die aktuelle Arbeitsmappe.',
+            invalidIterations: 'Die maximale Iterationszahl muss eine ganze Zahl von 1 bis {0} sein.',
+            invalidChange: 'Die maximale Änderung muss eine endliche positive Zahl sein.',
+            cancel: 'Abbrechen',
+            confirm: 'OK',
+            circular: 'Diese Formel enthält einen Zirkelbezug. Öffnen Sie die Berechnungsoptionen, um die iterative Berechnung zu aktivieren.',
+            action: 'Iterative Berechnung',
+        },
+
         shortcut: {
             'quick-sum': 'Schnelle Summe',
         },

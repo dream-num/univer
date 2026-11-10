@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsUIConfig } from '../config/config';
 import { Disposable, IConfigService, Inject, Injector } from '@univerjs/core';
 import { ComponentManager, IconManager } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from '../config/config';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import {
     UNIVER_SHEET_PERMISSION_DIALOG,
@@ -35,12 +35,15 @@ import { CellPopup } from '../views/CellPopup';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { dropdownMap } from '../views/dropdown';
-import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../views/menu-item-frozen/index';
-import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-input/index';
-import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../views/permission';
+import { MENU_ITEM_FROZEN_COMPONENT } from '../views/menu-item-frozen/interface';
+import { MenuItemFrozen } from '../views/menu-item-frozen/MenuItemFrozen';
+import { MENU_ITEM_INPUT_COMPONENT } from '../views/menu-item-input/interface';
+import { MenuItemInput } from '../views/menu-item-input/MenuItemInput';
 import { AlertDialog } from '../views/permission/AlertDialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../views/permission/error-msg-dialog/interface';
-import { SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput } from '../views/sheet-slider/SheetZoomInput';
+import { SheetPermissionDialog } from '../views/permission/SheetPermissionDialog';
+import { SheetPermissionPanel } from '../views/permission/SheetPermissionPanel';
+import { SheetPermissionUserDialog } from '../views/permission/SheetPermissionUserDialog';
 import { sheetsUIIcons } from './sheets-ui-icons';
 
 export class ComponentsController extends Disposable {
@@ -52,7 +55,6 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
     }
 
@@ -84,15 +86,12 @@ export class ComponentsController extends Disposable {
                 })
             );
         }
-    }
 
-    private _registerParts(): void {
         const componentManager = this._componentManager;
 
         // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
         this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
-        this.disposeWithMe(componentManager.register(SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
         this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));

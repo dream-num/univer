@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Поворот текста',
             },
             toggleGridlines: 'Переключить сетку',
+            zoom: 'Масштаб',
             fullscreen: 'Полноэкранный режим',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'ОК',
             cancel: 'Отмена',
+        },
+        borderStyle: {
+            thin: 'Тонкая',
+            hair: 'Волосяная',
+            dotted: 'Точечная',
+            dashed: 'Штриховая',
+            dashDot: 'Штрихпунктирная',
+            dashDotDot: 'Штрихпунктирная с двумя точками',
+            medium: 'Средняя',
+            mediumDashed: 'Средняя штриховая',
+            mediumDashDot: 'Средняя штрихпунктирная',
+            mediumDashDotDot: 'Средняя штрихпунктирная с двумя точками',
+            thick: 'Толстая',
+            double: 'Двойная',
         },
         borderLine: {
             borderTop: 'верхняя граница',

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Xoay văn bản',
             },
             toggleGridlines: 'Chuyển đổi đường lưới',
+            zoom: 'Thu phóng',
             fullscreen: 'Toàn màn hình',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'Xác nhận',
             cancel: 'Hủy',
+        },
+        borderStyle: {
+            thin: 'Nét mảnh',
+            hair: 'Nét cực mảnh',
+            dotted: 'Nét chấm',
+            dashed: 'Nét đứt',
+            dashDot: 'Gạch chấm',
+            dashDotDot: 'Gạch hai chấm',
+            medium: 'Nét vừa',
+            mediumDashed: 'Nét đứt vừa',
+            mediumDashDot: 'Gạch chấm vừa',
+            mediumDashDotDot: 'Gạch hai chấm vừa',
+            thick: 'Nét đậm',
+            double: 'Nét đôi',
         },
         borderLine: {
             borderTop: 'Viền trên',

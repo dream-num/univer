@@ -25,24 +25,41 @@ import type {
     IRangeWithCoord,
     Nullable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderModule,
+    Scene,
+    SpreadsheetSkeleton,
+    Viewport,
+} from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     convertCellToRange,
     createIdentifier,
     Disposable,
+    IConfigService,
     InterceptorManager,
     RANGE_TYPE,
     ThemeService,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertPrimaryWithCoordToPrimary, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import {
+    attachSelectionWithCoord,
+    convertPrimaryWithCoordToPrimary,
+    REF_SELECTIONS_ENABLED,
+    SELECTIONS_ENABLED,
+} from '@univerjs/sheets';
+import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
@@ -198,10 +215,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             return;
         }
 
-        this._clearUpdatingListeners();
-        this._reset();
-        this._escapeShortcutDisposable?.dispose();
-        this._escapeShortcutDisposable = null;
+        this._clearRuntime();
 
         this._controlFillConfig$.complete();
         this._selectionMoveEnd$.complete();
@@ -251,7 +265,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             columnHeaderHeight,
             columnHeaderHeightAndMarginTop,
         } = skeleton;
+        const config = this._injector.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         const control = new SelectionControl(scene, zIndex, this._selectionTheme, {
+            enableAutoFill: config?.enableFillHandle,
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
@@ -345,7 +361,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        if (this._skeleton.worksheet) {
+        if (this._skeleton) {
             const [unitId, sheetId] = this._skeleton.getLocation();
             return selectionControls.map((control) => {
                 const v = control.getValue();
@@ -376,6 +392,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         selectionWithStyle.style = style;
         const control = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         return control;
+    }
+
+    protected _clearRuntime(): void {
+        this._clearUpdatingListeners();
+        this._reset();
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = null;
+        this._skeleton = undefined!;
+        this._activeViewport = null;
+        this._selectionMoving = false;
     }
 
     protected _clearAllSelectionControls(): void {
@@ -744,7 +770,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _clearUpdatingListeners(): void {
         const scene = this._scene;
-        scene.enableObjectsEvent();
+        scene?.enableObjectsEvent();
 
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerMoveSub = null;
@@ -808,7 +834,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 { firstMatch: true } // for visible
             );
 
-            if (!primaryWithCoord) return;
+            if (!primaryWithCoord) {
+                return;
+            }
 
             const rangeWithCoord = convertCellToRange(primaryWithCoord);
             return {
@@ -853,6 +881,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         //#endregion
     }
 
+    protected _isContextMenuGesture(evt: IPointerEvent | IMouseEvent): boolean {
+        return isSheetContextMenuGesture(evt, this._injector.get(IPlatformService).isMac, this.inRefSelectionMode());
+    }
+
+    protected _isMultiSelectModifier(evt: IPointerEvent | IMouseEvent): boolean {
+        return isSheetMultiSelectModifier(evt, this._injector.get(IPlatformService).isMac);
+    }
+
     protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent): void {
         const curControls = this.getSelectionControls();
         if (curControls.length === 0) {
@@ -860,7 +896,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
 
         if (
-            (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey && !this._remainLastEnabled) ||
+            (this._isContextMenuGesture(evt) && !this.inRefSelectionMode()) ||
+            (!this._isMultiSelectModifier(evt) && !evt.shiftKey && !this._remainLastEnabled) ||
             (this._singleSelectionEnabled && !evt.shiftKey)
         ) {
             this._clearAllSelectionControls();

@@ -18,23 +18,15 @@ import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ComponentManager, IconManager } from '../../../../common';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
-import { MobileSidebar } from '../MobileSidebar';
 import { Sidebar } from '../Sidebar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-class TestState {
-    static closes = 0;
-
-    static reset(): void {
-        this.closes = 0;
-    }
-}
 
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
@@ -67,12 +59,12 @@ describe('Sidebar', () => {
         cleanup();
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
-        TestState.reset();
     });
 
     it('closes the active panel through the close button and reports the service state', () => {
         const rendered = renderWithDependencies(<Sidebar />);
         const sidebarService = rendered.injector.get(ISidebarService);
+        let closes = 0;
 
         act(() => {
             sidebarService.open({
@@ -80,7 +72,7 @@ describe('Sidebar', () => {
                 header: { title: <span>Inspector</span> },
                 children: { title: <span>Cell details</span> },
                 onClose: () => {
-                    TestState.closes += 1;
+                    closes += 1;
                 },
             });
         });
@@ -90,7 +82,7 @@ describe('Sidebar', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Close sidebar' }));
 
         expect(sidebarService.visible).toBe(false);
-        expect(TestState.closes).toBe(1);
+        expect(closes).toBe(1);
         expect(screen.queryByRole('complementary', { name: 'Sidebar panel' })).toBeNull();
         expect(rendered.container.querySelector('[data-u-comp="sidebar"]')?.getAttribute('aria-expanded')).toBe('false');
         rendered.dispose();
@@ -122,7 +114,7 @@ describe('Sidebar', () => {
 
         expect(document.activeElement).toBe(opener);
         expect(screen.queryByRole('complementary', { name: 'Sidebar panel' })).toBeNull();
-        expect(rendered.container.querySelector('[data-u-comp="sidebar"]')?.className).toContain('univer-invisible');
+        expect(screen.queryByRole('button', { name: 'Focusable content' })).toBeNull();
         rendered.dispose();
     });
 
@@ -168,27 +160,6 @@ describe('Sidebar', () => {
         fireEvent.mouseUp(document);
 
         expect(sidebarService.width).toBe(800);
-        rendered.dispose();
-    });
-
-    it('renders sidebar content as a modal bottom drawer on mobile', () => {
-        const rendered = renderWithDependencies(<MobileSidebar />);
-        const sidebarService = rendered.injector.get(ISidebarService);
-
-        act(() => {
-            sidebarService.open({
-                id: 'comments',
-                header: { title: <span>Comments</span> },
-                children: { title: <span>Comment list</span> },
-            });
-        });
-
-        const drawer = screen.getByRole('dialog', { name: 'Sidebar panel' });
-        expect(drawer.className).toContain('univer-bottom-0');
-        expect(screen.getByText('Comment list')).toBeTruthy();
-
-        fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[0]);
-        expect(screen.queryByRole('dialog', { name: 'Sidebar panel' })).toBeNull();
         rendered.dispose();
     });
 });

@@ -66,6 +66,7 @@ import { ThreadCommentPanelService } from '../../services/thread-comment-panel.s
 import { MobileThreadCommentPanel } from '../mobile/MobileThreadCommentPanel';
 import { transformTextNodes2Document } from '../thread-comment-editor/util';
 import { ThreadCommentPanel } from '../ThreadCommentPanel';
+import { ThreadCommentTree, ThreadCommentTreeLocation } from '../ThreadCommentTree';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -683,6 +684,54 @@ describe('ThreadCommentPanel', () => {
         });
 
         expect(testBed.panelService.activeCommentId).toBeUndefined();
+    });
+
+    it.each([
+        { unitId: UNIT_ID, subUnitId: SHEET_ID, id: 'open-thread', keepsActive: true },
+        { unitId: 'other-unit', subUnitId: SHEET_ID, id: 'open-thread', keepsActive: false },
+        { unitId: UNIT_ID, subUnitId: 'other-sheet', id: 'open-thread', keepsActive: false },
+        { unitId: UNIT_ID, subUnitId: SHEET_ID, id: 'other-thread', keepsActive: false },
+    ])('handles editor canvas clicks in cell popup $unitId/$subUnitId/$id', (popup) => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'open-thread', ref: 'A1' }));
+        ({ container, root } = renderPanel(
+            testBed.injector,
+            <>
+                <ThreadCommentPanel
+                    unitId={UNIT_ID}
+                    subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                    type={UniverInstanceType.UNIVER_SHEET}
+                    onAdd={() => undefined}
+                    getSubUnitName={(subUnitId) => subUnitId}
+                />
+                <ThreadCommentTree
+                    unitId={popup.unitId}
+                    subUnitId={popup.subUnitId}
+                    id={popup.id}
+                    location={ThreadCommentTreeLocation.CELL}
+                    type={UniverInstanceType.UNIVER_SHEET}
+                    getSubUnitName={(subUnitId) => subUnitId}
+                />
+            </>
+        ));
+        act(() => {
+            getPanelItem(container!, 'open-thread').click();
+        });
+        const activeComment = testBed.panelService.activeCommentId;
+        expect(activeComment?.commentId).toBe('open-thread');
+
+        const popupElement = document.getElementById(
+            `${ThreadCommentTreeLocation.CELL}-${popup.unitId}-${popup.subUnitId}-${popup.id}`
+        );
+        expect(popupElement).not.toBeNull();
+        // The editor service boundary does not create a renderer canvas in this test.
+        const canvas = document.createElement('canvas');
+        popupElement!.appendChild(canvas);
+        act(() => {
+            canvas.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 }));
+        });
+
+        expect(testBed.panelService.activeCommentId).toEqual(popup.keepsActive ? activeComment : undefined);
     });
 
     it('clears the active comment when the primary pointer hits a blank area', () => {

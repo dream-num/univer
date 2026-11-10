@@ -37,16 +37,20 @@ import {
     FormulaCurrentConfigService,
     FormulaDataModel,
     FormulaRuntimeService,
+    FunctionService,
     HyperlinkEngineFormulaService,
     ICalculateFormulaService,
     IDefinedNamesService,
     IFormulaCurrentConfigService,
     IFormulaRuntimeService,
+    IFunctionService,
     IHyperlinkEngineFormulaService,
     LexerTreeBuilder,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    AutoFillService,
+    IAutoFillService,
     RangeProtectionRuleModel,
     SheetInterceptorService,
     SheetPermissionCheckController,
@@ -583,6 +587,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([SheetsSelectionsService]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([RangeProtectionRuleModel]);
+            injector.add([IAutoFillService, { useClass: AutoFillService }]);
             injector.add([SheetPermissionCheckController]);
             injector.add(clipboardBoundary
                 ? [IClipboardInterfaceService, { useValue: clipboardBoundary }]
@@ -609,6 +614,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

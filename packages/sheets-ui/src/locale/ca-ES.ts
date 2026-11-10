@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Girar text',
             },
             toggleGridlines: 'Alternar línies de quadrícula',
+            zoom: 'Zoom',
             fullscreen: 'Pantalla completa',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'D\'acord',
             cancel: 'Cancel·lar',
+        },
+        borderStyle: {
+            thin: 'Fi',
+            hair: 'Molt fi',
+            dotted: 'Puntejat',
+            dashed: 'Discontinu',
+            dashDot: 'Guió i punt',
+            dashDotDot: 'Guió i dos punts',
+            medium: 'Mitjà',
+            mediumDashed: 'Discontinu mitjà',
+            mediumDashDot: 'Guió i punt mitjà',
+            mediumDashDotDot: 'Guió i dos punts mitjà',
+            thick: 'Gruixut',
+            double: 'Doble',
         },
         borderLine: {
             borderTop: 'voraSuperior',

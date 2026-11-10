@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: '標準スタイル {0}',
+        customStyleNumber: 'カスタムスタイル {0}',
+        removeCustomStyle: 'カスタムスタイル {0} を削除',
         calculatedColumn: '集計列',
         columnFormula: '数式',
         columnFormulaHint: '適用すると列のデータセル {0} 個を置換します。見出しと集計行は除きます。自動入力の停止は既存セルを保持します。元に戻せます。',

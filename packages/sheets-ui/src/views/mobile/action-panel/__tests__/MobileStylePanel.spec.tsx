@@ -17,7 +17,6 @@
 import type { IDisplayMenuItem, IMenuItem, IMenuSchema } from '@univerjs/ui';
 import type { ComponentProps } from 'react';
 import type { Root } from 'react-dom/client';
-import type { MobileNumberFormatItem } from '../MobileStylePanel';
 import {
     BorderStyleTypes,
     BorderType,
@@ -52,6 +51,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { MobileNumberFormatItem, MobileStyleView } from '../MobileStylePanel';
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
@@ -61,6 +61,8 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../../../commands/commands/inline-format.command';
+import enUS from '../../../../locale/en-US';
+import zhCN from '../../../../locale/zh-CN';
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from '../../../border-panel/interface';
 import { MobileStylePanel } from '../MobileStylePanel';
 
@@ -77,6 +79,8 @@ function renderStylePanel(
     injector.add([ComponentManager]);
     injector.add([IFontService, { useClass: FontService }]);
     injector.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
+    injector.get(LocaleService).setDirection('ltr');
     configureInjector?.(injector);
     const resolvedProps: ComponentProps<typeof MobileStylePanel> = {
         groups: [],
@@ -110,7 +114,9 @@ function renderStylePanel(
 function getButton(container: HTMLElement, name: string): HTMLButtonElement {
     const button = Array.from(container.querySelectorAll('button')).find((element) =>
         element.getAttribute('aria-label') === name || element.textContent?.trim() === name);
-    if (!button) throw new Error(`Button "${name}" was not rendered.`);
+    if (!button) {
+        throw new Error(`Button "${name}" was not rendered.`);
+    }
     return button;
 }
 
@@ -131,6 +137,83 @@ afterEach(() => {
 });
 
 describe('MobileStylePanel', () => {
+    it.each(['color', 'border', 'border-color', 'border-style'] as const)(
+        'disables an open %s view when its menu permission changes',
+        (kind) => {
+            const disabled$ = new BehaviorSubject(false);
+            const hidden$ = new BehaviorSubject(false);
+            const item = { id: SetBorderBasicCommand.id, type: MenuItemType.BUTTON as const, disabled$, hidden$ };
+            const currentView: MobileStyleView = kind === 'color'
+                ? { kind, title: 'Color', item, target: 'background' as const }
+                : { kind, title: 'Border', item };
+            const onExecute = vi.fn();
+            const rendered = renderStylePanel({ currentView, onExecute });
+            root = rendered.root;
+            container = rendered.container;
+            const button = container.querySelector('button')!;
+
+            act(() => disabled$.next(true));
+            expect(container.querySelector('fieldset')?.disabled).toBe(true);
+            act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+            expect(onExecute).not.toHaveBeenCalled();
+
+            act(() => disabled$.next(false));
+            expect(container.querySelector('fieldset')?.disabled).toBe(false);
+            act(() => button.click());
+            expect(onExecute).toHaveBeenCalledOnce();
+
+            act(() => hidden$.next(true));
+            expect(container.querySelector('button')).toBeNull();
+        }
+    );
+
+    it('does not open color or border navigation when the menu is disabled', () => {
+        const onOpenView = vi.fn();
+        const rendered = renderStylePanel({
+            groups: [{ key: 'style', order: 0, children: [SetBackgroundColorCommand.id, SetBorderBasicCommand.id].map((id) => ({
+                key: id,
+                order: 0,
+                item: { id, type: MenuItemType.BUTTON, title: id, disabled$: new BehaviorSubject(true) },
+            })) }],
+            onOpenView,
+        });
+        root = rendered.root;
+        container = rendered.container;
+        for (const button of container.querySelectorAll('button')) {
+            expect(button.disabled).toBe(true);
+            act(() => button.click());
+        }
+        expect(onOpenView).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        [LocaleType.EN_US, 'Dashed'],
+        [LocaleType.ZH_CN, '虚线'],
+    ])('applies the numeric border style selected by its localized name in %s', (language, label) => {
+        const onExecute = vi.fn();
+        const rendered = renderStylePanel({
+            currentView: {
+                kind: 'border-style',
+                title: 'Border style',
+                item: { id: SetBorderBasicCommand.id, type: MenuItemType.BUTTON },
+            },
+            onExecute,
+        }, (injector) => {
+            const localeService = injector.get(LocaleService);
+            localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
+            localeService.setLocale(language);
+        });
+        root = rendered.root;
+        container = rendered.container;
+
+        clickButton(container, label);
+
+        expect(onExecute).toHaveBeenCalledExactlyOnceWith({
+            id: SetBorderBasicCommand.id,
+            value: expect.objectContaining({ style: BorderStyleTypes.DASHED }),
+        });
+    });
+
     it('keeps BIUS controls independently selected and clickable', () => {
         const commandIds = [
             SetRangeBoldCommand.id,
@@ -509,7 +592,7 @@ describe('MobileStylePanel', () => {
         rendered = renderStylePanel({ currentView: { kind: 'border-style', title: 'Border style', item }, onExecute });
         root = rendered.root;
         container = rendered.container;
-        BORDER_SIZE_CHILDREN.forEach((option) => clickButton(rendered.container, String(option.value)));
+        BORDER_SIZE_CHILDREN.forEach((option) => clickButton(rendered.container, option.label));
         expect(onExecute.mock.calls.map(([command]) => command)).toEqual(BORDER_SIZE_CHILDREN.map((option) => ({
             id: SetBorderBasicCommand.id,
             value: { ...borderValue, style: option.value },

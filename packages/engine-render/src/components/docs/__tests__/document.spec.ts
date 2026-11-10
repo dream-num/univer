@@ -15,11 +15,10 @@
  */
 
 import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import type { IExtensionConfig } from '../../extension';
 import {
     BooleanNumber,
     ColumnSeparatorType,
+    createDocumentModelWithStyle,
     CustomRangeType,
     DashStyleType,
     DataStreamTreeTokenType,
@@ -38,6 +37,8 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { IExtensionConfig } from '../../extension';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
 import {
@@ -49,15 +50,20 @@ import {
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
 import { UniverRenderingContext } from '../../../context';
+import { DrawingGroupObject } from '../../../drawing-group';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
-import { Path, Rect } from '../../../shape';
+import { Image } from '../../../shape/image';
+import { Path } from '../../../shape/path';
+import { Rect } from '../../../shape/rect';
 import { Viewport } from '../../../viewport';
+import { SheetCellDocumentViewModel } from '../../sheets/sheet-cell-document-view-model';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
+import { Liquid } from '../liquid';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 
@@ -495,6 +501,79 @@ describe('documents render', () => {
             bed.viewModel.dispose();
             bed.dataModel.dispose();
         }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((flavor) => [false, true].map((grouped) => [flavor, grouped] as const)))('picks exposed behind-text drawings while preserving text editing (flavor %s, grouped %s)', (documentFlavor, grouped) => {
+        const univer = new Univer();
+        const model = new DocumentDataModel({
+            id: 'behind-text-pick',
+            body: {
+                dataStream: 'Hello\r\n',
+                paragraphs: [{ startIndex: 5, paragraphId: 'paragraph' }],
+                sectionBreaks: [{ startIndex: 6, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor,
+                pageSize: { width: 200, height: 420 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const documents = new Documents('behind-text-doc', skeleton, { pageLayoutType: PageLayoutType.VERTICAL, pageMarginTop: 0, pageMarginLeft: 0 });
+        documents.transformByState({ left: 40, top: 30, width: 200, height: 420 });
+        scene.addObject(documents, 2);
+        const drawing = new Image('behind-text-drawing', { left: 40, top: 30, width: 160, height: 180 });
+        drawing.isDrawingObject = true;
+        scene.addObject(drawing, 1);
+        let target: Image | DrawingGroupObject = drawing;
+        if (grouped) {
+            const group = new DrawingGroupObject('behind-text-group');
+            group.setBaseBound({ left: 40, top: 30, width: 160, height: 180 });
+            group.transformByState({ left: 40, top: 30, width: 160, height: 180 });
+            scene.addObject(group, 1);
+            group.addObject(drawing);
+            target = group;
+        }
+
+        const page = skeleton.getSkeletonData()!.pages[0];
+        const section = page.sections[0];
+        const column = section.columns[0];
+        const line = column.lines[0];
+        const divide = line.divides[0];
+        const glyph = divide.glyphGroup.find((item) => item.content === 'H')!;
+        const liquid = new Liquid();
+        liquid.translatePagePadding(page);
+        liquid.translateSection(section);
+        liquid.translateColumn(column);
+        liquid.translateLine(line, true, true);
+        liquid.translateDivide(divide);
+        const textPoint = Vector2.create(40 + liquid.x + glyph.left + glyph.width / 2, 30 + liquid.y + line.contentHeight / 2);
+
+        expect(scene.pick(textPoint)).toBe(documents);
+        expect(scene.pick(Vector2.create(textPoint.x, 30 + liquid.y + line.contentHeight + 1))).toBe(target);
+        expect(scene.pick(Vector2.create(180, 150))).toBe(target);
+        expect(scene.pick(Vector2.create(230, 250))).toBe(documents);
+        target.hide();
+        expect(scene.pick(Vector2.create(180, 150))).toBe(documents);
+        target.show();
+        target.evented = false;
+        expect(scene.pick(Vector2.create(180, 150))).toBe(documents);
+        target.evented = true;
+        scene.transformByState({ scaleX: 1.5, scaleY: 1.5 });
+        expect(scene.pick(Vector2.create(270, 225))).toBe(target);
+        expect(scene.pick(Vector2.create(textPoint.x * 1.5, textPoint.y * 1.5))).toBe(documents);
+
+        scene.transformByState({ scaleX: 1, scaleY: 1 });
+        attachTable(page);
+        const tablePoint = Vector2.create(40 + page.marginLeft + 60, 30 + page.marginTop + 40);
+        expect(scene.pick(tablePoint) === documents).toBe(true);
+
+        skeleton.dispose();
+        univer.dispose();
     });
 
     it('hit tests table content and controls that overflow the document bounds', () => {
@@ -1977,6 +2056,36 @@ describe('documents render', () => {
         documents.dispose();
         skeleton.dispose();
         univer.dispose();
+    });
+
+    it('centers upright stacked ink of different widths on one vertical axis', () => {
+        const univer = new Univer();
+        const model = createDocumentModelWithStyle('Wi中é', { ff: 'Arial', fs: 14 }, { textRotation: { a: 0, v: BooleanNumber.TRUE } });
+        const skeleton = DocumentSkeleton.create(new SheetCellDocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const documents = new Documents('stacked-ink', skeleton);
+        try {
+            skeleton.calculate();
+            scene.addObject(documents, 1);
+            documents.transformByState({ width: 100, height: 200 });
+            const context = canvas.getContext();
+            const fill = vi.spyOn(context, 'fillText');
+            documents.draw(context);
+            const glyphs = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0].divides.flatMap((divide) => divide.glyphGroup).filter((glyph) => glyph.content && glyph.content !== '\r');
+            const calls = fill.mock.calls.filter(([content]) => content && content !== '\r');
+            expect(calls.map(([content]) => content)).toEqual(['W', 'i', '中', 'é']);
+            const centerX = calls[0][1] + glyphs[0].bBox.width / 2;
+            for (let index = 0; index < calls.length; index++) {
+                expect(calls[index][1] + glyphs[index].bBox.width / 2).toBeCloseTo(centerX);
+                if (index > 0) {
+                    expect(calls[index][2] - calls[index - 1][2]).toBeGreaterThanOrEqual(glyphs[index - 1].bBox.aba + glyphs[index].bBox.abd);
+                }
+            }
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
     });
 
     it('draws vertical cell glyphs down the physical cell and restores its parent origin', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, ThemeService } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
 import { Range } from '@univerjs/core';
@@ -38,7 +38,10 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
     public renderCache = new Set<string>();
     protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' | 'none' = 'always';
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
+    constructor(
+        private readonly _themeService: ThemeService,
+        shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none'
+    ) {
         super();
         this._img.src = base64;
         if (shadowStrategy) {
@@ -80,6 +83,7 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
             return;
         }
         ctx.save();
+        ctx.globalAlpha *= this._themeService.darkMode ? 0.16 : 1;
         if (!this._pattern) {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
@@ -124,10 +128,6 @@ export class RangeProtectionCanViewRenderExtension extends RangeProtectionRender
     override uKey = RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_VIEW_Z_INDEX;
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
-        super(shadowStrategy);
-    }
-
     protected override shouldRender(config: ICellPermission): boolean {
         // If strategy is 'none', never show shadow
         if (this._shadowStrategy === 'none') {
@@ -149,10 +149,6 @@ export class RangeProtectionCanViewRenderExtension extends RangeProtectionRender
 export class RangeProtectionCanNotViewRenderExtension extends RangeProtectionRenderExtension {
     override uKey = RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_NOT_VIEW_Z_INDEX;
-
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
-        super(shadowStrategy);
-    }
 
     protected override shouldRender(config: ICellPermission): boolean {
         // If strategy is 'none', never show shadow

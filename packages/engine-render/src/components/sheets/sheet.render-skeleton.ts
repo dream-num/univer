@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-import type { BorderStyleTypes, IBorderStyleData, ICellDataForSheetInterceptor, ICellInfo, ICellWithCoord, IColAutoWidthInfo, IColumnRange, IDocumentData, IPaddingData, IRange, IRowAutoHeightInfo, IRowRange, ISize, IStyleData, ITextRotation, Nullable, Styles, Worksheet } from '@univerjs/core';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { ITransformChangeState } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import type { Scene } from '../../scene';
-import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+import type {
+    BorderStyleTypes,
+    IBorderStyleData,
+    ICellDataForSheetInterceptor,
+    ICellInfo,
+    ICellWithCoord,
+    IColAutoWidthInfo,
+    IColumnRange,
+    IDocumentData,
+    IPaddingData,
+    IRange,
+    IRowAutoHeightInfo,
+    IRowRange,
+    ISize,
+    IStyleData,
+    ITextRotation,
+    Nullable,
+    Styles,
+    Worksheet,
+} from '@univerjs/core';
 import {
     BooleanNumber,
-
     CellValueType,
     ColorKit,
     DEFAULT_STYLES,
@@ -30,46 +43,48 @@ import {
     getColorStyle,
     getDisplayValueFromCell,
     HorizontalAlign,
-
     IConfigService,
     IContextService,
-
     Inject,
     Injector,
-
     isCellCoverable,
     isDefaultFormat,
-
     isNullCell,
-
     isWhiteColor,
-
     LocaleService,
-
     numfmt,
     ObjectMatrix,
     Range,
     searchArray,
+    SHEET_TEXT_LINE_GAP,
     SheetSkeleton,
-
     ThemeService,
     Tools,
     VerticalAlign,
-
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { FontCache } from '../../basics';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { ITransformChangeState } from '../../basics/interfaces';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
+import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, getFontStyleString } from '../../basics/tools';
 import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import { FontCache } from '../docs/layout/shaping-engine/font-cache';
 import { columnIterator } from '../docs/layout/tools';
-import { DocumentViewModel } from '../docs/view-model/document-view-model';
-import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH, shouldRenderRowText } from './constants';
+import {
+    EXPAND_SIZE_FOR_RENDER_OVERFLOW,
+    MEASURE_EXTENT,
+    MEASURE_EXTENT_FOR_PARAGRAPH,
+    shouldRenderRowText,
+} from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
+import { SheetCellDocumentViewModel } from './sheet-cell-document-view-model';
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
 
@@ -226,6 +241,13 @@ function updateDocumentPageWidth(documentModel: DocumentDataModel, cellInfo: ICe
     documentModel.updateDocumentDataPageSize(endX - startX, Infinity);
 }
 
+function updateStackedDocumentPageWidth(documentModel: DocumentDataModel, cellInfo: ICellWithCoord): void {
+    const { startY, endY } = cellInfo.isMergedMainCell ? cellInfo.mergeInfo : cellInfo;
+    const { marginLeft = 0, marginRight = 0 } = documentModel.getSnapshot().documentStyle;
+    // Tiny rows still need a positive layout width; cell clipping handles the invisible ink.
+    documentModel.updateDocumentDataPageSize(Math.max(endY - startY, marginLeft + marginRight + 1), Infinity);
+}
+
 function pushRowRange(ranges: IRange[], row: number, startColumn: number, endColumn: number): void {
     if (endColumn < startColumn) {
         return;
@@ -310,6 +332,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _defaultGridlinesColor!: string;
     private _scene: Nullable<Scene> = null;
 
+    readonly textLineGap: number;
+
     constructor(
         worksheet: Worksheet,
         _styles: Styles,
@@ -319,6 +343,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         @Inject(Injector) _injector: Injector
     ) {
         super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
+        this.textLineGap = _configService.getConfig<number>(SHEET_TEXT_LINE_GAP) ?? 0;
         const themeService = _injector.get(ThemeService);
         this.disposeWithMe(themeService.currentTheme$.subscribe(() => {
             const gray200 = themeService.getColorFromTheme('gray.200');
@@ -503,7 +528,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @param vpInfo viewBounds
      * @param options screen scale
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
     setStylesCache(vpInfo?: IViewportInfo, options?: ISetStylesCacheOptions): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
@@ -716,7 +740,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return results;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
     calculateAutoHeightForCell(row: number, col: number) {
         const { columnData, defaultColumnWidth } = this._worksheetData;
         const cellMergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
@@ -768,14 +791,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 return undefined;
             }
 
-            const documentViewModel = new DocumentViewModel(documentModel);
+            const documentViewModel = new SheetCellDocumentViewModel(documentModel);
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
             documentSkeleton.calculate();
 
             let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
@@ -816,7 +839,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     getFontStyleString(style).fontCache,
                     style?.tb === WrapStrategy.WRAP,
                     colWidth - paddingLeft - paddingRight,
-                    Infinity
+                    Infinity,
+                    this.textLineGap
                 );
                 skeleton.calculate();
                 return skeleton.getTotalHeight() + paddingTop + paddingBottom;
@@ -996,16 +1020,20 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             return measuredWidth;
         }
 
-        const documentViewModel = new DocumentViewModel(documentModel);
+        const documentViewModel = new SheetCellDocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         if (style?.tb === WrapStrategy.WRAP) {
-            documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
+            if (textRotation.v === BooleanNumber.TRUE) {
+                updateStackedDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, column));
+            } else {
+                documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
+            }
         } else {
             documentModel.updateDocumentDataPageSize(Infinity, Infinity);
         }
 
-        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
+        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
 
         documentSkeleton.calculate();
         // key
@@ -1121,7 +1149,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
-    // eslint-disable-next-line complexity, max-lines-per-function
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem, hasMergeData = true): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
@@ -1210,19 +1237,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             this.appendToOverflowCache(row, column, startColumn, endColumn);
         } else if (wrapStrategy === WrapStrategy.WRAP && vertexAngle !== 0) {
-            // Merged cells do not support overflow.
-            if (hasMergeData && this.intersectMergeRange(row, column)) {
+            const isMerged = hasMergeData && this.intersectMergeRange(row, column);
+            if (isMerged && centerAngle !== VERTICAL_ROTATE_ANGLE) {
                 return true;
             }
 
-            const { startY, endY } = this.getCellWithCoordByIndex(
-                row,
-                column
-            );
-
-            const cellHeight = endY - startY;
-            documentSkeleton!.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
+            const cellInfo = this.getCellWithCoordByIndex(row, column);
+            const documentModel = documentSkeleton!.getViewModel().getDataModel();
+            if (centerAngle === VERTICAL_ROTATE_ANGLE) {
+                updateStackedDocumentPageWidth(documentModel, cellInfo);
+            } else {
+                documentModel.updateDocumentDataPageSize(cellInfo.endY - cellInfo.startY);
+            }
             documentSkeleton!.calculate();
+
+            // Merged stacked cells wrap within their full height without overflowing adjacent cells.
+            if (isMerged) {
+                return true;
+            }
             const contentSize = getDocsSkeletonPageSize(documentSkeleton!, vertexAngle);
 
             if (!contentSize) {
@@ -1453,7 +1485,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (fontCache.documentSkeleton) {
             const snapshot = fontCache.documentSkeleton.getViewModel().getDataModel().getSnapshot();
             const documentModel = new DocumentDataModel(scaleDocumentDataForShrinkToFit(snapshot, scale, fallbackFontSize));
-            const documentSkeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), this._localeService);
+            const documentSkeleton = DocumentSkeleton.create(new SheetCellDocumentViewModel(documentModel), this._localeService, { lineGap: this.textLineGap });
             documentSkeleton.calculate();
             fontCache.documentSkeleton = documentSkeleton;
         } else {
@@ -1531,10 +1563,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
                     updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
                 }
-                const documentViewModel = new DocumentViewModel(documentModel);
+                const documentViewModel = new SheetCellDocumentViewModel(documentModel);
                 if (documentViewModel) {
-                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
-                    documentSkeleton.calculate();
+                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService, { lineGap: this.textLineGap });
+                    // Wrapped stacks are laid out once their physical cell height is available below.
+                    if (wrapStrategy !== WrapStrategy.WRAP || centerAngle !== VERTICAL_ROTATE_ANGLE || style.stf === BooleanNumber.TRUE) {
+                        documentSkeleton.calculate();
+                    }
 
                     config = {
                         documentSkeleton,

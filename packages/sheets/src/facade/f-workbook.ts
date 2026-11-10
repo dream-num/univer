@@ -21,6 +21,7 @@ import type {
     IDisposable,
     IRange,
     IStyleData,
+    IWorkbookCalculationSettings,
     IWorkbookData,
     IWorksheetData,
     Workbook,
@@ -54,6 +55,7 @@ import {
     RemoveSheetCommand,
     SetDefinedNameCommand,
     SetSelectionsOperation,
+    SetWorkbookCalculationSettingsCommand,
     SetWorkbookNameCommand,
     SetWorksheetActiveOperation,
     SetWorksheetOrderCommand,
@@ -1158,5 +1160,44 @@ export class FWorkbook extends FBaseInitialable {
      */
     removeStyles(styleKeys: string[]): void {
         this._workbook.removeStyles(styleKeys);
+    }
+
+    /**
+     * Get the workbook's iterative calculation settings.
+     * Missing or invalid settings use the defaults: iteration disabled, 100 iterations and a maximum change of 0.001.
+     * @returns {IWorkbookCalculationSettings} A copy of the normalized workbook calculation settings.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const settings = fWorkbook.getCalculationSettings();
+     * console.log(settings.iterativeCalculation, settings.maxIterations, settings.maxChange);
+     * ```
+     */
+    getCalculationSettings(): IWorkbookCalculationSettings {
+        return this._workbook.getCalculationSettings();
+    }
+
+    /**
+     * Set iterative calculation settings for the entire workbook through an undoable command.
+     * @param {IWorkbookCalculationSettings} settings The complete calculation settings.
+     * Set `iterativeCalculation` to enable or disable iterative evaluation of circular references.
+     * `maxIterations` must be an integer from 1 to 32767, and `maxChange` must be a finite positive number.
+     * @returns {boolean} Whether the settings command succeeded. Returns false if the workbook cannot be edited or found.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const success = fWorkbook.setCalculationSettings({
+     *     iterativeCalculation: true,
+     *     maxIterations: 100,
+     *     maxChange: 0.001,
+     * });
+     * console.log('Calculation settings updated:', success);
+     * ```
+     */
+    setCalculationSettings(settings: IWorkbookCalculationSettings): boolean {
+        return this._commandService.syncExecuteCommand(SetWorkbookCalculationSettingsCommand.id, {
+            unitId: this.id,
+            settings,
+        });
     }
 }

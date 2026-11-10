@@ -28,6 +28,22 @@ describe('Test networkdays.intl function', () => {
     const testFunction = new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS_INTL);
 
     describe('NetworkdaysIntl', () => {
+        it.each(['1', '000001', '00000110', '00000001', '00000|1', '0000011x', '11111111', '0000011\n'])('rejects invalid weekend mask %j', (weekend) => {
+            const result = testFunction.calculate(NumberValueObject.create(45000), NumberValueObject.create(45006), StringValueObject.create(weekend));
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+
+        it('preserves valid masks and numeric weekend codes', () => {
+            const startDate = NumberValueObject.create(45000);
+            const endDate = NumberValueObject.create(45006);
+
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, StringValueObject.create('0000011')))).toBe(5);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, NumberValueObject.create(1)))).toBe(5);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, NumberValueObject.create(11)))).toBe(6);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, StringValueObject.create('0000000')))).toBe(7);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, StringValueObject.create('1111111')))).toBe(0);
+        });
+
         it('Value is all date string', () => {
             const startDate = StringValueObject.create('2012-10-1');
             const endDate = StringValueObject.create('2013-3-1');

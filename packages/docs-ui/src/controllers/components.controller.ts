@@ -38,6 +38,7 @@ import {
     H5Icon,
     HeaderFooterIcon,
     HorizontallyIcon,
+    InsertBelowDoubleIcon,
     InsertDoubleIcon,
     InsertRowAboveDoubleIcon,
     InsertRowBelowDoubleIcon,
@@ -72,10 +73,12 @@ import {
     TodoListDoubleIcon,
     UnderlineIcon,
     UnorderIcon,
+    ZoomInIcon,
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions } from '../views/DocPasteOptions';
+import { EditorColorPicker } from '../views/EditorColorPicker';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
 import {
     COMPONENT_DOC_HEADER_FOOTER_PANEL,
@@ -137,14 +140,7 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
-    }
-
-    private _registerParts(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions));
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 
     private _registerIcons(): void {
@@ -170,6 +166,7 @@ export class ComponentsController extends Disposable {
             H5Icon,
             HeaderFooterIcon,
             HorizontallyIcon,
+            InsertBelowDoubleIcon,
             InsertDoubleIcon,
             InsertRowAboveDoubleIcon,
             InsertRowBelowDoubleIcon,
@@ -203,6 +200,7 @@ export class ComponentsController extends Disposable {
             TodoListDoubleIcon,
             UnderlineIcon,
             UnorderIcon,
+            ZoomInIcon,
             DefaultTextColorIcon,
             HeaderTextColorIcon,
             MoreRightIcon,
@@ -235,7 +233,7 @@ export class ComponentsController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(this._componentManager.register(DOC_HEADER_FOOTER_RIBBON_CONTROL, DocHeaderFooterRibbonControl));
-        if (!this._componentManager.get(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
+        if (!this._componentManager.hasDefault(COMPONENT_DOC_HEADER_FOOTER_PANEL)) {
             this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
         }
 
@@ -247,6 +245,7 @@ export class ComponentsController extends Disposable {
             [DOC_PARAGRAPH_MENU_COMPONENT_KEY, ParagraphMenu],
             [DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, TableBlockMenu],
             [FLOAT_MENU_COMPONENT_KEY, FloatToolbar],
+            [EditorColorPicker.componentKey, EditorColorPicker],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
             [DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery],
         ] as const).forEach(([key, comp]) => {
@@ -254,5 +253,9 @@ export class ComponentsController extends Disposable {
                 this._componentManager.register(key, comp)
             );
         });
+
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions));
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 }

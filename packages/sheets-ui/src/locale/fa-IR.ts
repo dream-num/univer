@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'چرخش متن',
             },
             toggleGridlines: 'تغییر وضعیت خطوط شبکه',
+            zoom: 'بزرگ‌نمایی',
             fullscreen: 'تمام‌صفحه',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'تایید',
             cancel: 'انصراف',
+        },
+        borderStyle: {
+            thin: 'نازک',
+            hair: 'بسیار نازک',
+            dotted: 'نقطه‌چین',
+            dashed: 'خط‌چین',
+            dashDot: 'خط و نقطه',
+            dashDotDot: 'خط و دو نقطه',
+            medium: 'متوسط',
+            mediumDashed: 'خط‌چین متوسط',
+            mediumDashDot: 'خط و نقطه متوسط',
+            mediumDashDotDot: 'خط و دو نقطه متوسط',
+            thick: 'ضخیم',
+            double: 'دوتایی',
         },
         borderLine: {
             borderTop: 'خط بالای قاب',

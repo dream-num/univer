@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import { DocumentFlavor } from '@univerjs/core';
+import type { DocumentDataModel, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
+import { DocumentFlavor, UniverInstanceType } from '@univerjs/core';
+import { distinctUntilChanged, Observable, of, switchMap } from 'rxjs';
+import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 
 const DEFAULT_DOC_ZOOM_RATIO = 1;
 export const DEFAULT_MODERN_DOC_ZOOM_RATIO = 1;
+export const DOC_ZOOM_SHORTCUTS = [50, 80, 100, 130, 150, 170, 200, 400];
 
 type DocZoomSource = Pick<DocumentDataModel, 'getSettings' | 'getSnapshot'>;
 
@@ -32,4 +36,27 @@ export function getDocEffectiveZoomRatio(documentModel: DocZoomSource): number {
     return documentFlavor === DocumentFlavor.MODERN
         ? DEFAULT_MODERN_DOC_ZOOM_RATIO
         : DEFAULT_DOC_ZOOM_RATIO;
+}
+
+export function getDocZoomRatio$(commandService: ICommandService, instanceService: IUniverInstanceService) {
+    return instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(
+        switchMap((documentModel) => {
+            if (!documentModel) {
+                return of(100);
+            }
+
+            return new Observable<number>((subscriber) => {
+                const update = () => subscriber.next(Math.round(getDocEffectiveZoomRatio(documentModel) * 100));
+                const disposable = commandService.onCommandExecuted((command) => {
+                    if (command.id === SetDocZoomRatioOperation.id &&
+                        (command.params as ISetDocZoomRatioOperationParams).unitId === documentModel.getUnitId()) {
+                        update();
+                    }
+                });
+                update();
+                return () => disposable.dispose();
+            });
+        }),
+        distinctUntilChanged()
+    );
 }

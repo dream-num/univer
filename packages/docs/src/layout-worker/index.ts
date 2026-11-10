@@ -15,22 +15,38 @@
  */
 
 import type { IMessageProtocol } from '@univerjs/rpc';
-import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutExecutor, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
-import type { IDocsLayoutFontFace, IUniverDocsLayoutWorkerConfig } from './config/config';
-import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import { DependentOn, Disposable, IConfigService, Inject, Injector, merge, Plugin, Tools } from '@univerjs/core';
 import { FontCache } from '@univerjs/engine-render';
 import { ChannelService, toModule } from '@univerjs/rpc';
 import { Observable, shareReplay } from 'rxjs';
+import type {
+    IDocLayoutCancelRequest,
+    IDocLayoutCreateSessionRequest,
+    IDocLayoutDisposeMountRequest,
+    IDocLayoutDisposeSessionRequest,
+    IDocLayoutExecutor,
+    IDocLayoutPageRequest,
+    IDocLayoutPageResult,
+    IDocLayoutPerformanceMetrics,
+    IDocLayoutStartRequest,
+    IDocLayoutStartResult,
+    IDocLayoutStepRequest,
+    IDocLayoutStepResult,
+} from '../services/doc-layout-executor.service';
+import type { IDocsLayoutFontFace, IUniverDocsLayoutWorkerConfig } from './config/config';
+import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import pkg from '../../package.json';
 import { UniverDocsPlugin } from '../plugin';
 import { DocLayoutExecutorService, DocLayoutExecutorType } from '../services/doc-layout-executor.service';
-import { DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS, defaultPluginDocsLayoutWorkerConfig, DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY } from './config/config';
+import {
+    DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS,
+    defaultPluginDocsLayoutWorkerConfig,
+    DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY,
+} from './config/config';
 import { collectDocumentFontFamilies, measureDocumentFontFamilies } from './document-font-metrics';
 import { DocsLayoutFontLoader } from './font-loader';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';
 import { DOCS_LAYOUT_WORKER_CHANNEL, DOCS_LAYOUT_WORKER_PROTOCOL_VERSION } from './protocol';
-import { startDocsLayoutWorker } from './worker';
 
 const FONT_METRICS_TOLERANCE = 1;
 
@@ -312,7 +328,3 @@ export class UniverDocsLayoutWorkerPlugin extends Plugin {
         this.disposeWithMe(this._layoutExecutorService.register(client));
     }
 }
-
-export type { IUniverDocsLayoutWorkerConfig } from './config/config';
-export type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerFontProbe, IDocsLayoutWorkerRuntime } from './protocol';
-export { startDocsLayoutWorker };

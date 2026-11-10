@@ -45,7 +45,7 @@ export class Proper extends BaseFunction {
 
         const textValue = text.getValue().toLocaleString();
 
-        const result = textValue.toLocaleLowerCase().replace(/(^|\b|\W|\d|_)[a-z]/g, (txt) => txt.toLocaleUpperCase());
+        const result = textValue.toLocaleLowerCase().replace(/(^|[^\p{L}])(\p{L})/gu, (_, before, letter) => before + letter.toLocaleUpperCase());
 
         return StringValueObject.create(result);
     }

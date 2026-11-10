@@ -44,6 +44,7 @@ export interface ICellAlert {
     height: number;
     key: string;
     menu?: ICellAlertMenuItem[];
+    action?: ICellAlertMenuItem;
 }
 
 export class CellAlertManagerService extends Disposable {
@@ -63,6 +64,7 @@ export class CellAlertManagerService extends Disposable {
         super();
 
         this.disposeWithMe(() => {
+            this.clearAlert();
             this._currentAlert$.complete();
         });
     }
@@ -71,9 +73,7 @@ export class CellAlertManagerService extends Disposable {
         let lastPopup = this._currentAlert.get(alert.key);
         if (lastPopup) {
             lastPopup.dispose.dispose();
-        };
-        if (lastPopup) {
-            lastPopup.dispose.dispose();
+            lastPopup.alert = alert;
         } else {
             lastPopup = {
                 alert,
@@ -113,9 +113,6 @@ export class CellAlertManagerService extends Disposable {
             }
         );
         if (disposable) {
-            if (lastPopup) {
-                lastPopup.dispose?.dispose();
-            }
             lastPopup.dispose = disposable;
         }
 

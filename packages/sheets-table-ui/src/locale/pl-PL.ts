@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Styl domyślny {0}',
+        customStyleNumber: 'Styl niestandardowy {0}',
+        removeCustomStyle: 'Usuń styl niestandardowy {0}',
         calculatedColumn: 'Kolumna obliczeniowa',
         columnFormula: 'Formuła',
         columnFormulaHint: 'Natychmiast zastępuje {0} komórek danych bez nagłówka i sumy. Zatrzymanie zachowuje istniejące komórki. Można cofnąć.',

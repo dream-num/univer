@@ -16,7 +16,6 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { LocaleKey } from '../../locale/types';
 import { generateRandomId, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, clsx, Confirm, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -35,6 +34,7 @@ import {
 import { useDependency, useObservable, useVirtualList } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import { DefinedNameInput } from './DefinedNameInput';
 
 export interface IDefinedNameContainerProps {
@@ -243,7 +243,7 @@ export const DefinedNameContainer = ({
         <div
             data-u-comp="defined-name-container"
             className="
-              univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-flex-col
+              univer-relative univer-box-border univer-flex univer-h-0 univer-min-h-full univer-w-full univer-flex-col
               univer-overflow-hidden
             "
         >
@@ -278,7 +278,7 @@ export const DefinedNameContainer = ({
                 className={clsx('univer-min-h-0 univer-flex-1 univer-overflow-y-auto', scrollbarClassName)}
                 {...virtualActions.containerProps}
             >
-                <div style={virtualActions.wrapperStyle}>
+                <div className="univer-box-content univer-pb-4" style={virtualActions.wrapperStyle}>
                     {virtualDefinedNames.map(({ data: definedName, index }) => {
                         return (
                             <div
@@ -291,9 +291,9 @@ export const DefinedNameContainer = ({
                             >
                                 <div
                                     className={clsx(`
-                                      univer-group univer-relative univer-flex univer-w-full univer-cursor-default
-                                      univer-select-none univer-items-center univer-justify-between univer-rounded-md
-                                      univer-p-2
+                                      univer-group univer-relative univer-box-border univer-flex univer-w-full
+                                      univer-cursor-default univer-select-none univer-items-center
+                                      univer-justify-between univer-rounded-md univer-p-2
                                       hover:univer-bg-gray-50
                                       dark:hover:!univer-bg-gray-700
                                     `, {
@@ -310,7 +310,7 @@ export const DefinedNameContainer = ({
                                             `}
                                         >
                                             {definedName.name}
-                                            <span className="univer-text-xxs univer-ml-1 univer-text-gray-400">
+                                            <span className="univer-ml-1 univer-text-xs univer-text-gray-400">
                                                 {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                             </span>
                                         </div>

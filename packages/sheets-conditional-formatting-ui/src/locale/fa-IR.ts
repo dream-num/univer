@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'توقف در صورت درست بودن',
             createRule: 'ایجاد قانون',
             clear: 'پاک کردن همه قوانین',
             range: 'اعمال محدوده',

@@ -130,7 +130,7 @@ export class Border extends SheetExtension {
 
             if (type !== BORDER_TYPE.TOP && type !== BORDER_TYPE.BOTTOM && type !== BORDER_TYPE.LEFT && type !== BORDER_TYPE.RIGHT) {
                 if (isMerged) {
-                    return true;
+                    continue;
                 }
 
                 if (isMergedMainCell) {

@@ -267,6 +267,9 @@ function updateParagraphs(
                 } = removeParagraph;
                 let newParagraphStyle;
                 let newBullet;
+                const paragraphAttributes = coverType === UpdateDocsAttributeType.COVER
+                    ? { ...removeParagraph, ...updateParagraph }
+                    : { ...updateParagraph, ...removeParagraph };
 
                 if (coverType === UpdateDocsAttributeType.COVER) {
                     newParagraphStyle = { ...removeParagraphStyle, ...updateParagraphStyle };
@@ -292,10 +295,11 @@ function updateParagraphs(
 
                 if (updateStartIndex === removeStartIndex) {
                     splitUpdateParagraphs.push({
+                        ...paragraphAttributes,
                         startIndex: updateStartIndex,
                         paragraphId: updateParagraphId ?? removeParagraphId,
                         paragraphStyle: newParagraphStyle,
-                        bullet: newBullet,
+                        bullet: removeBullet == null && updateBullet == null ? undefined : newBullet,
                     });
                     break;
                 }

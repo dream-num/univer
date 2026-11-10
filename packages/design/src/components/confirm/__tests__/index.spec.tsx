@@ -43,7 +43,7 @@ describe('Confirm', () => {
     it('should render the mobile confirmation as a bottom surface', () => {
         render(<MobileConfirm visible title="Mobile confirm" confirmText="Confirm">content</MobileConfirm>);
 
-        expect(document.querySelector('[role="dialog"]')).toHaveClass('!univer-bottom-0');
+        expect(screen.getByRole('dialog')).toHaveStyle({ position: 'fixed', bottom: '0px' });
         expect(screen.getByRole('button', { name: 'Confirm' }).parentElement).toHaveClass('univer-w-full');
     });
 });

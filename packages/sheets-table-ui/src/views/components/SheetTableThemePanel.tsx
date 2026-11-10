@@ -30,7 +30,6 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
 import {
     TABLE_BORDER_DEFAULT,
     TABLE_BORDER_NONE,
@@ -71,12 +70,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const rangeThemeModel = useDependency(SheetRangeThemeModel);
     const sheetTableThemeUIController = useDependency(SheetTableThemeUIController);
 
-    const rangeThemeMapChanged = useObservable(rangeThemeModel.rangeThemeMapChange$);
-    const tableRefresh = useObservable(sheetTableThemeUIController.refreshTable$);
+    useObservable(rangeThemeModel.rangeThemeMapChange$);
+    useObservable(sheetTableThemeUIController.refreshTable$);
 
     const errorService = useDependency(ErrorService);
-
-    const [, setRefresh] = useState(Math.random);
 
     const themeConfig = useObservable(tableManager.tableThemeChanged$, {
         theme: table?.getTableStyleId(),
@@ -142,11 +139,9 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
         });
     };
 
-    useEffect(() => {
-        setRefresh(Math.random());
-    }, [rangeThemeMapChanged, tableRefresh]);
-
-    if (!table) return null;
+    if (!table) {
+        return null;
+    }
 
     const headerBgIsDark = new ColorKit(headerBg).isDark();
     const firstRowBgIsDark = new ColorKit(firstRowBg).isDark();
@@ -223,6 +218,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                 </h5>
                 <div className="univer-grid univer-grid-cols-6 univer-gap-2">
                     {defaultRangeThemes.map((item) => {
+                        const label = localeService.t<LocaleKey>('sheets-table-ui.defaultStyleNumber', item.slice(TABLE_DEFAULT_NAME_PREFIX.length));
                         const rangeThemeItem = rangeThemeModel.getDefaultRangeThemeStyle(item);
                         const rowBackgrounds = [
                             rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR,
@@ -236,8 +232,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             <button
                                 key={item}
                                 type="button"
-                                title={item}
-                                aria-label={item}
+                                title={label}
+                                aria-label={label}
                                 aria-pressed={selected}
                                 className={clsx(`
                                   univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-flex-col
@@ -300,6 +296,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         <IncreaseIcon className="univer-size-4" />
                     </button>
                     {customRangeThemes.map((item) => {
+                        const styleNumber = item.slice(TABLE_CUSTOM_NAME_PREFIX.length);
+                        const label = localeService.t<LocaleKey>('sheets-table-ui.customStyleNumber', styleNumber);
                         const rangeThemeItem = rangeThemeModel.getCustomRangeThemeStyle(unitId, item);
                         const rowBackgrounds = [
                             rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb,
@@ -313,8 +311,8 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                             <div key={item} className="univer-group univer-relative univer-h-12 univer-min-w-0">
                                 <button
                                     type="button"
-                                    title={item}
-                                    aria-label={item}
+                                    title={label}
+                                    aria-label={label}
                                     aria-pressed={selected}
                                     className={clsx(`
                                       univer-flex univer-size-full univer-cursor-pointer univer-flex-col
@@ -342,7 +340,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 <button
                                     type="button"
                                     data-u-comp="sheet-table-theme-remove"
-                                    aria-label={`${localeService.t<LocaleKey>('sheets-table-ui.customStyle')} ${item}`}
+                                    aria-label={localeService.t<LocaleKey>('sheets-table-ui.removeCustomStyle', styleNumber)}
                                     className={clsx(`
                                       univer-absolute univer-right-[-6px] univer-top-[-6px] univer-z-10 univer-flex
                                       univer-size-5 univer-cursor-pointer univer-items-center univer-justify-center

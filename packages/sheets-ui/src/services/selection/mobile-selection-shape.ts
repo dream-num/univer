@@ -14,16 +14,36 @@
  * limitations under the License.
  */
 
-import type { ThemeService } from '@univerjs/core';
-import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
-import type { ISelectionStyle } from '@univerjs/sheets';
+import type { ICellRenderContext, ThemeService } from '@univerjs/core';
+import type { BaseObject, IRectProps, Scene, SpreadsheetSkeleton, Vector2 } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWithCoord } from '@univerjs/sheets';
 import { RANGE_TYPE } from '@univerjs/core';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SELECTION_MANAGER_KEY, SelectionControl } from './selection-control';
 
+class MobileSelectionHandle extends Rect {
+    constructor(key: string, props: IRectProps, private readonly _isCellWidgetHit: (coord: Vector2) => boolean) {
+        super(key, props);
+    }
+
+    override isHit(coord: Vector2): boolean {
+        if (!super.isHit(coord)) {
+            return false;
+        }
+
+        const local = this.getInverseCoord(coord);
+        const onVisibleHandle = Math.abs(local.x - this.width / 2) <= (this.visualWidth ?? this.width) / 2 &&
+            Math.abs(local.y - this.height / 2) <= (this.visualHeight ?? this.height) / 2;
+
+        // Keep the handle draggable while letting cell widgets receive taps through its invisible padding.
+        return onVisibleHandle || !this._isCellWidgetHit(coord);
+    }
+}
+
 export class MobileSelectionControl extends SelectionControl {
+    private _skeleton: SpreadsheetSkeleton | undefined;
+
     /**
      * topLeft controlPointer, it is not visible, just transparent, for handling event.
      */
@@ -62,7 +82,7 @@ export class MobileSelectionControl extends SelectionControl {
         const controlStroke = defaultStyle.autofillStroke!;
         const zIndex = this.zIndex;
         // @transformControlPoint takes care of left & top
-        this._expandControlTopLeft = new Rect(SELECTION_MANAGER_KEY.expandTopLeft + zIndex, {
+        this._expandControlTopLeft = new MobileSelectionHandle(SELECTION_MANAGER_KEY.expandTopLeft + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
@@ -70,9 +90,9 @@ export class MobileSelectionControl extends SelectionControl {
             visualWidth: expandCornerInnerSize,
             visualHeight: expandCornerInnerSize,
             strokeWidth: controlStrokeWidth,
-        });
+        }, (coord) => this._isCellWidgetHit(coord));
 
-        this._expandControlBottomRight = new Rect(SELECTION_MANAGER_KEY.expandBottomRight + zIndex, {
+        this._expandControlBottomRight = new MobileSelectionHandle(SELECTION_MANAGER_KEY.expandBottomRight + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
@@ -80,7 +100,7 @@ export class MobileSelectionControl extends SelectionControl {
             visualHeight: expandCornerInnerSize,
             visualWidth: expandCornerInnerSize,
             strokeWidth: controlStrokeWidth,
-        });
+        }, (coord) => this._isCellWidgetHit(coord));
 
         const controlProps: IRectProps = {
             fill: stroke,
@@ -136,6 +156,42 @@ export class MobileSelectionControl extends SelectionControl {
         this._rangeType = value;
     }
 
+    override updateRangeBySelectionWithCoord(selection: ISelectionWithCoord, skeleton?: SpreadsheetSkeleton, animate = false): void {
+        if (skeleton) {
+            this._skeleton = skeleton;
+        }
+        super.updateRangeBySelectionWithCoord(selection, skeleton, animate);
+    }
+
+    private _isCellWidgetHit(coord: Vector2): boolean {
+        const skeleton = this._skeleton;
+        if (!skeleton) {
+            return false;
+        }
+
+        const { worksheet } = skeleton;
+        const cell = skeleton.getCellWithCoordByOffset(coord.x, coord.y, 1, 1, { x: 0, y: 0 });
+        const row = cell.isMerged ? cell.mergeInfo.startRow : cell.actualRow;
+        const col = cell.isMerged ? cell.mergeInfo.startColumn : cell.actualColumn;
+        const data = worksheet.getCell(row, col);
+        if (!data?.customRender?.length) {
+            return false;
+        }
+
+        const info: ICellRenderContext = {
+            data,
+            style: worksheet.getComposedCellStyleByCellData(row, col, data),
+            primaryWithCoord: skeleton.getCellWithCoordByIndex(row, col),
+            unitId: worksheet.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+            row,
+            col,
+            worksheet,
+        };
+
+        return data.customRender.some((render) => render.onPointerDown && render.isHit?.(coord, info));
+    }
+
     override dispose(): void {
         this._expandControlBottomRight?.dispose();
         this._expandControlTopLeft?.dispose();
@@ -149,14 +205,12 @@ export class MobileSelectionControl extends SelectionControl {
         // startX startY shares same coordinate with viewport.(include row & colheader)
 
         const defaultStyle = this.currentStyle;
-        if (style == null) {
-            style = defaultStyle;
-        }
+        const selectionStyle = style ?? defaultStyle;
 
         const {
             widgets = defaultStyle.widgets!,
-        } = style;
-        this.currentStyle = style;
+        } = selectionStyle;
+        this.currentStyle = selectionStyle;
 
         // this condition is derived from selection-shape, I do not understand.
         if (!super._hasWidgets(widgets)) {

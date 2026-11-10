@@ -27,7 +27,6 @@ export { ReferenceAbsoluteOperation } from './commands/operations/reference-abso
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
 export { genFormulaRefSelectionStyle } from './common/selection';
 export type { IUniverSheetsFormulaUIConfig } from './config/config';
-export { FormulaReorderController } from './controllers/formula-reorder.controller';
 export { menuSchema as SheetsFormulaUIMenuSchema } from './menu/schema';
 export { UniverSheetsFormulaMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFormulaUIPlugin } from './plugin';
@@ -37,6 +36,7 @@ export type { IShowRangeSelectorDialogOptions } from './services/range-selector.
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
 export { FormulaEditor } from './views/formula-editor/index';
 export type { IFormulaEditorRef } from './views/formula-editor/index';
+export { MORE_FUNCTIONS_COMPONENT } from './views/more-functions/interface';
 export { RangeSelector } from './views/range-selector/index';
 export type { IRangeSelectorInstance, IRangeSelectorProps } from './views/range-selector/index';
 export { MobileRangeSelector } from './views/range-selector/MobileRangeSelector';

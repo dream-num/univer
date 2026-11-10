@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { describe, expect, it } from 'vitest';
 import type { ICellData, ICellWithCoord, IRange, ISelectionCell } from '../../sheets/typedef';
 import type { IDocumentData } from '../../types/interfaces';
-import { describe, expect, it } from 'vitest';
 import {
     RANGE_TYPE,
 } from '../../sheets/typedef';
@@ -250,9 +250,9 @@ describe('Test common', () => {
             rangeType: RANGE_TYPE.COLUMN,
         })).toBe(true);
 
-        expect(covertCellValue('=SUM(1,2)')).toEqual({ f: '=SUM(1,2)', v: null, p: null });
-        expect(covertCellValue(1)).toEqual({ v: 1, p: null, f: null });
-        const cell = { v: 'text', p: null, f: null } as ICellData;
+        expect(covertCellValue('=SUM(1,2)')).toEqual({ f: '=SUM(1,2)', v: null, p: null, si: null });
+        expect(covertCellValue(1)).toEqual({ v: 1, p: null, f: null, si: null });
+        const cell = { v: 'text', p: null, f: null, si: null } as ICellData;
         expect(covertCellValue(cell)).toBe(cell);
 
         const mixedValues = [
@@ -262,14 +262,15 @@ describe('Test common', () => {
 
         expect(covertCellValues(mixedValues, { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 } as IRange)).toEqual({
             0: {
-                0: { v: 1, p: null, f: null },
-                1: { f: '=A1', v: null, p: null },
+                0: { v: 1, p: null, f: null, si: null },
+                1: { f: '=A1', v: null, p: null, si: null },
             },
             1: {
                 0: {
                     v: 0.02,
                     p: null,
                     f: null,
+                    si: null,
                     s: { n: { pattern: '0%' } },
                 },
                 1: null,
@@ -280,8 +281,30 @@ describe('Test common', () => {
             3: { 4: '=B2' },
         }, { startRow: 3, endRow: 3, startColumn: 4, endColumn: 4 } as IRange)).toEqual({
             3: {
-                4: { f: '=B2', v: null, p: null },
+                4: { f: '=B2', v: null, p: null, si: null },
             },
         });
+    });
+
+    it('should replace the target formula when a cell-data write supplies content without formula identity', () => {
+        const content = { v: 300 } as ICellData;
+        expect(covertCellValue(content)).toEqual({ v: 300, f: null, si: null });
+        expect(content).toEqual({ v: 300 });
+
+        const richText = { p: { id: 'rich-text', body: { dataStream: 'text' } } } as ICellData;
+        expect(covertCellValue(richText)).toEqual({ p: richText.p, f: null, si: null });
+        expect(richText).toEqual({ p: { id: 'rich-text', body: { dataStream: 'text' } } });
+
+        const formula = { f: '=A1', si: null } as ICellData;
+        expect(covertCellValue(formula)).toBe(formula);
+
+        const sharedFormula = { f: '=A1' } as ICellData;
+        expect(covertCellValue(sharedFormula)).toEqual({ f: '=A1', si: null });
+
+        const style = { s: { bg: { rgb: '#ffffff' } } } as ICellData;
+        expect(covertCellValue(style)).toBe(style);
+
+        const sharedFollower = { si: 'shared-1' } as ICellData;
+        expect(covertCellValue(sharedFollower)).toBe(sharedFollower);
     });
 });

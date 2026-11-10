@@ -22,12 +22,6 @@ import type {
     ITableManualFilterItem,
     ITableRecordFilterItem,
 } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../locale/types';
-import type {
-    IFilterByValueWithTreeItem,
-    ITableFilterColorList,
-    ITableFilterItemList,
-} from '../types';
 import {
     cellToRange,
     ColorKit,
@@ -35,6 +29,7 @@ import {
     Disposable,
     FilterSelectionMode,
     getColorStyle,
+    getRecordValueKey,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -47,7 +42,6 @@ import { SetRangeValuesMutation } from '@univerjs/sheets';
 import {
     compileTableRecordFilter,
     getTableRecordValue,
-    getTableRecordValueKey,
     isColorTableFilter,
     isConditionFilter,
     isManualTableFilter,
@@ -59,6 +53,12 @@ import {
     TableColumnFilterTypeEnum,
     TableManager,
 } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../locale/types';
+import type {
+    IFilterByValueWithTreeItem,
+    ITableFilterColorList,
+    ITableFilterItemList,
+} from '../types';
 import { FilterByEnum } from '../types';
 
 interface ISheetTableFilterPanelProps {
@@ -147,7 +147,9 @@ export class SheetsTableUiService extends Disposable {
         if (table) {
             const filter = table.getTableFilterColumn(columnIndex);
             if (isManualTableFilter(filter)) {
-                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty') : value));
+                checkedItems.push(...filter.values.map((value) => value === TABLE_FILTER_EMPTY_VALUE
+                    ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty')
+                    : String(value)));
             } else if (isRecordTableFilter(filter)) {
                 const accepts = compileTableRecordFilter(filter);
                 const items = this.getTableFilterItems(unitId, table.getSubunitId(), tableId, columnIndex);
@@ -192,7 +194,7 @@ export class SheetsTableUiService extends Disposable {
 
         const candidateKeys = new Set(recordItems.map((item) => item.valueKey!));
         const values = currentFilter.values
-            .filter((value) => !candidateKeys.has(getTableRecordValueKey(value)))
+            .filter((value) => !candidateKeys.has(getRecordValueKey(value)))
             .map((value) => value.type === RecordValueType.Blank ? { type: RecordValueType.Blank } as const : { ...value });
         recordItems.forEach((item) => {
             const selected = checkedItemSet.has(item.valueKey!);
@@ -318,17 +320,13 @@ export class SheetsTableUiService extends Disposable {
             if (filteredRowsByOtherColumns.has(row)) {
                 continue;
             }
-            let stringItem = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column) as string;
-
-            if (stringItem == null) {
-                stringItem = this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty');
-            }
-            if (useRecordValues && typeof stringItem !== 'string') {
-                stringItem = String(stringItem);
-            }
+            const cellValue = this._sheetTableService.getCellValueWithConditionType(worksheet, row, column);
+            const stringItem = cellValue == null
+                ? this._localeService.t<LocaleKey>('sheets-table-ui.condition.empty')
+                : String(cellValue);
 
             const recordValue = useRecordValues ? getTableRecordValue(worksheet, row, column) : undefined;
-            const valueKey = recordValue ? getTableRecordValueKey(recordValue) : undefined;
+            const valueKey = recordValue ? getRecordValueKey(recordValue) : undefined;
             const itemKey = valueKey ?? stringItem;
             if (!map.has(itemKey)) {
                 data.push({

@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type {
     ISetFormulaCalculationStartMutation,
@@ -29,7 +30,6 @@ import type {
 } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -49,7 +49,6 @@ import {
     SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
-import { DEFAULT_CYCLE_REFERENCE_COUNT } from '../config/config';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
@@ -106,6 +105,8 @@ export class CalculateController extends Disposable {
 
     private async _calculate(formulaDirtyData: Partial<IFormulaDirtyData>) {
         const {
+            dirtyIterationUnits,
+            dirtyReferenceUnits,
             forceCalculation: forceCalculate = false,
             dirtyRanges = [],
             dirtyNameMap = {},
@@ -114,7 +115,7 @@ export class CalculateController extends Disposable {
             dirtyUnitFeatureMap = {},
             dirtyUnitOtherFormulaMap = {},
             clearDependencyTreeCache = {},
-            maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT,
+            calculationSettings,
             rowData,
             externalReferences,
             isCalculateTreeModel = false,
@@ -126,6 +127,8 @@ export class CalculateController extends Disposable {
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
         this._calculateFormulaService.execute({
+            dirtyIterationUnits,
+            dirtyReferenceUnits,
             formulaData,
             arrayFormulaCellData,
             arrayFormulaRange,
@@ -137,7 +140,7 @@ export class CalculateController extends Disposable {
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
-            maxIteration,
+            calculationSettings,
             isCalculateTreeModel,
             rowData,
             externalReferences,
@@ -248,6 +251,7 @@ export class CalculateController extends Disposable {
                 SetFormulaCalculationNotificationMutation.id,
                 {
                     functionsExecutedState,
+                    circularReferences: data.circularReferences,
                 },
                 {
                     onlyLocal: true,
@@ -318,6 +322,7 @@ export class CalculateController extends Disposable {
                 },
                 {
                     onlyLocal: true,
+                    fromFormula: true,
                 }
             );
         }

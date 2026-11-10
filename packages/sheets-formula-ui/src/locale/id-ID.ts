@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'Referensi Sirkular',
+            title: 'Opsi Perhitungan',
+            enable: 'Aktifkan perhitungan iteratif',
+            iterations: 'Iterasi maksimum (1–{0})',
+            change: 'Perubahan maksimum',
+            workbook: 'Pengaturan ini berlaku untuk buku kerja saat ini.',
+            invalidIterations: 'Iterasi maksimum harus berupa bilangan bulat dari 1 hingga {0}.',
+            invalidChange: 'Perubahan maksimum harus berupa bilangan positif yang terbatas.',
+            cancel: 'Batal',
+            confirm: 'OK',
+            circular: 'Rumus ini berisi referensi melingkar. Buka Opsi Perhitungan untuk mengaktifkan perhitungan iteratif.',
+            action: 'Perhitungan Iteratif',
+        },
+
         shortcut: {
             'quick-sum': 'Jumlah Cepat',
         },

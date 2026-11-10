@@ -41,6 +41,7 @@ import {
     DeleteColumnDoubleIcon,
     DeleteIcon,
     DeleteRowDoubleIcon,
+    DocPasteOptionsIcon,
     DownBorderDoubleIcon,
     DownloadImageIcon,
     EyeIcon,
@@ -99,6 +100,7 @@ import {
     VerticalIntegrationIcon,
     VerticalTextIcon,
     WriteIcon,
+    ZoomInIcon,
 } from '@univerjs/icons';
 
 export const sheetsUIIcons: IconMap = {
@@ -127,6 +129,7 @@ export const sheetsUIIcons: IconMap = {
     DeleteColumnDoubleIcon,
     DeleteIcon,
     DeleteRowDoubleIcon,
+    DocPasteOptionsIcon,
     DownBorderDoubleIcon,
     DownloadImageIcon,
     EyeIcon,
@@ -185,4 +188,5 @@ export const sheetsUIIcons: IconMap = {
     VerticalIntegrationIcon,
     VerticalTextIcon,
     WriteIcon,
+    ZoomInIcon,
 };

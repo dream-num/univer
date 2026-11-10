@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, Nullable, RichTextValue, Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    ICommandInfo,
+    IDocumentData,
+    Injector,
+    IStyleData,
+    Nullable,
+    RichTextValue,
+    Workbook,
+} from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     AbsoluteRefType,
+    BooleanNumber,
+    BorderStyleTypes,
+    BorderType,
+    CellValueType,
+    DEFAULT_NUMBER_FORMAT,
     Dimension,
     HorizontalAlign,
     ICommandService,
@@ -26,6 +41,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     TestConfirmService,
+    Tools,
     UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
@@ -68,8 +84,87 @@ import {
     UnregisterWorksheetRangeThemeStyleMutation,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FRange } from '../f-range';
+import type { FWorksheet } from '../f-worksheet';
+import { SetBorderBasicCommand, SetBorderCommand } from '../../commands/commands/set-border.command';
+import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
+
+describe('FRange style-only text preservation', () => {
+    it.each<{ name: string; apply: (range: FRange) => FRange }>([
+        { name: 'setFontWeight', apply: (range) => range.setFontWeight('bold') },
+        { name: 'setFontStyle', apply: (range) => range.setFontStyle('italic') },
+        { name: 'setFontColor', apply: (range) => range.setFontColor('#ffff00') },
+        { name: 'setFontFamily', apply: (range) => range.setFontFamily('Arial') },
+        { name: 'setFontSize', apply: (range) => range.setFontSize(20) },
+        { name: 'setBackground', apply: (range) => range.setBackground('#ffff00') },
+        { name: 'setBackgroundColor', apply: (range) => range.setBackgroundColor('#ffff00') },
+        { name: 'setHorizontalAlignment', apply: (range) => range.setHorizontalAlignment('center') },
+        { name: 'setVerticalAlignment', apply: (range) => range.setVerticalAlignment('middle') },
+        { name: 'setWrap', apply: (range) => range.setWrap(true) },
+        { name: 'setBorder', apply: (range) => range.setBorder(BorderType.ALL, BorderStyleTypes.THIN, '#ffff00') },
+        {
+            name: 'setValues with style-only cells',
+            apply: (range) => range.setValues(Array.from({ length: range.getHeight() }, () =>
+                Array.from({ length: range.getWidth() }, () => ({ s: { bl: BooleanNumber.TRUE } })))),
+        },
+    ])('preserves values and types through $name, including neighboring border cells', ({ name, apply }) => {
+        const bed = createFacadeTestBed(undefined, [[BorderStyleManagerService]]);
+        try {
+            const commandService = bed.get(ICommandService);
+            [
+                SetRangeValuesCommand,
+                SetRangeValuesMutation,
+                SetStyleCommand,
+                SetTextWrapCommand,
+                SetHorizontalTextAlignCommand,
+                SetVerticalTextAlignCommand,
+                SetBorderBasicCommand,
+                SetBorderCommand,
+            ].forEach((command) => commandService.registerCommand(command));
+            bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1');
+            const worksheet = bed.univerAPI.getActiveWorkbook()!.getActiveSheet();
+            const surroundingRange = worksheet.getRange('A1:J5');
+            const border = { s: BorderStyleTypes.THIN, cl: { rgb: '#000000' } };
+            surroundingRange.setValue({
+                v: '001',
+                t: CellValueType.STRING,
+                s: { bd: { t: border, b: border, l: border, r: border } },
+            });
+            const cells: ICellData[] = [
+                ...['014', '1.50', '1e3', 'abc', '2-2', '12%'].map((v) => ({ v, t: CellValueType.STRING })),
+                { v: 14, t: CellValueType.NUMBER },
+                { v: 3, t: CellValueType.NUMBER, f: '=1+2' },
+            ];
+            const range = worksheet.getRange('B2:I4');
+            range.setValues([undefined, '000', DEFAULT_NUMBER_FORMAT].map((pattern) =>
+                cells.map((cell) => ({ ...cell, s: pattern ? { n: { pattern } } : undefined }))));
+            const before = Tools.deepClone(surroundingRange.getCellDataGrid());
+            const readValues = () => surroundingRange.getCellDataGrid().map((row) =>
+                row.map((cell) => ({ v: cell?.v, t: cell?.t, f: cell?.f })));
+            const expected = readValues();
+            expect(range.getCellDataGrid().map((row) => row.map((cell) => cell?.v))).toEqual([
+                cells.map((cell) => cell.v),
+                cells.map((cell) => cell.v),
+                cells.map((cell) => cell.v),
+            ]);
+
+            apply(range);
+
+            expect(readValues()).toEqual(expected);
+            expect(surroundingRange.getCellDataGrid()).not.toEqual(before);
+            if (name === 'setBorder') {
+                expect(worksheet.getRange('B1').getCellStyleData()?.bd?.b).toBeUndefined();
+                expect(worksheet.getRange('B5').getCellStyleData()?.bd?.t).toBeUndefined();
+                expect(worksheet.getRange('A2').getCellStyleData()?.bd?.r).toBeUndefined();
+                expect(worksheet.getRange('J2').getCellStyleData()?.bd?.l).toBeUndefined();
+            }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -766,6 +861,39 @@ describe('Test FRange', () => {
         expect(activeSheet.getRange('I3').getValue(true)).toBeUndefined();
     });
 
+    it('persists copied rich-text edits without changing the source cell', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet()!;
+        const style = { ff: '宋体', fs: 18, bl: 1, cl: { rgb: '#FF0000' } };
+        const data = {
+            id: 'imported-rich-text',
+            documentStyle: {},
+            body: {
+                dataStream: 'Data\rData\r\n',
+                textRuns: [
+                    { st: 0, ed: 4, ts: { ...style, bl: 1 } },
+                    { st: 5, ed: 9, ts: { ...style, bl: 1 } },
+                ],
+                paragraphs: [{ startIndex: 4 }, { startIndex: 9 }],
+                sectionBreaks: [{ startIndex: 10 }],
+            },
+        } as unknown as IDocumentData;
+        sheet.getRange('H4').setRichTextValueForCell(data);
+        const original = sheet.getRange('H4').getValue(true) as RichTextValue;
+        const before = JSON.parse(JSON.stringify(original.getData()));
+        const edited = original.copy().setStyle(0, 4, { ff: 'Courier New', fs: 22, bl: 0 });
+        sheet.getRange('I4').setRichTextValueForCell(edited);
+
+        const saved = workbook.save().sheets[sheet.getSheetId()].cellData!;
+        expect(saved[3][8].p?.body?.textRuns).toEqual([
+            { st: 0, ed: 4, ts: { ...style, ff: 'Courier New', fs: 22, bl: 0 } },
+            { st: 5, ed: 9, ts: style },
+        ]);
+        expect(saved[3][8].p?.body?.dataStream).toBe('Data\rData\r\n');
+        expect(saved[3][7].p).toEqual(before);
+        expect(original.getData()).toEqual(before);
+    });
+
     it('Range inserts and deletes cells along both dimensions', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
         activeSheet.getRange('A20:D23').setValues([
@@ -907,6 +1035,96 @@ describe('Test FRange', () => {
         ]));
     });
 
+    describe('getDataRegion', () => {
+        let worksheet: FWorksheet;
+
+        beforeEach(() => {
+            worksheet = univerAPI.createWorkbook({
+                id: 'data-region',
+                sheetOrder: ['data'],
+                sheets: {
+                    data: { id: 'data', name: 'data', rowCount: 8, columnCount: 8 },
+                },
+            }).getActiveSheet();
+        });
+
+        it.each([
+            { dataRange: 'A1:A4', cells: ['A1', 'A2', 'A3', 'A4'] },
+            { dataRange: 'A1:D1', cells: ['A1', 'B1', 'C1', 'D1'] },
+        ])('expands every cell in $dataRange to the whole list', ({ dataRange, cells }) => {
+            worksheet.getRange(dataRange).setValue(1);
+
+            for (const cell of cells) {
+                const range = worksheet.getRange(cell);
+                expect(range.getDataRegion().getA1Notation()).toBe(dataRange);
+                expect(range.getA1Notation()).toBe(cell);
+            }
+        });
+
+        it('expands rectangles while respecting the requested dimension', () => {
+            worksheet.getRange('A1:F6').setValue(1);
+
+            expect(worksheet.getRange('C3').getDataRegion().getA1Notation()).toBe('A1:F6');
+            expect(worksheet.getRange('C3:D4').getDataRegion().getA1Notation()).toBe('A1:F6');
+            expect(worksheet.getRange('C3:D4').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C1:D6');
+            expect(worksheet.getRange('C3:D4').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A3:F4');
+        });
+
+        it('rechecks boundaries exposed by expansion in another direction', () => {
+            worksheet.getRange('B4:D4').setValue(1);
+            worksheet.getRange('D2:D3').setValue(1);
+            worksheet.getRange('A2:C2').setValue(1);
+            worksheet.getRange('A1').setValue(1);
+
+            expect(worksheet.getRange('B4').getDataRegion().getA1Notation()).toBe('A1:D4');
+        });
+
+        it('counts zero, false, formulas and rich text as data and stops at empty boundaries', () => {
+            worksheet.getRange('A1:A4').setValues([
+                [{ v: 0 }],
+                [{ v: false }],
+                [{ f: '=1' }],
+                [{ p: { id: 'rich-text', documentStyle: {}, body: { dataStream: 'text\r\n' } } }],
+            ]);
+            worksheet.getRange('A5:B5').setValues([[{ v: '' }, {}]]);
+            worksheet.getRange('A5:B5').setFontWeight('bold');
+            worksheet.getRange('A6:B6').setValue('separate');
+            worksheet.getRange('C1:C4').setValue('separate');
+
+            expect(worksheet.getRange('A1').getDataRegion().getA1Notation()).toBe('A1:A4');
+            expect(worksheet.getRange('A4').getDataRegion().getA1Notation()).toBe('A1:A4');
+        });
+
+        it('expands an empty starting cell when adjacent cells contain data', () => {
+            worksheet.getRange('C2').setValue(1);
+            worksheet.getRange('B3').setValue(1);
+            worksheet.getRange('D3').setValue(1);
+            worksheet.getRange('C4').setValue(1);
+
+            expect(worksheet.getRange('C3').getDataRegion().getA1Notation()).toBe('B2:D4');
+            expect(worksheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C4');
+            expect(worksheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('B3:D3');
+        });
+
+        it('keeps isolated ranges and ignores diagonal-only neighbors', () => {
+            worksheet.getRange('A1').setValue(1);
+            worksheet.getRange('C3').setValue(1);
+            worksheet.getRange('F6').setValue(1);
+
+            expect(worksheet.getRange('A1').getDataRegion().getA1Notation()).toBe('A1');
+            expect(worksheet.getRange('B2').getDataRegion().getA1Notation()).toBe('B2');
+            expect(worksheet.getRange('D4:E5').getDataRegion().getA1Notation()).toBe('D4:E5');
+        });
+
+        it('stays within worksheet bounds when data reaches every edge', () => {
+            worksheet.getRange('A1:H8').setValue(1);
+
+            expect(worksheet.getRange('D4').getDataRegion().getA1Notation()).toBe('A1:H8');
+            expect(worksheet.getRange('A1').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('A1:A8');
+            expect(worksheet.getRange('H8').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A8:H8');
+        });
+    });
+
     it('Range supports an analyst editing a formatted data island', () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         const activeSheet = workbook.getActiveSheet();
@@ -982,9 +1200,9 @@ describe('Test FRange', () => {
         activeSheet.getRange('A3').setValue('Neighbor');
         activeSheet.getRange('E3').setValue('Calculated');
         activeSheet.getRange('C5').setValue('Footer');
-        expect(activeSheet.getRange('C3').getDataRegion().getA1Notation()).toBe('B2:D4');
-        expect(activeSheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C4');
-        expect(activeSheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('B3:D3');
+        expect(activeSheet.getRange('C3').getDataRegion().getA1Notation()).toBe('A1:E5');
+        expect(activeSheet.getRange('C3').getDataRegion(Dimension.ROWS).getA1Notation()).toBe('C2:C5');
+        expect(activeSheet.getRange('C3').getDataRegion(Dimension.COLUMNS).getA1Notation()).toBe('A3:E3');
 
         const offset = report.offset(1, 1, 2);
         expect(offset.getA1Notation()).toBe('C3:E4');
@@ -1087,5 +1305,64 @@ describe('Test FRange', () => {
                 ]);
             }
         });
+    });
+});
+
+describe('FRange formula replacement', () => {
+    function createBed() {
+        const bed = createFacadeTestBed(undefined, [[BorderStyleManagerService]]);
+        const commandService = bed.get(ICommandService);
+        [SetRangeValuesCommand, SetRangeValuesMutation].forEach((command) => commandService.registerCommand(command));
+
+        return { bed, commandService, worksheet: bed.univerAPI.getActiveWorkbook()!.getActiveSheet() };
+    }
+
+    it('removes the formula and the shared formula id from the collaboration changeset', () => {
+        const { bed, commandService, worksheet } = createBed();
+        try {
+            const durable: ICommandInfo[] = [];
+            commandService.onMutationExecutedForCollab((command, options) => {
+                if (options?.onlyLocal !== true) {
+                    durable.push(command);
+                }
+            });
+
+            worksheet.getRange('A1').setValues([[{ f: '=SUM(B1:B2)', si: 'shared-1', v: 3 }]]);
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ f: '=SUM(B1:B2)', si: 'shared-1' });
+
+            worksheet.getRange('A1').setValue({ v: 300 });
+
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ v: 300 });
+            expect(worksheet.getRange('A1').getCellData()?.f).toBeUndefined();
+            expect(worksheet.getRange('A1').getCellData()?.si).toBeUndefined();
+            expect((durable[durable.length - 1].params as ISetRangeValuesMutationParams).cellValue).toMatchObject({
+                0: { 0: { v: 300, f: null, si: null } },
+            });
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('disassociates a rewritten formula from the previous shared formula id', () => {
+        const { bed, commandService, worksheet } = createBed();
+        try {
+            const durable: ICommandInfo[] = [];
+            commandService.onMutationExecutedForCollab((command, options) => {
+                if (options?.onlyLocal !== true) {
+                    durable.push(command);
+                }
+            });
+
+            worksheet.getRange('A1').setValues([[{ f: '=SUM(B1:B2)', si: 'shared-1', v: 3 }]]);
+            worksheet.getRange('A1').setValue('=SUM(B1:B3)');
+
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ f: '=SUM(B1:B3)' });
+            expect(worksheet.getRange('A1').getCellData()?.si).toBeUndefined();
+            expect((durable[durable.length - 1].params as ISetRangeValuesMutationParams).cellValue).toMatchObject({
+                0: { 0: { f: '=SUM(B1:B3)', si: null } },
+            });
+        } finally {
+            bed.univer.dispose();
+        }
     });
 });

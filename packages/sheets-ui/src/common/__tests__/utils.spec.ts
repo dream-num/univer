@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
+import { Univer, UniverInstanceType } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SheetSkeletonService } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import {
     checkCellContentInRange,
@@ -29,6 +33,61 @@ import {
 } from '../utils';
 
 describe('common utils', () => {
+    it.each([
+        { xSplit: 0, scale: 1 },
+        { xSplit: 1, scale: 1 },
+        { xSplit: 1, scale: 1.25 },
+        { xSplit: 1, scale: 2 },
+    ])('keeps a frozen Table menu below its title with %j', ({ xSplit, scale }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([SheetSkeletonService]);
+        const skeletonService = injector.get(SheetSkeletonService);
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'table-menu',
+            sheetOrder: ['sheet1'],
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    rowCount: 20,
+                    columnCount: 20,
+                    freeze: { startRow: 3, startColumn: xSplit || -1, ySplit: 3, xSplit },
+                },
+            },
+        });
+
+        try {
+            const worksheet = workbook.getActiveSheet();
+            const skeleton = skeletonService.getSkeleton(workbook.getUnitId(), worksheet.getSheetId())!;
+            skeleton.setGapConfig({ rowGaps: { 0: { size: 32 } } });
+            const frozenEnd = skeleton.getNoMergeCellWithCoordByIndex(3, xSplit, false);
+            // Only the platform viewport is supplied here; worksheet and layout use real providers.
+            const scene = {
+                getAncestorScale: () => ({ scaleX: scale, scaleY: scale }),
+                getViewport: () => ({
+                    left: (skeleton.rowHeaderWidth + frozenEnd.startX) * scale,
+                    top: (skeleton.columnHeaderHeight + frozenEnd.startY) * scale,
+                    viewportScrollX: 150,
+                    viewportScrollY: 300,
+                }),
+            } as unknown as Scene;
+            const cell = skeleton.getNoMergeCellWithCoordByIndex(0, 0);
+            const title = {
+                left: cell.startX,
+                right: cell.startX + 122,
+                top: cell.startY - 28,
+                bottom: cell.startY,
+            };
+            const bound = transformBound2OffsetBound(title, scene, skeleton, worksheet);
+
+            // The popup's anchor bottom must stay at the visible bottom of the title after scrolling.
+            expect(bound.top).toBe(title.top * scale);
+            expect(bound.bottom).toBe(title.bottom * scale);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('compares collaborator user lists by user id and role', () => {
         const list1 = [
             { id: 'b', subject: { userID: 'u2' }, role: 'viewer' },
@@ -120,7 +179,7 @@ describe('common utils', () => {
 
         const scene = {
             getAncestorScale: () => ({ scaleX: 2, scaleY: 3 }),
-            getViewport: () => ({ top: 50, left: 40, viewportScrollX: 5, viewportScrollY: 6 }),
+            getViewport: () => ({ top: 150, left: 80, viewportScrollX: 5, viewportScrollY: 6 }),
         };
         const skeleton = {
             getNoMergeCellWithCoordByIndex: (row: number, col: number) => {
@@ -137,7 +196,7 @@ describe('common utils', () => {
         };
 
         const result = transformPosition2Offset(60, 20, scene as any, skeleton as any, worksheet as any);
-        expect(result).toEqual({ x: 110, y: 76 });
+        expect(result).toEqual({ x: 110, y: 114 });
 
         const bound = transformBound2OffsetBound({ left: 30, top: 20, right: 60, bottom: 70 } as any, scene as any, skeleton as any, worksheet as any);
         expect(bound.left).toBeTypeOf('number');

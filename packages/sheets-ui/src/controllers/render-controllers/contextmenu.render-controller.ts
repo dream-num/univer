@@ -15,18 +15,28 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
-import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
+import type {
+    IMouseEvent,
+    IRenderContext,
+    IRenderModule,
+    Spreadsheet,
+    SpreadsheetColumnHeader,
+    SpreadsheetHeader,
+} from '@univerjs/engine-render';
 import {
     Disposable,
+    IContextService,
     Inject,
     Injector,
     RANGE_TYPE,
+    SheetTypes,
 } from '@univerjs/core';
-import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/sheets';
-import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { attachSelectionWithCoord, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
+import { ContextMenuPosition, IContextMenuService, IPlatformService } from '@univerjs/ui';
+import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
+import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+import { isSheetContextMenuGesture } from '../../common/selection-input';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
@@ -41,7 +51,9 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IPlatformService private readonly _platformService: IPlatformService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -49,12 +61,19 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         this._initEmbedRuntimeSessionListener();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _init(): void {
         const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDown$;
 
         // Content range context menu
         const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
-            if (event.button === 2) {
+            if (this._getSheetType() === SheetTypes.CHART) {
+                return;
+            }
+            if (this._isContextMenuGesture(event)) {
                 const selections = this._selectionManagerService.getCurrentSelections();
                 const currentSelection = selections?.[0];
                 if (!currentSelection) {
@@ -103,7 +122,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const rowHeaderSub = spreadsheetRowHeader.onPointerDown$.subscribeEvent((event) => {
-            if (event.button === 2) {
+            if (this._isContextMenuGesture(event)) {
                 if (this._shouldSuppressHostContextMenu()) {
                     return;
                 }
@@ -115,7 +134,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         // Col header context menu
         const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDown$;
         const colHeaderObserver = colHeaderPointerDownObserver.subscribeEvent((event) => {
-            if (event.button === 2) {
+            if (this._isContextMenuGesture(event)) {
                 if (this._shouldSuppressHostContextMenu()) {
                     return;
                 }
@@ -123,6 +142,14 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
             }
         });
         this.disposeWithMe(colHeaderObserver);
+    }
+
+    private _isContextMenuGesture(event: IMouseEvent): boolean {
+        return isSheetContextMenuGesture(
+            event,
+            this._platformService.isMac,
+            this._contextService.getContextValue(REF_SELECTIONS_ENABLED)
+        );
     }
 
     private _initEmbedRuntimeSessionListener(): void {

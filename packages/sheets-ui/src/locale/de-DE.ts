@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Text drehen',
             },
             toggleGridlines: 'Gitterlinien ein-/ausblenden',
+            zoom: 'Zoom',
             fullscreen: 'Vollbild',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Abbrechen',
+        },
+        borderStyle: {
+            thin: 'Dünn',
+            hair: 'Haarlinie',
+            dotted: 'Gepunktet',
+            dashed: 'Gestrichelt',
+            dashDot: 'Strich-Punkt',
+            dashDotDot: 'Strich-Punkt-Punkt',
+            medium: 'Mittel',
+            mediumDashed: 'Mittel gestrichelt',
+            mediumDashDot: 'Mittel Strich-Punkt',
+            mediumDashDotDot: 'Mittel Strich-Punkt-Punkt',
+            thick: 'Dick',
+            double: 'Doppelt',
         },
         borderLine: {
             borderTop: 'Rahmen oben',

@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type {
+    BooleanNumber,
+    IMutation,
+    IObjectArrayPrimitiveType,
+    IRange,
+    IRowAutoHeightInfo,
+    Nullable,
+    Worksheet,
+} from '@univerjs/core';
+import { CommandType, isValidSheetDimension, IUniverInstanceService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetRowHeightMutationParams {
@@ -114,7 +122,17 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
         const { ranges, rowHeight } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
+
+        const dimensions = params.rowHeight;
+        if (typeof dimensions === 'number'
+            ? !isValidSheetDimension(dimensions)
+            : dimensions == null || typeof dimensions !== 'object' ||
+                Object.values(dimensions).some((value) => value != null && !isValidSheetDimension(value))) {
+            return false;
+        }
 
         const { worksheet } = target;
         const manager = worksheet.getRowManager();
@@ -140,7 +158,9 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
         const { ranges, autoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const manager = target.worksheet.getRowManager();
         for (const { startRow, endRow } of ranges) {
@@ -164,9 +184,14 @@ export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHe
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { rowsAutoHeightInfo } = params;
+        if (rowsAutoHeightInfo.some(({ autoHeight }) => autoHeight != null && !isValidSheetDimension(autoHeight))) {
+            return false;
+        }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
 
         const rowManager = target.worksheet.getRowManager();
 

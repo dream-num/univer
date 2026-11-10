@@ -16,7 +16,6 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from './config/config';
 import {
     DependentOn,
     IConfigService,
@@ -31,12 +30,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverDocsMobileUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
+import type { IUniverSheetsUIConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -136,7 +136,7 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
     UniverMobileUIPlugin,
-    UniverDocsUIPlugin
+    UniverDocsMobileUIPlugin
 )
 export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';

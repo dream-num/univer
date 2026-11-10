@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: 'مرجع دائري',
+            title: 'خيارات الحساب',
+            enable: 'تمكين الحساب التكراري',
+            iterations: 'الحد الأقصى للتكرارات (1–{0})',
+            change: 'الحد الأقصى للتغيير',
+            workbook: 'تنطبق هذه الإعدادات على المصنف الحالي.',
+            invalidIterations: 'يجب أن يكون الحد الأقصى للتكرارات عددًا صحيحًا من 1 إلى {0}.',
+            invalidChange: 'يجب أن يكون الحد الأقصى للتغيير عددًا موجبًا ومحدودًا.',
+            cancel: 'إلغاء',
+            confirm: 'موافق',
+            circular: 'تحتوي هذه الصيغة على مرجع دائري. افتح خيارات الحساب لتمكين الحساب التكراري.',
+            action: 'الحساب التكراري',
+        },
+
         shortcut: {
             'quick-sum': 'مجموع سريع',
         },

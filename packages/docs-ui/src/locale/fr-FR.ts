@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Restauration de la mise en page du document…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Plein écran',
             font: 'Police',
             fontSize: 'Taille de la police',
             bold: 'Gras',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Paramètres de section',
             },
             paragraphSetting: {
+                wordWrap: 'Autoriser la césure en milieu de mot pour le texte en caractères latins',
                 alignment: 'Alignement',
                 indentation: 'Retrait',
                 left: 'Gauche',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Diminuer le retrait',
             defaultTextColor: 'Couleur de texte par défaut',
             noBackground: 'Aucun arrière-plan',
+        },
+        heading: {
+            collapse: 'Réduire',
+            expand: 'Développer',
         },
         'page-settings': {
             'document-setting': 'Paramètres du document',

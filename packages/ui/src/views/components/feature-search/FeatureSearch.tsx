@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../../locale/types';
-import type {
-    IMenuCommandParams,
-    IMenuItem,
-    IValueOption,
-    MenuItemDefaultValueType,
-} from '../../../services/menu/menu';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { ICommandService, LocaleService, Tools } from '@univerjs/core';
 import {
     Command,
@@ -34,6 +26,14 @@ import {
 import { useMemo } from 'react';
 import { combineLatest, isObservable, merge, of } from 'rxjs';
 import { map, startWith, switchMap } from 'rxjs/operators';
+import type { LocaleKey } from '../../../locale/types';
+import type {
+    IMenuCommandParams,
+    IMenuItem,
+    IValueOption,
+    MenuItemDefaultValueType,
+} from '../../../services/menu/menu';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
@@ -64,23 +64,6 @@ interface IMenuCandidate {
     parentTitle?: string;
 }
 
-function resolveParams(item: IMenuItem, value: MenuItemDefaultValueType) {
-    const params = typeof item.params === 'function' ? item.params() : item.params;
-    return params ?? (value === undefined ? undefined : { value });
-}
-
-function resolveOptionParams(option: IValueOption) {
-    const params = typeof option.params === 'function' ? option.params(option.value) : option.params;
-    return params ?? (option.value === undefined ? undefined : { value: option.value });
-}
-
-function deduplicate(items: IFeatureSearchItem[]) {
-    // ponytail: Menu inventories are small; replace this scan only if profiling shows it is a hot path.
-    return items.filter((item, index) => items.findIndex((candidate) => (
-        candidate.commandId === item.commandId && Tools.diffValue(candidate.params, item.params)
-    )) === index);
-}
-
 export function FeatureSearch() {
     const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
@@ -89,6 +72,23 @@ export function FeatureSearch() {
     const layoutService = useDependency(ILayoutService);
     const ribbonService = useDependency(IRibbonService);
     const items$ = useMemo(() => {
+        function resolveParams(item: IMenuItem, value: MenuItemDefaultValueType) {
+            const params = typeof item.params === 'function' ? item.params() : item.params;
+            return params ?? (value === undefined ? undefined : { value });
+        }
+
+        function resolveOptionParams(option: IValueOption) {
+            const params = typeof option.params === 'function' ? option.params(option.value) : option.params;
+            return params ?? (option.value === undefined ? undefined : { value: option.value });
+        }
+
+        function deduplicate(items: IFeatureSearchItem[]) {
+            // shortcut: quadratic scan for small menu inventories, optimize if profiling identifies a bottleneck.
+            return items.filter((item, index) => items.findIndex((candidate) => (
+                candidate.commandId === item.commandId && Tools.diffValue(candidate.params, item.params)
+            )) === index);
+        }
+
         function getItemTitle(item: IMenuItem) {
             const titleKey = item.title ?? item.tooltip ?? item.description;
             return titleKey ? localeService.t(titleKey) : '';
@@ -279,7 +279,7 @@ export function FeatureSearch() {
                                 <span className="univer-truncate">{item.title}</span>
                             </span>
                             {item.path && (
-                                <span className="univer-max-w-1/2 univer-truncate univer-text-xs univer-text-gray-400">
+                                <span className="univer-max-w-[50%] univer-truncate univer-text-xs univer-text-gray-400">
                                     {item.path}
                                 </span>
                             )}

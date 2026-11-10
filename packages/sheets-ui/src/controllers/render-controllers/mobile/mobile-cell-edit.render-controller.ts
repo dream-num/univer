@@ -45,11 +45,11 @@ export class MobileCellEditRenderController extends Disposable implements IRende
                 return;
             }
 
+            // Mobile edits in the formula bar; a cell pointer position would later refocus the hidden cell editor.
             this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
                 unitId: this._context.unitId,
-                pointerPosition: { x: cell.event.clientX, y: cell.event.clientY },
             } as IEditorBridgeServiceVisibleParam);
         }));
 

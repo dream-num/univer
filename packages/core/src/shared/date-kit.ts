@@ -433,9 +433,11 @@ function startOf(date: Date, unit: DateKitCoreUnit, isUTC: boolean) {
 }
 
 function getWeekOfYear(date: Date, isUTC: boolean) {
-    const currentWeekStart = startOf(date, 'week', isUTC);
+    const current = getDateParts(startOf(date, 'week', isUTC), isUTC);
     const yearStart = startOf(date, 'year', isUTC);
-    const firstWeekStart = startOf(yearStart, 'week', isUTC);
+    const first = getDateParts(startOf(yearStart, 'week', isUTC), isUTC);
+    const currentWeekStart = createDateWithParts(current.year, current.month, current.day, 0, 0, 0, 0, true);
+    const firstWeekStart = createDateWithParts(first.year, first.month, first.day, 0, 0, 0, 0, true);
     return Math.floor((currentWeekStart.getTime() - firstWeekStart.getTime()) / DAY / 7) + 1;
 }
 

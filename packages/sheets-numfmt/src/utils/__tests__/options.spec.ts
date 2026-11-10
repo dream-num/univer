@@ -17,7 +17,7 @@
 import { LocaleType, numfmt } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DATEFMTLISG } from '../../base/const/formatdetail';
-import { getDateFormatOptions } from '../options';
+import { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from '../options';
 
 describe('getDateFormatOptions', () => {
     it('keeps the legacy public options when no locale is supplied', () => {
@@ -64,5 +64,23 @@ describe('getDateFormatOptions', () => {
         const options = getDateFormatOptions('unsupported' as LocaleType);
         expect(options.some((option) => option.label === '1930-08-05')).toBe(true);
         expect(options.some((option) => /[年月日]|上午|下午/.test(option.label))).toBe(false);
+    });
+});
+
+describe('format options', () => {
+    it('option helpers expose formatted labels and values', () => {
+        expect(getCurrencyOptions()[0]).toEqual({ label: 'Rp', value: 'Rp' });
+        expect(getCurrencyFormatOptions('€')[0]).toMatchObject({
+            label: expect.stringContaining('€'),
+            value: expect.stringContaining('€'),
+        });
+        expect(getDateFormatOptions()[0]).toMatchObject({
+            label: expect.any(String),
+            value: expect.any(String),
+        });
+        expect(getNumberFormatOptions()[0]).toMatchObject({
+            label: expect.any(String),
+            value: expect.any(String),
+        });
     });
 });

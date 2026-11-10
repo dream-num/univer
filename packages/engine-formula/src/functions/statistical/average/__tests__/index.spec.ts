@@ -192,5 +192,39 @@ describe('Test average function', () => {
             const result = testFunction.calculate(var1, var2);
             expect(getObjectValue(result, true)).toBe(7.96692307692);
         });
+
+        it('Positioned function result array is averaged as a whole', () => {
+            // e.g. =AVERAGE(FILTER(B1:B3,A1:A3="Phone")) entered in H1, where FILTER returns {3;7}
+            const averageFunction = new Average(FUNCTION_NAMES_STATISTICAL.AVERAGE);
+            averageFunction.setRefInfo('', '', 0, 7);
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[3], [7]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = averageFunction.calculate(var1);
+            expect(getObjectValue(result)).toBe(5);
+        });
+
+        it('Legacy implicit aggregate array still uses implicit intersection', () => {
+            const averageFunction = new Average(FUNCTION_NAMES_STATISTICAL.AVERAGE);
+            averageFunction.setRefInfo('', '', 1, 7);
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[3], [7]]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            var1.setLegacyImplicitForAggregate(true);
+            const result = averageFunction.calculate(var1);
+            expect(getObjectValue(result)).toBe(7);
+        });
     });
 });

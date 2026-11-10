@@ -53,6 +53,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Zastaviť, ak je pravda',
             createRule: 'Vytvoriť pravidlo',
             clear: 'Vymazať všetky pravidlá',
             range: 'Rozsah použitia',

@@ -17,7 +17,6 @@
 import type { DocumentDataModel, IAccessor, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -47,7 +46,6 @@ import {
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import {
-    COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
     EMOJI_PICKER_COMPONENT,
     FONT_FAMILY_COMPONENT,
@@ -60,8 +58,8 @@ import {
     MenuItemType,
     SYMBOL_PICKER_COMPONENT,
 } from '@univerjs/ui';
-
 import { combineLatest, distinctUntilChanged, map, Observable, of, shareReplay, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import {
@@ -100,6 +98,7 @@ import { DocOpenPageSettingCommand } from '../commands/operations/open-page-sett
 import { getCommandSkeleton } from '../commands/util';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { DocMenuStyleService } from '../services/doc-menu-style.service';
+import { EditorColorPicker } from '../views/EditorColorPicker';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
 export function shouldSuppressDocMenuStateRefresh(accessor: IAccessor): boolean {
@@ -1010,7 +1009,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },
@@ -1585,7 +1584,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },

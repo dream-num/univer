@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ISdtCustomRange } from '../../../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentBody, ISdtCustomRange } from '../../../../../types/interfaces';
 import { UpdateDocsAttributeType } from '../../../../../shared';
 import { CustomRangeType } from '../../../../../types/interfaces';
 import { updateAttribute } from '../update-apply';
@@ -69,5 +69,22 @@ describe('retained SDT metadata boundaries', () => {
             endIndex: expectedEnd,
             properties: { alias: 'after' },
         });
+    });
+});
+
+describe('retained heading collapse metadata', () => {
+    it.each([true, false])('preserves the fold flag through paragraph formatting (%s)', (headingCollapsed) => {
+        const body: IDocumentBody = { dataStream: 'A\rB\r\n', paragraphs: [
+            { paragraphId: 'a', startIndex: 1, headingCollapsed, styleId: 'heading-style' },
+            { paragraphId: 'b', startIndex: 3 },
+        ] };
+        updateAttribute(body, {
+            dataStream: '',
+            paragraphs: [{ paragraphId: 'a', startIndex: 0, paragraphStyle: { outlineLevel: 0 } }],
+        }, 1, 1, UpdateDocsAttributeType.COVER);
+        expect(body.paragraphs?.[0].headingCollapsed).toBe(headingCollapsed);
+        expect(body.paragraphs?.[0].styleId).toBe('heading-style');
+        expect(body.paragraphs?.[0].paragraphStyle?.outlineLevel).toBe(0);
+        expect(body.paragraphs?.[1].headingCollapsed).toBeUndefined();
     });
 });

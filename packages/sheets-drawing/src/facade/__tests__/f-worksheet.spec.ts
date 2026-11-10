@@ -349,7 +349,7 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 
         expect(() => fWorksheet.setDrawingPlacement(drawing.drawingId, {
             kind: SheetDrawingAnchorType.Position,
-            bounds: { left: 120, top: 80, width: 0, height: 160 },
+            bounds: { left: 120, top: 80, width: -1, height: 160 },
         })).toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
         expect(() => fWorksheet.setDrawingPlacement(drawing.drawingId, {
             kind: SheetDrawingAnchorType.Both,

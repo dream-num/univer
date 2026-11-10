@@ -204,7 +204,9 @@ function isStaleFormulaResult(cell: Nullable<ICellData>, source: Nullable<Pick<I
 
 const overwriteCellPropertiesSet = new Set(['f', 'p', 'si', 'custom', 'ref', 'xf', 'ft', 'fd']);
 function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles, isOverrideStyle = false) {
-    const type = getCellType(styles, newValue, oldValue);
+    const canPreserveValue = newValue.v === undefined && newValue.t === undefined && oldValue.t != null;
+    const previousStyle = canPreserveValue ? styles.getStyleByCell(oldValue) : undefined;
+    const type = canPreserveValue ? oldValue.t : getCellType(styles, newValue, oldValue);
     Object.keys(newValue).forEach((key) => {
         const cellPropertyKey = key as keyof ICellData;
         if (overwriteCellPropertiesSet.has(cellPropertyKey)) {
@@ -229,9 +231,13 @@ function mergeCellData(newValue: ICellData, oldValue: ICellData, styles: Styles,
         delete oldValue.fd;
     }
 
-    if (oldValue.v !== undefined) {
-        oldValue.t = type;
-        oldValue.v = getCellValue(type, oldValue);
+    const numberFormatChanged = canPreserveValue &&
+        previousStyle?.n?.pattern !== styles.getStyleByCell(oldValue)?.n?.pattern;
+    if (oldValue.v !== undefined && (!canPreserveValue || numberFormatChanged)) {
+        // Format changes still infer from the original style, including forced/text-formatted values.
+        const nextType = numberFormatChanged ? getCellType(styles, newValue, { ...oldValue, s: previousStyle }) : type;
+        oldValue.t = nextType;
+        oldValue.v = getCellValue(nextType, oldValue);
     }
 
     if (oldValue.v === null) {

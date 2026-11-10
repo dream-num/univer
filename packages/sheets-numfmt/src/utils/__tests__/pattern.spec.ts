@@ -15,8 +15,8 @@
  */
 
 import { DEFAULT_NUMBER_FORMAT } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
-import { getPatternPreview, getPatternType } from '../pattern';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from '../pattern';
 
 describe('getPatternType', () => {
     it('classifies conditional general formats as number formats', () => {
@@ -38,5 +38,36 @@ describe('getPatternType', () => {
         expect(getPatternPreview(pattern, 1)).toEqual({ result: '未完成' });
         expect(getPatternPreview(pattern, 0)).toEqual({ result: '完成' });
         expect(getPatternPreview(pattern, -1)).toEqual({ result: '完成' });
+    });
+});
+
+describe('getPatternPreview', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it.each([
+        { pattern: '[Red]0.00;[Green]\\-0.00;0.00', colors: ['red', 'green', undefined, 'red'] },
+        { pattern: '[Red]0.00;[Green]\\-0.00;[Blue]0.00', colors: ['red', 'green', 'blue', 'red'] },
+        { pattern: '[Red]0.00', colors: ['red', 'red', 'red', 'red'] },
+        { pattern: '[Red]0.00;[Green]\\-0.00', colors: ['red', 'green', 'red', 'red'] },
+        { pattern: '[Red][>=10]0.00;[Blue][<0]\\-0.00;[Green]0.00', colors: ['red', 'blue', 'green', 'green'] },
+        { pattern: '0.00', colors: [undefined, undefined, undefined, undefined] },
+    ])('returns the active section color for $pattern', ({ pattern, colors }) => {
+        [12.34, -12.34, 0, 5].forEach((value, index) => {
+            expect(getPatternPreview(pattern, value)).toEqual({
+                result: value.toFixed(2),
+                color: colors[index],
+            });
+        });
+    });
+
+    it('pattern preview helpers return types and gracefully handle general or invalid formats', () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+        expect(getPatternType('0%')).toBe('percent');
+        expect(getPatternPreview('0.00', 12.3)).toEqual({ result: '12.30' });
+        expect(getPatternPreviewIgnoreGeneral(DEFAULT_NUMBER_FORMAT, 0.1 + 0.2)).toEqual({ result: '0.3' });
+        expect(getPatternPreview('[invalid', 42)).toEqual({ result: '42' });
     });
 });

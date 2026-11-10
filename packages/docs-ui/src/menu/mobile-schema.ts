@@ -21,7 +21,7 @@ import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/
 import { DOC_CARET_MENU_ID } from '../consts/mobile-context';
 import { PasteMenuFactory, PasteSpecialMenuFactory, SelectAllMenuFactory, SelectWordMenuFactory } from './context-menu';
 
-export const mobileMenuSchema: MenuSchemaType = {
+export const mobileMenuSchema = {
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.QUICK]: {
             [DocSelectWordCommand.id]: { order: 3, menuItemFactory: SelectWordMenuFactory },
@@ -53,4 +53,4 @@ export const mobileMenuSchema: MenuSchemaType = {
         },
     },
 
-};
+} satisfies MenuSchemaType;

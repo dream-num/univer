@@ -108,6 +108,18 @@ function createService(withCurrentWorkbook = true) {
 }
 
 describe('FormulaCurrentConfigService', () => {
+    it('keeps conservative feature invalidation separate from ordinary formula calculation', () => {
+        const bed = createFunctionTestBed();
+        try {
+            const service = bed.get(IFormulaCurrentConfigService);
+            service.load({ formulaData: {}, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: false, dirtyReferenceUnits: ['unit'], dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {}, allUnitData: {} });
+            expect(service.getDirtyData().forceCalculation).toBe(false);
+            expect(service.getDirtyData(true).forceCalculation).toBe(true);
+            service.loadDirtyRangesAndExcludedCell([]);
+            expect(service.getDirtyData(true).forceCalculation).toBe(false);
+        } finally { bed.univer.dispose(); }
+    });
+
     it('distinguishes transported filter exclusions from manual hiding and clears stale exclusions', () => {
         const testBed = createFunctionTestBed();
         try {
@@ -238,6 +250,14 @@ describe('FormulaCurrentConfigService', () => {
         workbookById.set('date-1904', { getDateSystem: () => DateSystem.Date1904 });
         expect(service.getDateSystem('date-1904')).toBe(DateSystem.Date1904);
         expect(service.getDateSystem('missing')).toBe(DateSystem.Date1900);
+    });
+
+    it('resolves explicit workbook order independently of the focused workbook', () => {
+        const { service, workbookById } = createService();
+        workbookById.set('other', { getSnapshot: () => ({ id: 'other', sheetOrder: ['end', 'start'] }) });
+        expect(service.getSheetsInfo('other').sheetOrder).toEqual(['end', 'start']);
+        expect(service.getSheetsInfo().sheetOrder).toEqual(['sheet-current']);
+        expect(service.getSheetsInfo('missing')).toEqual({ sheetOrder: [], sheetNameMap: {} });
     });
 
     it('should resolve sheet size, filtered rows and lightweight data loading', () => {

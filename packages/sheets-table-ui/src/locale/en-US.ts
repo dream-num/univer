@@ -16,6 +16,9 @@
 
 const locale = {
     'sheets-table-ui': {
+        defaultStyleNumber: 'Default style {0}',
+        customStyleNumber: 'Custom style {0}',
+        removeCustomStyle: 'Delete custom style {0}',
         calculatedColumn: 'Calculated column',
         columnFormula: 'Formula',
         columnFormulaHint: 'Apply replaces all {0} data cells in this column immediately. Header and footer are excluded. Stop preserves existing cells. Changes can be undone.',

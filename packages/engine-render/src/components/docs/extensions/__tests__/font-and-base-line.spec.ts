@@ -15,10 +15,10 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
-import type { IExtensionConfig } from '../../../extension';
 import { BaselineOffset, BooleanNumber } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
+import type { IExtensionConfig } from '../../../extension';
 import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../basics/tools';
@@ -146,6 +146,26 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
+    it('paints stacked scripts and graphemes upright while preserving ordinary vertical text', () => {
+        const extension = new FontAndBaseLine();
+        const context = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 90, centerAngle: 90, stackedText: true },
+        };
+        for (const content of ['A', '1', '（', 'ー', '한', 'é', '👩‍💻']) {
+            extension.draw(context, DEFAULT_SCALE, createGlyph(content));
+            expect(context.fillText).toHaveBeenCalledWith(content, 12, 20);
+        }
+        expect(context.rotate).not.toHaveBeenCalled();
+
+        extension.extensionOffset.renderConfig = { vertexAngle: 90, centerAngle: 90 };
+        extension.draw(context, DEFAULT_SCALE, createGlyph('A'));
+        expect(context.rotate).toHaveBeenCalledWith(Math.PI / 2);
+    });
+
     it.each([90, 200])('paints character width scaling at the glyph origin without changing baseline: %s', (sa) => {
         const extension = new FontAndBaseLine();
         const context = createContext();
@@ -178,6 +198,66 @@ describe('docs font and baseline extension', () => {
             }));
             expect(context.fontKerning).toBe(fontKerning ?? 'auto');
         }
+    });
+
+    it('writes kerning only when the current canvas state needs to change', () => {
+        const extension = new FontAndBaseLine();
+        const CanvasContext = createContext();
+        let currentKerning: CanvasFontKerning = 'auto';
+        const setKerning = vi.fn((value: CanvasFontKerning) => {
+            currentKerning = value;
+        });
+        Object.defineProperty(CanvasContext, 'fontKerning', {
+            get: () => currentKerning,
+            set: setKerning,
+        });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+        };
+        const legacy = createGlyph('AV');
+        for (let index = 0; index < 100; index++) {
+            extension.draw(CanvasContext, DEFAULT_SCALE, legacy);
+        }
+        expect(setKerning).not.toHaveBeenCalled();
+        expect(CanvasContext.fillText).toHaveBeenCalledTimes(100);
+
+        const normal = createGlyph('AV', { fontStyle: { ...legacy.fontStyle!, fontKerning: 'normal' } });
+        extension.draw(CanvasContext, DEFAULT_SCALE, normal);
+        extension.draw(CanvasContext, DEFAULT_SCALE, normal);
+        expect(setKerning.mock.calls).toEqual([['normal']]);
+        extension.draw(CanvasContext, DEFAULT_SCALE, legacy);
+        expect(setKerning.mock.calls).toEqual([['normal'], ['auto']]);
+
+        // A restore or another extension can change native state between glyphs.
+        currentKerning = 'none';
+        extension.draw(CanvasContext, DEFAULT_SCALE, legacy);
+        expect(setKerning.mock.calls).toEqual([['normal'], ['auto'], ['auto']]);
+
+        const OtherCanvasContext = createContext();
+        OtherCanvasContext.fontKerning = 'none';
+        extension.draw(OtherCanvasContext, DEFAULT_SCALE, legacy);
+        expect(OtherCanvasContext.fontKerning).toBe('auto');
+        expect(OtherCanvasContext.fillText).toHaveBeenCalledWith('AV', 12, 20);
+    });
+
+    it.each([undefined, null])('leaves unsupported canvas kerning untouched: %s', (currentKerning) => {
+        const extension = new FontAndBaseLine();
+        const CanvasContext = createContext();
+        const setKerning = vi.fn();
+        Object.defineProperty(CanvasContext, 'fontKerning', {
+            get: () => currentKerning,
+            set: setKerning,
+        });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+        };
+        extension.draw(CanvasContext, DEFAULT_SCALE, createGlyph('AV'));
+        expect(setKerning).not.toHaveBeenCalled();
+        expect(CanvasContext.fillText).toHaveBeenCalledWith('AV', 12, 20);
     });
 
     it.each([0, 90])('paints tracked glyph segments using layout positions at %s degrees without native letterSpacing', (angle) => {

@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Girar texto',
             },
             toggleGridlines: 'Alternar líneas de cuadrícula',
+            zoom: 'Zoom',
             fullscreen: 'Pantalla completa',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'Aceptar',
             cancel: 'Cancelar',
+        },
+        borderStyle: {
+            thin: 'Fino',
+            hair: 'Muy fino',
+            dotted: 'Punteado',
+            dashed: 'Discontinuo',
+            dashDot: 'Guion y punto',
+            dashDotDot: 'Guion y dos puntos',
+            medium: 'Medio',
+            mediumDashed: 'Discontinuo medio',
+            mediumDashDot: 'Guion y punto medio',
+            mediumDashDotDot: 'Guion y dos puntos medio',
+            thick: 'Grueso',
+            double: 'Doble',
         },
         borderLine: {
             borderTop: 'bordeSuperior',

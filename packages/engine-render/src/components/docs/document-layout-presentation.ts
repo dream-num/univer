@@ -62,6 +62,7 @@ export interface IDocumentLayoutTextStyle extends ITextStyle {
 }
 
 export interface IDocumentLayoutRenderConfig extends IDocumentRenderConfig {
+    stackedText?: boolean;
     topAlignExactLineSpacing?: BooleanNumber;
     useTextInkForHitTesting?: BooleanNumber;
     preservePunctuationSpacing?: BooleanNumber;

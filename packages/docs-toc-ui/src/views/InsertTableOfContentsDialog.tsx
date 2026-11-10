@@ -17,6 +17,7 @@
 import type { TableOfContentsFormat, TableOfContentsTabLeader } from '@univerjs/docs-toc';
 import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
+import { Checkbox, clsx, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
@@ -57,71 +58,58 @@ export function InsertTableOfContentsDialog(props: IInsertTableOfContentsDialogP
         setValue(next);
         props.onChange(next);
     };
-    const leader = value.tabLeader === 'dots' ? '··········' : value.tabLeader === 'dashes' ? '----------' : value.tabLeader === 'underline' ? '__________' : '';
+    const leader = { none: '', dots: '··········', dashes: '----------', underline: '__________' }[value.tabLeader];
+    const indent = { fromTemplate: 18, classic: 14, modern: 20, simple: 12 }[value.format];
 
     return (
         <div className="univer-grid univer-gap-4 univer-py-2" data-testid="table-of-contents-insert-dialog">
             <div className="univer-grid univer-grid-cols-2 univer-gap-3">
                 <label className="univer-grid univer-gap-1 univer-text-sm">
                     <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.levels')}</span>
-                    <select
-                        className="univer-h-8 univer-rounded-md univer-border univer-bg-transparent univer-px-2"
-                        value={value.levels}
-                        onChange={(event) => update({ levels: Number(event.target.value) })}
-                    >
-                        {Array.from({ length: 9 }, (_, index) => index + 1).map((level) => (
-                            <option key={level} value={level}>{level}</option>
-                        ))}
-                    </select>
+                    <Select
+                        aria-label={localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.levels')}
+                        value={String(value.levels)}
+                        options={Array.from({ length: 9 }, (_, index) => ({ value: String(index + 1), label: String(index + 1) }))}
+                        onChange={(levels) => update({ levels: Number(levels) })}
+                    />
                 </label>
                 <label className="univer-grid univer-gap-1 univer-text-sm">
                     <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.format')}</span>
-                    <select
-                        className="univer-h-8 univer-rounded-md univer-border univer-bg-transparent univer-px-2"
+                    <Select
+                        aria-label={localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.format')}
                         value={value.format}
-                        onChange={(event) => update({ format: event.target.value as TableOfContentsFormat })}
-                    >
-                        {FORMAT_OPTIONS.map(([format, label]) => (
-                            <option key={format} value={format}>{localeService.t<LocaleKey>(label)}</option>
-                        ))}
-                    </select>
+                        options={FORMAT_OPTIONS.map(([format, label]) => ({ value: format, label: localeService.t<LocaleKey>(label) }))}
+                        onChange={(format) => update({ format: format as TableOfContentsFormat })}
+                    />
                 </label>
             </div>
             <div className="univer-grid univer-gap-2 univer-text-sm">
-                <label className="univer-flex univer-items-center univer-gap-2">
-                    <input
-                        type="checkbox"
-                        checked={value.showPageNumbers}
-                        onChange={(event) => update({
-                            showPageNumbers: event.target.checked,
-                            rightAlignPageNumbers: event.target.checked && value.rightAlignPageNumbers,
-                        })}
-                    />
-                    <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.showPageNumbers')}</span>
-                </label>
-                <label className="univer-flex univer-items-center univer-gap-2">
-                    <input
-                        type="checkbox"
-                        checked={value.rightAlignPageNumbers}
-                        disabled={!value.showPageNumbers}
-                        onChange={(event) => update({ rightAlignPageNumbers: event.target.checked })}
-                    />
-                    <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.rightAlignPageNumbers')}</span>
-                </label>
+                <Checkbox
+                    checked={value.showPageNumbers}
+                    onChange={(checked) => update({
+                        showPageNumbers: Boolean(checked),
+                        rightAlignPageNumbers: Boolean(checked) && value.rightAlignPageNumbers,
+                    })}
+                >
+                    {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.showPageNumbers')}
+                </Checkbox>
+                <Checkbox
+                    checked={value.rightAlignPageNumbers}
+                    disabled={!value.showPageNumbers}
+                    onChange={(checked) => update({ rightAlignPageNumbers: Boolean(checked) })}
+                >
+                    {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.rightAlignPageNumbers')}
+                </Checkbox>
                 <label className="univer-flex univer-items-center univer-justify-between univer-gap-3">
                     <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.tabLeader')}</span>
-                    <select
-                        className="
-                          univer-h-8 univer-min-w-40 univer-rounded-md univer-border univer-bg-transparent univer-px-2
-                        "
+                    <Select
+                        aria-label={localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.tabLeader')}
+                        className="univer-min-w-40"
                         value={value.tabLeader}
                         disabled={!value.showPageNumbers || !value.rightAlignPageNumbers}
-                        onChange={(event) => update({ tabLeader: event.target.value as TableOfContentsTabLeader })}
-                    >
-                        {LEADER_OPTIONS.map(([tabLeader, label]) => (
-                            <option key={tabLeader} value={tabLeader}>{localeService.t<LocaleKey>(label)}</option>
-                        ))}
-                    </select>
+                        options={LEADER_OPTIONS.map(([tabLeader, label]) => ({ value: tabLeader, label: localeService.t<LocaleKey>(label) }))}
+                        onChange={(tabLeader) => update({ tabLeader: tabLeader as TableOfContentsTabLeader })}
+                    />
                 </label>
             </div>
             <section
@@ -136,13 +124,10 @@ export function InsertTableOfContentsDialog(props: IInsertTableOfContentsDialogP
                 {Array.from({ length: Math.min(value.levels, 3) }, (_, index) => index).map((level) => (
                     <div
                         key={level}
-                        className={`
-                          univer-flex univer-items-baseline univer-text-sm
-                          ${value.format === 'modern'
-                        ? 'univer-mb-2'
-                        : 'univer-mb-1'}
-                        `}
-                        style={{ marginInlineStart: `${level * (value.format === 'simple' ? 12 : value.format === 'classic' ? 14 : value.format === 'modern' ? 20 : 18)}px` }}
+                        className={clsx('univer-flex univer-items-baseline univer-text-sm', value.format === 'modern'
+                            ? 'univer-mb-2'
+                            : 'univer-mb-1')}
+                        style={{ marginInlineStart: `${level * indent}px` }}
                     >
                         <span>
                             {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.previewHeading')}

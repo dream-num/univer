@@ -15,9 +15,14 @@
  */
 
 import type { IDocumentBody, IParagraph } from '@univerjs/core';
-import type { IDocumentSkeletonLine, IDocumentSkeletonPage } from '@univerjs/engine-render';
+import type { IDocumentSkeletonLine, IDocumentSkeletonPage, UniverRenderingContext } from '@univerjs/engine-render';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, NamedStyleType } from '@univerjs/core';
-import { DocumentSkeletonPageType, GlyphType, LineType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import {
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    setDocsTableRenderViewportProvider,
+} from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     drawParagraphPlaceholders,
@@ -359,12 +364,46 @@ describe('doc paragraph placeholder render controller', () => {
         }]);
     });
 
+    it('paints hints at half the inherited opacity without fading subsequent document content', () => {
+        const alphaStack: number[] = [];
+        const paintedAlphas: number[] = [];
+        const context = {
+            globalAlpha: 0.8,
+            save() {
+                alphaStack.push(this.globalAlpha);
+            },
+            restore() {
+                this.globalAlpha = alphaStack.pop()!;
+            },
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            fillText() {
+                paintedAlphas.push(this.globalAlpha);
+            },
+        };
+        drawParagraphPlaceholders(context as unknown as UniverRenderingContext, [{
+            fontFamily: 'Arial',
+            fontSize: 16,
+            fontWeight: 'normal',
+            maxWidth: 200,
+            text: 'Hint',
+            x: 20,
+            y: 40,
+        }]);
+        expect(paintedAlphas).toEqual([0.4]);
+        expect(context.globalAlpha).toBe(0.8);
+        expect(alphaStack).toEqual([]);
+    });
+
     it('clips long placeholder text instead of scaling its glyphs to maxWidth', () => {
         const ctx = {
             beginPath: vi.fn(),
             clip: vi.fn(),
             closePath: vi.fn(),
             fillText: vi.fn(),
+            globalAlpha: 1,
             rectByPrecision: vi.fn(),
             restore: vi.fn(),
             save: vi.fn(),

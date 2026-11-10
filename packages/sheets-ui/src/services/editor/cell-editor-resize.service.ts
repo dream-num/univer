@@ -54,6 +54,14 @@ interface ICanvasOffset {
 }
 
 export class SheetCellEditorResizeService extends Disposable {
+    private _editorWidth = 0;
+
+    private _editorHeight = 0;
+
+    private _initialEditorSize: Nullable<{ width: number; height: number }> = null;
+
+    private _cellSize: Nullable<{ width: number; height: number }> = null;
+
     constructor(
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -64,6 +72,15 @@ export class SheetCellEditorResizeService extends Disposable {
         @Optional(ISheetEmbedFloatingGeometryService) private readonly _embedFloatingGeometryService?: ISheetEmbedFloatingGeometryService
     ) {
         super();
+
+        this.disposeWithMe(this._editorBridgeService.visible$.subscribe(({ visible }) => {
+            if (!visible) {
+                this._editorWidth = 0;
+                this._editorHeight = 0;
+                this._initialEditorSize = null;
+                this._cellSize = null;
+            }
+        }));
     }
 
     private get _currentRenderer() {
@@ -96,6 +113,8 @@ export class SheetCellEditorResizeService extends Disposable {
         const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
         const { startX, startY, endX, endY } = position;
+        const cellWidth = endX - startX;
+        const cellHeight = endY - startY;
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
@@ -104,6 +123,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
+        this._syncCellSize(cellWidth / scaleX, cellHeight / scaleY);
         // Cell editors are embedded docs with unspecified compatibility mode. Reset before
         // measuring so stale page width from a previous resize does not leak into this editor.
         documentSkeleton.resetInitialWidth();
@@ -121,15 +141,10 @@ export class SheetCellEditorResizeService extends Disposable {
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
         actualWidth = actualWidth + (paddingData.l ?? 0) * scaleX + (paddingData.r ?? 0) * scaleX;
         actualHeight = actualHeight + (paddingData.t ?? 0) * scaleY + (paddingData.b ?? 0) * scaleY;
-        let editorWidth = endX - startX;
-        let editorHeight = endY - startY;
-        if (editorWidth < actualWidth) {
-            editorWidth = Math.ceil(actualWidth);
-        }
-
-        if (editorHeight < actualHeight) {
-            editorHeight = Math.ceil(actualHeight);
-        }
+        const contentWidth = cellWidth < actualWidth ? Math.ceil(actualWidth) : cellWidth;
+        const contentHeight = cellHeight < actualHeight ? Math.ceil(actualHeight) : cellHeight;
+        const editorWidth = Math.max(contentWidth, Math.min(this._editorWidth * scaleX, info.maxSize.width));
+        const editorHeight = Math.max(contentHeight, Math.min(this._editorHeight * scaleY, info.maxSize.height));
 
         // Set the top margin under vertical alignment.
         let offsetTop = 0;
@@ -144,11 +159,9 @@ export class SheetCellEditorResizeService extends Disposable {
         }
 
         let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            // offsetLeft = ((editorWidth - actualWidth) / 2 / scaleX);
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+        if (horizontalAlign === HorizontalAlign.RIGHT) {
             offsetLeft = (editorWidth - actualWidth) / scaleX;
-        } else {
+        } else if (horizontalAlign !== HorizontalAlign.CENTER) {
             offsetLeft = paddingData.l || 0;
         }
         offsetTop = Math.max(offsetTop, paddingData.t || 0);
@@ -160,8 +173,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         documentSkeleton.calculate();
         this._editAreaProcessing(
-            editorWidth,
-            editorHeight,
+            { width: editorWidth, height: editorHeight, contentWidth },
             position,
             canvasOffset,
             fill,
@@ -170,6 +182,18 @@ export class SheetCellEditorResizeService extends Disposable {
             horizontalAlign,
             callback
         );
+    }
+
+    private _syncCellSize(width: number, height: number) {
+        if (this._cellSize && (
+            Math.abs(this._cellSize.width - width) > 1e-6 ||
+            Math.abs(this._cellSize.height - height) > 1e-6
+        )) {
+            // Refit resized cells while still covering the original worksheet text until the edit is submitted.
+            this._editorWidth = this._initialEditorSize?.width ?? 0;
+            this._editorHeight = this._initialEditorSize?.height ?? 0;
+        }
+        this._cellSize = { width, height };
     }
 
     /**
@@ -192,26 +216,28 @@ export class SheetCellEditorResizeService extends Disposable {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         const { vertexAngle: angle } = convertTextRotation(textRotation);
+        const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
+        if (!maxSize) return;
 
+        // Measure content without alignment margins left over from the previous editor size.
+        documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
             documentDataModel?.updateDocumentDataPageSize((endX - startX) / scaleX);
-            documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
             documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
             // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
             return {
                 actualWidth: actualWidth * scaleX,
                 actualHeight: actualHeight * scaleY,
+                maxSize,
             };
         }
 
-        const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
-        if (!maxSize) return;
         documentDataModel?.updateDocumentDataPageSize(maxSize.width / scaleX);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
-        let editorWidth = endX - startX;
+        let editorWidth = Math.max(endX - startX, Math.min(this._editorWidth * scaleX, maxSize.width));
 
         if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX) {
             editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP * scaleX;
@@ -231,6 +257,7 @@ export class SheetCellEditorResizeService extends Disposable {
         return {
             actualWidth: size.actualWidth * scaleX,
             actualHeight: size.actualHeight * scaleY,
+            maxSize,
         };
     }
 
@@ -292,10 +319,8 @@ export class SheetCellEditorResizeService extends Disposable {
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
-    // eslint-disable-next-line max-lines-per-function
     private _editAreaProcessing(
-        editorWidth: number,
-        editorHeight: number,
+        size: { width: number; height: number; contentWidth: number },
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
         fill: Nullable<string>,
@@ -317,36 +342,17 @@ export class SheetCellEditorResizeService extends Disposable {
         let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
-        const viewportMain = editorScene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-
         const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign)!;
-
         const { height: clientHeight, width: clientWidth, contentScaleX, contentScaleY, scaleAdjustX, scaleAdjustY } = info;
+        const { physicHeight, scrollBarWidth } = this._fitEditorViewport(editorScene, size.height, clientHeight);
+        const editorWidth = Math.min(Math.max(size.width, size.contentWidth + scrollBarWidth), clientWidth);
+        const editorHeight = size.height;
 
-        let physicHeight = editorHeight;
-
-        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
-
-        if (physicHeight > clientHeight) {
-            if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
-            } else {
-                viewportMain?.resetCanvasSizeAndUpdateScroll();
-            }
-            viewportMain?.scrollToViewportPos({
-                viewportScrollY: physicHeight - clientHeight,
-            });
-
-            physicHeight = clientHeight;
-        } else {
-            scrollBar = null;
-            viewportMain?.getScrollBar()?.dispose();
-        }
-
-        editorWidth += scrollBar?.barSize || 0;
-
-        if (editorWidth > clientWidth) {
-            editorWidth = clientWidth;
+        // Keep the visible extent for this edit only; skeleton measurements must still discard stale layout width.
+        this._editorWidth = Math.max(this._editorWidth, editorWidth / scaleX);
+        this._editorHeight = Math.max(this._editorHeight, physicHeight / scaleY);
+        if (!this._initialEditorSize && this._editorBridgeService.isVisible().visible) {
+            this._initialEditorSize = { width: editorWidth / scaleX, height: physicHeight / scaleY };
         }
 
         this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
@@ -362,11 +368,7 @@ export class SheetCellEditorResizeService extends Disposable {
 
         documentComponent.resize(editorWidth * scaleAdjustX / scaleX, editorHeight * scaleAdjustY / scaleY);
 
-        /**
-         * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
-         * resize canvas
-         * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
-         */
+        // Defer canvas resizing until formula selections have updated the render scene.
         setTimeout(() => {
             docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
@@ -396,6 +398,28 @@ export class SheetCellEditorResizeService extends Disposable {
             endY: physicHeight * scaleAdjustY + startY,
             show: true,
         });
+    }
+
+    private _fitEditorViewport(editorScene: Scene, editorHeight: number, clientHeight: number) {
+        const viewportMain = editorScene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+
+        if (editorHeight > clientHeight) {
+            if (scrollBar == null) {
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+            } else {
+                viewportMain?.resetCanvasSizeAndUpdateScroll();
+            }
+            viewportMain?.scrollToViewportPos({ viewportScrollY: editorHeight - clientHeight });
+        } else {
+            scrollBar = null;
+            viewportMain?.getScrollBar()?.dispose();
+        }
+
+        return {
+            physicHeight: Math.min(editorHeight, clientHeight),
+            scrollBarWidth: scrollBar?.barSize ?? 0,
+        };
     }
 
     private _getEditorContentElement(): HTMLElement {

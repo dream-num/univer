@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Obrót tekstu',
             },
             toggleGridlines: 'Przełącz linie siatki',
+            zoom: 'Powiększenie',
             fullscreen: 'Pełny ekran',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Anuluj',
+        },
+        borderStyle: {
+            thin: 'Cienka',
+            hair: 'Bardzo cienka',
+            dotted: 'Kropkowana',
+            dashed: 'Kreskowana',
+            dashDot: 'Kreska-kropka',
+            dashDotDot: 'Kreska-kropka-kropka',
+            medium: 'Średnia',
+            mediumDashed: 'Średnia kreskowana',
+            mediumDashDot: 'Średnia kreska-kropka',
+            mediumDashDotDot: 'Średnia kreska-kropka-kropka',
+            thick: 'Gruba',
+            double: 'Podwójna',
         },
         borderLine: {
             borderTop: 'Góra',

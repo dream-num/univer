@@ -49,6 +49,7 @@ export interface ILinkInfo {
 }
 
 const INFO_POPUP_HIDE_DELAY = 150;
+const INFO_POPUP_REPLACEMENT_DELAY = 200;
 
 function isSameLinkInfo(current: ILinkInfo | null, next: ILinkInfo): boolean {
     return current?.linkId === next.linkId &&
@@ -69,7 +70,9 @@ export class DocHyperLinkPopupService extends Disposable {
     private _editPopupUnitId: string | null = null;
     private _infoPopup: IDisposable | null = null;
     private _infoPopupPinned = false;
+    private _infoPopupHovered = false;
     private _infoPopupHideTimer: ReturnType<typeof setTimeout> | null = null;
+    private _infoPopupReplacement: { info: ILinkInfo; timer: ReturnType<typeof setTimeout> } | null = null;
     private _infoPopupSuppressed = false;
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -105,6 +108,9 @@ export class DocHyperLinkPopupService extends Disposable {
             }
         }));
         this.disposeWithMe(this._renderManagerService.disposed$.subscribe((unitId) => {
+            if (this._infoPopupReplacement?.info.unitId === unitId) {
+                this._cancelScheduledInfoPopupReplacement();
+            }
             if (this._editPopupUnitId === unitId) {
                 this.hideEditPopup();
             }
@@ -133,6 +139,7 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showEditPopup(unitId: string, linkInfo: ILinkInfo | null): IDisposable | null {
+        this._cancelScheduledInfoPopupReplacement();
         const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (doc && getEditorRuntimeConfig(doc)?.customHyperLinkUI) {
             return null;
@@ -187,6 +194,7 @@ export class DocHyperLinkPopupService extends Disposable {
         if (!(doc instanceof DocumentDataModel) || getEditorRuntimeConfig(doc)?.customHyperLinkUI) {
             return;
         }
+        this._cancelScheduledInfoPopupReplacement();
         this.cancelScheduledHideInfoPopup();
         if (this._infoPopupSuppressed) {
             return;
@@ -206,6 +214,7 @@ export class DocHyperLinkPopupService extends Disposable {
             this._infoPopup = null;
         }
         this._infoPopupPinned = options?.pinned ?? false;
+        this._infoPopupHovered = false;
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
 
         this._infoPopup = this._openInfoSurface(info);
@@ -256,17 +265,47 @@ export class DocHyperLinkPopupService extends Disposable {
 
     showInfoPopupFromHover(info: ILinkInfo): void {
         this.cancelScheduledHideInfoPopup();
-        if (this._infoPopupPinned || this._infoPopupSuppressed) {
+        if (this._infoPopupPinned || this._infoPopupHovered || this._infoPopupSuppressed) {
             return;
         }
-        if (!this.showing) {
+        if (!this.showing || isSameLinkInfo(this.showing, info)) {
             this.showInfoPopup(info);
+            return;
+        }
+        if (isSameLinkInfo(this._infoPopupReplacement?.info ?? null, info)) {
+            return;
+        }
+        this._cancelScheduledInfoPopupReplacement();
+        const pendingInfo = { ...info };
+        this._infoPopupReplacement = {
+            info: pendingInfo,
+            timer: setTimeout(() => {
+                this._infoPopupReplacement = null;
+                this.showInfoPopup(pendingInfo);
+            }, INFO_POPUP_REPLACEMENT_DELAY),
+        };
+    }
+
+    setInfoPopupHovered(hovered: boolean): void {
+        this._infoPopupHovered = hovered && this.showing !== null;
+        if (this._infoPopupHovered) {
+            this._cancelScheduledInfoPopupReplacement();
+            this.cancelScheduledHideInfoPopup();
+        }
+    }
+
+    private _cancelScheduledInfoPopupReplacement(): void {
+        if (this._infoPopupReplacement) {
+            clearTimeout(this._infoPopupReplacement.timer);
+            this._infoPopupReplacement = null;
         }
     }
 
     hideInfoPopup() {
+        this._cancelScheduledInfoPopupReplacement();
         this.cancelScheduledHideInfoPopup();
         this._infoPopupPinned = false;
+        this._infoPopupHovered = false;
         this._showingLink$.next(null);
         const popup = this._infoPopup;
         this._infoPopup = null;
@@ -274,7 +313,8 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     scheduleHideInfoPopup() {
-        if (this._infoPopupPinned || !this.showing) {
+        this._cancelScheduledInfoPopupReplacement();
+        if (this._infoPopupPinned || this._infoPopupHovered || !this.showing) {
             return;
         }
 

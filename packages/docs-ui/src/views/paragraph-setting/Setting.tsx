@@ -15,12 +15,12 @@
  */
 
 import type { ComponentType, ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -33,6 +33,7 @@ import {
     useFirstParagraphSpaceBelow,
 } from './hook/utils';
 import { getLineSpacingInputConfig, LINE_SPACING_RULE_OPTIONS } from './line-spacing';
+import { ParagraphWordWrapSetting } from './ParagraphWordWrapSetting';
 
 const ALIGNMENT_OPTIONS = [
     { label: 'docs-ui.toolbar.alignLeft', value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingIcon /> },
@@ -244,6 +245,9 @@ export function ParagraphSetting({
                     </RowComponent>
                 </div>
             </ParagraphSettingSection>
+            <div className="univer-mt-5">
+                <ParagraphWordWrapSetting />
+            </div>
         </div>
     );
 }

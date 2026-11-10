@@ -37,6 +37,7 @@ import {
     H5Icon,
     HeaderFooterIcon,
     HorizontallyIcon,
+    InsertBelowDoubleIcon,
     InsertDoubleIcon,
     InsertRowAboveDoubleIcon,
     InsertRowBelowDoubleIcon,
@@ -71,10 +72,12 @@ import {
     TodoListDoubleIcon,
     UnderlineIcon,
     UnorderIcon,
+    ZoomInIcon,
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../../views/DocLayoutRecovery';
 import { DOC_PASTE_OPTIONS_COMPONENT } from '../../views/DocPasteOptions';
+import { EditorColorPicker } from '../../views/EditorColorPicker';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../../views/header-footer/panel/component-name';
 import {
     DefaultTextColorIcon,
@@ -129,14 +132,7 @@ export class MobileComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
-    }
-
-    private _registerParts(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
-        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, MobileDocPasteOptions));
     }
 
     private _registerIcons(): void {
@@ -162,6 +158,7 @@ export class MobileComponentsController extends Disposable {
             H5Icon,
             HeaderFooterIcon,
             HorizontallyIcon,
+            InsertBelowDoubleIcon,
             InsertDoubleIcon,
             InsertRowAboveDoubleIcon,
             InsertRowBelowDoubleIcon,
@@ -194,6 +191,7 @@ export class MobileComponentsController extends Disposable {
             TodoListDoubleIcon,
             UnderlineIcon,
             UnorderIcon,
+            ZoomInIcon,
             DefaultTextColorIcon,
             HeaderTextColorIcon,
             MoreRightIcon,
@@ -225,6 +223,7 @@ export class MobileComponentsController extends Disposable {
     }
 
     protected _registerComponents(): void {
+        this.disposeWithMe(this._componentManager.register(EditorColorPicker.componentKey, EditorColorPicker));
         this.disposeWithMe(this._componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, MobileHeaderFooterPanel));
         this.disposeWithMe(this._componentManager.register('doc_ui_paragraph-setting-panel', MobileParagraphSettings));
         this.disposeWithMe(this._componentManager.register(DOC_SECTION_SETTING_COMPONENT, MobileSectionSettings));
@@ -233,5 +232,9 @@ export class MobileComponentsController extends Disposable {
         this.disposeWithMe(this._componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(this._componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
         this.disposeWithMe(this._componentManager.register(DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery));
+
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, MobileDocPasteOptions));
     }
 }

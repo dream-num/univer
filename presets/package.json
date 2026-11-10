@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/presets",
-    "version": "1.0.3",
+    "version": "1.4.0",
     "private": false,
     "description": "Build Univer apps faster and easier with pre-configured plugin collections.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -51,9 +51,9 @@
         "lib"
     ],
     "scripts": {
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli preset build --cleanup",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "dependencies": {
@@ -70,6 +70,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@wendellhu/redi": "1.1.3",
-        "typescript": "^6.0.3"
+        "tsrs": "0.20.1-ts7.1.0-beta"
     }
 }

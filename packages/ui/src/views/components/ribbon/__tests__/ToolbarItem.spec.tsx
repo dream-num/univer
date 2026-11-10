@@ -15,7 +15,6 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
     ContextService,
@@ -29,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { IIconProps } from '../../../../common/icon-manager';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { ILayoutService } from '../../../../services/layout/layout.service';
@@ -129,7 +129,6 @@ describe('ToolbarItem', () => {
 
         expect(trigger.getAttribute('role')).toBe('button');
         expect(trigger.getAttribute('tabindex')).toBe('0');
-        expect(trigger.getAttribute('aria-label')).toBe('Format');
         trigger.focus();
         expect(document.activeElement).toBe(trigger);
         fireEvent.keyDown(trigger, { key: 'Enter' });
@@ -137,9 +136,10 @@ describe('ToolbarItem', () => {
         expect(await findByText('Format rows')).toBeTruthy();
     });
 
-    it('keeps a custom selector label as the only keyboard focus target', () => {
-        const { container } = renderWithDependencies(
+    it('opens a custom selector from its named arrow without nesting interactive controls', async () => {
+        const { container, getByRole, findByText } = renderWithDependencies(
             <ToolbarItem
+                tooltip="Format"
                 id="test-custom-selector"
                 type={MenuItemType.SELECTOR}
                 label={{ name: 'TestDynamicOption' }}
@@ -150,7 +150,13 @@ describe('ToolbarItem', () => {
 
         expect(trigger.getAttribute('role')).toBeNull();
         expect(trigger.getAttribute('tabindex')).toBeNull();
-        expect(trigger.querySelector('button')).toBeTruthy();
+        expect(trigger.querySelector('button button')).toBeNull();
+        const arrow = getByRole('button', { name: 'Format' });
+        arrow.focus();
+        fireEvent.keyDown(arrow, { key: 'Enter' });
+        expect(await findByText('Format rows')).toBeTruthy();
+        fireEvent.keyDown(getByRole('menu'), { key: 'Escape' });
+        await waitFor(() => expect(document.activeElement).toBe(arrow));
     });
 
     it('closes open selector options when the parent becomes disabled', async () => {
@@ -251,6 +257,25 @@ describe('ToolbarItem', () => {
         );
 
         expect(getByText('Financial')).toBeTruthy();
+    });
+
+    it('keeps icon-only overflow selectors named and keyboard-operable without visible titles', async () => {
+        const { getByRole, findByText } = renderWithDependencies(
+            <ToolbarItem
+                id="test-overflow-selector"
+                type={MenuItemType.SELECTOR}
+                icon="TestIcon"
+                title="Alignment"
+                selections={[{ label: 'Align left', value: 'left' }]}
+                grid
+                overflow
+            />
+        );
+        const trigger = getByRole('button', { name: 'Alignment' });
+        expect(trigger.textContent).toBe('');
+        trigger.focus();
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+        expect(await findByText('Align left')).toBeTruthy();
     });
 
     it('does not wrap an interactive custom button label in another button', () => {

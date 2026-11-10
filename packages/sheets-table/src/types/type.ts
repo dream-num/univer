@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValueType } from '@univerjs/core';
+import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValue } from '@univerjs/core';
 import type {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -74,13 +74,6 @@ export interface ITableFilterJSON {
     tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
 }
 
-export type TableRecordValue =
-    | { type: RecordValueType.Blank }
-    | { type: RecordValueType.String; value: string }
-    | { type: RecordValueType.Number | RecordValueType.Date; value: number }
-    | { type: RecordValueType.Boolean; value: boolean }
-    | { type: RecordValueType.Error; value: string };
-
 export type ITableFilterItem =
     | ITableManualFilterItem
     | ITableConditionFilterItem
@@ -120,7 +113,7 @@ export interface ITableColorFilterItem {
 export interface ITableRecordFilterItem {
     filterType: TableColumnFilterTypeEnum.record;
     mode: FilterSelectionMode.Include | FilterSelectionMode.Exclude;
-    values: TableRecordValue[];
+    values: RecordValue[];
 }
 
 export interface ITableDateFilterInfo {
@@ -221,6 +214,7 @@ export interface ITableNameChangedEvent extends ITableBaseEvent {
 export interface ITableRangeChangedEvent extends ITableBaseEvent {
     range: ITableRange;
     oldRange: ITableRange;
+    oldSubUnitId?: string;
 }
 
 export interface ITableThemeChangedEvent extends ITableBaseEvent {
@@ -232,18 +226,11 @@ export type ITableDeletedEvent = ITableAddedEvent & {
     tableStyleId?: string;
 };
 
-export interface ITableRangeChangedEvent {
-    unitId: string;
-    subUnitId: string;
-    tableId: string;
-    range: ITableRange;
-    oldRange: ITableRange;
-}
-
 export interface ITableFilterChangedEvent {
     unitId: string;
     subUnitId: string;
     tableId: string;
+    oldSubUnitId?: string;
 }
 export interface ITableColumnJson {
     dataType: TableColumnDataTypeEnum;

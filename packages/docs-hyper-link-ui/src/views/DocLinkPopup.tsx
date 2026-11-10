@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import {
     CustomRangeType,
     DocumentDataModel,
@@ -29,6 +28,7 @@ import { getDocumentPermissionValue } from '@univerjs/docs';
 import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
@@ -67,9 +67,10 @@ export const DocLinkPopup = () => {
               dark:!univer-bg-gray-900
             `, borderClassName)}
             onPointerEnter={() => {
-                hyperLinkService.cancelScheduledHideInfoPopup();
+                hyperLinkService.setInfoPopupHovered(true);
             }}
             onPointerLeave={() => {
+                hyperLinkService.setInfoPopupHovered(false);
                 hyperLinkService.scheduleHideInfoPopup();
             }}
             onClick={() => {

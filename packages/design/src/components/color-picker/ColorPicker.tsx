@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Dialog } from '../dialog/Dialog';
 import { AlphaSlider } from './AlphaSlider';
-import { hexToHsv, hsvToHex, hsvToRgb, hsvToRgba, parseRgba, rgbToHex, rgbToHsv } from './color-conversion';
+import { hexToHsv, hsvToHex, hsvToRgba, parseRgba, rgbToHsv } from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
 import { HueSlider } from './HueSlider';
-
-const MemoizedColorSpectrum = memo(ColorSpectrum);
-const MemoizedHueSlider = memo(HueSlider);
-const MemoizedAlphaSlider = memo(AlphaSlider);
-const MemoizedColorInput = memo(ColorInput);
-const MemoizedColorPresets = memo(ColorPresets);
 
 export interface IColorPickerProps {
     format?: 'hex' | 'rgba';
@@ -40,32 +33,42 @@ export interface IColorPickerProps {
 
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
     const { direction, locale } = useContext(ConfigContext);
-
-    const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
+    const [selectedColor, setSelectedColor] = useState(value);
+    const [hsv, setHsv] = useState<[number, number, number]>([0, 0, 0]);
     const [alpha, setAlpha] = useState(1);
-    const [visible, setVisible] = useState(false);
+    const [custom, setCustom] = useState(false);
+    const returnFocusRef = useRef(false);
+    const moreButtonRef = useRef<HTMLButtonElement>(null);
+    const customPanelRef = useRef<HTMLDivElement>(null);
 
-    const getRgb = useCallback((h: number, s: number, v: number) => {
-        return hsvToRgb(h, s, v);
-    }, []);
-
-    useEffect(() => {
+    const resetDraft = useCallback((color?: string) => {
         try {
-            const actualValue = value || (format === 'hex' ? '#000000' : 'rgba(0, 0, 0, 1)');
             if (format === 'hex') {
-                const [h, s, v] = hexToHsv(actualValue);
-                setHsv([h, s, v]);
+                setHsv(hexToHsv(color || '#000000'));
                 setAlpha(1);
-            } else if (format === 'rgba') {
-                const [r, g, b, a] = parseRgba(actualValue);
-                const [h, s, v] = rgbToHsv(r, g, b);
-                setHsv([h, s, v]);
+            } else {
+                const [r, g, b, a] = parseRgba(color || 'rgba(0, 0, 0, 1)');
+                setHsv(rgbToHsv(r, g, b));
                 setAlpha(a);
             }
         } catch (error) {
             console.error('Invalid value:', error);
         }
-    }, [value, format]);
+    }, [format]);
+
+    useEffect(() => {
+        setSelectedColor(value);
+        resetDraft(value);
+    }, [value, resetDraft]);
+
+    useLayoutEffect(() => {
+        if (custom) {
+            customPanelRef.current?.querySelector('input')?.focus();
+        } else if (returnFocusRef.current) {
+            moreButtonRef.current?.focus();
+            returnFocusRef.current = false;
+        }
+    }, [custom]);
 
     if (!isBrowser) {
         return null;
@@ -75,122 +78,114 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
         setHsv([h, s, v]);
     }
 
-    function handleAlphaChange(a: number) {
-        setAlpha(a);
+    function applyColor(h: number, s: number, v: number, a: number) {
+        const color = format === 'hex' ? hsvToHex(h, s, v) : hsvToRgba(h, s, v, a);
+        setSelectedColor(color);
+        returnFocusRef.current = custom;
+        setCustom(false);
+        onChange?.(color);
     }
 
-    function handleColorChanged(h: number, s: number, v: number, a: number = alpha) {
-        if (format === 'hex') {
-            const [r, g, b] = getRgb(h, s, v);
-            const hex = rgbToHex(r, g, b);
-            onChange?.(hex);
-        } else if (format === 'rgba') {
-            const [r, g, b] = getRgb(h, s, v);
-            onChange?.(`rgba(${r}, ${g}, ${b}, ${a})`);
-        }
-    }
-
-    function handleConfirmCustomColor() {
-        const [h, s, v] = hsv;
-        if (format === 'hex') {
-            const hex = hsvToHex(h, s, v);
-            onChange?.(hex);
-        } else if (format === 'rgba') {
-            const [r, g, b] = getRgb(h, s, v);
-            onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
-        }
-        setVisible(false);
+    function cancelCustomColor() {
+        returnFocusRef.current = true;
+        resetDraft(selectedColor);
+        setCustom(false);
     }
 
     return (
         <div
             data-u-comp="color-picker"
             dir={direction}
-            className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
-            onClick={(e) => e.stopPropagation()}
+            className="univer-w-72 univer-max-w-full univer-cursor-default univer-rounded-lg"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+                if (custom) event.stopPropagation();
+                if (custom && event.key === 'Escape') {
+                    event.preventDefault();
+                    cancelCustomColor();
+                }
+            }}
         >
-            <MemoizedColorPresets
-                hsv={hsv}
-                onChange={(h, s, v) => {
-                    handleColorChange(h, s, v);
-                    handleAlphaChange(1);
-                    handleColorChanged(h, s, v, 1);
-                }}
-            />
-
-            <div className="univer-flex univer-h-7 univer-items-center">
-                <button
-                    type="button"
-                    className="
-                      univer-cursor-pointer univer-border-0 univer-bg-transparent univer-p-0 univer-text-sm
-                      univer-text-gray-900 univer-transition-opacity
-                      hover:univer-opacity-80
-                      dark:!univer-text-gray-0
-                    "
-                    onClick={() => setVisible(true)}
-                >
-                    {locale?.ColorPicker.more}
-                </button>
-            </div>
-
-            <Dialog
-                className="!univer-z-[1090] !univer-w-fit !univer-p-2.5"
-                overlayClassName="!univer-z-[1090]"
-                closable={false}
-                maskClosable={false}
-                open={visible}
-                onOpenChange={setVisible}
-            >
-                <div className="univer-grid univer-w-64 univer-gap-2">
-                    <MemoizedColorSpectrum
-                        hsv={hsv}
-                        onChange={handleColorChange}
-                    />
-
-                    <div className="univer-flex univer-items-center univer-gap-2">
-                        <div
-                            className="univer-size-6 univer-flex-shrink-0 univer-rounded-sm"
-                            style={{
-                                backgroundColor: format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha),
-                            }}
-                        />
-                        <div className="univer-flex-1 univer-space-y-2">
-                            <MemoizedHueSlider
-                                hsv={hsv}
-                                onChange={handleColorChange}
-                            />
-                            {format === 'rgba' && (
-                                <MemoizedAlphaSlider
-                                    hsv={hsv}
-                                    alpha={alpha}
-                                    onChange={handleAlphaChange}
-                                />
-                            )}
-                        </div>
-                    </div>
-
-                    <MemoizedColorInput
-                        hsv={hsv}
-                        alpha={alpha}
-                        format={format}
-                        onChange={(h, s, v, a) => {
-                            handleColorChange(h, s, v);
-                            if (a !== undefined) {
-                                handleAlphaChange(a);
+            {custom
+                ? (
+                    <div
+                        ref={customPanelRef}
+                        className="univer-grid univer-gap-3"
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                applyColor(...hsv, alpha);
                             }
                         }}
-                    />
-
-                    <footer className="univer-flex univer-items-center univer-justify-end univer-gap-2">
-                        <Button onClick={() => setVisible(false)}>
-                            {locale?.ColorPicker.cancel}
+                    >
+                        <div className="univer-h-40 univer-overflow-hidden univer-rounded-md">
+                            <ColorSpectrum hsv={hsv} onChange={handleColorChange} />
+                        </div>
+                        <div className="univer-flex univer-items-center univer-gap-3">
+                            <span
+                                className="
+                                  univer-size-8 univer-shrink-0 univer-rounded-md univer-border univer-border-solid
+                                  univer-border-gray-200
+                                  dark:!univer-border-gray-600
+                                "
+                                style={{ backgroundColor: format === 'hex' ? hsvToHex(...hsv) : hsvToRgba(...hsv, alpha) }}
+                            />
+                            <div className="univer-flex-1 univer-space-y-3">
+                                <HueSlider hsv={hsv} onChange={handleColorChange} />
+                                {format === 'rgba' && <AlphaSlider hsv={hsv} alpha={alpha} onChange={setAlpha} />}
+                            </div>
+                        </div>
+                        <ColorInput
+                            hsv={hsv}
+                            alpha={alpha}
+                            format={format}
+                            onChange={(h, s, v, a) => {
+                                handleColorChange(h, s, v);
+                                if (a !== undefined) setAlpha(a);
+                            }}
+                        />
+                        <footer className="univer-flex univer-justify-end univer-gap-2">
+                            <Button onClick={cancelCustomColor}>{locale?.ColorPicker.cancel}</Button>
+                            <Button variant="primary" onClick={() => applyColor(...hsv, alpha)}>
+                                {locale?.ColorPicker.confirm}
+                            </Button>
+                        </footer>
+                    </div>
+                )
+                : (
+                    <div className="univer-space-y-2">
+                        <ColorPresets
+                            hsv={selectedColor && alpha === 1 ? hsv : undefined}
+                            onChange={(h, s, v) => {
+                                handleColorChange(h, s, v);
+                                setAlpha(1);
+                                applyColor(h, s, v, 1);
+                            }}
+                        />
+                        <Button
+                            ref={moreButtonRef}
+                            variant="ghost"
+                            className="univer-w-full univer-justify-between"
+                            onClick={() => {
+                                resetDraft(selectedColor);
+                                setCustom(true);
+                            }}
+                        >
+                            {locale?.ColorPicker.more}
+                            {selectedColor && (
+                                <span
+                                    className="
+                                      univer-size-5 univer-rounded univer-border univer-border-solid
+                                      univer-border-gray-200
+                                      dark:!univer-border-gray-600
+                                    "
+                                    style={{ backgroundColor: selectedColor }}
+                                />
+                            )}
                         </Button>
-                        <Button variant="primary" onClick={handleConfirmCustomColor}>
-                            {locale?.ColorPicker.confirm}
-                        </Button>
-                    </footer>
-                </div>
-            </Dialog>
+                    </div>
+                )}
         </div>
     );
 }

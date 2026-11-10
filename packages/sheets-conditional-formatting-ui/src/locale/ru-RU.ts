@@ -52,6 +52,7 @@ const locale: typeof enUS = {
             lessThanOrEqual: '<=',
         },
         panel: {
+            stopIfTrue: 'Остановить, если истина',
             createRule: 'Создать правило',
             clear: 'Очистить все правила',
             range: 'Применить диапазон',

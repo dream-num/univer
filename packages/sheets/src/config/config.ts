@@ -56,6 +56,15 @@ export interface IUniverSheetsConfig {
     autoHeightForMergedCells?: boolean;
 
     /**
+     * Extra space in pixels between lines of cell text, including rich text and cell editors.
+     * Applies at initialization to all workbooks in this Univer instance. Existing row heights
+     * are unchanged until auto-resized; fixed-height cells may clip additional text.
+     * Must be finite and non-negative.
+     * @default 0
+     */
+    textLineGap?: number;
+
+    /**
      * Whether synchronize the frozen state to other users in real-time collaboration.
      * @default true
      */

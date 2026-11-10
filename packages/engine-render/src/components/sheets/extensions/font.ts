@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-
 import type {
     ICellDataForSheetInterceptor,
     ICellWithCoord,
@@ -27,13 +24,6 @@ import type {
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics';
-import type { UniverRenderingContext } from '../../../context';
-import type { Documents } from '../../docs/document';
-import type { IDrawInfo } from '../../extension';
-import type { IFontCacheItem } from '../interfaces';
-import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import {
     CellValueType,
     getDisplayValueFromCell,
@@ -41,7 +31,14 @@ import {
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
+import type { UniverRenderingContext } from '../../../context';
+import type { Documents } from '../../docs/document';
+import type { IDrawInfo } from '../../extension';
+import type { IFontCacheItem } from '../interfaces';
+import type { SheetComponent } from '../sheet-component';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
@@ -320,12 +317,12 @@ export class Font extends SheetExtension {
         //#endregion
 
         if (notInMergeRange) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
             if (!visibleRow) {
                 return true;
             }
 
-            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col) && spreadsheetSkeleton.worksheet.getColumnWidth(col) > 0;
             if (!visibleCol) {
                 return true;
             }
@@ -333,7 +330,7 @@ export class Font extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;
@@ -347,7 +344,7 @@ export class Font extends SheetExtension {
             let isAllColHidden = true;
 
             for (let c = mergeInfo.startColumn; c <= mergeInfo.endColumn; c++) {
-                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c);
+                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(c) && spreadsheetSkeleton.worksheet.getColumnWidth(c) > 0;
                 if (visibleCol) {
                     isAllColHidden = false;
                     break;
@@ -389,7 +386,7 @@ export class Font extends SheetExtension {
         if (fontCache.documentSkeleton) {
             this._renderDocuments(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
         } else {
-            this._renderText(ctx, row, col, renderFontCtx, spreadsheetSkeleton.overflowCache);
+            this._renderText(ctx, renderFontCtx);
         }
         ctx.restore();
 
@@ -509,7 +506,7 @@ export class Font extends SheetExtension {
                     } else {
                         try {
                             ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
-                        } catch (e) {
+                        } catch {
                             this._drawFallbackImage(ctx, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
                         }
                     }
@@ -524,7 +521,7 @@ export class Font extends SheetExtension {
      * @param renderFontContext
      * @param row
      * @param col
-     * @param fontCache
+     * @param padding
      */
     private _clipByRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, fontCache } = renderFontContext;
@@ -624,10 +621,7 @@ export class Font extends SheetExtension {
 
     private _renderText(
         ctx: UniverRenderingContext,
-        row: number,
-        col: number,
-        renderFontCtx: IRenderFontContext,
-        overflowCache: ObjectMatrix<IRange>
+        renderFontCtx: IRenderFontContext
     ) {
         const { fontCache } = renderFontCtx;
         if (!fontCache) return;
@@ -648,6 +642,7 @@ export class Font extends SheetExtension {
             text,
             fontStyle: fontCache.fontString,
             warp: wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0,
+            lineGap: renderFontCtx.spreadsheetSkeleton.textLineGap,
             hAlign,
             vAlign: fontCache.verticalAlign,
             width: cellWidth,

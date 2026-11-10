@@ -16,6 +16,7 @@
 
 import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
+import { Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
@@ -39,28 +40,27 @@ export function TableOfContentsDialog(props: ITableOfContentsDialogProps) {
             <p className="univer-m-0 univer-text-sm">
                 {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.updateHint')}
             </p>
-            <fieldset className="univer-grid univer-gap-3 univer-border-0 univer-p-0">
+            <RadioGroup
+                direction="vertical"
+                className="univer-gap-3"
+                value={mode}
+                onChange={(nextMode) => {
+                    const next = nextMode as ITableOfContentsDialogProps['mode'];
+                    setMode(next);
+                    props.onModeChange(next);
+                }}
+            >
                 {options.map(([value, label]) => (
-                    <label
+                    <Radio
                         key={value}
+                        name="toc-update-mode"
+                        value={value}
                         className="univer-flex univer-gap-3 univer-rounded-lg univer-border univer-p-3"
                     >
-                        <input
-                            type="radio"
-                            name="toc-update-mode"
-                            value={value}
-                            checked={mode === value}
-                            onChange={() => {
-                                setMode(value);
-                                props.onModeChange(value);
-                            }}
-                        />
-                        <span className="univer-text-sm">
-                            {localeService.t<LocaleKey>(label)}
-                        </span>
-                    </label>
+                        {localeService.t<LocaleKey>(label)}
+                    </Radio>
                 ))}
-            </fieldset>
+            </RadioGroup>
         </div>
     );
 }

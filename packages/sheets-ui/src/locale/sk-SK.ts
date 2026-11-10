@@ -55,6 +55,7 @@ const locale: typeof enUS = {
                 main: 'Otočenie textu',
             },
             toggleGridlines: 'Prepnúť mriežku',
+            zoom: 'Priblíženie',
             fullscreen: 'Celá obrazovka',
         },
         align: {
@@ -68,6 +69,20 @@ const locale: typeof enUS = {
         button: {
             confirm: 'OK',
             cancel: 'Zrušiť',
+        },
+        borderStyle: {
+            thin: 'Tenká',
+            hair: 'Vlasová',
+            dotted: 'Bodkovaná',
+            dashed: 'Čiarkovaná',
+            dashDot: 'Bodkočiarkovaná',
+            dashDotDot: 'Dvojbodkočiarkovaná',
+            medium: 'Stredná',
+            mediumDashed: 'Stredná čiarkovaná',
+            mediumDashDot: 'Stredná bodkočiarkovaná',
+            mediumDashDotDot: 'Stredná dvojbodkočiarkovaná',
+            thick: 'Hrubá',
+            double: 'Dvojitá',
         },
         borderLine: {
             borderTop: 'hornéOhraničenie',

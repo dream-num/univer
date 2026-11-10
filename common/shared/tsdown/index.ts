@@ -1,10 +1,10 @@
-import type { TModuleFormat } from './configs/module.ts';
-import type { IBuildContext, IBuildOptions } from './types.ts';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
+import type { TModuleFormat } from './configs/module.ts';
+import type { IBuildContext, IBuildOptions } from './types.ts';
 import { createModuleConfig } from './configs/module.ts';
 import { createUmdConfig } from './configs/umd.ts';
 import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants.ts';
@@ -39,8 +39,9 @@ function createBuildContext(packageDir: string, options: IBuildOptions): IBuildC
  * Expands the package context into all required tsdown configs.
  */
 function createModuleEntryGroups(entries: IBuildContext['entries']) {
-    const primaryEntries = entries.filter((entry) => entry.type === 'index' || entry.type === 'locale');
-    const isolatedEntries = entries.filter((entry) => entry.type !== 'index' && entry.type !== 'locale');
+    // Share class definitions across public entries to preserve DI token identity.
+    const primaryEntries = entries.filter((entry) => entry.type !== 'facade');
+    const isolatedEntries = entries.filter((entry) => entry.type === 'facade');
 
     return [
         ...(primaryEntries.length > 0 ? [primaryEntries] : []),
@@ -72,7 +73,8 @@ export function createConfigs(context: IBuildContext, options: IBuildOptions) {
         return moduleConfigs;
     }
 
-    const umdConfigs = context.entries.map((entry) => createUmdConfig({
+    // Worker entry points are published as ESM/CJS; UMD cannot share their internal modules.
+    const umdConfigs = context.entries.filter((entry) => entry.type !== 'worker').map((entry) => createUmdConfig({
         baseConfig,
         enableObfuscation,
         entry,

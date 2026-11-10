@@ -15,7 +15,12 @@
  */
 
 import type { Dependency, DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
-import type { IDocImage, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type {
+    IDocImage,
+    IInsertDocDrawingCommandParams,
+    ISetDocDrawingArrangeCommandParams,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
 import {
     AlignTypeH,
     ArrangeTypeEnum,
@@ -58,12 +63,19 @@ import {
 } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentEditArea, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import {
+    DocumentEditArea,
+    DocumentSkeletonPageType,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-notification.controller';
-import { DocDrawingUpdateRenderController } from '../../../controllers/render-controllers/doc-drawing-update.render-controller';
+import {
+    DocDrawingUpdateRenderController,
+} from '../../../controllers/render-controllers/doc-drawing-update.render-controller';
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
@@ -689,8 +701,35 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    it('deletes a focused drawing through the command pipeline and removes it from the document and services', async () => {
-        const testBed = setupDrawingTestBed(createDrawingDocData());
+    it('persists an OLE online link in the document and restores it through undo and redo', async () => {
+        const data = createDrawingDocData();
+        Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained' });
+        const testBed = setupDrawingTestBed(data);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
+        const doc = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const online = { unitId: 'child', type: UniverInstanceType.UNIVER_SHEET };
+        expect(await testBed.commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [{ drawingId: 'shape-1', key: 'oleOnlineUnit', value: online }, { drawingId: 'shape-1', key: 'oleFileName', value: '预算.xlsx' }],
+        })).toBe(true);
+        await awaitTime(350);
+        const read = () => JSON.parse(JSON.stringify(doc.getSnapshot().drawings!['shape-1']));
+        expect(read()).toMatchObject({ oleAttachmentId: 'retained', oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        expect(await testBed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(read()).not.toHaveProperty('oleOnlineUnit');
+        expect(read()).not.toHaveProperty('oleFileName');
+        expect(await testBed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(read()).toMatchObject({ oleOnlineUnit: online, oleFileName: '预算.xlsx' });
+        testBed.univer.dispose();
+    });
+
+    it.each([false, true])('deletes a focused drawing through the command pipeline and removes it from the document and services (OLE: %s)', async (ole) => {
+        const data = createDrawingDocData();
+        if (ole) {
+            Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained-attachment' });
+        }
+        const testBed = setupDrawingTestBed(data);
 
         testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
@@ -844,8 +883,12 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    it('moves a focused floating drawing by updating the persisted doc transform', async () => {
-        const testBed = setupDrawingTestBed(createDrawingDocData());
+    it.each([false, true])('moves a focused floating drawing by updating the persisted doc transform (OLE: %s)', async (ole) => {
+        const data = createDrawingDocData();
+        if (ole) {
+            Object.assign(data.drawings!['shape-1'], { drawingType: DrawingTypeEnum.DRAWING_OLE, oleAttachmentId: 'retained-attachment' });
+        }
+        const testBed = setupDrawingTestBed(data);
         vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({
             getSkeletonData: () => null,
         } as never);
@@ -1035,8 +1078,14 @@ describe('docs drawing commands integration', () => {
                     skeDrawings: new Map(),
                     skeTables: new Map([
                         ['table-1', {
+                            tableId: 'table-1',
+                            left: 0,
+                            top: 0,
                             rows: [{
+                                top: 0,
                                 cells: [{
+                                    type: DocumentSkeletonPageType.CELL,
+                                    left: 0,
                                     marginTop: 4,
                                     marginLeft: 5,
                                     skeDrawings: new Map([
@@ -1092,6 +1141,7 @@ describe('docs drawing commands integration', () => {
 
     it('updates drawing behind-text wrapping and keeps the anchor position in page coordinates', async () => {
         const docData = createDrawingDocData();
+        docData.drawings!['shape-1'].layoutType = PositionedObjectLayoutType.INLINE;
         docData.drawings!['shape-1'].docTransform = {
             positionH: {
                 relativeFrom: ObjectRelativeFromH.MARGIN,

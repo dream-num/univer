@@ -15,11 +15,11 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -722,7 +722,8 @@ export class LexerTreeBuilder extends Disposable {
             : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${injectDefinedNameParam.refOffsetX}\0${injectDefinedNameParam.refOffsetY}\0${formulaString}`;
         if (transformSuffix === true && isCacheable) {
             const lexerNode = FormulaLexerNodeCache.get(cacheKey);
-            const simpleCheckDefinedNameResult = injectDefinedNameParam && this._simpleCheckDefinedName?.(formulaString, injectDefinedNameParam);
+            const simpleCheckDefinedNameResult = injectDefinedNameParam
+                && this._simpleCheckDefinedName(formulaString, injectDefinedNameParam, lexerNode);
             if (lexerNode && !simpleCheckDefinedNameResult) {
                 return lexerNode;
             }
@@ -829,21 +830,17 @@ export class LexerTreeBuilder extends Disposable {
                 const definedNameToken = token.trim();
                 const definedContent = getValueByName(unitId, definedNameToken, sheetId);
                 if (definedContent) {
+                    definedNames.push(definedContent.name);
                     const refOffsetX = definedContent.localSheetId === 'AllDefaultWorkbook'
                         ? param.refOffsetX - 1
                         : param.refOffsetX;
                     const refString = definedContent.formulaOrRefString.startsWith('=')
                         ? definedContent.formulaOrRefString
                         : this._moveDefinedNameRefOffset(definedContent.formulaOrRefString, refOffsetX, param.refOffsetY);
-                    // if (refString.substring(0, 1) === operatorToken.EQUALS) {
-                    //     refString = refString.substring(1);
-                    // }
-
                     const nestedDefinedNameParam = this._handleNestedDefinedName(refString, param);
                     if (nestedDefinedNameParam == null || typeof nestedDefinedNameParam !== 'object') {
                         sequenceString += nestedDefinedNameParam || ErrorType.NAME;
                         hasDefinedName = true;
-                        definedNames.push(definedNameToken);
                     } else if (typeof nestedDefinedNameParam === 'object') {
                         const { sequenceString: nestedSequenceString, definedNames: nestedDefinedNames } = nestedDefinedNameParam;
                         sequenceString += nestedSequenceString;
@@ -948,7 +945,11 @@ export class LexerTreeBuilder extends Disposable {
         return this._handleDefinedName(sequenceArray, param);
     }
 
-    private _simpleCheckDefinedName(formulaString: string, injectDefinedNameParam: IInjectDefinedNameParam) {
+    private _simpleCheckDefinedName(
+        formulaString: string,
+        injectDefinedNameParam: IInjectDefinedNameParam,
+        lexerNode?: LexerNode
+    ) {
         const { getDirtyDefinedNameMap, unitId } = injectDefinedNameParam;
         const definedNameMap = getDirtyDefinedNameMap();
         const executeUnitId = unitId;
@@ -956,7 +957,7 @@ export class LexerTreeBuilder extends Disposable {
             const names = Object.keys(definedNameMap[executeUnitId]!);
             for (let i = 0, len = names.length; i < len; i++) {
                 const name = names[i];
-                if (formulaString.indexOf(name) > -1) {
+                if (formulaString.indexOf(name) > -1 || lexerNode?.getDefinedNames().includes(name)) {
                     return true;
                 }
             }
@@ -1486,6 +1487,12 @@ export class LexerTreeBuilder extends Disposable {
         this._segment = '';
 
         this._bracketState = []; // ()
+
+        this._openBracketNormalIndexStack = [];
+
+        this._squareBracketState = 0;
+
+        this._tableBracketState = false;
 
         this._bracesState = 0; // {}
 

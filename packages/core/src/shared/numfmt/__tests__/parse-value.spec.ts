@@ -19,8 +19,11 @@
 
 // @vitest-environment node
 
-import { addLocale, dateToSerial, format, parseBool, parseDate, parseNumber, parseTime, parseValue } from '../api';
-import { getLocale, listLocales } from '../locale';
+import { describe, expect, it } from 'vitest';
+import { format } from '../api';
+import { addLocale, getLocale, listLocales } from '../locale';
+import { parseBool, parseDate, parseNumber, parseTime, parseValue } from '../parse-value';
+import { dateToSerial } from '../serial-date';
 import { getTimeZoneName, isLeapYear, numfmtTest } from './test-utils';
 
 /* globals process */
@@ -794,4 +797,17 @@ numfmtTest('parseBool locale support', (t) => {
     t.deepEqual(parseBool('FALSE', { locale: 'hu' }), { v: false }, 'hu: FALSE');
     t.deepEqual(parseBool('IGAZ', { locale: 'hu' }), { v: true }, 'hu: IGAZ');
     t.deepEqual(parseBool('HAMIS', { locale: 'hu' }), { v: false }, 'hu: HAMIS');
+});
+
+describe('parseDate', () => {
+    it('date parse date', () => {
+        expect(parseDate('asdasdasd')).toBe(null);
+        expect(parseDate('1988/12/12 21:21:21')?.z).toBe('yyyy/mm/dd hh:mm:ss');
+        expect(parseDate('12/12 21:21:21')?.z).toBe('mm/dd hh:mm:ss');
+        expect(parseDate('2012/12 21:21:21')?.z).toBe('yyyy/m hh:mm:ss');
+        expect(parseDate('2012/12 21:21')?.z).toBe('yyyy/m hh:mm');
+        expect(parseDate('2012/12')?.z).toBe('yyyy/m');
+        expect(parseDate('2012/12/12')?.z).toBe('yyyy/mm/dd');
+        expect(parseDate('21:21')).toBe(null);
+    });
 });

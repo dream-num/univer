@@ -15,12 +15,14 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
-import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService, IUndoRedoService, sequenceExecute, Tools } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
+import type { IDeleteSheetTableParams } from '../mutations/delete-sheet-table.mutation';
+import { hasTableDxfStyles } from '../../models/table-dxf';
 import { TableManager } from '../../models/table-manager';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../mutations/delete-sheet-table.mutation';
+import { SetSheetTableFilterMutation } from '../mutations/set-table-filter.mutation';
 
 export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
     id: 'sheet.command.delete-table',
@@ -66,8 +68,24 @@ export const DeleteSheetTableCommand: ICommand<IDeleteSheetTableParams> = {
                 tableId: params.tableId,
                 name: tableConfig.name,
                 range: tableConfig.range,
-                options: tableConfig.options,
+                ...(hasTableDxfStyles(tableConfig) ? { meta: Tools.deepClone(tableConfig.meta) } : {}),
+                options: hasTableDxfStyles(tableConfig)
+                    ? { ...tableConfig.options, columns: Tools.deepClone(tableConfig.columns) }
+                    : tableConfig.options,
             },
+        });
+        tableConfig.filters.tableColumnFilterList?.forEach((tableFilter, column) => {
+            if (tableFilter) {
+                undos.push({
+                    id: SetSheetTableFilterMutation.id,
+                    params: {
+                        unitId: params.unitId,
+                        tableId: params.tableId,
+                        column,
+                        tableFilter,
+                    },
+                });
+            }
         });
         undos.push(...interceptorCommands.undos);
 

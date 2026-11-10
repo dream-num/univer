@@ -16,7 +16,7 @@
 
 import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import type { ICellAlert } from '../../services/cell-alert-manager.service';
-import { DropdownMenu } from '@univerjs/design';
+import { Button, DropdownMenu } from '@univerjs/design';
 import { ErrorIcon, InfoIcon, MoreDownIcon, WarningIcon } from '@univerjs/icons';
 import { useState } from 'react';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
@@ -39,7 +39,7 @@ export function CellAlert({ popup, DropdownMenuComponent = DropdownMenu }: ICell
     if (!alert) {
         return null;
     }
-    const { type, title, message, menu } = alert as ICellAlert;
+    const { type, title, message, menu, action, width } = alert as ICellAlert;
 
     if (menu?.length) {
         const accessibleLabel = [title, message]
@@ -110,9 +110,10 @@ export function CellAlert({ popup, DropdownMenuComponent = DropdownMenu }: ICell
 
     return (
         <div
+            style={{ width }}
             className={`
-              univer-z-[100] univer-box-border univer-w-[156px] univer-rounded-lg univer-bg-gray-0 univer-px-2
-              univer-py-1 univer-text-gray-900 univer-shadow
+              univer-z-[100] univer-box-border univer-rounded-lg univer-bg-gray-0 univer-px-2 univer-py-1
+              univer-text-gray-900 univer-shadow
               dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
             `}
         >
@@ -126,6 +127,11 @@ export function CellAlert({ popup, DropdownMenuComponent = DropdownMenu }: ICell
                 {title}
             </div>
             <div className="univer-text-sm">{message}</div>
+            {action && (
+                <Button className="univer-mt-2" disabled={action.disabled} onClick={action.onSelect}>
+                    {action.label}
+                </Button>
+            )}
         </div>
     );
 }

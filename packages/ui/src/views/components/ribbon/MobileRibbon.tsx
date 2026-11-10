@@ -15,8 +15,6 @@
  */
 
 import type { ComponentType } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, UniverInstanceType } from '@univerjs/core';
 import {
     borderBottomClassName,
@@ -29,6 +27,8 @@ import {
 import { MoreHorizontalIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { LocaleKey } from '../../../locale/types';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { RibbonPosition, RibbonStartGroup } from '../../../services/menu/types';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { IWorkbenchService } from '../../../services/workbench/workbench.service';
@@ -322,7 +322,6 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                                         <div
                                             key={child.key}
                                             className={clsx(`
-                                              [&_button]:!univer-font-inherit
                                               univer-flex univer-h-8 univer-shrink-0 univer-items-center
                                               univer-rounded-md
                                               [&_*]:univer-box-border
@@ -356,6 +355,7 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                                               [&_button]:!univer-border-0 [&_button]:!univer-bg-transparent
                                               [&_button]:!univer-p-0 [&_button]:!univer-px-1.5
                                               [&_button]:!univer-leading-none [&_button]:!univer-outline-none
+                                              [&_button]:![font-family:inherit]
                                               [&_input]:!univer-m-0 [&_input]:!univer-appearance-none
                                               [&_input]:!univer-border-0 [&_input]:!univer-bg-transparent
                                               [&_input]:!univer-p-0 [&_input]:!univer-leading-none
@@ -440,9 +440,8 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                         className="
                           univer-w-full
                           [&>span]:univer-block [&>span]:univer-w-full
-                          [&_button]:!univer-h-12 [&_button]:!univer-w-full [&_button]:!univer-justify-start
-                          [&_button]:!univer-gap-3 [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
-                          [&_button]:!univer-text-base
+                          [&_button]:!univer-w-full [&_button]:!univer-justify-start [&_button]:!univer-gap-3
+                          [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
                         "
                         onClick={() => setMoreOpen(false)}
                     >
@@ -467,7 +466,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                 <div
                     className="
                       univer-flex univer-items-center univer-gap-1
-                      [&_button]:!univer-min-h-10 [&_button]:!univer-min-w-10 [&_button]:!univer-rounded-lg
+                      [&_button]:!univer-min-w-10 [&_button]:!univer-rounded-lg
                       [&_button_svg]:!univer-size-5
                     "
                 >

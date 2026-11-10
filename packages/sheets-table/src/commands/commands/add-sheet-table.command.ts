@@ -15,8 +15,6 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableOptions } from '../../types/type';
 import {
     CommandType,
     customNameCharacterCheck,
@@ -26,8 +24,12 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    Tools,
 } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableOptions } from '../../types/type';
+import { TableColumn } from '../../models/table-column';
 import { TableManager } from '../../models/table-manager';
 import { getExistingNamesSet } from '../../util';
 import { AddSheetTableMutation } from '../mutations/add-sheet-table.mutation';
@@ -83,8 +85,11 @@ export const AddSheetTableCommand: ICommand<IAddSheetTableCommandParams> = {
 
         const { unitId, subUnitId, range } = params;
         const header = tableManager.getColumnHeader(unitId, subUnitId, range, localeService.t<LocaleKey>('sheets-table.columnPrefix'));
+        const options = Tools.deepClone(params.options ?? {});
+        options.columns = header.map((name, index) =>
+            options.columns?.[index] ?? new TableColumn(generateRandomId(), name).toJSON());
 
-        redos.push({ id: AddSheetTableMutation.id, params: { ...params, tableId, name: tableName, header } });
+        redos.push({ id: AddSheetTableMutation.id, params: { ...params, tableId, name: tableName, header, options } });
         undos.push({ id: DeleteSheetTableMutation.id, params: { tableId, unitId: params.unitId } });
 
         const res = sequenceExecute(redos, commandService);

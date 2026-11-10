@@ -2000,6 +2000,8 @@ export class RichTextBuilder extends RichTextValue {
     constructor(data: IDocumentData) {
         super(data);
         this._doc = new DocumentDataModel(data);
+        // Section normalization may replace the body; all builder reads must use the edited body.
+        this._data.body = this._doc.getBody();
     }
 
     /**

@@ -22,7 +22,7 @@ import { isEventTargetInSameFormulaEmbedInteractionBoundary } from '../formula-e
 
 export function focusFormulaEditor(
     editorService: Pick<IEditorService, 'focus'>,
-    editor?: Pick<Editor, 'getEditorId' | 'getSelectionRanges' | 'setSelectionRanges' | 'getDocumentData' | 'docSelectionRenderService'> & { editorDOM?: HTMLElement },
+    editor?: Pick<Editor, 'getEditorId' | 'getSelectionRanges' | 'setSelectionRanges' | 'getDocumentData' | 'docSelectionRenderService'>,
     offset?: number
 ) {
     if (!editor) {
@@ -32,7 +32,7 @@ export function focusFormulaEditor(
     // Blurring the previous editor can publish its stale rendered selection.
     const selections = [...editor.getSelectionRanges()];
     editorService.focus(editor.getEditorId());
-    focusFormulaEditorElement(editor);
+    editor.docSelectionRenderService.focus();
     if (editor.docSelectionRenderService.isOnPointerEvent) {
         return;
     }
@@ -48,25 +48,10 @@ export function focusFormulaEditor(
     }
 }
 
-function focusFormulaEditorElement(editor: Pick<Editor, 'getEditorId'> & { editorDOM?: HTMLElement }): void {
-    const ownerDocument = editor.editorDOM?.ownerDocument ?? document;
-    const editorElement = ownerDocument.getElementById(`__editor_${editor.getEditorId()}`);
-    editorElement?.focus({ preventScroll: true });
-}
-
-export function shouldSkipFormulaEditorMouseUpFocus(_target: EventTarget | null): boolean {
-    return false;
-}
-
 export function shouldRefocusFormulaEditorOnMouseUp(options: {
-    target: EventTarget | null;
     isFocusing: boolean | undefined;
     isPointerSelecting: boolean | undefined;
 }): boolean {
-    if (shouldSkipFormulaEditorMouseUpFocus(options.target)) {
-        return false;
-    }
-
     if (options.isPointerSelecting || options.isFocusing) {
         return false;
     }

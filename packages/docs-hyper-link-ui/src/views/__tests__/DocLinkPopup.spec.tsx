@@ -16,10 +16,9 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import {
     CustomRangeType,
+    DocumentFlavor,
     ICommandService,
     IPermissionService,
     IUniverInstanceService,
@@ -34,14 +33,16 @@ import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
-import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { DocHyperLinkEdit } from '../DocHyperLinkEdit';
 import { DocLinkPopup } from '../DocLinkPopup';
@@ -103,7 +104,7 @@ function createDocData(): IDocumentData {
     };
 }
 
-function createPopupTestBed() {
+function createPopupTestBed(documentData = createDocData()) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -122,7 +123,7 @@ function createPopupTestBed() {
     }]);
     injector.add([DocHyperLinkPopupService]);
 
-    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
+    const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, documentData);
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
     injector.get(LocaleService).load({
         [LocaleType.EN_US]: {
@@ -151,6 +152,7 @@ function createPopupTestBed() {
     commandService.registerCommand(UpdateDocHyperLinkCommand);
     commandService.registerCommand(DeleteDocHyperLinkCommand);
     commandService.registerCommand(ShowDocHyperLinkEditPopupOperation);
+    commandService.registerCommand(ClickDocHyperLinkOperation);
     commandService.registerCommand(RichTextEditingMutation);
 
     return {
@@ -212,6 +214,8 @@ describe('DocLinkPopup', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+        vi.restoreAllMocks();
+        vi.useRealTimers();
     });
 
     it('keeps desktop and mobile hyperlink edit components independent', () => {
@@ -252,6 +256,102 @@ describe('DocLinkPopup', () => {
                 },
             },
         });
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('displays and edits the newly hovered link (document flavor %s)', async (documentFlavor) => {
+        vi.useFakeTimers();
+        const documentData = createDocData();
+        documentData.documentStyle = { ...documentData.documentStyle, documentFlavor };
+        documentData.body?.customRanges?.unshift({
+            startIndex: 0,
+            endIndex: 4,
+            rangeId: 'first-link',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { url: 'https://example.com/first' },
+        });
+        currentTestBed = createPopupTestBed(documentData);
+        currentTestBed.popupService.showInfoPopupFromHover({
+            unitId: UNIT_ID,
+            linkId: 'first-link',
+            startIndex: 0,
+            endIndex: 4,
+        });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const actions = renderPopup(root, container, currentTestBed);
+        expect(container.textContent).toContain('https://example.com/first');
+        expect(container.textContent).not.toContain('https://univer.ai');
+        const secondLink = { unitId: UNIT_ID, linkId: 'existing-link', startIndex: 6, endIndex: 10 };
+        const executedCommands: Array<{ id: string; params: unknown }> = [];
+        currentTestBed.commandService.onCommandExecuted((command) => {
+            executedCommands.push({ id: command.id, params: command.params });
+        });
+
+        await act(async () => {
+            currentTestBed?.popupService.showInfoPopupFromHover(secondLink);
+            vi.advanceTimersByTime(200);
+        });
+        expect(container.textContent).toContain('https://univer.ai');
+        expect(container.textContent).not.toContain('https://example.com/first');
+        expect(container.contains(actions.edit)).toBe(true);
+
+        await act(async () => {
+            actions.edit.click();
+        });
+
+        expect(executedCommands).toContainEqual({
+            id: ShowDocHyperLinkEditPopupOperation.id,
+            params: { link: { ...secondLink, segmentId: undefined, segmentPage: undefined } },
+        });
+        expect(currentTestBed.popupService.editing).toEqual(secondLink);
+        expect(currentTestBed.popupService.showing).toBeNull();
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('keeps the current URL clickable while crossing an adjacent link into its popup (document flavor %s)', async (documentFlavor) => {
+        vi.useFakeTimers();
+        const documentData = createDocData();
+        documentData.documentStyle = { ...documentData.documentStyle, documentFlavor };
+        documentData.body?.customRanges?.unshift({
+            startIndex: 0,
+            endIndex: 4,
+            rangeId: 'first-link',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { url: 'https://example.com/first' },
+        });
+        currentTestBed = createPopupTestBed(documentData);
+        const popupService = currentTestBed.popupService;
+        const secondLink = { unitId: UNIT_ID, linkId: 'existing-link', startIndex: 6, endIndex: 10 };
+        popupService.showInfoPopupFromHover(secondLink);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPopup(root, container, currentTestBed);
+        const open = vi.spyOn(window, 'open').mockReturnValue(null);
+        const popup = container.firstElementChild;
+        expect(popup).toBeInstanceOf(HTMLElement);
+
+        await act(async () => {
+            popupService.showInfoPopupFromHover({ unitId: UNIT_ID, linkId: 'first-link', startIndex: 0, endIndex: 4 });
+            vi.advanceTimersByTime(100);
+            popup?.dispatchEvent(new MouseEvent('pointerover', { bubbles: true }));
+            vi.advanceTimersByTime(30);
+            popupService.showInfoPopupFromHover({ unitId: UNIT_ID, linkId: 'first-link', startIndex: 0, endIndex: 4 });
+            popupService.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(200);
+        });
+        expect(popupService.showing).toEqual(secondLink);
+        expect(container.firstElementChild).toBe(popup);
+        expect(container.textContent).toContain('https://univer.ai');
+        expect(container.textContent).not.toContain('https://example.com/first');
+
+        const url = Array.from(container.querySelectorAll('span')).find((span) => span.textContent === 'https://univer.ai');
+        expect(url).toBeDefined();
+        await act(async () => {
+            url?.click();
+        });
+        expect(open).toHaveBeenCalledExactlyOnceWith('https://univer.ai', '_blank', 'noopener noreferrer');
+        expect(popupService.showing).toBeNull();
     });
 
     it('disables the copy action when document copy permission is denied', () => {

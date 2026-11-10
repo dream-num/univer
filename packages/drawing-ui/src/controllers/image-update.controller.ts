@@ -27,7 +27,12 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, normalizeImageOpacity, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    normalizeImageOpacity,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { bufferTime, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -227,7 +232,7 @@ export class ImageUpdateController extends Disposable {
 
                     const { transform, drawingType, srcRect, prstGeom, source, imageSourceType, opacity } = drawingParam;
 
-                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE && drawingType !== DrawingTypeEnum.DRAWING_OLE) {
                         return;
                     }
 
@@ -262,7 +267,7 @@ export class ImageUpdateController extends Disposable {
                         opacity,
                         this._currentUniverService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET
                     );
-                    if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
+                    if (drawingType === DrawingTypeEnum.DRAWING_IMAGE && source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
                         imageShape.changeSource(source);
                     }
                 });
@@ -289,6 +294,9 @@ export class ImageUpdateController extends Disposable {
     }
 
     private _addDialogForImage(o: Image) {
+        if (this._drawingManagerService.getDrawingOKey(o.oKey)?.drawingType === DrawingTypeEnum.DRAWING_OLE) {
+            return;
+        }
         const preview = () => {
             const native = o.getNative();
             if (native) {

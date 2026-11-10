@@ -30,7 +30,6 @@ import type {
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
 import type { Theme } from '@univerjs/themes';
-import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import {
     ColorKit,
     createInterceptorKey,
@@ -42,11 +41,17 @@ import {
     Injector,
     InterceptorManager,
     RANGE_TYPE,
+    SheetTypes,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-
-import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    Rect,
+    SHEET_VIEWPORT_KEY,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+    Vector2,
+} from '@univerjs/engine-render';
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -70,9 +75,12 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
-import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../../commands/commands/headersize-changed.command';
-
+import { EMPTY, Subscription, switchMap } from 'rxjs';
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
+import {
+    SetColumnHeaderHeightCommand,
+    SetRowHeaderWidthCommand,
+} from '../../commands/commands/headersize-changed.command';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
@@ -166,7 +174,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._initialize();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     override dispose(): void {
+        this._clearFreeze();
         super.dispose();
     }
 
@@ -199,6 +212,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
     ) {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return null;
+        }
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
@@ -643,7 +659,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return;
+            if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+                this._clearFreeze();
+                return;
+            }
 
             const oldFreeze = worksheet.getConfig()?.freeze;
             let xSplit = oldFreeze?.xSplit || 0;
@@ -752,7 +771,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             this._scrollManagerService.validViewportScrollInfo$.subscribe((param: Nullable<IViewportScrollState>) => {
-                if (!param) return;
+                if (!param || this._getSheetType() === SheetTypes.CHART) {
+                    return;
+                }
 
                 const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
@@ -799,7 +820,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         resetScroll = ResetScrollType.ALL
     ) {
         const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
-        if (skeleton == null) {
+        const worksheet = this._context.unit.getActiveSheet();
+        if (skeleton == null || worksheet?.getConfig().type === SheetTypes.CHART || skeleton.worksheet.getSheetId() !== worksheet?.getSheetId()) {
             return;
         }
 
@@ -861,6 +883,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         // freeze start
         const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
+        // The gap above the first row belongs to the frozen area, including any Table title in it.
+        if (isTopView && row === ySplit) {
+            startSheetView.startY = 0;
+        }
         // freeze end
         const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
@@ -1148,15 +1174,26 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
      */
     private _skeletonListener() {
         this.disposeWithMe(
+            this._sheetSkeletonManagerService.currentSkeleton$.pipe(
+                switchMap((param) => param?.skeleton?.gapConfigChanged$ ?? EMPTY)
+            ).subscribe(() => this._refreshCurrent())
+        );
+        this.disposeWithMe(
             toDisposable(
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (this._getSheetType() === SheetTypes.CHART) {
+                        this._clearFreeze();
+                        this._lastFreeze = undefined;
+                        return;
+                    }
                     const allowedCommands = [
                         SetWorksheetActiveOperation.id,
                         InsertRangeMoveDownCommand.id,
                         InsertRangeMoveRightCommand.id,
                     ];
 
-                    if (allowedCommands.includes(param?.commandId || '')) {
+                    if (param && (allowedCommands.includes(param.commandId || '') ||
+                        this._lastFreeze !== this._context.unit.getActiveSheet()?.getFreeze())) {
                         this._refreshCurrent();
                     }
                 })
@@ -1167,9 +1204,17 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     private _refreshCurrent() {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return;
+        if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            this._clearFreeze();
+            return;
+        }
 
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+        if (skeleton?.worksheet.getSheetId() !== worksheet.getSheetId()) {
+            return;
+        }
         const freeze = worksheet.getConfig().freeze;
+        this._lastFreeze = freeze;
 
         const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
 
@@ -1583,10 +1628,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._columnFreezeHeaderRect?.dispose();
         this._columnFreezeMainRect?.dispose();
 
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
+        this._rowFreezeHeaderRect = null;
+        this._rowFreezeMainRect = null;
+        this._columnFreezeHeaderRect = null;
+        this._columnFreezeMainRect = null;
 
         [this._freezeDownSubs, this._freezePointerEnterSubs, this._freezePointerLeaveSubs].forEach((s) => {
             s?.unsubscribe();
@@ -1627,6 +1672,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze() {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return;
+        }
         return this._sheetSkeletonManagerService
             .getCurrentParam()
             ?.skeleton

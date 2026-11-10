@@ -27,6 +27,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [hue] = hsv;
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -36,8 +37,8 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         if (!ctx) return;
 
         const gradientS = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradientS.addColorStop(0, `hsl(${hsv[0]}, 0%, 50%)`);
-        gradientS.addColorStop(1, `hsl(${hsv[0]}, 100%, 50%)`);
+        gradientS.addColorStop(0, '#ffffff');
+        gradientS.addColorStop(1, `hsl(${hue}, 100%, 50%)`);
         ctx.fillStyle = gradientS;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -46,7 +47,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         gradientV.addColorStop(1, 'rgba(0, 0, 0, 1)');
         ctx.fillStyle = gradientV;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }, [hsv[0]]);
+    }, [hue]);
 
     const handlePointerEvent = (e: PointerEvent) => {
         e.stopPropagation();
@@ -68,21 +69,19 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         setIsDragging(false);
     }, []);
 
-    function handleChange() {
-        onChanged?.(hsv[0], hsv[1], hsv[2]);
-    }
-
     useEffect(() => {
-        containerRef.current?.addEventListener('mouseup', handleChange);
+        const container = containerRef.current;
+        const handleChange = () => onChanged?.(...hsv);
+        container?.addEventListener('mouseup', handleChange);
         window.addEventListener('pointerup', handlePointerUp);
         window.addEventListener('mouseup', handlePointerUp);
 
         return () => {
-            containerRef.current?.removeEventListener('mouseup', handleChange);
+            container?.removeEventListener('mouseup', handleChange);
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('mouseup', handlePointerUp);
         };
-    }, [hsv]);
+    }, [hsv, onChanged, handlePointerUp]);
 
     // Calculate the position of the indicator
     const getIndicatorStyles = () => {
@@ -93,20 +92,6 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
             transition: isDragging ? 'none' : 'left 0.1s ease-out, top 0.1s ease-out',
         };
     };
-
-    useEffect(() => {
-        const handlePointerUp = () => {
-            setIsDragging(false);
-        };
-
-        window.addEventListener('pointerup', handlePointerUp);
-        window.addEventListener('mouseup', handlePointerUp);
-
-        return () => {
-            window.removeEventListener('pointerup', handlePointerUp);
-            window.removeEventListener('mouseup', handlePointerUp);
-        };
-    }, []);
 
     return (
         <div

@@ -26,7 +26,6 @@ import type {
     MenuConfig,
     RibbonType,
 } from '@univerjs/ui';
-import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { IConfigService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -43,6 +42,7 @@ import {
     PasteCommand,
     UI_PLUGIN_CONFIG_KEY,
 } from '@univerjs/ui';
+import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
@@ -412,11 +412,13 @@ export interface IFUniverUIMixin {
     registerUIPart(key: BuiltInUIPart, component: ComponentType): IDisposable;
 
     /**
-     * Register an component.
+     * Register a component, overriding its built-in default regardless of registration order.
+     * Register before opening the corresponding view; mounted views do not update automatically.
      * @param {string} name - The name of the component.
      * @param {ComponentType} component - The component.
-     * @param {IComponentOptions} [options] - The options of the component.
-     * @returns {IDisposable} The disposable object.
+     * @param {IComponentOptions} [options] - Component options. `override` defaults to true; pass false to register a default.
+     * @returns {IDisposable} Disposes this registration, restoring the current built-in default when available.
+     * @throws When another override is already registered for this name. Dispose it before registering a replacement.
      * @example
      * ```tsx
      * const fWorksheet = univerAPI.getActiveWorkbook().getSheetByName('Sheet1');
@@ -478,16 +480,18 @@ export interface IFUniverUIMixin {
      * @param fonts The array of font configurations to add.
      * @example
      * ```ts
+     * import { FontCategory } from '@univerjs/ui';
+     *
      * univerAPI.addFonts([
      *   {
      *     value: 'CustomFont1',
      *     label: 'Custom Font 1',
-     *     category: 'sans-serif',
+     *     category: FontCategory.SANS_SERIF,
      *   },
      *   {
      *     value: 'CustomFont2',
      *     label: 'Custom Font 2',
-     *     category: 'serif',
+     *     category: FontCategory.SERIF,
      *   },
      * ]);
      * ```
@@ -578,7 +582,10 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
         const componentManager = this._injector.get(ComponentManager);
-        return this.disposeWithMe(componentManager.register(name, component, options));
+        return this.disposeWithMe(componentManager.register(name, component, {
+            ...options,
+            override: options?.override ?? true,
+        }));
     }
 
     override setCurrent(unitId: string): void {

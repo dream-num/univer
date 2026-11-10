@@ -561,15 +561,6 @@ function dispatchMouseEvent(element: Element, type: string) {
     });
 }
 
-function getRootDeleteAction(panelItem: Element) {
-    const header = panelItem.firstElementChild;
-    const controls = header?.lastElementChild;
-    const action = controls?.lastElementChild;
-    expect(action).toBeInstanceOf(HTMLElement);
-
-    return action as HTMLElement;
-}
-
 function waitForTreeRefresh() {
     return new Promise((resolve) => setTimeout(resolve, 40));
 }
@@ -1005,8 +996,11 @@ describe('SheetsThreadCommentPanel', () => {
         dispatchMouseEvent(panelThread!, 'mouseover');
         expect(TestState.shapes).toHaveLength(1);
 
+        const deleteButton = panelThread!.querySelector<HTMLButtonElement>(
+            `button[aria-label="${threadCommentEnUS['thread-comment-ui'].item.delete}"]`
+        )!;
         await act(async () => {
-            getRootDeleteAction(panelThread!).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            deleteButton.click();
             await waitForTreeRefresh();
         });
 

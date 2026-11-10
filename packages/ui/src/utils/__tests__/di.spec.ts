@@ -15,8 +15,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { useState } from 'react';
-import { Observable, of, Subject } from 'rxjs';
+import { createElement, StrictMode, Suspense, useState } from 'react';
+import { BehaviorSubject, debounceTime, Observable, of, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { useObservable, useObservableRef } from '../di';
 
@@ -59,6 +59,111 @@ describe('useObservableRef', () => {
 });
 
 describe('useObservable', () => {
+    it('retains the latest value when a non-replaying stream returns a new observable wrapper', () => {
+        const subject = new Subject<number>();
+        const { result, rerender } = renderHook(() => useObservable(subject.asObservable(), 0));
+
+        act(() => subject.next(42));
+        expect(result.current).toBe(42);
+        rerender();
+        expect(result.current).toBe(42);
+    });
+
+    it('does not retain a subscription when rendering suspends before commit', () => {
+        const subject = new BehaviorSubject(1);
+        const pending = new Promise(() => {});
+        const { unmount } = renderHook(() => {
+            useObservable(subject, undefined, true);
+            throw pending;
+        }, {
+            wrapper: ({ children }) => createElement(Suspense, { fallback: null }, children),
+        });
+
+        expect(subject.observed).toBe(false);
+        unmount();
+    });
+
+    it('provides synchronous values during render and refreshes mutable values', () => {
+        const state = { count: 1 };
+        const subject = new BehaviorSubject(state);
+        const { result } = renderHook(() => useObservable(subject, undefined, true).count);
+        expect(result.current).toBe(1);
+
+        act(() => {
+            state.count = 2;
+            subject.next(state);
+        });
+        expect(result.current).toBe(2);
+    });
+
+    it('releases the previous source and uses the default when the source is removed', () => {
+        const subject = new BehaviorSubject(1);
+        const { result, rerender } = renderHook(({ source }) => useObservable(source, null), {
+            initialProps: { source: subject as Observable<number> | null },
+        });
+        expect(result.current).toBe(1);
+
+        rerender({ source: null });
+
+        expect(subject.observed).toBe(false);
+        expect(result.current).toBeNull();
+    });
+
+    it('rejects a source without the required synchronous value without retaining it', () => {
+        const subject = new Subject<number>();
+        expect(() => renderHook(() => useObservable(subject, undefined, true))).toThrow('Expected a synchronous value');
+        expect(subject.observed).toBe(false);
+    });
+
+    it('unsubscribes and cancels pending emissions on unmount', () => {
+        vi.useFakeTimers();
+        const subject = new Subject<number>();
+        try {
+            const { unmount } = renderHook(() => useObservable(() => subject.pipe(debounceTime(100)), 0, false, []));
+            act(() => subject.next(1));
+            expect(vi.getTimerCount()).toBe(1);
+
+            unmount();
+
+            expect(subject.observed).toBe(false);
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            vi.clearAllTimers();
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps the replacement subscription active and releases it on unmount', () => {
+        const first = new Subject<number>();
+        const second = new Subject<number>();
+        const { result, rerender, unmount } = renderHook(
+            ({ source }) => useObservable(() => source, 0, false, [source]),
+            { initialProps: { source: first } }
+        );
+
+        rerender({ source: second });
+        expect(first.observed).toBe(false);
+        act(() => second.next(42));
+        expect(result.current).toBe(42);
+
+        unmount();
+        expect(second.observed).toBe(false);
+    });
+
+    it('resubscribes after StrictMode effect cleanup and releases the final subscription', () => {
+        const subject = new BehaviorSubject(1);
+        const { result, unmount } = renderHook(() => useObservable(subject, undefined, true), {
+            wrapper: ({ children }) => createElement(StrictMode, null, children),
+        });
+
+        expect(result.current).toBe(1);
+        act(() => subject.next(2));
+        expect(result.current).toBe(2);
+
+        unmount();
+        expect(subject.observed).toBe(false);
+    });
+
     it('should return undefined when no initial value is provided', () => {
         const observable: Observable<boolean> | undefined = undefined;
 

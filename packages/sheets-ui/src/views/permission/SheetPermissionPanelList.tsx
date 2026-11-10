@@ -17,8 +17,6 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import {
     IAuthzIoService,
     ICommandService,
@@ -29,7 +27,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { ActionRow, Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
+import { ActionRow, Avatar, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -45,6 +43,8 @@ import {
 import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged, from, merge, startWith, switchMap } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { useHighlightRange } from '../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
@@ -206,27 +206,19 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
         sidebarService.open(sidebarProps);
     };
 
-    const handleChangeHeaderType = (isCurrentSheet: boolean) => {
-        setIsCurrentSheet(isCurrentSheet);
-    };
-
     const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value;
 
     return (
         <div className="univer-mt-2 univer-flex univer-h-[calc(100%-8px)] univer-flex-col">
-            <div className="univer-flex univer-h-[30px] univer-py-2">
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': isCurrentSheet })}>
-                        {' '}
-                        {localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet')}
-                    </div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': isCurrentSheet })} />
-                </div>
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet')}</div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': !isCurrentSheet })} />
-                </div>
-            </div>
+            <Segmented
+                className="univer-my-2 univer-w-full univer-shrink-0"
+                items={[
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet'), value: 'current' },
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet'), value: 'all' },
+                ]}
+                value={isCurrentSheet ? 'current' : 'all'}
+                onChange={(value) => setIsCurrentSheet(value === 'current')}
+            />
 
             {ruleList?.length > 0
                 ? (
@@ -273,6 +265,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                     className={clsx(`
                                       univer-mt-3 univer-rounded-lg univer-p-3
                                       hover:univer-bg-gray-50
+                                      dark:hover:!univer-bg-gray-800
                                     `, borderClassName)}
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
@@ -313,6 +306,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
                                                               hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-700
                                                             `}
                                                             onClick={() => handleEdit(rule as IPermissionPanelRule)}
                                                         >
@@ -326,6 +320,7 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                                             className={`
                                                               univer-box-border univer-h-6 univer-rounded-sm univer-p-1
                                                               hover:univer-bg-gray-200
+                                                              dark:hover:!univer-bg-gray-700
                                                             `}
                                                             onClick={() => handleDelete(rule)}
                                                         >
@@ -385,8 +380,8 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                             <Tooltip title={rule.description}>
                                                 <div
                                                     className={`
-                                                      univer-text-3 univer-mt-2 univer-max-w-64 univer-truncate
-                                                      univer-text-sm univer-text-gray-400
+                                                      univer-mt-2 univer-max-w-64 univer-truncate univer-text-sm
+                                                      univer-text-gray-400
                                                     `}
                                                 >
                                                     {rule.description}

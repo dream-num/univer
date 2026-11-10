@@ -32,7 +32,7 @@ describe('Test FUniver with sheets-formula-ui facade', () => {
         disposeUniver();
     });
 
-    it('showRangeSelectorDialog forwards options to the selector service and resolves with selected ranges', async () => {
+    it('showRangeSelectorDialog preserves the caller callback when the same options are reused', async () => {
         const testBed = createFormulaTestBed(undefined, [[GlobalRangeSelectorService]]);
         const selectorService = testBed.get(GlobalRangeSelectorService);
         const callback = vi.fn();
@@ -49,19 +49,20 @@ describe('Test FUniver with sheets-formula-ui facade', () => {
 
         disposeUniver = () => testBed.univer.dispose();
 
-        const selectorPromise = firstValueFrom(selectorService.currentSelector$.pipe(skip(1)));
-        const resultPromise = testBed.univerAPI.showRangeSelectorDialog({
+        const options = {
             unitId: 'test',
             subUnitId: 'sheet1',
             initialValue: selectedRanges,
             maxRangeCount: 2,
             supportAcrossSheet: true,
             callback,
-        });
+        };
+        const firstSelectorPromise = firstValueFrom(selectorService.currentSelector$.pipe(skip(1)));
+        const firstResultPromise = testBed.univerAPI.showRangeSelectorDialog(options);
 
-        const currentSelector = await selectorPromise;
+        const firstSelector = await firstSelectorPromise;
 
-        expect(currentSelector).toMatchObject({
+        expect(firstSelector).toMatchObject({
             unitId: 'test',
             subUnitId: 'sheet1',
             initialValue: selectedRanges,
@@ -69,9 +70,17 @@ describe('Test FUniver with sheets-formula-ui facade', () => {
             supportAcrossSheet: true,
         });
 
-        currentSelector!.callback(selectedRanges);
+        firstSelector!.callback(selectedRanges);
+        await expect(firstResultPromise).resolves.toEqual(selectedRanges);
 
-        await expect(resultPromise).resolves.toEqual(selectedRanges);
-        expect(callback).toHaveBeenCalledWith(selectedRanges);
+        const secondSelectorPromise = firstValueFrom(selectorService.currentSelector$.pipe(skip(1)));
+        const secondResultPromise = testBed.univerAPI.showRangeSelectorDialog(options);
+        const secondSelector = await secondSelectorPromise;
+
+        secondSelector!.callback(selectedRanges);
+        await expect(secondResultPromise).resolves.toEqual(selectedRanges);
+
+        expect(callback).toHaveBeenCalledTimes(2);
+        expect(options.callback).toBe(callback);
     });
 });

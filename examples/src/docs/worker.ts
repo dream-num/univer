@@ -1,3 +1,5 @@
-import { startDocsLayoutWorker } from '@univerjs/docs';
+import { Univer } from '@univerjs/core';
+import { UniverDocsWorkerPlugin } from '@univerjs/docs/worker';
 
-startDocsLayoutWorker();
+const univer = new Univer();
+univer.registerPlugin(UniverDocsWorkerPlugin);

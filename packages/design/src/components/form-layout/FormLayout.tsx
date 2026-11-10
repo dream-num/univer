@@ -32,14 +32,14 @@ export interface IFormLayoutProps {
     defaultCollapsed?: boolean;
 }
 
-const FormLayoutContext = createContext(false);
+export const FormLayoutContext = createContext(false);
 
 export const FormLayout = (props: IFormLayoutProps) => {
     const { label, desc, children, style, className, error, contentStyle, collapsable = false, defaultCollapsed = false } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
     return (
-        <FormLayoutContext.Provider value>
+        <FormLayoutContext.Provider value={Boolean(error)}>
             <div data-u-comp="form-layout" className={clsx('univer-mb-3 univer-flex univer-flex-col', className)} style={style}>
                 {label && (
                     <div
@@ -79,20 +79,22 @@ export const FormLayout = (props: IFormLayoutProps) => {
                             {children
                                 ? (
                                     <div
-                                        className={clsx(`
+                                        className={`
                                           last:univer-mb-0
                                           [&_[data-u-comp=input]]:univer-w-full
                                           [&_[data-u-comp=select]]:univer-w-full
-                                        `, {
-                                            '[&_[data-u-comp=input]]:univer-border-red-500': error,
-                                            '[&_[data-u-comp=select]]:univer-border-red-500': error,
-                                        })}
+                                        `}
                                         style={contentStyle}
                                     >
                                         {children}
                                         {error
                                             ? (
-                                                <div className="univer-mt-1 univer-text-xs univer-text-red-500">
+                                                <div
+                                                    className="
+                                                      univer-mt-1 univer-text-xs univer-text-red-600
+                                                      dark:!univer-text-red-400
+                                                    "
+                                                >
                                                     {error}
                                                 </div>
                                             )

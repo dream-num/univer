@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IExecutionInProgressParams } from '@univerjs/engine-formula';
 import {
     CommandType,
     ICommandService,
     IConfigService,
+    IUniverInstanceService,
     LocaleType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
-    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
     FormulaCalculationSessionController,
     FormulaCalculationSessionService,
@@ -89,7 +90,7 @@ function createControllerTestBed(initialFormulaComputing = CalculationMode.WHEN_
 
     configService.setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing }, { merge: true });
     configService.setConfig(ENGINE_FORMULA_RETURN_DEPENDENCY_TREE, true);
-    configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, 7);
+    injector.get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.setCalculationSettings({ iterativeCalculation: true, maxIterations: 7, maxChange: 0.001 });
 
     [
         SetTriggerFormulaCalculationStartMutation,
@@ -171,14 +172,14 @@ describe('TriggerCalculationController', () => {
             id: SetFormulaCalculationStartMutation.id,
             params: expect.objectContaining({
                 isCalculateTreeModel: true,
-                maxIteration: 7,
+                calculationSettings: { test: { iterativeCalculation: true, maxIterations: 7, maxChange: 0.001 } },
                 rowData: testBed.formulaDataModel.getHiddenRowsFiltered(),
             }),
         });
         expect(testBed.executedCommands.find((command) => command.id === SetFormulaStringBatchCalculationMutation.id)).toMatchObject({
             id: SetFormulaStringBatchCalculationMutation.id,
             params: expect.objectContaining({
-                maxIteration: 7,
+                calculationSettings: { test: { iterativeCalculation: true, maxIterations: 7, maxChange: 0.001 } },
                 rowData: testBed.formulaDataModel.getHiddenRowsFiltered(),
             }),
         });
@@ -372,5 +373,52 @@ describe('TriggerCalculationController', () => {
         subscription.unsubscribe();
         testBed.executedDisposable.dispose();
         testBed.testBed.univer.dispose();
+    });
+
+    it.each([0, 250, 999, 1000])('should cancel delayed progress when Univer is disposed after %d ms', async (delay) => {
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+
+        await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            stageInfo: {
+                stage: FormulaExecuteStageType.START,
+                totalFormulasToCalculate: 0,
+                completedFormulasCount: 0,
+                totalArrayFormulasToCalculate: 0,
+                completedArrayFormulasCount: 0,
+                formulaCycleIndex: 0,
+            } satisfies IExecutionInProgressParams,
+        });
+        vi.advanceTimersByTime(delay);
+
+        testBed.testBed.univer.dispose();
+
+        expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
+    });
+
+    it('should release the latest progress timer when disposed after successive starts', async () => {
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+        const controller = testBed.testBed.injector.get(TriggerCalculationController);
+
+        try {
+            for (let index = 0; index < 3; index++) {
+                await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+                    stageInfo: {
+                        stage: FormulaExecuteStageType.START,
+                        totalFormulasToCalculate: 0,
+                        completedFormulasCount: 0,
+                        totalArrayFormulasToCalculate: 0,
+                        completedArrayFormulasCount: 0,
+                        formulaCycleIndex: 0,
+                    } satisfies IExecutionInProgressParams,
+                });
+                vi.advanceTimersByTime(100);
+            }
+
+            controller.dispose();
+
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            testBed.testBed.univer.dispose();
+        }
     });
 });

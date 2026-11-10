@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { ICommandService, Injector, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
+import { RemoveOtherFormulaMutation } from '@univerjs/engine-formula';
 import {
     CopySheetCommand,
     InsertColMutation,
     InsertRowMutation,
+    InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
     RemoveSheetCommand,
+    RemoveSheetMutation,
     ReorderRangeMutation,
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CFNumberOperator, CFRuleType, CFSubRuleType } from '../../base/const';
+import { AddConditionalRuleMutation } from '../../commands/mutations/add-conditional-rule.mutation';
+import { createTestBed } from '../../models/calculate-unit-v2/__tests__/test.util';
 import { ConditionalFormattingRangeIndexModel } from '../../models/conditional-formatting-range-index-model';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
@@ -251,4 +258,73 @@ describe('ConditionalFormattingService', () => {
         expect(markRuleDirty).toHaveBeenCalledWith('book-1', 'sheet-1', 'cf-1');
         expect(markRuleDirty.mock.calls.length).toBeGreaterThanOrEqual(6);
     });
+});
+
+it('preserves stop-if-true priority when copying a sheet, undoing, and redoing', async () => {
+    vi.useFakeTimers();
+    const testBed = createTestBed();
+    try {
+        const service = testBed.getConditionalFormattingService();
+        const ruleModel = testBed.getConditionalFormattingRuleModel();
+        const workbook = testBed.get(IUniverInstanceService).getUnit<Workbook>(testBed.unitId)!;
+        testBed.commandService.registerCommand(InsertSheetMutation);
+        testBed.commandService.registerCommand(RemoveSheetMutation);
+        testBed.commandService.registerCommand(RemoveOtherFormulaMutation);
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }];
+        const base = {
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.number,
+            operator: CFNumberOperator.greaterThan,
+            value: 0,
+        };
+        for (const rule of [
+            { cfId: 'red', ranges, stopIfTrue: false, rule: { ...base, style: { bg: { rgb: '#ff0000' } } } },
+            { cfId: 'stop', ranges, stopIfTrue: true, rule: { ...base, style: {} } },
+            { cfId: 'higher', ranges, stopIfTrue: false, rule: { ...base, style: { cl: { rgb: '#333333' } } } },
+        ]) {
+            testBed.commandService.syncExecuteCommand(AddConditionalRuleMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: testBed.subUnitId,
+                rule,
+            });
+        }
+        const source = service.composeStyle(testBed.unitId, testBed.subUnitId, 0, 1);
+        expect(source).toEqual({ style: { cl: { rgb: '#333333' } } });
+        const sourceRules = ruleModel.getSubunitRules(testBed.unitId, testBed.subUnitId)!;
+        const targetSubUnitId = 'copied';
+        const insertParams = {
+            unitId: testBed.unitId,
+            index: 1,
+            sheet: { ...workbook.getActiveSheet()!.getConfig(), id: targetSubUnitId, name: targetSubUnitId },
+        };
+        const { redos, undos } = testBed.get(SheetInterceptorService).onCommandExecute({
+            id: CopySheetCommand.id,
+            params: { unitId: testBed.unitId, subUnitId: testBed.subUnitId, targetSubUnitId },
+        });
+        for (let attempt = 0; attempt < 2; attempt++) {
+            expect(testBed.commandService.syncExecuteCommand(InsertSheetMutation.id, insertParams)).toBe(true);
+            for (const mutation of redos) {
+                expect(testBed.commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+            }
+            await vi.advanceTimersByTimeAsync(100);
+            expect(service.composeStyle(testBed.unitId, targetSubUnitId, 0, 1)).toEqual(source);
+            const copiedRules = ruleModel.getSubunitRules(testBed.unitId, targetSubUnitId)!;
+            expect(copiedRules.map(({ cfId, ...rule }) => rule))
+                .toEqual(sourceRules.map(({ cfId, ...rule }) => rule));
+            expect(copiedRules.every((rule) => !sourceRules.some((sourceRule) => sourceRule.cfId === rule.cfId))).toBe(true);
+            expect(sourceRules.map((rule) => rule.cfId)).toEqual(['higher', 'stop', 'red']);
+
+            expect(testBed.commandService.syncExecuteCommand(RemoveSheetMutation.id, {
+                unitId: testBed.unitId,
+                subUnitId: targetSubUnitId,
+            })).toBe(true);
+            for (const mutation of undos) {
+                expect(testBed.commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+            }
+            expect(ruleModel.getSubunitRules(testBed.unitId, targetSubUnitId)).toEqual([]);
+        }
+    } finally {
+        testBed.univer.dispose();
+        vi.useRealTimers();
+    }
 });

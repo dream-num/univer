@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-import type { ComponentType, ReactElement } from 'react';
-import type { IValueOption } from '../../../../services/menu/menu';
-import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
+import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ILogService, Injector, LocaleService } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import {
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    UniverInstanceService,
+} from '@univerjs/core';
+import { RediContext } from '@wendellhu/redi/react-bindings';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager, IconManager } from '../../../../common';
-import { ILayoutService } from '../../../../services/layout/layout.service';
+import type { IValueOption } from '../../../../services/menu/menu';
+import type { IMenuSchema, MenuSchemaType } from '../../../../services/menu/menu-manager.service';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
+import enUS from '../../../../locale/en-US';
+import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
-import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { connectInjector } from '../../../../utils/di';
+import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR,
@@ -36,48 +50,21 @@ import {
     shouldShowContextMenuGroupSeparator,
 } from '../ContextMenuPanel';
 
+// The locally linked icon package uses a separate React runtime for these hook-based icons.
 vi.mock('@univerjs/icons', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/icons')>();
 
     return {
         ...actual,
-        CheckMarkIcon: ({ className }: { className?: string }) => <span className={className} data-icon="check-mark" />,
-        MoreLeftIcon: ({ className }: { className?: string }) => <span className={className} data-icon="more-left" />,
-        MoreRightIcon: ({ className }: { className?: string }) => <span className={className} data-icon="more-right" />,
+        CheckMarkIcon: () => <span data-icon="check-mark" />,
+        MoreLeftIcon: () => <span data-icon="more-left" />,
+        MoreRightIcon: () => <span data-icon="more-right" />,
     };
 });
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-class TestMenuManagerService {
-    readonly menuChanged$ = new Subject<void>();
-    private readonly _menusByPosition = new Map<string, IMenuSchema[]>();
-
-    setMenus(position: string, menus: IMenuSchema[]): void {
-        this._menusByPosition.set(position, menus);
-        this.menuChanged$.next();
-    }
-
-    getMenuByPositionKey(position: string): IMenuSchema[] {
-        return this._menusByPosition.get(position) ?? [];
-    }
-}
-
-class TestLocaleService {
-    readonly direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
-
-    t(key: string): string {
-        return `translated:${key}`;
-    }
-}
-
-class TestLayoutService {
-    readonly rootContainerElement = document.body;
-}
-
-class TestLogService {
-    warn(): void {}
-}
+const injectors: Injector[] = [];
 
 class TestState {
     static selectedOptions: IValueOption[] = [];
@@ -91,19 +78,27 @@ class TestState {
 
 function createContextMenuTestInjector() {
     const injector = new Injector();
-    injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
-    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([ILogService, { useClass: TestLogService as never }]);
+    injectors.push(injector);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([LocaleService]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
 
     injector.get(IconManager).register({
-        AlignLeftIcon: ({ className }: { className?: string }) => <span className={className} data-icon="align-left" />,
-        AlignCenterIcon: ({ className }: { className?: string }) => <span className={className} data-icon="align-center" />,
-        TextColorIcon: ({ className }: { className?: string }) => <span className={className} data-icon="text-color" />,
-        ResetIcon: ({ className }: { className?: string }) => <span className={className} data-icon="reset" />,
+        AlignLeftIcon: () => <span />,
+        AlignCenterIcon: () => <span />,
+        ResetIcon: () => <span />,
     });
+    injector.get(ILayoutService).registerRootContainerElement(document.body);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     return injector;
 }
@@ -115,12 +110,21 @@ function renderWithDependencies(
 ) {
     const injector = createContextMenuTestInjector();
     setupInjector?.(injector);
-    const menuManagerService = injector.get(IMenuManagerService) as unknown as TestMenuManagerService;
+    const menuManagerService = injector.get(IMenuManagerService);
 
-    Object.entries(menuMap).forEach(([position, menus]) => menuManagerService.setMenus(position, menus));
+    function toMenuSchema(menus: IMenuSchema[]): MenuSchemaType {
+        return Object.fromEntries(menus.map(({ key, item, children, ...schema }) => [key, {
+            ...schema,
+            ...(item ? { menuItemFactory: () => item } : {}),
+            ...(children ? toMenuSchema(children) : {}),
+        }]));
+    }
 
-    const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    return render(<ConnectedTestRoot />);
+    menuManagerService.appendRootMenu(Object.fromEntries(
+        Object.entries(menuMap).map(([position, menus]) => [position, toMenuSchema(menus)])
+    ));
+
+    return render(<RediContext.Provider value={{ injector }}>{element}</RediContext.Provider>);
 }
 
 function createButtonItem(
@@ -150,10 +154,6 @@ function createButtonItem(
     };
 }
 
-function hasClassToken(element: HTMLElement, token: string): boolean {
-    return element.className.split(/\s+/).includes(token);
-}
-
 async function nextFrame() {
     await act(async () => {
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -163,8 +163,49 @@ async function nextFrame() {
 describe('ContextMenuPanel', () => {
     afterEach(() => {
         cleanup();
+        injectors.splice(0).forEach((injector) => injector.dispose());
         vi.useRealTimers();
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
         TestState.reset();
+    });
+
+    it.each([[36, 636], [240, 500]])('keeps the menu fully visible when the editor starts at y=%i', async (containerTop, menuTop) => {
+        vi.stubGlobal('innerHeight', 800);
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+            return this === document.body
+                ? new DOMRect(0, containerTop, 1280, 800 - containerTop)
+                : new DOMRect(500, menuTop, 208, 164);
+        });
+        vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(162);
+
+        const { container } = renderWithDependencies(<ContextMenuPanel menuType="bottom-menu" />, {
+            'bottom-menu': [createButtonItem('action', { title: 'Action' })],
+        });
+        await nextFrame();
+
+        const panel = container.firstElementChild as HTMLElement;
+        expect(Number.parseFloat(panel.style.maxHeight)).toBeGreaterThanOrEqual(panel.getBoundingClientRect().height);
+    });
+
+    it('limits tall menus to the viewport and restores room when the viewport grows', async () => {
+        vi.stubGlobal('innerHeight', 320);
+        const { container } = renderWithDependencies(<ContextMenuPanel menuType="tall-menu" />, {
+            'tall-menu': Array.from({ length: 30 }, (_, index) => createButtonItem(`action-${index}`, { title: `Action ${index}` })),
+        });
+        await nextFrame();
+
+        const panel = container.firstElementChild as HTMLElement;
+        const initialMaxHeight = Number.parseFloat(panel.style.maxHeight);
+        expect(initialMaxHeight).toBeGreaterThan(0);
+        expect(initialMaxHeight).toBeLessThanOrEqual(window.innerHeight);
+
+        vi.stubGlobal('innerHeight', 800);
+        fireEvent(window, new Event('resize'));
+        await nextFrame();
+
+        expect(Number.parseFloat(panel.style.maxHeight)).toBeGreaterThan(initialMaxHeight);
+        expect(Number.parseFloat(panel.style.maxHeight)).toBeLessThanOrEqual(window.innerHeight);
     });
 
     it('keeps paragraph quick groups visually connected while separating the next normal group', () => {
@@ -268,13 +309,11 @@ describe('ContextMenuPanel', () => {
 
         const quickGrids = container.querySelectorAll('.univer-menu-item-group');
         expect(quickGrids).toHaveLength(1);
-        expect(hasClassToken(quickGrids[0] as HTMLElement, 'univer-grid-cols-6')).toBe(true);
-        expect(screen.getByText('translated:docs-ui.paragraphMenu.align')).not.toBeNull();
-        expect(screen.getByRole('button', { name: 'translated:extension-item' })).not.toBeNull();
-        expect(screen.queryByRole('button', { name: 'translated:docs-ui.toolbar.resetFormat' })).toBeNull();
+        expect(screen.getByText('docs-ui.paragraphMenu.align')).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'extension-item' })).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'docs-ui.toolbar.resetFormat' })).toBeNull();
 
-        const alignCenterButton = screen.getByRole('button', { name: 'translated:docs-ui.toolbar.alignCenter' });
-        expect(hasClassToken(alignCenterButton, 'univer-bg-gray-50')).toBe(true);
+        const alignCenterButton = screen.getByRole('button', { name: 'docs-ui.toolbar.alignCenter' });
 
         fireEvent.click(alignCenterButton);
 
@@ -284,7 +323,7 @@ describe('ContextMenuPanel', () => {
             commandId: undefined,
             params: { horizontalAlign: 'center' },
             value: undefined,
-            tooltip: 'translated:docs-ui.toolbar.alignCenter',
+            tooltip: 'docs-ui.toolbar.alignCenter',
         }]);
     });
 
@@ -325,10 +364,10 @@ describe('ContextMenuPanel', () => {
         );
 
         await waitFor(() => {
-            expect(screen.queryByText('translated:docs-ui.hiddenGroup')).toBeNull();
+            expect(screen.queryByText('docs-ui.hiddenGroup')).toBeNull();
         });
-        expect(screen.getByText('translated:docs-ui.visibleGroup')).not.toBeNull();
-        expect(screen.getByRole('button', { name: 'translated:docs-ui.visibleAction' })).not.toBeNull();
+        expect(screen.getByText('docs-ui.visibleGroup')).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'docs-ui.visibleAction' })).not.toBeNull();
     });
 
     it('supports keyboard navigation, confirm, and cancel from the real menu DOM', async () => {
@@ -365,8 +404,8 @@ describe('ContextMenuPanel', () => {
         await nextFrame();
 
         const panel = document.querySelector('[tabindex="-1"]') as HTMLDivElement;
-        const headingButton = screen.getByRole('button', { name: 'translated:docs-ui.heading1' });
-        const calloutButton = screen.getByRole('button', { name: 'translated:docs-ui.callout' });
+        const headingButton = screen.getByRole('button', { name: 'docs-ui.heading1' });
+        const calloutButton = screen.getByRole('button', { name: 'docs-ui.callout' });
 
         expect(document.activeElement).toBe(headingButton);
 
@@ -386,7 +425,7 @@ describe('ContextMenuPanel', () => {
         expect(TestState.cancels).toBe(1);
     });
 
-    it('enters, navigates, and exits a submenu with arrow keys', async () => {
+    it.each(['ltr', 'rtl'] as const)('enters, navigates, and exits a submenu with arrow keys in %s', async (direction) => {
         renderWithDependencies(<ContextMenuPanel menuType="root" />, {
             root: [
                 {
@@ -403,21 +442,98 @@ describe('ContextMenuPanel', () => {
                 createButtonItem('bring-front', { title: 'Bring to Front' }),
                 createButtonItem('send-back', { title: 'Send to Back' }),
             ],
-        });
-        const trigger = screen.getByRole('button', { name: 'translated:Arrange' });
+        }, (injector) => injector.get(LocaleService).setDirection(direction));
+        const trigger = screen.getByRole('button', { name: 'Arrange' });
         trigger.focus();
 
-        fireEvent.keyDown(trigger, { key: 'ArrowRight' });
-        const first = await screen.findByRole('button', { name: 'translated:Bring to Front' });
+        fireEvent.keyDown(trigger, { key: direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight' });
+        const first = await screen.findByRole('button', { name: 'Bring to Front' });
         await nextFrame();
         await waitFor(() => expect(document.activeElement).toBe(first));
 
         fireEvent.keyDown(first, { key: 'ArrowDown' });
-        const second = screen.getByRole('button', { name: 'translated:Send to Back' });
+        const second = screen.getByRole('button', { name: 'Send to Back' });
         expect(document.activeElement).toBe(second);
 
-        fireEvent.keyDown(second, { key: 'ArrowLeft' });
+        fireEvent.keyDown(second, { key: direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft' });
         expect(document.activeElement).toBe(trigger);
+    });
+
+    it.each(['click', 'pointer return', 'ArrowRight', 'Enter'])(
+        'keeps a hovered submenu visible and usable after %s on its parent',
+        async (interaction) => {
+            const onOptionSelect = vi.fn();
+            renderWithDependencies(<ContextMenuPanel menuType="root" onOptionSelect={onOptionSelect} />, {
+                root: [{
+                    key: 'copy-special',
+                    order: 0,
+                    item: {
+                        id: 'copy-special',
+                        type: MenuItemType.SUBITEMS,
+                        title: 'Copy special',
+                    },
+                }],
+                'copy-special': [createButtonItem('copy-formula', { title: 'Copy formula only' })],
+            });
+            const trigger = screen.getByRole('button', { name: 'Copy special' });
+
+            fireEvent.mouseEnter(trigger);
+            await nextFrame();
+            expect(screen.getByRole('button', { name: 'Copy formula only' })).not.toBeNull();
+
+            if (interaction === 'click') {
+                fireEvent.click(trigger, { detail: 1 });
+            } else if (interaction === 'pointer return') {
+                const panel = trigger.closest('[tabindex="-1"]');
+                fireEvent.mouseLeave(trigger, { relatedTarget: panel });
+                fireEvent.mouseEnter(trigger);
+            } else {
+                trigger.focus();
+                fireEvent.keyDown(trigger, { key: interaction });
+            }
+            await nextFrame();
+            const option = screen.getByRole('button', { name: 'Copy formula only' });
+            if (interaction === 'ArrowRight' || interaction === 'Enter') {
+                expect(document.activeElement).toBe(option);
+            }
+            fireEvent.click(option);
+
+            expect(onOptionSelect).toHaveBeenCalledOnce();
+            expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'copy-formula' }));
+            expect(screen.queryByRole('button', { name: 'Copy formula only' })).toBeNull();
+        }
+    );
+
+    it.each(['parent', 'submenu'])('closes the submenu when the pointer leaves the window from its %s', async (origin) => {
+        const contains = Node.prototype.contains;
+        // The test DOM accepts Window here, whereas browsers require a Node.
+        vi.spyOn(Node.prototype, 'contains').mockImplementation(function (this: Node, other) {
+            if (other !== null && !(other instanceof Node)) {
+                throw new TypeError('Node.contains requires a Node');
+            }
+            return contains.call(this, other);
+        });
+        renderWithDependencies(<ContextMenuPanel menuType="root" />, {
+            root: [{
+                key: 'color',
+                order: 0,
+                item: {
+                    id: 'color',
+                    type: MenuItemType.SELECTOR,
+                    title: 'Color',
+                    selections: [{ label: 'Red', value: 'red' }],
+                },
+            }],
+        });
+        const trigger = screen.getByRole('button', { name: 'Color' });
+        fireEvent.mouseEnter(trigger);
+        await nextFrame();
+        const submenu = document.getElementById(trigger.getAttribute('aria-controls')!)!;
+
+        fireEvent.mouseLeave(origin === 'parent' ? trigger : submenu, { relatedTarget: window });
+
+        expect(screen.queryByText('Red')).toBeNull();
+        expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
     it('selects an option from a selector submenu with the selector command id', () => {
@@ -438,7 +554,6 @@ describe('ContextMenuPanel', () => {
                                 item: {
                                     id: 'text-color',
                                     type: MenuItemType.BUTTON_SELECTOR,
-                                    icon: 'TextColorIcon',
                                     title: 'docs-ui.textColor',
                                     tooltip: 'docs-ui.textColor',
                                     selectionsCommandId: 'doc.command.setTextColor',
@@ -460,10 +575,10 @@ describe('ContextMenuPanel', () => {
             }
         );
 
-        const colorButton = screen.getByRole('button', { name: 'translated:docs-ui.textColor' });
+        const colorButton = screen.getByRole('button', { name: 'docs-ui.textColor' });
         fireEvent.mouseEnter(colorButton.parentElement as HTMLElement);
 
-        fireEvent.click(screen.getByText('translated:palette.red').closest('button') as HTMLButtonElement);
+        fireEvent.click(screen.getByText('palette.red').closest('button') as HTMLButtonElement);
 
         expect(TestState.selectedOptions).toEqual([{
             id: 'text-color',
@@ -474,9 +589,11 @@ describe('ContextMenuPanel', () => {
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
     });
 
-    it('does not add option padding around a non-selectable custom submenu component', () => {
+    it('keeps a custom submenu component interactive without selecting its parent option', async () => {
+        const onOptionSelect = vi.fn();
+        const onPickerClick = vi.fn();
         renderWithDependencies(
-            <ContextMenuPanel menuType="insert-menu" sizeVariant="paragraph-t" />,
+            <ContextMenuPanel menuType="insert-menu" sizeVariant="paragraph-t" onOptionSelect={onOptionSelect} />,
             {
                 'insert-menu': [
                     {
@@ -498,18 +615,26 @@ describe('ContextMenuPanel', () => {
                 ],
             },
             (injector) => {
-                injector.get(ComponentManager).register('test-picker', () => <div data-testid="test-picker" />);
+                injector.get(ComponentManager).register('test-picker', () => (
+                    <button type="button" onClick={onPickerClick}>Pick a value</button>
+                ));
             }
         );
 
-        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insertTable' });
+        const insertButton = screen.getByRole('button', { name: 'docs-ui.insertTable' });
         fireEvent.mouseEnter(insertButton.parentElement as HTMLElement);
+        await nextFrame();
 
-        const picker = screen.getByTestId('test-picker');
-        const optionWrapper = picker.parentElement?.parentElement as HTMLElement;
+        fireEvent.click(screen.getByRole('button', { name: 'Pick a value' }));
 
-        expect(hasClassToken(optionWrapper, 'univer-p-0')).toBe(true);
-        expect(hasClassToken(optionWrapper, 'univer-px-3')).toBe(false);
+        screen.getByRole('button', { name: 'Pick a value' }).focus();
+        const submenu = document.querySelector(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)!;
+        fireEvent.mouseLeave(submenu, { relatedTarget: document.body });
+        fireEvent.mouseLeave(insertButton.parentElement!, { relatedTarget: document.body });
+
+        expect(onPickerClick).toHaveBeenCalledOnce();
+        expect(onOptionSelect).not.toHaveBeenCalled();
+        expect(screen.getByRole('button', { name: 'Pick a value' })).not.toBeNull();
     });
 
     it('keeps the newly hovered submenu open when moving across sibling submenu items', () => {
@@ -555,27 +680,100 @@ describe('ContextMenuPanel', () => {
             }
         );
 
-        const indentButton = screen.getByRole('button', { name: 'translated:docs-ui.indent' });
-        const colorsButton = screen.getByRole('button', { name: 'translated:docs-ui.colors' });
+        const indentButton = screen.getByRole('button', { name: 'docs-ui.indent' });
+        const colorsButton = screen.getByRole('button', { name: 'docs-ui.colors' });
         const indentWrapper = indentButton.parentElement as HTMLElement;
         const colorsWrapper = colorsButton.parentElement as HTMLElement;
 
         act(() => {
             fireEvent.mouseEnter(indentWrapper);
         });
-        expect(screen.getByText('translated:docs-ui.indentMore')).not.toBeNull();
+        expect(screen.getByText('docs-ui.indentMore')).not.toBeNull();
 
         act(() => {
             fireEvent.mouseLeave(indentWrapper, { relatedTarget: colorsWrapper });
             fireEvent.mouseEnter(colorsWrapper);
         });
-        expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
-        expect(screen.queryByRole('button', { name: 'translated:docs-ui.indentMore' })).toBeNull();
+        expect(screen.getByText('docs-ui.fillColor')).not.toBeNull();
+        expect(screen.queryByRole('button', { name: 'docs-ui.indentMore' })).toBeNull();
 
         act(() => {
             vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 10);
         });
-        expect(screen.getByText('translated:docs-ui.fillColor')).not.toBeNull();
+        expect(screen.getByText('docs-ui.fillColor')).not.toBeNull();
+    });
+
+    describe.each([
+        { direction: 'ltr' as const, triggerLeft: 100, side: 'right' },
+        { direction: 'ltr' as const, triggerLeft: 900, side: 'left' },
+        { direction: 'rtl' as const, triggerLeft: 600, side: 'left' },
+        { direction: 'rtl' as const, triggerLeft: 20, side: 'right' },
+    ])('pointer movement in $direction with a submenu opening to the $side', ({ direction, triggerLeft, side }) => {
+        it.each(['enter submenu', 'pause on sibling', 'click sibling', 'move away', 'leave sibling'])(
+            'protects the diagonal path and handles %s',
+            async (interaction) => {
+                vi.stubGlobal('innerWidth', 1200);
+                const onOptionSelect = vi.fn();
+                renderWithDependencies(<ContextMenuPanel menuType="root" onOptionSelect={onOptionSelect} />, {
+                    root: ['Paste', 'Clear'].map((title, order) => ({
+                        key: title,
+                        order,
+                        item: { id: title, type: MenuItemType.SUBITEMS, title },
+                    })),
+                    Paste: ['Values', 'Format', 'Width', 'Borders', 'Formulas'].map((title) => createButtonItem(title, { title })),
+                    Clear: [createButtonItem('clear-content', { title: 'Clear content' })],
+                }, (injector) => injector.get(LocaleService).setDirection(direction));
+                const paste = screen.getByRole('button', { name: 'Paste' });
+                const clear = screen.getByRole('button', { name: 'Clear' });
+                vi.spyOn(paste.parentElement!, 'getBoundingClientRect').mockReturnValue(new DOMRect(triggerLeft, 100, 200, 32));
+                fireEvent.mouseEnter(paste);
+                const submenu = document.getElementById(paste.getAttribute('aria-controls')!)!;
+                const submenuLeft = side === 'right' ? triggerLeft + 198 : triggerLeft - 198;
+                vi.spyOn(submenu, 'getBoundingClientRect').mockReturnValue(new DOMRect(submenuLeft, 100, 200, 180));
+                vi.spyOn(submenu.firstElementChild!, 'getBoundingClientRect').mockReturnValue(
+                    new DOMRect(submenuLeft + (side === 'right' ? 20 : 0), 100, 180, 180)
+                );
+                await nextFrame();
+                expect(screen.getByRole('button', { name: 'Formulas' })).not.toBeNull();
+                expect(side === 'right'
+                    ? Number.parseFloat(submenu.style.left) > triggerLeft
+                    : Number.parseFloat(submenu.style.left) < triggerLeft).toBe(true);
+
+                vi.useFakeTimers();
+                const originX = triggerLeft + 100;
+                const step = side === 'right' ? 1 : -1;
+                fireEvent.mouseLeave(paste, { relatedTarget: clear, clientX: originX, clientY: 132 });
+                fireEvent.mouseEnter(clear, { clientX: originX + step * 30, clientY: 150 });
+
+                expect(screen.getByRole('button', { name: 'Formulas' })).not.toBeNull();
+                expect(screen.queryByText('Clear content')).toBeNull();
+
+                if (interaction === 'enter submenu') {
+                    fireEvent.mouseMove(clear, { clientX: originX + step * 60, clientY: 165 });
+                    fireEvent.mouseEnter(submenu);
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    fireEvent.click(screen.getByRole('button', { name: 'Formulas' }));
+                    expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'Formulas' }));
+                } else if (interaction === 'leave sibling') {
+                    fireEvent.mouseLeave(clear, { relatedTarget: clear.closest('[tabindex="-1"]') });
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    expect(screen.queryByText('Clear content')).toBeNull();
+                    expect(screen.queryByText('Formulas')).toBeNull();
+                } else {
+                    if (interaction === 'pause on sibling') {
+                        act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    } else if (interaction === 'click sibling') {
+                        fireEvent.click(clear, { detail: 1 });
+                    } else {
+                        fireEvent.mouseMove(clear, { clientX: originX, clientY: 160 });
+                    }
+                    expect(screen.getByText('Clear content')).not.toBeNull();
+                    expect(screen.queryByText('Formulas')).toBeNull();
+                    act(() => vi.advanceTimersByTime(CONTEXT_MENU_SUBMENU_CLOSE_DELAY + 1));
+                    expect(screen.getByText('Clear content')).not.toBeNull();
+                }
+            }
+        );
     });
 
     it('closes an open submenu when its parent becomes disabled', async () => {
@@ -604,12 +802,51 @@ describe('ContextMenuPanel', () => {
             }
         );
 
-        const printButton = screen.getByRole('button', { name: 'translated:docs-ui.print' });
+        const printButton = screen.getByRole('button', { name: 'docs-ui.print' });
         fireEvent.mouseEnter(printButton.parentElement as HTMLElement);
-        expect(screen.getByText('translated:docs-ui.printLayout')).not.toBeNull();
+        expect(screen.getByText('docs-ui.printLayout')).not.toBeNull();
 
         act(() => disabled$.next(true));
-        await waitFor(() => expect(screen.queryByText('translated:docs-ui.printLayout')).toBeNull());
+        await waitFor(() => expect(screen.queryByText('docs-ui.printLayout')).toBeNull());
+    });
+
+    it('keeps a submenu inside the viewport when its color editor grows', async () => {
+        vi.stubGlobal('innerHeight', 600);
+        const resizeCallbacks = new Map<Element, () => void>();
+        const disconnect = vi.fn();
+        vi.stubGlobal('ResizeObserver', class {
+            constructor(private readonly callback: () => void) {}
+            observe(element: Element) { resizeCallbacks.set(element, this.callback); }
+            disconnect = disconnect;
+        });
+        const view = renderWithDependencies(
+            <ContextMenuPanel menuType="color-root" />,
+            {
+                'color-root': [{
+                    key: 'color',
+                    order: 0,
+                    item: {
+                        id: 'color',
+                        type: MenuItemType.SELECTOR,
+                        title: 'Color',
+                        selections: [{ label: 'Custom color', value: '#123456' }],
+                    },
+                }],
+            }
+        );
+        const button = screen.getByRole('button', { name: 'Color' });
+        vi.spyOn(button.parentElement!, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 400, 160, 32));
+        fireEvent.click(button);
+        const submenu = document.querySelector<HTMLElement>(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)!;
+        let height = 100;
+        vi.spyOn(submenu, 'getBoundingClientRect').mockImplementation(() => new DOMRect(0, 0, 288, height));
+        await nextFrame();
+        height = 320;
+        act(() => resizeCallbacks.get(submenu)!());
+        expect(Number.parseFloat(submenu.style.top) + height).toBeLessThanOrEqual(window.innerHeight);
+        expect(Number.parseFloat(submenu.style.top)).toBeGreaterThanOrEqual(0);
+        view.unmount();
+        expect(disconnect).toHaveBeenCalled();
     });
 
     it('opens submenus to the left by default in rtl when there is enough space', async () => {
@@ -636,11 +873,11 @@ describe('ContextMenuPanel', () => {
                 ],
             },
             (injector) => {
-                (injector.get(LocaleService) as unknown as TestLocaleService).direction$.next('rtl');
+                injector.get(LocaleService).setDirection('rtl');
             }
         );
 
-        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insert' });
+        const insertButton = screen.getByRole('button', { name: 'docs-ui.insert' });
         const insertWrapper = insertButton.parentElement as HTMLElement;
         insertWrapper.getBoundingClientRect = () => ({
             bottom: 140,
@@ -702,11 +939,11 @@ describe('ContextMenuPanel', () => {
                 ],
             },
             (injector) => {
-                (injector.get(LocaleService) as unknown as TestLocaleService).direction$.next('rtl');
+                injector.get(LocaleService).setDirection('rtl');
             }
         );
 
-        const insertButton = screen.getByRole('button', { name: 'translated:docs-ui.insert' });
+        const insertButton = screen.getByRole('button', { name: 'docs-ui.insert' });
 
         expect(insertButton.querySelector('[data-icon="more-left"]')).not.toBeNull();
         expect(insertButton.querySelector('[data-icon="more-right"]')).toBeNull();

@@ -36,7 +36,9 @@ import {
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
+import { OleObject } from '../views/ole/ole-object';
 import { DrawingImageClipService } from './drawing-image-clip.service';
+import { OleUIService } from './ole-ui.service';
 
 // const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
@@ -81,11 +83,12 @@ export class DrawingRenderService {
         @IGalleryService private readonly _galleryService: IGalleryService,
         @IURLImageService private readonly _urlImageService: IURLImageService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DrawingImageClipService) private readonly _drawingImageClipService: DrawingImageClipService
+        @Inject(DrawingImageClipService) private readonly _drawingImageClipService: DrawingImageClipService,
+        @Inject(OleUIService) private readonly _oleUI: OleUIService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
+    async renderImages(imageParam: IImageData, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
         const {
             transform: singleTransform,
             drawingType,
@@ -108,7 +111,7 @@ export class DrawingRenderService {
             layoutType?: PositionedObjectLayoutType;
         };
 
-        if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+        if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE && drawingType !== DrawingTypeEnum.DRAWING_OLE) {
             return;
         }
 
@@ -136,6 +139,9 @@ export class DrawingRenderService {
             const imageShape = scene.getObject(imageShapeKey);
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                if (drawingType === DrawingTypeEnum.DRAWING_OLE) {
+                    imageShape.transformerConfig = { ...imageShape.transformerConfig, rotateEnabled: false };
+                }
                 (imageShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
                 if (this._univerInstanceService.getUnitType(unitId) === UniverInstanceType.UNIVER_SHEET || opacity !== undefined) {
                     (imageShape as Image).setOpacity(normalizeImageOpacity(opacity));
@@ -154,30 +160,32 @@ export class DrawingRenderService {
                 opacity: normalizeImageOpacity(opacity),
                 zIndex: zIndex === -1 ? (orders.length - 1) : zIndex,
             };
-            const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
-
             let shouldBeCache = false;
-            if (isRenderableImageCache(imageNativeCache)) {
-                imageConfig.image = imageNativeCache;
-            } else {
-                if (imageSourceType === ImageSourceType.UUID) {
-                    try {
-                        imageConfig.url = await this._imageIoService.getImage(source);
-                    } catch (error) {
-                        console.error(error);
-                        continue;
-                    }
-                } else if (imageSourceType === ImageSourceType.URL) {
-                    try {
-                        imageConfig.url = await this._urlImageService.getImage(source);
-                    } catch (error) {
-                        console.error(error);
-                        imageConfig.url = source;
-                    }
-                    shouldBeCache = true;
+            if (drawingType !== DrawingTypeEnum.DRAWING_OLE) {
+                const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
+
+                if (isRenderableImageCache(imageNativeCache)) {
+                    imageConfig.image = imageNativeCache;
                 } else {
-                    imageConfig.url = source;
-                    shouldBeCache = true;
+                    if (imageSourceType === ImageSourceType.UUID) {
+                        try {
+                            imageConfig.url = await this._imageIoService.getImage(source);
+                        } catch (error) {
+                            console.error(error);
+                            continue;
+                        }
+                    } else if (imageSourceType === ImageSourceType.URL) {
+                        try {
+                            imageConfig.url = await this._urlImageService.getImage(source);
+                        } catch (error) {
+                            console.error(error);
+                            imageConfig.url = source;
+                        }
+                        shouldBeCache = true;
+                    } else {
+                        imageConfig.url = source;
+                        shouldBeCache = true;
+                    }
                 }
             }
 
@@ -193,13 +201,16 @@ export class DrawingRenderService {
             }
 
             imageConfig.printable = true;
-            const image = new Image(imageShapeKey, imageConfig);
+            const image = drawingType === DrawingTypeEnum.DRAWING_OLE
+                ? new OleObject(imageShapeKey, imageConfig)
+                : new Image(imageShapeKey, imageConfig);
             image.setClipService(this._drawingImageClipService);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
 
             scene.addObject(image, getDrawingRenderLayerIndex(imageParam as IDrawingParamWithBehindText));
+            this._oleUI.bindObject(image, imageParam, options?.interactive !== false);
             if (this._drawingManagerService.getDrawingEditable()) {
                 scene.attachTransformerTo(image);
             }
@@ -294,7 +305,7 @@ export class DrawingRenderService {
         return rects;
     }
 
-    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean }) {
+    renderDrawing(param: IDrawingSearch, scene: Scene, options?: { allowInactiveSheet?: boolean; interactive?: boolean }) {
         const drawingParam = this._drawingManagerService.getDrawingByParam(param);
         if (drawingParam == null) {
             return;
@@ -302,6 +313,7 @@ export class DrawingRenderService {
 
         switch (drawingParam.drawingType) {
             case DrawingTypeEnum.DRAWING_IMAGE:
+            case DrawingTypeEnum.DRAWING_OLE:
                 return this.renderImages(drawingParam as IImageData, scene, options);
             default:
         }

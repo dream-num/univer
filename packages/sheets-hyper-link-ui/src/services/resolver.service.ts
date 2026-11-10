@@ -33,7 +33,7 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService } from '@univerjs/engine-formula';
-import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { getPrimaryForRange, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
@@ -51,7 +51,7 @@ function getContainRange(range: IRange, worksheet: Worksheet) {
         range.endRow = maxRow;
     }
 
-    if (range.rangeType === RANGE_TYPE.COLUMN || RANGE_TYPE.ROW) {
+    if (range.rangeType === RANGE_TYPE.COLUMN || range.rangeType === RANGE_TYPE.ROW) {
         return range;
     }
 
@@ -153,7 +153,7 @@ export class SheetsHyperLinkResolverService {
 
                     selections: [{
                         range: realRange,
-                        primary: null,
+                        primary: getPrimaryForRange(realRange, worksheet),
                     }],
                 } as ISetSelectionsOperationParams
             );

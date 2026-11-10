@@ -161,7 +161,7 @@ describe('XHRHTTPImplementation', () => {
         xhrInstances[0].statusText = 'Server Error';
         xhrInstances[0].responseText = '{"ok":false}';
         xhrInstances[0].emit('load');
-        await expect(statusError).rejects.toMatchObject({ status: 500, statusText: 'Server Error' });
+        await expect(statusError).rejects.toMatchObject({ status: 500, statusText: 'Server Error', error: { ok: false } });
 
         const jsonError = new Promise((resolve, reject) => {
             impl.send(createRequest('json')).subscribe({ next: resolve, error: reject });

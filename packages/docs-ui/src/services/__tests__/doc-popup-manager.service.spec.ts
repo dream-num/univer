@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, RenderUnit } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import {
     BooleanNumber,
@@ -36,9 +36,12 @@ import {
     IRenderManagerService,
     Rect,
     RenderManagerService,
+    Viewport,
 } from '@univerjs/engine-render';
 import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
+import { animationFrameScheduler, firstValueFrom, Subject, throttleTime } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     DocCanvasPopupLayoutInteractionController,
@@ -55,7 +58,7 @@ import {
 import { NodePositionConvertToCursor } from '../selection/convert-text-range';
 
 describe('popup anchors with real document layout', () => {
-    it('lets an object toolbar follow layout transforms without holding a document layout lock', () => {
+    it('lets an object toolbar follow layout transforms without holding a document layout lock', async () => {
         const context = new Proxy({}, { get: () => () => {} });
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
         const univer = new Univer();
@@ -94,7 +97,7 @@ describe('popup anchors with real document layout', () => {
             });
             expect(interaction.isActive).toBe(false);
             shape.transformByState({ top: 280, width: 150, height: 60 });
-            expect(anchors[anchors.length - 1]).toMatchObject({ left: 20, right: 170, top: 280, bottom: 340 });
+            await vi.waitFor(() => expect(anchors[anchors.length - 1]).toMatchObject({ left: 20, right: 170, top: 280, bottom: 340 }));
             expect(interaction.isActive).toBe(false);
             popup.dispose();
             expect(completed).toBe(true);
@@ -115,7 +118,7 @@ describe('popup anchors with real document layout', () => {
         { startOffset: 1, length: 3 },
         { startOffset: 5, length: 0 },
         { startOffset: 6, length: 0 },
-    ])('anchors a $length-character range at $startOffset, including paragraph-end and empty carets', ({ startOffset, length }) => {
+    ])('anchors a $length-character range at $startOffset, including paragraph-end and empty carets', async ({ startOffset, length }) => {
         const context = new Proxy({
             font: '',
             webkitBackingStorePixelRatio: 1,
@@ -195,6 +198,37 @@ describe('popup anchors with real document layout', () => {
                 expect(bounds[0].right).toBeCloseTo(lastGlyphBounds.right);
                 expect(bounds[0].right).toBeGreaterThan(bounds[0].left);
             }
+
+            const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene);
+            const popup = injector.get(DocCanvasPopManagerService).attachPopupToRange({
+                startOffset,
+                endOffset: startOffset + length,
+                collapsed: length === 0,
+            }, { componentKey: 'zoom-range-popup', requiresStableLayout: false }, model.getUnitId());
+            const anchors: IBoundRectNoAngle[] = [];
+            const subscription = popupService.popups[0][1].anchorRect$.pipe(
+                throttleTime(0, animationFrameScheduler)
+            ).subscribe((anchor) => anchors.push(anchor));
+            const exclusions: IBoundRectNoAngle[][] = [];
+            const exclusionSubscription = popupService.popups[0][1].excludeRects$!.pipe(
+                throttleTime(0, animationFrameScheduler)
+            ).subscribe((bounds) => exclusions.push(bounds));
+            render.scene.scale(0.7, 0.7);
+            documents.translate(240, 35);
+            await vi.waitFor(() => expect(anchors[anchors.length - 1].left)
+                .toBeCloseTo((bounds[0].left + 240 - viewport.viewportScrollX) * 0.7));
+            const after = anchors[anchors.length - 1];
+            expect(after.left).toBeCloseTo((bounds[0].left + 240 - viewport.viewportScrollX) * 0.7);
+            expect(after.right).toBeCloseTo((bounds[0].right + 240 - viewport.viewportScrollX) * 0.7);
+            expect(after.top).toBeCloseTo((bounds[0].top + 35 - viewport.viewportScrollY) * 0.7);
+            expect(after.bottom).toBeCloseTo((bounds[0].bottom + 35 - viewport.viewportScrollY) * 0.7);
+            await vi.waitFor(() => expect(exclusions[exclusions.length - 1][0]).toEqual(after));
+            popup.dispose();
+            const count = anchors.length;
+            documents.translate(300, 50);
+            expect(anchors).toHaveLength(count);
+            subscription.unsubscribe();
+            exclusionSubscription.unsubscribe();
         } finally {
             univer.dispose();
             vi.restoreAllMocks();
@@ -241,7 +275,9 @@ class TestRenderManagerService {
     scopedPopupService = new TestCanvasPopupService();
     getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();
+    readonly onDocumentTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
+    readonly afterRender$ = new Subject();
 
     constructor() {
         this.popupInjector.add([ICanvasPopupService, { useValue: this.scopedPopupService as never }]);
@@ -263,6 +299,7 @@ class TestRenderManagerService {
             },
             getInjector: this.getInjector,
             mainComponent: {
+                onTransformChange$: this.onDocumentTransformChange$,
                 getOffsetConfig: () => {
                     if (this.throwOnGetOffsetConfig) {
                         throw new TypeError("Cannot read properties of null (reading 'clone')");
@@ -297,6 +334,7 @@ class TestRenderManagerService {
                 })
                 : undefined,
             onTransformChange$: this.onTransformChange$,
+            afterRender$: this.afterRender$,
         };
     }
 }
@@ -406,7 +444,7 @@ describe('DocCanvasPopManagerService', () => {
         expect(transformOffset2Bound(200, 100, scene as never)).toEqual({ x: 200, y: 100 });
     });
 
-    it('refreshes rect popup positions after scene scale changes', () => {
+    it('refreshes rect popup positions after scene scale changes', async () => {
         const { service, popupService, renderManagerService } = createService();
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'test' }, 'doc-1');
@@ -417,8 +455,7 @@ describe('DocCanvasPopManagerService', () => {
         renderManagerService.scale = 1.5;
         renderManagerService.onTransformChange$.emitEvent({} as never);
 
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
-        expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
+        expect(await firstValueFrom(popup!.anchorRect$)).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
     });
 
     it('keeps main-scene popups global and routes embedded render popups to the render scope', () => {
@@ -480,43 +517,68 @@ describe('DocCanvasPopManagerService', () => {
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
     });
 
-    it('refreshes function-based rect popup anchors after scroll and rich text changes', () => {
+    it('refreshes business-owned rect anchors only when explicitly notified after paint', async () => {
         const { service, popupService, renderManagerService, commandService } = createService();
         const rect = { left: 10, right: 110, top: 20, bottom: 40 };
 
-        service.attachPopupToRect(() => rect, { componentKey: 'dynamic-rect' }, 'doc-1');
+        const positionChanges$ = new Subject<void>();
+        const disposable = service.attachPopupToRect(() => rect, { componentKey: 'dynamic-rect', positionChanges$ }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
+        const anchorRect$ = popup!.anchorRect$;
+        const anchors: unknown[] = [];
+        const subscription = anchorRect$.subscribe((anchor) => anchors.push(anchor));
 
         renderManagerService.viewportScrollX = 20;
         renderManagerService.viewportScrollY = 30;
         renderManagerService.onScrollAfter$.emitEvent({} as never);
-        expect(anchorRect$?.value).toEqual({ left: 0, right: 100, top: 10, bottom: 30 });
+        await vi.waitFor(() => expect(anchors[anchors.length - 1]).toEqual({ left: 0, right: 100, top: 10, bottom: 30 }));
 
         rect.left = 30;
         rect.right = 130;
         commandService.emit(RichTextEditingMutation.id);
-        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 10, bottom: 30 });
+        await vi.waitFor(() => expect(anchors[anchors.length - 1]).toEqual({ left: 20, right: 120, top: 10, bottom: 30 }));
+
+        rect.left = 60;
+        rect.right = 160;
+        renderManagerService.afterRender$.next(null);
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        expect(anchors).toHaveLength(3);
+        positionChanges$.next();
+        await vi.waitFor(() => expect(anchors[anchors.length - 1]).toEqual({ left: 50, right: 150, top: 10, bottom: 30 }));
+        expect(anchors).toHaveLength(4);
+        positionChanges$.next();
+        positionChanges$.next();
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        expect(anchors).toHaveLength(4);
+        disposable.dispose();
+        rect.left = 90;
+        positionChanges$.next();
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        expect(anchors[anchors.length - 1]).toEqual({ left: 50, right: 150, top: 10, bottom: 30 });
+        expect(anchors).toHaveLength(4);
+        subscription.unsubscribe();
     });
 
-    it('does not refresh rect popup anchors for rich text changes from another document', () => {
+    it('does not refresh rect popup anchors for rich text changes from another document', async () => {
         const { service, popupService, commandService } = createService();
         const rect = { left: 10, right: 110, top: 20, bottom: 40 };
         const getRect = vi.fn(() => rect);
 
         service.attachPopupToRect(getRect, { componentKey: 'dynamic-rect' }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
 
         rect.left = 30;
         rect.right = 130;
         commandService.emit(RichTextEditingMutation.id, { unitId: 'slide-shape-editor' });
 
         expect(getRect).toHaveBeenCalledTimes(1);
-        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+        expect(await firstValueFrom(popup!.anchorRect$)).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
     });
 
-    it('keeps the last rect popup anchor when a stale dynamic rect throws during refresh', () => {
+    it('keeps the last rect popup anchor when a stale dynamic rect throws during refresh', async () => {
         const { service, popupService, commandService } = createService();
         let stale = false;
         const getRect = vi.fn(() => {
@@ -529,28 +591,26 @@ describe('DocCanvasPopManagerService', () => {
 
         service.attachPopupToRect(getRect, { componentKey: 'stale-dynamic-rect' }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
 
         stale = true;
 
         expect(() => commandService.emit(RichTextEditingMutation.id, { unitId: 'doc-1' })).not.toThrow();
-        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+        expect(await firstValueFrom(popup!.anchorRect$)).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
     });
 
-    it('ignores stale rect popup updates after the render canvas is released', () => {
+    it('ignores stale rect popup updates after the render canvas is released', async () => {
         const { service, popupService, renderManagerService, commandService } = createService();
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'stale-rect' }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
 
         renderManagerService.canvasElement = null;
 
         expect(() => commandService.emit(RichTextEditingMutation.id)).not.toThrow();
-        expect(anchorRect$?.value).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
+        expect(await firstValueFrom(popup!.anchorRect$)).toEqual({ left: 20, right: 120, top: 40, bottom: 60 });
     });
 
-    it('updates object anchored popups after zoom commands and removes popup on dispose', () => {
+    it('updates object anchored popups after zoom commands and removes popup on dispose', async () => {
         const { service, popupService, commandService } = createService();
         const targetObject = new Rect('popup-target', { left: 30, top: 40, width: 50, height: 60 });
 
@@ -561,8 +621,7 @@ describe('DocCanvasPopManagerService', () => {
 
         targetObject.transformByState({ left: 60, top: 80 });
         commandService.emit(SetDocZoomRatioOperation.id);
-        const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
-        expect(anchorRect$?.value).toEqual({ left: 70, right: 120, top: 100, bottom: 160 });
+        expect(await firstValueFrom(popup!.anchorRect$)).toEqual({ left: 70, right: 120, top: 100, bottom: 160 });
 
         popupService.activePopupId = 'another-popup';
         expect(disposable.canDispose()).toBe(true);
@@ -588,7 +647,7 @@ describe('DocCanvasPopManagerService', () => {
             .toThrow('Current render not found, unitId: missing-doc');
     });
 
-    it('anchors range popups to text bounds and updates them after rich text changes', () => {
+    it('anchors range popups to text bounds and updates them after rich text changes', async () => {
         const { service, popupService, commandService } = createService();
         let borderBoxPointGroup = [
             [{ x: 10, y: 10 }, { x: 40, y: 10 }, { x: 40, y: 20 }, { x: 10, y: 20 }],
@@ -622,7 +681,7 @@ describe('DocCanvasPopManagerService', () => {
         ];
         commandService.emit(RichTextEditingMutation.id, { unitId: 'doc-1' });
 
-        expect(emittedAnchors.at(-1)).toEqual({ left: 30, right: 100, top: 80, bottom: 100 });
+        await vi.waitFor(() => expect(emittedAnchors.at(-1)).toEqual({ left: 30, right: 100, top: 80, bottom: 100 }));
 
         anchorSubscription?.unsubscribe();
         disposable.dispose();

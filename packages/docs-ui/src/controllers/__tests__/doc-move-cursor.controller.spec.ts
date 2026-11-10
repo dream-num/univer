@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, Direction } from '@univerjs/core';
-import { DocumentSkeletonPageType, LineType } from '@univerjs/engine-render';
+import {
+    DataStreamTreeTokenType,
+    Direction,
+    DocumentDataModel,
+    DocumentFlavor,
+    LocaleService,
+    NamedStyleType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import {
+    DocumentSkeleton,
+    DocumentSkeletonPageType,
+    DocumentViewModel,
+    IRenderManagerService,
+    LineType,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { DocMoveCursorController } from '../doc-move-cursor.controller';
 
@@ -25,8 +42,10 @@ function createControllerHarness() {
 
 function createOffsetSkeleton(validOffsets: number[]) {
     const validOffsetSet = new Set(validOffsets);
+    const view = new DocumentViewModel(new DocumentDataModel({ id: 'cursor-offsets', documentStyle: {}, body: { dataStream: '\r\n', paragraphs: [{ startIndex: 0, paragraphId: 'empty' }] } }));
 
     return {
+        getViewModel: () => view,
         findNodePositionByCharIndex: vi.fn((offset: number) => validOffsetSet.has(offset) ? { offset } : undefined),
     };
 }
@@ -636,3 +655,35 @@ function createColumnGroup(columns: object[], bodyPage: ReturnType<typeof create
 
     return columnGroup;
 }
+
+it('navigates across hidden sections and returns to the heading at a folded document end', () => {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    univer.registerPlugin(UniverDocsPlugin);
+    injector.add([DocMoveCursorController]);
+    const model = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+        id: 'fold-cursor',
+        documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+        body: { dataStream: 'One\rText\rTwo\rTail\r\n', paragraphs: [
+            { paragraphId: 'one', startIndex: 3, headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+            { paragraphId: 'text', startIndex: 8 },
+            { paragraphId: 'two', startIndex: 12, headingCollapsed: true, paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } },
+            { paragraphId: 'tail', startIndex: 17 },
+        ] },
+    }) as DocumentDataModel;
+    const view = new DocumentViewModel(model);
+    const skeleton = DocumentSkeleton.create(view, injector.get(LocaleService));
+    try {
+        skeleton.calculate();
+        const controller = injector.get(DocMoveCursorController);
+        const normalize = Reflect.get(controller, '_normalizeRenderableCursorOffset').bind(controller);
+        const stream = model.getBody()!.dataStream;
+        expect(normalize(skeleton, stream, [], 4, Direction.RIGHT, '', -1)).toBe(9);
+        expect(normalize(skeleton, stream, [], 8, Direction.LEFT, '', -1)).toBe(3);
+        expect(normalize(skeleton, stream, [], 13, Direction.RIGHT, '', -1)).toBe(12);
+    } finally {
+        skeleton.dispose();
+        univer.dispose();
+    }
+});

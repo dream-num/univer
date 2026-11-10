@@ -30,6 +30,18 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
+## Worker usage
+
+On the main thread, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
+
+In the worker entry, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula/worker`:
+
+```ts
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula/worker';
+
+univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

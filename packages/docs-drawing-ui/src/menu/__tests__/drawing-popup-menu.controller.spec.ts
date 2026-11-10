@@ -28,16 +28,20 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { setDocumentPermissionValue } from '@univerjs/docs';
-import { DocDrawingService, IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
+import {
+    DocDrawingService,
+    IDocDrawingAdapterService,
+    IDocDrawingService,
+    RemoveDocDrawingCommand,
+} from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService, MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { COMPONENT_MOBILE_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { COMPONENT_MOBILE_IMAGE_POPUP_MENU, OleUIService, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { ContextMenuPosition, IContextMenuService, IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-
 import { EditDocDrawingOperation } from '../../commands/operations/edit-doc-drawing.operation';
 import { MobileDocDrawingPopupMenuController } from '../../controllers/mobile/drawing-popup-menu.controller';
 import { DocDrawingFloatingToolbarAdapterService } from '../../services/doc-drawing-floating-toolbar-adapter.service';
@@ -47,6 +51,7 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mo
     const unitId = 'doc-1';
     const drawingId = 'drawing-1';
     const injector = new Injector();
+    injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
     const createControl$ = new Subject<void>();
     const clearControl$ = new Subject<boolean>();
     const changing$ = new Subject<void>();

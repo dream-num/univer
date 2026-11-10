@@ -15,8 +15,9 @@
  */
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { borderBottomClassName, resetButtonClassName } from '../../helper/class-utilities';
+import { borderBottomClassName, focusClassName, resetButtonClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { Button } from '../button/Button';
 
 export interface IMobileActionRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'title' | 'value'> {
     title: ReactNode;
@@ -43,13 +44,16 @@ export function MobileActionRow(props: IMobileActionRowProps) {
     } = props;
 
     return (
-        <button
+        <Button
+            size="middle"
             type={type}
-            className={clsx(resetButtonClassName, `
-              univer-flex univer-min-h-12 univer-w-full univer-items-center univer-gap-3 univer-rounded-xl univer-px-4
-              univer-text-left univer-text-base univer-font-medium univer-text-gray-900
+            className={clsx(resetButtonClassName, focusClassName, `
+              univer-flex univer-w-full univer-items-center univer-gap-3 univer-rounded-xl univer-text-left
+              univer-font-medium univer-text-gray-900
+              aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
               disabled:univer-opacity-40
               dark:!univer-text-gray-100
+              dark:aria-pressed:!univer-bg-primary-900 dark:aria-pressed:!univer-text-primary-100
               [&>svg]:univer-size-5
             `, {
                 'univer-bg-gray-0 active:univer-bg-gray-100 dark:!univer-bg-gray-800 dark:active:!univer-bg-gray-700': variant === 'surface',
@@ -58,7 +62,7 @@ export function MobileActionRow(props: IMobileActionRowProps) {
             {...buttonProps}
         >
             {icon}
-            <span className="univer-flex-1">{title}</span>
+            <span className="univer-min-w-0 univer-flex-1 univer-truncate">{title}</span>
             {value && valueType === 'color' && (
                 <span
                     className="
@@ -71,14 +75,14 @@ export function MobileActionRow(props: IMobileActionRowProps) {
             {value && valueType === 'text' && (
                 <span
                     className="
-                      univer-max-w-32 univer-truncate univer-text-sm univer-font-normal univer-text-gray-500
-                      dark:!univer-text-gray-400
+                      univer-max-w-32 univer-truncate univer-font-normal univer-text-gray-500
+                      dark:!univer-text-gray-300
                     "
                 >
                     {value}
                 </span>
             )}
             {trailing}
-        </button>
+        </Button>
     );
 }

@@ -122,8 +122,7 @@ export interface IDocumentSkeletonContinuousSnapshot {
 }
 
 function withoutParent<T extends { parent?: unknown }>(value: T): Omit<T, 'parent'> {
-    const copy = { ...value };
-    delete copy.parent;
+    const { parent: _parent, ...copy } = value;
     return copy;
 }
 
@@ -214,7 +213,9 @@ export function serializeDocumentSkeletonPage(
     return {
         ...geometry,
         sections: source.sections.map(serializeSection),
-        noteDecorations: noteDecorations?.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
+        ...(noteDecorations == null ? {} : {
+            noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
+        }),
         ...(notes == null
             ? {}
             : {
@@ -458,17 +459,22 @@ function hydrateDocumentSkeletonPageInternal(
     snapshot: IDocumentData | undefined,
     resourceSegmentId: string
 ): IDocumentSkeletonPage {
+    const { notes, noteDecorations, ...geometry } = source;
     const page: IDocumentSkeletonPage = {
-        ...source,
+        ...geometry,
         sections: [],
-        noteDecorations: source.noteDecorations?.map((decoration) => ({
-            ...decoration,
-            page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
-        })),
-        notes: source.notes?.map((note) => ({
-            ...note,
-            page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
-        })),
+        ...(noteDecorations == null ? {} : {
+            noteDecorations: noteDecorations.map((decoration) => ({
+                ...decoration,
+                page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
+            })),
+        }),
+        ...(notes == null ? {} : {
+            notes: notes.map((note) => ({
+                ...note,
+                page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
+            })),
+        }),
         skeDrawings: new Map(source.skeDrawings.map(([drawingId, drawing]) => [
             drawingId,
             hydrateDrawing(drawing, snapshot, resourceSegmentId),

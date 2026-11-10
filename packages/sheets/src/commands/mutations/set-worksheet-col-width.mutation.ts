@@ -15,8 +15,7 @@
  */
 
 import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
-
+import { CommandType, isValidSheetDimension, IUniverInstanceService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetColWidthMutationParams {
@@ -64,7 +63,17 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+        if (!target) {
+            return false;
+        }
+
+        const dimensions = params.colWidth;
+        if (typeof dimensions === 'number'
+            ? !isValidSheetDimension(dimensions)
+            : dimensions == null || typeof dimensions !== 'object' ||
+                Object.values(dimensions).some((value) => value != null && !isValidSheetDimension(value))) {
+            return false;
+        }
 
         const { worksheet } = target;
         const manager = worksheet.getColumnManager();
@@ -74,7 +83,9 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
             const range = ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
                 const visible = worksheet.getColVisible(j);
-                if (!visible) continue;
+                if (!visible) {
+                    continue;
+                }
                 if (typeof params.colWidth === 'number') {
                     manager.setColumnWidth(j, params.colWidth);
                 } else if (Tools.isDefine(params.colWidth[j])) {

@@ -65,13 +65,6 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         setActive(index);
     }
 
-    function handleLiMouseLeave() {
-        if (!isEnableMouseEnterOrOut.current) {
-            return;
-        }
-        setActive(-1);
-    }
-
     useEffect(() => {
         if (!searchList.length) {
             return;
@@ -103,7 +96,9 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 case KeyCode.TAB:
                 case KeyCode.ENTER: {
                     const item = searchList[active];
-                    handleFunctionSelect(item.name, item.functionType);
+                    if (item) {
+                        handleFunctionSelect(item.name, item.functionType);
+                    }
                     break;
                 }
                 case KeyCode.ESC: {
@@ -214,7 +209,6 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                         })}
                         onMouseEnter={() => handleLiMouseEnter(index)}
-                        onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
                         onClick={() => {
                             handleFunctionSelect(item.name, item.functionType);

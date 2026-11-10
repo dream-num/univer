@@ -22,6 +22,7 @@ import type {
     IRange,
     IRowData,
     IUnitRange,
+    IWorkbookCalculationSettings,
     Nullable,
     ObjectMatrix,
     Styles,
@@ -112,7 +113,6 @@ export interface IFormulaExternalReferenceBinding {
 }
 
 export interface IFormulaExternalReferenceResource {
-    schemaVersion: number;
     references: Record<string, IFormulaExternalReferenceBinding>;
 }
 
@@ -232,6 +232,10 @@ export interface ISuperTable {
     showFooter?: boolean;
 }
 
+export interface ISuperTableData extends Omit<ISuperTable, 'titleMap'> {
+    titleMap: Record<string, number>;
+}
+
 export enum TableOptionType {
     ALL = '#All',
     DATA = '#Data',
@@ -250,6 +254,14 @@ export interface IUnitRowData {
 }
 
 export interface IFormulaDatasetConfig {
+    /** Sheet metadata changed; rebind and calculate affected references without forcing all formulas. */
+    dirtyReferenceUnits?: string[];
+    /** Recalculate iteration-sensitive groups and their dependents in these workbooks. */
+    dirtyIterationUnits?: string[];
+    /** Snapshot replay limits calculation to affected cycles and their required precedents. */
+    calculateCircularOnly?: boolean;
+    /** Finalize replay by calculating ordinary formulas without advancing complete circular caches. */
+    preserveCircularUnits?: string[];
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
     arrayFormulaRange: IArrayFormulaRangeType;
@@ -267,7 +279,7 @@ export interface IFormulaDatasetConfig {
     unitSheetNameMap?: IUnitSheetNameMap;
     unitNameMap?: IFormulaUnitNameMap;
     externalReferences?: IFormulaExternalReferences;
-    maxIteration?: number;
+    calculationSettings?: Record<string, IWorkbookCalculationSettings>;
     isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
 }

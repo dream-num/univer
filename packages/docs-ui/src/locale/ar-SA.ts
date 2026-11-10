@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'جارٍ استعادة تخطيط المستند…',
         },
         toolbar: {
+            zoom: 'التكبير والتصغير',
+            fullscreen: 'ملء الشاشة',
             font: 'خط',
             fontSize: 'حجم الخط',
             bold: 'غامق',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'إعدادات المقطع',
             },
             paragraphSetting: {
+                wordWrap: 'السماح بالتفاف النص اللاتيني في وسط الكلمة',
                 alignment: 'محاذاة',
                 indentation: 'إزاحة',
                 left: 'يسار',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'تقليل المسافة البادئة',
             defaultTextColor: 'لون النص الافتراضي',
             noBackground: 'بدون خلفية',
+        },
+        heading: {
+            collapse: 'طي',
+            expand: 'توسيع',
         },
         'page-settings': {
             'document-setting': 'إعداد المستند',

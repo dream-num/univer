@@ -33,6 +33,8 @@ const locale: typeof enUS = {
             save: '保存',
         },
         item: {
+            markResolved: '解決済みにする',
+            markUnresolved: '未解決にする',
             edit: '編集',
             delete: 'コメントを削除',
             more: 'もっと見る',

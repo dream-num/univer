@@ -26,6 +26,17 @@ import type {
     IParagraphStyle,
     Nullable,
 } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DocumentBlockRangeType,
+    DocxBreakType,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphStyle,
+    TableTextWrapType,
+} from '@univerjs/core';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -41,17 +52,6 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
-import {
-    BooleanNumber,
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
-    DocumentBlockRangeType,
-    DocxBreakType,
-    PositionedObjectLayoutType,
-    resolveDocumentParagraphStyle,
-    TableTextWrapType,
-} from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType, GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
@@ -113,6 +113,34 @@ function _isDocxColumnBreakVisuallyBlankColumn(column: IDocumentSkeletonColumn):
 
 function _hasOnlyCustomBlockGlyphs(glyphs: IDocumentSkeletonGlyph[]): boolean {
     return glyphs.length > 0 && glyphs.every((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK);
+}
+
+function _mergeTrailingBlockEndShapedTexts(shapedTextList: IShapedText[]): IShapedText[] {
+    const result: IShapedText[] = [];
+    for (const shapedText of shapedTextList) {
+        const previous = result[result.length - 1];
+        if (
+            previous?.breakPointType === BreakPointType.Mandatory &&
+            _endsWithToken(previous.text, previous.glyphs, DataStreamTreeTokenType.PARAGRAPH) &&
+            shapedText.glyphs.length > 0 &&
+            shapedText.glyphs.some((glyph) => glyph.streamType === DataStreamTreeTokenType.BLOCK_END) &&
+            shapedText.glyphs.every((glyph, index) => glyph.width === 0 && (
+                glyph.streamType === DataStreamTreeTokenType.BLOCK_END ||
+                (index === shapedText.glyphs.length - 1 && glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK)
+            ))
+        ) {
+            // A block delimiter and optional section end follow the authored paragraph mark.
+            // Keep its logical offset on that line instead of opening an empty line.
+            result[result.length - 1] = {
+                ...previous,
+                text: previous.text + shapedText.text,
+                glyphs: [...previous.glyphs, ...shapedText.glyphs],
+            };
+        } else {
+            result.push(shapedText);
+        }
+    }
+    return result;
 }
 
 function _mergeAdjacentCustomBlockShapedTexts(
@@ -1045,7 +1073,7 @@ function _prepareLineBreaking(
                 ...getFontCreateConfig(endIndex - paragraphNode.contentStartIndex, viewModel, paragraphNode, sectionBreakConfig, {
                     ...paragraph,
                     paragraphStyle: resolvedParagraphStyle,
-                }).textStyle,
+                }, false).textStyle,
                 // Explicit list formatting below may underline the marker; paragraph-mark formatting may not.
                 ul: { s: BooleanNumber.FALSE },
             }
@@ -1156,9 +1184,11 @@ function _layoutShapedTexts({
     const referencePageBreaks = retainedBreaks
         ? new Set(retainedBreaks.map((offset) => offset - paragraphNode.contentStartIndex))
         : undefined;
-    const mergedShapedTextList = _mergeAdjacentCustomBlockShapedTexts(
-        _splitAtReferencePageBreaks(shapedTextList, referencePageBreaks),
-        paragraphNonInlineSkeDrawingsByBlockId
+    const mergedShapedTextList = _mergeTrailingBlockEndShapedTexts(
+        _mergeAdjacentCustomBlockShapedTexts(
+            _splitAtReferencePageBreaks(shapedTextList, referencePageBreaks),
+            paragraphNonInlineSkeDrawingsByBlockId
+        )
     );
 
     for (let shapedIndex = 0; shapedIndex < mergedShapedTextList.length; shapedIndex++) {
@@ -1175,6 +1205,7 @@ function _layoutShapedTexts({
                 return;
             }
 
+            const markerSourceIndex = textStartIndex - paragraphNode.contentStartIndex - _glyphCount(deferredRenderedMarkers);
             if (deferredRenderedMarkers.length > 0) {
                 pendingGlyphs = [...deferredRenderedMarkers, ...pendingGlyphs];
                 deferredRenderedMarkers = [];
@@ -1193,6 +1224,17 @@ function _layoutShapedTexts({
                     glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH &&
                     glyph.streamType !== DataStreamTreeTokenType.SECTION_BREAK &&
                     glyph.streamType !== DataStreamTreeTokenType.DOCS_END));
+            const renderBullet = renderParagraphBullet && !preserveParagraphStart;
+            const paragraph = renderBullet && paragraphConfig.bulletSkeleton
+                ? viewModel.getParagraph(paragraphNode.endIndex)
+                : undefined;
+            // Resolve the actual marker provider after zero-height anchors, without copying hyperlink appearance.
+            const markerTextStyle = paragraph
+                ? getFontCreateConfig(markerSourceIndex, viewModel, paragraphNode, sectionBreakConfig, {
+                    ...paragraph,
+                    paragraphStyle: paragraphConfig.paragraphStyle,
+                }, false).textStyle
+                : undefined;
             allPages = layoutParagraph(
                 ctx,
                 pendingGlyphs,
@@ -1201,8 +1243,9 @@ function _layoutShapedTexts({
                 paragraphConfig,
                 isParagraphFirstShapedText || (!nonFlowAnchor && hasOnlyFloatingCustomBlockGlyphs(pendingGlyphs, paragraphNonInlineSkeDrawingsByBlockId)),
                 layoutBreakPointType,
-                renderParagraphBullet && !preserveParagraphStart,
-                startNewLine
+                renderBullet,
+                startNewLine,
+                markerTextStyle ? { cl: markerTextStyle.cl, ul: markerTextStyle.ul } : undefined
             );
 
             // Zero-height drawing anchors do not consume the visible first line.

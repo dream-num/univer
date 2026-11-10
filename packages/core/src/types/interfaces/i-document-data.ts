@@ -17,7 +17,15 @@
 import type { ImageSourceType } from '../../services/image-io/image-io.service';
 import type { IResources } from '../../services/resource-manager/type';
 import type { ISize } from '../../shared/shape';
-import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type {
+    BooleanNumber,
+    CellValueType,
+    HorizontalAlign,
+    LocaleType,
+    TextDirection,
+    VerticalAlign,
+    WrapStrategy,
+} from '../enum';
 import type { IDrawingParam } from './i-drawing';
 import type { IMention } from './i-mention';
 import type { IColorStyle, IGlowEffect, IShadowEffect, IStyleBase } from './i-style-data';
@@ -892,6 +900,8 @@ export interface IParagraph {
     // elements: IElement[]; // elements
     startIndex: number;
     paragraphId: string;
+    /** Collapse the following heading section in modern documents; content remains in the snapshot. */
+    headingCollapsed?: boolean;
     /** Optional stable named-style reference. Direct paragraph style has higher precedence. */
     styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
@@ -1053,22 +1063,7 @@ export interface IDocDrawingPosition {
     flipX?: boolean;
     /** Vertical flip persisted with the document drawing transform. */
     flipY?: boolean;
-    // Union field properties can be only one of the following:
-    // shapeProperties?: IShapeProperties;
-    // chartProperties?: IChartProperties;
-    // imageProperties?: IImageProperties;
 }
-
-/**
- * ChartProperties
- */
-export interface IChartProperties {}
-
-// export enum BulletType {
-//     NONE,
-//     ORDERED_LIST,
-//     UNORDERED_LIST,
-// }
 
 /**
  * Properties of text style
@@ -1255,7 +1250,8 @@ export interface IParagraphProperties extends IIndentStart {
      * OOXML: 17.3.1.23 `pageBreakBefore`.
      */
     pageBreakBefore?: BooleanNumber;
-    wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
+    /** Allow words to split across lines. Absent inherits; DOCX w:wordWrap uses the inverse value. */
+    wordWrap?: BooleanNumber;
     /**
      * Avoids leaving a single measured first or last line on a separate page
      * when the paragraph can be adjusted without violating stronger keep rules.

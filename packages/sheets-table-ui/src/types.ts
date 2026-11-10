@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { TableRecordValue } from '@univerjs/sheets-table';
+import type { RecordValue } from '@univerjs/core';
 
 export enum FilterByEnum {
     Items = 'items',
@@ -37,7 +37,7 @@ export interface IFilterByValueWithTreeItem {
     key: string;
     leaf: boolean;
     valueKey?: string;
-    recordValue?: TableRecordValue;
+    recordValue?: RecordValue;
     originValues?: Set<string>;
     children?: IFilterByValueWithTreeItem[];
 }

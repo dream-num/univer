@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'S’està restaurant el disseny del document…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Pantalla completa',
             font: 'Tipus de lletra',
             fontSize: 'Mida de lletra',
             bold: 'Negreta',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configuració de secció',
             },
             paragraphSetting: {
+                wordWrap: 'Permet ajustar el text llatí al mig d’una paraula',
                 alignment: 'Alineació',
                 indentation: 'Sagnat',
                 left: 'Esquerra',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Redueix el sagnat',
             defaultTextColor: 'Color de text predeterminat',
             noBackground: 'Sense fons',
+        },
+        heading: {
+            collapse: 'Redueix',
+            expand: 'Expandeix',
         },
         'page-settings': {
             'document-setting': 'Configuració de document',

@@ -55,7 +55,7 @@ export interface IPopupProps {
 export function Popup(props: IPopupProps) {
     const { children, visible = false, offset = DEFAULT_POPUP_OFFSET, overflowVisible = false, placementY = 'below' } = props;
 
-    const nodeRef = useRef(null);
+    const nodeRef = useRef<HTMLElement>(null);
 
     const [realOffset, setRealOffset] = useState<[number, number]>(HIDDEN_POPUP_OFFSET);
 
@@ -94,7 +94,7 @@ export function Popup(props: IPopupProps) {
     }, [offset, placementY, visible]);
 
     useEffect(() => {
-        if (!visible) {
+        if (!visible || !nodeRef.current) {
             return;
         }
 
@@ -105,8 +105,11 @@ export function Popup(props: IPopupProps) {
             }
         };
 
+        const resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(nodeRef.current);
         window.addEventListener('resize', handleResize);
         return () => {
+            resizeObserver.disconnect();
             window.removeEventListener('resize', handleResize);
         };
     }, [offset, placementY, visible]);
@@ -126,13 +129,9 @@ export function Popup(props: IPopupProps) {
                 `,
                 visible
                     ? `
-                      univer-[transition-timing-function:cubic-bezier(0.08,0.82,0.17,1)] univer-scale-y-100
-                      univer-opacity-100
+                      univer-scale-y-100 univer-opacity-100 [transition-timing-function:cubic-bezier(0.08,0.82,0.17,1)]
                     `
-                    : `
-                      univer-[transition-timing-function:cubic-bezier(0.6,0.04,0.98,0.34)] univer-scale-y-0
-                      univer-opacity-0
-                    `
+                    : 'univer-scale-y-0 univer-opacity-0 [transition-timing-function:cubic-bezier(0.6,0.04,0.98,0.34)]'
             )}
             style={{
                 // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would

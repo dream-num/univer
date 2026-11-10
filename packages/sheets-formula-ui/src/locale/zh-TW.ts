@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: '循環參照',
+            title: '計算選項',
+            enable: '啟用反覆運算',
+            iterations: '反覆運算次數上限（1～{0}）',
+            change: '最大誤差',
+            workbook: '設定套用於目前的活頁簿。',
+            invalidIterations: '反覆運算次數上限必須是 1～{0} 的整數。',
+            invalidChange: '最大誤差必須是有限正數。',
+            cancel: '取消',
+            confirm: '確定',
+            circular: '此公式存在循環參照。請開啟計算選項以啟用反覆運算。',
+            action: '反覆運算',
+        },
+
         shortcut: {
             'quick-sum': '快速求和',
         },

@@ -41,14 +41,14 @@ function NotificationStoryShell({ title, description, children }: { title: strin
         >
             <div
                 className={`
-                  univer-border-gray-0/20 univer-bg-gray-0/10 univer-mx-auto univer-max-w-5xl univer-rounded-3xl
-                  univer-border univer-border-solid univer-p-8 univer-backdrop-blur-xl
+                  univer-mx-auto univer-max-w-5xl univer-rounded-3xl univer-border univer-border-solid
+                  univer-border-gray-0 univer-bg-gray-0 univer-p-8
                 `}
             >
                 <h2
                     className="
                       univer-m-0 univer-font-sans univer-text-2xl univer-font-semibold univer-tracking-tight
-                      univer-text-gray-0
+                      univer-text-gray-900
                     "
                 >
                     {title}
@@ -56,7 +56,7 @@ function NotificationStoryShell({ title, description, children }: { title: strin
                 <p
                     className="
                       univer-mb-0 univer-mt-2 univer-max-w-3xl univer-font-sans univer-text-sm univer-leading-6
-                      univer-text-slate-200
+                      univer-text-gray-600
                     "
                 >
                     {description}

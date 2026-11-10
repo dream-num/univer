@@ -38,8 +38,10 @@ import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render
 import { IGalleryService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { OleObject } from '../../views/ole/ole-object';
 import { DrawingImageClipService } from '../drawing-image-clip.service';
 import { DOC_DRAWING_BEHIND_TEXT_LAYER_INDEX, DrawingRenderService } from '../drawing-render.service';
+import { OleUIService } from '../ole-ui.service';
 
 const BASE_TRANSFORM = {
     left: 10,
@@ -273,6 +275,8 @@ function createScene(): IRecordedScene {
 
 function createHarness() {
     const injector = new Injector();
+    const oleUI = { bindObject: vi.fn() };
+    injector.add([OleUIService, { useValue: oleUI as never }]);
 
     injector.add([IDrawingManagerService, { useClass: TestDrawingManagerService as never }]);
     injector.add([IImageIoService, { useClass: TestImageIoService as never }]);
@@ -284,6 +288,7 @@ function createHarness() {
 
     return {
         service: injector.get(DrawingRenderService),
+        oleUI,
         drawingManagerService: injector.get(IDrawingManagerService) as unknown as TestDrawingManagerService,
         imageIoService: injector.get(IImageIoService) as unknown as TestImageIoService,
         urlImageService: injector.get(IURLImageService) as unknown as TestUrlImageService,
@@ -295,6 +300,32 @@ function createHarness() {
 }
 
 describe('DrawingRenderService', () => {
+    it('renders OLE attachments with their menu binding and disables rotation', async () => {
+        const harness = createHarness();
+        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE, imageSourceType: ImageSourceType.UUID });
+        const readSource = vi.spyOn(harness.imageIoService, 'getImage');
+        const readCache = vi.spyOn(harness.imageIoService, 'getImageSourceCache');
+        await harness.service.renderImages(drawing, harness.scene as unknown as Scene);
+        const object = harness.scene.addedObjects[0].object;
+        expect(object).toBeInstanceOf(OleObject);
+        expect(readSource).not.toHaveBeenCalled();
+        expect(readCache).not.toHaveBeenCalled();
+        expect(object.transformerConfig?.rotateEnabled).toBe(false);
+        expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing, true);
+    });
+
+    it.each([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC])('paints OLE print copies without registering editor interaction (host: %s)', async (type) => {
+        const h = createHarness();
+        h.univerInstanceService.unitType = type;
+        const drawing = imageParam({ drawingType: DrawingTypeEnum.DRAWING_OLE });
+        h.drawingManagerService.drawings.set(drawingKey(drawing), drawing);
+        await h.service.renderImages(drawing, h.scene as unknown as Scene);
+        const printScene = createScene();
+        await h.service.renderDrawing(drawing, printScene as unknown as Scene, { allowInactiveSheet: true, interactive: false });
+        expect(printScene.addedObjects[0].object).toBeInstanceOf(OleObject);
+        expect(h.oleUI.bindObject.mock.calls.map((call) => call[2])).toEqual([true, false]);
+    });
+
     it('skips image rendering when the drawing is not renderable in the current context', async () => {
         const hiddenCase = createHarness();
         hiddenCase.drawingManagerService.visible = false;

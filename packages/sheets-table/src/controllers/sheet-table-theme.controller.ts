@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITableDefaultThemeStyle, IUniverSheetsTableConfig } from '../config/config';
 import { Disposable, IConfigService, Inject } from '@univerjs/core';
 import { RangeThemeStyle, SheetRangeThemeModel, SheetRangeThemeService } from '@univerjs/sheets';
+import type { ITableDefaultThemeStyle, IUniverSheetsTableConfig } from '../config/config';
 import { SHEETS_TABLE_PLUGIN_CONFIG_KEY } from '../config/config';
+import { isImportedTableWithoutTheme } from '../models/table-dxf';
 import { TableManager } from '../models/table-manager';
 import { tableThemeConfig } from './table-theme.factory';
 
@@ -42,6 +43,10 @@ export class SheetsTableThemeController extends Disposable {
             this._tableManager.tableAdd$.subscribe((event) => {
                 const { range, tableId, unitId, subUnitId, tableStyleId } = event;
                 const table = this._tableManager.getTable(unitId, tableId)!;
+                if (!tableStyleId && isImportedTableWithoutTheme(table)) {
+                    table.setTableStyleId('');
+                    return;
+                }
                 // If the tableStyleId is not set or is empty string, use the default theme
                 const _tableStyleId = tableStyleId || this._allThemes[this._defaultThemeIndex].name;
                 table.setTableStyleId(_tableStyleId);
@@ -55,16 +60,19 @@ export class SheetsTableThemeController extends Disposable {
 
         this.disposeWithMe(
             this._tableManager.tableRangeChanged$.subscribe((event) => {
-                const { range, oldRange, tableId, unitId, subUnitId } = event;
+                const { range, oldRange, tableId, unitId, subUnitId, oldSubUnitId = subUnitId } = event;
                 const table = this._tableManager.getTable(unitId, tableId)!;
                 let tableStyleId = table.getTableStyleId();
+                if (!tableStyleId && isImportedTableWithoutTheme(table)) {
+                    return;
+                }
                 if (!tableStyleId) {
                     tableStyleId = this._allThemes[this._defaultThemeIndex].name;
                     table.setTableStyleId(tableStyleId);
                 }
                 this._sheetRangeThemeService.removeRangeThemeRule(tableStyleId, {
                     unitId,
-                    subUnitId,
+                    subUnitId: oldSubUnitId,
                     range: { ...oldRange },
                 });
                 this._sheetRangeThemeService.registerRangeThemeStyle(tableStyleId, {

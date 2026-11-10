@@ -189,6 +189,7 @@ describe('FormulaRuntimeService', () => {
             totalArrayFormulasToCalculate: 4,
             completedArrayFormulasCount: 1,
             stage: FormulaExecuteStageType.IDLE,
+            circularReferences: [],
             formulaCycleIndex: 2,
         });
 

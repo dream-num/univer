@@ -14,10 +14,31 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, ITextRangeParam, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDocDrawingPosition,
+    IDrawingParam,
+    IImageIoServiceParam,
+    ITextRangeParam,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
-import type { BaseObject, Documents, Image, IRenderContext, IRenderModule, ITransformerConfig } from '@univerjs/engine-render';
+import type {
+    IDocDrawing,
+    IDrawingDocTransform,
+    IInsertDocDrawingCommandParams,
+    ISetDocDrawingArrangeCommandParams,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
+import type {
+    BaseObject,
+    Documents,
+    Image,
+    IRenderContext,
+    IRenderModule,
+    ITransformerConfig,
+} from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -47,7 +68,14 @@ import {
     getDocumentEntityPermissionObjectId,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { collectDocDrawings, findDocDrawing, IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import {
+    collectDocDrawings,
+    findDocDrawing,
+    IDocDrawingService,
+    InsertDocDrawingCommand,
+    SetDocDrawingArrangeCommand,
+    UpdateDrawingDocTransformCommand,
+} from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
@@ -65,6 +93,7 @@ import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import { getDrawingTextRanges } from '../../utils/drawing-text-anchor';
 import { getDocImageCropUpdates } from './doc-drawing-crop';
 import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
@@ -494,7 +523,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
-                    this._setTransformerEditable(shape, editable);
+                    this._setTransformerEditable(shape, editable, drawing);
                     try {
                         // Repeated header/footer drawings are faded by the content cover,
                         // never individually: an opaque picture must still hide pictures below it.
@@ -502,7 +531,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                         (shape as Image).setOpacity(fadeBody ? 0.5 : 1);
                     } catch {
                     }
-                    if (!isDocInteractionFocusing) {
+                    // Main scenes must accept the first click; embedded scenes keep their focus boundary.
+                    if (!isDocInteractionFocusing && !this._context.isMainScene) {
                         continue;
                     }
                     if (
@@ -565,7 +595,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
     }
 
-    private _setTransformerEditable(shape: BaseObject, editable: boolean): void {
+    private _setTransformerEditable(shape: BaseObject, editable: boolean, drawing: IDocDrawing): void {
         if (editable) {
             const config = this._editableTransformerConfigs.get(shape);
             if (config) {
@@ -586,7 +616,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         if (!this._editableEventedStates.has(shape)) {
             this._editableEventedStates.set(shape, shape.evented);
         }
-        shape.evented = false;
+        // OLE attachments remain browsable without enabling drawing transforms.
+        shape.evented = drawing.drawingType === DrawingTypeEnum.DRAWING_OLE;
         this._context.scene.getTransformer()?.clearControlByIds([shape.oKey]);
         shape.transformerConfig = {
             ...shape.transformerConfig,
@@ -692,12 +723,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     private _setDrawingSelections(params: IDrawingParam[]) {
         const { unit } = this._context;
-        const ranges = params.flatMap((item) => {
-            const segmentId = getDocumentDrawingSegmentId(unit, item.drawingId);
-            const body = unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-            const block = body?.customBlocks?.find((block) => block.blockId === item.drawingId);
-            return block ? [{ startOffset: block.startIndex, endOffset: block.startIndex + 1, segmentId }] : [];
-        });
+        const ranges = getDrawingTextRanges(unit.getSnapshot(), params.map(({ drawingId }) => drawingId));
         this._docSelectionManagerService.replaceDocRanges(ranges);
     }
 }

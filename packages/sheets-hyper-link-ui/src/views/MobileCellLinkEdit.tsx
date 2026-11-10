@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { LocaleKey } from '../locale/types';
 import {
     BuildTextUtils,
     ColorKit,
@@ -41,7 +40,7 @@ import {
     serializeRangeWithSheet,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { MobileRangeSelector } from '@univerjs/sheets-formula-ui';
 import {
     AddHyperLinkCommand,
@@ -51,9 +50,10 @@ import {
     UpdateHyperLinkCommand,
     UpdateRichHyperLinkCommand,
 } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, IMarkSelectionService } from '@univerjs/sheets-ui';
 import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { ISheetsHyperLinkPopupService } from '../services/popup.service';
@@ -407,19 +407,11 @@ export const MobileCellLinkEdit = () => {
             }
         }
         if (editing?.type === HyperLinkEditSourceType.VIEWING) {
-            await commandService.executeCommand(SetWorksheetActiveOperation.id, {
-                unitId: editing.unitId,
-                subUnitId: editing.subUnitId,
-            });
-
-            const GAP = 1;
-            await commandService.executeCommand(ScrollToRangeOperation.id, {
-                range: {
-                    startRow: Math.max(editing.row - GAP, 0),
-                    endRow: editing.row + GAP,
-                    startColumn: Math.max(editing.col - GAP, 0),
-                    endColumn: editing.col + GAP,
-                },
+            await resolverService.navigateToRange(editing.unitId, editing.subUnitId, {
+                startRow: editing.row,
+                endRow: editing.row,
+                startColumn: editing.col,
+                endColumn: editing.col,
             });
         }
 
@@ -456,12 +448,13 @@ export const MobileCellLinkEdit = () => {
                                     handleSubmit();
                                 }
                             }}
+                            size="small"
                         />
                     </FormLayout>
                 )
                 : null}
             <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.tooltip')}>
-                <Input value={tooltip} onChange={setTooltip} />
+                <Input value={tooltip} onChange={setTooltip} size="small" />
             </FormLayout>
             <FormLayout label={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.type')}>
                 <MobileSelect
@@ -472,6 +465,7 @@ export const MobileCellLinkEdit = () => {
                         setType(newType as SheetHyperLinkType);
                         setPayload('');
                     }}
+                    size="small"
                 />
             </FormLayout>
             {type === SheetHyperLinkType.URL && (
@@ -495,6 +489,7 @@ export const MobileCellLinkEdit = () => {
                                 handleSubmit();
                             }
                         }}
+                        size="small"
                     />
                 </FormLayout>
             )}
@@ -538,6 +533,7 @@ export const MobileCellLinkEdit = () => {
                                 setDisplaySyncedWithPayload(true);
                             }
                         }}
+                        size="small"
                     />
                 </FormLayout>
             )}
@@ -556,6 +552,7 @@ export const MobileCellLinkEdit = () => {
                                 setDisplaySyncedWithPayload(true);
                             }
                         }}
+                        size="small"
                     />
                 </FormLayout>
             )}
@@ -582,12 +579,14 @@ export const MobileCellLinkEdit = () => {
                         }
                         await commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
+                    size="middle"
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.cancel')}
                 </Button>
                 <Button
                     variant="primary"
                     onClick={handleSubmit}
+                    size="middle"
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.ok')}
                 </Button>

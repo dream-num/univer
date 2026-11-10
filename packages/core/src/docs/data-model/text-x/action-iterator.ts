@@ -34,7 +34,7 @@ export class ActionIterator {
     }
 
     next(length?: number): TextXAction {
-        if (!length) {
+        if (length === undefined) {
             length = Number.POSITIVE_INFINITY;
         }
 

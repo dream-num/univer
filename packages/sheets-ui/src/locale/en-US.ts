@@ -53,6 +53,7 @@ const locale = {
                 main: 'Text rotate',
             },
             toggleGridlines: 'Toggle Gridlines',
+            zoom: 'Zoom',
             fullscreen: 'Fullscreen',
         },
         align: {
@@ -66,6 +67,20 @@ const locale = {
         button: {
             confirm: 'OK',
             cancel: 'Cancel',
+        },
+        borderStyle: {
+            thin: 'Thin',
+            hair: 'Hairline',
+            dotted: 'Dotted',
+            dashed: 'Dashed',
+            dashDot: 'Dash-dot',
+            dashDotDot: 'Dash-dot-dot',
+            medium: 'Medium',
+            mediumDashed: 'Medium dashed',
+            mediumDashDot: 'Medium dash-dot',
+            mediumDashDotDot: 'Medium dash-dot-dot',
+            thick: 'Thick',
+            double: 'Double',
         },
         borderLine: {
             borderTop: 'borderTop',

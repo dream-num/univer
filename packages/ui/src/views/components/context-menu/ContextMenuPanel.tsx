@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
+import type { Dispatch, KeyboardEvent, MouseEvent, RefObject, SetStateAction } from 'react';
+import { isRealNum, LocaleService } from '@univerjs/core';
+import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
+import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -24,18 +30,11 @@ import type {
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
-import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
-import { useScrollYOverContainer } from '../../hooks/layout';
 import { preventBrowserZoomInContainers } from '../../hooks/prevent-browser-zoom';
 import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../menu/desktop/TinyMenuGroup';
 
@@ -88,6 +87,7 @@ interface IContextMenuMenuItemProps {
     maxMenuHeight: number;
     activeSubmenuKey: string | null;
     setActiveSubmenuKey: Dispatch<SetStateAction<string | null>>;
+    pointerGraceRef: RefObject<IContextMenuPointerGrace | null>;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     hoverSuppressed?: boolean;
@@ -97,6 +97,13 @@ interface IContextMenuMenuItemProps {
     onMenuPointerEnter?: () => void;
     onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
+}
+
+interface IContextMenuPointerGrace {
+    menuKey: string;
+    contains: (event: MouseEvent<HTMLDivElement>) => boolean;
+    deferHover: (action: (() => void) | null) => void;
+    cancel: () => void;
 }
 
 interface IContextMenuSchemaRenderGroup {
@@ -258,6 +265,7 @@ const contextMenuSubmenuPanelVariants = cva(
 const contextMenuItemVariants = cva(
     `
       univer-relative univer-flex univer-border-none univer-bg-transparent univer-text-left univer-text-gray-900
+      rtl:!univer-text-right
       dark:!univer-text-gray-0
     `,
     {
@@ -275,9 +283,16 @@ const contextMenuItemVariants = cva(
                 true: 'univer-cursor-not-allowed univer-opacity-60',
                 false: `
                   univer-cursor-pointer
-                  focus:univer-bg-gray-50 focus:univer-outline-none
-                  dark:focus:!univer-bg-gray-600
+                  focus:univer-outline-none
+                  focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
                 `,
+            },
+            submenuOpen: {
+                true: `
+                  univer-bg-gray-50
+                  dark:!univer-bg-gray-600
+                `,
+                false: '',
             },
             hoverSuppressed: {
                 true: '',
@@ -701,8 +716,6 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
     const submenuPortalContainer = layoutService.rootContainerElement?.ownerDocument?.body
         ?? (typeof document !== 'undefined' ? document.body : null);
 
-    useScrollYOverContainer(menuElement, layoutService.rootContainerElement);
-
     useEffect(() => {
         if (!menuElement) {
             return;
@@ -822,7 +835,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 getContextMenuPanelClassName(sizeVariant),
                 borderClassName,
                 scrollbarClassName,
-                hoverSuppressed && 'univer-context-menu-hover-suppressed',
+                hoverSuppressed && '[&_button:hover:not(:focus)]:!univer-bg-transparent',
                 className
             )}
             style={{
@@ -861,6 +874,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
+    const pointerGraceRef = useRef<IContextMenuPointerGrace | null>(null);
 
     const visibleSchemas = useMemo(() => {
         return menuSchemas.filter((item) => {
@@ -960,6 +974,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             rootMenuElement={rootMenuElement}
                             activeSubmenuKey={activeSubmenuKey}
                             setActiveSubmenuKey={setActiveSubmenuKey}
+                            pointerGraceRef={pointerGraceRef}
                             onOptionSelect={onOptionSelect}
                             maxMenuHeight={maxMenuHeight}
                             hiddenItemIds={hiddenItemIds}
@@ -1002,6 +1017,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         rootMenuElement={rootMenuElement}
                                         activeSubmenuKey={activeSubmenuKey}
                                         setActiveSubmenuKey={setActiveSubmenuKey}
+                                        pointerGraceRef={pointerGraceRef}
                                         activeItemIds={activeItemIds}
                                         hiddenItemIds={hiddenItemIds}
                                         hoverSuppressed={hoverSuppressed}
@@ -1039,6 +1055,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     rootMenuElement={rootMenuElement}
                                     activeSubmenuKey={activeSubmenuKey}
                                     setActiveSubmenuKey={setActiveSubmenuKey}
+                                    pointerGraceRef={pointerGraceRef}
                                     activeItemIds={activeItemIds}
                                     hiddenItemIds={hiddenItemIds}
                                     hoverSuppressed={hoverSuppressed}
@@ -1085,6 +1102,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     rootMenuElement={rootMenuElement}
                     activeSubmenuKey={activeSubmenuKey}
                     setActiveSubmenuKey={setActiveSubmenuKey}
+                    pointerGraceRef={pointerGraceRef}
                     activeItemIds={activeItemIds}
                     hiddenItemIds={hiddenItemIds}
                     hoverSuppressed={hoverSuppressed}
@@ -1112,6 +1130,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         maxMenuHeight,
         activeSubmenuKey,
         setActiveSubmenuKey,
+        pointerGraceRef,
         activeItemIds,
         hiddenItemIds = [],
         hoverSuppressed = false,
@@ -1147,6 +1166,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const menuButtonRef = useRef<HTMLButtonElement | null>(null);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
     const submenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingHoverActionRef = useRef<(() => void) | null>(null);
     const submenuId = useId();
 
     const selections = useMemo(() => {
@@ -1176,13 +1196,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const selectionsCommandId = selectorItem.selectionsCommandId;
 
     const clearSubmenuCloseTimer = useCallback(() => {
-        if (submenuCloseTimerRef.current == null) {
-            return;
+        if (submenuCloseTimerRef.current != null) {
+            clearTimeout(submenuCloseTimerRef.current);
+            submenuCloseTimerRef.current = null;
         }
 
-        clearTimeout(submenuCloseTimerRef.current);
-        submenuCloseTimerRef.current = null;
-    }, []);
+        pendingHoverActionRef.current = null;
+        if (pointerGraceRef.current?.menuKey === menuKey) {
+            pointerGraceRef.current = null;
+        }
+    }, [menuKey, pointerGraceRef]);
 
     const closeSubmenu = useCallback(() => {
         clearSubmenuCloseTimer();
@@ -1192,8 +1215,13 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const scheduleSubmenuClose = useCallback(() => {
         clearSubmenuCloseTimer();
         submenuCloseTimerRef.current = setTimeout(() => {
-            submenuCloseTimerRef.current = null;
-            closeSubmenu();
+            const pendingHoverAction = pendingHoverActionRef.current;
+            clearSubmenuCloseTimer();
+            if (pendingHoverAction) {
+                pendingHoverAction();
+            } else if (!submenuElementRef.current?.contains(document.activeElement)) {
+                closeSubmenu();
+            }
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
     }, [clearSubmenuCloseTimer, closeSubmenu]);
 
@@ -1204,10 +1232,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
     useEffect(() => {
-        if (disabled) {
+        if (disabled || !submenuVisible) {
             closeSubmenu();
         }
-    }, [closeSubmenu, disabled]);
+    }, [closeSubmenu, disabled, submenuVisible]);
 
     useEffect(() => {
         const submenuElement = submenuElementRef.current;
@@ -1264,11 +1292,16 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         };
 
         const frameId = window.requestAnimationFrame(updateSubmenuPosition);
+        const resizeObserver = new ResizeObserver(updateSubmenuPosition);
+        if (submenuElementRef.current) {
+            resizeObserver.observe(submenuElementRef.current);
+        }
         window.addEventListener('resize', updateSubmenuPosition);
         window.addEventListener('scroll', updateSubmenuPosition, true);
 
         return () => {
             window.cancelAnimationFrame(frameId);
+            resizeObserver.disconnect();
             window.removeEventListener('resize', updateSubmenuPosition);
             window.removeEventListener('scroll', updateSubmenuPosition, true);
         };
@@ -1291,6 +1324,26 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         setActiveSubmenuKey((currentKey) => (currentKey === menuKey ? null : currentKey));
     };
 
+    const onPointerHover = (event: MouseEvent<HTMLDivElement>) => {
+        if (hoverSuppressed || (hasSubmenu && disabled)) {
+            return;
+        }
+
+        const applyHover = () => {
+            clearSubmenuCloseTimer();
+            setKeyboardSubmenuFocusRequested(false);
+            setActiveSubmenuKey(hasSubmenu ? menuKey : null);
+        };
+        const pointerGrace = pointerGraceRef.current;
+        if (pointerGrace && pointerGrace.menuKey !== menuKey && pointerGrace.contains(event)) {
+            pointerGrace.deferHover(applyHover);
+            return;
+        }
+
+        pointerGrace?.cancel();
+        applyHover();
+    };
+
     const itemVariant: ContextMenuItemVariant = compact
         ? headerAction ? 'compactHeaderAction' : 'compact'
         : 'default';
@@ -1298,7 +1351,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         sizeVariant,
         variant: itemVariant,
         disabled,
-        hoverSuppressed,
+        hoverSuppressed: hoverSuppressed || (activeSubmenuKey !== null && !submenuVisible),
+        submenuOpen: submenuVisible,
         active: resolveMenuItemActiveState(menuItem.id, activated, activeItemIds),
     });
 
@@ -1327,22 +1381,14 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         <div
             ref={menuItemElementRef}
             className="univer-relative"
-            onMouseEnter={() => {
-                clearSubmenuCloseTimer();
-                if (hasSubmenu && !disabled && !hoverSuppressed) {
-                    setKeyboardSubmenuFocusRequested(false);
-                    setSubmenuPositionReady(false);
-                    setActiveSubmenuKey(menuKey);
-                    return;
-                }
-
-                if (!hasSubmenu && !hoverSuppressed) {
-                    setActiveSubmenuKey(null);
-                }
-            }}
+            onMouseEnter={onPointerHover}
+            onMouseMove={onPointerHover}
             onMouseLeave={(event) => {
-                if (hasSubmenu) {
-                    const nextTarget = event.relatedTarget as Node | null;
+                if (submenuVisible) {
+                    if (submenuElementRef.current?.contains(document.activeElement)) {
+                        return;
+                    }
+                    const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
                     if (nextTarget && submenuElementRef.current?.contains(nextTarget)) {
                         return;
                     }
@@ -1351,6 +1397,25 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         return;
                     }
                     scheduleSubmenuClose();
+                    const submenuRect = submenuElementRef.current?.firstElementChild?.getBoundingClientRect();
+                    if (submenuRect) {
+                        const { clientX: originX, clientY: originY } = event;
+                        const edgeX = submenuPlacement === 'right' ? submenuRect.left : submenuRect.right;
+                        // Protect the diagonal path to the submenu, including when it flips at a viewport edge.
+                        pointerGraceRef.current = {
+                            menuKey,
+                            contains: ({ clientX, clientY }) => {
+                                const progress = (clientX - originX) / (edgeX - originX);
+                                return progress >= 0 && progress <= 1
+                                    && clientY >= originY + (submenuRect.top - originY) * progress
+                                    && clientY <= originY + (submenuRect.bottom - originY) * progress;
+                            },
+                            deferHover: (action) => { pendingHoverActionRef.current = action; },
+                            cancel: clearSubmenuCloseTimer,
+                        };
+                    }
+                } else {
+                    pointerGraceRef.current?.deferHover(null);
                 }
             }}
         >
@@ -1390,17 +1455,17 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
                             event.preventDefault();
                             event.stopPropagation();
+                            pointerGraceRef.current?.cancel();
                             clearSubmenuCloseTimer();
                             setKeyboardSubmenuFocusRequested(true);
-                            setSubmenuPositionReady(false);
                             setActiveSubmenuKey(menuKey);
                         }}
                         onClick={(event) => {
+                            pointerGraceRef.current?.cancel();
                             clearSubmenuCloseTimer();
                             if (hasSubmenu) {
                                 if (headerAction) {
                                     setKeyboardSubmenuFocusRequested(event.detail === 0);
-                                    setSubmenuPositionReady(false);
                                     setActiveSubmenuKey(menuKey);
                                     return;
                                 }
@@ -1418,7 +1483,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }
 
                                 setKeyboardSubmenuFocusRequested(event.detail === 0);
-                                setSubmenuPositionReady(false);
                                 setActiveSubmenuKey(menuKey);
                                 return;
                             }
@@ -1474,7 +1538,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 onMenuPointerEnter?.();
                             }}
                             onMouseLeave={(event) => {
-                                const nextTarget = event.relatedTarget as Node | null;
+                                if (submenuElementRef.current?.contains(document.activeElement)) {
+                                    return;
+                                }
+                                const nextTarget = event.relatedTarget instanceof Node ? event.relatedTarget : null;
                                 if (nextTarget && menuItemElementRef.current?.contains(nextTarget)) {
                                     return;
                                 }
@@ -1532,12 +1599,14 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                           univer-w-full univer-items-center univer-rounded-lg
                                                           univer-border-none univer-bg-transparent univer-px-3
                                                           univer-text-left univer-text-base
+                                                          rtl:!univer-text-right
                                                         `
                                                         : `
                                                           univer-relative univer-box-border univer-flex univer-min-h-8
                                                           univer-w-full univer-items-center univer-rounded-md
                                                           univer-border-none univer-bg-transparent univer-px-2
                                                           univer-text-left univer-text-sm
+                                                          rtl:!univer-text-right
                                                         `
                                                     : `
                                                       univer-relative univer-box-border univer-block univer-w-full

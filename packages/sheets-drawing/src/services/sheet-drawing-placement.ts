@@ -17,8 +17,9 @@
 import type { IGroupBaseBound, ITransformState } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
+import { DrawingTypeEnum } from '@univerjs/core';
+import { getGroupState, Transform, Vector2 } from '@univerjs/engine-render';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
-
 import type {
     ISheetDrawing,
     ISheetDrawingPosition,
@@ -96,6 +97,21 @@ export interface ISheetDrawingPlacementByBounds {
  */
 export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingPlacementByBounds;
 
+const PLACEMENT_ERROR = {
+    CELL_INVALID: 'SHEET_DRAWING_PLACEMENT_CELL_INVALID',
+    EXTENT_INVALID: 'SHEET_DRAWING_PLACEMENT_EXTENT_INVALID',
+    KIND_INVALID: 'SHEET_DRAWING_PLACEMENT_KIND_INVALID',
+    POSITION_INVALID: 'SHEET_DRAWING_PLACEMENT_POSITION_INVALID',
+} as const;
+
+interface ISheetDrawingPlacementFailure {
+    ok: false;
+    reason: typeof PLACEMENT_ERROR[keyof typeof PLACEMENT_ERROR];
+    details?: Record<string, unknown>;
+}
+
+type SheetDrawingPlacementRefreshResult = { ok: true; drawing: ISheetDrawing } | ISheetDrawingPlacementFailure;
+
 export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
     const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
     if (anchorType === SheetDrawingAnchorType.None) {
@@ -144,8 +160,124 @@ export function applySheetDrawingPlacement(
     input: ISheetDrawingPlacementInput,
     skeleton?: SpreadsheetSkeleton
 ): ISheetDrawing {
-    const placement = normalizeSheetDrawingPlacement(input, skeleton);
+    const requiresArea = requiresDrawingArea(drawing);
+    const placement = normalizePlacement(input, skeleton, requiresArea);
 
+    return resolveSheetDrawingPlacement(drawing, placement, skeleton);
+}
+
+/** Place a batch at the logical start corner of a Chart Sheet, preserving its relative geometry. */
+export function transformDrawingsToChartSheet(
+    drawings: readonly ISheetDrawing[],
+    chartSheetBounds: IGroupBaseBound,
+    rightToLeft: boolean
+): ISheetDrawing[] | null {
+    if (validateBounds(chartSheetBounds, true)) {
+        return null;
+    }
+    if (!drawings.length) {
+        return [];
+    }
+    const bounds: IGroupBaseBound[] = [];
+    for (const drawing of drawings) {
+        const state = drawing.transform;
+        if (!state || validateBounds(state as IGroupBaseBound, requiresDrawingArea(drawing))
+            || [state.angle, state.skewX, state.skewY, state.scaleX, state.scaleY]
+                .some((value) => value !== undefined && !Number.isFinite(value))) {
+            return null;
+        }
+        const { width = 0, height = 0, angle = 0 } = state;
+        const matrix = Transform.create().composeMatrix(state);
+        if (angle) {
+            // Match the renderer's center rotation, including scale, skew and flips.
+            matrix.rotate(-angle).translate(width / 2, height / 2).rotate(angle).translate(-width / 2, -height / 2);
+        }
+        const box = matrix.makeBoundingBoxFromPoints([
+            new Vector2(0, 0),
+            new Vector2(width, 0),
+            new Vector2(width, height),
+            new Vector2(0, height),
+        ]);
+        bounds.push({ left: box.left!, top: box.top!, width: box.width!, height: box.height! });
+    }
+    const group = getGroupState(0, 0, bounds);
+    const scale = Math.min(1, group.width ? chartSheetBounds.width / group.width : 1, group.height ? chartSheetBounds.height / group.height : 1);
+    const left = rightToLeft ? chartSheetBounds.left + chartSheetBounds.width - group.width * scale : chartSheetBounds.left;
+    return drawings.map((drawing) => applySheetDrawingPlacement(drawing, {
+        kind: SheetDrawingAnchorType.None,
+        left: left + (drawing.transform!.left! - group.left) * scale,
+        top: chartSheetBounds.top + (drawing.transform!.top! - group.top) * scale,
+        width: drawing.transform!.width! * scale,
+        height: drawing.transform!.height! * scale,
+    }));
+}
+
+/** Refresh layout-derived geometry without changing the drawing's anchor semantics. */
+export function refreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): ISheetDrawing {
+    const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+    if (!result.ok) {
+        throw createPlacementError(result);
+    }
+    return result.drawing;
+}
+
+/** Validate persisted markers before any caller reads them to select a refresh range. */
+export function validateSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacementFailure | undefined {
+    if (!drawing || typeof drawing !== 'object') {
+        return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
+    }
+    const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
+    if (anchorType === SheetDrawingAnchorType.None) {
+        return;
+    }
+    if (anchorType !== SheetDrawingAnchorType.Position && anchorType !== SheetDrawingAnchorType.Both) {
+        return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
+    }
+    const markerFailure = validateCellPosition(drawing.sheetTransform?.from)
+        ?? validateCellPosition(drawing.sheetTransform?.to);
+    if (markerFailure) {
+        return markerFailure;
+    }
+    return validatePlacement(getSheetDrawingPlacement(drawing), requiresDrawingArea(drawing));
+}
+
+/** Expected snapshot errors are results; unexpected calculation failures are caught by the task owner. */
+export function tryRefreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): SheetDrawingPlacementRefreshResult {
+    const failure = validateSheetDrawingPlacement(drawing);
+    if (failure) {
+        return failure;
+    }
+    if (drawing.anchorType === SheetDrawingAnchorType.None) {
+        return { ok: true, drawing };
+    }
+
+    const placement = getSheetDrawingPlacement(drawing);
+    const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton);
+    // A valid two-cell drawing can temporarily collapse when its cells are hidden.
+    const extentFailure = validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresDrawingArea(drawing), true);
+    if (extentFailure) {
+        return extentFailure;
+    }
+    return {
+        ok: true,
+        drawing: {
+            ...drawing,
+            sheetTransform: resolved.sheetTransform,
+            transform: resolved.transform,
+            axisAlignSheetTransform: resolved.axisAlignSheetTransform,
+        },
+    };
+}
+
+function requiresDrawingArea(drawing: ISheetDrawing): boolean {
+    return drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
+}
+
+function resolveSheetDrawingPlacement(
+    drawing: ISheetDrawing,
+    placement: ISheetDrawingPlacement,
+    skeleton?: SpreadsheetSkeleton
+): ISheetDrawing {
     if (placement.kind === SheetDrawingAnchorType.None) {
         const transform = withExistingTransform(drawing.transform, placement);
         const sheetTransform = absoluteSheetTransform(placement, drawing.sheetTransform);
@@ -166,19 +298,25 @@ export function applySheetDrawingPlacement(
         const converted = convertPositionCellToSheetOverGrid(
             drawing.unitId,
             drawing.subUnitId,
-            placement.from,
+            getVisibleCellPosition(placement.from, skeleton),
             placement.width,
             placement.height,
             skeleton
         );
-        const sheetTransform = withExistingSheetTransform(drawing.sheetTransform, converted.sheetTransform);
+        const sheetTransform = withExistingSheetTransform(drawing.sheetTransform, {
+            from: placement.from,
+            to: converted.sheetTransform.to,
+        });
         const transform = withExistingTransform(drawing.transform, converted.transform);
         return {
             ...drawing,
             anchorType: SheetDrawingAnchorType.Position,
             sheetTransform,
             transform,
-            axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+            axisAlignSheetTransform: withExistingSheetTransform(
+                drawing.axisAlignSheetTransform,
+                transformToAxisAlignPosition(transform, skeleton)
+            ),
         };
     }
 
@@ -189,7 +327,10 @@ export function applySheetDrawingPlacement(
     const bounds = convertPositionSheetOverGridToAbsolute(
         drawing.unitId,
         drawing.subUnitId,
-        sheetTransform,
+        {
+            from: getVisibleCellPosition(placement.from, skeleton),
+            to: getVisibleCellPosition(placement.to, skeleton),
+        },
         skeleton
     );
     const transform = withExistingTransform(drawing.transform, bounds);
@@ -198,7 +339,19 @@ export function applySheetDrawingPlacement(
         anchorType: SheetDrawingAnchorType.Both,
         sheetTransform,
         transform,
-        axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+        axisAlignSheetTransform: withExistingSheetTransform(
+            drawing.axisAlignSheetTransform,
+            transformToAxisAlignPosition(transform, skeleton)
+        ),
+    };
+}
+
+function getVisibleCellPosition(position: ICellOverGridPosition, skeleton: SpreadsheetSkeleton): ICellOverGridPosition {
+    const cell = skeleton.getNoMergeCellWithCoordByIndex(position.row, position.column);
+    return {
+        ...position,
+        columnOffset: cell.startX === cell.endX ? 0 : position.columnOffset,
+        rowOffset: cell.startY === cell.endY ? 0 : position.rowOffset,
     };
 }
 
@@ -210,10 +363,18 @@ export function normalizeSheetDrawingPlacement(
     input: ISheetDrawingPlacementInput,
     skeleton?: SpreadsheetSkeleton
 ): ISheetDrawingPlacement {
+    return normalizePlacement(input, skeleton, false);
+}
+
+function normalizePlacement(
+    input: ISheetDrawingPlacementInput,
+    skeleton: SpreadsheetSkeleton | undefined,
+    requiresArea: boolean
+): ISheetDrawingPlacement {
     if (!('bounds' in input)) {
-        validatePlacement(input);
+        assertValidPlacement(validatePlacement(input, requiresArea));
         if (input.kind === SheetDrawingAnchorType.Both && skeleton) {
-            validateBounds(convertPositionSheetOverGridToAbsolute(
+            assertValidPlacement(validateBounds(convertPositionSheetOverGridToAbsolute(
                 skeleton.worksheet.getUnitId(),
                 skeleton.worksheet.getSheetId(),
                 {
@@ -221,12 +382,12 @@ export function normalizeSheetDrawingPlacement(
                     to: input.to,
                 },
                 skeleton
-            ));
+            ), requiresArea));
         }
         return input;
     }
 
-    validateBounds(input.bounds);
+    assertValidPlacement(validateBounds(input.bounds, requiresArea));
     if (input.kind === SheetDrawingAnchorType.None) {
         return {
             kind: SheetDrawingAnchorType.None,
@@ -254,7 +415,7 @@ export function normalizeSheetDrawingPlacement(
         };
     }
 
-    throw new Error('SHEET_DRAWING_PLACEMENT_KIND_INVALID');
+    throw new Error(PLACEMENT_ERROR.KIND_INVALID);
 }
 
 function withExistingSheetTransform(
@@ -302,39 +463,35 @@ function absoluteSheetTransform(
     };
 }
 
-function validatePlacement(placement: ISheetDrawingPlacement): void {
+function validatePlacement(placement: ISheetDrawingPlacement, requiresArea: boolean): ISheetDrawingPlacementFailure | undefined {
     if (placement.kind === SheetDrawingAnchorType.Position) {
-        validateCellPosition(placement.from);
-        validateExtent(placement.width, placement.height);
-        return;
+        return validateCellPosition(placement.from) ?? validateExtent(placement.width, placement.height, requiresArea);
     }
 
     if (placement.kind === SheetDrawingAnchorType.Both) {
-        validateCellPosition(placement.from);
-        validateCellPosition(placement.to);
-        return;
+        return validateCellPosition(placement.from) ?? validateCellPosition(placement.to);
     }
 
     if (placement.kind === SheetDrawingAnchorType.None) {
         if (!Number.isFinite(placement.left) || !Number.isFinite(placement.top)) {
-            throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
+            return { ok: false, reason: PLACEMENT_ERROR.POSITION_INVALID };
         }
-        validateExtent(placement.width, placement.height);
-        return;
+        return validateExtent(placement.width, placement.height, requiresArea);
     }
 
-    throw new Error('SHEET_DRAWING_PLACEMENT_KIND_INVALID');
+    return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
 }
 
-function validateBounds(bounds: IGroupBaseBound): void {
-    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) {
-        throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
+function validateBounds(bounds: IGroupBaseBound, requiresArea: boolean): ISheetDrawingPlacementFailure | undefined {
+    if (!bounds || !Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) {
+        return { ok: false, reason: PLACEMENT_ERROR.POSITION_INVALID };
     }
-    validateExtent(bounds.width, bounds.height);
+    return validateExtent(bounds.width, bounds.height, requiresArea);
 }
 
-function validateCellPosition(position: ICellOverGridPosition): void {
+function validateCellPosition(position: ICellOverGridPosition | undefined): ISheetDrawingPlacementFailure | undefined {
     if (
+        !position ||
         !Number.isInteger(position.row) ||
         !Number.isInteger(position.column) ||
         position.row < 0 ||
@@ -342,12 +499,26 @@ function validateCellPosition(position: ICellOverGridPosition): void {
         !Number.isFinite(position.rowOffset) ||
         !Number.isFinite(position.columnOffset)
     ) {
-        throw new Error('SHEET_DRAWING_PLACEMENT_CELL_INVALID');
+        return { ok: false, reason: PLACEMENT_ERROR.CELL_INVALID };
     }
 }
 
-function validateExtent(width: number, height: number): void {
-    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
-        throw new Error('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+function validateExtent(width: number, height: number, requiresArea: boolean, allowCollapsed = false): ISheetDrawingPlacementFailure | undefined {
+    // Horizontal and vertical lines have a zero bounding-box extent on one axis;
+    // this is independent of stroke width. Images and floating DOM still require area.
+    const hasInvalidZeroExtent = !allowCollapsed && (requiresArea ? width === 0 || height === 0 : width === 0 && height === 0);
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0 || hasInvalidZeroExtent) {
+        return { ok: false, reason: PLACEMENT_ERROR.EXTENT_INVALID, details: { width, height } };
     }
+}
+
+function assertValidPlacement(failure: ISheetDrawingPlacementFailure | undefined): void {
+    if (failure) {
+        throw createPlacementError(failure);
+    }
+}
+
+function createPlacementError(failure: ISheetDrawingPlacementFailure): Error {
+    const error = failure.reason === PLACEMENT_ERROR.POSITION_INVALID ? new TypeError(failure.reason) : new Error(failure.reason);
+    return Object.assign(error, failure.details);
 }

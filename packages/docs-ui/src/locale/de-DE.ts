@@ -56,6 +56,8 @@ const locale: typeof enUS = {
             recovering: 'Dokumentlayout wird wiederhergestellt…',
         },
         toolbar: {
+            zoom: 'Zoom',
+            fullscreen: 'Vollbild',
             font: 'Schriftart',
             fontSize: 'Schriftgröße',
             bold: 'Fett',
@@ -183,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Abschnittseinstellungen',
             },
             paragraphSetting: {
+                wordWrap: 'Textumbruch in der Mitte eines Wortes für westlichen Text zulassen',
                 alignment: 'Ausrichtung',
                 indentation: 'Einzug',
                 left: 'Links',
@@ -241,6 +244,10 @@ const locale: typeof enUS = {
             decreaseIndent: 'Einzug verkleinern',
             defaultTextColor: 'Standardtextfarbe',
             noBackground: 'Kein Hintergrund',
+        },
+        heading: {
+            collapse: 'Einklappen',
+            expand: 'Ausklappen',
         },
         'page-settings': {
             'document-setting': 'Dokumenteneinstellung',

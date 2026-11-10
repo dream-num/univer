@@ -14,39 +14,27 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, JSONXActions, Univer } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { RenderUnit } from '@univerjs/engine-render';
+import type { IChangeObserverConfig, RenderUnit } from '@univerjs/engine-render';
+import type { Subject } from 'rxjs';
 import {
-    BooleanNumber,
     CustomRangeType,
-    DocumentFlavor,
     DrawingTypeEnum,
     ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
     JSONX,
+    LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     RedoCommand,
     UndoCommand,
-    Univer,
-    UniverInstanceType,
 } from '@univerjs/core';
 import {
-    DocLayoutExecutorService,
-    DocSelectionManagerService,
     DocSkeletonManagerService,
-    DocStateChangeManagerService,
-    DocStateEmitService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import {
-    DocDrawingAdapterService,
-    DocDrawingController,
-    DocDrawingService,
-    IDocDrawingAdapterService,
     IDocDrawingService,
     InsertDocDrawingCommand,
     RemoveDocDrawingCommand,
@@ -54,16 +42,20 @@ import {
     UpdateDocDrawingWrappingStyleCommand,
     UpdateDrawingDocTransformCommand,
 } from '@univerjs/docs-drawing';
-import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import {
-    CanvasColorService,
-    ICanvasColorService,
     IRenderManagerService,
-    RenderManagerService,
+    Rect,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDocDrawing, createDocDrawingTestBed } from '../../__tests__/create-doc-drawing-test-bed';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
-import { DocDrawingAddRemoveController } from '../doc-drawing-notification.controller';
+import {
+    findDrawingAnchor,
+    getDrawingWrappingPosition,
+    resolveDrawingWrappingPosition,
+} from '../../utils/drawing-wrapping-position';
+import { DocDrawingTransformerController } from '../doc-drawing-transformer-update.controller';
 
 describe('DocDrawingAddRemoveController with real commands and services', () => {
     const unitId = 'drawing-notifications';
@@ -76,91 +68,53 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
     let refresh: DocRefreshDrawingsService;
 
     function drawing(drawingId: string): IDocDrawing {
-        return {
-            unitId,
-            subUnitId: unitId,
-            drawingId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: drawingId === 'a' ? BooleanNumber.TRUE : BooleanNumber.FALSE,
-            transform: { left: 20, top: 30, width: 40, height: 30 },
-            docTransform: {
-                size: { width: 40, height: 30 },
-                angle: 0,
-                positionH: { relativeFrom: ObjectRelativeFromH.MARGIN, posOffset: 20 },
-                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 30 },
-            },
-        };
+        return createDocDrawing(unitId, drawingId);
     }
 
     beforeEach(() => {
-        const context = new Proxy({
-            font: '',
-            webkitBackingStorePixelRatio: 1,
-            measureText: (text: string) => ({
-                width: text.length * 8,
-                actualBoundingBoxAscent: 8,
-                actualBoundingBoxDescent: 2,
-                fontBoundingBoxAscent: 8,
-                fontBoundingBoxDescent: 2,
-            }),
-        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
-        univer = new Univer();
+        ({ univer, model, render } = createDocDrawingTestBed(unitId));
         const injector = univer.__getInjector();
-        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-        injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
-        injector.add([IDocDrawingService, { useClass: DocDrawingService }]);
-        injector.add([IDocDrawingAdapterService, { useClass: DocDrawingAdapterService }]);
-        injector.add([DocLayoutExecutorService]);
-        injector.add([DocSelectionManagerService]);
-        injector.add([DocStateEmitService]);
-        injector.add([DocStateChangeManagerService]);
-        injector.add([DocRefreshDrawingsService]);
-        injector.add([DocDrawingController]);
-        injector.add([DocDrawingAddRemoveController]);
         commands = injector.get(ICommandService);
-        commands.registerCommand(RichTextEditingMutation);
-        injector.get(IUndoRedoService);
-        injector.get(DocStateChangeManagerService);
-        const drawingController = injector.get(DocDrawingController);
-        model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
-            id: unitId,
-            body: {
-                dataStream: 'A\b\rB\b\r\n',
-                paragraphs: [{ startIndex: 2, paragraphId: 'p1' }, { startIndex: 5, paragraphId: 'p2' }],
-                sectionBreaks: [{ startIndex: 6, sectionId: 's1' }],
-                customBlocks: [{ startIndex: 1, blockId: 'a' }, { startIndex: 4, blockId: 'b' }],
-            },
-            drawings: { a: drawing('a'), b: drawing('b') },
-            drawingsOrder: ['a', 'b'],
-            documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
-                autoHyphenation: BooleanNumber.FALSE,
-                pageSize: { width: 300, height: 400 },
-                marginTop: 20,
-                marginBottom: 20,
-                marginLeft: 20,
-                marginRight: 20,
-            },
-        });
-        injector.get(IUniverInstanceService).setCurrentUnitForType(unitId);
-        injector.get(IUniverInstanceService).focusUnit(unitId);
-        render = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
-        render.deactivate();
-        render.addRenderDependencies([[DocSkeletonManagerService]]);
-        render.with(DocSkeletonManagerService);
-        drawingController.loadDrawingDataForUnit(unitId);
         manager = injector.get(IDrawingManagerService);
         docDrawings = injector.get(IDocDrawingService);
         refresh = injector.get(DocRefreshDrawingsService);
-        injector.get(DocDrawingAddRemoveController);
     });
 
     afterEach(() => {
         univer?.dispose();
         vi.restoreAllMocks();
+    });
+
+    it('commits drawing transforms after a document render is recreated with the same unit id', async () => {
+        const injector = univer.__getInjector();
+        injector.add([DocDrawingTransformerController]);
+        injector.get(DocDrawingTransformerController);
+        model.getSnapshot().drawings!.a.layoutType = PositionedObjectLayoutType.INLINE;
+        const renderManager = injector.get(IRenderManagerService);
+        for (const width of [60, 80]) {
+            const object = new Rect(getDrawingShapeKeyByDrawingSearch(drawing('a')), {
+                left: 20,
+                top: 30,
+                width: width - 20,
+                height: 30,
+            });
+            render.scene.addObject(object);
+            manager.addNotification([drawing('a')]);
+            const transformer = render.scene.getTransformerByCreate();
+            const objects = new Map([[object.oKey, object]]);
+            // Feed pointer gesture boundaries into the real transformer and command pipeline.
+            transformer.activeAnObject(object);
+            object.transformByState({ width });
+            const gesture = transformer as unknown as { _changeEnd$: Subject<IChangeObserverConfig & { event: { button: number } }> };
+            gesture._changeEnd$.next({ objects, type: 2, event: { button: 0 } });
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            expect(model.getSnapshot().drawings!.a.docTransform.size.width).toBe(width);
+            renderManager.removeRender(unitId);
+            render = renderManager.createRender(unitId) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            render.with(DocSkeletonManagerService);
+        }
     });
 
     function mutate(actions: JSONXActions): void {
@@ -342,12 +296,77 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
         }
     });
 
+    it.each([-20, 0, 35].flatMap((offset) => [false, true].flatMap((atEnd) =>
+        [ObjectRelativeFromV.PARAGRAPH, ObjectRelativeFromV.LINE].flatMap((relativeFrom) =>
+            [PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, PositionedObjectLayoutType.WRAP_SQUARE].map((layoutType) =>
+                ({ offset, atEnd, relativeFrom, layoutType }))
+        )
+    )))(
+        'round-trips text-relative wrapping: $offset, paragraph end: $atEnd, reference: $relativeFrom, layout: $layoutType',
+        ({ offset, atEnd, relativeFrom, layoutType }) => {
+            const anchorText = 'Anchor text before and after the drawing wraps across this paragraph.';
+            const anchored = atEnd ? `${anchorText}\b` : `${anchorText.slice(0, 9)}\b${anchorText.slice(9)}`;
+            const text = `First paragraph before the drawing.\r${anchored}\rFollowing paragraph for reflow.\r`;
+            const snapshot = model.getSnapshot();
+            const source: IDocumentData & { drawings: { a: IDocDrawing } } = {
+                ...snapshot,
+                body: {
+                    dataStream: `${text}\n`,
+                    paragraphs: [...text.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p${index}` })),
+                    sectionBreaks: [{ startIndex: text.length, sectionId: 's1' }],
+                    customBlocks: [{ startIndex: text.indexOf('\b'), blockId: 'a' }],
+                },
+                drawings: { a: {
+                    ...drawing('a'),
+                    layoutType,
+                    docTransform: {
+                        angle: 0,
+                        size: { width: 120, height: 60 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                        positionV: { relativeFrom, posOffset: offset },
+                    },
+                } },
+                drawingsOrder: ['a'],
+                documentStyle: {
+                    ...snapshot.documentStyle,
+                    pageSize: { width: 720, height: 960 },
+                    marginLeft: 50,
+                    marginRight: 50,
+                    marginTop: 50,
+                    marginBottom: 50,
+                    textStyle: { ff: 'Arial', fs: 12 },
+                },
+            };
+            const skeletonManager = render.with(DocSkeletonManagerService);
+            const layout = () => {
+                model.reset(source);
+                skeletonManager.getViewModel().reset(model);
+                const skeleton = skeletonManager.getSkeleton();
+                skeleton.makeDirty(true);
+                skeleton.calculate();
+                return findDrawingAnchor(unitId, 'a', skeleton.getSkeletonData()!, skeletonManager.getViewModel().getEditArea(), source.drawings.a)!;
+            };
+            const initial = layout();
+            const top = initial.skeDrawing.aTop;
+            source.drawings.a.docTransform = getDrawingWrappingPosition(initial, source.drawings.a.layoutType, undefined, ObjectRelativeFromV.MARGIN);
+            const margin = layout();
+            const converted = getDrawingWrappingPosition(margin, source.drawings.a.layoutType, undefined, relativeFrom);
+            const beforePreview = JSON.stringify(model.getSnapshot());
+            const resolved = resolveDrawingWrappingPosition(margin, converted, model.getSnapshot(), univer.__getInjector().get(LocaleService), skeletonManager.getViewModel().getEditArea());
+            expect(JSON.stringify(model.getSnapshot())).toBe(beforePreview);
+            expect(resolved).not.toBeNull();
+            source.drawings.a.docTransform = resolved!;
+            const back = layout();
+            expect({ top, margin: margin.skeDrawing.aTop, back: back.skeDrawing.aTop, offset: source.drawings.a.docTransform.positionV.posOffset }).toMatchObject({ margin: top, back: top });
+        }
+    );
+
     it('preserves the resolved anchor when changing wrapping and refreshes the drawing afterward', () => {
         const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
         const page = skeleton.getSkeletonData()!.pages[0];
         const anchor = page.skeDrawings.get('a')!;
         expect(anchor).toBeDefined();
-        const expectedLeft = anchor.aLeft - page.marginLeft;
+        const expectedLeft = anchor.aLeft;
         const expectedTop = anchor.aTop - anchor.blockAnchorTop;
         const refreshDrawings = vi.spyOn(refresh, 'refreshDrawings');
         expect(commands.syncExecuteCommand(UpdateDocDrawingWrappingStyleCommand.id, {

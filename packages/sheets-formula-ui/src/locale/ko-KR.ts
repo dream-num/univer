@@ -18,6 +18,21 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'sheets-formula-ui': {
+        calculation: {
+            circularTitle: '순환 참조',
+            title: '계산 옵션',
+            enable: '반복 계산 사용',
+            iterations: '최대 반복 횟수 (1–{0})',
+            change: '최대 변화값',
+            workbook: '현재 통합 문서에 적용됩니다.',
+            invalidIterations: '최대 반복 횟수는 1에서 {0} 사이의 정수여야 합니다.',
+            invalidChange: '최대 변화값은 유한한 양수여야 합니다.',
+            cancel: '취소',
+            confirm: '확인',
+            circular: '이 수식에 순환 참조가 있습니다. 계산 옵션에서 반복 계산을 사용하세요.',
+            action: '반복 계산',
+        },
+
         shortcut: {
             'quick-sum': '빠른 합계',
         },

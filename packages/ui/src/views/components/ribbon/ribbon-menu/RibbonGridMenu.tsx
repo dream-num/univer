@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../../utils/di';
+import { useRibbonTabs } from './use-ribbon-tabs';
 
 export function RibbonGridMenu({
     ribbon,
@@ -29,6 +30,7 @@ export function RibbonGridMenu({
     onSelectTab: (tab: IMenuSchema) => void;
 }) {
     const localeService = useDependency(LocaleService);
+    const handleKeyDown = useRibbonTabs(ribbon, onSelectTab);
 
     return (
         <div
@@ -40,6 +42,7 @@ export function RibbonGridMenu({
               dark:!univer-bg-gray-900
             "
             role="tablist"
+            onKeyDown={handleKeyDown}
         >
             {ribbon.map((group) => {
                 const isActive = activatedTab === group.key;
@@ -50,6 +53,7 @@ export function RibbonGridMenu({
                         type="button"
                         role="tab"
                         aria-selected={isActive}
+                        tabIndex={isActive ? 0 : -1}
                         title={title}
                         onClick={() => onSelectTab(group)}
                         className={clsx(`

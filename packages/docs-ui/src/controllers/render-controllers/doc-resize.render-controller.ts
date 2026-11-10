@@ -57,6 +57,17 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
     }
 
     private _initResize() {
+        // Mounting can finish before this controller observes a resize; restore geometry on activation too.
+        this.disposeWithMe(
+            this._context.activated$.pipe(
+                observeOn(animationFrameScheduler)
+            ).subscribe((activated) => {
+                if (activated) {
+                    this._refreshLayoutAndSelection();
+                }
+            })
+        );
+
         this.disposeWithMe(
             fromEventSubject(this._context.engine.onTransformChange$).pipe(
                 throttleTime(0, animationFrameScheduler)

@@ -21,6 +21,11 @@ import { RuleList } from './panel/RuleList';
 
 export interface IConditionFormattingPanelProps {
     rule?: IConditionFormattingRule;
+    /**
+     * Called when editing ends after submission, cancellation, or worksheet activation/removal.
+     * Does not indicate that saving succeeded or that the sidebar closed.
+     */
+    onEditorExit?: () => void;
     RuleEditComponent?: typeof RuleEdit;
     RuleListComponent?: typeof RuleList;
 }
@@ -37,6 +42,7 @@ export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) 
     const handleCancel = () => {
         setIsShowRuleEditor(false);
         setCurrentEditRule(undefined);
+        props.onEditorExit?.();
     };
 
     const handleRuleClick = (rule: IConditionFormattingRule) => {
@@ -45,7 +51,7 @@ export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) 
     };
 
     return (
-        <div className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-4">
+        <div className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-4">
             {isShowRuleEditor
                 ? (
                     <RuleEditComponent onCancel={handleCancel} rule={currentEditRule} />

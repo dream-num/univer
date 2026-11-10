@@ -396,6 +396,7 @@ export class DocumentLayoutSession extends Disposable {
                         {
                             paragraphIndex: anchor.paragraphIndex,
                             top: anchor.top,
+                            ...(anchor.left == null ? {} : { left: anchor.left }),
                         },
                     ]),
                 ])

@@ -27,6 +27,15 @@ describe('Test choose function', () => {
     const testFunction = new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE);
 
     describe('Choose', () => {
+        it('keeps a one-element array selector as an array result', () => {
+            const result = testFunction.calculate(
+                ArrayValueObject.create('{2}'),
+                NumberValueObject.create(11),
+                NumberValueObject.create(22)
+            );
+            expect(result.isArray()).toBe(true);
+            expect(getObjectValue(result)).toEqual([[22]]);
+        });
         it('Index num and value', async () => {
             const indexNum = NumberValueObject.create(2);
             const value1 = NumberValueObject.create(11);

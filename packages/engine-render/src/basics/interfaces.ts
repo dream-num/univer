@@ -95,6 +95,7 @@ export interface IFontLocale {
 }
 
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
+    lineGap?: number;
     localeService: LocaleService;
     documentTextStyle?: IDocumentLayoutTextStyle;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
@@ -170,6 +171,7 @@ export interface IParagraphConfig {
 }
 
 export interface IFontCreateConfig {
+    stackedText?: boolean;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
     charSpace: number;
@@ -194,6 +196,8 @@ export interface IFontCreateConfig {
 
 export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
+    /** The pointer is inside the glyph's content box, excluding line spacing and paragraph margins. */
+    isInsideGlyph?: boolean;
     ratioX: number;
     ratioY: number;
     segmentId: string;

@@ -16,7 +16,6 @@
 
 import type { IAccessor, IColorStyle, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     composeStyles,
@@ -38,7 +37,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { SetInlineFormatCommand } from '@univerjs/docs-ui';
+import { EditorColorPicker, SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -74,7 +73,6 @@ import {
     WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
 import {
-    COLOR_PICKER_COMPONENT,
     CutCommand,
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
@@ -83,7 +81,7 @@ import {
     MenuItemType,
 } from '@univerjs/ui';
 import { combineLatest, combineLatestWith, map, Observable, startWith } from 'rxjs';
-
+import type { LocaleKey } from '../locale/types';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -170,7 +168,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Locale
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -239,6 +237,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Loca
                 worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
             },
+            true,
             true
         ),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
@@ -335,7 +334,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -356,7 +355,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -412,7 +411,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
+    }, true, true);
 
     return {
         id: SetRangeFontFamilyCommand.id,
@@ -491,7 +490,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -509,7 +508,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },
@@ -542,7 +541,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
     };
 }
 
@@ -573,7 +572,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         selections: [
             {
                 label: {
-                    name: COLOR_PICKER_COMPONENT,
+                    name: EditorColorPicker.componentKey,
                     hoverable: false,
                     selectable: false,
                 },
@@ -1068,6 +1067,7 @@ export function PasteRibbonMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     return {
         ...PasteSpacialMenuItemFactory(accessor),
         id: PASTE_RIBBON_MENU_ID,
+        icon: 'DocPasteOptionsIcon',
         title: 'sheets-ui.rightClick.paste',
         hidden$: combineLatest([
             getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
@@ -1297,7 +1297,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const min = 2;
+    const min = 0;
 
     return {
         id: SetRowHeightCommand.id,
@@ -1342,7 +1342,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-    const min = 2;
+    const min = 0;
 
     return {
         id: SetColWidthCommand.id,

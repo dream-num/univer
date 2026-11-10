@@ -142,6 +142,7 @@ export function UniverSheetsCorePreset(config: Partial<IUniverSheetsCorePresetCo
                 formulaBar,
                 footer,
                 allowArrowKeyWrapOnSheetBoundary: sheets?.allowArrowKeyWrapOnSheetBoundary,
+                selectionAnimation: sheets?.selectionAnimation,
                 maxAutoHeightCount: sheets?.maxAutoHeightCount,
                 enableFillHandle: sheets?.enableFillHandle,
                 clipboardConfig: sheets?.clipboardConfig,

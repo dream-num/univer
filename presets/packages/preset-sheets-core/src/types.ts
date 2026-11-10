@@ -49,5 +49,6 @@ export interface IUniverSheetsPresetConfig extends
         | 'disableForceStringAlert'
         | 'disableForceStringMark'
         | 'allowArrowKeyWrapOnSheetBoundary'
+        | 'selectionAnimation'
     > {
 }

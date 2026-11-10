@@ -36,6 +36,13 @@ export interface IUniverSheetsUIConfig {
     allowArrowKeyWrapOnSheetBoundary?: boolean;
 
     /**
+     * Whether to animate the selection outline when clicking between cells on desktop.
+     * The system preference for reduced motion takes precedence.
+     * @default true
+     */
+    selectionAnimation?: boolean;
+
+    /**
      * The maximum count of rows triggering auto height. This is used to avoid performance issue.
      * @default 1000
      */

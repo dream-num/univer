@@ -42,15 +42,16 @@ export class GlobalRangeSelectorService extends Disposable {
 
     showRangeSelectorDialog(opts: IShowRangeSelectorDialogOptions) {
         const callback = opts.callback;
+        const request = { ...opts };
         let completed = false;
         const promise = new Promise<IUnitRangeName[]>((resolve) => {
-            opts.callback = (ranges) => {
+            request.callback = (ranges) => {
                 if (completed) {
                     return;
                 }
                 completed = true;
                 // Release this request before its callback can open another selector.
-                if (this._currentSelector$.getValue() === opts) {
+                if (this._currentSelector$.getValue() === request) {
                     this._currentSelector$.next(null);
                 }
                 resolve(ranges);
@@ -58,7 +59,7 @@ export class GlobalRangeSelectorService extends Disposable {
             };
         });
 
-        this._currentSelector$.next(opts);
+        this._currentSelector$.next(request);
         return promise;
     }
 }

@@ -16,7 +16,7 @@
 
 import type { IUnitRangeName } from '@univerjs/core';
 import { Injector } from '@univerjs/core';
-import { describe, expect, it, onTestFinished } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { GlobalRangeSelectorService } from '../range-selector.service';
 
 function createService(): GlobalRangeSelectorService {
@@ -67,6 +67,30 @@ describe('GlobalRangeSelectorService', () => {
         expect(requests[requests.length - 1]?.unitId).toBe('second');
         requests[requests.length - 1]!.callback([]);
         await nextPromise;
+        subscription.unsubscribe();
+    });
+
+    it('preserves the caller callback when the same options are reused', async () => {
+        const service = createService();
+        const requests: Array<{ callback: (ranges: IUnitRangeName[]) => void } | null> = [];
+        const subscription = service.currentSelector$.subscribe((request) => requests.push(request));
+        const callback = vi.fn();
+        const options = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            callback,
+        };
+
+        const firstPromise = service.showRangeSelectorDialog(options);
+        requests[requests.length - 1]!.callback([]);
+        await expect(firstPromise).resolves.toEqual([]);
+
+        const secondPromise = service.showRangeSelectorDialog(options);
+        requests[requests.length - 1]!.callback([]);
+        await expect(secondPromise).resolves.toEqual([]);
+
+        expect(callback).toHaveBeenCalledTimes(2);
+        expect(options.callback).toBe(callback);
         subscription.unsubscribe();
     });
 

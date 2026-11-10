@@ -41,6 +41,7 @@ export interface IUniverSheetsPresetConfig extends
         IUniverSheetsUIConfig,
         'maxAutoHeightCount'
         | 'clipboardConfig'
+        | 'warnBeforeDragOverwrite'
         | 'scrollConfig'
         | 'protectedRangeShadow'
         | 'protectedRangeUserSelector'

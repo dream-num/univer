@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, ObjectMatrix, Plugin } from '@univerjs/core';
+import { ICommandService, Inject, Injector, LocaleService, LocaleType, ObjectMatrix, Plugin } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
@@ -36,10 +36,13 @@ import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
 import { generateAstNode } from '../../engine/utils/generate-ast-node';
 import { AsyncCustomFunction, CustomFunction } from '../../functions/custom-function';
 import { Sum } from '../../functions/math/sum';
+import { Minus } from '../../functions/meta/minus';
 import { ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { IDefinedNamesService } from '../defined-names.service';
 import { FormulaCacheService } from '../formula-cache.service';
+import { DescriptionService, IDescriptionService } from '../formula/description.service';
+import { IRegisterFunctionService, RegisterFunctionService } from '../formula/register-function.service';
 import { IFunctionService } from '../function.service';
 import { IFormulaRuntimeService } from '../runtime.service';
 
@@ -93,6 +96,39 @@ function registerCustom(client: ReturnType<typeof createCommandTestBed>, value: 
 }
 
 describe('FormulaCacheService calculation isolation', () => {
+    it.each([
+        ['=CUSTOM(0)', 'CUSTOM', 42],
+        ['=CUSTOM (0)', 'CUSTOM', 42],
+        ['=_xlfn.CUSTOM(0)', 'CUSTOM', 42],
+        ['=_xlws.CUSTOM(0)', 'CUSTOM', 42],
+        ['=_xleta.CUSTOM(0)', 'CUSTOM', 42],
+        ['=_XlFn.cUsToM (0)', 'CUSTOM', 42],
+        ['=-_xlfn.CUSTOM(0)', 'CUSTOM', -42],
+        ['=@_xlws.CUSTOM(0)', 'CUSTOM', 42],
+        ['=REGEXTEST(0)', 'REGEXMATCH', 42],
+        ['=_xlfn.REGEXTEST(0)', 'REGEXMATCH', 42],
+    ] as const)('refreshes a cached unknown function through registration: %s', (formula, name, expected) => {
+        const client = createCommandTestBed(undefined, [
+            [IDescriptionService, { useClass: DescriptionService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+        ]);
+        try {
+            initialize(client);
+            client.get(LocaleService).load({ [LocaleType.ZH_CN]: {}, [LocaleType.EN_US]: {} });
+            const functions = client.get(IFunctionService);
+            functions.registerExecutors(new Minus('MINUS'));
+            const registration = client.get(IRegisterFunctionService);
+            expect(evaluate(client, formula)).toBe('#NAME?');
+            const disposable = registration.registerFunction({ name, func: () => 42, description: 'Cache recovery' });
+            functions.deleteFormulaAstCacheKey(name);
+            expect(evaluate(client, formula)).toBe(expected);
+            disposable.dispose();
+            expect(evaluate(client, formula)).toBe('#NAME?');
+            registration.registerFunction({ name, func: () => 84, description: 'Replacement executor' });
+            expect(evaluate(client, formula)).toBe(expected * 2);
+        } finally { client.univer.dispose(); }
+    });
+
     it('single instance recalculates aggregates after source values change', async () => {
         const client = createCommandTestBed();
         client.get(IFunctionService).registerExecutors(new Sum('SUM'));

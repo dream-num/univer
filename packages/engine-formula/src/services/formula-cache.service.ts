@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
+import { Disposable, LRUMap } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { AstRootNode } from '../engine/ast-node/ast-root-node';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { Disposable, LRUMap } from '@univerjs/core';
 import { FormulaAstLRU } from '../basics/cache-lru';
+import { normalizeFunctionToken } from '../basics/function';
 import { InvertedIndexCache } from '../basics/inverted-index-cache';
+import { prefixToken } from '../basics/token';
 
 function usesFunction(node: BaseAstNode | LexerNode, names: Set<string>): boolean {
-    return names.has(node.getToken().toUpperCase()) || node.getChildren().some((child) =>
+    let token = node.getToken().trim().toUpperCase();
+    if (token[0] === prefixToken.MINUS || token[0] === prefixToken.AT) token = token.slice(1);
+    return names.has(normalizeFunctionToken(token)) || node.getChildren().some((child) =>
         typeof child !== 'string' && usesFunction(child, names));
 }
 

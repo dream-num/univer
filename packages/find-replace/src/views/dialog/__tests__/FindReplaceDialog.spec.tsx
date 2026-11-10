@@ -15,7 +15,17 @@
  */
 
 import { awaitTime, ICommandService, LocaleService, LocaleType, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
+import {
+    ILayoutService,
+    IMessageService,
+    IPlatformService,
+    IUIRuntimeScopeService,
+    KeyCode,
+    PlatformService,
+    RediContext,
+    ShortcutService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -26,9 +36,12 @@ import {
     ReplaceCurrentMatchCommand,
 } from '../../../commands/commands/replace.command';
 import {
+    GoToNextMatchOperation,
+    GoToPreviousMatchOperation,
     OpenFindDialogOperation,
     OpenReplaceDialogOperation,
 } from '../../../commands/operations/find-replace.operation';
+import { GoToNextFindMatchShortcutItem, GoToPreviousFindMatchShortcutItem } from '../../../controllers/find-replace.shortcut';
 import enUS from '../../../locale/en-US';
 import {
     FindBy,
@@ -386,28 +399,58 @@ describe('FindReplaceDialog', () => {
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 3, matchesPosition: 1 });
     });
 
-    it('reveals replace controls from a focusable advanced action without restarting the session', async () => {
+    it('keeps match navigation working after clicking the focusable advanced find action', async () => {
         const testBed = createDialogTestBed();
-        await act(async () => {
-            testBed.commandService.syncExecuteCommand(OpenFindDialogOperation.id);
-        });
+        const injector = testBed.univer.__getInjector();
+        injector.add([IPlatformService, { useClass: PlatformService }]);
+        injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+        injector.add([ShortcutService]);
+        const shortcutService = injector.get(ShortcutService);
+        [GoToNextMatchOperation, GoToPreviousMatchOperation].forEach((command) => testBed.commandService.registerCommand(command));
+        [GoToNextFindMatchShortcutItem, GoToPreviousFindMatchShortcutItem].forEach((shortcut) => shortcutService.registerShortcut(shortcut));
 
-        const rendered = renderDialog(testBed.univer.__getInjector());
-        root = rendered.root;
-        container = rendered.container;
+        try {
+            await act(async () => {
+                testBed.commandService.syncExecuteCommand(OpenFindDialogOperation.id);
+            });
+            const rendered = renderDialog(injector);
+            root = rendered.root;
+            container = rendered.container;
 
-        await act(async () => {
-            const button = getButton(container!, ADVANCED_LABEL);
-            button.focus();
-            expect(document.activeElement).toBe(button);
-            button.click();
-        });
+            await act(async () => {
+                setInputValue(getInputs(container!)[0], 'apple');
+                await awaitTime(560);
+            });
+            await flushSearch();
 
-        expect(testBed.findReplaceService.replaceRevealed).toBe(true);
-        expect(getButton(container!, FIND_LABEL).disabled).toBe(true);
-        expect(getButton(container!, REPLACE_LABEL).disabled).toBe(true);
-        expect(getButton(container!, REPLACE_ALL_LABEL).disabled).toBe(true);
-        expect(getInputs(container!)).toHaveLength(2);
+            await act(async () => {
+                const button = getButton(container!, ADVANCED_LABEL);
+                button.focus();
+                expect(document.activeElement).toBe(button);
+                button.click();
+            });
+            const [findInput, replaceInput] = getInputs(container);
+            expect(document.activeElement).toBe(findInput);
+
+            await act(async () => {
+                findInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: KeyCode.ENTER, bubbles: true, cancelable: true }));
+            });
+            expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A2' });
+
+            await act(async () => {
+                findInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: KeyCode.ENTER, shiftKey: true, bubbles: true, cancelable: true }));
+            });
+            expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A1' });
+
+            await act(async () => {
+                replaceInput.focus();
+                replaceInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: KeyCode.ENTER, bubbles: true, cancelable: true }));
+            });
+            expect(readCurrentMatch(testBed.findReplaceService)?.range).toEqual({ id: 'A1' });
+            expect(document.activeElement).toBe(replaceInput);
+        } finally {
+            shortcutService.dispose();
+        }
     });
 
     it('shows only controls supported by the active provider', async () => {
@@ -598,6 +641,8 @@ describe('FindReplaceDialog', () => {
         const rendered = renderDialog(testBed.univer.__getInjector());
         root = rendered.root;
         container = rendered.container;
+
+        expect(getButton(container, FIND_LABEL).disabled).toBe(true);
 
         await act(async () => {
             const inputs = getInputs(container!);

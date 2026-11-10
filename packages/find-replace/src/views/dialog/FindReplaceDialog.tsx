@@ -334,7 +334,7 @@ export function FindReplaceDialog() {
             }
         });
 
-        // Focus the input element the first time we open the find replace dialog.
+        // Sync focus after opening or switching forms, once the new input ref is attached.
         focusRef.current?.focus();
 
         setDialogContainerFocus(true);
@@ -344,7 +344,7 @@ export function FindReplaceDialog() {
             focusSubscription.unsubscribe();
             setDialogContainerFocus(false);
         };
-    }, [setDialogContainerFocus, setDialogInputFocus]);
+    }, [setDialogContainerFocus, setDialogInputFocus, state.replaceRevealed]);
 
     return (
         <div ref={dialogContainerRef} data-u-comp="find-replace-dialog">

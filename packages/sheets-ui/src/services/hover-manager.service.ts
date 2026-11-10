@@ -529,6 +529,11 @@ export class HoverManagerService extends Disposable {
         }
     }
 
+    triggerMouseLeave() {
+        // Interactive rich-text popups manage their own hover lifetime.
+        this._currentCell$.next(null);
+    }
+
     triggerScroll() {
         this._currentCell$.next(null);
     }

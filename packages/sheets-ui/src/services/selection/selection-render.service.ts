@@ -22,10 +22,9 @@ import type {
     ISetSelectionsOperationParams,
     WorkbookSelectionModel,
 } from '@univerjs/sheets';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
-import type { SelectionControl } from './selection-control';
 import {
     ICommandService,
+    IConfigService,
     IContextService,
     ILogService,
     Inject,
@@ -48,7 +47,10 @@ import {
 } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import type { SelectionControl } from './selection-control';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -472,7 +474,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         let activeControl = this.getActiveSelectionControl();
         if (activeControl && this._canAnimateSelection(evt, activeControl, cursorRange)) {
-            activeControl.updateRangeBySelectionWithCoord(selectionWithCoord, this._skeleton, true);
+            const config = this._injector.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+            activeControl.updateRangeBySelectionWithCoord(selectionWithCoord, this._skeleton, config?.selectionAnimation !== false);
             return activeControl;
         }
         this._checkClearPreviousControls(evt);

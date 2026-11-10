@@ -20,17 +20,13 @@ import type { IInsertAction, IRetainAction } from '../action-types';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
-import {
-    CustomDecorationType,
-    CustomRangeType,
-    DocumentBlockRangeType,
-} from '../../../../types/interfaces/i-document-data';
+import { CustomDecorationType, CustomRangeType, DocumentBlockRangeType, SpecialCharacterKind } from '../../../../types/interfaces/i-document-data';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
 import { TextX } from '../text-x';
-import { composeBody } from '../utils';
+import { composeBody, getBodySlice } from '../utils';
 
 describe('test TextX methods and branches', () => {
     it('keeps peer formatting and nested fields when undoing heading metadata without text edits', () => {
@@ -175,6 +171,7 @@ describe('test TextX methods and branches', () => {
             expect(body).toEqual(original);
         }
     });
+
     it.each(['', 'Value'])('roundtrips identity removal and history through JSONX for %j', (value) => {
         const original = {
             id: 'doc',
@@ -742,5 +739,71 @@ describe('test TextX methods and branches', () => {
         it('textX name should to be text-x', () => {
             expect(TextX.name).toBe('text-x');
         });
+    });
+
+    it.each([
+        { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011' },
+        { kind: SpecialCharacterKind.OPTIONAL_HYPHEN, character: '\u00AD' },
+        { kind: 'emSpace', character: '\u2003' },
+        { kind: 'enSpace', character: '\u2002' },
+    ])('moves, copies, deletes and restores a semantic character without changing adjacent literal text (%j)', ({ kind, character }) => {
+        const source: IDocumentBody = { dataStream: `AB${character}CD\r\n`, customRanges: [{ rangeId: 'hyphen', rangeType: CustomRangeType.CUSTOM, wholeEntity: true, startIndex: 2, endIndex: 2, properties: { kind } }] };
+        const insert = new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize();
+        TextX.makeInvertible(insert, source);
+        const shifted = TextX.apply(Tools.deepClone(source), insert);
+        expect(shifted.dataStream).toBe(`AXB${character}CD\r\n`);
+        expect(shifted.customRanges![0]).toEqual({ ...source.customRanges![0], startIndex: 3, endIndex: 3 });
+        const restoredInsert = TextX.apply(Tools.deepClone(shifted), TextX.invert(insert));
+        expect(restoredInsert.dataStream).toBe(source.dataStream);
+        expect(restoredInsert.customRanges).toEqual(source.customRanges);
+        const copied = getBodySlice(source, 2, 3);
+        const pasted = TextX.apply({ dataStream: 'Z\r\n' }, new TextX().insert(1, copied).serialize());
+        expect(pasted.dataStream).toBe(`${character}Z\r\n`);
+        expect(pasted.customRanges).toEqual([{ ...source.customRanges![0], startIndex: 0, endIndex: 0 }]);
+        const remove = new TextX().retain(3).delete(1).serialize();
+        TextX.makeInvertible(remove, shifted);
+        const deleted = TextX.apply(Tools.deepClone(shifted), remove);
+        expect(deleted.dataStream).toBe('AXBCD\r\n');
+        expect(deleted.customRanges).toEqual([]);
+        const restoredDelete = TextX.apply(deleted, TextX.invert(remove));
+        expect(restoredDelete.dataStream).toBe(shifted.dataStream);
+        expect(restoredDelete.customRanges).toEqual(shifted.customRanges);
+    });
+
+    it.each([CustomRangeType.FIELD, CustomRangeType.SDT, CustomRangeType.BOOKMARK])('does not duplicate an enclosing range when undoing text-only formatting (%s)', (rangeType) => {
+        const source: IDocumentBody = {
+            dataStream: '\u001FValue\u001E\r\n',
+            textRuns: [{ st: 1, ed: 6, ts: { fs: 11 } }],
+            customRanges: [{ rangeId: 'enclosing', rangeType, wholeEntity: false, startIndex: 0, endIndex: 6, properties: { instruction: 'REF target' } }],
+        };
+        const actions = new TextX()
+            .retain(1)
+            .retain(5, { dataStream: '', textRuns: [{ st: 0, ed: 5, ts: { it: BooleanNumber.TRUE } }] }, UpdateDocsAttributeType.REPLACE)
+            .updateCustomRanges([{ rangeId: 'enclosing', range: { ...source.customRanges![0], properties: { dirty: BooleanNumber.FALSE } }, propertyPaths: [['dirty']] }])
+            .serialize();
+        TextX.makeInvertible(actions, source);
+        const changed = TextX.apply(Tools.deepClone(source), actions);
+        const restored = TextX.apply(changed, TextX.invert(actions));
+
+        expect(restored.customRanges).toEqual(source.customRanges);
+        expect(restored.dataStream).toBe(source.dataStream);
+        expect(restored.textRuns).toEqual(source.textRuns);
+    });
+
+    it('keeps an absent run array absent when inserting an unformatted undo placeholder', () => {
+        const body: IDocumentBody = { dataStream: 'AB\r\n' };
+        const actions = new TextX().retain(1).insert(1, { dataStream: 'X', textRuns: [{ st: 0, ed: 1, ts: {} }] }).serialize();
+        const result = TextX.apply(Tools.deepClone(body), actions);
+        expect(result.dataStream).toBe('AXB\r\n');
+        expect(result.textRuns).toBeUndefined();
+    });
+
+    it.each([undefined, []])('keeps inserted character formatting when the destination has no runs (%j)', (textRuns) => {
+        const body: IDocumentBody = { dataStream: 'AB\r\n', textRuns };
+        const actions = new TextX().retain(1).insert(1, { dataStream: 'X', textRuns: [{ st: 0, ed: 1, ts: { it: BooleanNumber.TRUE } }] }).serialize();
+        const result = TextX.apply(Tools.deepClone(body), actions);
+        expect(result.dataStream).toBe('AXB\r\n');
+        expect(result.textRuns).toEqual([{ st: 1, ed: 2, ts: { it: BooleanNumber.TRUE } }]);
+        expect(body).toEqual({ dataStream: 'AB\r\n', textRuns });
     });
 });

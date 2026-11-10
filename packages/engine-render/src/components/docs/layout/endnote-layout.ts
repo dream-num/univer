@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeTokenType, DocumentDataModel } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../basics/interfaces';
 import type { ILayoutContext } from './tools';
-import { DocumentDataModel } from '@univerjs/core';
 import { DocumentViewModel } from '../view-model/document-view-model';
 import { defaultSeparatorBody, layoutNoteBody, layoutNoteSegment } from './footnote-layout';
 import { createSkeletonPage } from './model/page';
@@ -49,22 +49,39 @@ export class DocumentEndnoteLayout {
         this._ctx.footnoteLayout?.finish(pages, config);
         let page = pages[pages.length - 1];
         let top = getEndnoteFlowBottom(page);
-        let decoration = this._layoutDecoration(page, config, 'separator');
+        let separatorKind: 'separator' | 'continuationSeparator' = 'separator';
+        let decoration = this._layoutDecoration(page, config, separatorKind);
         let needsSeparator = true;
+        let hasEndnotes = false;
         for (const reference of references) {
-            const contentHeight = page.pageHeight - page.marginTop - page.marginBottom - (page.footnoteHeight ?? 0);
-            const separatorHeight = needsSeparator ? decoration?.height ?? 0 : 0;
             const continuation = this._layoutDecoration(page, config, 'continuationSeparator');
             const notice = this._layoutDecoration(page, config, 'continuationNotice');
-            const options = {
-                width: page.pageWidth - page.marginLeft - page.marginRight,
-                firstPageHeight: Math.max(1, contentHeight - top - separatorHeight),
-                continuationPageHeight: Math.max(1, page.pageHeight - page.marginTop - page.marginBottom - (continuation?.height ?? 0) - (notice?.height ?? 0)),
-                columnCount: 1,
-            };
-            let notePages = layoutNoteBody(this._ctx, reference, config, options);
-            if (notice && notePages.length > 1) {
-                notePages = layoutNoteBody(this._ctx, reference, config, { ...options, firstPageHeight: Math.max(1, options.firstPageHeight - notice.height) });
+            let notePages: IDocumentSkeletonPage[];
+            for (;;) {
+                const contentHeight = page.pageHeight - page.marginTop - page.marginBottom - (page.footnoteHeight ?? 0);
+                const separatorHeight = needsSeparator ? decoration?.height ?? 0 : 0;
+                const options = {
+                    width: page.pageWidth - page.marginLeft - page.marginRight,
+                    firstPageHeight: Math.max(1, contentHeight - top - separatorHeight),
+                    continuationPageHeight: Math.max(1, page.pageHeight - page.marginTop - page.marginBottom - (continuation?.height ?? 0) - (notice?.height ?? 0)),
+                    columnCount: 1,
+                };
+                notePages = layoutNoteBody(this._ctx, reference, config, options);
+                if (notice && notePages.length > 1) {
+                    options.firstPageHeight = Math.max(1, options.firstPageHeight - notice.height);
+                    notePages = layoutNoteBody(this._ctx, reference, config, options);
+                }
+                const first = notePages[0];
+                if (top === 0 || !first || !hasNoteContent(first) || first.height <= options.firstPageHeight + 2) {
+                    break;
+                }
+                // A note's first line can overflow its constrained story; retry on an empty body page.
+                page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, page.pageNumber + 1);
+                pages.push(page);
+                top = 0;
+                needsSeparator = true;
+                separatorKind = hasEndnotes ? 'continuationSeparator' : 'separator';
+                decoration = this._layoutDecoration(page, config, separatorKind);
             }
             let continued = false;
             for (let index = 0; index < notePages.length; index++) {
@@ -74,7 +91,8 @@ export class DocumentEndnoteLayout {
                     pages.push(page);
                     top = 0;
                     needsSeparator = true;
-                    decoration = continued ? continuation : this._layoutDecoration(page, config, 'separator');
+                    separatorKind = hasEndnotes ? 'continuationSeparator' : 'separator';
+                    decoration = hasEndnotes ? continuation : this._layoutDecoration(page, config, 'separator');
                 }
                 if (!hasNoteContent(fragment)) {
                     continue;
@@ -83,7 +101,7 @@ export class DocumentEndnoteLayout {
                     page.noteDecorations ??= [];
                     page.noteDecorations.push({
                         noteType: 'endnote',
-                        kind: continued ? 'continuationSeparator' : 'separator',
+                        kind: separatorKind,
                         left: page.marginLeft,
                         top: page.marginTop + top,
                         page: decoration,
@@ -93,6 +111,7 @@ export class DocumentEndnoteLayout {
                 needsSeparator = false;
                 page.notes ??= [];
                 page.notes.push({ noteType: 'endnote', noteId: reference.noteId, referenceIndex: reference.referenceIndex, continued, left: page.marginLeft, top: page.marginTop + top, page: fragment });
+                hasEndnotes = true;
                 top += fragment.height;
                 continued = true;
                 if (notice && index < notePages.length - 1) {
@@ -115,7 +134,7 @@ export class DocumentEndnoteLayout {
         if (!body) {
             return;
         }
-        const model = new DocumentDataModel({ id: `endnote-${kind}`, body, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
+        const model = new DocumentDataModel({ id: `endnote-${kind}`, body, tableSource: body.tableSource, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
         const viewModel = new DocumentViewModel(model);
         try {
             return layoutNoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
@@ -137,7 +156,10 @@ function hasNoteContent(page: IDocumentSkeletonPage): boolean {
 export function getEndnoteFlowBottom(page: IDocumentSkeletonPage): number {
     const bodyBottom = page.sections.reduce((bottom, section) => Math.max(bottom, section.top, ...section.columns.map((column) => {
         const line = column.lines[column.lines.length - 1];
-        return line ? section.top + line.top + line.lineHeight : section.top;
+        const afterSpacing = line?.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH))
+            ? Math.max(0, line.spaceBelowApply - line.marginBottom)
+            : 0;
+        return line ? section.top + line.top + line.lineHeight + afterSpacing : section.top;
     })), 0);
     return Math.max(bodyBottom, ...page.notes?.filter((note) => note.noteType === 'endnote')
         .map((note) => note.top - page.marginTop + note.page.height) ?? []);

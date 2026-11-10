@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { describe, expect, it } from 'vitest';
-import { CustomRangeType, DocStyleType } from '../../../types/interfaces/i-document-data';
+import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
+import { CustomRangeType, DocStyleType, DocumentFlavor } from '../../../types/interfaces/i-document-data';
 import { DocumentDataModel } from '../document-data-model';
 import { JSONX } from '../json-x/json-x';
 import { validateDocumentStructure } from '../text-x/structure-validator';
@@ -46,7 +46,72 @@ function createDocument(): DocumentDataModel {
     });
 }
 
+describe('public document metadata', () => {
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('persists named aliases and typed properties through edits, undo and reload (%s)', (documentFlavor) => {
+        const document = new DocumentDataModel({
+            id: 'metadata',
+            body: body('Text'),
+            documentStyle: { documentFlavor },
+            styles: { DOCXHeading: { name: 'Heading', aliases: ['Original'], type: DocStyleType.paragraph } },
+            customProperties: {
+                DOCXDOCID: { type: 'string', value: 'Block DocID' },
+                Count: { type: 'integer', value: 3 },
+                Ratio: { type: 'number', value: 1.25 },
+                Converted: { type: 'boolean', value: false },
+                Prepared: { type: 'date', value: '2024-10-23T12:34:56Z' },
+            },
+        });
+        const before = structuredClone(document.getSnapshot());
+        const jsonX = JSONX.getInstance();
+        try {
+            const propertyEdit = jsonX.replaceOp(['customProperties', 'DOCXDOCID', 'value'], 'Block DocID', 'Edited & metadata');
+            const propertyUndo = JSONX.invertWithDoc(propertyEdit, before);
+            document.apply(propertyEdit);
+            const aliasEdit = jsonX.replaceOp(['styles', 'DOCXHeading', 'aliases'], ['Original'], ['Edited']);
+            const aliasUndo = JSONX.invertWithDoc(aliasEdit, document.getSnapshot());
+            document.apply(aliasEdit);
+            const restored = new DocumentDataModel(JSON.parse(JSON.stringify(document.getSnapshot())));
+            try {
+                expect(restored.getSnapshot().customProperties).toEqual({
+                    ...before.customProperties,
+                    DOCXDOCID: { type: 'string', value: 'Edited & metadata' },
+                });
+                expect(restored.getSnapshot().styles?.DOCXHeading.aliases).toEqual(['Edited']);
+                expect(restored.getBody()).toEqual(before.body);
+            } finally {
+                restored.dispose();
+            }
+            document.apply(aliasUndo);
+            document.apply(propertyUndo);
+            expect(document.getSnapshot()).toEqual(before);
+        } finally {
+            document.dispose();
+        }
+    });
+});
+
 describe('document footnote segments', () => {
+    it('inherits shared document styles in headers and footers without duplicating persisted definitions', () => {
+        const document = new DocumentDataModel({
+            id: 'doc',
+            body: body('Body'),
+            documentStyle: { textStyle: { ff: 'Calibri', fs: 11 } },
+            styles: { Story: { name: 'Story', type: DocStyleType.paragraph, textStyle: { fs: 9 } } },
+            headers: { header: { headerId: 'header', body: body('Header') } },
+            footers: { footer: { footerId: 'footer', body: body('Footer') } },
+        });
+        try {
+            for (const model of [document.headerModelMap.get('header'), document.footerModelMap.get('footer')]) {
+                expect(model?.getSnapshot().styles?.Story.textStyle?.fs).toBe(9);
+                expect(model?.getDocumentStyle().textStyle).toMatchObject({ ff: 'Calibri', fs: 11 });
+            }
+            expect(Object.keys(document.getSnapshot().headers!.header)).toEqual(['headerId', 'body']);
+            expect(Object.keys(document.getSnapshot().footers!.footer)).toEqual(['footerId', 'body']);
+        } finally {
+            document.dispose();
+        }
+    });
+
     it('inherits document styles and refreshes them without persisting duplicate styles in each note', () => {
         const document = createDocument();
         const jsonX = JSONX.getInstance();

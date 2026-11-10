@@ -51,7 +51,7 @@ export class DocDrawingPrintingController extends Disposable {
                                 if (visibleDrawingIds && !visibleDrawingIds.has(id)) {
                                     return;
                                 }
-                                const drawing = subUnitData.data[id];
+                                const drawing = this._docPrintInterceptorService.getDrawingForPrint(skeleton, subUnitData.data[id]);
                                 if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                                     this._drawingRenderService.renderDrawing(drawing, scene, { interactive: false });
                                 }
@@ -77,7 +77,7 @@ export class DocDrawingPrintingController extends Disposable {
                         const visibleDrawingIds = this._docPrintInterceptorService.getPageDrawingIds(skeleton, pageIndex);
                         if (subUnitData) {
                             const floatDomInfos = subUnitData.order.filter((id) => !visibleDrawingIds || visibleDrawingIds.has(id)).map((id) => {
-                                const drawing = subUnitData.data[id] as IDocFloatDom;
+                                const drawing = this._docPrintInterceptorService.getDrawingForPrint(skeleton, subUnitData.data[id]) as IDocFloatDom;
                                 if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
                                     return {
                                         ...drawing,

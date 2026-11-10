@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { IDocumentNoteDecoration } from '@univerjs/core';
+import { ColumnSeparatorType, CustomRangeType, DataStreamTreeTokenType, DocumentDataModel, GridType } from '@univerjs/core';
 import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonNote,
@@ -25,7 +26,6 @@ import type {
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { INoteReferenceLayout } from './note-numbering';
 import type { ILayoutContext } from './tools';
-import { ColumnSeparatorType, CustomRangeType, DocumentDataModel, GridType } from '@univerjs/core';
 import { DocumentSkeletonPageType } from '../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { DocumentViewModel } from '../view-model/document-view-model';
@@ -74,7 +74,9 @@ function lastFootnoteColumn(fragments: IDocumentSkeletonNote[]) {
     for (let index = columns.length - 1; index >= 0; index--) {
         const line = columns[index].lines[columns[index].lines.length - 1];
         if (line) {
-            return { index, top: line.top + line.lineHeight };
+            const endsParagraph = line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH));
+            const afterSpacing = endsParagraph ? Math.max(0, line.spaceBelowApply - line.marginBottom) : 0;
+            return { index, top: line.top + line.lineHeight + afterSpacing };
         }
     }
     return { index: 0, top: 0 };
@@ -169,6 +171,18 @@ export function layoutNoteSegment(
         updateInlineDrawingCoordsAndBorder(ctx, pages);
         expandCellPageHeightForInlineDrawings(pages);
         expandCellPageHeightForFlowTables(pages);
+        // Word reserves the final paragraph's after-spacing inside a note story.
+        for (const page of pages) {
+            for (const section of page.sections) {
+                for (const column of section.columns) {
+                    const line = column.lines[column.lines.length - 1];
+                    if (line?.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH))) {
+                        page.height = Math.max(page.height, section.top + line.top + line.lineHeight +
+                            Math.max(0, line.spaceBelowApply - line.marginBottom));
+                    }
+                }
+            }
+        }
         return pages;
     } finally {
         // Text run offsets are local to a segment. Never reuse a note's font cache for body text.
@@ -187,7 +201,7 @@ interface IPageFootnoteLayout {
 
 type FootnoteDecorationKind = IDocumentSkeletonNoteDecoration['kind'];
 
-export function defaultSeparatorBody(continued: boolean): IDocumentBody {
+export function defaultSeparatorBody(continued: boolean): IDocumentNoteDecoration {
     return {
         dataStream: '\uFFFC\r\n',
         paragraphs: [{ paragraphId: 'separator', startIndex: 1, paragraphStyle: { spaceAbove: { v: 0 }, spaceBelow: { v: 0 } } }],
@@ -475,7 +489,7 @@ export class DocumentFootnoteLayout {
         const firstReference = this._references.get(inherited.fragments[0]?.noteId ?? referenceIds[0]);
         const requestedCount = firstReference?.properties.columnCount ?? 0;
         const columnCount = requestedCount === 0 ? Math.max(1, config.columnProperties?.length ?? 1) : requestedCount;
-        const separator = this._layoutDecoration(inherited.fragments.some((fragment) => fragment.continued) ? 'continuationSeparator' : 'separator', page, config);
+        const separator = this._layoutDecoration(this._getSeparatorKind(inherited.fragments.some((fragment) => fragment.continued)), page, config);
         const available = Math.max(1, contentHeight - bodyBottom - (separator?.height ?? 0));
         let plan = this._layoutPageNotes(page, config, referenceIds, inherited, available, columnCount, separator);
         if (!plan) {
@@ -567,8 +581,12 @@ export class DocumentFootnoteLayout {
     /** Rebuild reservations after keep-lines or widow control relocates shaped lines. */
     reconcilePages(pages: IDocumentSkeletonPage[], config: ISectionBreakConfig): boolean {
         let fits = true;
-        for (const page of pages) {
-            this._inherited.delete(page);
+        for (let index = 0; index < pages.length; index++) {
+            const page = pages[index];
+            // The first page can inherit a continuation from a paragraph outside this move.
+            if (index > 0) {
+                this._inherited.delete(page);
+            }
             this._pages.delete(page);
             this._updateReferenceLabels(page, []);
             const bodyBottom = page.sections.reduce((bottom, section) => Math.max(
@@ -603,7 +621,7 @@ export class DocumentFootnoteLayout {
             separator,
         };
         const width = page.pageWidth - page.marginLeft - page.marginRight;
-        const continuationSeparator = this._layoutDecoration('continuationSeparator', page, config);
+        const continuationSeparator = this._layoutDecoration(this._getSeparatorKind(true), page, config);
         const notice = this._layoutDecoration('continuationNotice', page, config);
         const continuationHeight = page.pageHeight - page.marginTop - page.marginBottom -
             (continuationSeparator?.height ?? 0) - (notice?.height ?? 0);
@@ -669,6 +687,18 @@ export class DocumentFootnoteLayout {
         return plan;
     }
 
+    private _getSeparatorKind(continued: boolean): 'separator' | 'continuationSeparator' {
+        if (!continued) {
+            return 'separator';
+        }
+        const style = this._ctx.dataModel.documentStyle;
+        // Word 2013 layout reuses the ordinary footnote separator on continuation pages.
+        if (getDocumentCompatibilityPolicy(style.documentFlavor).mode === 'traditional' && Number(style.compatibilitySettings?.compatibilityMode) >= 15) {
+            return 'separator';
+        }
+        return 'continuationSeparator';
+    }
+
     private _layoutDecoration(kind: FootnoteDecorationKind, page: IDocumentSkeletonPage, config: ISectionBreakConfig): IDocumentSkeletonPage | undefined {
         const width = page.pageWidth - page.marginLeft - page.marginRight;
         const key = `${kind}:${config.sectionId}:${width}`;
@@ -681,7 +711,7 @@ export class DocumentFootnoteLayout {
             this._decorations.set(key, undefined);
             return undefined;
         }
-        const model = new DocumentDataModel({ id: `footnote-${kind}`, body, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
+        const model = new DocumentDataModel({ id: `footnote-${kind}`, body, tableSource: body.tableSource, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
         const viewModel = new DocumentViewModel(model);
         try {
             const pages = layoutNoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
@@ -744,7 +774,7 @@ export class DocumentFootnoteLayout {
         const previousPlan = previous == null ? undefined : this._pages.get(previous);
         const fragments = previousPlan?.following[0] ?? [];
         const separator = fragments.length > 0
-            ? this._layoutDecoration(fragments.some((fragment) => fragment.continued) ? 'continuationSeparator' : 'separator', page, config)
+            ? this._layoutDecoration(this._getSeparatorKind(fragments.some((fragment) => fragment.continued)), page, config)
             : undefined;
         const notice = (previousPlan?.following.length ?? 0) > 1 ? this._layoutDecoration('continuationNotice', page, config) : undefined;
         const plan: IPageFootnoteLayout = {
@@ -781,7 +811,7 @@ export class DocumentFootnoteLayout {
         page.footnoteHeight = plan.height;
         const decorations: IDocumentSkeletonNoteDecoration[] = [];
         if (plan.separator) {
-            decorations.push({ kind: plan.fragments.some((fragment) => fragment.continued) ? 'continuationSeparator' : 'separator', left: page.marginLeft, top: top - separatorHeight, page: plan.separator });
+            decorations.push({ kind: this._getSeparatorKind(plan.fragments.some((fragment) => fragment.continued)), left: page.marginLeft, top: top - separatorHeight, page: plan.separator });
         }
         if (plan.notice) {
             decorations.push({ kind: 'continuationNotice', left: page.marginLeft, top: top + footnoteContentHeight(plan.fragments), page: plan.notice });

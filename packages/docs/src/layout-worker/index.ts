@@ -18,31 +18,14 @@ import type { IMessageProtocol } from '@univerjs/rpc';
 import { DependentOn, Disposable, IConfigService, Inject, Injector, merge, Plugin, Tools } from '@univerjs/core';
 import { FontCache } from '@univerjs/engine-render';
 import { ChannelService, toModule } from '@univerjs/rpc';
-import { Observable, shareReplay } from 'rxjs';
-import type {
-    IDocLayoutCancelRequest,
-    IDocLayoutCreateSessionRequest,
-    IDocLayoutDisposeMountRequest,
-    IDocLayoutDisposeSessionRequest,
-    IDocLayoutExecutor,
-    IDocLayoutPageRequest,
-    IDocLayoutPageResult,
-    IDocLayoutPerformanceMetrics,
-    IDocLayoutStartRequest,
-    IDocLayoutStartResult,
-    IDocLayoutStepRequest,
-    IDocLayoutStepResult,
-} from '../services/doc-layout-executor.service';
+import { Observable, share } from 'rxjs';
+import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutExecutor, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
 import type { IDocsLayoutFontFace, IUniverDocsLayoutWorkerConfig } from './config/config';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import pkg from '../../package.json';
 import { UniverDocsPlugin } from '../plugin';
 import { DocLayoutExecutorService, DocLayoutExecutorType } from '../services/doc-layout-executor.service';
-import {
-    DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS,
-    defaultPluginDocsLayoutWorkerConfig,
-    DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY,
-} from './config/config';
+import { DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS, defaultPluginDocsLayoutWorkerConfig, DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY } from './config/config';
 import { collectDocumentFontFamilies, measureDocumentFontFamilies } from './document-font-metrics';
 import { DocsLayoutFontLoader } from './font-loader';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';
@@ -71,7 +54,7 @@ function createDocsLayoutWorkerMessageProtocol(
             const handler = (event: MessageEvent) => subscriber.next(event.data);
             worker.addEventListener('message', handler);
             return () => worker.removeEventListener('message', handler);
-        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
+        }).pipe(share()),
     };
 }
 

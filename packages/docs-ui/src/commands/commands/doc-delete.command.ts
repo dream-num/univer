@@ -49,6 +49,7 @@ import {
     IUniverInstanceService,
     JSONX,
     PositionedObjectLayoutType,
+    resolveDocumentParagraphBullet,
     sequenceExecuteAsync,
     SHEET_EDITOR_UNITS,
     TextX,
@@ -567,11 +568,16 @@ export const DeleteLeftCommand: ICommand<IDeleteBoundaryParams> = {
 
             const paragraphIndex = paragraph?.startIndex;
 
-            const updateParagraph: IParagraph = { startIndex: 0, paragraphId: paragraph.paragraphId };
+            const updateParagraph: IParagraph = { ...paragraph, startIndex: 0 };
 
             const paragraphStyle = paragraph.paragraphStyle;
 
             if (isBullet === true) {
+                if (resolveDocumentParagraphBullet(docDataModel.getSnapshot(), { styleId: paragraph.styleId })) {
+                    updateParagraph.bullet = null;
+                } else {
+                    delete updateParagraph.bullet;
+                }
                 if (paragraphStyle) {
                     updateParagraph.paragraphStyle = { ...paragraphStyle };
                     // TODO: It maybe need to update codes bellow when we support nested list.

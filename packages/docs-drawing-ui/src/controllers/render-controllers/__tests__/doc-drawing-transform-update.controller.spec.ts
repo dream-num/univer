@@ -16,28 +16,11 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import {
-    AlignTypeH,
-    AlignTypeV,
-    BooleanNumber,
-    DrawingTypeEnum,
-    ICommandService,
-    IImageIoService,
-    ImageSourceType,
-    IURLImageService,
-    JSONX,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PositionedObjectLayoutType,
-} from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { AlignTypeH, AlignTypeV, BooleanNumber, DocumentFlavor, DrawingTypeEnum, ICommandService, IImageIoService, ImageSourceType, IResourceManagerService, IURLImageService, JSONX, LocaleService, LocaleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, RedoCommand, UndoCommand } from '@univerjs/core';
+import { DocSkeletonManagerService, DocStateChangeManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { InsertDocDrawingCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import {
-    getDrawingShapeKeyByDrawingSearch,
-    IDrawingManagerService,
-    OleService,
-    SetDrawingSelectedOperation,
-} from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, OleService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
 import { DrawingUpdateController } from '@univerjs/drawing-ui/controllers/drawing-update.controller.ts';
 import { ImageUpdateController } from '@univerjs/drawing-ui/controllers/image-update.controller.ts';
@@ -46,6 +29,7 @@ import {
     DocumentSkeletonPageType,
     Liquid,
     Rect,
+    registerDocumentReferenceLayoutResolver,
     setDocsTableRenderViewportProvider,
 } from '@univerjs/engine-render';
 import {
@@ -68,19 +52,7 @@ import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transfor
 import { createDocDrawingTestBed } from '../../../__tests__/create-doc-drawing-test-bed';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
-import {
-    DocDrawingPublicationTracker,
-    DocDrawingTransformUpdateController,
-    getDocsDrawingBehindText,
-    getDocsDrawingClipPage,
-    getDocsDrawingPageClipBounds,
-    getDocsOverlayRuntimeDrawing,
-    getDocsPageRelativeDrawingAnchorPage,
-    getDocsPageRelativeDrawingLeft,
-    getDocsPageRelativeDrawingTop,
-    getDocsTableCellDrawingOffset,
-    shouldRefreshDocDrawingTransform,
-} from '../doc-drawing-transform-update.controller';
+import { DocDrawingPublicationTracker, DocDrawingTransformUpdateController, getDocsDrawingBehindText, getDocsDrawingClipPage, getDocsDrawingPageClipBounds, getDocsOverlayRuntimeDrawing, getDocsPageRelativeDrawingAnchorPage, getDocsPageRelativeDrawingLeft, getDocsPageRelativeDrawingTop, getDocsTableCellDrawingOffset, shouldRefreshDocDrawingTransform } from '../doc-drawing-transform-update.controller';
 
 async function createRepeatedImageTestBed(unitId: string) {
     const testBed = createDocDrawingTestBed(unitId);
@@ -1483,5 +1455,233 @@ describe('DocDrawingTransformUpdateController', () => {
                 behindDoc: BooleanNumber.FALSE,
             },
         } as never)).toBe(false);
+    });
+
+    it('commits readonly reference pictures and keeps their resources correct through undo and redo', async () => {
+        vi.useFakeTimers();
+        const unitId = 'readonly-reference-picture-commit';
+        const { univer, model, render, manager, commands } = await createRepeatedImageTestBed(unitId);
+        const skeletonManager = render.with(DocSkeletonManagerService);
+        const skeleton = skeletonManager.getSkeleton();
+        const source = JSON.stringify(model.getSnapshot());
+        const resource = univer.__getInjector().get(IResourceManagerService).getAllResourceHooks().find((hook) => hook.pluginName === 'DOC_DRAWING_PLUGIN')!;
+        const saved = resource.toJson(unitId);
+        const search = { unitId, subUnitId: unitId, drawingId: 'reference-picture' };
+        const picture = {
+            ...model.getDrawings()!.b,
+            ...search,
+            source: 'cached-header-image',
+            imageSourceType: ImageSourceType.BASE64,
+            layoutType: PositionedObjectLayoutType.INLINE,
+        };
+        const registration = registerDocumentReferenceLayoutResolver(model, {
+            hasReferences: () => true,
+            project: (document) => document.drawings?.[search.drawingId]
+                ? undefined
+                : {
+                    ...document,
+                    body: {
+                        ...document.body!,
+                        customBlocks: document.body!.customBlocks!.map((block) => block.blockId === 'b'
+                            ? { ...block, blockId: search.drawingId }
+                            : block),
+                    },
+                    drawings: { ...document.drawings, [search.drawingId]: picture },
+                    drawingsOrder: [...document.drawingsOrder!, search.drawingId],
+                },
+        });
+        try {
+            skeleton.makeDirty(true);
+            skeletonManager.recalculate();
+            await vi.advanceTimersByTimeAsync(34);
+            expect(manager.getDrawingByParam(search)).toMatchObject({ selectable: false });
+            expect(resource.toJson(unitId)).toBe(saved);
+            expect(JSON.stringify(model.getSnapshot())).toBe(source);
+            expect(commands.syncExecuteCommand(InsertDocDrawingCommand.id, {
+                unitId,
+                drawings: [picture],
+                textRange: { startOffset: 0, endOffset: 0 },
+            })).toBe(true);
+            univer.__getInjector().get(DocStateChangeManagerService).flushPendingChanges(unitId);
+            await vi.advanceTimersByTimeAsync(34);
+            expect(model.getDrawings()![search.drawingId]).toBeDefined();
+            expect(manager.getDrawingByParam(search)).toBeDefined();
+            expect(manager.getDrawingByParam(search)?.selectable).not.toBe(false);
+            expect(render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))!.evented).toBe(true);
+            expect(resource.toJson(unitId)).toContain(search.drawingId);
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            await vi.advanceTimersByTimeAsync(34);
+            expect(model.getDrawings()![search.drawingId]).toBeUndefined();
+            expect(manager.getDrawingByParam(search)).toMatchObject({ selectable: false });
+            expect(render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))!.evented).toBe(false);
+            expect(resource.toJson(unitId)).toBe(saved);
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            await vi.advanceTimersByTimeAsync(34);
+            expect(model.getDrawings()![search.drawingId]).toBeDefined();
+            expect(manager.getDrawingByParam(search)).toBeDefined();
+            expect(manager.getDrawingByParam(search)?.selectable).not.toBe(false);
+            expect(new Set(manager.getDrawingOrder(unitId, unitId)).size).toBe(manager.getDrawingOrder(unitId, unitId).length);
+            expect(render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))!.evented).toBe(true);
+            expect(resource.toJson(unitId)).toContain(search.drawingId);
+        } finally {
+            registration.dispose();
+            univer.dispose();
+            vi.useRealTimers();
+        }
+    });
+
+    it('renders transient reference pictures and removes them without saving or editing their resources', async () => {
+        vi.useFakeTimers();
+        const unitId = 'readonly-reference-pictures';
+        const bed = await createRepeatedImageTestBed(unitId);
+        const { univer, model, render, manager } = bed;
+        const skeletonManager = render.with(DocSkeletonManagerService);
+        const skeleton = skeletonManager.getSkeleton();
+        const source = JSON.stringify(model.getSnapshot());
+        const resource = univer.__getInjector().get(IResourceManagerService).getAllResourceHooks().find((hook) => hook.pluginName === 'DOC_DRAWING_PLUGIN')!;
+        const saved = resource.toJson(unitId);
+        const registration = registerDocumentReferenceLayoutResolver(model, {
+            hasReferences: () => true,
+            project: (document) => document.drawings?.['reference-picture']
+                ? undefined
+                : {
+                    ...document,
+                    body: {
+                        ...document.body!,
+                        customBlocks: document.body!.customBlocks!.map((block) => block.blockId === 'b'
+                            ? { ...block, blockId: 'reference-picture' }
+                            : block),
+                    },
+                    drawings: {
+                        ...document.drawings,
+                        'reference-picture': {
+                            ...document.drawings!.b,
+                            drawingId: 'reference-picture',
+                            imageSourceType: ImageSourceType.BASE64,
+                            source: 'cached-header-image',
+                            layoutType: PositionedObjectLayoutType.INLINE,
+                        },
+                    },
+                    drawingsOrder: [...document.drawingsOrder!, 'reference-picture'],
+                },
+        });
+        try {
+            skeleton.makeDirty(true);
+            skeletonManager.recalculate();
+            await vi.advanceTimersByTimeAsync(34);
+            const search = { unitId, subUnitId: unitId, drawingId: 'reference-picture' };
+            expect(manager.getDrawingByParam(search)).toBeDefined();
+            const image = render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search));
+            expect(image).toBeDefined();
+            expect(image!.evented).toBe(false);
+            expect(JSON.stringify(model.getSnapshot())).toBe(source);
+            expect(resource.toJson(unitId)).toBe(saved);
+
+            registration.dispose();
+            skeleton.makeDirty(true);
+            skeletonManager.recalculate();
+            await vi.advanceTimersByTimeAsync(34);
+            expect(manager.getDrawingByParam(search)).toBeUndefined();
+            expect(render.scene.getObject(getDrawingShapeKeyByDrawingSearch(search))).toBeUndefined();
+            expect(JSON.stringify(model.getSnapshot())).toBe(source);
+            expect(resource.toJson(unitId)).toBe(saved);
+        } finally {
+            registration.dispose();
+            univer.dispose();
+            vi.useRealTimers();
+        }
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL].flatMap((documentFlavor) =>
+        [false, true].map((hasFlowBreak) => ({ documentFlavor, hasFlowBreak }))
+    ))('moves page-relative overlays immediately and restores them through undo and redo ($documentFlavor, flow break: $hasFlowBreak)', async ({ documentFlavor, hasFlowBreak }) => {
+        const unitId = `overlay-edit-${documentFlavor}-${hasFlowBreak}`;
+        const { univer, model, render } = createDocDrawingTestBed(unitId);
+        try {
+            const injector = univer.__getInjector();
+            const locale = injector.get(LocaleService);
+            locale.load({ [LocaleType.EN_US]: {} });
+            locale.setLocale(LocaleType.EN_US);
+            locale.setDirection('ltr');
+            const snapshot = model.getSnapshot();
+            snapshot.documentStyle!.documentFlavor = documentFlavor;
+            snapshot.drawings!.b.docTransform.positionV = { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 30 };
+            if (hasFlowBreak) {
+                snapshot.body!.paragraphs![1].paragraphStyle = { pageBreakBefore: BooleanNumber.TRUE };
+            }
+            model.reset(snapshot);
+            const drawings = injector.get(IDrawingManagerService);
+            const source = model.getDrawings()!.b;
+            Object.assign(drawings.getDrawingByParam(source)!, source);
+            const skeletonManager = render.with(DocSkeletonManagerService);
+            skeletonManager.getViewModel().reset(model);
+            skeletonManager.getSkeleton().makeDirty(true);
+            skeletonManager.recalculate();
+            injector.add([IEditorService, { useClass: EditorService }]);
+            render.mainComponent = new Documents(`${unitId}-document`);
+            render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
+            render.with(DocDrawingTransformUpdateController);
+            const commands = injector.get(ICommandService);
+            const skeleton = skeletonManager.getSkeleton();
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(documentFlavor === DocumentFlavor.TRADITIONAL && hasFlowBreak ? 2 : 1);
+            expect(Number.isFinite(pages[0].pageHeight)).toBe(documentFlavor === DocumentFlavor.TRADITIONAL);
+            const before = JSON.stringify(model.getSnapshot());
+            const position = () => ({ ...drawings.getDrawingByParam(source)!.transform! });
+            const initial = position();
+            expect(commands.syncExecuteCommand(UpdateDrawingDocTransformCommand.id, {
+                unitId,
+                subUnitId: unitId,
+                drawings: [{ drawingId: 'b', key: 'positionV', value: {
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 67,
+                } }],
+            })).toBe(true);
+            expect(model.getDrawings()!.b.docTransform.positionV.posOffset).toBe(67);
+            expect(position()).toMatchObject({ left: initial.left, top: initial.top! + 37 });
+            expect(skeleton.getSkeletonData()!.pages).toBe(pages);
+            const after = JSON.stringify(model.getSnapshot());
+            injector.get(DocStateChangeManagerService).flushPendingChanges(unitId);
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+            expect(position()).toEqual(initial);
+            expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+            expect(JSON.stringify(model.getSnapshot())).toBe(after);
+            expect(position()).toMatchObject({ left: initial.left, top: initial.top! + 37 });
+            expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+            expect(position()).toEqual(initial);
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+        }
+    });
+
+    it.each([
+        { positionH: { posOffset: 348.4 }, expected: 424 },
+        { positionH: { align: AlignTypeH.LEFT }, expected: 75.6 },
+        { positionH: { align: AlignTypeH.CENTER }, expected: 235.8 },
+        { positionH: { align: AlignTypeH.RIGHT }, expected: 396 },
+        { positionH: { percent: 0.25 }, expected: 237.7 },
+    ])('positions margin-relative drawings once within asymmetric body margins ($expected)', ({ positionH, expected }) => {
+        expect(getDocsPageRelativeDrawingLeft({
+            hostPage: { pageWidth: 800, marginLeft: 75.6, marginRight: 76 },
+            positionH: { ...positionH, relativeFrom: ObjectRelativeFromH.MARGIN },
+            width: 328,
+        })).toBeCloseTo(expected);
+    });
+
+    it.each([
+        { posOffset: 74.66666666666667 },
+        { align: AlignTypeV.TOP },
+        { align: AlignTypeV.CENTER },
+        { align: AlignTypeV.BOTTOM },
+        { percent: 0.25 },
+    ])('keeps the measured flow position for a page-relative drawing in a continuous document (%o)', (positionV) => {
+        expect(getDocsPageRelativeDrawingTop({
+            hostPage: { pageHeight: Number.POSITIVE_INFINITY },
+            positionV: { ...positionV, relativeFrom: ObjectRelativeFromV.PAGE },
+            height: 486,
+        })).toBeUndefined();
     });
 });

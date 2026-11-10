@@ -14,35 +14,53 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentData, IParagraphStyle } from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
     BulletAlignment,
+    CustomRangeType,
+    DashStyleType,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentBlockRangeType,
+    DocumentDataModel,
     DocumentFlavor,
     GridType,
     HorizontalAlign,
     ListGlyphType,
+    LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    SectionType,
     SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
     TableTextWrapType,
+    TabStopAlignment,
+    Univer,
+    VerticalAlignmentType,
     WrapTextType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonPage } from '../../../../../../basics/i-document-skeleton-cached';
+import wordHangingBorders from '../../../../__tests__/fixtures/word-hanging-paragraph-borders.json';
 import { GlyphType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
+import { Documents } from '../../../../document';
 import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
+import { DocumentViewModel } from '../../../../view-model/document-view-model';
 import { DocumentSkeleton } from '../../../doc-skeleton';
 import { FontCache } from '../../../shaping-engine/font-cache';
 import { updateInlineDrawingCoordsAndBorder } from '../../../tools';
-import { lineBreaking } from '../linebreaking';
+import { lineBreaking, resolveDocumentParagraphNumbering } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed, createSectionLayoutTestBed } from './create-paragraph-layout-test-bed';
+import wordParagraphSeparators from './fixtures/word-paragraph-separator-spacing.json';
 
 function createContext() {
     return {
@@ -62,6 +80,121 @@ function paragraphLines(page: IDocumentSkeletonPage, paragraphIndex: number) {
             column.lines.filter((line) => line.paragraphIndex === paragraphIndex)
         )
     );
+}
+
+interface IReferenceSpacingScenario {
+    documentFlavor: DocumentFlavor;
+    automaticBefore: boolean;
+    beforePoints?: number;
+    afterPoints?: number;
+    automaticAfter?: boolean;
+    fixedSpacing?: boolean;
+    firstOnly?: boolean;
+    contextual?: boolean;
+    stylePoints?: number;
+    runPoints?: number;
+}
+
+function referenceSpacingBaseline(scenario: IReferenceSpacingScenario): number {
+    const first = scenario.firstOnly ? '' : 'Anchor line\r';
+    const target = 'Reference heading \x1F1\x1E\r';
+    const stream = `${first}${target}\n`;
+    const univer = new Univer();
+    const locale = univer.__getInjector().get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: {} });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    const fieldStart = first.length + target.indexOf('\x1F');
+    const model = new DocumentDataModel({
+        id: 'reference-auto-spacing',
+        body: {
+            dataStream: stream,
+            textRuns: [
+                { st: 0, ed: first.length, ts: { ff: 'Times New Roman', fs: 12 } },
+                { st: first.length, ed: stream.length, ts: { ff: 'Times New Roman', fs: scenario.runPoints ?? 12 } },
+            ],
+            paragraphs: [
+                ...(first
+                    ? [{
+                        startIndex: first.length - 1,
+                        paragraphId: 'anchor',
+                        styleId: scenario.contextual ? 'ReferenceControl' : 'Normal',
+                        paragraphStyle: {
+                            lineSpacing: 1,
+                            beforeAutoSpacing: BooleanNumber.FALSE,
+                            spaceAbove: { v: 0 },
+                            afterAutoSpacing: scenario.automaticAfter ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                            spaceBelow: { v: (scenario.afterPoints ?? 0) * 96 / 72 },
+                        },
+                    }]
+                    : []),
+                {
+                    startIndex: stream.length - 2,
+                    paragraphId: 'reference',
+                    styleId: 'ReferenceControl',
+                    paragraphStyle: {
+                        lineSpacing: 1,
+                        ...(scenario.automaticBefore ? {} : { beforeAutoSpacing: BooleanNumber.FALSE }),
+                        spaceAbove: { v: (scenario.beforePoints ?? 5) * 96 / 72 },
+                        afterAutoSpacing: BooleanNumber.FALSE,
+                        spaceBelow: { v: 0 },
+                        paragraphMarkTextStyle: { ff: 'Times New Roman', fs: 12 },
+                    },
+                },
+            ],
+            sectionBreaks: [{ startIndex: stream.length - 1, sectionId: 'section' }],
+            customRanges: [{
+                startIndex: fieldStart,
+                endIndex: fieldStart + 2,
+                rangeId: 'reference-field',
+                rangeType: CustomRangeType.FIELD,
+                properties: { fieldType: 'SEQ', instruction: 'SEQ RefSpacingControl', cachedResult: '1', sourceKind: 'complex' },
+            }],
+        },
+        styles: {
+            Normal: { name: 'Normal', type: DocStyleType.paragraph, textStyle: { ff: 'Times New Roman', fs: 12 } },
+            ReferenceParent: {
+                name: 'Reference parent',
+                type: DocStyleType.paragraph,
+                basedOn: 'Normal',
+                textStyle: { fs: scenario.stylePoints ?? 14 },
+                paragraphStyle: {
+                    beforeAutoSpacing: BooleanNumber.TRUE,
+                    ...(scenario.contextual ? { contextualSpacing: BooleanNumber.TRUE } : {}),
+                },
+            },
+            ReferenceControl: { name: 'Reference control', type: DocStyleType.paragraph, basedOn: 'ReferenceParent' },
+        },
+        documentStyle: {
+            documentFlavor: scenario.documentFlavor,
+            defaultParagraphStyleId: 'Normal',
+            autoHyphenation: BooleanNumber.FALSE,
+            compatibilityFlags: { doNotUseHTMLParagraphAutoSpacing: scenario.fixedSpacing ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+            pageSize: { width: 816, height: 1056 },
+            marginTop: 96,
+            marginBottom: 96,
+            marginLeft: 96,
+            marginRight: 96,
+        },
+    });
+    const before = JSON.stringify(model.getSnapshot());
+    const viewModel = new DocumentViewModel(model);
+    const skeleton = DocumentSkeleton.create(viewModel, locale);
+    try {
+        skeleton.calculate();
+        const lines = skeleton.getSkeletonData()!.pages.flatMap((page) =>
+            page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))
+        );
+        const line = lines.find((line) => line.paragraphIndex === stream.length - 2)!;
+        expect(line).toBeDefined();
+        expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        return line.top + line.marginTop + line.paddingTop + line.asc;
+    } finally {
+        skeleton.dispose();
+        viewModel.dispose();
+        model.dispose();
+        univer.dispose();
+    }
 }
 
 function paginationSignature(pages: IDocumentSkeletonPage[]) {
@@ -112,6 +245,51 @@ describe('linebreaking', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         setDocsCustomBlockRenderViewportProvider(null);
+    });
+
+    describe('Word automatic spacing around reference paragraphs', () => {
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+            [10, 14, 20].flatMap((stylePoints) => [8, 12, 18].map((runPoints) => ({ documentFlavor, stylePoints, runPoints })))
+        ))('uses HTML automatic before spacing independent of reference fonts ($documentFlavor, $stylePoints, $runPoints)', (scenario) => {
+            const explicit = referenceSpacingBaseline({ ...scenario, automaticBefore: false });
+            const automatic = referenceSpacingBaseline({ ...scenario, automaticBefore: true });
+            expect(automatic - explicit).toBeCloseTo(12, 6);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('uses HTML automatic after spacing before a reference (%s)', (documentFlavor) => {
+            const scenario = { documentFlavor, automaticBefore: false, beforePoints: 0, afterPoints: 5 };
+            expect(referenceSpacingBaseline({ ...scenario, automaticAfter: true }) - referenceSpacingBaseline(scenario)).toBeCloseTo(12, 6);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('suppresses HTML automatic before spacing at the first reference (%s)', (documentFlavor) => {
+            const scenario = { documentFlavor, firstOnly: true };
+            expect(referenceSpacingBaseline({ ...scenario, automaticBefore: true })).toBeCloseTo(
+                referenceSpacingBaseline({ ...scenario, automaticBefore: false, beforePoints: 0 }),
+                6
+            );
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('collapses adjacent HTML automatic spacing around a reference (%s)', (documentFlavor) => {
+            const scenario = { documentFlavor, automaticBefore: true, afterPoints: 5 };
+            expect(referenceSpacingBaseline({ ...scenario, automaticAfter: true })).toBeCloseTo(referenceSpacingBaseline(scenario), 6);
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+            [0, 5, 50].map((beforePoints) => ({ documentFlavor, beforePoints }))
+        ))('retains explicit fixed spacing around a reference ($documentFlavor, $beforePoints)', (scenario) => {
+            expect(referenceSpacingBaseline({ ...scenario, automaticBefore: true, fixedSpacing: true })).toBeCloseTo(
+                referenceSpacingBaseline({ ...scenario, automaticBefore: false, fixedSpacing: true }),
+                6
+            );
+        });
+
+        it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('applies contextual suppression after automatic reference spacing (%s)', (documentFlavor) => {
+            const scenario = { documentFlavor, contextual: true };
+            expect(referenceSpacingBaseline({ ...scenario, automaticBefore: true })).toBeCloseTo(
+                referenceSpacingBaseline({ ...scenario, automaticBefore: false, beforePoints: 0 }),
+                6
+            );
+        });
     });
 
     it('lays out short text on a single page', () => {
@@ -754,6 +932,54 @@ describe('linebreaking', () => {
             retryCount: 0,
             movedLineCount: 0,
         });
+    });
+
+    it.each([1, 2])('keeps a list marker with its text after %s leading manual page breaks', (breakCount) => {
+        const content = `${DataStreamTreeTokenType.PAGE_BREAK.repeat(breakCount)}Copyright notice`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { paragraphs: [{ startIndex: content.length, styleId: 'Preface' }] },
+            styles: {
+                Preface: {
+                    name: 'Preface',
+                    type: DocStyleType.paragraph,
+                    bullet: { listId: 'preface-list', listType: 'preface', nestingLevel: 0 },
+                },
+            },
+            lists: {
+                preface: {
+                    listType: 'preface',
+                    counterIds: ['preface-list'],
+                    nestingLevel: [{
+                        bulletAlignment: BulletAlignment.START,
+                        glyphFormat: '%1.',
+                        startNumber: 0,
+                        glyphType: ListGlyphType.DECIMAL,
+                    }],
+                },
+            },
+        });
+        const pages = lineBreaking(
+            bed.ctx,
+            bed.viewModel,
+            shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig),
+            bed.curPage,
+            bed.paragraphNode,
+            bed.sectionBreakConfig,
+            null
+        );
+        const listMarkers = pages.map((page) => page.sections
+            .flatMap((section) => section.columns)
+            .flatMap((column) => column.lines)
+            .flatMap((line) => line.divides)
+            .flatMap((divide) => divide.glyphGroup)
+            .filter((glyph) => glyph.glyphType === GlyphType.LIST)
+            .map((glyph) => glyph.content));
+
+        expect(pages).toHaveLength(breakCount + 1);
+        expect(listMarkers).toEqual([...Array.from({ length: breakCount }, () => []), ['1.']]);
+        expect(pageText(pages[breakCount])).toContain('1.Copyright notice');
+        expect(bed.ctx.paragraphConfigCache.get(bed.curPage.segmentId)).toHaveLength(1);
     });
 
     it('renders a list marker only once when a bullet paragraph ends with a manual page break', () => {
@@ -1899,6 +2125,147 @@ describe('linebreaking', () => {
         expect(bed.viewModel.getBody()!.paragraphs![0].paragraphStyle!.spaceBelow!.v).toBe(12);
     });
 
+    it.each([0, 80])('keeps entry text inside a right indent of %s before its page-number tab', (rightIndent) => {
+        const content = '1\tAlpha beta gamma\t12';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 240, height: 600 } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphId: 'toc-right-indent', paragraphStyle: {
+                indentStart: { v: 40 },
+                hanging: { v: 40 },
+                indentEnd: { v: rightIndent },
+                tabStops: [{ offset: 40, alignment: TabStopAlignment.START }, { offset: 200, alignment: TabStopAlignment.END }],
+            } }] },
+        });
+        try {
+            const { ctx, paragraphNode, viewModel, curPage, sectionBreakConfig } = bed;
+            lineBreaking(ctx, viewModel, shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig), curPage, paragraphNode, sectionBreakConfig, null);
+            const lines = curPage.sections[0].columns[0].lines;
+            expect(lines.length).toBe(rightIndent > 0 ? 2 : 1);
+            if (rightIndent > 0) {
+                expect(lines[0].divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.content).join('')).toBe('1\tAlpha beta ');
+            }
+            const lastDivide = lines[lines.length - 1].divides[0];
+            const pageNumber = lastDivide.glyphGroup.filter((glyph) => glyph.content === '2').pop()!;
+            expect(lastDivide.left + lastDivide.paddingLeft + pageNumber.left + pageNumber.width).toBeCloseTo(200);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(wordHangingBorders.cases.flatMap((entry) => [
+        { ...entry, flavor: DocumentFlavor.TRADITIONAL },
+        { ...entry, flavor: DocumentFlavor.MODERN },
+    ]))('uses the paragraph-border extent for $name (flavor $flavor)', (entry) => {
+        const content = entry.wrapped
+            ? '1\tA numbered directory entry that wraps onto another line. '.repeat(5)
+            : '1\tA numbered directory entry';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: entry.flavor },
+            body: { paragraphs: [{ startIndex: content.length, paragraphId: 'word-border-control', paragraphStyle: {
+                spacingRule: SpacingRule.EXACT,
+                lineSpacing: 20,
+                indentStart: { v: entry.indentStart },
+                indentFirstLine: { v: entry.indentFirstLine },
+                hanging: { v: entry.hanging },
+                borderBottom: { color: { rgb: '#000000' }, width: 2 / 3, padding: 0, style: 'single' },
+            } }] },
+        });
+        const { ctx, paragraphNode, viewModel, curPage, sectionBreakConfig } = bed;
+        lineBreaking(ctx, viewModel, shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig), curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = curPage.sections[0].columns[0].lines;
+        const line = lines[lines.length - 1];
+        const skeleton = DocumentSkeleton.create(viewModel, ctx.docsConfig.localeService);
+        const documents = new Documents('word-hanging-border', skeleton);
+        const draw = vi.spyOn(documents as unknown as {
+            _drawBorder: (...args: unknown[]) => void;
+        }, '_drawBorder').mockImplementation(() => undefined);
+        Reflect.set(documents, '_drawLiquid', { x: 0, y: 0 });
+        try {
+            if (entry.wrapped) {
+                expect(lines.length).toBeGreaterThan(1);
+            }
+            expect(line.paragraphPaddingLeft).toBe(entry.indentStart);
+            line.borderBottom = viewModel.getBody()!.paragraphs![0].paragraphStyle!.borderBottom;
+            Reflect.get(documents, '_drawParagraphBorders').call(documents, {}, curPage, line);
+            expect(draw).toHaveBeenCalledTimes(1);
+            const position = draw.mock.calls[0][3] as { startX: number };
+            const actualOffset = position.startX - (curPage.marginLeft - 2);
+            const expectedOffset = entry.flavor === DocumentFlavor.TRADITIONAL
+                ? entry.actualWordLeftOffsetPixels
+                : entry.indentStart + 2;
+            expect(Math.abs(actualOffset - expectedOffset)).toBeLessThan(wordHangingBorders.coordinateTolerancePixels);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(wordParagraphSeparators.exactCases)('honors measured Word separator padding ($id)', ({ control, actualWordBaselineDeltaPixels }) => {
+        const border = { color: { rgb: '#000000' }, padding: control.topPadding, width: 1, dashStyle: DashStyleType.SOLID };
+        const paragraphStyle: IParagraphStyle = {
+            spacingRule: SpacingRule.EXACT,
+            lineSpacing: 20,
+            spaceAbove: { v: control.before },
+            spaceBelow: { v: control.after },
+            borderTop: border,
+            borderBetween: { ...border, padding: control.betweenPadding },
+        };
+        const bed = createSectionLayoutTestBed(['AAA', 'BBB'], {
+            body: { paragraphs: [3, 7].map((startIndex) => ({ startIndex, paragraphStyle })) },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const before = JSON.stringify(bed.dataModel.getSnapshot());
+        try {
+            for (const [index, node] of bed.sectionNode.children.entries()) {
+                lineBreaking(bed.ctx, bed.viewModel, shaping(bed.ctx, node.content!, bed.viewModel, node, bed.sectionBreakConfig), bed.curPage, node, bed.sectionBreakConfig, null, false, bed.sectionNode.children[index + 1]);
+            }
+            const baselines = bed.curPage.sections[0].columns[0].lines.map((line) => line.top + line.marginTop + line.paddingTop + line.asc);
+            expect(baselines).toHaveLength(2);
+            expect(Math.abs(baselines[1] - baselines[0] - actualWordBaselineDeltaPixels)).toBeLessThan(wordParagraphSeparators.coordinateTolerancePixels);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(wordParagraphSeparators.compatibilityPairs)('honors measured Word fixed-spacing compatibility ($id)', ({ control, actualWordCompatibilityGapDifferencePixels }) => {
+        const gaps = [false, true].map((fixedSpacing) => {
+            const border = { color: { rgb: '#000000' }, padding: control.topPadding, width: 1, dashStyle: DashStyleType.SOLID };
+            const paragraphStyle: IParagraphStyle = {
+                lineSpacing: 1,
+                spaceAbove: { v: control.before },
+                spaceBelow: { v: control.after },
+                ...(control.borders ? { borderTop: border, borderBetween: { ...border, padding: control.betweenPadding } } : {}),
+            };
+            const bed = createSectionLayoutTestBed(['AAA', 'BBB'], {
+                styles: control.named ? { Control: { name: 'Control', type: DocStyleType.paragraph, paragraphStyle } } : {},
+                body: { paragraphs: [3, 7].map((startIndex) => ({ startIndex, ...(control.named ? { styleId: 'Control' } : { paragraphStyle }) })) },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    compatibilityFlags: { doNotUseHTMLParagraphAutoSpacing: fixedSpacing ? BooleanNumber.TRUE : BooleanNumber.FALSE },
+                },
+            });
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            try {
+                for (const [index, node] of bed.sectionNode.children.entries()) {
+                    lineBreaking(bed.ctx, bed.viewModel, shaping(bed.ctx, node.content!, bed.viewModel, node, bed.sectionBreakConfig), bed.curPage, node, bed.sectionBreakConfig, null, false, bed.sectionNode.children[index + 1]);
+                }
+                const baselines = bed.curPage.sections[0].columns[0].lines.map((line) => line.top + line.marginTop + line.paddingTop + line.asc);
+                expect(baselines).toHaveLength(2);
+                expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+                return baselines[1] - baselines[0];
+            } finally {
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            }
+        });
+        expect(Math.abs(gaps[1] - gaps[0] - actualWordCompatibilityGapDifferencePixels)).toBeLessThan(wordParagraphSeparators.coordinateTolerancePixels);
+    });
+
     it.each([0, 2])('adds traditional border clearance outside collapsed paragraph spacing (width %s)', (width) => {
         const border = { color: { rgb: '#000000' }, padding: 3, width };
         const borderSpace = width > 0 ? 5 : 0;
@@ -1949,6 +2316,32 @@ describe('linebreaking', () => {
         expect(lines[0].borderTopSpace).toBe(5);
         expect(lines[lines.length - 1].borderBottomSpace).toBe(5);
         expect(lines.reduce((height, line) => height + line.lineHeight, 0)).toBe(lines.length * 20 + 10);
+    });
+
+    it('reserves the full ink and gap extent of a compound paragraph border', () => {
+        const border = { color: { rgb: '#000000' }, padding: 1, width: 4, style: 'thinThickSmallGap' };
+        const bed = createParagraphLayoutTestBed('A', {
+            body: { paragraphs: [{ startIndex: 1, paragraphStyle: {
+                spacingRule: SpacingRule.EXACT,
+                lineSpacing: 20,
+                borderTop: border,
+                borderBottom: border,
+            } }] },
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        try {
+            const { ctx, paragraphNode, viewModel, curPage, sectionBreakConfig } = bed;
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const line = curPage.sections[0].columns[0].lines[0];
+            expect(line.borderTopSpace).toBe(7);
+            expect(line.borderBottomSpace).toBe(7);
+            expect(line.lineHeight).toBe(34);
+            expect(bed.viewModel.getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toEqual(border);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     it('paginates a bordered paragraph when its text fits but its border does not', () => {
@@ -2003,7 +2396,7 @@ describe('linebreaking', () => {
                 lineBreaking(bed.ctx, bed.viewModel, shaping(bed.ctx, node.content!, bed.viewModel, node, bed.sectionBreakConfig), bed.curPage, node, bed.sectionBreakConfig, null, false, bed.sectionNode.children[index + 1]);
             }
             const lines = bed.curPage.sections[0].columns[0].lines;
-            expect(lines.map((line) => line.borderTopSpace ?? 0)).toEqual([5, 0]);
+            expect(lines.map((line) => line.borderTopSpace ?? 0)).toEqual([5, borderBetween ? 3 : 0]);
             expect(lines.map((line) => line.borderBottomSpace ?? 0)).toEqual([borderBetween ? 5 : 0, 5]);
         }
     );
@@ -2246,7 +2639,7 @@ describe('linebreaking', () => {
         }
     });
 
-    it.each(['\f', '\f\f', '\fText', '\t\f', ' ', ''])('retains list data while suppressing page-break-only markers (%j)', (middle) => {
+    it.each(['\f', '\f\f', '\fText', '\t\f', ' ', ''])('counts authored page-break-only paragraphs without changing list data (%j)', (middle) => {
         const contents = ['First', middle, 'Second'];
         let end = 0;
         const bullet = { listId: 'list-1', listType: 'numbered', nestingLevel: 0 };
@@ -2264,7 +2657,7 @@ describe('linebreaking', () => {
         try {
             skeleton.calculate();
             const markers = skeleton.getSkeletonData()!.pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.filter((glyph) => glyph.glyphType === GlyphType.LIST).map((glyph) => glyph.content))))));
-            expect(markers).toEqual(/^\f+$/.test(middle) ? ['1.', '2.'] : ['1.', '2.', '3.']);
+            expect(markers).toEqual(['1.', '2.', '3.']);
             expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(snapshot);
         } finally {
             skeleton.dispose();
@@ -2584,6 +2977,257 @@ describe('linebreaking', () => {
         const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
         expect(result.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it.each([false, true])('excludes oversized whitespace from a visible traditional line (leading: %s)', (leading) => {
+        const stream = `${leading ? '   Text' : 'Text   '}\r\n`;
+        const whitespaceStart = leading ? 0 : 'Text'.length;
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const measureLine = (largeWhitespace: boolean) => {
+            const model = new DocumentDataModel({
+                id: `whitespace-height-${leading}-${largeWhitespace}`,
+                body: {
+                    dataStream: stream,
+                    textRuns: [
+                        { st: 0, ed: whitespaceStart, ts: { ff: 'Times New Roman', fs: 12 } },
+                        { st: whitespaceStart, ed: whitespaceStart + 3, ts: { ff: 'Times New Roman', fs: largeWhitespace ? 60 : 12 } },
+                        { st: whitespaceStart + 3, ed: stream.length, ts: { ff: 'Times New Roman', fs: 12 } },
+                    ].filter((run) => run.st < run.ed),
+                    paragraphs: [{
+                        startIndex: stream.length - 2,
+                        paragraphId: 'visible-line',
+                        paragraphStyle: { lineSpacing: 1.5, paragraphMarkTextStyle: { ff: 'Times New Roman', fs: 12 } },
+                    }],
+                    sectionBreaks: [{ startIndex: stream.length - 1, sectionId: 'section' }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    autoHyphenation: BooleanNumber.FALSE,
+                    pageSize: { width: 816, height: 1056 },
+                    marginTop: 96,
+                    marginBottom: 96,
+                    marginLeft: 96,
+                    marginRight: 96,
+                },
+            });
+            const before = JSON.stringify(model.getSnapshot());
+            const viewModel = new DocumentViewModel(model);
+            const skeleton = DocumentSkeleton.create(viewModel, locale);
+            try {
+                skeleton.calculate();
+                const lines = skeleton.getSkeletonData()!.pages.flatMap((page) =>
+                    page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))
+                );
+                expect(lines).toHaveLength(1);
+                expect(JSON.stringify(model.getSnapshot())).toBe(before);
+                return lines[0].lineHeight;
+            } finally {
+                skeleton.dispose();
+                viewModel.dispose();
+                model.dispose();
+            }
+        };
+        try {
+            const normalHeight = measureLine(false);
+            expect(normalHeight).toBeGreaterThan(0);
+            expect(measureLine(true)).toBeCloseTo(normalHeight);
+        } finally {
+            univer.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('reserves a line for wrapped leading tabs (flavor: %s)', (documentFlavor) => {
+        const stream = `${'\t'.repeat(13)}   Page\r\n`;
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const model = new DocumentDataModel({
+            id: `wrapped-tabs-${documentFlavor}`,
+            body: {
+                dataStream: stream,
+                textRuns: [{ st: 0, ed: stream.length, ts: { ff: 'Times New Roman', fs: 12 } }],
+                paragraphs: [{ startIndex: stream.length - 2, paragraphId: 'wrapped-tabs', paragraphStyle: { lineSpacing: 1.5 } }],
+                sectionBreaks: [{ startIndex: stream.length - 1, sectionId: 'section' }],
+            },
+            documentStyle: {
+                documentFlavor,
+                defaultTabStop: 48,
+                autoHyphenation: BooleanNumber.FALSE,
+                pageSize: { width: 816, height: 1056 },
+                marginTop: 96,
+                marginBottom: 96,
+                marginLeft: 96,
+                marginRight: 96,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        try {
+            skeleton.calculate();
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page) =>
+                page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))
+            );
+            expect(lines).toHaveLength(2);
+            const content = (line: typeof lines[number]) => line.divides.flatMap((divide) =>
+                divide.glyphGroup.map((glyph) => glyph.raw)
+            ).join('');
+            expect(content(lines[0])).toMatch(/^[\t ]+$/);
+            expect(content(lines[1])).toContain('Page');
+            expect(lines[0].lineHeight).toBeGreaterThan(0);
+            expect(lines[0].lineHeight).toBeCloseTo(lines[1].lineHeight);
+            expect(lines[1].top).toBeCloseTo(lines[0].top + lines[0].lineHeight);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [SectionType.CONTINUOUS, SectionType.NEXT_PAGE].flatMap((sectionType) =>
+            ['', 'Visible'].map((boundary) => ({ documentFlavor, sectionType, boundary }))
+        )
+    ))('handles an empty continuous section boundary (flavor: $documentFlavor, type: $sectionType, text: $boundary)', ({ documentFlavor, sectionType, boundary }) => {
+        const first = `Heading\r\r${boundary}\r\n`;
+        const stream = `${first}After\r\n`;
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const model = new DocumentDataModel({
+            id: `section-boundary-${documentFlavor}-${sectionType}-${boundary}`,
+            body: {
+                dataStream: stream,
+                textRuns: [{ st: 0, ed: stream.length, ts: { ff: 'Times New Roman', fs: 12 } }],
+                paragraphs: [...stream.matchAll(/\r/g)].map((match, index) => ({
+                    startIndex: match.index!,
+                    paragraphId: `paragraph-${index}`,
+                    paragraphStyle: { lineSpacing: 1.5 },
+                })),
+                sectionBreaks: [
+                    { startIndex: first.length - 1, sectionId: 'first-section', sectionType },
+                    { startIndex: stream.length - 1, sectionId: 'last-section', sectionType },
+                ],
+            },
+            documentStyle: {
+                documentFlavor,
+                autoHyphenation: BooleanNumber.FALSE,
+                pageSize: { width: 816, height: 1056 },
+                marginTop: 96,
+                marginBottom: 96,
+                marginLeft: 96,
+                marginRight: 96,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        try {
+            skeleton.calculate();
+            const lines = skeleton.getSkeletonData()!.pages.flatMap((page) =>
+                page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines))
+            );
+            const sectionMark = lines.find((line) => line.paragraphIndex === first.length - 2)!;
+            expect(sectionMark).toBeDefined();
+            if (documentFlavor === DocumentFlavor.TRADITIONAL && sectionType === SectionType.CONTINUOUS && boundary === '') {
+                expect(sectionMark.lineHeight).toBe(0);
+            } else {
+                expect(sectionMark.lineHeight).toBeGreaterThan(0);
+            }
+            expect(lines.find((line) => line.paragraphIndex === 'Heading\r'.length)!.lineHeight).toBeGreaterThan(0);
+            expect(lines.find((line) => line.paragraphIndex === stream.length - 2)!.lineHeight).toBeGreaterThan(0);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each((['opening', 'closing', 'empty'] as const).flatMap((marker) =>
+        [false, true].flatMap((split) => [false, true].map((visible) => ({ marker, split, visible })))
+    ))('keeps reference markers with a terminal manual page break ($marker, split: $split, visible: $visible)', ({ marker, split, visible }) => {
+        const start = DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        const end = DataStreamTreeTokenType.CUSTOM_RANGE_END;
+        const prefix = marker === 'closing' ? `${start}Before` : 'Before';
+        const boundary = { opening: start, closing: end, empty: `${start}${end}` }[marker]!;
+        const first = `${prefix}${DataStreamTreeTokenType.PAGE_BREAK}${boundary}${visible ? 'Visible' : ''}\r`;
+        const stream = `${first}INDEX${marker === 'opening' ? end : ''}\r\n`;
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const model = new DocumentDataModel({
+            id: `manual-break-reference-${marker}-${split}-${visible}`,
+            body: {
+                dataStream: stream,
+                textRuns: [{ st: 0, ed: stream.length, ts: { ff: 'Times New Roman', fs: 12 } }],
+                paragraphs: [
+                    { startIndex: first.length - 1, paragraphId: 'boundary', paragraphStyle: { lineSpacing: 1.5 } },
+                    { startIndex: stream.length - 2, paragraphId: 'heading', paragraphStyle: { lineSpacing: 1.5 } },
+                ],
+                sectionBreaks: [{ startIndex: stream.length - 1, sectionId: 'section' }],
+                customRanges: [{
+                    startIndex: stream.indexOf(start),
+                    endIndex: stream.indexOf(end),
+                    rangeId: 'directory',
+                    rangeType: CustomRangeType.FIELD,
+                    properties: { fieldType: 'INDEX', instruction: 'INDEX', sourceKind: 'complex' },
+                }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                autoHyphenation: BooleanNumber.FALSE,
+                splitPageBreakAndParagraphMark: split ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                pageSize: { width: 400, height: 600 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const before = JSON.stringify(model.getSnapshot());
+        const viewModel = new DocumentViewModel(model);
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        try {
+            skeleton.calculate();
+            const pages = skeleton.getSkeletonData()!.pages;
+            expect(pages).toHaveLength(2);
+            const lines = pages[1].sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+            const heading = lines.find((line) => line.divides.flatMap((divide) =>
+                divide.glyphGroup.map((glyph) => glyph.content)
+            ).join('').startsWith('INDEX'))!;
+            expect(heading).toBeDefined();
+            if (split || visible) {
+                expect(heading.top).toBeGreaterThan(0);
+            } else {
+                expect(heading.top).toBe(0);
+            }
+            const markers = pages.flatMap((page) => page.sections.flatMap((section) =>
+                section.columns.flatMap((column) => column.lines.flatMap((line) =>
+                    line.divides.flatMap((divide) => divide.glyphGroup)
+                ))
+            )).filter((glyph) => glyph.raw === start || glyph.raw === end);
+            expect(markers.map((glyph) => glyph.raw)).toEqual([start, end]);
+            expect(JSON.stringify(model.getSnapshot())).toBe(before);
+        } finally {
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
     });
 
     it('DOCX golden e2e honors page breaks in paragraphs that only contain floating custom blocks', () => {
@@ -4571,3 +5215,147 @@ function createStaleTopBottomSkeleton(drawingId: string, drawingOrigin: unknown,
         width: 960,
     } as never;
 }
+
+describe('document paragraph numbering', () => {
+    it('counts inherited style numbering, partial overrides and explicit suppression in both document flavors', () => {
+        for (const documentFlavor of [DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL]) {
+            const data: IDocumentData = {
+                id: 'inherited-numbering',
+                documentStyle: { documentFlavor },
+                styles: {
+                    base: { name: 'Base', type: DocStyleType.paragraph, bullet: { listId: 'instance' } },
+                    child: { name: 'Child', type: DocStyleType.paragraph, basedOn: 'base', bullet: { nestingLevel: 0 } },
+                },
+                body: { dataStream: 'A\rB\rC\rD\r\n', paragraphs: [
+                    { startIndex: 1, paragraphId: 'one', styleId: 'child' },
+                    { startIndex: 3, paragraphId: 'disabled', styleId: 'child', bullet: null },
+                    { startIndex: 5, paragraphId: 'partial', styleId: 'child', bullet: { nestingLevel: 1 } },
+                    { startIndex: 7, paragraphId: 'two', styleId: 'child' },
+                ] },
+                lists: { decimal: { listType: 'decimal', counterIds: ['instance'], nestingLevel: [
+                    { bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 },
+                    { bulletAlignment: BulletAlignment.START, glyphFormat: '%1.%2.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 },
+                ] } },
+            };
+            const before = JSON.stringify(data);
+            const labels = resolveDocumentParagraphNumbering(data);
+            expect([...labels.keys()]).toEqual([1, 5, 7]);
+            expect([...labels.values()].map((item) => item.label)).toEqual(['1.', '1.1.', '2.']);
+            expect(JSON.stringify(data)).toBe(before);
+        }
+    });
+
+    it('does not invent a numbered reference or throw when a definition has no levels', () => {
+        const bed = createParagraphLayoutTestBed('Alpha', {
+            body: { paragraphs: [{ startIndex: 5, paragraphId: 'unresolved-list', bullet: { listId: '30', listType: '74', nestingLevel: 1 } }] },
+            lists: { 74: { listType: '74', counterIds: ['30'] } },
+        });
+        try {
+            expect([...resolveDocumentParagraphNumbering(bed.dataModel.getSnapshot())]).toEqual([]);
+        } finally {
+            bed.viewModel.dispose();
+        }
+    });
+    it('applies an imported restart once across inherited and explicit instance switches', () => {
+        const ids = ['1', '1', '1', '2', '1', '2'];
+        const data: Pick<IDocumentData, 'body' | 'lists'> = {
+            body: { dataStream: `${'A\r'.repeat(ids.length)}\n`, paragraphs: ids.map((listId, index) => ({ paragraphId: `p-${index}`, startIndex: index * 2 + 1, bullet: { listId, listType: 'decimal', nestingLevel: 0 } })) },
+            lists: { decimal: { listType: 'decimal', counterIds: ['1', '2'], counterStarts: { 2: { 0: 0 } }, nestingLevel: [{ bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 }] } },
+        };
+        const expected = ['1.', '2.', '3.', '1.', '2.', '3.'];
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(expected);
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(expected);
+        data.body!.paragraphs!.splice(0, 1);
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(['1.', '2.', '1.', '2.', '3.']);
+    });
+
+    it('applies level overrides only when used and keeps normal child resets after a higher item', () => {
+        const sequence = [['1', 0], ['1', 1], ['2', 1], ['1', 1], ['1', 0], ['2', 1]] as const;
+        const data: Pick<IDocumentData, 'body' | 'lists'> = {
+            body: { dataStream: `${'A\r'.repeat(sequence.length)}\n`, paragraphs: sequence.map(([listId, nestingLevel], index) => ({ paragraphId: `p-${index}`, startIndex: index * 2 + 1, bullet: { listId, listType: 'decimal', nestingLevel } })) },
+            lists: { decimal: { listType: 'decimal', counterIds: ['1', '2'], counterStarts: { 2: { 0: 2, 1: 3 } }, nestingLevel: [
+                { bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 },
+                { bulletAlignment: BulletAlignment.START, glyphFormat: '%1.%2.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 },
+            ] } },
+        };
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(['1.', '1.1.', '1.4.', '1.5.', '2.', '2.1.']);
+        data.body!.dataStream = 'A\r\n';
+        data.body!.paragraphs = [{ paragraphId: 'first-child', startIndex: 1, bullet: { listId: '2', listType: 'decimal', nestingLevel: 1 } }];
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(['1.4.']);
+    });
+
+    it('distinguishes implicit numbering ancestors after a skipped level and a counter reset', () => {
+        const sequence = [3, 0, 3, 2, 3, 0, 3];
+        const data: Pick<IDocumentData, 'body' | 'lists'> = {
+            body: { dataStream: `${'A\r'.repeat(sequence.length)}\n`, paragraphs: sequence.map((nestingLevel, index) => ({ paragraphId: `p-${index}`, startIndex: index * 2 + 1, bullet: { listId: 'outline', listType: 'decimal', nestingLevel } })) },
+            lists: { decimal: { listType: 'decimal', nestingLevel: Array.from({ length: 4 }, (_, index) => ({ bulletAlignment: BulletAlignment.START, glyphFormat: `%${index + 1}.`, glyphType: ListGlyphType.DECIMAL, startNumber: 0 })) } },
+        };
+        const source = JSON.stringify(data);
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.context.map((level) => level.isImplicit))).toEqual([
+            [true, true, true, false],
+            [false],
+            [false, true, true, false],
+            [false, true, false],
+            [false, true, false, false],
+            [false],
+            [false, true, true, false],
+        ]);
+        expect(JSON.stringify(data)).toBe(source);
+    });
+
+    it('does not count a numbered paragraph inside a covered merged cell', () => {
+        const token = DataStreamTreeTokenType;
+        const stream = `${token.TABLE_START + token.TABLE_ROW_START + token.TABLE_CELL_START}A\r\n${token.TABLE_CELL_END}${token.TABLE_ROW_END
+        }${token.TABLE_ROW_START}${token.TABLE_CELL_START}hidden\r\n${token.TABLE_CELL_END}${token.TABLE_ROW_END}${token.TABLE_END}\r\nB\r\n`;
+        const data: Pick<IDocumentData, 'body' | 'lists' | 'tableSource'> = {
+            body: {
+                dataStream: stream,
+                paragraphs: Array.from(stream.matchAll(/\r/g), (match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index!, bullet: index === 2 ? undefined : { listId: '1', listType: 'decimal', nestingLevel: 0 } })),
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: stream.indexOf(token.TABLE_END) + 1 }],
+            },
+            lists: { decimal: { listType: 'decimal', nestingLevel: [{ bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 }] } },
+            tableSource: { table: {
+                tableId: 'table',
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: 0 }, positionV: { relativeFrom: 0 } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: { type: TableSizeType.SPECIFIED, width: { v: 100 } },
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 100 } } }],
+                tableRows: [
+                    { trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [{ rowSpan: 2, columnSpan: 1, vAlign: VerticalAlignmentType.TOP }] },
+                    { trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [{ rowSpan: 0, columnSpan: 0, vAlign: VerticalAlignmentType.TOP }] },
+                ],
+            } },
+        };
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(['1.', '2.']);
+    });
+
+    it.each([
+        ['A\r\r\nB\r\n', [3, 6], ['1.', '2.']],
+        ['A\r\rB\r\n', [5], ['1.', '2.', '3.']],
+        ['A\r\f\rB\r\n', [6], ['1.', '2.', '3.']],
+    ])('matches Word break-only and ordinary blank paragraph numbering for %j', (stream, sectionEnds, expected) => {
+        const data: Pick<IDocumentData, 'body' | 'lists'> = {
+            body: {
+                dataStream: stream,
+                paragraphs: Array.from(stream.matchAll(/\r/g), (match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index!, bullet: { listId: '1', listType: 'decimal', nestingLevel: 0 } })),
+                sectionBreaks: sectionEnds.map((startIndex) => ({ startIndex, sectionId: `section-${startIndex}` })),
+            },
+            lists: { decimal: { listType: 'decimal', nestingLevel: [{ bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 }] } },
+        };
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(expected);
+    });
+
+    it('continues imported Word list instances while new lists retain independent counters', () => {
+        const data: Pick<IDocumentData, 'body' | 'lists'> = {
+            body: {
+                dataStream: 'A\rB\rC\rD\r\n',
+                paragraphs: ['1', '1', '2', 'new-list'].map((listId, index) => ({ paragraphId: `p-${index}`, startIndex: index * 2 + 1, bullet: { listId, listType: 'decimal', nestingLevel: 0 } })),
+            },
+            lists: { decimal: { listType: 'decimal', counterIds: ['1', '2'], nestingLevel: [{ bulletAlignment: BulletAlignment.START, glyphFormat: '%1.', glyphType: ListGlyphType.DECIMAL, startNumber: 0 }] } },
+        };
+        expect([...resolveDocumentParagraphNumbering(data).values()].map((number) => number.label)).toEqual(['1.', '2.', '3.', '1.']);
+    });
+});

@@ -243,6 +243,24 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
         expect(renderedImageIds()).toEqual(imageIds);
     });
 
+    it.each([
+        { managedHidden: true, sourceHidden: undefined, visible: true },
+        { managedHidden: false, sourceHidden: true, visible: false },
+    ])('prints source image visibility independently of viewport state ($managedHidden/$sourceHidden)', ({ managedHidden, sourceHidden, visible }) => {
+        const manager = univer.__getInjector().get(IDrawingManagerService);
+        const source = skeleton.getViewModel().getDataModel().getDrawings()!['body-second'];
+        source.hidden = sourceHidden;
+        const data = manager.getDrawingDataForUnit(unitId)![unitId].data;
+        manager.setDrawingData(unitId, unitId, { ...data, 'body-second': { ...data['body-second'], hidden: managedHidden } });
+        expect(source.hidden).toBe(sourceHidden);
+
+        collect(1);
+        const image = scene.getObject(getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId: unitId, drawingId: 'body-second' }));
+        expect(image?.visible === true).toBe(visible);
+        expect(manager.getDrawingByParam({ unitId, subUnitId: unitId, drawingId: 'body-second' })?.hidden).toBe(managedHidden);
+        expect(source.hidden).toBe(sourceHidden);
+    });
+
     it('does not render another page when the requested print page is missing', () => {
         collect(2);
         expect(renderedImageIds()).toEqual([]);

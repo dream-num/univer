@@ -23,22 +23,8 @@ import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
-import {
-    normalizeInsertedParagraphIdsForDocument,
-    normalizeInsertedSectionIdsForDocument,
-    RESTORE_INSERTED_PARAGRAPH_IDS,
-} from './apply-utils/common';
-import {
-    appendRangeUpdates,
-    composeRangeUpdate,
-    dropRemovedRangeAnchors,
-    getChangedPropertyPaths,
-    getRangeUpdates,
-    moveRangeUpdates,
-    reconcileRangeUpdates,
-    transformRangeUpdate,
-    withoutRangeUpdates,
-} from './custom-range-update';
+import { normalizeInsertedParagraphIdsForDocument, normalizeInsertedSectionIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
+import { appendRangeUpdates, composeRangeUpdate, dropRemovedRangeAnchors, getChangedPropertyPaths, getRangeUpdates, moveRangeUpdates, reconcileRangeUpdates, transformRangeUpdate, withoutRangeUpdates } from './custom-range-update';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, getBodySliceForTextXAction, isUselessRetainAction } from './utils';
 

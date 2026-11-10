@@ -15,6 +15,7 @@
  */
 
 import type {
+    IDocumentStyle,
     IPosition,
     IRange,
     IRangeWithCoord,
@@ -27,12 +28,14 @@ import {
     ColorKit,
     DEFAULT_STYLES,
     FontStyleType,
+    LocaleType,
     Rectangle,
     Tools,
 } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 import type { IBoundRectNoAngle } from './vector2';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
+import { cjk } from './cjk-regexp';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 
 const DEG180 = 180;
@@ -42,6 +45,15 @@ const DEG180_OVER_PI = DEG180 / Math.PI;
 const RGB_PAREN = 'rgb(';
 const RGBA_PAREN = 'rgba(';
 const SCROLLABLE_OVERFLOW_EPSILON = 0.5;
+const DOCUMENT_FONT_FAMILY_FALLBACKS = {
+    // Word uses Calibri for unavailable automatic-family fonts, independently of document/theme defaults.
+    auto: 'Calibri',
+    decorative: 'fantasy',
+    modern: 'monospace',
+    roman: 'serif',
+    script: 'cursive',
+    swiss: 'sans-serif',
+};
 
 export function hasScrollableOverflow(contentSize: number, viewportSize: number): boolean {
     return contentSize - viewportSize > SCROLLABLE_OVERFLOW_EPSILON;
@@ -256,9 +268,65 @@ export function fixLineWidthByScale(num: number, scale: number) {
     return Math.round(num * scale) / scale;
 }
 
+export function resolveDocumentDefaultFont(
+    textStyle: ITextStyle,
+    documentStyle: IDocumentStyle | undefined,
+    locale: LocaleType
+): ITextStyle {
+    const group = documentStyle?.defaultFontTheme;
+    if (textStyle.ff || !group) {
+        return textStyle;
+    }
+    const family = documentStyle.latinFontScheme?.[group];
+    if (family) {
+        return { ...textStyle, ff: family };
+    }
+    // A missing Word theme inherits the application's Office font scheme, not the editor's generic font.
+    const fallback = locale === LocaleType.ZH_CN
+        ? { major: '等线 Light', minor: '等线' }
+        : { major: 'Calibri Light', minor: 'Calibri' };
+    return { ...textStyle, ff: fallback[group] };
+}
+
+export function resolveTextStyleEastAsiaFont(
+    textStyle: ITextStyle,
+    scheme?: IDocumentStyle['eastAsiaFontScheme'],
+    content?: string
+): ITextStyle {
+    const binding = textStyle.eastAsiaFontTheme;
+    const fonts = binding && scheme?.[binding];
+    if (!fonts) {
+        return textStyle;
+    }
+    const language = (scheme.language ?? textStyle.altLang ?? '').toLowerCase();
+    let script: string | undefined;
+    if (/^zh(?:-|$)/.test(language)) {
+        script = /(?:^|-)hans(?:-|$)/.test(language)
+            ? 'Hans'
+            : /(?:^|-)(?:hant|tw|hk|mo)(?:-|$)/.test(language) ? 'Hant' : 'Hans';
+    } else if (/^ja(?:-|$)/.test(language)) {
+        script = 'Jpan';
+    } else if (/^ko(?:-|$)/.test(language)) {
+        script = 'Hang';
+    }
+    if (!script && content && cjk.hasCJK(content)) {
+        if (/[\u3041-\u30FF\u31F0-\u31FF\uFF66-\uFF9F]/.test(content)) {
+            script = 'Jpan';
+        } else if (/[\u1100-\u11FF\u3131-\u318E\uA960-\uA97C\uAC00-\uD7FB\uFFA0-\uFFDC]/.test(content)) {
+            script = 'Hang';
+        } else {
+            script = 'Hans';
+        }
+    }
+    const family = fonts.fontFamily || (script && fonts.scriptFonts?.[script]);
+    return family ? { ...textStyle, eastAsiaFontFamily: family } : textStyle;
+}
+
 export function getFontStyleString(
     textStyle?: Nullable<ITextStyle>,
-    fontFamilyFallbacks?: Record<string, string>
+    fontFamilyFallbacks?: Record<string, string>,
+    fontFamilyClasses?: IDocumentStyle['fontFamilyClasses'],
+    wordScriptSizeRatio?: number
 ): IDocumentSkeletonFontStyle {
     const defaultFont = DEFAULT_STYLES.ff;
 
@@ -298,19 +366,34 @@ export function getFontStyleString(
     }
     let fontSize = originFontSize;
 
-    let fontFamilyResult = normalizeFontFamily(textStyle.ff, defaultFont);
-    if (fontFamilyFallbacks) {
-        const families = fontFamilyResult.split(',').map((family) => family.trim().replace(/^['"]|['"]$/g, ''));
-        const expanded: string[] = [];
+    const authoredFamilies = normalizeFontFamily(textStyle.ff, defaultFont);
+    const family = authoredFamilies.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+    const classification = fontFamilyClasses?.[family];
+    const fallback = classification && DOCUMENT_FONT_FAMILY_FALLBACKS[classification];
+    const familyGroups = [authoredFamilies];
+    if (textStyle.eastAsiaFontFamily?.trim()) {
+        familyGroups.push(normalizeFontFamily(textStyle.eastAsiaFontFamily, defaultFont));
+    }
+
+    const expanded: string[] = [];
+    for (const [index, group] of familyGroups.entries()) {
+        // The automatic Latin substitute precedes the separate East Asian font slot.
+        if (index > 0 && classification === 'auto' && fallback && !expanded.includes(fallback)) {
+            expanded.push(fallback);
+        }
+        const families = group.split(',').map((family) => family.trim().replace(/^['"]|['"]$/g, ''));
         for (const family of families) {
             let current: string | undefined = family;
             while (typeof current === 'string' && current && !expanded.includes(current)) {
                 expanded.push(current);
-                current = fontFamilyFallbacks[current];
+                current = fontFamilyFallbacks?.[current];
             }
         }
-        fontFamilyResult = normalizeFontFamily(expanded.join(', '), defaultFont);
     }
+    if (fallback && !expanded.includes(fallback)) {
+        expanded.push(fallback);
+    }
+    const fontFamilyResult = normalizeFontFamily(expanded.join(', '), defaultFont);
 
     const { va: baselineOffset } = textStyle;
 
@@ -318,10 +401,15 @@ export function getFontStyleString(
         baselineOffset === BaselineOffset.SUBSCRIPT ||
         baselineOffset === BaselineOffset.SUPERSCRIPT
     ) {
-        const baselineOffsetInfo = FontCache.getBaselineOffsetInfo(fontFamilyResult, fontSize);
+        const useWordScriptMetrics = wordScriptSizeRatio != null && Number.isFinite(wordScriptSizeRatio) && wordScriptSizeRatio > 0;
+        const baselineOffsetInfo = FontCache.getBaselineOffsetInfo(fontFamilyResult, fontSize, useWordScriptMetrics ? wordScriptSizeRatio : undefined);
         const { sbr, spr } = baselineOffsetInfo;
 
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
+        if (useWordScriptMetrics) {
+            // Word rounds the font's precise OS/2 script size to half-points.
+            fontSize = Math.max(0.5, Math.round(fontSize * 2) / 2);
+        }
     }
 
     const fontStringPure = `${italic} ${bold} ${fontSize}pt ${fontFamilyResult}`;
@@ -478,6 +566,10 @@ export function isCjkLeftAlignedPunctuation(text: string) {
     const LEFT_ALIGNED_PUNCTUATION = ['”', '’', '，', '。', '．', '、', '：', '；', '？', '！', '》', '）', '』', '」', '】', '〗', '〕', '〉', '］', '｝'];
 
     return LEFT_ALIGNED_PUNCTUATION.indexOf(text) > -1;
+}
+
+export function isWesternHangingPunctuation(text: string): boolean {
+    return /^[!%),.:;?\]}’”]$/.test(text);
 }
 
 // See <https://www.w3.org/TR/clreq/#punctuation_width_adjustment>

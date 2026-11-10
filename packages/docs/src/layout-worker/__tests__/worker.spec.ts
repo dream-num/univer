@@ -14,25 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    createDocumentModelWithStyle,
-    CustomRangeType,
-    DataStreamTreeTokenType,
-    DocumentFlavor,
-    JSONX,
-    LocaleType,
-    NamedStyleType,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PositionedObjectLayoutType,
-    TableAlignmentType,
-    TableRowHeightRule,
-    TableSizeType,
-    TableTextWrapType,
-    TextX,
-    TextXActionType,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
+import { createDocumentModelWithStyle, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor, JSONX, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TextX, TextXActionType, UpdateDocsAttributeType } from '@univerjs/core';
 import { getFontStyleString, invalidateDocumentFontMetrics } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocLayoutSessionStatus } from '../../services/doc-layout-executor.service';
@@ -318,104 +300,6 @@ describe('DocsLayoutWorkerRuntime', () => {
         }
     });
 
-    it('applies custom range presentations to the matching body, header, and footer segments', async () => {
-        stubOffscreenCanvas();
-        const sourceModel = createDocumentModelWithStyle('Body\r', {});
-        sourceModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
-        const snapshot = structuredClone(sourceModel.getSnapshot());
-        const createRange = (startIndex: number) => ({
-            startIndex,
-            endIndex: startIndex,
-            rangeId: 'shared-range',
-            rangeType: CustomRangeType.CUSTOM,
-        });
-        snapshot.body!.customRanges = [createRange(0)];
-        snapshot.headers = {
-            'header-1': {
-                headerId: 'header-1',
-                body: {
-                    dataStream: 'Header\r\n',
-                    paragraphs: [{ paragraphId: 'header-paragraph', startIndex: 6 }],
-                    customRanges: [createRange(1)],
-                },
-            },
-        };
-        snapshot.footers = {
-            'footer-1': {
-                footerId: 'footer-1',
-                body: {
-                    dataStream: 'Footer\r\n',
-                    paragraphs: [{ paragraphId: 'footer-paragraph', startIndex: 6 }],
-                    customRanges: [createRange(2)],
-                },
-            },
-        };
-        const runtime = new DocsLayoutWorkerRuntime();
-        const unitId = sourceModel.getUnitId();
-        await runtime.createSession({
-            unitId,
-            sessionEpoch: 1,
-            snapshot,
-            modelRevision: 0,
-            locale: LocaleType.EN_US,
-            localeData: {},
-            direction: 'ltr',
-        });
-
-        await runtime.startLayout({
-            unitId,
-            mountId: 'mount-1',
-            mountEpoch: 1,
-            viewportEpoch: 1,
-            metricsRevision: 1,
-            baseRevision: 0,
-            modelRevision: 0,
-            mutations: [],
-            customBlockViewports: {},
-            customRangePresentations: [
-                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 1 } },
-                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 99 } },
-                { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 2 } },
-                { segmentId: 'footer-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 3 } },
-            ],
-            reason: 'initial',
-            budgetMs: 0,
-        });
-
-        const dataModel = [...((runtime as unknown as {
-            _sessions: Map<string, { dataModel: ReturnType<typeof createDocumentModelWithStyle> }>;
-        })._sessions.values())][0].dataModel;
-        expect(dataModel.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 1 });
-        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 2 });
-        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
-
-        await runtime.startLayout({
-            unitId,
-            mountId: 'mount-1',
-            mountEpoch: 1,
-            viewportEpoch: 1,
-            metricsRevision: 2,
-            baseRevision: 0,
-            modelRevision: 0,
-            mutations: [],
-            customBlockViewportPatch: { removals: [], upserts: {} },
-            customRangePresentationPatch: {
-                removals: [{ segmentId: '', rangeId: 'shared-range' }],
-                upserts: [{
-                    segmentId: 'header-1',
-                    rangeId: 'shared-range',
-                    presentation: { glyphWidthEm: 4 },
-                }],
-            },
-            reason: 'edit',
-            budgetMs: 0,
-        });
-
-        expect(dataModel.getBody()?.customRanges?.[0]).not.toHaveProperty('glyphWidthEm');
-        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
-        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
-    });
-
     it('applies many presentations with one bounded pass over each segment range list', () => {
         const rangeCount = 100;
         let indexedRangeReads = 0;
@@ -437,6 +321,7 @@ describe('DocsLayoutWorkerRuntime', () => {
             getBody: () => body,
             headerModelMap: new Map(),
             footerModelMap: new Map(),
+            noteModelMap: new Map(),
             getSelfOrHeaderFooterModel: () => ({ getBody: () => body }),
         };
         const presentations = ranges.map((range, index) => ({
@@ -849,5 +734,215 @@ describe('DocsLayoutWorkerRuntime', () => {
 
         runtime.dispose();
         sourceModel.dispose();
+    });
+
+    it('applies custom range presentations to the matching main, header, footer, and note segments', async () => {
+        stubOffscreenCanvas();
+        const sourceModel = createDocumentModelWithStyle('Body\r', {});
+        sourceModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        const snapshot = structuredClone(sourceModel.getSnapshot());
+        const createRange = (startIndex: number) => ({
+            startIndex,
+            endIndex: startIndex,
+            rangeId: 'shared-range',
+            rangeType: CustomRangeType.CUSTOM,
+        });
+        snapshot.body!.customRanges = [createRange(0)];
+        snapshot.headers = {
+            'header-1': {
+                headerId: 'header-1',
+                body: {
+                    dataStream: 'Header\r\n',
+                    paragraphs: [{ paragraphId: 'header-paragraph', startIndex: 6 }],
+                    customRanges: [createRange(1)],
+                },
+            },
+        };
+        snapshot.footers = {
+            'footer-1': {
+                footerId: 'footer-1',
+                body: {
+                    dataStream: 'Footer\r\n',
+                    paragraphs: [{ paragraphId: 'footer-paragraph', startIndex: 6 }],
+                    customRanges: [createRange(2)],
+                },
+            },
+        };
+        snapshot.notes = Object.fromEntries((['footnote', 'endnote'] as const).map((type, index) => [type, {
+            noteId: type,
+            type,
+            body: {
+                dataStream: 'Note text\r\n',
+                paragraphs: [{ paragraphId: type, startIndex: 9 }],
+                customRanges: [createRange(index + 3)],
+            },
+        }]));
+        const runtime = new DocsLayoutWorkerRuntime();
+        const unitId = sourceModel.getUnitId();
+        await runtime.createSession({
+            unitId,
+            sessionEpoch: 1,
+            snapshot,
+            modelRevision: 0,
+            locale: LocaleType.EN_US,
+            localeData: {},
+            direction: 'ltr',
+        });
+
+        await runtime.startLayout({
+            unitId,
+            mountId: 'mount-1',
+            mountEpoch: 1,
+            viewportEpoch: 1,
+            metricsRevision: 1,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewports: {},
+            customRangePresentations: [
+                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 1 } },
+                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 99 } },
+                { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 2 } },
+                { segmentId: 'footer-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 3 } },
+                { segmentId: 'footnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 4 } },
+                { segmentId: 'endnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 5 } },
+            ],
+            reason: 'initial',
+            budgetMs: 0,
+        });
+
+        const dataModel = [...((runtime as unknown as {
+            _sessions: Map<string, { dataModel: ReturnType<typeof createDocumentModelWithStyle> }>;
+        })._sessions.values())][0].dataModel;
+        expect(dataModel.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 1 });
+        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 2 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footnote')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
+        expect(dataModel.getSelfOrHeaderFooterModel('endnote')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 5 });
+
+        await runtime.startLayout({
+            unitId,
+            mountId: 'mount-1',
+            mountEpoch: 1,
+            viewportEpoch: 1,
+            metricsRevision: 2,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewportPatch: { removals: [], upserts: {} },
+            customRangePresentationPatch: {
+                removals: [{ segmentId: '', rangeId: 'shared-range' }, { segmentId: 'footnote', rangeId: 'shared-range' }],
+                upserts: [
+                    { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 4 } },
+                    { segmentId: 'endnote', rangeId: 'shared-range', presentation: { glyphWidthEm: 6 } },
+                ],
+            },
+            reason: 'edit',
+            budgetMs: 0,
+        });
+
+        expect(dataModel.getBody()?.customRanges?.[0]).not.toHaveProperty('glyphWidthEm');
+        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footnote')?.getBody()?.customRanges?.[0]).not.toHaveProperty('glyphWidthEm');
+        expect(dataModel.getSelfOrHeaderFooterModel('endnote')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 6 });
+    });
+
+    it('applies custom range presentations to the matching body, header, and footer segments', async () => {
+        stubOffscreenCanvas();
+        const sourceModel = createDocumentModelWithStyle('Body\r', {});
+        sourceModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        const snapshot = structuredClone(sourceModel.getSnapshot());
+        const createRange = (startIndex: number) => ({
+            startIndex,
+            endIndex: startIndex,
+            rangeId: 'shared-range',
+            rangeType: CustomRangeType.CUSTOM,
+        });
+        snapshot.body!.customRanges = [createRange(0)];
+        snapshot.headers = {
+            'header-1': {
+                headerId: 'header-1',
+                body: {
+                    dataStream: 'Header\r\n',
+                    paragraphs: [{ paragraphId: 'header-paragraph', startIndex: 6 }],
+                    customRanges: [createRange(1)],
+                },
+            },
+        };
+        snapshot.footers = {
+            'footer-1': {
+                footerId: 'footer-1',
+                body: {
+                    dataStream: 'Footer\r\n',
+                    paragraphs: [{ paragraphId: 'footer-paragraph', startIndex: 6 }],
+                    customRanges: [createRange(2)],
+                },
+            },
+        };
+        const runtime = new DocsLayoutWorkerRuntime();
+        const unitId = sourceModel.getUnitId();
+        await runtime.createSession({
+            unitId,
+            sessionEpoch: 1,
+            snapshot,
+            modelRevision: 0,
+            locale: LocaleType.EN_US,
+            localeData: {},
+            direction: 'ltr',
+        });
+
+        await runtime.startLayout({
+            unitId,
+            mountId: 'mount-1',
+            mountEpoch: 1,
+            viewportEpoch: 1,
+            metricsRevision: 1,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewports: {},
+            customRangePresentations: [
+                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 1 } },
+                { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 99 } },
+                { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 2 } },
+                { segmentId: 'footer-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 3 } },
+            ],
+            reason: 'initial',
+            budgetMs: 0,
+        });
+
+        const dataModel = [...((runtime as unknown as {
+            _sessions: Map<string, { dataModel: ReturnType<typeof createDocumentModelWithStyle> }>;
+        })._sessions.values())][0].dataModel;
+        expect(dataModel.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 1 });
+        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 2 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
+
+        await runtime.startLayout({
+            unitId,
+            mountId: 'mount-1',
+            mountEpoch: 1,
+            viewportEpoch: 1,
+            metricsRevision: 2,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewportPatch: { removals: [], upserts: {} },
+            customRangePresentationPatch: {
+                removals: [{ segmentId: '', rangeId: 'shared-range' }],
+                upserts: [{
+                    segmentId: 'header-1',
+                    rangeId: 'shared-range',
+                    presentation: { glyphWidthEm: 4 },
+                }],
+            },
+            reason: 'edit',
+            budgetMs: 0,
+        });
+
+        expect(dataModel.getBody()?.customRanges?.[0]).not.toHaveProperty('glyphWidthEm');
+        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
     });
 });

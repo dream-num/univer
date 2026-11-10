@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITable, ITableCellBorder, ITableRow, Nullable } from '@univerjs/core';
+import type { IDocumentBody, ITable, ITableRow, Nullable } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DocumentDataModel,
+    GridType,
+    PageOrientType,
+    PositionedObjectLayoutType,
+    TableTextWrapType,
+} from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -22,19 +31,15 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import {
-    BooleanNumber,
-    CustomRangeType,
-    GridType,
-    PageOrientType,
-    PositionedObjectLayoutType,
-    TableTextWrapType,
-} from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
+import { ptToPixel } from '../../../../basics/tools';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
+import { getHeaderFooterReferencePageKey } from '../../header-footer-reference';
+import { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWithSection } from '../block/section';
+import { getHeaderFooterReferenceOffsetMap, remapHeaderFooterReferenceSkeleton } from '../header-footer-reference-projection';
+import { getCellBorderWidth, getTableCellSpacing, getTableCellSpacingInsets } from '../table-cell-spacing';
 import {
     getGlyphGroupWidth,
     getLastLine,
@@ -70,6 +75,7 @@ export function createSkeletonPage(
     const {
         sectionId,
         pageNumberStart = 1,
+        pageNumberFormat,
         pageSize = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY },
         pageOrient = PageOrientType.PORTRAIT,
         headerIds = {},
@@ -97,6 +103,7 @@ export function createSkeletonPage(
     page.pageNumber = pageNumber;
     page.sectionId = sectionId;
     page.pageNumberStart = pageNumberStart;
+    page.pageNumberFormat = pageNumberFormat;
     page.renderConfig = renderConfig;
     page.marginLeft = marginLeft;
     page.marginRight = marginRight;
@@ -123,11 +130,13 @@ export function createSkeletonPage(
     let header: Nullable<IDocumentSkeletonHeaderFooter>;
     let footer: Nullable<IDocumentSkeletonHeaderFooter>;
     if (headerId) {
+        const referenceKey = getHeaderFooterReferencePageKey('headers', headerId, page);
+        const referenceBody = ctx.headerFooterReferenceBodies?.get(referenceKey);
         const fieldRanges = headerTreeMap?.get(headerId)?.getBody()?.customRanges;
         const dynamic = fieldRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
-            range.properties?.locked !== BooleanNumber.TRUE &&
             (range.properties?.fieldType === 'PAGE' || range.properties?.fieldType === 'NUMPAGES'));
-        const key = dynamic ? JSON.stringify([sectionId, pageNumber, pageWidth, marginLeft, marginRight, ctx.hasNumPagesFields ? ctx.fieldPageCount : undefined]) : pageWidth;
+        const pageNumbers = ctx.headerFooterFieldPageNumbers?.get(JSON.stringify(['header', headerId]));
+        const key = dynamic || referenceBody ? JSON.stringify([sectionId, pageNumber, pageNumberFormat, pageWidth, marginLeft, marginRight, ctx.hasPageCountDependentFields ? ctx.fieldPageCount : undefined, pageNumbers, ...(referenceBody ? [referenceKey] : [])]) : pageWidth;
         if (typeof key === 'string') {
             page.headerLayoutKey = key;
         }
@@ -135,17 +144,18 @@ export function createSkeletonPage(
             header = skeHeaders.get(headerId)?.get(key);
         } else if (headerTreeMap && headerTreeMap.has(headerId)) {
             const previousFieldContext = ctx.headerFooterFieldContext;
-            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount } : undefined;
+            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount, pageNumberFormat, pageNumbers } : undefined;
             try {
-                header = _createSkeletonHeaderFooter(
+                header = _createSkeletonHeaderFooterForPage(
                     ctx,
                     headerTreeMap.get(headerId)!,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     headerId,
-                    true
+                    true,
+                    referenceBody
                 );
-                header.fieldsResolved = Boolean(dynamic);
+                header.fieldsResolved = Boolean(dynamic && !pageNumbers);
             } finally {
                 ctx.headerFooterFieldContext = previousFieldContext;
             }
@@ -158,11 +168,13 @@ export function createSkeletonPage(
     }
 
     if (footerId) {
+        const referenceKey = getHeaderFooterReferencePageKey('footers', footerId, page);
+        const referenceBody = ctx.headerFooterReferenceBodies?.get(referenceKey);
         const fieldRanges = footerTreeMap?.get(footerId)?.getBody()?.customRanges;
         const dynamic = fieldRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
-            range.properties?.locked !== BooleanNumber.TRUE &&
             (range.properties?.fieldType === 'PAGE' || range.properties?.fieldType === 'NUMPAGES'));
-        const key = dynamic ? JSON.stringify([sectionId, pageNumber, pageWidth, marginLeft, marginRight, ctx.hasNumPagesFields ? ctx.fieldPageCount : undefined]) : pageWidth;
+        const pageNumbers = ctx.headerFooterFieldPageNumbers?.get(JSON.stringify(['footer', footerId]));
+        const key = dynamic || referenceBody ? JSON.stringify([sectionId, pageNumber, pageNumberFormat, pageWidth, marginLeft, marginRight, ctx.hasPageCountDependentFields ? ctx.fieldPageCount : undefined, pageNumbers, ...(referenceBody ? [referenceKey] : [])]) : pageWidth;
         if (typeof key === 'string') {
             page.footerLayoutKey = key;
         }
@@ -170,17 +182,18 @@ export function createSkeletonPage(
             footer = skeFooters.get(footerId)?.get(key);
         } else if (footerTreeMap && footerTreeMap.has(footerId)) {
             const previousFieldContext = ctx.headerFooterFieldContext;
-            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount } : undefined;
+            ctx.headerFooterFieldContext = dynamic ? { pageNumber, pageCount: ctx.fieldPageCount, pageNumberFormat, pageNumbers } : undefined;
             try {
-                footer = _createSkeletonHeaderFooter(
+                footer = _createSkeletonHeaderFooterForPage(
                     ctx,
                     footerTreeMap.get(footerId)!,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     footerId,
-                    false
+                    false,
+                    referenceBody
                 );
-                footer.fieldsResolved = Boolean(dynamic);
+                footer.fieldsResolved = Boolean(dynamic && !pageNumbers);
             } finally {
                 ctx.headerFooterFieldContext = previousFieldContext;
             }
@@ -275,6 +288,45 @@ function _getNullPage(
     };
 }
 
+function _createSkeletonHeaderFooterForPage(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    sectionBreakConfig: ISectionBreakConfig,
+    skeletonResourceReference: ISkeletonResourceReference,
+    segmentId: string,
+    isHeader: boolean,
+    projected?: IDocumentBody
+): IDocumentSkeletonHeaderFooter {
+    const original = viewModel.getBody();
+    const offsets = original && projected && getHeaderFooterReferenceOffsetMap(original, projected);
+    if (!offsets || !projected || !original) {
+        return _createSkeletonHeaderFooter(ctx, viewModel, sectionBreakConfig, skeletonResourceReference, segmentId, isHeader, null);
+    }
+    const model = new DocumentDataModel({ ...viewModel.getSnapshot(), body: projected });
+    const projectedView = new DocumentViewModel(model, { ...ctx.viewModel.getSnapshot().tableSource, ...model.getSnapshot().tableSource });
+    const interception = projectedView.registerCustomRangeInterceptor({
+        getCustomRange: (index) => {
+            const range = projectedView.getCustomRangeRaw(index);
+            const inherited = viewModel.getCustomRange(offsets[index]);
+            return range && inherited?.rangeId === range.rangeId ? { ...inherited, ...range } : range;
+        },
+        getCustomDecoration: (index) => {
+            const decoration = projectedView.getCustomDecorationRaw(index);
+            const inherited = viewModel.getCustomDecoration(offsets[index]);
+            return decoration ? { ...inherited, ...decoration } : decoration;
+        },
+    });
+    try {
+        const page = _createSkeletonHeaderFooter({ ...ctx, paragraphConfigCache: new Map(), sectionBreakConfigCache: new Map() }, projectedView, sectionBreakConfig, skeletonResourceReference, segmentId, isHeader, null);
+        remapHeaderFooterReferenceSkeleton(page, original, projected, offsets);
+        return page;
+    } finally {
+        interception.dispose();
+        projectedView.dispose();
+        model.dispose();
+    }
+}
+
 function _createSkeletonHeaderFooter(
     ctx: ILayoutContext,
     headerOrFooterViewModel: DocumentViewModel,
@@ -285,6 +337,8 @@ function _createSkeletonHeaderFooter(
     areaPage: Nullable<IDocumentSkeletonHeaderFooter>,
     count = 0
 ): IDocumentSkeletonHeaderFooter {
+    // Paragraph offsets in a header/footer must not consume body pagination hints.
+    ctx = { ...ctx, isDirty: false, paragraphsOpenNewPage: new Set() };
     const {
         sectionId,
         lists,
@@ -389,7 +443,7 @@ function _createSkeletonHeaderFooter(
         sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
     );
     if (traditional) {
-        positionUnwrappedStoryFrames(page, headerOrFooterViewModel);
+        positionUnwrappedStoryFrames(page, headerOrFooterViewModel, marginLeft);
     }
     updateBlockIndex([page], -1, sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy());
 
@@ -408,10 +462,12 @@ function _createSkeletonHeaderFooter(
         });
     }
 
+    // Story resources can be published before the remaining body pages finish layout.
+    updateInlineDrawingCoordsAndBorder(ctx, [page]);
     return page;
 }
 
-function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewModel: DocumentViewModel) {
+function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewModel: DocumentViewModel, marginLeft: number) {
     // Positioned text-only frames share editable glyphs with their story. Wrapped
     // frames and stories with anchored objects require the object-wrap layout path.
     if (page.skeTables.size > 0 || page.skeDrawings.size > 0) {
@@ -424,11 +480,19 @@ function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewM
             for (let index = 0; index < lines.length; index++) {
                 const line = lines[index];
                 const frame = viewModel.getParagraph(line.paragraphIndex)?.paragraphStyle?.paragraphFrame;
-                const y = typeof frame === 'object' ? Number(frame.y ?? 0) / 15 : 0;
                 if (frame == null || typeof frame !== 'object' || frame.wrap !== 'none'
-                    || frame.horizontalAnchor !== 'margin' || frame.verticalAnchor !== 'text'
-                    || !['left', 'center', 'right'].includes(frame.xAlign ?? '')
-                    || frame.yAlign != null || !Number.isFinite(y)) {
+                    || frame.verticalAnchor !== 'text' || (frame.yAlign != null && frame.yAlign !== 'top')) {
+                    line.top -= removedHeight;
+                    continue;
+                }
+                const y = frame.yAlign == null ? Number(frame.y ?? 0) / 15 : 0;
+                const pageX = frame.horizontalAnchor === 'page' && frame.x != null
+                    && String(frame.x).trim() !== '' && frame.xAlign == null
+                    ? Number(frame.x) / 15 - marginLeft
+                    : null;
+                const marginAligned = frame.horizontalAnchor === 'margin'
+                    && ['left', 'center', 'right'].includes(frame.xAlign ?? '');
+                if ((!marginAligned && (pageX == null || !Number.isFinite(pageX))) || !Number.isFinite(y)) {
                     line.top -= removedHeight;
                     continue;
                 }
@@ -451,7 +515,7 @@ function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewM
                     }
                 }
                 const available = Math.max(0, column.width - width);
-                let left = 0;
+                let left = pageX ?? 0;
                 if (frame.xAlign === 'right') {
                     left = available;
                 } else if (frame.xAlign === 'center') {
@@ -465,7 +529,9 @@ function positionUnwrappedStoryFrames(page: IDocumentSkeletonHeaderFooter, viewM
                         divide.width = Math.max(0, width - divide.left + left);
                     }
                 }
-                removedHeight += occupiedHeight;
+                // Word consumes up to 6 pt of the following paragraph's spacing at the frame anchor.
+                const anchorSpacing = Math.min(Math.max(0, lines[end].marginTop ?? 0), ptToPixel(6));
+                removedHeight += occupiedHeight + anchorSpacing;
                 index = end - 1;
             }
         }
@@ -522,7 +588,8 @@ export function createNullCellPage(
         top = { v: 5 },
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
-    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+    const spacing = getTableCellSpacing(tableConfig, row);
+    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || spacing != null) {
         // Word aligns all cells to the row's largest vertical padding and border,
         // even when the tallest text is in a different, thinner-bordered cell.
         top = { ...top, v: getRowVerticalInset(tableConfig, row, 'top') };
@@ -534,6 +601,11 @@ export function createNullCellPage(
     const pageWidth = tableColumns
         .slice(gridColumn, gridColumn + columnSpan)
         .reduce((sum, column) => sum + column.size.width.v, 0);
+    if (spacing != null) {
+        const insets = getTableCellSpacingInsets(tableConfig, row, col);
+        start = { ...start, v: (start.v ?? 0) + insets.left + getCellBorderWidth(cellConfig.borderLeft) / 2 };
+        end = { ...end, v: (end.v ?? 0) + insets.right + getCellBorderWidth(cellConfig.borderRight) / 2 };
+    }
     if (start.v + end.v >= pageWidth) {
         const marginWidth = start.v + end.v;
         const availableMarginWidth = Math.max(0, pageWidth - 1);
@@ -627,10 +699,6 @@ function finishVerticalCellLayout(pages: IDocumentSkeletonPage[], physicalWidth:
     }
 }
 
-export function getCellBorderWidth(border: ITableCellBorder | undefined): number {
-    return border == null || border.color?.rgb === 'transparent' ? 0 : Math.max(0, border.width?.v ?? 1);
-}
-
 export function getRowBorderInset(row: ITableRow, edge: 'borderTop' | 'borderBottom', tableBoundary = false): number {
     return row.tableCells.reduce((inset, cell) => {
         const border = cell[edge];
@@ -640,13 +708,17 @@ export function getRowBorderInset(row: ITableRow, edge: 'borderTop' | 'borderBot
     }, 0);
 }
 
-function getRowVerticalInset(table: ITable, index: number, edge: 'top' | 'bottom'): number {
+export function getRowVerticalInset(table: ITable, index: number, edge: 'top' | 'bottom'): number {
     const row = table.tableRows[index];
     const padding = row.tableCells.reduce((max, cell) => {
         const margin = cell.margin?.[edge] ?? table.cellMargin?.[edge] ?? { v: 5 };
         return Math.max(max, margin.v ?? 0);
     }, 0);
     const borderEdge = edge === 'top' ? 'borderTop' : 'borderBottom';
+    const spacing = getTableCellSpacing(table, index);
+    if (spacing != null) {
+        return padding + spacing + getRowBorderInset(row, borderEdge) * 2;
+    }
     const neighbour = table.tableRows[index + (edge === 'top' ? -1 : 1)];
     const oppositeEdge = edge === 'top' ? 'borderBottom' : 'borderTop';
     const border = Math.max(getRowBorderInset(row, borderEdge), neighbour ? getRowBorderInset(neighbour, oppositeEdge) : 0);
@@ -986,8 +1058,8 @@ function applyTrailingCellParagraphSpaceBelow(
         return;
     }
 
-    // Word includes the last paragraph's after-spacing in the cell's content height,
-    // except automatic spacing at the cell boundary.
+    // Authored after-spacing participates in whole-row fitting. A short cell's
+    // trailing space can be trimmed only when a sibling actually continues.
     page.height += spaceBelow;
 }
 

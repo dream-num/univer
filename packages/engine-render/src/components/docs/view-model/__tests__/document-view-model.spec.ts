@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { DataStreamTreeNode } from '../data-stream-tree-node';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { DataStreamTreeNode } from '../data-stream-tree-node';
 import { DocumentEditArea, DocumentViewModel, parseDataStreamToTree } from '../document-view-model';
 
 interface ITreeNodeSnapshot {
@@ -82,6 +82,7 @@ function createDocumentDataModel(overrides?: {
     return {
         getBody: vi.fn(() => body),
         getSnapshot: vi.fn(() => snapshot),
+        getMutationRevision: () => 0,
         headerModelMap: overrides?.headerModelMap ?? new Map(),
         footerModelMap: overrides?.footerModelMap ?? new Map(),
         noteModelMap: new Map(),
@@ -981,5 +982,66 @@ describe('DocumentViewModel', () => {
 
             expect(footerViewModel.getTableByStartIndex(0)?.tableSource).toBe(footerTableSource);
         });
+    });
+});
+
+describe('custom range lookup across long reference stories', () => {
+    it('preserves first-array priority, inclusive boundaries and edits for cached custom ranges', () => {
+        const model = new DocumentDataModel({ body: { dataStream: `${'x'.repeat(300)}\r\n`, customRanges: [
+            { rangeId: 'inner', rangeType: CustomRangeType.BOOKMARK, startIndex: 110, endIndex: 120 },
+            { rangeId: 'later', rangeType: CustomRangeType.BOOKMARK, startIndex: 200, endIndex: 220 },
+            { rangeId: 'outer', rangeType: CustomRangeType.BOOKMARK, startIndex: 100, endIndex: 250 },
+            { rangeId: 'point', rangeType: CustomRangeType.BOOKMARK, startIndex: 50, endIndex: 50 },
+        ] } });
+        const view = new DocumentViewModel(model);
+        try {
+            const queries = [99, 100, 109.5, 110, 120, 120.5, 199, 200, 220, 220.5, 250, 251, 50, 49.5];
+            for (const index of [...queries, ...queries.slice().reverse()]) {
+                expect(view.getCustomRangeRaw(index)).toBe(model.getBody()!.customRanges!.find(
+                    (range) => index >= range.startIndex && index <= range.endIndex
+                ));
+            }
+            expect(view.getCustomRangeRaw(110)?.rangeId).toBe('inner');
+            model.apply(JSONX.getInstance().editOp(new TextX().updateCustomRanges([
+                { rangeId: 'inner', range: { ...model.getBody()!.customRanges![0], startIndex: 260, endIndex: 270 } },
+            ]).serialize(), ['body']));
+            expect(view.getCustomRangeRaw(110)?.rangeId).toBe('outer');
+            expect(view.getCustomRangeRaw(260)?.rangeId).toBe('inner');
+            view.reset(model);
+            expect(view.getCustomRangeRaw(260)?.rangeId).toBe('inner');
+        } finally {
+            view.dispose();
+            model.dispose();
+        }
+    });
+
+    it('does not rescan every reference range for each character of a long story', () => {
+        const model = new DocumentDataModel({ body: { dataStream: `${'x'.repeat(10000)}\r\n`, customRanges:
+            Array.from({ length: 32 }, (_, index) => ({ rangeId: `r${index}`, rangeType: CustomRangeType.BOOKMARK, startIndex: 100 + index * 100, endIndex: 110 + index * 100 })) } });
+        let boundReads = 0;
+        for (const range of model.getBody()!.customRanges!) {
+            const start = range.startIndex;
+            Object.defineProperty(range, 'startIndex', {
+                configurable: true,
+                get: () => {
+                    boundReads++;
+                    return start;
+                },
+            });
+        }
+        const view = new DocumentViewModel(model);
+        try {
+            for (let index = 0; index < 10000; index++) {
+                const range = view.getCustomRangeRaw(index);
+                if (range) {
+                    expect(index).toBeGreaterThanOrEqual(range.startIndex);
+                    expect(index).toBeLessThanOrEqual(range.endIndex);
+                }
+            }
+            expect(boundReads).toBeLessThan(10000);
+        } finally {
+            view.dispose();
+            model.dispose();
+        }
     });
 });

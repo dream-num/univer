@@ -14,117 +14,44 @@
  * limitations under the License.
  */
 
-import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import {
-    BaselineOffset,
-    BooleanNumber,
-    CustomRangeType,
-    DataStreamTreeNodeType,
-    DataStreamTreeTokenType,
-    DocumentFlavor,
-    PositionedObjectLayoutType,
-    PRESET_LIST_TYPE,
-    SectionType,
-    Skeleton,
-} from '@univerjs/core';
+import type { ColumnSeparatorType, IDocumentBody, IDocumentData, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DataStreamTreeTokenType, DisposableCollection, DocumentDataModel, DocumentFlavor, PositionedObjectLayoutType, PRESET_LIST_TYPE, resolveDocumentParagraphStyle, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import type {
-    IDocumentSkeletonCached,
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonColumnGroup,
-    IDocumentSkeletonColumnGroupColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonDrawingAnchor,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonRow,
-    IDocumentSkeletonSection,
-    IDocumentSkeletonTable,
-    ISkeletonResourceReference,
-} from '../../../basics/i-document-skeleton-cached';
-import type {
-    IDocsConfig,
-    INodeInfo,
-    INodePosition,
-    INodeSearch,
-    ISectionBreakConfig,
-} from '../../../basics/interfaces';
+import type { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonColumnGroup, IDocumentSkeletonColumnGroupColumn, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonSection, IDocumentSkeletonTable, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
 import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
-import type {
-    IDocumentLayoutBlockGeometryPublication,
-    IDocumentLayoutDrawingAnchorPublication,
-    IDocumentLayoutGeometryPublication,
-    IDocumentLayoutPagePublication,
-    IDocumentLayoutResourcePublication,
-} from './document-layout-publication';
-import type {
-    DocumentLayoutMode,
-    DocumentLayoutReason,
-    IDocumentLayoutApplyResult,
-    IDocumentLayoutInvalidation,
-    IDocumentLayoutPageRange,
-    IDocumentLayoutProgress,
-    IDocumentLayoutProtectedPageRange,
-    IDocumentLayoutProtectedRange,
-} from './document-layout-types';
-import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
-import {
-    BreakType,
-    DocumentSkeletonPageType,
-    GlyphType,
-    LineType,
-    PageLayoutType,
-} from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentLayoutBlockGeometryPublication, IDocumentLayoutDrawingAnchorPublication, IDocumentLayoutGeometryPublication, IDocumentLayoutPagePublication, IDocumentLayoutResourcePublication } from './document-layout-publication';
+import type { DocumentLayoutMode, DocumentLayoutReason, IDocumentLayoutApplyResult, IDocumentLayoutInvalidation, IDocumentLayoutPageRange, IDocumentLayoutProgress, IDocumentLayoutProtectedPageRange, IDocumentLayoutProtectedRange } from './document-layout-types';
+import type { IDocumentPaginationMetrics, IHeaderFooterFieldPageNumber, ILayoutContext } from './tools';
+import { BreakType, DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { getDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { getDocumentReferenceLayoutResolver, hasDocumentReferenceLayout } from '../document-reference-layout';
+import { getDocumentHeaderFooterReferenceResolver, getHeaderFooterReferencePageKey, hasDocumentHeaderFooterReferenceLayout, registerDocumentHeaderFooterReferenceResolver } from '../header-footer-reference';
 import { Liquid } from '../liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
-import { DocumentEditArea } from '../view-model/document-view-model';
+import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 import { getHyphenationLanguage } from './block/paragraph/shaping';
 import { dealWithSection, rollbackSectionPages } from './block/section';
-import {
-    cachePrecomputedSlicedTableSkeletons,
-    cachePrecomputedTableSkeleton,
-    getTableIdAndSliceIndex,
-    startTableSkeletonBuild,
-    startTableSkeletonsBuild,
-    stepTableSkeletonBuild,
-    stepTableSkeletonsBuild,
-} from './block/table';
-import {
-    applyDocumentSkeletonContinuousBlock,
-    hydrateDocumentSkeletonPage,
-    hydrateDocumentSkeletonPageMaterializationPlaceholder,
-    serializeDocumentSkeletonPage,
-} from './document-layout-page-patch';
+import { cachePrecomputedSlicedTableSkeletons, cachePrecomputedTableSkeleton, getTableIdAndSliceIndex, startTableSkeletonBuild, startTableSkeletonsBuild, stepTableSkeletonBuild, stepTableSkeletonsBuild } from './block/table';
+import { applyDocumentSkeletonContinuousBlock, hydrateDocumentSkeletonPage, hydrateDocumentSkeletonPageMaterializationPlaceholder, serializeDocumentSkeletonPage } from './document-layout-page-patch';
 import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
 import { DocumentFootnoteLayout } from './footnote-layout';
+import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-projection';
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
-import { resolveNoteReferences } from './note-numbering';
+import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
+import { layoutPagelessDocumentNotes } from './pageless-note-layout';
+import { projectDocumentReferenceLayout } from './reference-layout-projection';
 import { FontCache } from './shaping-engine/font-cache';
-import {
-    getLastNotFullColumnInfo,
-    getLastPage,
-    getNullSkeleton,
-    getPageFromPath,
-    prepareSectionBreakConfig,
-    resetContext,
-    setPageParent,
-    updateBlockIndex,
-    updateInlineDrawingCoordsAndBorder,
-    updateParagraphBorders,
-} from './tools';
+import { getLastNotFullColumnInfo, getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder, updateParagraphBorders } from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
 
@@ -705,6 +632,7 @@ function hasSamePageExitGeometry(
         'marginBottom',
         'pageNumber',
         'pageNumberStart',
+        'pageNumberFormat',
     ] as const;
     if (scalarKeys.some((key) => previous[key] !== current[key])) {
         return false;
@@ -857,10 +785,12 @@ export interface IFindNodeRestrictions {
 
 function getPagePath(page: IDocumentSkeletonPage) {
     const path: (string | number)[] = [];
+    let segmentId = page.segmentId;
 
     let skeNode: any = page;
     let parent: any = skeNode.parent;
     while (parent) {
+        segmentId = parent.segmentId || segmentId;
         if (parent.page === skeNode && parent.noteId && parent.parent?.notes) {
             const index = parent.parent.notes.indexOf(parent);
             if (index !== -1) {
@@ -910,7 +840,7 @@ function getPagePath(page: IDocumentSkeletonPage) {
         parent = parent?.parent;
     }
 
-    return path;
+    return { path, segmentId };
 }
 
 function getBoundaryGlyphInPage(page: IDocumentSkeletonPage, useLast: boolean) {
@@ -1038,6 +968,7 @@ function serializePaginatedContinuationCheckpoint(page: IDocumentSkeletonPagePat
         marginBottom: page.marginBottom,
         pageNumber: page.pageNumber,
         pageNumberStart: page.pageNumberStart,
+        pageNumberFormat: page.pageNumberFormat,
         breakType: page.breakType,
         segmentId: page.segmentId,
         type: page.type,
@@ -1148,7 +1079,8 @@ function hydrateDrawingAnchors(
 function getSegmentPageFromRelativePath(
     skeletonData: IDocumentSkeletonCached,
     segmentPageIndex: number,
-    path: (string | number)[]
+    path: (string | number)[],
+    segmentId?: string
 ): Nullable<IDocumentSkeletonPage> {
     const rootPage = skeletonData.pages[segmentPageIndex];
     if (rootPage == null) {
@@ -1157,8 +1089,8 @@ function getSegmentPageFromRelativePath(
 
     const { headerId, footerId, pageWidth } = rootPage;
     const segmentPages = [
-        headerId == null ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth),
-        footerId == null ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth),
+        headerId == null || (segmentId != null && segmentId !== headerId) ? null : skeletonData.skeHeaders.get(headerId)?.get(rootPage.headerLayoutKey ?? pageWidth),
+        footerId == null || (segmentId != null && segmentId !== footerId) ? null : skeletonData.skeFooters.get(footerId)?.get(rootPage.footerLayoutKey ?? pageWidth),
     ];
 
     for (const segmentPage of segmentPages) {
@@ -1180,6 +1112,9 @@ function getSegmentPageFromRelativePath(
 }
 
 export class DocumentSkeleton extends Skeleton {
+    private _referenceLayoutSnapshot?: IDocumentData;
+    private _calculatedDataModel?: DocumentDataModel;
+    private _calculatedMutationRevision?: number;
     private _dirty$ = new Subject<boolean>();
     readonly dirty$ = this._dirty$.asObservable();
 
@@ -1267,6 +1202,7 @@ export class DocumentSkeleton extends Skeleton {
         this._layoutProgress$.complete();
         this._layoutPageMaterialized$.complete();
         this._skeletonData = null;
+        this._referenceLayoutSnapshot = undefined;
         this._lastCompleteSkeletonData = null;
         this._completedPageCount = undefined;
         this._pendingInvalidationAnchor = null;
@@ -1288,7 +1224,9 @@ export class DocumentSkeleton extends Skeleton {
      * PS: This method has significant impact on performance.
      */
     calculate(bounds?: IViewportInfo) {
-        if (!this.dirty) {
+        const dataModel = this.getViewModel().getDataModel();
+        const mutationRevision = dataModel.getMutationRevision();
+        if (!this.dirty && this._calculatedDataModel === dataModel && this._calculatedMutationRevision === mutationRevision) {
             return;
         }
 
@@ -1305,13 +1243,85 @@ export class DocumentSkeleton extends Skeleton {
             }
             ctx = retry;
         }
+        if (this._skeletonData) {
+            this._skeletonData = this._projectReferenceLayout(this._skeletonData);
+        }
         this._lastCompleteSkeletonData = this._skeletonData;
         this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
         this._publishedHeadingCollapseSignature = this._completedHeadingCollapseSignature;
         this._completedPageCount = this._skeletonData?.pages.length;
         this._pendingInvalidationAnchor = null;
         this._paginationMetrics = ctx.paginationMetrics ?? null;
+        this._calculatedDataModel = dataModel;
+        this._calculatedMutationRevision = mutationRevision;
+        this.makeDirty(false);
         this._dirty$.next(true);
+    }
+
+    /** The renderer may read transient field resources without changing the editable model. */
+    getLayoutSnapshot(): IDocumentData {
+        return this._referenceLayoutSnapshot ?? this.getViewModel().getSnapshot();
+    }
+
+    private _projectReferenceLayout(skeleton: IDocumentSkeletonCached): IDocumentSkeletonCached {
+        this._referenceLayoutSnapshot = undefined;
+        const source = this.getViewModel();
+        const model = source.getDataModel();
+        const resolver = hasDocumentReferenceLayout(model) ? getDocumentReferenceLayoutResolver(model) : undefined;
+        if (!resolver) {
+            return skeleton;
+        }
+        const original = source.getSnapshot();
+        const headerFooterResolver = getDocumentHeaderFooterReferenceResolver(model);
+        const projection = projectDocumentReferenceLayout(original, skeleton, resolver, (document) => {
+            const projectedModel = new DocumentDataModel(document);
+            const view = new DocumentViewModel(projectedModel);
+            const interceptions = new DisposableCollection();
+            const inheritInterceptors = (originalView: DocumentViewModel, projectedView: DocumentViewModel): void => {
+                const originalBody = originalView.getBody();
+                const projectedBody = projectedView.getBody();
+                const offsets = originalBody && projectedBody && getHeaderFooterReferenceOffsetMap(originalBody, projectedBody);
+                if (!offsets) {
+                    return;
+                }
+                interceptions.add(projectedView.registerCustomRangeInterceptor({
+                    getCustomRange: (index) => {
+                        const range = projectedView.getCustomRangeRaw(index);
+                        const inherited = originalView.getCustomRange(offsets[index]);
+                        return range && inherited?.rangeId === range.rangeId ? { ...inherited, ...range } : range;
+                    },
+                    getCustomDecoration: (index) => {
+                        const decoration = projectedView.getCustomDecorationRaw(index);
+                        const inherited = originalView.getCustomDecoration(offsets[index]);
+                        return decoration ? { ...inherited, ...decoration } : decoration;
+                    },
+                }));
+            };
+            inheritInterceptors(source, view);
+            const sourceStories = [source.getHeaderFooterTreeMap().headerTreeMap, source.getHeaderFooterTreeMap().footerTreeMap, source.getNoteTreeMap()];
+            const projectedStories = [view.getHeaderFooterTreeMap().headerTreeMap, view.getHeaderFooterTreeMap().footerTreeMap, view.getNoteTreeMap()];
+            for (let index = 0; index < projectedStories.length; index++) {
+                for (const [segmentId, projectedView] of projectedStories[index]) {
+                    const originalView = sourceStories[index].get(segmentId);
+                    if (originalView) {
+                        inheritInterceptors(originalView, projectedView);
+                    }
+                }
+            }
+            const registration = headerFooterResolver && registerDocumentHeaderFooterReferenceResolver(projectedModel, headerFooterResolver);
+            const projectedSkeleton = DocumentSkeleton.create(view, this._localeService, { lineGap: this._lineGap });
+            try {
+                projectedSkeleton.calculate();
+                return projectedSkeleton.getSkeletonData()!;
+            } finally {
+                registration?.dispose();
+                interceptions.dispose();
+                projectedSkeleton.dispose();
+                projectedModel.dispose();
+            }
+        });
+        this._referenceLayoutSnapshot = projection?.document;
+        return projection?.skeleton ?? skeleton;
     }
 
     private _getHeadingCollapseSignature(): string {
@@ -1647,6 +1657,7 @@ export class DocumentSkeleton extends Skeleton {
         const start = blocks[startBlockIndex];
         const previousPage = previousSkeleton.pages[startPageIndex];
         const sectionBreakConfig = prepareSectionBreakConfig(ctx, start.sectionIndex);
+        sectionBreakConfig.pageNumberStart = previousPage.pageNumberStart;
 
         this._copySkeletonResources(
             previousSkeleton,
@@ -2187,7 +2198,7 @@ export class DocumentSkeleton extends Skeleton {
         if (
             !state.cancelled &&
             canPublish &&
-            // A NUMPAGES retry is provisional until its pagination converges.
+            // Page-field retries are provisional until pagination and printed labels converge.
             (state.ctx.fieldCountCandidates == null || state.complete) &&
             (!suppressPreAnchorPublication || shouldPublishPriority || state.complete)
         ) {
@@ -3101,7 +3112,7 @@ export class DocumentSkeleton extends Skeleton {
 
         let pageIndex = -1;
 
-        const path = getPagePath(page);
+        const { path, segmentId } = getPagePath(page);
 
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER:
@@ -3135,6 +3146,7 @@ export class DocumentSkeleton extends Skeleton {
             page: pageIndex,
             segmentPage,
             pageType,
+            ...(pageType === DocumentSkeletonPageType.CELL && path[0] !== 'pages' && segmentId ? { segmentId } : {}),
             path,
         };
     }
@@ -3163,7 +3175,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = '', segmentPIndex = -1): Nullable<INodePosition> {
-        const nodes = this._findNodeByIndex(charIndex, segmentId, segmentPIndex);
+        const nodes = this._findNodeByIndex(charIndex, segmentId, segmentPIndex, isBack);
 
         if (nodes == null) {
             return;
@@ -3179,7 +3191,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { glyph, divide, line, column, section, page, segmentPageIndex, pageType } = nodes;
 
-        const path = getPagePath(page);
+        const { path, segmentId: ownerSegmentId } = getPagePath(page);
 
         let pageIndex = -1;
 
@@ -3216,6 +3228,7 @@ export class DocumentSkeleton extends Skeleton {
             pageType,
             segmentPage: segmentPageIndex,
             isBack,
+            ...(pageType === DocumentSkeletonPageType.CELL && path[0] !== 'pages' && (segmentId || ownerSegmentId) ? { segmentId: segmentId || ownerSegmentId } : {}),
             path,
         };
     }
@@ -3243,7 +3256,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path, segmentId } = position;
 
         let { glyph } = position;
 
@@ -3269,7 +3282,7 @@ export class DocumentSkeleton extends Skeleton {
                 }
             }
         } else if (pageType === DocumentSkeletonPageType.CELL && path[0] !== 'pages') {
-            skePage = getSegmentPageFromRelativePath(skeletonData, segmentPage, path);
+            skePage = getSegmentPageFromRelativePath(skeletonData, segmentPage, path, segmentId);
         } else {
             skePage = getPageFromPath(skeletonData, path);
         }
@@ -4561,7 +4574,12 @@ export class DocumentSkeleton extends Skeleton {
             }
             const previousPendingCount = pending.length;
             if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
-                const style = viewModel.getParagraph(node.endIndex)?.paragraphStyle ?? {};
+                const paragraph = viewModel.getParagraph(node.endIndex);
+                const snapshot = viewModel.getSnapshot();
+                const style = resolveDocumentParagraphStyle(snapshot.documentStyle, paragraph?.paragraphStyle, {
+                    styles: snapshot.styles,
+                    paragraphStyleId: paragraph?.styleId,
+                });
                 const lang = getHyphenationLanguage(ctx, node.content ?? '', style, config);
                 if (lang !== Lang.UNKNOWN && !ctx.hyphen.hasPattern(lang)) {
                     pending.push(ctx.hyphen.loadPattern(lang));
@@ -4954,6 +4972,10 @@ export class DocumentSkeleton extends Skeleton {
         let curSkeletonPage = getLastPage(allSkeletonPages);
         let reuseNextColumn = false;
 
+        sectionBreakConfig.pageNumberStart = curSkeletonPage?.sectionId === sectionBreakConfig.sectionId
+            ? curSkeletonPage.pageNumberStart
+            : curSkeletonPage?.pageNumber ?? pageNumberStart;
+
         ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
         if (
@@ -4970,8 +4992,14 @@ export class DocumentSkeleton extends Skeleton {
             );
         }
 
+        const reuseExplicitPageBreak =
+            layoutAnchor == null &&
+            (effectiveSectionType === SectionType.NEXT_PAGE || effectiveSectionType === SectionType.CONTINUOUS) &&
+            curSkeletonPage?.breakType === BreakType.PAGE &&
+            hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
         const hasCompatibleContinuousPage =
             effectiveSectionType === SectionType.CONTINUOUS &&
+            !reuseExplicitPageBreak &&
             curSkeletonPage != null &&
             hasCompatiblePhysicalPage(curSkeletonPage, sectionBreakConfig);
         if (hasCompatibleContinuousPage) {
@@ -4989,11 +5017,7 @@ export class DocumentSkeleton extends Skeleton {
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
             }
         } else if (!reuseNextColumn && (layoutAnchor == null || curSkeletonPage == null)) {
-            const reuseExplicitPageBreak =
-                effectiveSectionType === SectionType.NEXT_PAGE &&
-                curSkeletonPage?.breakType === BreakType.PAGE &&
-                hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
-            const previousSkeletonPage = allSkeletonPages.at(-2);
+            const previousSkeletonPage = allSkeletonPages[allSkeletonPages.length - 2];
             const reuseOverflowedSectionBoundary =
                 effectiveSectionType === SectionType.NEXT_PAGE &&
                 curSkeletonPage?.breakType === BreakType.SECTION &&
@@ -5017,7 +5041,7 @@ export class DocumentSkeleton extends Skeleton {
             ) {
                 allSkeletonPages.push(createSkeletonPage(
                     ctx,
-                    sectionBreakConfig,
+                    { ...sectionBreakConfig, headerIds: {}, footerIds: {} },
                     skeletonResourceReference,
                     curSkeletonPage.pageNumber + 1
                 ));
@@ -5029,13 +5053,15 @@ export class DocumentSkeleton extends Skeleton {
             ) {
                 const fillerPage = createSkeletonPage(
                     ctx,
-                    sectionBreakConfig,
+                    { ...sectionBreakConfig, headerIds: {}, footerIds: {} },
                     skeletonResourceReference,
                     nextPageNumber
                 );
                 allSkeletonPages.push(fillerPage);
                 nextPageNumber++;
             }
+            // The first page of a continuing section can have any printed number.
+            sectionBreakConfig.pageNumberStart = nextPageNumber;
             curSkeletonPage = createSkeletonPage(
                 ctx,
                 sectionBreakConfig,
@@ -5149,6 +5175,7 @@ export class DocumentSkeleton extends Skeleton {
         if (state.mode === 'continuous') {
             updateBlockIndex(skeleton.pages, -1, ctx.docsConfig.documentCompatibilityPolicy);
             updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);
+            layoutPagelessDocumentNotes(ctx, prepareSectionBreakConfig(ctx, ctx.viewModel.getChildren().length - 1));
         }
         for (const hSkeMap of skeleton.skeHeaders.values()) {
             for (const page of hSkeMap.values()) {
@@ -5189,7 +5216,8 @@ export class DocumentSkeleton extends Skeleton {
             state.interactionWindowResume = null;
             return;
         }
-        setPageParent(skeleton.pages, skeleton);
+        ctx.skeleton = this._projectReferenceLayout(skeleton);
+        setPageParent(ctx.skeleton.pages, ctx.skeleton);
         state.complete = true;
         state.stableLaidOutThrough = state.laidOutThrough;
     }
@@ -5199,17 +5227,76 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     private _prepareFieldCountRetry(ctx: ILayoutContext): ILayoutContext | null {
-        if (!ctx.hasNumPagesFields || ctx.fieldPageCount === ctx.skeleton.pages.length) {
+        if (!ctx.hasPageCountDependentFields && !ctx.headerFooterReferenceResolver) {
+            return null;
+        }
+        const referenceBodies = new Map<string, IDocumentBody>();
+        if (ctx.headerFooterReferenceResolver) {
+            const document = ctx.viewModel.getSnapshot();
+            const measuredPages = ctx.skeleton.pages.map(clonePageFlowForPublish);
+            updateBlockIndex(measuredPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
+            const pages = measuredPages.map((page) => ({
+                start: page.st,
+                end: page.ed,
+                label: formatNoteNumber(page.pageNumber, page.pageNumberFormat),
+                number: page.pageNumber,
+                headerId: page.headerId,
+                footerId: page.footerId,
+            }));
+            ctx.skeleton.pages.forEach((page, index) => {
+                for (const [kind, id] of [['headers', page.headerId], ['footers', page.footerId]] as const) {
+                    if (id) {
+                        const body = ctx.headerFooterReferenceResolver!(document, kind, id, pages[index], pages);
+                        if (body) {
+                            referenceBodies.set(getHeaderFooterReferencePageKey(kind, id, page), body);
+                        }
+                    }
+                }
+            });
+        }
+        const referenceSignature = (bodies?: Map<string, IDocumentBody>): string => JSON.stringify(
+            [...(bodies ?? [])].sort(([left], [right]) => left.localeCompare(right))
+        );
+        const pageNumbers = new Map<string, IHeaderFooterFieldPageNumber[]>();
+        for (const page of ctx.skeleton.pages) {
+            for (const [story, id] of [['header', page.headerId], ['footer', page.footerId]] as const) {
+                const trees = story === 'header' ? ctx.docsConfig.headerTreeMap : ctx.docsConfig.footerTreeMap;
+                if (!id || !trees?.get(id)?.getBody()?.customRanges?.some((range) =>
+                    range.rangeType === CustomRangeType.FIELD && range.properties?.fieldType === 'PAGE')) {
+                    continue;
+                }
+                const key = JSON.stringify([story, id]);
+                const numbers = pageNumbers.get(key) ?? [];
+                if (!numbers.some((number) => number.pageNumber === page.pageNumber && number.pageNumberFormat === page.pageNumberFormat)) {
+                    numbers.push({ pageNumber: page.pageNumber, pageNumberFormat: page.pageNumberFormat });
+                }
+                pageNumbers.set(key, numbers);
+            }
+        }
+        const signature = (numbers?: Map<string, IHeaderFooterFieldPageNumber[]>): string => JSON.stringify(
+            [...(numbers ?? [])].sort(([left], [right]) => left.localeCompare(right))
+                .map(([key, values]) => [key, values.map((value) => JSON.stringify(value)).sort()])
+        );
+        const countStable = !ctx.hasPageCountDependentFields || (ctx.fieldPageCount === ctx.skeleton.pages.length && signature(ctx.headerFooterFieldPageNumbers) === signature(pageNumbers));
+        if (countStable && referenceSignature(ctx.headerFooterReferenceBodies) === referenceSignature(referenceBodies)) {
             return null;
         }
         const retry = this._prepareLayoutContext();
         retry.fieldPageCount = ctx.skeleton.pages.length;
+        retry.headerFooterFieldPageNumbers = pageNumbers;
+        retry.headerFooterReferenceBodies = referenceBodies;
         retry.headerFooterMinimumMargins = ctx.headerFooterMinimumMargins;
         retry.fieldCountCandidates = ctx.fieldCountCandidates ?? new Set();
         if (ctx.fieldPageCount != null) {
             retry.fieldCountCandidates.add(ctx.fieldPageCount);
         }
-        retry.fieldCountCycle = ctx.fieldCountCycle || retry.fieldCountCandidates.has(retry.fieldPageCount);
+        if (referenceBodies.size || ctx.headerFooterReferenceBodies?.size) {
+            retry.headerFooterReferenceCandidates = ctx.headerFooterReferenceCandidates ?? new Set();
+            retry.headerFooterReferenceCandidates.add(JSON.stringify([ctx.fieldPageCount, signature(ctx.headerFooterFieldPageNumbers), referenceSignature(ctx.headerFooterReferenceBodies)]));
+            retry.fieldCountCycle = ctx.fieldCountCycle || retry.headerFooterReferenceCandidates.has(JSON.stringify([retry.fieldPageCount, signature(pageNumbers), referenceSignature(referenceBodies)]));
+        } else {
+            retry.fieldCountCycle = ctx.fieldCountCycle || retry.fieldCountCandidates.has(retry.fieldPageCount);
+        }
         return retry;
     }
 
@@ -5258,18 +5345,20 @@ export class DocumentSkeleton extends Skeleton {
             drawingAnchor,
         };
 
-        const hasNumPagesFields = [...headerTreeMap.values(), ...footerTreeMap.values()].some((story) =>
+        const hasPageCountDependentFields = [...headerTreeMap.values(), ...footerTreeMap.values()].some((story) =>
             story.getBody()?.customRanges?.some((range) => range.rangeType === CustomRangeType.FIELD &&
-                range.properties?.fieldType === 'NUMPAGES' && range.properties.locked !== BooleanNumber.TRUE));
+                (range.properties?.fieldType === 'NUMPAGES' || range.properties?.fieldType === 'PAGE')));
+        const headerFooterReferenceResolver = hasDocumentHeaderFooterReferenceLayout(dataModel)
+            ? getDocumentHeaderFooterReferenceResolver(dataModel)
+            : undefined;
         const ctx: ILayoutContext = {
             fieldPageCount: this.getCompletedPageCount(),
-            hasNumPagesFields,
-            headerFooterMinimumMargins: hasNumPagesFields ? new Map() : undefined,
+            hasPageCountDependentFields,
+            headerFooterMinimumMargins: hasPageCountDependentFields || headerFooterReferenceResolver ? new Map() : undefined,
+            headerFooterReferenceResolver,
             viewModel,
             dataModel,
-            noteReferences: documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL
-                ? resolveNoteReferences(dataModel.getSnapshot())
-                : undefined,
+            noteReferences: resolveNoteReferences(dataModel.getSnapshot()),
             skeleton,
             skeletonResourceReference,
             docsConfig,
@@ -5295,7 +5384,7 @@ export class DocumentSkeleton extends Skeleton {
             hyphen: this._hyphen,
             languageDetector: this._languageDetector,
         };
-        if (ctx.noteReferences?.size) {
+        if (ctx.noteReferences?.size && documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL) {
             ctx.footnoteLayout = new DocumentFootnoteLayout(ctx);
             ctx.endnoteLayout = new DocumentEndnoteLayout(ctx);
         }
@@ -5352,6 +5441,9 @@ export class DocumentSkeleton extends Skeleton {
             skeleton.pages,
             ctx.dataModel.documentStyle.documentFlavor === DocumentFlavor.MODERN
         );
+        if (ctx.dataModel.documentStyle.documentFlavor === DocumentFlavor.MODERN) {
+            layoutPagelessDocumentNotes(ctx, prepareSectionBreakConfig(ctx, viewModel.getChildren().length - 1));
+        }
         // Calculate inline drawing position and update.
         updateInlineDrawingCoordsAndBorder(ctx, skeleton.pages);
         for (const hSkeMap of skeleton.skeHeaders.values()) {
@@ -5405,6 +5497,10 @@ export class DocumentSkeleton extends Skeleton {
             let reuseCurrentPage = false;
             let reuseNextColumn = false;
 
+            sectionBreakConfig.pageNumberStart = curSkeletonPage?.sectionId === sectionBreakConfig.sectionId
+                ? curSkeletonPage.pageNumberStart
+                : curSkeletonPage?.pageNumber ?? pageNumberStart;
+
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
             if (
@@ -5421,8 +5517,14 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
 
+            const reuseExplicitPageBreak =
+                sectionLayoutAnchor == null &&
+                (effectiveSectionType === SectionType.NEXT_PAGE || effectiveSectionType === SectionType.CONTINUOUS) &&
+                curSkeletonPage?.breakType === BreakType.PAGE &&
+                hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
             const hasCompatibleContinuousPage =
                 effectiveSectionType === SectionType.CONTINUOUS &&
+                !reuseExplicitPageBreak &&
                 curSkeletonPage != null &&
                 hasCompatiblePhysicalPage(curSkeletonPage, sectionBreakConfig);
             if (hasCompatibleContinuousPage) {
@@ -5443,11 +5545,7 @@ export class DocumentSkeleton extends Skeleton {
             } else if (reuseNextColumn) {
                 reuseCurrentPage = true;
             } else if (sectionLayoutAnchor == null || curSkeletonPage == null) {
-                const reuseExplicitPageBreak =
-                    effectiveSectionType === SectionType.NEXT_PAGE &&
-                    curSkeletonPage?.breakType === BreakType.PAGE &&
-                    hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
-                const previousSkeletonPage = allSkeletonPages.at(-2);
+                const previousSkeletonPage = allSkeletonPages[allSkeletonPages.length - 2];
                 const reuseOverflowedSectionBoundary =
                     effectiveSectionType === SectionType.NEXT_PAGE &&
                     curSkeletonPage?.breakType === BreakType.SECTION &&
@@ -5471,7 +5569,7 @@ export class DocumentSkeleton extends Skeleton {
                 ) {
                     allSkeletonPages.push(createSkeletonPage(
                         ctx,
-                        sectionBreakConfig,
+                        { ...sectionBreakConfig, headerIds: {}, footerIds: {} },
                         skeletonResourceReference,
                         curSkeletonPage.pageNumber + 1
                     ));
@@ -5483,13 +5581,14 @@ export class DocumentSkeleton extends Skeleton {
                 ) {
                     const fillerPage = createSkeletonPage(
                         ctx,
-                        sectionBreakConfig,
+                        { ...sectionBreakConfig, headerIds: {}, footerIds: {} },
                         skeletonResourceReference,
                         nextPageNumber
                     );
                     allSkeletonPages.push(fillerPage);
                     nextPageNumber++;
                 }
+                sectionBreakConfig.pageNumberStart = nextPageNumber;
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
@@ -5633,7 +5732,7 @@ export class DocumentSkeleton extends Skeleton {
         section.height = restoredSection.height;
     }
 
-    private _findNodeByIndex(charIndex: number, segmentId = '', segmentPageIndex = -1) {
+    private _findNodeByIndex(charIndex: number, segmentId = '', segmentPageIndex = -1, preferLeadingProjection = false) {
         const skeletonData = this.getSkeletonData();
 
         if (skeletonData == null) {
@@ -5679,7 +5778,7 @@ export class DocumentSkeleton extends Skeleton {
                 segmentPageParent?.page === segmentPage &&
                 segmentPageParent.parent?.columnGroupId;
 
-            if (charIndex < st || charIndex > ed) {
+            if (charIndex < st || charIndex > ed + Number(preferLeadingProjection)) {
                 if (isColumnSegmentPage) {
                     const boundary = getBoundaryGlyphInPage(segmentPage, charIndex >= ed);
 
@@ -5699,14 +5798,14 @@ export class DocumentSkeleton extends Skeleton {
             for (const section of sections) {
                 const { columns, st, ed } = section;
 
-                if (charIndex < st || charIndex > ed) {
+                if (charIndex < st || charIndex > ed + Number(preferLeadingProjection)) {
                     continue;
                 }
 
                 for (const column of columns) {
                     const { lines, st, ed } = column;
 
-                    if (charIndex < st || charIndex > ed) {
+                    if (charIndex < st || charIndex > ed + Number(preferLeadingProjection)) {
                         continue;
                     }
 
@@ -5714,7 +5813,7 @@ export class DocumentSkeleton extends Skeleton {
                         const { divides, st, ed } = line;
                         const divideLength = divides.length;
 
-                        if (charIndex < st || charIndex > ed) {
+                        if (charIndex < st || charIndex > ed + Number(preferLeadingProjection)) {
                             continue;
                         }
 
@@ -5722,7 +5821,7 @@ export class DocumentSkeleton extends Skeleton {
                             const divide = divides[i];
                             const { glyphGroup, st, ed } = divide;
 
-                            if (charIndex < st || charIndex > ed) {
+                            if (charIndex < st || charIndex > ed + Number(preferLeadingProjection)) {
                                 continue;
                             }
 
@@ -5730,9 +5829,12 @@ export class DocumentSkeleton extends Skeleton {
                             let delta = charIndex - st;
 
                             for (const glyph of glyphGroup) {
+                                // Expanded reference text can paint several glyphs at one source boundary.
+                                const isLeadingProjection = preferLeadingProjection && delta === 0 &&
+                                    glyph.referenceSourceBoundary === true && Boolean(glyph.content?.length);
                                 delta -= glyph.count;
 
-                                if (delta < 0) {
+                                if (delta < 0 || isLeadingProjection) {
                                     return {
                                         page: segmentPage,
                                         pageType: segmentPage.type,

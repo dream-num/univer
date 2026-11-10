@@ -148,7 +148,7 @@ export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: stri
     },
 };
 
-function findInternalLinkTarget(body: IDocumentBody | undefined, bookmarkId?: string, headingId?: string): number | undefined {
+export function findInternalLinkTarget(body: IDocumentBody | undefined, bookmarkId?: string, headingId?: string): number | undefined {
     if (!body) {
         return;
     }
@@ -164,7 +164,7 @@ function findInternalLinkTarget(body: IDocumentBody | undefined, bookmarkId?: st
     }
 
     if (headingId) {
-        const paragraphIndex = body.paragraphs?.findIndex((paragraph) => paragraph.paragraphStyle?.headingId === headingId) ?? -1;
+        const paragraphIndex = body.paragraphs?.findIndex((paragraph) => paragraph.paragraphStyle?.headingId === headingId || paragraph.paragraphId === headingId) ?? -1;
         if (paragraphIndex >= 0) {
             return paragraphIndex === 0 ? 0 : body.paragraphs![paragraphIndex - 1].startIndex + 1;
         }

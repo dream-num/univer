@@ -177,7 +177,65 @@ function useDocumentFlavor(sectionBreakConfig: Record<string, unknown>, document
 }
 
 describe('table utilities', () => {
+    it.each([false, true].flatMap((traditional) => [false, true].flatMap((omittedColumn) => [false, true]
+        .map((directOverride) => ({ traditional, omittedColumn, directOverride })))))('resolves editable table and row border defaults ($traditional/$omittedColumn/$directOverride)', ({ traditional, omittedColumn, directOverride }) => {
+        const border = (width: number) => ({ color: { rgb: '#123456' }, width: { v: width } });
+        const cells = [{ ...(directOverride ? { borderTop: border(7), borderLeft: border(0) } : {}) }];
+        if (!omittedColumn) {
+            cells.push({});
+        }
+        const table = createMockTable({
+            tableColumns: [0, 1].map(() => ({ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } })),
+            borderDefaults: { top: border(1), left: border(1), bottom: border(1), right: border(1), insideHorizontal: border(1), insideVertical: border(1) },
+            tableRows: [
+                { trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO }, tableCells: [{}, {}] },
+                {
+                    trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO },
+                    gridBefore: omittedColumn ? 1 : 0,
+                    borderDefaults: { top: border(2), left: border(3), bottom: border(4), right: border(0), insideHorizontal: border(5), insideVertical: border(6) },
+                    tableCells: cells,
+                },
+                { trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO }, tableCells: [{}, {}] },
+            ],
+        });
+        const before = JSON.stringify(table);
+        const resolved = resolveTableLayoutColumns(table, 400, traditional);
+        const row = resolved.tableRows[1];
+        expect(row.tableCells[0].borderTop?.width).toEqual({ v: directOverride ? 7 : 5 });
+        expect(row.tableCells[0].borderTop?.tableTopBorder?.width).toEqual(directOverride ? undefined : { v: 2 });
+        expect(row.tableCells[0].borderLeft?.width).toEqual({ v: directOverride ? 0 : omittedColumn ? 6 : 3 });
+        expect(row.tableCells[0].borderBottom?.tableBottomBorder?.width).toEqual({ v: 4 });
+        expect(row.tableCells[row.tableCells.length - 1].borderRight?.width).toEqual({ v: 0 });
+        expect(resolved.tableRows[0].tableCells[0].borderTop?.width).toEqual({ v: 1 });
+        expect(JSON.stringify(table)).toBe(before);
+        expect(resolveTableLayoutColumns(resolved, 400, traditional)).toBe(resolved);
+    });
+
     describe('resolveTableLayoutColumns', () => {
+        it.each([TableSizeType.SPECIFIED, TableSizeType.UNSPECIFIED])('fills omitted grid widths from percentage cells (table type: %s)', (type) => {
+            const table = createMockTable({
+                size: { type, width: { v: 100, u: NumberUnitType.PERCENT } },
+                tableColumns: [{}, {}, {}] as ITable['tableColumns'],
+                tableRows: [{ trHeight: { val: { v: 0 }, hRule: TableRowHeightRule.AUTO }, tableCells: [
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 200 / 3 } }, tcWidthType: 'pct' },
+                    { size: { type: TableSizeType.SPECIFIED, width: { v: 800 / 3 } }, tcWidthType: 'pct', columnSpan: 2 },
+                ] }] as ITable['tableRows'],
+            });
+            const snapshot = JSON.stringify(table);
+            const resolved = resolveTableLayoutColumns(table, 600);
+            expect(resolved.tableColumns.map((column) => column.size.width.v)).toEqual([120, 240, 240]);
+            expect(JSON.stringify(table)).toBe(snapshot);
+        });
+
+        it('allocates remaining width to unspecified columns after an omitted leading grid cell', () => {
+            const table = createMockTable({
+                size: { type: TableSizeType.SPECIFIED, width: { v: 600 } },
+                tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 100 } } }, {}, {}] as ITable['tableColumns'],
+                tableRows: [{ gridBefore: 1, tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }, {}] }] as ITable['tableRows'],
+            });
+            expect(resolveTableLayoutColumns(table, 900).tableColumns.map((column) => column.size.width.v)).toEqual([100, 200, 300]);
+        });
+
         it('scales imported percentage table grids to the current page or parent-cell width', () => {
             const table = createMockTable({
                 size: { type: TableSizeType.SPECIFIED, width: { v: 100, u: NumberUnitType.PERCENT } },

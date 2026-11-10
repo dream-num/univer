@@ -34,6 +34,10 @@ Use this package with `@univerjs/docs-toc-ui` when users need Ribbon, context-me
 
 The updater currently evaluates outline-based TOC instructions (`\\o`). Other Word TOC switches are retained in FIELD metadata but are not all evaluated.
 
+Heading discovery resolves named paragraph styles and uses paragraph IDs when an internal heading ID is absent. An explicit body outline level excludes a paragraph. These queries retain the imported snapshot unchanged.
+
+The body builder also accepts supplied heading or caption entries with local `textRuns`, printed page labels such as `iv`, and an explicit pageless mode. Reference providers can reuse its rich paragraphs, bookmark links and nested page fields without duplicating directory rendering.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -125,6 +125,7 @@ export interface IDocumentSkeletonPage {
 
     pageNumber: number; // page number
     pageNumberStart: number; // start page number
+    pageNumberFormat?: string;
     verticalAlign: boolean; // vertical align, only effective for one page
     angle: number; // rotation angle, only effective for one page
     width: number; // actual or content width，default 0
@@ -285,8 +286,10 @@ export interface IDocumentSkeletonLine {
     paragraphBorders?: IDocumentSkeletonParagraphBorders;
     paragraphPaddingLeft?: number;
     paragraphPaddingRight?: number;
+    paragraphBorderPaddingLeft?: number;
     borderTopSpace?: number;
     borderBottomSpace?: number;
+    minimumLineLeading?: number; // Minimum spacing before the natural font box, outside its paragraph border.
     backgroundColor?: IColorStyle; // backgroundColor
     bullet?: IDocumentSkeletonBullet; // unordered and ordered list bullet
     width?: number; // the actual width of a line
@@ -331,6 +334,10 @@ export interface IDocumentSkeletonGlyph {
     left: number; // left
     count: number; // count, content length，default 1
     content: string; // content
+    /** Runtime text reserved for shared page-field fitting; content keeps the displayed value. */
+    fieldLayoutContent?: string;
+    /** Painted reference expansion that does not advance the original source offset. */
+    referenceSourceBoundary?: boolean;
     raw: string;
     adjustability: IAdjustability; // The adjustability of the glyph.
     isJustifiable: boolean; // Whether this glyph is justifiable for CJK scripts.
@@ -358,6 +365,7 @@ export interface IDocumentSkeletonBullet {
     fontStyle?: IDocumentSkeletonFontStyle; // fontStyle converted from IDocumentLayoutTextStyle to canvas font
     startIndexItem: number; // startIndexItem, list start index
     startNumber?: number; // zero-based start number retained across a restarted sequence
+    counterStartsApplied?: readonly string[];
     // bBox: IDocumentSkeletonBoundingBox; // bBox text position information
     nestingLevel?: INestingLevel;
     bulletAlign?: BulletAlignment;
@@ -417,6 +425,7 @@ export interface IDocumentSkeletonBoundingBox {
     fontAscent?: number;
     fontDescent?: number;
     normalLineHeight?: number; // Normal font spacing, including leading when available, for Word AUTO spacing.
+    lineLeading?: number; // Word font leading included in the shared baseline beside inline objects.
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent
     sp: number; // strikeoutPosition

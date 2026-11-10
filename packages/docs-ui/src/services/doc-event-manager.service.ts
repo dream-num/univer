@@ -28,7 +28,7 @@ import type {
     IRenderContext,
     IRenderModule,
 } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
+import { CustomRangeType, Disposable, fromEventSubject, Inject, PresetListType, resolveDocumentParagraphBullet } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CURSOR_TYPE,
@@ -768,7 +768,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     private _buildBulletBoundsBySegment(segmentId?: string, segmentPage = -1): IBulletBound[] {
         const body = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-        const paragraphs = (body?.paragraphs ?? []).filter((p) => p.bullet);
+        const snapshot = this._context.unit.getSnapshot();
+        const paragraphs = (body?.paragraphs ?? []).flatMap((paragraph) => {
+            const bullet = resolveDocumentParagraphBullet(snapshot, paragraph);
+            return bullet ? [{ ...paragraph, bullet }] : [];
+        });
         const bounds: IBulletBound[] = [];
         const skeletonData = this._skeleton.getSkeletonData();
         if (!skeletonData) {
@@ -883,7 +887,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _getParagraphByStartIndex(startIndex: number, segmentId?: string): IParagraph | undefined {
-        return this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs?.find((paragraph) => paragraph.startIndex === startIndex);
+        const paragraph = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs?.find((paragraph) => paragraph.startIndex === startIndex);
+        return paragraph && { ...paragraph, bullet: resolveDocumentParagraphBullet(this._context.unit.getSnapshot(), paragraph) };
     }
 
     private _buildParagraphBoundsBySegment(segmentId?: string) {

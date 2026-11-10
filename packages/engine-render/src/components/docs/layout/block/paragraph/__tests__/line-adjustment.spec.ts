@@ -18,9 +18,11 @@ import {
     BooleanNumber,
     characterSpacingControlType,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentFlavor,
     HorizontalAlign,
     SpacingRule,
+    TabStopAlignment,
     WrapStrategy,
 } from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
@@ -35,6 +37,255 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('line-adjustment', () => {
+    it.each([HorizontalAlign.JUSTIFIED, HorizontalAlign.BOTH].flatMap((horizontalAlign) =>
+        [
+            { width: 90, spaceWidth: 6, right: 90 },
+            { width: 89, spaceWidth: 25 / 3, right: 97 },
+            { width: 86, spaceWidth: 22 / 3, right: 94 },
+        ]
+            .flatMap((values) => [undefined, characterSpacingControlType.doNotCompress]
+                .map((compression) => ({ ...values, horizontalAlign, compression })))))('compresses terminal words before using hanging punctuation: %j', ({ horizontalAlign, width, spaceWidth, right, compression }) => {
+        const content = 'aa bb cc dd.';
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockImplementation((text) => ({
+            width: text === '\r' ? 0 : text.length * 8,
+            ba: 10,
+            bd: 4,
+            aba: 10,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        }));
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: 15 },
+                characterSpacingControl: compression,
+                pageSize: { width, height: 600 },
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { lang: 'en-US', altLang: 'en-US' },
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign, hangingPunctuation: BooleanNumber.TRUE } }] },
+        });
+        try {
+            const shaped = shaping(bed.ctx, `${content}\r`, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            expect(lines).toHaveLength(1);
+            const glyphs = lines[0].divides[0].glyphGroup;
+            expect(glyphs.map((glyph) => glyph.content).join('').trimEnd()).toBe(content);
+            const spaces = glyphs.filter((glyph) => glyph.content === ' ');
+            expect(spaces).toHaveLength(3);
+            for (const space of spaces) {
+                expect(space.width).toBeCloseTo(spaceWidth);
+            }
+            const period = glyphs.find((glyph) => glyph.content === '.');
+            expect(period).toBeDefined();
+            expect(period!.left + period!.width).toBeCloseTo(right);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([HorizontalAlign.JUSTIFIED, HorizontalAlign.BOTH].flatMap((horizontalAlign) =>
+        [{ width: 44, right: 52 }, { width: 46, right: 46 }, { width: 47, right: 47 }, { width: 60, right: 60 }].flatMap((values) =>
+            [undefined, characterSpacingControlType.doNotCompress].map((compression) => ({ ...values, horizontalAlign, compression })))))('hangs justified punctuation only when fitting borrows its space: %j', ({ horizontalAlign, width, right, compression }) => {
+        const content = 'aa bb. cc';
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockImplementation((text) => ({
+            width: text === '\r' ? 0 : text.length * 8,
+            ba: 10,
+            bd: 4,
+            aba: 10,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        }));
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: 15 },
+                characterSpacingControl: compression,
+                pageSize: { width, height: 600 },
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { lang: 'en-US', altLang: 'en-US' },
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { horizontalAlign, hangingPunctuation: BooleanNumber.TRUE } }] },
+        });
+        try {
+            const shaped = shaping(bed.ctx, `${content}\r`, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const firstLine = pages[0].sections[0].columns[0].lines[0];
+            const divide = firstLine.divides[0];
+            expect(divide.glyphGroup.map((glyph) => glyph.content).join('').trimEnd()).toBe('aa bb.');
+            const period = divide.glyphGroup.find((glyph) => glyph.content === '.');
+            expect(period).toBeDefined();
+            expect(period!.left).toBeCloseTo(right - 8);
+            expect(period!.left + period!.width).toBeCloseTo(right);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each(['．．', '．（', '）．', '），', '》、', '”）'].flatMap((pair) =>
+        [undefined, characterSpacingControlType.compressPunctuation, characterSpacingControlType.compressPunctuationAndJapaneseKana, characterSpacingControlType.doNotCompress]
+            .map((compression) => ({ pair, compression }))))('keeps Word adjacent punctuation compact after line fitting: %j', ({ pair, compression }) => {
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+            width: 20,
+            ba: 18,
+            bd: 4,
+            aba: 18,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        });
+        const content = `A${pair}Z`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, characterSpacingControl: compression, textStyle: { ff: 'Arial', fs: 15 }, pageSize: { width: 400, height: 600 } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { snapToGrid: BooleanNumber.FALSE, horizontalAlign: HorizontalAlign.LEFT } }] },
+        });
+        try {
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const punctuation = shaped.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && pair.includes(glyph.content));
+            if (compression !== characterSpacingControlType.doNotCompress) {
+                expect(punctuation.reduce((sum, glyph) => sum + glyph.width, 0)).toBe(40);
+            }
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            expect(punctuation.reduce((sum, glyph) => sum + glyph.width, 0)).toBe(30);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('keeps Word adjacent punctuation compact across potential wrap points after fitting', () => {
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+            width: 20,
+            ba: 18,
+            bd: 4,
+            aba: 18,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        });
+        const content = 'A．．（Z';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, characterSpacingControl: characterSpacingControlType.compressPunctuation, textStyle: { ff: 'Arial', fs: 15 }, pageSize: { width: 400, height: 600 } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { snapToGrid: BooleanNumber.FALSE, horizontalAlign: HorizontalAlign.LEFT } }] },
+        });
+        try {
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const punctuation = shaped.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && '．（'.includes(glyph.content));
+            expect(punctuation.reduce((sum, glyph) => sum + glyph.width, 0)).toBe(40);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('preserves the resolved tab endpoint when compacting Word punctuation before it', () => {
+        const measure = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+            width: 20,
+            ba: 18,
+            bd: 4,
+            aba: 18,
+            abd: 4,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        });
+        const content = 'A．．\tZ';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, characterSpacingControl: characterSpacingControlType.compressPunctuation, textStyle: { ff: 'Arial', fs: 15 }, pageSize: { width: 400, height: 600 } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { snapToGrid: BooleanNumber.FALSE, horizontalAlign: HorizontalAlign.LEFT, tabStops: [{ offset: 140, alignment: TabStopAlignment.START }] } }] },
+        });
+        try {
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+            const glyphs = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup;
+            const tab = glyphs.find((glyph) => glyph.raw === DataStreamTreeTokenType.TAB)!;
+            const right = tab.left + tab.width;
+            lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            expect(tab.left + tab.width).toBeCloseTo(right);
+            expect(glyphs.filter((glyph) => glyph.content === '．').reduce((sum, glyph) => sum + glyph.width, 0)).toBe(30);
+        } finally {
+            measure.mockRestore();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [HorizontalAlign.CENTER, HorizontalAlign.RIGHT].flatMap((horizontalAlign) =>
+            ['named', 'document'].map((origin) => ({ documentFlavor, horizontalAlign, origin })))))(
+        'inherits alignment through $origin styles while preserving direct overrides ($documentFlavor/$horizontalAlign)',
+        ({ documentFlavor, horizontalAlign, origin }) => {
+            const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+                width: text.length * 8,
+                fontBoundingBoxAscent: 12,
+                fontBoundingBoxDescent: 4,
+            }) as TextMetrics);
+            onTestFinished(() => measure.mockRestore());
+            const content = 'Aligned';
+            const layout = (direct?: HorizontalAlign): number => {
+                const bed = createParagraphLayoutTestBed(content, {
+                    documentStyle: {
+                        documentFlavor,
+                        defaultParagraphStyle: origin === 'document' ? { horizontalAlign } : {},
+                    },
+                    styles: {
+                        Base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: origin === 'named' ? { horizontalAlign } : {} },
+                        Derived: { name: 'Derived', type: DocStyleType.paragraph, basedOn: 'Base' },
+                    },
+                    body: { paragraphs: [{ startIndex: content.length, styleId: 'Derived', paragraphStyle: direct == null ? {} : { horizontalAlign: direct } }] },
+                });
+                const before = JSON.stringify(bed.dataModel.getSnapshot());
+                try {
+                    const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+                    const pages = lineBreaking(bed.ctx, bed.viewModel, shaped, bed.curPage, bed.paragraphNode, bed.sectionBreakConfig, null);
+                    lineAdjustment(pages, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+                    expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+                    return pages[0].sections[0].columns[0].lines[0].divides[0].paddingLeft;
+                } finally {
+                    bed.viewModel.dispose();
+                    bed.dataModel.dispose();
+                }
+            };
+            expect(layout()).toBeGreaterThan(0);
+            expect(layout()).toBeCloseTo(layout(horizontalAlign));
+            expect(layout(HorizontalAlign.LEFT)).toBe(0);
+        }
+    );
+
     it.each(['“内容”', '文。。文', '（二）内容'])('preserves punctuation widths when compression is disabled: %s', (text) => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
             documentStyle: {

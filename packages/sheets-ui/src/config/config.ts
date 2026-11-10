@@ -42,6 +42,13 @@ export interface IUniverSheetsUIConfig {
     maxAutoHeightCount?: number;
 
     /**
+     * Whether to show the desktop fill handle for dragging and double-click filling.
+     * Does not affect fill commands or Facade APIs.
+     * @default true
+     */
+    enableFillHandle?: boolean;
+
+    /**
      * Whether to show the formula bar.
      */
     formulaBar?: boolean;

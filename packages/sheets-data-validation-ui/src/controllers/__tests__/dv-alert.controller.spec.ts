@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
 import type { IHoverCellPosition } from '@univerjs/sheets-ui';
-import type { Subject } from 'rxjs';
 import {
     DataValidationOperator,
     DataValidationStatus,
@@ -27,7 +27,7 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, Rect, RenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, SetRangeValuesMutation } from '@univerjs/sheets';
 import {
     AddSheetDataValidationCommand,
@@ -40,9 +40,13 @@ import {
     CellAlertManagerService,
     CellPopupManagerService,
     HoverManagerService,
+    HoverRenderController,
     SheetCanvasPopManagerService,
+    SheetScrollManagerService,
+    SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createDvUiTestBed } from '../../__tests__/create-dv-ui-test-bed';
 import enUS from '../../locale/en-US';
@@ -100,6 +104,37 @@ function createAlertTestBed() {
 }
 
 describe('DataValidationAlertController', () => {
+    it.each(['visible', 'pending'] as const)('dismisses a %s validation tooltip when the pointer leaves cells for a canvas control', async (state) => {
+        const { injector, alerts, setValue, addRule, hoverCell } = createAlertTestBed();
+        const mainComponent = new Rect('sheet-hover-test');
+        const context = { unitId: 'test', mainComponent, components: new Map() } as unknown as IRenderContext<Workbook>;
+        injector.add([SheetSkeletonManagerService, { useValue: {
+            getCurrentParam: () => ({}),
+            currentSkeleton$: new Subject(),
+        } as unknown as SheetSkeletonManagerService }]);
+        injector.add([SheetScrollManagerService, { useValue: { validViewportScrollInfo$: new Subject() } as unknown as SheetScrollManagerService }]);
+        injector.add([HoverRenderController, { useFactory: function createHoverController() {
+            return injector.createInstance(HoverRenderController, context);
+        } }]);
+        injector.get(HoverRenderController);
+        injector.get(DataValidationAlertController);
+        onTestFinished(() => mainComponent.dispose());
+        setValue(1);
+        addRule();
+        hoverCell(0);
+        await vi.advanceTimersByTimeAsync(state === 'visible' ? 120 : 50);
+        expect(alerts.currentAlert.size).toBe(state === 'visible' ? 1 : 0);
+
+        mainComponent.onPointerLeave$.emitEvent(new PointerEvent('pointerleave') as never);
+        expect(alerts.currentAlert.size).toBe(0);
+        await vi.advanceTimersByTimeAsync(120);
+        expect(alerts.currentAlert.size).toBe(0);
+
+        hoverCell(0);
+        await vi.advanceTimersByTimeAsync(120);
+        expect(alerts.currentAlert.size).toBe(1);
+    });
+
     it('closes on undo and reopens on redo without moving the pointer', async () => {
         const { injector, commandService, alerts, setValue, addRule, hoverCell } = createAlertTestBed();
         injector.get(DataValidationAlertController);

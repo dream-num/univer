@@ -257,6 +257,7 @@ const locale: typeof enUS = {
         },
     },
     DELTA: {
+        label: 'DELTA',
         description: 'Testuje, či sú dve hodnoty rovnaké',
         abstract: 'Testuje, či sú dve hodnoty rovnaké',
         links: [

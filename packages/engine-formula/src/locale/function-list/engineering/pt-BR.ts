@@ -257,6 +257,7 @@ const locale: typeof enUS = {
         },
     },
     DELTA: {
+        label: 'DELTA',
         description: 'Testa se dois valores são iguais. Retorna 1 se núm1 = núm2; caso contrário, retornará 0. Utilize esta função para filtrar um conjunto de valores. Por exemplo, somando várias funções DELTA, você pode calcular a contagem de pares iguais. Esta função também é chamada função Kronecker Delta.',
         abstract: 'Testa se dois valores são iguais. Retorna 1 se núm1 = núm2; caso contrário, retornará 0. Utilize esta função para filtrar um conjunto de valores. Por exemplo, somando várias funções DELTA, você pode calcular a contagem de pares iguais. Esta função também é chamada função Kronecker Delta.',
         links: [

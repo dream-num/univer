@@ -16,6 +16,7 @@
 
 const locale = {
     ABS: {
+        label: 'ABS',
         description: 'Returns the absolute value of a number. The absolute value of a number is the number without its sign.',
         abstract: 'Returns the absolute value of a number',
         links: [
@@ -29,6 +30,7 @@ const locale = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is number. The returned angle is given in radians in the range 0 (zero) to pi.',
         abstract: 'Returns the arccosine of a number',
         links: [
@@ -42,6 +44,7 @@ const locale = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is number, so ACOSH(COSH(number)) equals number.',
         abstract: 'Returns the inverse hyperbolic cosine of a number',
         links: [
@@ -55,6 +58,7 @@ const locale = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Returns the principal value of the arccotangent, or inverse cotangent, of a number.',
         abstract: 'Returns the arccotangent of a number',
         links: [
@@ -71,6 +75,7 @@ const locale = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Returns the hyperbolic arccotangent of a number',
         abstract: 'Returns the hyperbolic arccotangent of a number',
         links: [
@@ -84,6 +89,7 @@ const locale = {
         },
     },
     AGGREGATE: {
+        label: 'AGGREGATE',
         description: 'Returns an aggregate in a list or database',
         abstract: 'Returns an aggregate in a list or database',
         links: [
@@ -100,6 +106,7 @@ const locale = {
         },
     },
     ARABIC: {
+        label: 'ARABIC',
         description: 'Converts a Roman numeral to an Arabic numeral.',
         abstract: 'Converts a Roman numeral to an Arabic numeral.',
         links: [
@@ -113,6 +120,7 @@ const locale = {
         },
     },
     ASIN: {
+        label: 'ASIN',
         description: 'Returns the arcsine, or inverse sine, of a number. The arcsine is the angle whose sine is number . The returned angle is given in radians in the range -pi/2 to pi/2.',
         abstract: 'Returns the arcsine, or inverse sine, of a number. The arcsine is the angle whose sine is number . The returned angle is given in radians in the range -pi/2 to pi/2.',
         links: [
@@ -126,6 +134,7 @@ const locale = {
         },
     },
     ASINH: {
+        label: 'ASINH',
         description: 'Returns the inverse hyperbolic sine of a number. The inverse hyperbolic sine is the value whose hyperbolic sine is number , so ASINH(SINH(number)) equals number .',
         abstract: 'Returns the inverse hyperbolic sine of a number. The inverse hyperbolic sine is the value whose hyperbolic sine is number , so ASINH(SINH(number)) equals number .',
         links: [
@@ -139,6 +148,7 @@ const locale = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Returns the arctangent of a number.',
         abstract: 'Returns the arctangent of a number',
         links: [
@@ -152,6 +162,7 @@ const locale = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Returns the arctangent from x- and y-coordinates.',
         abstract: 'Returns the arctangent from x- and y-coordinates',
         links: [
@@ -166,6 +177,7 @@ const locale = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Returns the inverse hyperbolic tangent of a number. Number must be between -1 and 1 (excluding -1 and 1). The inverse hyperbolic tangent is the value whose hyperbolic tangent is number , so ATANH(TANH(number)) equals number .',
         abstract: 'Returns the inverse hyperbolic tangent of a number. Number must be between -1 and 1 (excluding -1 and 1). The inverse hyperbolic tangent is the value whose hyperbolic tangent is number , so ATANH(TANH(number)) equals number .',
         links: [
@@ -179,6 +191,7 @@ const locale = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Converts a number into a text representation with the given radix (base).',
         abstract: 'Converts a number into a text representation with the given radix (base).',
         links: [
@@ -194,6 +207,7 @@ const locale = {
         },
     },
     CEILING: {
+        label: 'CEILING',
         description: 'Rounds a number to the nearest integer or to the nearest multiple of significance',
         abstract: 'Rounds a number to the nearest integer or to the nearest multiple of significance',
         links: [
@@ -208,6 +222,7 @@ const locale = {
         },
     },
     CEILING_MATH: {
+        label: 'CEILING_MATH',
         description: 'Rounds a number up, to the nearest integer or to the nearest multiple of significance',
         abstract: 'Rounds a number up, to the nearest integer or to the nearest multiple of significance',
         links: [
@@ -223,6 +238,7 @@ const locale = {
         },
     },
     CEILING_PRECISE: {
+        label: 'CEILING_PRECISE',
         description: 'Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.',
         abstract: 'Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.',
         links: [
@@ -237,6 +253,7 @@ const locale = {
         },
     },
     COMBIN: {
+        label: 'COMBIN',
         description: 'Returns the number of combinations for a given number of objects',
         abstract: 'Returns the number of combinations for a given number of objects',
         links: [
@@ -251,6 +268,7 @@ const locale = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: 'Returns the number of combinations with repetitions for a given number of items',
         abstract: 'Returns the number of combinations with repetitions for a given number of items',
         links: [
@@ -265,6 +283,7 @@ const locale = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Returns the cosine of a number.',
         abstract: 'Returns the cosine of a number',
         links: [
@@ -278,6 +297,7 @@ const locale = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Returns the hyperbolic cosine of a number',
         abstract: 'Returns the hyperbolic cosine of a number',
         links: [
@@ -291,6 +311,7 @@ const locale = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Returns the cotangent of an angle',
         abstract: 'Returns the cotangent of an angle',
         links: [
@@ -304,6 +325,7 @@ const locale = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Returns the hyperbolic cotangent of a number',
         abstract: 'Returns the hyperbolic cotangent of a number',
         links: [
@@ -317,6 +339,7 @@ const locale = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Returns the cosecant of an angle',
         abstract: 'Returns the cosecant of an angle',
         links: [
@@ -330,6 +353,7 @@ const locale = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Returns the hyperbolic cosecant of an angle',
         abstract: 'Returns the hyperbolic cosecant of an angle',
         links: [
@@ -343,6 +367,7 @@ const locale = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: 'Converts a text representation of a number in a given base into a decimal number',
         abstract: 'Converts a text representation of a number in a given base into a decimal number',
         links: [
@@ -357,6 +382,7 @@ const locale = {
         },
     },
     DEGREES: {
+        label: 'DEGREES',
         description: 'Converts radians to degrees',
         abstract: 'Converts radians to degrees',
         links: [
@@ -370,6 +396,7 @@ const locale = {
         },
     },
     EVEN: {
+        label: 'EVEN',
         description: 'Rounds a number up to the nearest even integer',
         abstract: 'Rounds a number up to the nearest even integer',
         links: [
@@ -383,6 +410,7 @@ const locale = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Returns e raised to the power of a given number',
         abstract: 'Returns e raised to the power of a given number',
         links: [
@@ -396,6 +424,7 @@ const locale = {
         },
     },
     FACT: {
+        label: 'FACT',
         description: 'Returns the factorial of a number',
         abstract: 'Returns the factorial of a number',
         links: [
@@ -409,6 +438,7 @@ const locale = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACTDOUBLE',
         description: 'Returns the double factorial of a number',
         abstract: 'Returns the double factorial of a number',
         links: [
@@ -422,6 +452,7 @@ const locale = {
         },
     },
     FLOOR: {
+        label: 'FLOOR',
         description: 'Rounds a number down, toward zero',
         abstract: 'Rounds a number down, toward zero',
         links: [
@@ -436,6 +467,7 @@ const locale = {
         },
     },
     FLOOR_MATH: {
+        label: 'FLOOR_MATH',
         description: 'Rounds a number down, to the nearest integer or to the nearest multiple of significance',
         abstract: 'Rounds a number down, to the nearest integer or to the nearest multiple of significance',
         links: [
@@ -451,6 +483,7 @@ const locale = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'FLOOR_PRECISE',
         description: 'Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.',
         abstract: 'Rounds a number down to the nearest integer or to the nearest multiple of significance.',
         links: [
@@ -465,6 +498,7 @@ const locale = {
         },
     },
     GCD: {
+        label: 'GCD',
         description: 'Returns the greatest common divisor',
         abstract: 'Returns the greatest common divisor',
         links: [
@@ -479,6 +513,7 @@ const locale = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Rounds a number down to the nearest integer',
         abstract: 'Rounds a number down to the nearest integer',
         links: [
@@ -492,6 +527,7 @@ const locale = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO_CEILING',
         description: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
         abstract: 'Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance',
         links: [
@@ -506,6 +542,7 @@ const locale = {
         },
     },
     LCM: {
+        label: 'LCM',
         description: 'Returns the least common multiple',
         abstract: 'Returns the least common multiple',
         links: [
@@ -520,6 +557,7 @@ const locale = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Returns the natural logarithm of a number',
         abstract: 'Returns the natural logarithm of a number',
         links: [
@@ -533,6 +571,7 @@ const locale = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Returns the logarithm of a number to a specified base',
         abstract: 'Returns the logarithm of a number to a specified base',
         links: [
@@ -547,6 +586,7 @@ const locale = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Returns the base-10 logarithm of a number',
         abstract: 'Returns the base-10 logarithm of a number',
         links: [
@@ -560,6 +600,7 @@ const locale = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Returns the matrix determinant of an array',
         abstract: 'Returns the matrix determinant of an array',
         links: [
@@ -573,6 +614,7 @@ const locale = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSE',
         description: 'Returns the matrix inverse of an array',
         abstract: 'Returns the matrix inverse of an array',
         links: [
@@ -586,6 +628,7 @@ const locale = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Returns the matrix product of two arrays',
         abstract: 'Returns the matrix product of two arrays',
         links: [
@@ -600,6 +643,7 @@ const locale = {
         },
     },
     MOD: {
+        label: 'MOD',
         description: 'Returns the remainder after number is divided by divisor. The result has the same sign as divisor.',
         abstract: 'Returns the remainder from division',
         links: [
@@ -614,6 +658,7 @@ const locale = {
         },
     },
     MROUND: {
+        label: 'MROUND',
         description: 'Returns a number rounded to the desired multiple',
         abstract: 'Returns a number rounded to the desired multiple',
         links: [
@@ -628,6 +673,7 @@ const locale = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Returns the multinomial of a set of numbers',
         abstract: 'Returns the multinomial of a set of numbers',
         links: [
@@ -642,6 +688,7 @@ const locale = {
         },
     },
     MUNIT: {
+        label: 'MUNIT',
         description: 'Returns the unit matrix or the specified dimension',
         abstract: 'Returns the unit matrix or the specified dimension',
         links: [
@@ -655,6 +702,7 @@ const locale = {
         },
     },
     ODD: {
+        label: 'ODD',
         description: 'Rounds a number up to the nearest odd integer',
         abstract: 'Rounds a number up to the nearest odd integer',
         links: [
@@ -668,6 +716,7 @@ const locale = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Returns the value of pi',
         abstract: 'Returns the value of pi',
         links: [
@@ -680,6 +729,7 @@ const locale = {
         },
     },
     POWER: {
+        label: 'POWER',
         description: 'Returns the result of a number raised to a power.',
         abstract: 'Returns the result of a number raised to a power',
         links: [
@@ -694,6 +744,7 @@ const locale = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCT',
         description: 'Multiplies all the numbers given as arguments and returns the product.',
         abstract: 'Multiplies its arguments',
         links: [
@@ -708,6 +759,7 @@ const locale = {
         },
     },
     QUOTIENT: {
+        label: 'QUOTIENT',
         description: 'Returns the integer portion of a division',
         abstract: 'Returns the integer portion of a division',
         links: [
@@ -722,6 +774,7 @@ const locale = {
         },
     },
     RADIANS: {
+        label: 'RADIANS',
         description: 'Converts degrees to radians',
         abstract: 'Converts degrees to radians',
         links: [
@@ -735,6 +788,7 @@ const locale = {
         },
     },
     RAND: {
+        label: 'RAND',
         description: 'Returns a random number between 0 and 1',
         abstract: 'Returns a random number between 0 and 1',
         links: [
@@ -747,6 +801,7 @@ const locale = {
         },
     },
     RANDARRAY: {
+        label: 'RANDARRAY',
         description: 'Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.',
         abstract: 'Returns an array of random numbers between 0 and 1.',
         links: [
@@ -764,6 +819,7 @@ const locale = {
         },
     },
     RANDBETWEEN: {
+        label: 'RANDBETWEEN',
         description: 'Returns a random number between the numbers you specify',
         abstract: 'Returns a random number between the numbers you specify',
         links: [
@@ -778,6 +834,7 @@ const locale = {
         },
     },
     ROMAN: {
+        label: 'ROMAN',
         description: 'Converts an Arabic numeral to Roman, as text',
         abstract: 'Converts an Arabic numeral to Roman, as text',
         links: [
@@ -792,6 +849,7 @@ const locale = {
         },
     },
     ROUND: {
+        label: 'ROUND',
         description: 'Rounds a number to a specified number of digits',
         abstract: 'Rounds a number to a specified number of digits',
         links: [
@@ -806,6 +864,7 @@ const locale = {
         },
     },
     ROUNDBANK: {
+        label: 'ROUNDBANK',
         description: 'Rounds a number in banker\'s rounding',
         abstract: 'Rounds a number in banker\'s rounding',
         links: [
@@ -820,6 +879,7 @@ const locale = {
         },
     },
     ROUNDDOWN: {
+        label: 'ROUNDDOWN',
         description: 'Rounds a number down, toward zero',
         abstract: 'Rounds a number down, toward zero',
         links: [
@@ -834,6 +894,7 @@ const locale = {
         },
     },
     ROUNDUP: {
+        label: 'ROUNDUP',
         description: 'Rounds a number up, away from zero',
         abstract: 'Rounds a number up, away from zero',
         links: [
@@ -848,6 +909,7 @@ const locale = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Returns the secant of an angle',
         abstract: 'Returns the secant of an angle',
         links: [
@@ -861,6 +923,7 @@ const locale = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Returns the hyperbolic secant of an angle',
         abstract: 'Returns the hyperbolic secant of an angle',
         links: [
@@ -874,6 +937,7 @@ const locale = {
         },
     },
     SERIESSUM: {
+        label: 'SERIESSUM',
         description: 'Returns the sum of a power series based on the formula',
         abstract: 'Returns the sum of a power series based on the formula',
         links: [
@@ -890,6 +954,7 @@ const locale = {
         },
     },
     SEQUENCE: {
+        label: 'SEQUENCE',
         description: 'Generates a list of sequential numbers in an array, such as 1, 2, 3, 4',
         abstract: 'Generates a list of sequential numbers in an array, such as 1, 2, 3, 4',
         links: [
@@ -906,6 +971,7 @@ const locale = {
         },
     },
     SIGN: {
+        label: 'SIGN',
         description: 'Returns the sign of a number',
         abstract: 'Returns the sign of a number',
         links: [
@@ -919,6 +985,7 @@ const locale = {
         },
     },
     SIN: {
+        label: 'SIN',
         description: 'Returns the sine of the given angle',
         abstract: 'Returns the sine of the given angle',
         links: [
@@ -932,6 +999,7 @@ const locale = {
         },
     },
     SINH: {
+        label: 'SINH',
         description: 'Returns the hyperbolic sine of a number',
         abstract: 'Returns the hyperbolic sine of a number',
         links: [
@@ -945,6 +1013,7 @@ const locale = {
         },
     },
     SQRT: {
+        label: 'SQRT',
         description: 'Returns a positive square root',
         abstract: 'Returns a positive square root',
         links: [
@@ -958,6 +1027,7 @@ const locale = {
         },
     },
     SQRTPI: {
+        label: 'SQRTPI',
         description: 'Returns the square root of (number * pi)',
         abstract: 'Returns the square root of (number * pi)',
         links: [
@@ -971,6 +1041,7 @@ const locale = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'Returns a subtotal in a list or database.',
         abstract: 'Returns a subtotal in a list or database',
         links: [
@@ -986,6 +1057,7 @@ const locale = {
         },
     },
     SUM: {
+        label: 'SUM',
         description: 'You can add individual values, cell references or ranges or a mix of all three.',
         abstract: 'Adds its arguments',
         links: [
@@ -1006,6 +1078,7 @@ const locale = {
         },
     },
     SUMIF: {
+        label: 'SUMIF',
         description: 'Sum the values in a range that meet criteria that you specify.',
         abstract: 'Adds the cells specified by a given criteria',
         links: [
@@ -1030,6 +1103,7 @@ const locale = {
         },
     },
     SUMIFS: {
+        label: 'SUMIFS',
         description: 'Adds all of its arguments that meet multiple criteria.',
         abstract: 'Adds all of its arguments that meet multiple criteria.',
         links: [
@@ -1047,6 +1121,7 @@ const locale = {
         },
     },
     SUMPRODUCT: {
+        label: 'SUMPRODUCT',
         description: 'Returns the sum of the products of corresponding array components',
         abstract: 'Returns the sum of the products of corresponding array components',
         links: [
@@ -1061,6 +1136,7 @@ const locale = {
         },
     },
     SUMSQ: {
+        label: 'SUMSQ',
         description: 'Returns the sum of the squares of the arguments',
         abstract: 'Returns the sum of the squares of the arguments',
         links: [
@@ -1075,6 +1151,7 @@ const locale = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMX2MY2',
         description: 'Returns the sum of the difference of squares of corresponding values in two arrays',
         abstract: 'Returns the sum of the difference of squares of corresponding values in two arrays',
         links: [
@@ -1089,6 +1166,7 @@ const locale = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMX2PY2',
         description: 'Returns the sum of the sum of squares of corresponding values in two arrays',
         abstract: 'Returns the sum of the sum of squares of corresponding values in two arrays',
         links: [
@@ -1103,6 +1181,7 @@ const locale = {
         },
     },
     SUMXMY2: {
+        label: 'SUMXMY2',
         description: 'Returns the sum of squares of differences of corresponding values in two arrays',
         abstract: 'Returns the sum of squares of differences of corresponding values in two arrays',
         links: [
@@ -1117,6 +1196,7 @@ const locale = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Returns the tangent of a number.',
         abstract: 'Returns the tangent of a number',
         links: [
@@ -1130,6 +1210,7 @@ const locale = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Returns the hyperbolic tangent of a number.',
         abstract: 'Returns the hyperbolic tangent of a number',
         links: [
@@ -1143,6 +1224,7 @@ const locale = {
         },
     },
     TRUNC: {
+        label: 'TRUNC',
         description: 'Truncates a number to an integer',
         abstract: 'Truncates a number to an integer',
         links: [

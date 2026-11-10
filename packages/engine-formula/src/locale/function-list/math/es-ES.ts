@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     ABS: {
+        label: 'ABS',
         description: 'Devuelve el valor absoluto de un número. El valor absoluto de un número es el número sin su signo.',
         abstract: 'Devuelve el valor absoluto de un número',
         links: [
@@ -31,6 +32,7 @@ const locale: typeof enUS = {
         },
     },
     ACOS: {
+        label: 'ACOS',
         description: 'Devuelve el arcocoseno, o coseno inverso, de un número. El arcocoseno es el ángulo cuyo coseno es el número. El ángulo devuelto se da en radianes en el rango de 0 (cero) a pi.',
         abstract: 'Devuelve el arcocoseno de un número',
         links: [
@@ -44,6 +46,7 @@ const locale: typeof enUS = {
         },
     },
     ACOSH: {
+        label: 'ACOSH',
         description: 'Devuelve el coseno hiperbólico inverso de un número. El número debe ser mayor o igual que 1. El coseno hiperbólico inverso es el valor cuyo coseno hiperbólico es el número, por lo que ACOSH(COSH(número)) es igual a número.',
         abstract: 'Devuelve el coseno hiperbólico inverso de un número',
         links: [
@@ -57,6 +60,7 @@ const locale: typeof enUS = {
         },
     },
     ACOT: {
+        label: 'ACOT',
         description: 'Devuelve el valor principal del arcocotangente, o cotangente inversa, de un número.',
         abstract: 'Devuelve el arcocotangente de un número',
         links: [
@@ -73,6 +77,7 @@ const locale: typeof enUS = {
         },
     },
     ACOTH: {
+        label: 'ACOTH',
         description: 'Devuelve el arcocotangente hiperbólico de un número',
         abstract: 'Devuelve el arcocotangente hiperbólico de un número',
         links: [
@@ -86,6 +91,7 @@ const locale: typeof enUS = {
         },
     },
     AGGREGATE: {
+        label: 'AGREGADO',
         description: 'Devuelve un agregado en una lista o base de datos',
         abstract: 'Devuelve un agregado en una lista o base de datos',
         links: [
@@ -102,6 +108,7 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
+        label: 'NUMERO.ARABE',
         description: 'Convierte un número romano a arábigo, como un número',
         abstract: 'Convierte un número romano a arábigo, como un número',
         links: [
@@ -115,6 +122,7 @@ const locale: typeof enUS = {
         },
     },
     ASIN: {
+        label: 'ASENO',
         description: 'Devuelve el arcoseno de un número.',
         abstract: 'Devuelve el arcoseno de un número',
         links: [
@@ -128,6 +136,7 @@ const locale: typeof enUS = {
         },
     },
     ASINH: {
+        label: 'ASENOH',
         description: 'Devuelve el seno hiperbólico inverso de un número.',
         abstract: 'Devuelve el seno hiperbólico inverso de un número',
         links: [
@@ -141,6 +150,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN: {
+        label: 'ATAN',
         description: 'Devuelve el arcotangente de un número.',
         abstract: 'Devuelve el arcotangente de un número',
         links: [
@@ -154,6 +164,7 @@ const locale: typeof enUS = {
         },
     },
     ATAN2: {
+        label: 'ATAN2',
         description: 'Devuelve el arcotangente de las coordenadas x e y.',
         abstract: 'Devuelve el arcotangente de las coordenadas x e y',
         links: [
@@ -168,6 +179,7 @@ const locale: typeof enUS = {
         },
     },
     ATANH: {
+        label: 'ATANH',
         description: 'Devuelve la tangente hiperbólica inversa de un número. El número debe estar entre -1 y 1 (excluyendo -1 y 1). La tangente hiperbólica inversa es el valor cuya tangente hiperbólica es número , de modo que ATANH(TANH(número)) es igual a número .',
         abstract: 'Devuelve la tangente hiperbólica inversa de un número. El número debe estar entre -1 y 1 (excluyendo -1 y 1). La tangente hiperbólica inversa es el valor cuya tangente hiperbólica es número , de modo que ATANH(TANH(número)) es igual a número .',
         links: [
@@ -181,6 +193,7 @@ const locale: typeof enUS = {
         },
     },
     BASE: {
+        label: 'BASE',
         description: 'Convierte un número en una representación de texto con la base dada.',
         abstract: 'Convierte un número en una representación de texto con la base dada.',
         links: [
@@ -196,6 +209,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING: {
+        label: 'MULTIPLO.SUPERIOR',
         description: 'Redondea un número al entero más cercano o al múltiplo más cercano de la cifra significativa',
         abstract: 'Redondea un número al entero más cercano o al múltiplo más cercano de la cifra significativa',
         links: [
@@ -210,6 +224,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_MATH: {
+        label: 'TECHO.MATEMATICAS',
         description: 'Redondea un número hacia arriba, al entero más cercano o al múltiplo más cercano de la cifra significativa',
         abstract: 'Redondea un número hacia arriba, al entero más cercano o al múltiplo más cercano de la cifra significativa',
         links: [
@@ -225,6 +240,7 @@ const locale: typeof enUS = {
         },
     },
     CEILING_PRECISE: {
+        label: 'MULTIPLO.SUPERIOR.EXACTO',
         description: 'Redondea un número al entero más cercano o al múltiplo más cercano de la cifra significativa. Independientemente del signo del número, el número se redondea hacia arriba.',
         abstract: 'Redondea un número al entero más cercano o al múltiplo más cercano de la cifra significativa. Independientemente del signo del número, el número se redondea hacia arriba.',
         links: [
@@ -239,6 +255,7 @@ const locale: typeof enUS = {
         },
     },
     COMBIN: {
+        label: 'COMBINAT',
         description: 'Devuelve el número de combinaciones para un número dado de objetos',
         abstract: 'Devuelve el número de combinaciones para un número dado de objetos',
         links: [
@@ -253,6 +270,7 @@ const locale: typeof enUS = {
         },
     },
     COMBINA: {
+        label: 'COMBINA',
         description: 'Devuelve el número de combinaciones con repeticiones para un número dado de elementos',
         abstract: 'Devuelve el número de combinaciones con repeticiones para un número dado de elementos',
         links: [
@@ -267,6 +285,7 @@ const locale: typeof enUS = {
         },
     },
     COS: {
+        label: 'COS',
         description: 'Devuelve el coseno de un número.',
         abstract: 'Devuelve el coseno de un número',
         links: [
@@ -280,6 +299,7 @@ const locale: typeof enUS = {
         },
     },
     COSH: {
+        label: 'COSH',
         description: 'Devuelve el coseno hiperbólico de un número',
         abstract: 'Devuelve el coseno hiperbólico de un número',
         links: [
@@ -293,6 +313,7 @@ const locale: typeof enUS = {
         },
     },
     COT: {
+        label: 'COT',
         description: 'Devuelve la cotangente de un ángulo',
         abstract: 'Devuelve la cotangente de un ángulo',
         links: [
@@ -306,6 +327,7 @@ const locale: typeof enUS = {
         },
     },
     COTH: {
+        label: 'COTH',
         description: 'Devuelve la cotangente hiperbólica de un número',
         abstract: 'Devuelve la cotangente hiperbólica de un número',
         links: [
@@ -319,6 +341,7 @@ const locale: typeof enUS = {
         },
     },
     CSC: {
+        label: 'CSC',
         description: 'Devuelve la cosecante de un ángulo',
         abstract: 'Devuelve la cosecante de un ángulo',
         links: [
@@ -332,6 +355,7 @@ const locale: typeof enUS = {
         },
     },
     CSCH: {
+        label: 'CSCH',
         description: 'Devuelve la cosecante hiperbólica de un ángulo',
         abstract: 'Devuelve la cosecante hiperbólica de un ángulo',
         links: [
@@ -345,6 +369,7 @@ const locale: typeof enUS = {
         },
     },
     DECIMAL: {
+        label: 'DECIMAL',
         description: 'Convierte una representación de texto de un número en una base dada en un número decimal',
         abstract: 'Convierte una representación de texto de un número en una base dada en un número decimal',
         links: [
@@ -359,6 +384,7 @@ const locale: typeof enUS = {
         },
     },
     DEGREES: {
+        label: 'GRADOS',
         description: 'Convierte radianes a grados',
         abstract: 'Convierte radianes a grados',
         links: [
@@ -372,6 +398,7 @@ const locale: typeof enUS = {
         },
     },
     EVEN: {
+        label: 'REDONDEA.PAR',
         description: 'Redondea un número hacia arriba al entero par más cercano',
         abstract: 'Redondea un número hacia arriba al entero par más cercano',
         links: [
@@ -385,6 +412,7 @@ const locale: typeof enUS = {
         },
     },
     EXP: {
+        label: 'EXP',
         description: 'Devuelve e elevado a la potencia de un número dado',
         abstract: 'Devuelve e elevado a la potencia de un número dado',
         links: [
@@ -398,6 +426,7 @@ const locale: typeof enUS = {
         },
     },
     FACT: {
+        label: 'HECHO',
         description: 'Devuelve el factorial de un número',
         abstract: 'Devuelve el factorial de un número',
         links: [
@@ -411,6 +440,7 @@ const locale: typeof enUS = {
         },
     },
     FACTDOUBLE: {
+        label: 'FACT.DOBLE',
         description: 'Devuelve el doble factorial de un número',
         abstract: 'Devuelve el doble factorial de un número',
         links: [
@@ -424,6 +454,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR: {
+        label: 'MULTIPLO.INFERIOR',
         description: 'Redondea un número hacia abajo, hacia cero',
         abstract: 'Redondea un número hacia abajo, hacia cero',
         links: [
@@ -438,6 +469,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_MATH: {
+        label: 'PISO.MATEMATICAS',
         description: 'Redondea un número hacia abajo, al entero más cercano o al múltiplo más cercano de la cifra significativa',
         abstract: 'Redondea un número hacia abajo, al entero más cercano o al múltiplo más cercano de la cifra significativa',
         links: [
@@ -453,6 +485,7 @@ const locale: typeof enUS = {
         },
     },
     FLOOR_PRECISE: {
+        label: 'MULTIPLO.INFERIOR.EXACTO',
         description: 'Redondea un número hacia abajo al entero más cercano o al múltiplo más cercano de la cifra significativa. Independientemente del signo del número, el número se redondea hacia abajo.',
         abstract: 'Redondea un número hacia abajo al entero más cercano o al múltiplo más cercano de la cifra significativa.',
         links: [
@@ -467,6 +500,7 @@ const locale: typeof enUS = {
         },
     },
     GCD: {
+        label: 'M.C.D',
         description: 'Devuelve el máximo común divisor',
         abstract: 'Devuelve el máximo común divisor',
         links: [
@@ -481,6 +515,7 @@ const locale: typeof enUS = {
         },
     },
     INT: {
+        label: 'INT',
         description: 'Redondea un número hacia abajo al entero más cercano',
         abstract: 'Redondea un número hacia abajo al entero más cercano',
         links: [
@@ -494,6 +529,7 @@ const locale: typeof enUS = {
         },
     },
     ISO_CEILING: {
+        label: 'ISO.TECHO',
         description: 'Devuelve un número redondeado hacia arriba al entero más cercano o al múltiplo más cercano de la cifra significativa',
         abstract: 'Devuelve un número redondeado hacia arriba al entero más cercano o al múltiplo más cercano de la cifra significativa',
         links: [
@@ -508,6 +544,7 @@ const locale: typeof enUS = {
         },
     },
     LCM: {
+        label: 'M.C.M',
         description: 'Devuelve el mínimo común múltiplo',
         abstract: 'Devuelve el mínimo común múltiplo',
         links: [
@@ -522,6 +559,7 @@ const locale: typeof enUS = {
         },
     },
     LN: {
+        label: 'LN',
         description: 'Devuelve el logaritmo natural de un número',
         abstract: 'Devuelve el logaritmo natural de un número',
         links: [
@@ -535,6 +573,7 @@ const locale: typeof enUS = {
         },
     },
     LOG: {
+        label: 'LOG',
         description: 'Devuelve el logaritmo de un número en una base especificada',
         abstract: 'Devuelve el logaritmo de un número en una base especificada',
         links: [
@@ -549,6 +588,7 @@ const locale: typeof enUS = {
         },
     },
     LOG10: {
+        label: 'LOG10',
         description: 'Devuelve el logaritmo en base 10 de un número',
         abstract: 'Devuelve el logaritmo en base 10 de un número',
         links: [
@@ -562,6 +602,7 @@ const locale: typeof enUS = {
         },
     },
     MDETERM: {
+        label: 'MDETERM',
         description: 'Devuelve el determinante matricial de una matriz',
         abstract: 'Devuelve el determinante matricial de una matriz',
         links: [
@@ -575,6 +616,7 @@ const locale: typeof enUS = {
         },
     },
     MINVERSE: {
+        label: 'MINVERSA',
         description: 'Devuelve la matriz inversa de una matriz',
         abstract: 'Devuelve la matriz inversa de una matriz',
         links: [
@@ -588,6 +630,7 @@ const locale: typeof enUS = {
         },
     },
     MMULT: {
+        label: 'MMULT',
         description: 'Devuelve el producto matricial de dos matrices',
         abstract: 'Devuelve el producto matricial de dos matrices',
         links: [
@@ -602,6 +645,7 @@ const locale: typeof enUS = {
         },
     },
     MOD: {
+        label: 'RESIDUO',
         description: 'Devuelve el resto después de que el número se divida por el divisor. El resultado tiene el mismo signo que el divisor.',
         abstract: 'Devuelve el resto de la división',
         links: [
@@ -616,6 +660,7 @@ const locale: typeof enUS = {
         },
     },
     MROUND: {
+        label: 'REDOND.MULT',
         description: 'Devuelve un número redondeado al múltiplo deseado',
         abstract: 'Devuelve un número redondeado al múltiplo deseado',
         links: [
@@ -630,6 +675,7 @@ const locale: typeof enUS = {
         },
     },
     MULTINOMIAL: {
+        label: 'MULTINOMIAL',
         description: 'Devuelve el multinomial de un conjunto de números',
         abstract: 'Devuelve el multinomial de un conjunto de números',
         links: [
@@ -644,6 +690,7 @@ const locale: typeof enUS = {
         },
     },
     MUNIT: {
+        label: 'MUNIDAD',
         description: 'Devuelve la matriz unitaria o la dimensión especificada',
         abstract: 'Devuelve la matriz unitaria o la dimensión especificada',
         links: [
@@ -657,6 +704,7 @@ const locale: typeof enUS = {
         },
     },
     ODD: {
+        label: 'REDONDEA.IMPAR',
         description: 'Redondea un número hacia arriba al entero impar más cercano',
         abstract: 'Redondea un número hacia arriba al entero impar más cercano',
         links: [
@@ -670,6 +718,7 @@ const locale: typeof enUS = {
         },
     },
     PI: {
+        label: 'PI',
         description: 'Devuelve el valor de pi',
         abstract: 'Devuelve el valor de pi',
         links: [
@@ -682,6 +731,7 @@ const locale: typeof enUS = {
         },
     },
     POWER: {
+        label: 'POTENCIA',
         description: 'Devuelve el resultado de un número elevado a una potencia.',
         abstract: 'Devuelve el resultado de un número elevado a una potencia',
         links: [
@@ -696,6 +746,7 @@ const locale: typeof enUS = {
         },
     },
     PRODUCT: {
+        label: 'PRODUCTO',
         description: 'Multiplica todos los números dados como argumentos y devuelve el producto.',
         abstract: 'Multiplica sus argumentos',
         links: [
@@ -710,6 +761,7 @@ const locale: typeof enUS = {
         },
     },
     QUOTIENT: {
+        label: 'COCIENTE',
         description: 'Devuelve la parte entera de una división',
         abstract: 'Devuelve la parte entera de una división',
         links: [
@@ -724,6 +776,7 @@ const locale: typeof enUS = {
         },
     },
     RADIANS: {
+        label: 'RADIANES',
         description: 'Convierte grados a radianes',
         abstract: 'Convierte grados a radianes',
         links: [
@@ -737,6 +790,7 @@ const locale: typeof enUS = {
         },
     },
     RAND: {
+        label: 'ALEATORIO',
         description: 'Devuelve un número aleatorio entre 0 y 1',
         abstract: 'Devuelve un número aleatorio entre 0 y 1',
         links: [
@@ -749,6 +803,7 @@ const locale: typeof enUS = {
         },
     },
     RANDARRAY: {
+        label: 'MATRIZALEAT',
         description: 'Devuelve una matriz de números aleatorios entre 0 y 1. Sin embargo, puede especificar el número de filas y columnas a rellenar, los valores mínimos y máximos, y si se devuelven números enteros o valores decimales.',
         abstract: 'Devuelve una matriz de números aleatorios entre 0 y 1.',
         links: [
@@ -766,6 +821,7 @@ const locale: typeof enUS = {
         },
     },
     RANDBETWEEN: {
+        label: 'ALEATORIO.ENTRE',
         description: 'Devuelve un número aleatorio entre los números que especifique',
         abstract: 'Devuelve un número aleatorio entre los números que especifique',
         links: [
@@ -780,6 +836,7 @@ const locale: typeof enUS = {
         },
     },
     ROMAN: {
+        label: 'NUMERO.ROMANO',
         description: 'Convierte un número arábigo a romano, como texto',
         abstract: 'Convierte un número arábigo a romano, como texto',
         links: [
@@ -794,6 +851,7 @@ const locale: typeof enUS = {
         },
     },
     ROUND: {
+        label: 'REDONDEAR',
         description: 'Redondea un número a un número especificado de dígitos',
         abstract: 'Redondea un número a un número especificado de dígitos',
         links: [
@@ -808,6 +866,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDBANK: {
+        label: 'REDONDEAR.BANQUERO',
         description: 'Redondea un número con redondeo bancario',
         abstract: 'Redondea un número con redondeo bancario',
         links: [
@@ -822,6 +881,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDDOWN: {
+        label: 'REDONDEAR.MENOS',
         description: 'Redondea un número hacia abajo, hacia cero',
         abstract: 'Redondea un número hacia abajo, hacia cero',
         links: [
@@ -836,6 +896,7 @@ const locale: typeof enUS = {
         },
     },
     ROUNDUP: {
+        label: 'REDONDEAR.MAS',
         description: 'Redondea un número hacia arriba, en dirección contraria a cero',
         abstract: 'Redondea un número hacia arriba, en dirección contraria a cero',
         links: [
@@ -850,6 +911,7 @@ const locale: typeof enUS = {
         },
     },
     SEC: {
+        label: 'SEC',
         description: 'Devuelve la secante de un ángulo',
         abstract: 'Devuelve la secante de un ángulo',
         links: [
@@ -863,6 +925,7 @@ const locale: typeof enUS = {
         },
     },
     SECH: {
+        label: 'SECH',
         description: 'Devuelve la secante hiperbólica de un ángulo',
         abstract: 'Devuelve la secante hiperbólica de un ángulo',
         links: [
@@ -876,6 +939,7 @@ const locale: typeof enUS = {
         },
     },
     SERIESSUM: {
+        label: 'SUMA.SERIES',
         description: 'Devuelve la suma de una serie de potencias basada en la fórmula',
         abstract: 'Devuelve la suma de una serie de potencias basada en la fórmula',
         links: [
@@ -892,6 +956,7 @@ const locale: typeof enUS = {
         },
     },
     SEQUENCE: {
+        label: 'SECUENCIA',
         description: 'Genera una lista de números secuenciales en una matriz, como 1, 2, 3, 4',
         abstract: 'Genera una lista de números secuenciales en una matriz, como 1, 2, 3, 4',
         links: [
@@ -908,6 +973,7 @@ const locale: typeof enUS = {
         },
     },
     SIGN: {
+        label: 'SIGNO',
         description: 'Devuelve el signo de un número',
         abstract: 'Devuelve el signo de un número',
         links: [
@@ -921,6 +987,7 @@ const locale: typeof enUS = {
         },
     },
     SIN: {
+        label: 'SEN',
         description: 'Devuelve el seno del ángulo dado',
         abstract: 'Devuelve el seno del ángulo dado',
         links: [
@@ -934,6 +1001,7 @@ const locale: typeof enUS = {
         },
     },
     SINH: {
+        label: 'SENOH',
         description: 'Devuelve el seno hiperbólico de un número',
         abstract: 'Devuelve el seno hiperbólico de un número',
         links: [
@@ -947,6 +1015,7 @@ const locale: typeof enUS = {
         },
     },
     SQRT: {
+        label: 'RAIZ',
         description: 'Devuelve una raíz cuadrada positiva',
         abstract: 'Devuelve una raíz cuadrada positiva',
         links: [
@@ -960,6 +1029,7 @@ const locale: typeof enUS = {
         },
     },
     SQRTPI: {
+        label: 'RAIZ2PI',
         description: 'Devuelve la raíz cuadrada de (número * pi)',
         abstract: 'Devuelve la raíz cuadrada de (número * pi)',
         links: [
@@ -973,6 +1043,7 @@ const locale: typeof enUS = {
         },
     },
     SUBTOTAL: {
+        label: 'SUBTOTAL',
         description: 'Devuelve un subtotal en una lista o base de datos.',
         abstract: 'Devuelve un subtotal en una lista o base de datos',
         links: [
@@ -988,6 +1059,7 @@ const locale: typeof enUS = {
         },
     },
     SUM: {
+        label: 'SUMA',
         description: 'Puede sumar valores individuales, referencias de celda o rangos, o una mezcla de los tres.',
         abstract: 'Suma sus argumentos',
         links: [
@@ -1008,6 +1080,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIF: {
+        label: 'SUMAR.SI',
         description: 'Suma los valores en un rango que cumplen con los criterios que especifique.',
         abstract: 'Suma las celdas especificadas por un criterio dado',
         links: [
@@ -1032,6 +1105,7 @@ const locale: typeof enUS = {
         },
     },
     SUMIFS: {
+        label: 'SUMAR.SI.CONJUNTO',
         description: 'Suma todos sus argumentos que cumplen con múltiples criterios.',
         abstract: 'Suma todos sus argumentos que cumplen con múltiples criterios.',
         links: [
@@ -1049,6 +1123,7 @@ const locale: typeof enUS = {
         },
     },
     SUMPRODUCT: {
+        label: 'SUMAPRODUCTO',
         description: 'Devuelve la suma de los productos de los componentes correspondientes de la matriz',
         abstract: 'Devuelve la suma de los productos de los componentes correspondientes de la matriz',
         links: [
@@ -1063,6 +1138,7 @@ const locale: typeof enUS = {
         },
     },
     SUMSQ: {
+        label: 'SUMA.CUADRADOS',
         description: 'Devuelve la suma de los cuadrados de los argumentos',
         abstract: 'Devuelve la suma de los cuadrados de los argumentos',
         links: [
@@ -1077,6 +1153,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2MY2: {
+        label: 'SUMAX2MENOSY2',
         description: 'Devuelve la suma de la diferencia de cuadrados de los valores correspondientes en dos matrices',
         abstract: 'Devuelve la suma de la diferencia de cuadrados de los valores correspondientes en dos matrices',
         links: [
@@ -1091,6 +1168,7 @@ const locale: typeof enUS = {
         },
     },
     SUMX2PY2: {
+        label: 'SUMAX2MASY2',
         description: 'Devuelve la suma de la suma de cuadrados de los valores correspondientes en dos matrices',
         abstract: 'Devuelve la suma de la suma de cuadrados de los valores correspondientes en dos matrices',
         links: [
@@ -1105,6 +1183,7 @@ const locale: typeof enUS = {
         },
     },
     SUMXMY2: {
+        label: 'SUMAXMENOSY2',
         description: 'Devuelve la suma de los cuadrados de las diferencias de los valores correspondientes en dos matrices',
         abstract: 'Devuelve la suma de los cuadrados de las diferencias de los valores correspondientes en dos matrices',
         links: [
@@ -1119,6 +1198,7 @@ const locale: typeof enUS = {
         },
     },
     TAN: {
+        label: 'TAN',
         description: 'Devuelve la tangente de un número.',
         abstract: 'Devuelve la tangente de un número',
         links: [
@@ -1132,6 +1212,7 @@ const locale: typeof enUS = {
         },
     },
     TANH: {
+        label: 'TANH',
         description: 'Devuelve la tangente hiperbólica de un número.',
         abstract: 'Devuelve la tangente hiperbólica de un número',
         links: [
@@ -1145,6 +1226,7 @@ const locale: typeof enUS = {
         },
     },
     TRUNC: {
+        label: 'TRUNCAR',
         description: 'Trunca un número a un entero',
         abstract: 'Trunca un número a un entero',
         links: [

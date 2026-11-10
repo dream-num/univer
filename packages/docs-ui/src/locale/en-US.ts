@@ -183,6 +183,7 @@ const locale = {
                 sectionSetting: 'Section Settings',
             },
             paragraphSetting: {
+                wordWrap: 'Allow Latin text to wrap in the middle of a word',
                 alignment: 'Alignment',
                 indentation: 'Indentation',
                 left: 'Left',

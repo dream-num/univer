@@ -15,12 +15,6 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type {
-    IExpandSelectionCommandParams,
-    IMoveSelectionCommandParams,
-    IMoveSelectionEnterAndTabCommandParams,
-    ISelectAllCommandParams,
-} from '../set-selection.command';
 import {
     BooleanNumber,
     Direction,
@@ -48,6 +42,12 @@ import {
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type {
+    IExpandSelectionCommandParams,
+    IMoveSelectionCommandParams,
+    IMoveSelectionEnterAndTabCommandParams,
+    ISelectAllCommandParams,
+} from '../set-selection.command';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
@@ -679,6 +679,171 @@ describe('Test commands used for change selections', () => {
             });
 
             expectSelectionToBe(0, 1, 1, 2);
+        });
+
+        it('should keep extending a formula reference upwards while the ref selection has no primary', async () => {
+            prepareSelectionsTestBed();
+            get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+            const refSelectionsService = get(IRefSelectionsService);
+
+            // The sheet selection keeps the cell the reference was picked from.
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 7, startColumn: 1, endRow: 7, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 7,
+                        startColumn: 1,
+                        endRow: 7,
+                        endColumn: 1,
+                        actualRow: 7,
+                        actualColumn: 1,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+            // The ref selection is rebuilt from the formula text, so it carries no primary cell.
+            refSelectionsService.setSelections([
+                {
+                    range: { startRow: 6, startColumn: 1, endRow: 7, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.UP,
+                extra: 'formula-editor',
+            });
+
+            expect(refSelectionsService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 5,
+                startColumn: 1,
+                endRow: 7,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+
+            // The picked cell is kept so the next step can extend from it again.
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.UP,
+                extra: 'formula-editor',
+            });
+
+            expect(refSelectionsService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 4,
+                startColumn: 1,
+                endRow: 7,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+        });
+
+        it('should keep extending a formula reference leftwards while the ref selection has no primary', async () => {
+            prepareSelectionsTestBed();
+            get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+            const refSelectionsService = get(IRefSelectionsService);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 11, startColumn: 5, endRow: 11, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 11,
+                        startColumn: 5,
+                        endRow: 11,
+                        endColumn: 5,
+                        actualRow: 11,
+                        actualColumn: 5,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+            refSelectionsService.setSelections([
+                {
+                    range: { startRow: 11, startColumn: 4, endRow: 11, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+                extra: 'formula-editor',
+            });
+
+            expect(refSelectionsService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 11,
+                startColumn: 3,
+                endRow: 11,
+                endColumn: 5,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+            expect(refSelectionsService.getCurrentLastSelectionPrimaryCell()).toMatchObject({
+                startRow: 11,
+                startColumn: 5,
+                endRow: 11,
+                endColumn: 5,
+            });
+
+            // The second step must keep growing instead of collapsing back to a single cell.
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+                extra: 'formula-editor',
+            });
+
+            expect(refSelectionsService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 11,
+                startColumn: 2,
+                endRow: 11,
+                endColumn: 5,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
+        });
+
+        it('should shrink a formula reference when moving back towards the picked cell', async () => {
+            prepareSelectionsTestBed();
+            get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+            const refSelectionsService = get(IRefSelectionsService);
+
+            selectionManagerService.setSelections([
+                {
+                    range: { startRow: 7, startColumn: 1, endRow: 7, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: {
+                        startRow: 7,
+                        startColumn: 1,
+                        endRow: 7,
+                        endColumn: 1,
+                        actualRow: 7,
+                        actualColumn: 1,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
+                },
+            ]);
+            refSelectionsService.setSelections([
+                {
+                    range: { startRow: 4, startColumn: 1, endRow: 10, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.DOWN,
+                extra: 'formula-editor',
+            });
+
+            expect(refSelectionsService.getCurrentLastSelection()!.range).toEqual({
+                startRow: 5,
+                startColumn: 1,
+                endRow: 10,
+                endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
+            });
         });
     });
 

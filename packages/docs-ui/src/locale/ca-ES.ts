@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configuració de secció',
             },
             paragraphSetting: {
+                wordWrap: 'Permet ajustar el text llatí al mig d’una paraula',
                 alignment: 'Alineació',
                 indentation: 'Sagnat',
                 left: 'Esquerra',

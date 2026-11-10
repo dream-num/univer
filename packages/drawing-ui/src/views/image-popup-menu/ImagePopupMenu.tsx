@@ -17,7 +17,6 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -35,6 +34,7 @@ import {
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -52,6 +52,7 @@ export interface IImagePopupMenuItem {
 
 export interface IImagePopupMenuExtraProps {
     menuItems: IImagePopupMenuItem[];
+    icon?: string;
     variant?: 'doc-floating-toolbar' | 'doc-chart-floating-toolbar';
     unitId?: string;
     subUnitId?: string;
@@ -116,6 +117,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     };
 
     const showMore = visible || isHovered;
+    const Icon = popup.extraProps?.icon ? iconManager.get(popup.extraProps.icon) : AutofillDoubleIcon;
 
     return (
         <div
@@ -152,7 +154,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                         'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                     })}
                 >
-                    <AutofillDoubleIcon
+                    <Icon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
                           dark:!univer-text-gray-0
@@ -228,7 +230,7 @@ function ToolbarButton(props: {
 
     return (
         <Tooltip
-            className="univer-fill-mode-backwards univer-delay-100"
+            className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
             title={props.title}
             placement="bottom"
             visible={tooltipVisible}
@@ -314,7 +316,7 @@ function ToolbarDropdownButton<T extends string | number>(props: {
         >
             <span>
                 <Tooltip
-                    className="univer-fill-mode-backwards univer-delay-100"
+                    className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
                     title={props.title}
                     placement="bottom"
                     visible={tooltipVisible && !open}

@@ -61,4 +61,22 @@ describe('MultipleSelect', () => {
         fireEvent.keyDown(container.querySelector('[data-u-comp="multiple-select"]')!, { key: 'ArrowDown' });
         expect(screen.queryByRole('menu')).toBeNull();
     });
+
+    it('removes badge close actions when disabled after being enabled', () => {
+        const onChange = vi.fn();
+        const { rerender } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MultipleSelect value={['first']} options={options} onChange={onChange} />
+            </ConfigProvider>
+        );
+        expect(screen.getByLabelText(enUS.design.Accessibility.closeBadge)).toBeTruthy();
+        rerender(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MultipleSelect value={['first']} options={options} onChange={onChange} disabled />
+            </ConfigProvider>
+        );
+        expect(screen.queryByLabelText(enUS.design.Accessibility.closeBadge)).toBeNull();
+        fireEvent.click(screen.getByText('First'));
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });

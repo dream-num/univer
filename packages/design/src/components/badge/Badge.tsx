@@ -17,6 +17,7 @@
 import type { ReactNode } from 'react';
 import { CloseIcon } from '@univerjs/icons';
 import { useContext } from 'react';
+import { focusClassName, resetButtonClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -50,11 +51,10 @@ export function Badge(props: IBadgeProps) {
 
             {closable && (
                 <button
-                    className="
-                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none
-                      univer-p-0 univer-outline-none univer-transition-opacity
+                    className={clsx(resetButtonClassName, focusClassName, `
+                      univer-rounded-sm univer-text-current univer-transition-opacity
                       hover:univer-opacity-70
-                    "
+                    `)}
                     type="button"
                     aria-label={locale?.Accessibility.closeBadge}
                     onClick={onClose}

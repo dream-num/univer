@@ -31,6 +31,20 @@ import { UniverSheetsFilterPreset } from '@univerjs/preset-sheets-filter';
 // createUniver({ presets: [UniverSheetsFilterPreset()] });
 ```
 
+## Worker usage
+
+On the main thread, import `UniverSheetsFilterPreset` from `@univerjs/preset-sheets-filter`. Configure `workerURL` on `UniverSheetsCorePreset`.
+
+In the worker entry, import `UniverSheetsFilterWorkerPreset` from `@univerjs/preset-sheets-filter/worker`:
+
+```ts
+import { UniverSheetsCoreWorkerPreset } from '@univerjs/preset-sheets-core/worker';
+import { UniverSheetsFilterWorkerPreset } from '@univerjs/preset-sheets-filter/worker';
+import { createUniver } from '@univerjs/presets';
+
+createUniver({ presets: [UniverSheetsCoreWorkerPreset(), UniverSheetsFilterWorkerPreset()] });
+```
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

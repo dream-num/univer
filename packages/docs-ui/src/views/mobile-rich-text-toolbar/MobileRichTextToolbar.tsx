@@ -16,8 +16,6 @@
 
 import type { ITextStyle, Nullable } from '@univerjs/core';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { Editor } from '../../services/editor/editor';
 import {
     BooleanNumber,
     BuildTextUtils,
@@ -42,6 +40,8 @@ import {
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { merge } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { Editor } from '../../services/editor/editor';
 import {
     getStyleInTextRange,
     ResetInlineFormatTextColorCommand,
@@ -239,7 +239,7 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
                                 variant="text"
                                 size="icon"
                                 aria-label={localeService.t<LocaleKey>('docs-ui.toolbar.textColor.main')}
-                                className="univer-size-7 univer-justify-self-center"
+                                className="univer-justify-self-center"
                             >
                                 <ColorWheelMultiIcon className="!univer-size-6" />
                             </Button>

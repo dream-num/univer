@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Paramètres de section',
             },
             paragraphSetting: {
+                wordWrap: 'Autoriser la césure en milieu de mot pour le texte en caractères latins',
                 alignment: 'Alignement',
                 indentation: 'Retrait',
                 left: 'Gauche',

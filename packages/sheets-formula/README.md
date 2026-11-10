@@ -33,10 +33,21 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverSheetsFormulaPlugin`
-- `UniverRemoteSheetsFormulaPlugin`
+
+## Worker usage
+
+On the main thread, import `UniverSheetsFormulaPlugin` from `@univerjs/sheets-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
+
+In the worker entry, import `UniverRemoteSheetsFormulaPlugin` from `@univerjs/sheets-formula/worker`:
+
+```ts
+import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula/worker';
+
+univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
+```
 
 ## Integration Notes
 

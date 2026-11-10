@@ -23,6 +23,20 @@ import type {
     ITableCellBorder,
     Nullable,
 } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CellValueType,
+    ColumnSeparatorType,
+    DashStyleType,
+    DocumentFlavor,
+    HorizontalAlign,
+    TableTextWrapType,
+    TabStopAlignment,
+    toDisposable,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonColumnGroup,
@@ -45,20 +59,6 @@ import type { IDocumentLayoutRenderConfig } from './document-layout-presentation
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import type { DocumentViewModel } from './view-model/document-view-model';
-import {
-    BooleanNumber,
-    CellValueType,
-    ColumnSeparatorType,
-    DashStyleType,
-    DocumentFlavor,
-    HorizontalAlign,
-    TableTextWrapType,
-    TabStopAlignment,
-    toDisposable,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../basics/const';
 import { calculateRectRotate, drawLineByBorderType, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-document-skeleton-cached';
@@ -972,13 +972,18 @@ export class Documents extends DocComponent {
                 vertexAngle,
                 alignOffset
             );
-            const spanPointWithFont = calculateRectRotate(
-                originTranslate.addByPoint(spanLeft + maxLineAscSin + xOffset, maxLineAscCos),
-                centerPoint,
-                centerAngle,
-                vertexAngle,
-                alignOffset
-            );
+            const spanPointWithFont = renderConfig.stackedText
+                ? Vector2.create(
+                    spanStartPoint.x + centerPoint.x - glyph.bBox.width / 2,
+                    spanStartPoint.y + centerPoint.y + (glyph.bBox.aba - glyph.bBox.abd) / 2
+                )
+                : calculateRectRotate(
+                    originTranslate.addByPoint(spanLeft + maxLineAscSin + xOffset, maxLineAscCos),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
             const extensionOffset: IExtensionConfig = {
                 originTranslate,
                 spanStartPoint,

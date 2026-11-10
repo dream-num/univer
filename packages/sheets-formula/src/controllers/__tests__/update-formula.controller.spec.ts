@@ -16,7 +16,8 @@
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
@@ -25,12 +26,16 @@ import {
     SetDefinedNameMutation,
     SetFormulaDataMutation,
     SetTriggerFormulaCalculationStartMutation,
+    UniverFormulaEnginePlugin,
 } from '@univerjs/engine-formula';
-import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { InsertSheetMutation, MoveRangeCommand, MoveRangeMutation, RemoveDefinedNameCommand, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetStyleCommand, SetWorksheetNameCommand, SheetInterceptorService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
+import { UniverSheetsFormulaPlugin } from '../../plugin';
 import { UpdateFormulaController } from '../update-formula.controller';
+import '@univerjs/sheets/facade';
+import '../../facade/index';
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -213,6 +218,94 @@ describe('UpdateFormulaController', () => {
             .getValues() as Array<Array<Nullable<ICellData>>>;
 
         expect(values).toEqual([[null, { f: '=SUM(A1:B2)' }]]);
+    });
+
+    it('preserves source and other-sheet references when cutting a formula across sheets, undoing and redoing', async () => {
+        const workbook = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const source = workbook.getSheetBySheetId('sheet1')!;
+        const target = workbook.getSheetBySheetId('sheet2')!;
+        const original = '=SUM(A1:B2)+SUM(Sheet2!A1:B2)';
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 5: { 2: { f: original } } },
+        });
+
+        expect(await commandService.executeCommand(MoveRangeCommand.id, {
+            fromUnitId: 'test',
+            fromSubUnitId: 'sheet1',
+            toUnitId: 'test',
+            toSubUnitId: 'sheet2',
+            fromRange: { startRow: 5, endRow: 5, startColumn: 2, endColumn: 2 },
+            toRange: { startRow: 7, endRow: 7, startColumn: 3, endColumn: 3 },
+        })).toBe(true);
+        const expected = '=SUM(Sheet1!A1:B2)+SUM(Sheet2!A1:B2)';
+        expect(target.getCell(7, 3)?.f).toBe(expected);
+        expect(source.getCell(5, 2)?.f).toBeFalsy();
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(source.getCell(5, 2)?.f).toBe(original);
+        expect(target.getCell(7, 3)?.f).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(target.getCell(7, 3)?.f).toBe(expected);
+    });
+
+    it('unpacks shared followers when moving a reference used only by their anchor, with undo and redo', async () => {
+        const sheet = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                10: { 0: { v: 10 }, 2: { f: '=A11', si: 'shared-move' } },
+                11: { 0: { v: 20 }, 2: { si: 'shared-move' } },
+            },
+        });
+        expect(await commandService.executeCommand(MoveRangeCommand.id, {
+            fromRange: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 },
+            toRange: { startRow: 10, endRow: 10, startColumn: 1, endColumn: 1 },
+        })).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=B11');
+        expect(sheet.getCell(11, 2)?.f).toBe('=A12');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=A11');
+        expect(sheet.getCell(11, 2)?.si).toBe('shared-move');
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getCell(10, 2)?.f).toBe('=B11');
+        expect(sheet.getCell(11, 2)?.f).toBe('=A12');
+    });
+
+    it.each([
+        {
+            id: 'sheet.command.set-table-config',
+            params: { unitId: 'test', oldTableName: 'Sales', name: 'Revenue' },
+            expected: '=SUM(Revenue[Amount])+SUM(Other[Amount])+SUM(Revenue[Units])+SUM(Revenue[[#Data],[Amount]])',
+        },
+        {
+            id: 'sheet.command.delete-table',
+            params: { unitId: 'test', tableName: 'Sales' },
+            expected: '=SUM(#REF!)+SUM(Other[Amount])+SUM(#REF!)+SUM(#REF!)',
+        },
+        {
+            id: 'sheet.command.table-remove-column-at',
+            params: { unitId: 'test', subUnitId: 'sheet1', tableName: 'Sales', removedColumnNames: ['Amount'] },
+            expected: '=SUM(#REF!)+SUM(Other[Amount])+SUM(Sales[Units])+SUM(#REF!)',
+        },
+    ])('preserves unaffected table references and reversible formula updates for $id', ({ id, params, expected }) => {
+        const original = '=SUM(Sales[Amount])+SUM(Other[Amount])+SUM(Sales[Units])+SUM(Sales[[#Data],[Amount]])';
+        const sheet = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 10: { 1: { f: original } } },
+        });
+        const result = testBed.injector.get(SheetInterceptorService).onCommandExecute({ id, params });
+        for (const mutations of [result.redos, result.undos, result.redos]) {
+            for (const mutation of mutations) {
+                expect(commandService.syncExecuteCommand(mutation.id, mutation.params)).toBe(true);
+            }
+            expect(sheet.getCell(10, 1)?.f).toBe(mutations === result.undos ? original : expected);
+        }
     });
 
     it('should rewrite formulas when referenced sheets change', () => {
@@ -936,5 +1029,98 @@ describe('UpdateFormulaController', () => {
                 onlyLocal: true,
             }
         );
+    });
+});
+
+describe('UpdateFormulaController spill cache integration', () => {
+    it.each([
+        { formula: '=SEQUENCE($A$1)', horizontal: false, scale: 1 },
+        { formula: '=SEQUENCE(1,$A$1)', horizontal: true, scale: 1 },
+        { formula: '=FILTER($M$1:$M$5,$M$1:$M$5<=$A$1)', horizontal: false, scale: 1 },
+        { formula: '=SEQUENCE($A$1)*10', horizontal: false, scale: 10 },
+    ])('updates removed spill cells and their dependents for $formula', async ({ formula, horizontal, scale }) => {
+        const range = horizontal ? 'H1:L1' : 'H1:H5';
+        const tail = horizontal ? 'L1' : 'H5';
+        const removedRange = horizontal ? 'J1:L1' : 'H3:H5';
+        const cellData: NonNullable<IWorkbookData['sheets'][string]['cellData']> = {
+            0: { 0: { v: 5 }, 7: { f: formula }, 13: { f: `=SUM(${range})` } },
+            1: { 13: { f: `=${tail}` } },
+            2: { 13: { f: `=SUM(${removedRange})` } },
+            3: { 13: { f: '=N1*2' } },
+        };
+        for (let row = 0; row < 5; row++) {
+            (cellData[row] ??= {})[12] = { v: row + 1 };
+        }
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const api = FUniver.newAPI(univer);
+        const book = api.createWorkbook({
+            id: 'spill-cache',
+            sheetOrder: ['data', 'check'],
+            sheets: {
+                data: { id: 'data', name: 'Data', rowCount: 20, columnCount: 20, cellData },
+                check: { id: 'check', name: 'Check', rowCount: 5, columnCount: 3, cellData: { 0: { 0: { f: `=SUM(Data!${range})` } } } },
+            },
+        });
+        const sheet = book.getSheetByName('Data')!;
+        const calculator = api.getFormula();
+        univer.__getInjector().get(IUniverInstanceService).focusUnit(book.getId());
+        let calculationIndex = 0;
+        async function calculate(action: () => unknown): Promise<void> {
+            calculationIndex++;
+            let subscription: { dispose(): void };
+            let timer: ReturnType<typeof setTimeout>;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error(`Spill calculation ${calculationIndex} timed out`)), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer!);
+                subscription!.dispose();
+            }
+        }
+        function expectValues(count: number, scalar = false): void {
+            const sum = scalar ? 99 : count * (count + 1) / 2 * scale;
+            expect(sheet.getRange('N1').getValue()).toBe(sum);
+            expect(sheet.getRange('N2').getValue()).toBe(!scalar && count === 5 ? 5 * scale : 0);
+            expect(sheet.getRange('N3').getValue()).toBe(scalar ? 0 : Array.from({ length: Math.max(0, count - 2) }, (_, index) => (index + 3) * scale).reduce((a, b) => a + b, 0));
+            expect(sheet.getRange('N4').getValue()).toBe(sum * 2);
+            expect(book.getSheetByName('Check')!.getRange('A1').getValue()).toBe(sum);
+            for (let index = 0; index < 5; index++) {
+                const address = horizontal ? `${String.fromCharCode(72 + index)}1` : `H${index + 1}`;
+                const expected = scalar ? (index === 0 ? 99 : null) : (index < count ? (index + 1) * scale : null);
+                expect(sheet.getRange(address).getValue() ?? null).toBe(expected);
+            }
+        }
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expectValues(5);
+            for (const count of [2, 1, 5, 1, 3]) {
+                await calculate(() => sheet.getRange('A1').setValue(count));
+                expectValues(count);
+                await calculate(() => calculator.executeCalculation());
+                expectValues(count);
+            }
+            await calculate(() => sheet.getRange(tail).setValue(100));
+            await calculate(() => sheet.getRange('A1').setValue(5));
+            expect(sheet.getRange('H1').getValue()).toBe('#SPILL!');
+            expect(sheet.getRange(tail).getValue()).toBe(100);
+            await calculate(() => sheet.getRange(tail).clearContent());
+            expectValues(5);
+            await calculate(() => sheet.getRange('H1').setFormula('=99'));
+            expectValues(1, true);
+            const commands = univer.__getInjector().get(ICommandService);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expectValues(5);
+            await calculate(() => expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true));
+            expectValues(1, true);
+        } finally {
+            univer.dispose();
+        }
     });
 });

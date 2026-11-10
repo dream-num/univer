@@ -15,11 +15,11 @@
  */
 
 import type { ComponentType } from 'react';
-import type { LocaleKey } from '../../../locale/types';
 import { BooleanNumber, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../../locale/types';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { useHeaderFooterOptions } from './use-header-footer-options';
 
@@ -71,11 +71,11 @@ function DocHeaderFooterOptionsContent({ unitId }: { unitId: string }) {
                 </div>
             </div>
 
-            <div className="univer-mb-1 univer-flex">
+            <div className="univer-mb-1 univer-grid univer-grid-cols-2 univer-items-end univer-gap-4">
                 <div>
                     <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')}</span>
                     <InputNumber
-                        className="univer-mt-1.5 univer-w-4/5"
+                        className="univer-mt-1.5 univer-w-full"
                         min={0}
                         max={200}
                         precision={1}
@@ -86,7 +86,7 @@ function DocHeaderFooterOptionsContent({ unitId }: { unitId: string }) {
                 <div>
                     <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')}</span>
                     <InputNumber
-                        className="univer-mt-1.5 univer-w-4/5"
+                        className="univer-mt-1.5 univer-w-full"
                         min={0}
                         max={200}
                         precision={1}

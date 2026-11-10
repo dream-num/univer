@@ -198,6 +198,22 @@ describe('InputNumber', () => {
         expect(onPressEnter).toHaveBeenCalled();
     });
 
+    it('keeps numeric editing and bounds when a compact input hides its stepper controls', () => {
+        const onChange = vi.fn();
+        const { getByRole, queryByRole } = render(
+            <InputNumber size="small" controls={false} defaultValue={12} min={0} max={19} onChange={onChange} />
+        );
+        const input = getByRole('textbox');
+        expect(queryByRole('button')).toBeNull();
+        fireEvent.change(input, { target: { value: '18' } });
+        fireEvent.keyDown(input, { key: 'ArrowUp' });
+        expect(input).toHaveValue('19');
+        fireEvent.keyDown(input, { key: 'ArrowUp' });
+        expect(input).toHaveValue('19');
+        fireEvent.keyDown(input, { key: 'ArrowDown' });
+        expect(onChange).toHaveBeenLastCalledWith(18);
+    });
+
     it('should hide controls when controls is false and keep input disabled', () => {
         const { container } = render(<InputNumber defaultValue={3} controls={false} disabled />);
         expect(container.querySelector('[role="button"]')).toBeNull();

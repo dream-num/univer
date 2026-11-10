@@ -16,6 +16,7 @@
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import type { IInputProps } from '../input/Input';
 import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -25,7 +26,7 @@ export interface IInputNumberProps
     extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
     defaultValue?: number;
-    size?: 'mini' | 'small';
+    size?: IInputProps['size'];
     min?: number;
     max?: number;
     step?: number;
@@ -48,7 +49,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         {
             value,
             defaultValue,
-            size = 'small',
+            size,
             min = Number.MIN_SAFE_INTEGER,
             max = Number.MAX_SAFE_INTEGER,
             step = 1,
@@ -341,6 +342,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             <div className={clsx('univer-inline-block', className)}>
                 <div className="univer-relative univer-w-full">
                     <Input
+                        inputMode={min < 0 ? 'text' : 'decimal'}
                         {...inputProps}
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}

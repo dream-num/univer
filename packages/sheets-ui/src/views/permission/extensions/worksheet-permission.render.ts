@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IScale } from '@univerjs/core';
+import type { IScale, ThemeService } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { SheetExtension } from '@univerjs/engine-render';
@@ -34,7 +34,10 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
     private _img = new Image();
     protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' | 'none' = 'always';
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
+    constructor(
+        private readonly _themeService: ThemeService,
+        shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none'
+    ) {
         super();
         this._img.src = base64;
         if (shadowStrategy) {
@@ -54,6 +57,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         }
 
         ctx.save();
+        ctx.globalAlpha *= this._themeService.darkMode ? 0.16 : 1;
         if (!this._pattern) {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
@@ -63,6 +67,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
 
         const { hasWorksheetRule = false, selectionProtection = [] } = worksheet.getCell(startRow, startColumn) as IWorksheetProtectionRenderCellData || {};
         if (!this._pattern) {
+            ctx.restore();
             return;
         }
 

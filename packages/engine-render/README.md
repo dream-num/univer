@@ -30,6 +30,18 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 univer.registerPlugin(UniverRenderEnginePlugin);
 ```
 
+## Worker usage
+
+On the main thread, import `UniverRenderEnginePlugin` from `@univerjs/engine-render`.
+
+In the worker entry, import `DocumentLayoutSession` from `@univerjs/engine-render/worker`:
+
+```ts
+import { DocumentLayoutSession } from '@univerjs/engine-render/worker';
+```
+
+`DocumentLayoutSession` is a layout utility, not a plugin. For Docs layout workers, use the [Docs worker setup](../docs/README.md#worker-usage), which manages the session lifecycle.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -20,6 +20,15 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IFeatureDirtyRangeType,
     IFormulaData,
@@ -45,15 +54,6 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from './dependency-tree';
-import {
-    createIdentifier,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RTree,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -77,6 +77,7 @@ import {
     FormulaDependencyTreeType,
     FormulaDependencyTreeVirtual,
 } from './dependency-tree';
+import { ReferenceContext } from './reference-context';
 
 export function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): number {
     const idNum = dependencyManagerService.getLastTreeId() || 0;
@@ -84,6 +85,8 @@ export function generateRandomDependencyTreeId(dependencyManagerService: IDepend
 }
 
 export interface IFormulaDependencyGenerator {
+    /** Keep structural dirty information available when a calculation is interrupted. */
+    finishReferenceContext?(completed: boolean): void;
     generate(isCalculateTreeModel?: boolean): Promise<IFormulaDependencyTree[]>;
     getAllDependencyJson(): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number): Promise<IFormulaDependencyTreeFullJson | undefined>;
@@ -94,12 +97,26 @@ export interface IFormulaDependencyGenerator {
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
+function isEmptyRecord(record: Record<string, unknown> | null | undefined) {
+    return record == null || Object.keys(record).length === 0;
+}
+
 export class FormulaDependencyGenerator extends Disposable implements IFormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     protected _dependencyRTreeCacheForAddressFunction: RTree = new RTree();
 
     protected _dependencyTreeCache = new Map<number, IFormulaDependencyTree>();
+
+    // Keyed by the AST instance the engine is already reusing, so the range list cannot
+    // outlive the AST it was resolved from.
+    private _reusableRanges = new WeakMap<BaseAstNode, IUnitRange[] | null>();
+
+    // Sheet sizes take part in resolving open-ended references (`A:A`, `A1:`), and the AST
+    // cache does not invalidate on a resize, so the resolved ranges are only reusable while
+    // every sheet keeps the size it had when they were resolved.
+    private readonly _referenceContext = new ReferenceContext();
+    private _reusableSheetSignature: Nullable<string> = null;
 
     constructor(
         @IFormulaCurrentConfigService protected readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -248,7 +265,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         FDtree.rangeList = dependencyRanges;
         FDtree.getDirtyData = getDirtyData;
 
-        const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
+        const allDependency = getDirtyData(this._currentConfigService.getDirtyData(true) as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
         const dirtyRanges = this._convertDirtyRangesToUnitRange(allDependency.dirtyRanges);
 
         FDtree.featureDirtyRanges = dirtyRanges;
@@ -515,7 +532,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         return this._dependencyTreeCache.get(treeId);
     }
 
-    protected _getTreeNode(tree: IFormulaDependencyTree) {
+    protected _getTreeNode(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column'>) {
         return generateAstNode(
             tree.unitId,
             tree.formula,
@@ -689,6 +706,92 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     /**
+     * Whether the ranges resolved for this formula may be kept for a later calculation. This
+     * is independent of whether they may be reused right now: a forced calculation rebuilds
+     * the index but the ranges it resolves are still valid for the next one.
+     */
+    private _canShareRanges(tree: IFormulaDependencyTree, node: BaseAstNode, addressFunctionNodes: FunctionNode[]) {
+        if (addressFunctionNodes.length > 0) {
+            return false;
+        }
+
+        const excludedCell = this._currentConfigService.getExcludedRange()?.[tree.unitId]?.[tree.subUnitId];
+        if (excludedCell?.getValue(tree.row, tree.column) != null) {
+            return false;
+        }
+
+        const cached = this._reusableRanges.get(node);
+        if (cached !== undefined) {
+            return cached !== null;
+        }
+
+        const references: PreCalculateNodeType[] = [];
+        this._nodeTraversalRef(node, references);
+        if (references.some((reference) => !this._isStaticReference(reference))) {
+            // A stable AST can still resolve different ranges after an input value changes.
+            this._reusableRanges.set(node, null);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * `A:A` and other open-ended references are clipped to the size of the sheet they point
+     * at, so any resize can change a resolved range list without touching the AST.
+     */
+    private _getSheetSignature(unitData: IUnitData) {
+        let signature = '';
+
+        for (const unitId of Object.keys(unitData)) {
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+            signature += JSON.stringify(workbook?.getSheetOrders());
+            const sheets = unitData[unitId];
+            if (sheets == null) {
+                continue;
+            }
+
+            for (const sheetId of Object.keys(sheets)) {
+                const sheet = sheets[sheetId];
+                signature += `${unitId}:${sheetId}:${sheet.rowCount}:${sheet.columnCount};`;
+            }
+        }
+
+        return signature;
+    }
+
+    private _takeReusableRanges(node: BaseAstNode) {
+        return this._reusableRanges.get(node);
+    }
+
+    private _storeReusableRanges(node: BaseAstNode, rangeList: IUnitRange[]) {
+        this._reusableRanges.set(node, [...rangeList]);
+    }
+
+    finishReferenceContext(completed: boolean): void {
+        this._referenceContext.finish(completed);
+        if (!completed) {
+            this._reusableSheetSignature = null;
+        }
+    }
+
+    protected _updateReferenceContext(unitData: IUnitData): boolean {
+        return this._referenceContext.update(unitData, (unitId) => this._currentConfigService.getSheetsInfo?.(unitId));
+    }
+
+    protected _isReferenceContextAffected(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column' | 'rowCount' | 'columnCount' | 'refOffsetX' | 'refOffsetY'>, node?: BaseAstNode): boolean {
+        if (this._referenceContext.isSheetSizeChanged(tree.unitId, tree.subUnitId)) {
+            const arrayRange = this._currentConfigService.getArrayFormulaRange()?.[tree.unitId]?.[tree.subUnitId]?.[tree.row]?.[tree.column];
+            const cell = this._currentConfigService.getUnitData()[tree.unitId]?.[tree.subUnitId]?.cellData.getValue(tree.row, tree.column);
+            if (arrayRange || cell?.v === '#SPILL!' || cell?.v === '#REF!') {
+                return true;
+            }
+        }
+        this._runtimeService.setCurrent(tree.row, tree.column, tree.rowCount, tree.columnCount, tree.subUnitId, tree.unitId);
+        return this._referenceContext.isAffected(node ?? this._getTreeNode(tree), tree.unitId, tree.subUnitId, tree.refOffsetX, tree.refOffsetY);
+    }
+
+    /**
      * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.
      * @param formulaData
      */
@@ -697,6 +800,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         otherFormulaData: IOtherFormulaData,
         unitData: IUnitData
     ) {
+        const referenceContextChanged = this._updateReferenceContext(unitData);
         const formulaDataKeys = Object.keys(formulaData);
 
         const otherFormulaDataKeys = Object.keys(otherFormulaData);
@@ -715,11 +819,22 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         this._registerFeatureFormulas(treeList as FormulaDependencyTree[]);
 
+        const sheetSignature = this._getSheetSignature(unitData);
+
+        const canReuseRanges = this._reusableSheetSignature === sheetSignature
+            && isEmptyRecord(this._currentConfigService.getDirtyNameMap())
+            && isEmptyRecord(this._currentConfigService.getClearDependencyTreeCache());
+
+        if (!canReuseRanges) {
+            this._reusableRanges = new WeakMap();
+        }
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
             // After entering the pivot table, no calculation is required if there is no formula
             if (!tree.formula) {
+                tree.isDirty = referenceContextChanged && tree.type === FormulaDependencyTreeType.FEATURE_FORMULA;
                 continue;
             }
 
@@ -733,7 +848,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             );
 
             const node = this._getTreeNode(tree);
-            tree.isDirty = this._includeTree(tree, node);
+            tree.isDirty = this._includeTree(tree, node) || (referenceContextChanged && this._isReferenceContextAffected(tree, node));
 
             const addressFunctionNodes = this._getAddressFunctionNodeList(node);
             if (addressFunctionNodes.length > 0) {
@@ -744,13 +859,30 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 continue;
             }
 
+            const canShare = this._canShareRanges(tree, node, addressFunctionNodes);
+            const cachedRangeList = canShare && canReuseRanges ? this._takeReusableRanges(node) : undefined;
+
+            if (cachedRangeList != null) {
+                (tree as FormulaDependencyTree).pushRangeList(cachedRangeList);
+                // The index entries survive only while the dependency index does. A forced
+                // calculation resets it, in which case the tree has to be inserted again.
+                tree.isCache = this._dependencyManagerService.hasDependencyRTreeCache(tree.treeId);
+                continue;
+            }
+
             const rangeList = await this._getRangeListByNode({
                 node,
                 refOffsetX: tree.refOffsetX,
                 refOffsetY: tree.refOffsetY,
             });
             (tree as FormulaDependencyTree).pushRangeList(rangeList);
+
+            if (canShare) {
+                this._storeReusableRanges(node, rangeList);
+            }
         }
+
+        this._reusableSheetSignature = sheetSignature;
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -915,7 +1047,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 result.push(item as PreCalculateNodeType);
                 if (item.nodeType === NodeType.UNION) {
                     for (const unionChildItem of item.getChildren()) {
-                        if (unionChildItem.nodeType === NodeType.FUNCTION && (unionChildItem as FunctionNode).isAddress()) {
+                        if (!this._isStaticReference(unionChildItem)) {
                             this._nodeTraversalRef(unionChildItem, result);
                         }
                     }

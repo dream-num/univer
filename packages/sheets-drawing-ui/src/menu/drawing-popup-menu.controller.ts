@@ -224,6 +224,7 @@ export class DrawingPopupMenuController extends RxDisposable {
             offset: [2, 0],
             extraProps: {
                 menuItems,
+                icon: this._canvasPopManagerService.getFeatureMenuIcon(drawingType),
             },
         }));
     }

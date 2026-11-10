@@ -16,13 +16,13 @@
 
 import type { ISelectProps } from '@univerjs/design';
 import type { ComponentType } from 'react';
-import type { LocaleKey } from '../locale/types';
-import type { IBusinessComponentProps } from './components/interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { IBusinessComponentProps } from './components/interface';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
 import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
@@ -116,7 +116,10 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
     return (
         <div
             className={clsx(
-                'univer-flex univer-h-full univer-flex-col univer-justify-between univer-overflow-y-auto univer-pb-5',
+                `
+                  univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between
+                  univer-overflow-y-auto univer-pb-5
+                `,
                 scrollbarClassName
             )}
         >

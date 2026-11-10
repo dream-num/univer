@@ -21,12 +21,14 @@ import type {
     ICustomRangeForInterceptor,
     ICustomTable,
     IDisposable,
+    IParagraphStyle,
     ITable,
     JSONXActions,
     JSONXPath,
     Nullable,
 } from '@univerjs/core';
 import {
+    BooleanNumber,
     DataStreamTreeNodeType,
     DataStreamTreeTokenType,
     DocumentFlavor,
@@ -43,12 +45,14 @@ import type {
     IDocumentLayoutColumnGroup,
     IDocumentLayoutCustomColumnGroup,
     IDocumentLayoutParagraph,
+    IDocumentLayoutRenderConfig,
     IDocumentLayoutSectionBreak,
     IDocumentLayoutSnapshot,
     IDocumentLayoutTextRun,
 } from '../document-layout-presentation';
 import type { IHeadingSection } from './heading-sections';
 import { getDocumentLayoutPresentation } from '../document-layout-presentation';
+import { createDocumentLineBreaker } from '../layout/line-breaker/document-line-breaker';
 import { DataStreamTreeNode } from './data-stream-tree-node';
 import { getHeadingSections } from './heading-sections';
 
@@ -705,6 +709,18 @@ export class DocumentViewModel implements IDisposable {
         return getDocumentLayoutPresentation(this._documentDataModel)?.getSnapshot(snapshot) ?? snapshot;
     }
 
+    getParagraphWordWrap(paragraphStyle: IParagraphStyle): BooleanNumber | undefined {
+        return paragraphStyle.wordWrap ?? BooleanNumber.FALSE;
+    }
+
+    getLayoutRenderConfig(config: IDocumentLayoutRenderConfig): IDocumentLayoutRenderConfig {
+        return config;
+    }
+
+    createLineBreaker(content: string, paragraphStyle: IParagraphStyle, start: number) {
+        return createDocumentLineBreaker(this.getSnapshot(), paragraphStyle, content, start, this.getBody());
+    }
+
     getDataModel() {
         return this._documentDataModel;
     }
@@ -1094,7 +1110,7 @@ export class DocumentViewModel implements IDisposable {
         };
         this._children.forEach(visit);
         this._treeNodes = nodes;
-        this._treeNodesByStartIndex = nodes.toSorted((left, right) => left.startIndex - right.startIndex);
+        this._treeNodesByStartIndex = [...nodes].sort((left, right) => left.startIndex - right.startIndex);
         this._plainTopLevelParagraphNodes = this._children.flatMap((section) =>
             section.children.filter(
                 (node) => node.nodeType === DataStreamTreeNodeType.PARAGRAPH && node.children.length === 0
@@ -1234,6 +1250,10 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
+    protected _createChildViewModel(model: DocumentDataModel, tableSource?: Record<string, ITable>): DocumentViewModel {
+        return new DocumentViewModel(model, tableSource);
+    }
+
     private _buildHeaderFooterViewModel() {
         for (const [noteId, viewModel] of this._noteTreeMap) {
             if (viewModel.getDataModel() !== this._documentDataModel.noteModelMap.get(noteId)) {
@@ -1245,7 +1265,7 @@ export class DocumentViewModel implements IDisposable {
         const viewModels = [];
         const rootTableSource = this.getSnapshot().tableSource;
         for (const [headerId, headerModel] of headerModelMap) {
-            this._headerTreeMap.set(headerId, new DocumentViewModel(headerModel, {
+            this._headerTreeMap.set(headerId, this._createChildViewModel(headerModel, {
                 ...rootTableSource,
                 ...headerModel.getSnapshot().tableSource,
             }));
@@ -1253,7 +1273,7 @@ export class DocumentViewModel implements IDisposable {
         }
 
         for (const [footerId, footerModel] of footerModelMap) {
-            this._footerTreeMap.set(footerId, new DocumentViewModel(footerModel, {
+            this._footerTreeMap.set(footerId, this._createChildViewModel(footerModel, {
                 ...rootTableSource,
                 ...footerModel.getSnapshot().tableSource,
             }));
@@ -1262,7 +1282,7 @@ export class DocumentViewModel implements IDisposable {
 
         for (const [noteId, model] of this._documentDataModel.noteModelMap) {
             const viewModel = this._noteTreeMap.get(noteId)
-                ?? new DocumentViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
+                ?? this._createChildViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
             this._noteTreeMap.set(noteId, viewModel);
             viewModels.push(viewModel);
         }

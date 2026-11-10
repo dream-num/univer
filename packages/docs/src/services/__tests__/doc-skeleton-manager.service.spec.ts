@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDocLayoutExecutor } from '../doc-layout-executor.service';
 import {
+    BooleanNumber,
+    CellValueType,
     CommandService,
     ConfigService,
     ContextService,
+    createInternalEditorID,
     DesktopLogService,
     DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -36,8 +38,9 @@ import {
     UniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { registerDocumentLayoutPresentation } from '@univerjs/engine-render';
+import { FontCache, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDocLayoutExecutor } from '../doc-layout-executor.service';
 import {
     DocLayoutExecutorService,
     DocLayoutExecutorType,
@@ -248,6 +251,63 @@ describe('DocSkeletonManagerService', () => {
             spaced.dispose();
             baseline.dispose();
             injector.dispose();
+        }
+    });
+
+    it.each([
+        { id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, initial: ['오늘 전략', '을'], resized: ['오늘 전', '략을'] },
+        { id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, initial: ['오늘 전략', '을'], resized: ['오늘 전', '략을'] },
+        { id: 'ordinary-document', initial: ['오늘 ', '전략을'], resized: ['오늘 ', '전략을'] },
+        { id: createInternalEditorID('shape-word-wrap'), initial: ['오늘 ', '전략을'], resized: ['오늘 ', '전략을'] },
+    ])('keeps host wrapping when alignment metadata is cleared and the editor is resized: $id', ({ id, initial, resized }) => {
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 10,
+            fontBoundingBoxAscent: 10,
+            fontBoundingBoxDescent: 2,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        }));
+        const injector = new Injector();
+        const document = injector.createInstance(DocumentDataModel, {
+            id,
+            body: {
+                dataStream: '오늘 전략을\r\n',
+                paragraphs: [{ startIndex: 6, paragraphId: 'korean', paragraphStyle: { snapToGrid: BooleanNumber.FALSE } }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.UNSPECIFIED,
+                textStyle: { lang: 'ko-KR' },
+                pageSize: { width: 50, height: Infinity },
+                marginTop: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                renderConfig: { cellValueType: CellValueType.STRING, zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+        });
+        const before = JSON.stringify(document.getSnapshot());
+        const service = createService(document);
+        const lines = () => {
+            const pages = service.getSkeleton().getSkeletonData()!.pages;
+            return pages
+                .flatMap((page) => page.sections)
+                .flatMap((section) => section.columns)
+                .flatMap((column) => column.lines)
+                .map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r$/, ''));
+        };
+        try {
+            expect(lines()).toEqual(initial);
+            expect(JSON.stringify(document.getSnapshot())).toBe(before);
+            document.updateDocumentRenderConfig({ cellValueType: undefined });
+            document.updateDocumentDataPageSize(40, Infinity);
+            const resizedSnapshot = JSON.stringify(document.getSnapshot());
+            service.recalculate();
+            expect(lines()).toEqual(resized);
+            expect(JSON.stringify(document.getSnapshot())).toBe(resizedSnapshot);
+        } finally {
+            service.dispose();
+            injector.dispose();
+            measure.mockRestore();
         }
     });
 });

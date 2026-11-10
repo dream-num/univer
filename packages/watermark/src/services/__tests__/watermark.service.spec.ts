@@ -14,56 +14,50 @@
  * limitations under the License.
  */
 
+import type { IWatermarkConfigWithType } from '@univerjs/engine-render';
 import { ILocalStorageService, Injector } from '@univerjs/core';
-import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
-import { describe, expect, it, vi } from 'vitest';
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { WatermarkService } from '../watermark.service';
 
-const getItem = vi.fn(async () => ({ type: 'text' }));
-const setItem = vi.fn();
-const removeItem = vi.fn();
-
-class TestLocalStorage {
-    getItem = getItem;
-    setItem = setItem;
-    removeItem = removeItem;
-}
-
 describe('WatermarkService', () => {
-    it('should get/update/delete/refresh and dispose', async () => {
-        getItem.mockClear();
-        setItem.mockClear();
-        removeItem.mockClear();
-        const injector = new Injector();
-        injector.add([ILocalStorageService, { useClass: TestLocalStorage as never }]);
+    let injector: Injector;
+
+    afterEach(() => injector.dispose());
+
+    it('reads, updates and deletes the persisted watermark and notifies subscribers', async () => {
+        const config: IWatermarkConfigWithType = { type: IWatermarkTypeEnum.Text, config: {} };
+        const storage: ILocalStorageService = {
+            getItem: vi.fn().mockResolvedValue(config),
+            setItem: vi.fn().mockResolvedValue(config),
+            removeItem: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn().mockResolvedValue(undefined),
+            key: vi.fn().mockResolvedValue(null),
+            keys: vi.fn().mockResolvedValue([]),
+            iterate: vi.fn().mockResolvedValue(undefined),
+        };
+        injector = new Injector();
+        injector.add([ILocalStorageService, { useValue: storage }]);
         injector.add([WatermarkService]);
         const service = injector.get(WatermarkService);
 
-        await expect(service.getWatermarkConfig()).resolves.toEqual({ type: 'text' });
-        expect(getItem).toHaveBeenCalledWith(UNIVER_WATERMARK_STORAGE_KEY);
+        await expect(service.getWatermarkConfig()).resolves.toEqual(config);
+        expect(storage.getItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
 
         const updateValues: unknown[] = [];
         const refreshValues: number[] = [];
         service.updateConfig$.subscribe((value) => updateValues.push(value));
         service.refresh$.subscribe((value) => refreshValues.push(value));
 
-        service.updateWatermarkConfig({ type: 'image', config: { image: { url: 'x' } } } as never);
-        expect(setItem).toHaveBeenCalledWith(UNIVER_WATERMARK_STORAGE_KEY, {
-            type: 'image',
-            config: { image: { url: 'x' } },
-        });
+        service.updateWatermarkConfig(config);
+        expect(storage.setItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY', config);
 
         service.deleteWatermarkConfig();
-        expect(removeItem).toHaveBeenCalledWith(UNIVER_WATERMARK_STORAGE_KEY);
-        expect(updateValues).toEqual([
-            { type: 'image', config: { image: { url: 'x' } } },
-            null,
-        ]);
+        expect(storage.removeItem).toHaveBeenCalledWith('UNIVER_WATERMARK_STORAGE_KEY');
+        expect(updateValues).toEqual([config, null]);
 
         service.refresh();
         expect(refreshValues.length).toBe(1);
         expect(refreshValues[0]).toBeTypeOf('number');
-
-        service.dispose();
     });
 });

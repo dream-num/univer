@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { ActionRow, Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
+import { ActionRow, Avatar, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -206,27 +206,19 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
         sidebarService.open(sidebarProps);
     };
 
-    const handleChangeHeaderType = (isCurrentSheet: boolean) => {
-        setIsCurrentSheet(isCurrentSheet);
-    };
-
     const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value;
 
     return (
         <div className="univer-mt-2 univer-flex univer-h-[calc(100%-8px)] univer-flex-col">
-            <div className="univer-flex univer-h-[30px] univer-py-2">
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': isCurrentSheet })}>
-                        {' '}
-                        {localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet')}
-                    </div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': isCurrentSheet })} />
-                </div>
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet')}</div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': !isCurrentSheet })} />
-                </div>
-            </div>
+            <Segmented
+                className="univer-my-2 univer-w-full univer-shrink-0"
+                items={[
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet'), value: 'current' },
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet'), value: 'all' },
+                ]}
+                value={isCurrentSheet ? 'current' : 'all'}
+                onChange={(value) => setIsCurrentSheet(value === 'current')}
+            />
 
             {ruleList?.length > 0
                 ? (

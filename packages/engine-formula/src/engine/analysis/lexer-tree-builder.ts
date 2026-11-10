@@ -15,11 +15,11 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -1487,6 +1487,12 @@ export class LexerTreeBuilder extends Disposable {
         this._segment = '';
 
         this._bracketState = []; // ()
+
+        this._openBracketNormalIndexStack = [];
+
+        this._squareBracketState = 0;
+
+        this._tableBracketState = false;
 
         this._bracesState = 0; // {}
 

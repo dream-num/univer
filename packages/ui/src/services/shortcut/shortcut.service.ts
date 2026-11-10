@@ -221,7 +221,9 @@ export class ShortcutService extends Disposable implements IShortcutService {
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this._getBindingFromItem(shortcut);
-        if (!binding) return toDisposable(() => {});
+        if (!binding) {
+            return toDisposable(() => {});
+        }
 
         const bindingSet = this._shortCutMapping.get(binding);
         if (bindingSet) {
@@ -270,7 +272,9 @@ export class ShortcutService extends Disposable implements IShortcutService {
 
     getShortcutDisplay(shortcut: IShortcutItem): string | null {
         const binding = this._getBindingFromItem(shortcut);
-        if (!binding) return null;
+        if (!binding) {
+            return null;
+        }
 
         const ctrlKey = binding & MetaKeys.CTRL_COMMAND;
         const shiftKey = binding & MetaKeys.SHIFT;
@@ -318,6 +322,12 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return;
         }
 
+        // A focused button owns activation and focus traversal even while the canvas context remains active.
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && e.target instanceof HTMLButtonElement
+            && (e.key === 'Enter' || e.key === ' ' || e.key === 'Tab')) {
+            return;
+        }
+
         // Toolbar fields own their native editing and history before component key handlers run.
         if (e.target instanceof HTMLInputElement && e.target.closest('[data-u-command]')) {
             return;
@@ -338,7 +348,9 @@ export class ShortcutService extends Disposable implements IShortcutService {
         // Also we should check through escape list and force catching list.
         // if the target is not focused on the univer instance we should ignore the keyboard event.
         // Maybe the user has forcibly disabled the shortcut keys, and the shortcut keys should not be processed at this time.
-        if (this._forceEscapeCount > 0 || this._forceDisabled) return;
+        if (this._forceEscapeCount > 0 || this._forceDisabled) {
+            return;
+        }
 
         if (
             this._layoutService &&

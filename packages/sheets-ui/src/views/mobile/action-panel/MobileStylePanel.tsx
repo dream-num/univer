@@ -24,7 +24,6 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '@univerjs/ui';
-import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
 import {
     borderBottomClassName,
@@ -58,6 +57,7 @@ import {
 } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
 import { isObservable } from 'rxjs';
+import type { LocaleKey } from '../../../locale/types';
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
@@ -185,7 +185,7 @@ export type MobileStyleView =
         config: IMobileNumberFormatMenuConfig;
     };
 
-export function MobileStylePanel(props: {
+interface IMobileStylePanelProps {
     groups: IMenuSchema[];
     currentView: MobileStyleView | null;
     recentColors: string[];
@@ -193,7 +193,41 @@ export function MobileStylePanel(props: {
     onBack: () => void;
     onExecute: (params: IMobileStyleCommand) => void;
     onUseColor: (color: string) => void;
-}) {
+}
+
+export function MobileStylePanel(props: IMobileStylePanelProps) {
+    const { currentView, onExecute } = props;
+    const disabled = useObservable(currentView?.item.disabled$, false);
+    const hidden = useObservable(currentView?.item.hidden$, false);
+
+    function executeCommand(params: IMobileStyleCommand) {
+        if (!disabled && !hidden) {
+            onExecute(params);
+        }
+    }
+
+    if (currentView && hidden) {
+        return null;
+    }
+
+    if (!currentView) {
+        return <MobileStylePanelContent {...props} />;
+    }
+
+    return (
+        <fieldset
+            disabled={disabled}
+            className="
+              univer-m-0 univer-min-w-0 univer-border-0 univer-p-0
+              disabled:univer-opacity-40
+            "
+        >
+            <MobileStylePanelContent {...props} onExecute={executeCommand} />
+        </fieldset>
+    );
+}
+
+function MobileStylePanelContent(props: IMobileStylePanelProps) {
     const { groups, currentView, recentColors, onOpenView, onBack, onExecute, onUseColor } = props;
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
@@ -571,6 +605,7 @@ function MobileNumberFormatGroup(props: {
             >
                 <MobileActionRow
                     title={localeService.t(config.detailTitle)}
+                    disabled={status.disabled}
                     value={typeof status.value === 'string' ? status.value : undefined}
                     valueType="text"
                     trailing={<MoreRightIcon />}
@@ -899,6 +934,7 @@ function MobileStyleNavigationItem(props: {
     return (
         <MobileActionRow
             title={title}
+            disabled={status.disabled}
             value={typeof status.value === 'string' ? status.value : undefined}
             bordered={bordered}
             trailing={<MoreRightIcon />}
@@ -981,7 +1017,7 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
             <div
                 className="
                   univer-flex univer-min-h-12 univer-items-center univer-justify-center
-                  [&_button]:!univer-min-h-12 [&_button]:!univer-w-full
+                  [&_button]:!univer-w-full
                 "
             >
                 <ToolbarItem {...item} grid />

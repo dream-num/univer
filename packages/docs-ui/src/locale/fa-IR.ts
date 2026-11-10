@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'تنظیمات بخش',
             },
             paragraphSetting: {
+                wordWrap: 'اجازه شکستن متن لاتین در میانهٔ کلمه',
                 alignment: 'تراز',
                 indentation: 'تورفتگی',
                 left: 'چپ',

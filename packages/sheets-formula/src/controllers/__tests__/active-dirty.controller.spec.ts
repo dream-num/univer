@@ -17,7 +17,6 @@
 import type { Dependency, ICommandInfo, IWorkbookData } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IInsertSheetMutationParams, IRemoveRowsMutationParams } from '@univerjs/sheets';
-import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { LocaleType } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
@@ -37,8 +36,12 @@ import {
     SetRowHiddenMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetColumnCountMutation,
+    SetWorksheetOrderMutation,
+    SetWorksheetRowCountMutation,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { ITestBed } from '../../facade/__tests__/create-test-bed';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { ActiveDirtyController } from '../active-dirty.controller';
 
@@ -93,6 +96,18 @@ describe('ActiveDirtyController', () => {
         testBed?.univer.dispose();
     });
 
+    it('reports reference context changes without forcing every formula', () => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        const dirty = getDirtyData(testBed, {
+            id: SetWorksheetOrderMutation.id,
+            params: { unitId: 'test', subUnitId: 'sheet1', fromOrder: 0, toOrder: 1 },
+        });
+        expect(dirty.forceCalculation).toBeUndefined();
+        expect(dirty.dirtyReferenceUnits).toEqual(['test']);
+        expect(dirty.clearDependencyTreeCache).toBeUndefined();
+    });
+
     it('marks iteration-sensitive workbooks without making every sheet dirty', () => {
         testBed = createControllerTestBed();
         testBed.injector.get(ActiveDirtyController);
@@ -102,6 +117,12 @@ describe('ActiveDirtyController', () => {
         });
         expect(dirty.dirtyIterationUnits).toEqual(['test']);
         expect(dirty.dirtyRanges ?? []).toEqual([]);
+    });
+
+    it.each([SetWorksheetRowCountMutation.id, SetWorksheetColumnCountMutation.id])('triggers calculation for direct dimension changes: %s', (id) => {
+        testBed = createControllerTestBed();
+        testBed.injector.get(ActiveDirtyController);
+        expect(getDirtyData(testBed, { id, params: { unitId: 'test', subUnitId: 'sheet1', rowCount: 12, columnCount: 16 } })).toEqual({ dirtyReferenceUnits: ['test'] });
     });
 
     it.each(['__proto__', 'constructor', 'prototype', 'toString'])('keeps dirty sheet names local for special unit identifiers (%s)', (key) => {

@@ -37,5 +37,13 @@ export function getFontStyleAtCursor(accessor: IAccessor) {
     const { startOffset, endOffset } = activeTextRange;
     const textRun = textRuns.find(({ st, ed }) => startOffset >= st && endOffset <= ed);
 
-    return textRun;
+    if (textRun == null) return;
+
+    return {
+        ...textRun,
+        ts: {
+            ...textRun.ts,
+            fs: textRun.ts?.fs ?? editorDataModel.getDocumentStyle().textStyle?.fs,
+        },
+    };
 }

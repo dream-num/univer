@@ -16,6 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
+    composeStyles,
     Disposable,
     generateRandomId,
     Inject,
@@ -351,7 +352,15 @@ export class SheetRangeThemeModel extends Disposable {
 
                 if (style) {
                     const newCell: ICellDataForSheetInterceptor = (!cell || cell === context.rawData) ? { ...context.rawData } : cell;
-                    newCell.themeStyle = style;
+                    const inheritedStyle = newCell.themeStyle;
+                    if (!inheritedStyle) {
+                        newCell.themeStyle = style;
+                        return next(newCell);
+                    }
+                    newCell.themeStyle = composeStyles(style, inheritedStyle);
+                    if (style.bd && inheritedStyle?.bd) {
+                        newCell.themeStyle.bd = { ...style.bd, ...inheritedStyle.bd };
+                    }
                     return next(newCell);
                 }
 

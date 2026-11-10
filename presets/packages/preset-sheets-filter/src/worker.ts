@@ -15,7 +15,7 @@
  */
 
 import type { IPreset } from '@univerjs/presets';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter/worker';
 
 export function UniverSheetsFilterWorkerPreset(): IPreset {
     return {

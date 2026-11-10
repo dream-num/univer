@@ -29,7 +29,7 @@ import {
     SHEET_TEXT_LINE_GAP,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation } from '@univerjs/engine-render';
+import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation, SheetCellDocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocLayoutExecutorService } from './doc-layout-executor.service';
 
@@ -76,12 +76,6 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        // this._currentViewModel$.complete();
-
-        // this._docViewModel?.dispose();
-
-        //@ts-ignore
-        // delete this._docViewModel;
     }
 
     getSkeleton(): DocumentSkeleton {
@@ -166,6 +160,8 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     }
 
     private _buildDocViewModel(documentDataModel: DocumentDataModel) {
-        return new DocumentViewModel(documentDataModel);
+        return this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || this._context.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            ? new SheetCellDocumentViewModel(documentDataModel)
+            : new DocumentViewModel(documentDataModel);
     }
 }

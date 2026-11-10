@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IFontFamilyDropdownProps } from './FontFamilyDropdown';
 import { LocaleService } from '@univerjs/core';
 import { clsx, MobileSelect } from '@univerjs/design';
+import type { IFontFamilyDropdownProps } from './FontFamilyDropdown';
 import { useDependency, useObservable } from '../../utils/di';
 import { useFontList } from './use-font-list';
 
@@ -27,11 +27,12 @@ export function MobileFontFamilyDropdown(props: IFontFamilyDropdownProps) {
     return (
         <MobileSelect
             aria-label={props.ariaLabel}
-            className={clsx('univer-h-12 univer-w-full univer-min-w-0 univer-text-base', props.className)}
+            className={clsx('univer-w-full univer-min-w-0', props.className)}
             value={props.value}
             disabled={!!(props.disabled || disabled)}
             options={fonts.map((font) => ({ value: font.value, label: localeService.t(font.label) }))}
             onChange={props.onChange}
+            size="small"
         />
     );
 }

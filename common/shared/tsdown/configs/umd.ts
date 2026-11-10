@@ -1,6 +1,6 @@
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types.ts';
 import { defineConfig } from 'tsdown';
+import type { IEntryConfig } from '../types.ts';
 import { peerDepsMap } from '../data/peer-deps.ts';
 import { createCssNoopInputOptions } from '../plugins/css-noop.ts';
 import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
@@ -56,7 +56,8 @@ function resolveUmdGlobal(source: string) {
             return `${convertLibNameFromPackageName(localeMatch[1])}${convertLibNameFromPackageName(localeMatch[2])}`;
         }
 
-        return convertLibNameFromPackageName(source);
+        // Main-thread UMD consumers use the shared APIs exposed by the package's root global.
+        return convertLibNameFromPackageName(source.replace(/\/worker$/, ''));
     }
 
     return null;

@@ -15,13 +15,13 @@
  */
 
 import type { IObjectPositionH, IObjectPositionV } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
-import type { IDocDrawingPositionProps } from './DocDrawingPosition';
 import { DocumentFlavor, LocaleService } from '@univerjs/core';
 import { InputNumber, MobileActionRow } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IDocDrawingPositionProps } from './DocDrawingPosition';
 import { useDocDrawingPosition } from './use-doc-drawing-position';
 
 interface IMobileDocDrawingPositionProps {
@@ -78,8 +78,7 @@ function MobileDocDrawingPositionControls(props: IMobileDocDrawingPositionProps)
                         {localeService.t<LocaleKey>('docs-drawing-ui.image-position.absolutePosition')}
                         <InputNumber
                             disabled={props.disabled}
-                            className="univer-h-12 univer-w-full"
-                            inputClassName="[&_input]:!univer-h-12 [&_input]:!univer-text-base"
+                            className="univer-w-full"
                             controls={false}
                             min={props.minOffset}
                             max={props.maxOffset}
@@ -90,6 +89,7 @@ function MobileDocDrawingPositionControls(props: IMobileDocDrawingPositionProps)
                                     axis.onOffsetChange(value);
                                 }
                             }}
+                            size="small"
                         />
                     </label>
                     <div className="univer-grid univer-grid-cols-2 univer-gap-2" role="group" aria-label={localeService.t<LocaleKey>(axis.reference)}>
@@ -101,7 +101,7 @@ function MobileDocDrawingPositionControls(props: IMobileDocDrawingPositionProps)
                                 disabled={props.disabled || option.disabled}
                                 aria-pressed={String(axis.position.relativeFrom) === option.value}
                                 className="
-                                  univer-px-3 univer-text-center univer-text-sm
+                                  univer-px-3 univer-text-center
                                   aria-pressed:!univer-bg-primary-50 aria-pressed:!univer-text-primary-600
                                 "
                                 onClick={() => axis.onReferenceChange(option.value)}

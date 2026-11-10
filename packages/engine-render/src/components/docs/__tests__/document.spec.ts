@@ -15,11 +15,10 @@
  */
 
 import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import type { IExtensionConfig } from '../../extension';
 import {
     BooleanNumber,
     ColumnSeparatorType,
+    createDocumentModelWithStyle,
     CustomRangeType,
     DashStyleType,
     DataStreamTreeTokenType,
@@ -38,6 +37,8 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { IExtensionConfig } from '../../extension';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
 import {
@@ -52,8 +53,11 @@ import { UniverRenderingContext } from '../../../context';
 import { DrawingGroupObject } from '../../../drawing-group';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
-import { Image, Path, Rect } from '../../../shape';
+import { Image } from '../../../shape/image';
+import { Path } from '../../../shape/path';
+import { Rect } from '../../../shape/rect';
 import { Viewport } from '../../../viewport';
+import { SheetCellDocumentViewModel } from '../../sheets/sheet-cell-document-view-model';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
@@ -2052,6 +2056,36 @@ describe('documents render', () => {
         documents.dispose();
         skeleton.dispose();
         univer.dispose();
+    });
+
+    it('centers upright stacked ink of different widths on one vertical axis', () => {
+        const univer = new Univer();
+        const model = createDocumentModelWithStyle('Wi中é', { ff: 'Arial', fs: 14 }, { textRotation: { a: 0, v: BooleanNumber.TRUE } });
+        const skeleton = DocumentSkeleton.create(new SheetCellDocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const documents = new Documents('stacked-ink', skeleton);
+        try {
+            skeleton.calculate();
+            scene.addObject(documents, 1);
+            documents.transformByState({ width: 100, height: 200 });
+            const context = canvas.getContext();
+            const fill = vi.spyOn(context, 'fillText');
+            documents.draw(context);
+            const glyphs = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0].divides.flatMap((divide) => divide.glyphGroup).filter((glyph) => glyph.content && glyph.content !== '\r');
+            const calls = fill.mock.calls.filter(([content]) => content && content !== '\r');
+            expect(calls.map(([content]) => content)).toEqual(['W', 'i', '中', 'é']);
+            const centerX = calls[0][1] + glyphs[0].bBox.width / 2;
+            for (let index = 0; index < calls.length; index++) {
+                expect(calls[index][1] + glyphs[index].bBox.width / 2).toBeCloseTo(centerX);
+                if (index > 0) {
+                    expect(calls[index][2] - calls[index - 1][2]).toBeGreaterThanOrEqual(glyphs[index - 1].bBox.aba + glyphs[index].bBox.abd);
+                }
+            }
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
     });
 
     it('draws vertical cell glyphs down the physical cell and restores its parent origin', () => {

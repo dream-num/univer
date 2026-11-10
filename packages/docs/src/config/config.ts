@@ -23,3 +23,9 @@ export interface IUniverDocsConfig {
 }
 
 export const defaultPluginConfig: IUniverDocsConfig = {};
+
+export const DOCS_WORKER_PLUGIN_CONFIG_KEY = 'docs.worker.config';
+
+export interface IUniverDocsWorkerConfig {}
+
+export const defaultPluginWorkerConfig: IUniverDocsWorkerConfig = {};

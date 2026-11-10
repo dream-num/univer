@@ -15,8 +15,8 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import type { ITableOptions, ITableRange } from '../../types/type';
 import { CommandType } from '@univerjs/core';
+import type { ITableOptions, ITableRange, TableMetaType } from '../../types/type';
 import { SheetTableService } from '../../services/table.service';
 
 export interface IAddSheetTableParams {
@@ -28,15 +28,16 @@ export interface IAddSheetTableParams {
     options?: ITableOptions;
     tableId?: string;
     header?: string[];
+    meta?: TableMetaType;
 }
 
 export const AddSheetTableMutation: IMutation<IAddSheetTableParams & { tableId: string }> = {
     id: 'sheet.mutation.add-table',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { tableId, unitId, subUnitId, name, range, header, options } = params;
+        const { tableId, unitId, subUnitId, name, range, header, options, meta } = params;
         const sheetTableService = accessor.get(SheetTableService);
-        sheetTableService.addTable(unitId, subUnitId, name, range, header, tableId, options);
+        sheetTableService.addTable(unitId, subUnitId, name, range, header, tableId, options, meta);
         return true;
     },
 };

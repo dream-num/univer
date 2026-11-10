@@ -26,6 +26,7 @@ import {
     Inject,
     InterceptorEffectEnum,
     isDefaultFormat,
+    isRealNum,
     isTextFormat,
     IUniverInstanceService,
     LocaleService,
@@ -34,6 +35,7 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
+import { stripErrorMargin } from '@univerjs/engine-formula';
 import {
     checkCellValueType,
     InterceptCellContentPriority,
@@ -119,6 +121,18 @@ export class SheetsNumfmtCellContentController extends Disposable {
         );
     }
 
+    private _getNumfmtValue(cell: ICellDataForSheetInterceptor, location: ISheetLocation) {
+        const { unitId, subUnitId: sheetId, row, col, workbook } = location;
+        const tableDxfNumfmt = cell.themeStyle?.n;
+        if (tableDxfNumfmt === undefined) {
+            return workbook.getStyles().get(cell.s)?.n ?? this._numfmtService.getValue(unitId, sheetId, row, col);
+        }
+        const directNumfmt = workbook.getStyles().getStyleByCell(cell)?.n;
+        return directNumfmt !== undefined
+            ? directNumfmt
+            : this._numfmtService.getValue(unitId, sheetId, row, col) ?? tableDxfNumfmt;
+    }
+
     private _formatCell(
         cell: Nullable<ICellDataForSheetInterceptor>,
         location: ISheetLocation & { rawData: Nullable<ICellData> }
@@ -130,7 +144,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         const { unitId, subUnitId: sheetId, row, col, workbook } = location;
         const locale = this.getLocale(workbook);
         const dateSystem = workbook.getDateSystem();
-        const numfmtValue = workbook.getStyles().get(cell.s)?.n ?? this._numfmtService.getValue(unitId, sheetId, row, col);
+        const numfmtValue = this._getNumfmtValue(cell, location);
         const pattern = numfmtValue?.pattern;
         // General must preserve numeric strings such as '001'.
         if (isDefaultFormat(pattern)) {
@@ -144,11 +158,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         const formattedCell = cell === location.rawData ? { ...cell } : cell;
 
         if (isTextFormat(pattern)) {
-            formattedCell.t = CellValueType.STRING;
-            if (!this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
-                formattedCell.markers = { ...formattedCell.markers, ...TEXT_FORMAT_MARK };
-            }
-            return formattedCell;
+            return this._formatTextCell(cell, formattedCell);
         }
 
         const cacheParameters = `${unitId}_${sheetId}_${cell.v}_${pattern}_${locale}_${dateSystem}`;
@@ -171,6 +181,25 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
         this._renderCache.setValue(row, col, { result: res, parameters: cacheParameters });
         Object.assign(formattedCell, res);
+        return formattedCell;
+    }
+
+    private _formatTextCell(
+        cell: ICellDataForSheetInterceptor,
+        formattedCell: ICellDataForSheetInterceptor
+    ): ICellDataForSheetInterceptor {
+        // The cell stays text-formatted (keep its marker), but a numeric result
+        // must remain numeric and go through General's precision cleanup.
+        if (cell.t === CellValueType.NUMBER && isRealNum(formattedCell.v)) {
+            formattedCell.v = stripErrorMargin(Number(formattedCell.v));
+        } else {
+            formattedCell.t = CellValueType.STRING;
+        }
+
+        if (!this._configService.getConfig<IUniverSheetsNumfmtConfig>(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY)?.disableTextFormatMark) {
+            formattedCell.markers = { ...formattedCell.markers, ...TEXT_FORMAT_MARK };
+        }
+
         return formattedCell;
     }
 

@@ -18,10 +18,7 @@ export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from '.
 export { PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './config/config';
 export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
-export {
-    UniverRPCMainThreadPlugin,
-    UniverRPCWorkerThreadPlugin,
-} from './plugin';
+export { UniverRPCMainThreadPlugin } from './plugin';
 export {
     IRemoteInstanceService,
     RemoteInstanceServiceName,

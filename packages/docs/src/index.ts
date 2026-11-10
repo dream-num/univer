@@ -67,8 +67,9 @@ export type {
     IDocsCustomBlockMutationParams,
     IEmbedDocsCustomBlockData,
 } from './embed-host-anchor';
-export { DocsLayoutWorkerCapabilityError, DocsLayoutWorkerClientService, startDocsLayoutWorker, UniverDocsLayoutWorkerPlugin } from './layout-worker';
-export type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerFontProbe, IDocsLayoutWorkerRuntime, IUniverDocsLayoutWorkerConfig } from './layout-worker';
+export { DocsLayoutWorkerCapabilityError, DocsLayoutWorkerClientService, UniverDocsLayoutWorkerPlugin } from './layout-worker';
+export type { IUniverDocsLayoutWorkerConfig } from './layout-worker/config/config';
+export type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerFontProbe, IDocsLayoutWorkerRuntime } from './layout-worker/protocol';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 export type {

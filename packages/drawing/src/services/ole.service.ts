@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IOleResource } from '../models/ole-model';
 import { Disposable, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import type { IOleResource } from '../models/ole-model';
 import { OLE_RESOURCE_NAME, parseOleResource } from '../models/ole-model';
 
 /** Registered by the model plugin so headless save/export preserves original files too. */
@@ -29,7 +29,7 @@ export class OleService extends Disposable {
             businesses: [UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC, UniverInstanceType.UNIVER_SLIDE],
             onLoad: (unitId, resource) => this._resources.set(unitId, resource),
             onUnLoad: (unitId) => this._resources.delete(unitId),
-            toJson: (unitId) => JSON.stringify(this._resources.get(unitId) ?? { version: 1, files: {}, objects: {} }),
+            toJson: (unitId) => JSON.stringify(this._resources.get(unitId) ?? { files: {}, objects: {} }),
             parseJson: parseOleResource,
         }));
     }

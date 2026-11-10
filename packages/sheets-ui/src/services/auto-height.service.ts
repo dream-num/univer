@@ -121,8 +121,23 @@ export class AutoHeightService extends Disposable implements IRenderModule {
         );
     }
 
+    override dispose(): void {
+        if (this._calculateLoopId !== null) {
+            cancelIdleCallback(this._calculateLoopId);
+            this._calculateLoopId = null;
+        }
+        this._autoHeightTasks = [];
+
+        super.dispose();
+    }
+
     private _loopTask(task: IAutoHeightTaskInfo) {
         const skeleton = task.skeleton;
+        // The skeleton may have been replaced or disposed while the task was waiting for an idle period.
+        if (this._disposed || this._sheetSkeletonManagerService.getSkeleton(task.sheetId) !== skeleton) {
+            return;
+        }
+
         let result: IRange[] = [];
         let lasts: IRange[] = [];
         if (task.maxTime && task.maxTime + task.startTime <= Date.now()) {
@@ -162,24 +177,27 @@ export class AutoHeightService extends Disposable implements IRenderModule {
     }
 
     private _calculateLoop(options: IdleDeadline) {
+        this._calculateLoopId = null;
+        if (this._disposed) {
+            return;
+        }
+
         while (this._autoHeightTasks.length) {
             if (options.timeRemaining() <= 0) {
                 break;
             }
-            const task = this._autoHeightTasks.shift();
-            if (!task) {
-                this._calculateLoopId = null;
-                return;
-            }
+            const task = this._autoHeightTasks.shift()!;
             this._loopTask(task);
         }
 
-        this._calculateLoopId = requestIdleCallback((options) => {
-            this._calculateLoop(options);
-        });
+        this._initialCalculateLoop();
     }
 
     private _initialCalculateLoop() {
+        if (this._disposed || !this._autoHeightTasks.length) {
+            return;
+        }
+
         if (this._calculateLoopId === null) {
             this._calculateLoopId = requestIdleCallback((options) => {
                 this._calculateLoop(options);
@@ -188,6 +206,10 @@ export class AutoHeightService extends Disposable implements IRenderModule {
     }
 
     startAutoHeightTask(task: IAutoHeightTask): void {
+        if (this._disposed) {
+            return;
+        }
+
         const skeleton = this._sheetSkeletonManagerService.getSkeleton(task.sheetId);
         if (!skeleton) {
             return;

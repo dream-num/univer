@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 
 const DEV_LOCALE_ENDPOINT = '/__univer_examples_locale';
 const DEV_LOCALE_EXPORT_SCRIPT = fileURLToPath(new URL('./scripts/export-locale.mts', import.meta.url));
-const DEV_LOCALE_PRODUCTS = new Set(['docs', 'sheets', 'slides']);
+const DEV_LOCALE_PRODUCTS = new Set(['docs', 'sheets']);
 const DEV_TSX_IMPORT = fileURLToPath(import.meta.resolve('tsx'));
 const DEV_LOCALE_TAGS = new Set([
     'ar-SA',
@@ -29,7 +29,7 @@ const DEV_LOCALE_TAGS = new Set([
     'zh-HK',
     'zh-TW',
 ]);
-type DevLocaleProduct = 'docs' | 'sheets' | 'slides';
+type DevLocaleProduct = 'docs' | 'sheets';
 
 const VIRTUAL_LOCALE_MODULES = {
     'virtual:univer-examples-document-locale': {
@@ -41,11 +41,6 @@ const VIRTUAL_LOCALE_MODULES = {
         development: fileURLToPath(new URL('./src/sheets/locale-loader.dev.ts', import.meta.url)),
         exportName: 'loadSheetLocale',
         production: fileURLToPath(new URL('./src/sheets/locale-loader.ts', import.meta.url)),
-    },
-    'virtual:univer-examples-slide-locale': {
-        development: fileURLToPath(new URL('./src/slides/locale-loader.dev.ts', import.meta.url)),
-        exportName: 'loadSlideLocale',
-        production: fileURLToPath(new URL('./src/slides/locale-loader.ts', import.meta.url)),
     },
 } as const;
 

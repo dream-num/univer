@@ -32,8 +32,9 @@ function MobileObjectListInput(props: ComponentProps<typeof Input>) {
     return (
         <Input
             {...props}
-            className={clsx(props.className, 'univer-h-12')}
-            inputClass={clsx(props.inputClass, '!univer-text-base')}
+            className={clsx(props.className, '')}
+            inputClass={clsx(props.inputClass, '')}
+            size="small"
         />
     );
 }
@@ -54,7 +55,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
             <div className="univer-flex univer-min-w-0 univer-flex-col univer-gap-2">
                 <div className="univer-flex univer-w-full univer-min-w-0 univer-gap-2">
                     <Button
-                        className="univer-h-12 univer-flex-1"
+                        className="univer-flex-1"
                         size="middle"
                         disabled={visibilityItems.length === 0}
                         onClick={() => onSetVisible(visibilityItems.map((item) => item.id), !allVisible)}
@@ -64,7 +65,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                     {onSetSelectable && (
                         <Button
                             size="middle"
-                            className="univer-h-12 univer-flex-1"
+                            className="univer-flex-1"
                             disabled={selectableItems.length === 0}
                             onClick={() => onSetSelectable(selectableItems.map((item) => item.id), allLocked)}
                         >
@@ -114,12 +115,11 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
 
             <div className="univer-flex univer-shrink-0 univer-flex-col univer-gap-2">
                 <Input
-                    className="univer-h-12"
-                    inputClass="!univer-text-base"
                     value={searchQuery}
                     aria-label={labels.search}
                     placeholder={labels.search}
                     onChange={setSearchQuery}
+                    size="small"
                 />
                 <div className="univer-flex univer-min-w-0 univer-gap-1">
                     {([

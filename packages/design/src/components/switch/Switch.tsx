@@ -14,32 +14,35 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
+import type { ChangeEvent, InputHTMLAttributes } from 'react';
+import { useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
-export interface ISwitchProps {
+export interface ISwitchProps extends Pick<InputHTMLAttributes<HTMLInputElement>, 'id' | 'aria-label' | 'aria-labelledby' | 'aria-describedby'> {
     defaultChecked?: boolean;
     onChange?: (checked: boolean) => void;
 }
 
 const Switch = (props: ISwitchProps) => {
-    const { defaultChecked = false, onChange } = props;
-    const [checked, setChecked] = useState(defaultChecked);
+    const { defaultChecked = false, onChange, ...inputProps } = props;
+    const [state, setState] = useState({ checked: defaultChecked, defaultChecked });
+    if (state.defaultChecked !== defaultChecked) {
+        setState({ checked: defaultChecked, defaultChecked });
+    }
+    const { checked } = state;
 
-    const handleChange = () => {
-        setChecked(!checked);
-        onChange?.(!checked);
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const nextChecked = event.target.checked;
+        setState({ checked: nextChecked, defaultChecked });
+        onChange?.(nextChecked);
     };
-
-    useEffect(() => {
-        setChecked(defaultChecked);
-    }, [defaultChecked]);
 
     return (
         <div className="univer-h-4">
             <label className="univer-relative univer-inline-block univer-h-4 univer-w-7">
                 <input
-                    className="univer-size-0 univer-opacity-0"
+                    {...inputProps}
+                    className="univer-peer univer-sr-only"
                     type="checkbox"
                     checked={checked}
                     onChange={handleChange}
@@ -48,6 +51,7 @@ const Switch = (props: ISwitchProps) => {
                     className={clsx(`
                       univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-transition-colors
                       univer-duration-200
+                      peer-focus:univer-ring-2 peer-focus:univer-ring-primary-600 peer-focus:univer-ring-offset-2
                     `, {
                         'univer-bg-primary-600': checked,
                         'univer-bg-gray-200 dark:!univer-bg-gray-600': !checked,

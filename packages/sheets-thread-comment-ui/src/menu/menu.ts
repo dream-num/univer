@@ -17,11 +17,20 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionViewPoint,
+    WorkbookCommentPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
-import { map } from 'rxjs';
-import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+import { getMenuHiddenObservable, ISidebarService, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
+import { defer, distinctUntilChanged, map, startWith } from 'rxjs';
+import {
+    AddSheetDrawingCommentOperation,
+    ShowAddSheetCommentModalOperation,
+    ToggleSheetCommentPanelOperation,
+} from '../commands/operations/comment.operation';
+import { SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
 
 function getDrawingCommentDisable$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -65,7 +74,14 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
 };
 
 export const threadPanelMenuFactory = (accessor: IAccessor) => {
+    const sidebarService = accessor.get(ISidebarService);
+
     return {
+        activated$: defer(() => sidebarService.sidebarOptions$.pipe(
+            startWith(sidebarService.options),
+            map((options) => options.visible === true && options.children?.label === SHEETS_THREAD_COMMENT_PANEL),
+            distinctUntilChanged()
+        )),
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',

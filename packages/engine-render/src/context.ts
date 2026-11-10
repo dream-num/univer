@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import type { ICanvasColorService } from './services/canvas-color.service';
 import type { IRenderConfig } from './services/render-config';
-import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export interface IUniverRenderingContextOptions {
@@ -75,7 +75,6 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     isContextLost(): boolean {
-        // @ts-ignore
         return this._context.isContextLost();
     }
 
@@ -241,6 +240,14 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.direction = val;
     }
 
+    get lang() {
+        return this._context.lang ?? 'inherit';
+    }
+
+    set lang(val: string) {
+        this._context.lang = val;
+    }
+
     get font() {
         if (this._normalizedCachedFont) {
             return this._normalizedCachedFont;
@@ -270,56 +277,46 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     // fontStretch: CanvasFontStretch;
     get fontStretch() {
-        // @ts-ignore
         return this._context.fontStretch;
     }
 
     set fontStretch(val: CanvasFontStretch) {
-        // @ts-ignore
         this._context.fontStretch = val;
     }
 
     // fontVariantCaps: CanvasFontVariantCaps;
     get fontVariantCaps() {
-        // @ts-ignore
         return this._context.fontVariantCaps;
     }
 
     set fontVariantCaps(val: CanvasFontVariantCaps) {
-        // @ts-ignore
         this._context.fontVariantCaps = val;
     }
 
     // letterSpacing: string;
     get letterSpacing() {
-        // @ts-ignore
         return this._context.letterSpacing;
     }
 
     set letterSpacing(val: string) {
-        // @ts-ignore
         this._context.letterSpacing = val;
     }
 
     // textRendering: CanvasTextRendering;
     get textRendering() {
-        // @ts-ignore
         return this._context.textRendering;
     }
 
     set textRendering(val: CanvasTextRendering) {
-        // @ts-ignore
         this._context.textRendering = val;
     }
 
     // wordSpacing: string;
     get wordSpacing() {
-        // @ts-ignore
         return this._context.wordSpacing;
     }
 
     set wordSpacing(val: string) {
-        // @ts-ignore
         this._context.wordSpacing = val;
     }
 
@@ -391,6 +388,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
             return;
         }
 
+        // shortcut: Chrome 88 fallback supports numeric radii; expand it if callers need per-corner radii.
         const radius = typeof radii === 'number' ? Math.min(radii, w / 2, h / 2) : 0;
         if (!(radius > 0) || !Number.isFinite(radius)) {
             this._context.rect(x, y, w, h);
@@ -971,20 +969,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     setLineDash(segments: number[]) {
-        // works for Chrome and IE11
-
-        if (this._context.setLineDash) {
-            this._context.setLineDash(segments);
-        } else if ('mozDash' in this._context) {
-            // verified that this works in firefox
-            (<any> this._context.mozDash) = segments;
-        } else if ('webkitLineDash' in this._context) {
-            // does not currently work for Safari
-
-            (<any> this._context.webkitLineDash) = segments;
-        }
-
-        // no support for IE9 and IE10
+        this._context.setLineDash(segments);
     }
 
     /**

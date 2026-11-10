@@ -15,6 +15,9 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type {
     ITableAddedEvent,
@@ -33,16 +36,15 @@ import type {
     ITableResource,
     ITableSetConfig,
     ITableThemeChangedEvent,
+    TableMetaType,
 } from '../types/type';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
 import {
     IRangeOperationTypeEnum,
 } from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
 import { Table } from './table';
 import { TableColumn } from './table-column';
+import { hasTableDxfStyles } from './table-dxf';
 
 export class TableManager extends Disposable {
     private _tableMap: Map<string, Map<string, Table>>;
@@ -106,10 +108,16 @@ export class TableManager extends Disposable {
      * @param {ITableOptions} [options] Other options of the table.
      * @returns {string} The table id.
      */
-    addTable(unitId: string, subUnitId: string, name: string, range: ITableRange, header?: string[], initId?: string, options?: ITableOptions): string {
+    addTable(unitId: string, subUnitId: string, name: string, range: ITableRange, header?: string[], initId?: string, options?: ITableOptions, meta?: TableMetaType): string {
         const id = initId ?? generateRandomId();
         const tableHeader = header || this.getColumnHeader(unitId, subUnitId, range);
         const table = new Table(id, name, range, tableHeader, options);
+        if (meta !== undefined) {
+            table.setTableMeta(meta);
+        }
+        if (options?.columns && hasTableDxfStyles({ meta, columns: options.columns })) {
+            options.columns.forEach((column, index) => table.getTableColumnByIndex(index)?.setMeta(column.meta));
+        }
         // set subunit id to table
         table.setSubunitId(subUnitId);
         const unitMap = this._ensureUnit(unitId);
@@ -494,7 +502,7 @@ export class TableManager extends Disposable {
                 tables = data[subUnitId].tables;
             } else if (Array.isArray(data[subUnitId])) {
                 // for older versions, where tables were not nested under subUnitId
-                tables = data[subUnitId] as any as ITableJson[];
+                tables = data[subUnitId] as unknown as ITableJson[];
             }
             if (!tables) {
                 return;

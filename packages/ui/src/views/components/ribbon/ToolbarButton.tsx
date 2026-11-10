@@ -62,7 +62,7 @@ focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer
 [&_svg]:univer-shrink-0
 `;
 
-export const toolbarButtonVariants = cva(toolbarButtonClassName, {
+export const toolbarButtonVariants: ReturnType<typeof cva<Record<'noIcon' | 'active', Record<'true' | 'false', string>>>> = cva(toolbarButtonClassName, {
     variants: {
         noIcon: {
             true: 'univer-px-2',

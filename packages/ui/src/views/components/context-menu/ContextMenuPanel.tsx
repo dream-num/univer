@@ -835,7 +835,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 getContextMenuPanelClassName(sizeVariant),
                 borderClassName,
                 scrollbarClassName,
-                hoverSuppressed && 'univer-context-menu-hover-suppressed',
+                hoverSuppressed && '[&_button:hover:not(:focus)]:!univer-bg-transparent',
                 className
             )}
             style={{

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import type {
     IAdjustability,
     IDocumentSkeletonBoundingBox,
@@ -24,7 +25,6 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../document-compatibility';
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
@@ -542,7 +542,20 @@ export function _createSkeletonWordOrLetter(
         xOffset = 0;
     }
 
-    const adjustability = hasFixedTextAdvance
+    if (config.stackedText) {
+        // Layout runs along the future vertical axis; keep the ink width for upright painting.
+        // Zero-width glyphs must not reserve a vertical slot.
+        width = streamType === DataStreamTreeTokenType.PARAGRAPH || contentWidth === 0
+            ? 0
+            : bBox.ba + bBox.bd;
+        xOffset = 0;
+        if (contentWidth > bBox.ba + bBox.bd) {
+            bBox.ba = contentWidth / 2;
+            bBox.bd = contentWidth / 2;
+        }
+    }
+
+    const adjustability = hasFixedTextAdvance || config.stackedText
         ? {
             stretchability: [0, 0] as [number, number],
             shrinkability: [0, 0] as [number, number],
@@ -565,7 +578,7 @@ export function _createSkeletonWordOrLetter(
         adjustability,
         count: raw.length,
         raw,
-        ...(!hasFixedTextAdvance && glyphWidth == null && !validationGrid(gridType, snapToGrid) && fontStyle.fontKerning === 'normal'
+        ...(!config.stackedText && !hasFixedTextAdvance && glyphWidth == null && !validationGrid(gridType, snapToGrid) && fontStyle.fontKerning === 'normal'
             ? { kerningAdjustment: 0 }
             : {}),
         ...(spacing && spacing.segments.length > 1 ? { textSpacing: spacing } : {}),

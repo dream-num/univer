@@ -29,14 +29,11 @@ import type {
     IFormulaDependentsAndInRangeResults,
 } from '../engine/dependency/dependency-tree';
 import type { IFormulaDirtyData } from '../services/current-data.service';
-import type { IAllRuntimeData } from '../services/runtime.service';
-import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetCellFormulaDependencyCalculationMutation,
     SetCellFormulaDependencyCalculationResultMutation,
     SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
     SetFormulaDependencyCalculationMutation,
@@ -48,10 +45,8 @@ import {
     SetQueryFormulaDependencyMutation,
     SetQueryFormulaDependencyResultMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -121,15 +116,21 @@ export class CalculateController extends Disposable {
             isCalculateTreeModel = false,
         } = formulaDirtyData;
 
-        const formulaData = this._formulaDataModel.getFormulaData();
+        const snapshotExecutor = this._calculateFormulaService.supportsFormulaDataSnapshot === true
+            ? this._calculateFormulaService.executeWithFormulaDataSnapshot
+            : undefined;
+        // Capture at the same point as the eager list, before any later config reads.
+        const snapshot = typeof snapshotExecutor === 'function'
+            ? this._calculateFormulaService.prepareFormulaDataSnapshot?.()
+            : undefined;
+        const formulaData = snapshot ? undefined : this._formulaDataModel.getFormulaData();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
         // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
         const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
-        this._calculateFormulaService.execute({
+        const config = {
             dirtyIterationUnits,
             dirtyReferenceUnits,
-            formulaData,
             arrayFormulaCellData,
             arrayFormulaRange,
             forceCalculate,
@@ -144,7 +145,12 @@ export class CalculateController extends Disposable {
             isCalculateTreeModel,
             rowData,
             externalReferences,
-        });
+        };
+        if (snapshot && typeof snapshotExecutor === 'function') {
+            snapshotExecutor.call(this._calculateFormulaService, config, snapshot);
+        } else {
+            this._calculateFormulaService.execute({ ...config, formulaData: formulaData! });
+        }
     }
 
     private async _queryFormulaDependencyJson(param: ISetQueryFormulaDependencyMutation) {
@@ -154,6 +160,10 @@ export class CalculateController extends Disposable {
             result = await this._calculateFormulaService.getInRangeFormulas(unitRanges);
         } else {
             result = await this._calculateFormulaService.getRangeDependents(unitRanges);
+        }
+
+        if (this._disposed) {
+            return;
         }
 
         this._commandService.executeCommand(
@@ -170,6 +180,9 @@ export class CalculateController extends Disposable {
     private async _queryFormulaDependencyAllJson(param: ISetQueryFormulaDependencyAllMutation) {
         const { unitRanges } = param;
         const result: IFormulaDependentsAndInRangeResults = await this._calculateFormulaService.getDependentsAndInRangeFormulas(unitRanges);
+        if (this._disposed) {
+            return;
+        }
         this._commandService.executeCommand(
             SetQueryFormulaDependencyAllResultMutation.id,
             {
@@ -183,6 +196,9 @@ export class CalculateController extends Disposable {
 
     private async _generateAllDependencyTreeJson() {
         const result = await this._calculateFormulaService.getAllDependencyJson();
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetFormulaDependencyCalculationResultMutation.id,
@@ -198,6 +214,9 @@ export class CalculateController extends Disposable {
     private async _generateCellDependencyTreeJson(param: ISetFormulaDependencyCalculationMutation) {
         const { unitId, sheetId, row, column } = param;
         const result = await this._calculateFormulaService.getCellDependencyJson(unitId, sheetId, row, column);
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetCellFormulaDependencyCalculationResultMutation.id,
@@ -215,6 +234,9 @@ export class CalculateController extends Disposable {
         const result = await this._calculateFormulaService.executeFormulas(
             formulas
         );
+        if (this._disposed) {
+            return;
+        }
 
         this._commandService.executeCommand(
             SetFormulaStringBatchCalculationResultMutation.id,
@@ -232,21 +254,8 @@ export class CalculateController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
+        this.disposeWithMe(this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
             const functionsExecutedState = data.functionsExecutedState;
-            switch (functionsExecutedState) {
-                case FormulaExecutedStateType.NOT_EXECUTED:
-                    this._applyTreeResult(data);
-                    break;
-                case FormulaExecutedStateType.STOP_EXECUTION:
-                    break;
-                case FormulaExecutedStateType.SUCCESS:
-                    this._applyResult(data);
-                    break;
-                case FormulaExecutedStateType.INITIAL:
-                    break;
-            }
-
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {
@@ -257,12 +266,12 @@ export class CalculateController extends Disposable {
                     onlyLocal: true,
                 }
             );
-        });
+        }));
 
         /**
          * Assignment operation after formula calculation.
          */
-        this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
+        this.disposeWithMe(this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {
@@ -272,86 +281,6 @@ export class CalculateController extends Disposable {
                     onlyLocal: true,
                 }
             );
-        });
-    }
-
-    private async _applyTreeResult(data: IAllRuntimeData) {
-        const { dependencyTreeModelData } = data;
-        if (dependencyTreeModelData.length > 0) {
-            this._commandService.executeCommand(
-                SetFormulaDependencyCalculationResultMutation.id,
-                {
-                    result: dependencyTreeModelData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
-    }
-
-    private async _applyResult(data: IAllRuntimeData) {
-        const {
-            unitData,
-            sourceFormulaData,
-            unitOtherData,
-            arrayFormulaRange,
-            arrayFormulaCellData,
-            clearArrayFormulaCellData,
-            arrayFormulaEmbedded,
-            imageFormulaData,
-        } = data;
-
-        if (!unitData) {
-            this._applyTreeResult(data);
-            console.error('No sheetData from Formula Engine!');
-            return;
-        }
-
-        if (arrayFormulaRange || arrayFormulaEmbedded) {
-            this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
-            this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
-            this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
-
-            this._commandService.executeCommand(
-                SetArrayFormulaDataMutation.id,
-                {
-                    arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
-                    arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
-                    arrayFormulaEmbedded,
-                },
-                {
-                    onlyLocal: true,
-                    fromFormula: true,
-                }
-            );
-        }
-
-        // handle image formula data
-        if (imageFormulaData && imageFormulaData.length > 0) {
-            this._commandService.executeCommand(
-                SetImageFormulaDataMutation.id,
-                {
-                    imageFormulaData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
-
-        this._applyTreeResult(data);
-
-        this._commandService.executeCommand(
-            SetFormulaCalculationResultMutation.id,
-            {
-                unitData: convertRuntimeToUnitData(unitData),
-                sourceFormulaData,
-                unitOtherData,
-            },
-            {
-                onlyLocal: true,
-            }
-        );
+        }));
     }
 }

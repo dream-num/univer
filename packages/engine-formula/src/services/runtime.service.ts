@@ -31,18 +31,28 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { CellValueType, createIdentifier, Disposable, isNullCell, isRealNum, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { FormulaCalculationCache } from './formula-cache.service';
+import {
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    Inject,
+    isNullCell,
+    isRealNum,
+    IUniverInstanceService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { FORMULA_REF_TO_ARRAY_CACHE } from '../engine/reference-object/base-reference-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
-import { IFormulaCurrentConfigService } from './current-data.service';
+import { hasDeferredFormulaDataSnapshot, IFormulaCurrentConfigService } from './current-data.service';
+import { FormulaCacheService } from './formula-cache.service';
 import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
 
 /**
@@ -125,7 +135,12 @@ export interface IFormulaRuntimeService {
     dispose(): void;
 
     reset(): void;
-    beginCircularReferences(): void;
+    /** Custom runtimes without cache hooks continue to compute uncached values. */
+    getCalculationCache?(): FormulaCalculationCache | undefined;
+    clearInvertedIndexCache?(): void;
+    releaseCalculationCache?(): void;
+    /** Start empty when the engine will supply the complete current cycle set. */
+    beginCircularReferences(clearPrevious?: boolean): void;
     clearCircularReferenceCells(cells: { unitId: string; subUnitId: string; row: number; column: number }[]): void;
     recordCircularReferences(cells: ICircularReference[]): void;
     completeCircularReferences(): void;
@@ -230,6 +245,7 @@ export interface IFormulaRuntimeService {
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
+    private _calculationCache: FormulaCalculationCache | undefined;
     private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
 
     private _circularReferences = new Map<string, ICircularReference>();
@@ -289,6 +305,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _dependencyTreeModelData: IFormulaDependencyTreeJson[] = [];
 
     constructor(
+        @Inject(FormulaCacheService) private readonly _cacheService: FormulaCacheService,
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IHyperlinkEngineFormulaService private readonly _hyperlinkEngineFormulaService: IHyperlinkEngineFormulaService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -420,7 +437,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     isStopExecution() {
-        return this._stopState;
+        return this._stopState || this._disposed;
     }
 
     setFormulaExecuteStage(type: FormulaExecuteStageType) {
@@ -431,7 +448,26 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._formulaExecuteStage;
     }
 
+    getCalculationCache(): FormulaCalculationCache | undefined {
+        if (this._disposed || this._cacheService.closed) {
+            return;
+        }
+        return this._calculationCache ??= this._cacheService.createCalculation();
+    }
+
+    clearInvertedIndexCache(): void {
+        this._calculationCache?.invertedIndex.clear();
+    }
+
+    releaseCalculationCache(): void {
+        if (this._calculationCache) {
+            this._cacheService.releaseCalculation(this._calculationCache);
+            this._calculationCache = undefined;
+        }
+    }
+
     reset() {
+        this.releaseCalculationCache();
         this._formulaExecuteStage = FormulaExecuteStageType.IDLE;
         this._runtimeData = Object.create(null);
         this._sourceFormulaData = Object.create(null);
@@ -463,8 +499,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearReferenceToRangeCache();
     }
 
-    beginCircularReferences(): void {
-        this._pendingCircularReferences = new Map(this._circularReferences);
+    beginCircularReferences(clearPrevious = false): void {
+        this._pendingCircularReferences = clearPrevious ? new Map() : new Map(this._circularReferences);
+        if (clearPrevious) return;
+        if (this._pendingCircularReferences.size === 0 && hasDeferredFormulaDataSnapshot(this._currentConfigService)) return;
         const formulaData = this._currentConfigService.getFormulaData();
         for (const [key, cell] of this._pendingCircularReferences) {
             if (!formulaData[cell.unitId]?.[cell.sheetId]?.[cell.row]?.[cell.column]) {
@@ -573,6 +611,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     setRuntimeOtherData(formulaId: string, x: number, y: number, functionVariant: FunctionVariantType) {
+        if (this._disposed) {
+            return;
+        }
         const subUnitId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
@@ -629,6 +670,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     // eslint-disable-next-line max-lines-per-function
     setRuntimeData(functionVariant: FunctionVariantType) {
+        if (this._disposed) {
+            return;
+        }
         if (this._externalReferenceUnavailable) {
             const cell = this._currentConfigService.getUnitData()[this._currentUnitId]?.[this._currentSubUnitId]
                 ?.cellData
@@ -722,7 +766,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 clearArrayUnitData.setValue(row, column, valueObject);
 
                 // Formula calculation results are saved to cache
-                CELL_INVERTED_INDEX_CACHE.set(
+                this.getCalculationCache()?.invertedIndex.set(
                     unitId,
                     sheetId,
                     column,
@@ -740,7 +784,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 clearArrayUnitData.setValue(row, column, errorObject);
                 runtimeArrayUnitData.setValue(row, column, errorObject);
 
-                CELL_INVERTED_INDEX_CACHE.set(
+                this.getCalculationCache()?.invertedIndex.set(
                     unitId,
                     sheetId,
                     column,
@@ -771,7 +815,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 clearArrayUnitData.setValue(row, column, errorObject);
 
                 // Formula calculation results are saved to cache
-                CELL_INVERTED_INDEX_CACHE.set(
+                this.getCalculationCache()?.invertedIndex.set(
                     unitId,
                     sheetId,
                     column,
@@ -815,7 +859,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                     // Formula calculation results are saved to cache
-                    CELL_INVERTED_INDEX_CACHE.set(
+                    this.getCalculationCache()?.invertedIndex.set(
                         unitId,
                         sheetId,
                         column - startColumn + columnIndex,
@@ -869,7 +913,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             }
 
             // Formula calculation results are saved to cache
-            CELL_INVERTED_INDEX_CACHE.set(
+            this.getCalculationCache()?.invertedIndex.set(
                 unitId,
                 sheetId,
                 column,
@@ -1005,7 +1049,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     clearArrayObjectCache() {
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
+        this._calculationCache?.references.clear();
     }
 
     private _checkIfArrayFormulaRangeHasData(

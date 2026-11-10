@@ -15,10 +15,10 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { ISetFormulaCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
-import type { IExecutionInProgressParams } from '../runtime.service';
 import { Disposable } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { ISetFormulaCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
+import type { IExecutionInProgressParams } from '../runtime.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType } from '../runtime.service';
 
 export interface IFormulaCalculationSessionState {
@@ -55,6 +55,8 @@ export class FormulaCalculationSessionService extends Disposable {
     private readonly _resultApplied$ = new Subject<ISetFormulaCalculationResultMutation>();
 
     private _currentResult: ISetFormulaCalculationResultMutation | null = null;
+
+    private _lastAppliedResult = new WeakSet<ISetFormulaCalculationResultMutation>();
 
     private _hasEmittedCurrentResultApplied = false;
 
@@ -100,6 +102,7 @@ export class FormulaCalculationSessionService extends Disposable {
             resultApplied: false,
         });
         this._currentResult = null;
+        this._lastAppliedResult = new WeakSet();
         this._hasEmittedCurrentResultApplied = false;
         this._pendingResultApplicationTypes.clear();
         this._preAppliedSessionTypes.clear();
@@ -146,8 +149,9 @@ export class FormulaCalculationSessionService extends Disposable {
         result: ISetFormulaCalculationResultMutation,
         pendingApplications: boolean | Iterable<FormulaResultApplicationType>
     ): void {
-        if (this._currentResult !== result) {
+        if (this._currentResult !== result && !(this._currentResult == null && this._lastAppliedResult.has(result))) {
             this._hasEmittedCurrentResultApplied = false;
+            this._lastAppliedResult = new WeakSet();
         }
 
         this._currentResult = result;
@@ -159,13 +163,14 @@ export class FormulaCalculationSessionService extends Disposable {
         preAppliedTypes?.forEach((type) => this._pendingResultApplicationTypes.delete(type));
         this._preAppliedSessionTypes.clear();
         const resultApplied = this._pendingResultApplicationTypes.size === 0;
+        const sessionId = this.state.id;
         this._emit({
             ...this.state,
             resultEmitted: true,
             resultApplied,
         });
 
-        if (resultApplied) {
+        if (resultApplied && this.state.id === sessionId && this._currentResult === result) {
             this._emitResultApplied();
         }
     }
@@ -174,6 +179,12 @@ export class FormulaCalculationSessionService extends Disposable {
         type = FormulaResultApplicationType.SHEET,
         result?: ISetFormulaCalculationResultMutation
     ): void {
+        if (
+            this._currentResult == null && this._hasEmittedCurrentResultApplied &&
+            (result == null || this._lastAppliedResult.has(result))
+        ) {
+            return;
+        }
         if (result && this._currentResult !== result) {
             const types = this._preAppliedResultTypes.get(result) ?? new Set<FormulaResultApplicationType>();
             types.add(type);
@@ -191,11 +202,15 @@ export class FormulaCalculationSessionService extends Disposable {
             return;
         }
 
+        const currentResult = this._currentResult;
+        const sessionId = this.state.id;
         this._emit({
             ...this.state,
             resultApplied: true,
         });
-        this._emitResultApplied();
+        if (this.state.id === sessionId && this._currentResult === currentResult) {
+            this._emitResultApplied();
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -332,12 +347,21 @@ export class FormulaCalculationSessionService extends Disposable {
     }
 
     private _emitResultApplied(): void {
-        if (this._currentResult == null || this._hasEmittedCurrentResultApplied) {
+        if (this._currentResult == null || this._pendingResultApplicationTypes.size > 0) {
             return;
         }
 
-        this._hasEmittedCurrentResultApplied = true;
-        this._resultApplied$.next(this._currentResult);
+        const result = this._currentResult;
+        const sessionId = this.state.id;
+        if (!this._hasEmittedCurrentResultApplied) {
+            this._hasEmittedCurrentResultApplied = true;
+            this._resultApplied$.next(result);
+        }
+        if (this.state.id === sessionId && this._currentResult === result && this._pendingResultApplicationTypes.size === 0) {
+            // Keep duplicate-ACK identity without retaining the completed workbook result.
+            this._lastAppliedResult = new WeakSet([result]);
+            this._currentResult = null;
+        }
     }
 
     private _isAppliedTerminalState(state: IFormulaCalculationSessionState): boolean {

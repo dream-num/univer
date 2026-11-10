@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICellData, IWorkbookData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { Dependency, ICellData, Injector, IWorkbookData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { BaseAstNode, BaseFunction, IUnitData } from '@univerjs/engine-formula';
 import type { IRender } from '@univerjs/engine-render';
 import {
     CellValueType,
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
     ObjectMatrix,
-    Plugin,
     RANGE_TYPE,
     RedoCommand,
     set,
@@ -37,57 +34,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    ActiveDirtyManagerService,
-    AstRootNodeFactory,
-    AstTreeBuilder,
-    CalculateFormulaService,
-    DefinedNamesService,
-    FormulaCurrentConfigService,
-    FormulaDataModel,
-    FormulaDependencyGenerator,
-    FormulaRuntimeService,
-    FormulaUnitReferenceResolver,
-    functionMath,
-    FunctionNodeFactory,
-    FunctionService,
-    generateExecuteAstNodeData,
-    getObjectValue,
-    HyperlinkEngineFormulaService,
-    IActiveDirtyManagerService,
-    ICalculateFormulaService,
-    IDefinedNamesService,
-    IFormulaCurrentConfigService,
-    IFormulaDependencyGenerator,
-    IFormulaExternalReferenceDataLoader,
-    IFormulaRuntimeService,
-    IFormulaUnitReferenceResolver,
-    IFunctionService,
-    IHyperlinkEngineFormulaService,
-    Interpreter,
-    IOtherFormulaManagerService,
-    ISheetRowFilteredService,
-    ISuperTableService,
-    LambdaNodeFactory,
-    LambdaParameterNodeFactory,
-    Lexer,
-    LexerNode,
-    LexerTreeBuilder,
-    NoopFormulaExternalReferenceDataLoader,
-    OperatorNodeFactory,
-    OtherFormulaManagerService,
-    PrefixNodeFactory,
-    ReferenceNodeFactory,
-    RemoveSuperTableMutation,
-    SetArrayFormulaDataMutation,
-    SetFormulaDataMutation,
-    SetSuperTableMutation,
-    SheetRowFilteredService,
-    SuffixNodeFactory,
-    SuperTableService,
-    UnionNodeFactory,
-    ValueNodeFactory,
-} from '@univerjs/engine-formula';
+import { AstRootNodeFactory, AstTreeBuilder, CalculateFormulaService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaResultService, FormulaRuntimeService, FormulaUnitReferenceResolver, functionMath, FunctionNodeFactory, generateExecuteAstNodeData, getObjectValue, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaDependencyGenerator, IFormulaExternalReferenceDataLoader, IFormulaRuntimeService, IFormulaUnitReferenceResolver, IFunctionService, Interpreter, IOtherFormulaManagerService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerNode, LexerTreeBuilder, NoopFormulaExternalReferenceDataLoader, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, RemoveSuperTableMutation, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetSuperTableMutation, SuffixNodeFactory, UnionNodeFactory, UniverFormulaEnginePlugin, ValueNodeFactory } from '@univerjs/engine-formula';
 import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     InsertColMutation,
@@ -151,33 +98,23 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
 
             dependencies.forEach((d) => injector.add(d));
 
@@ -185,6 +122,8 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
         }
+
+        override onReady(): void {}
     }
 
     injector.get(LocaleService).load({ zhCN, enUS });
@@ -194,7 +133,7 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
     const newTheme = set(theme, 'gray.1000', '#35322b');
     themeService.setTheme(newTheme);
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
 
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData);
     injector.get(IUniverInstanceService).focusUnit('test');
@@ -280,16 +219,14 @@ function createWorkbookData(): IWorkbookData {
 
 function createControllerTestBed() {
     const dependencies: Dependency[] = [
+        [FormulaResultService],
         [ICalculateFormulaService, { useClass: CalculateFormulaService }],
-        [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
         [Lexer],
         [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
         [IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }],
         [IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }],
-        [IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }],
         [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
         [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
-        [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
         [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
         [Interpreter],
         [AstTreeBuilder],
@@ -303,7 +240,6 @@ function createControllerTestBed() {
         [SuffixNodeFactory],
         [UnionNodeFactory],
         [ValueNodeFactory],
-        [ISuperTableService, { useClass: SuperTableService }],
         [TableManager],
         [SheetTableService],
         [SheetTableFormulaController],

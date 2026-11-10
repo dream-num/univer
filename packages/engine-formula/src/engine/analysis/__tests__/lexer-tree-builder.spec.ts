@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import { AbsoluteRefType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISuperTable } from '../../../basics/common';
 import type { IFunctionNames } from '../../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../../services/defined-names.service';
 import type { LexerNode } from '../lexer-node';
-import { AbsoluteRefType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
@@ -28,7 +28,24 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/funct
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
-    const lexerTreeBuilder = new LexerTreeBuilder();
+    it('parses standalone formulas without dependency injection', () => {
+        const builder = new LexerTreeBuilder();
+        try {
+            const first = builder.treeBuilder('=SUM(1,2)') as LexerNode;
+            const second = builder.treeBuilder('=SUM(1,2)') as LexerNode;
+            expect(second.serialize()).toEqual(first.serialize());
+            expect(second).not.toBe(first);
+            expect(builder.sequenceNodesBuilder('SUM(A1:A2)')).toBeDefined();
+        } finally {
+            builder.dispose();
+        }
+    });
+
+    let lexerTreeBuilder: LexerTreeBuilder;
+    beforeEach(() => {
+        lexerTreeBuilder = new LexerTreeBuilder();
+    });
+    afterEach(() => lexerTreeBuilder.dispose());
 
     describe('lexer', () => {
         it('preserves empty string comparison inside IF parameter', () => {
@@ -830,8 +847,6 @@ describe('lexer nodeMaker test', () => {
     });
 
     describe('lexer nodeMaker test', () => {
-        const lexerTreeBuilder = new LexerTreeBuilder();
-
         describe('getNewFormulaWithPrefix', () => {
             const hasFunction = (functionToken: IFunctionNames) => {
                 const functionList = [

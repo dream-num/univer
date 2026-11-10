@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
-import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
-import { describe, expect, it } from 'vitest';
+import { Univer } from '@univerjs/core';
+import { IFunctionService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { afterEach, describe, expect, it } from 'vitest';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from '../remote-register-function.service';
 
+const univers: Univer[] = [];
+afterEach(() => {
+    univers.splice(0).forEach((univer) => univer.dispose());
+});
+
 function createService(): { service: IRemoteRegisterFunctionService; functionService: IFunctionService } {
-    const injector = new Injector();
-    injector.add([IFunctionService, { useClass: FunctionService }]);
+    const univer = new Univer();
+    univers.push(univer);
+    univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
+    const injector = univer.__getInjector();
     injector.add([IRemoteRegisterFunctionService, { useClass: RemoteRegisterFunctionService }]);
     return {
         service: injector.get(IRemoteRegisterFunctionService),

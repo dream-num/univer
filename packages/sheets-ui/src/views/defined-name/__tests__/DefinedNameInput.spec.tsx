@@ -25,15 +25,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    DefinedNamesService,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
 import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { ComponentManager, ISidebarService, RediContext } from '@univerjs/ui';
@@ -139,10 +131,11 @@ function createDefinedNameInputTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
+    class TestPlugin extends UniverFormulaEnginePlugin {
+        override onReady(): void {}
+    }
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
+
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
 

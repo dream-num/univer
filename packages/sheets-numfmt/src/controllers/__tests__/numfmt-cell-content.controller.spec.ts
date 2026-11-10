@@ -28,6 +28,7 @@ import {
     IUniverInstanceService,
     LocaleType,
     LogLevel,
+    ObjectMatrix,
     Plugin,
     ThemeService,
     Univer,
@@ -42,7 +43,7 @@ import {
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetsNumfmtCellContentController } from '../numfmt-cell-content.controller';
 
@@ -216,6 +217,44 @@ describe('SheetsNumfmtCellContentController', () => {
         expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.50');
         expect(getInterceptedCell(worksheet, workbook, 1, 6, get)?.v).toBe('12.35');
         expect(workbook.getStyles().getStyleByCell(worksheet.getCellRaw(1, 6))?.n?.pattern).toBe('0.00');
+    });
+
+    it('does not scan changed cells when the number-format render cache is empty', async () => {
+        get(SheetsNumfmtCellContentController);
+        const forValue = vi.spyOn(ObjectMatrix.prototype, 'forValue');
+        try {
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 1: { v: 42, t: CellValueType.NUMBER } } },
+            }, { onlyLocal: true, fromFormula: true });
+
+            expect(workbook.getSheetBySheetId('sheet1')?.getCellRaw(1, 1)?.v).toBe(42);
+            // The worksheet mutation still scans its payload; empty-cache invalidation adds no scan.
+            expect(forValue).toHaveBeenCalledTimes(1);
+        } finally {
+            forValue.mockRestore();
+        }
+    });
+
+    it('still invalidates populated render-cache entries during ordinary value edits', async () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.00', ranges: [cellToRange(1, 1)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '1234.50' });
+
+        const forValue = vi.spyOn(ObjectMatrix.prototype, 'forValue');
+        try {
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 1: { v: 42, t: CellValueType.NUMBER } } },
+            });
+            expect(forValue).toHaveBeenCalledTimes(2);
+            expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '42.00' });
+        } finally {
+            forValue.mockRestore();
+        }
     });
 
     it('skips unsupported cells and handles text format markers', () => {

@@ -17,71 +17,21 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISheetData } from '@univerjs/engine-formula';
+import type { FormulaDataModel, ISheetData } from '@univerjs/engine-formula';
 import type { FFormula } from '@univerjs/engine-formula/facade';
 import {
     CellValueType,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
     ObjectMatrix,
-    Plugin,
     touchDependencies,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import {
-    AstRootNodeFactory,
-    AstTreeBuilder,
-    CalculateController,
-    CalculateFormulaService,
-    DefinedNamesService,
-    DependencyManagerService,
-    FeatureCalculationManagerService,
-    FormulaCurrentConfigService,
-    FormulaDataModel,
-    FormulaDependencyGenerator,
-    FormulaRuntimeService,
-    FormulaUnitReferenceResolver,
-    FunctionNodeFactory,
-    FunctionService,
-    GlobalComputingStatusService,
-    HyperlinkEngineFormulaService,
-    ICalculateFormulaService,
-    IDefinedNamesService,
-    IDependencyManagerService,
-    IFeatureCalculationManagerService,
-    IFormulaCurrentConfigService,
-    IFormulaDependencyGenerator,
-    IFormulaExternalReferenceDataLoader,
-    IFormulaRuntimeService,
-    IFormulaUnitReferenceResolver,
-    IFunctionService,
-    IHyperlinkEngineFormulaService,
-    Interpreter,
-    IOtherFormulaManagerService,
-    ISheetRowFilteredService,
-    ISuperTableService,
-    LambdaNodeFactory,
-    LambdaParameterNodeFactory,
-    Lexer,
-    LexerTreeBuilder,
-    NoopFormulaExternalReferenceDataLoader,
-    OperatorNodeFactory,
-    OtherFormulaManagerService,
-    PrefixNodeFactory,
-    ReferenceNodeFactory,
-    SheetRowFilteredService,
-    stripErrorMargin,
-    SuffixNodeFactory,
-    SuperTableService,
-    UnionNodeFactory,
-    ValueNodeFactory,
-} from '@univerjs/engine-formula';
+import { AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDependencyGenerator, FormulaResultService, FormulaRuntimeService, FormulaUnitReferenceResolver, FunctionNodeFactory, ICalculateFormulaService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaDependencyGenerator, IFormulaExternalReferenceDataLoader, IFormulaRuntimeService, IFormulaUnitReferenceResolver, Interpreter, IOtherFormulaManagerService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, NoopFormulaExternalReferenceDataLoader, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, stripErrorMargin, SuffixNodeFactory, UnionNodeFactory, UniverFormulaEnginePlugin, ValueNodeFactory } from '@univerjs/engine-formula';
 import { CalculateResultApplyController } from '../../calculate-result-apply.controller';
 
 const getTestWorkbookData = (): IWorkbookData => {
@@ -182,37 +132,26 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
     /**
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([Lexer]);
-            injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([IFormulaExternalReferenceDataLoader, { useClass: NoopFormulaExternalReferenceDataLoader }]);
-            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaUnitReferenceResolver, { useClass: FormulaUnitReferenceResolver }]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
             injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
             injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([ISuperTableService, { useClass: SuperTableService }]);
-            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             injector.add([Interpreter]);
             injector.add([AstTreeBuilder]);
@@ -231,13 +170,10 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([SuffixNodeFactory]);
             injector.add([UnionNodeFactory]);
             injector.add([ValueNodeFactory]);
-            injector.add([FormulaDataModel]);
-
-            injector.add([GlobalComputingStatusService]);
 
             injector.add([CalculateResultApplyController]);
 
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {
@@ -248,7 +184,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
         }
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookData());
 
     const univerInstanceService = get(IUniverInstanceService);

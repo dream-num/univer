@@ -34,12 +34,14 @@ describe('SheetTableFormulaController', () => {
             getTableInfo: () => ({
                 name: 'Orders',
                 subUnitId: 's1',
-                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+                range: { startRow: 0, endRow: 5, startColumn: 3, endColumn: 4 },
                 columns: [
                     { displayName: 'id' },
                     { displayName: 'amount' },
                 ],
             }),
+            isShowHeader: vi.fn(() => true),
+            isShowFooter: vi.fn(() => true),
         };
 
         const tableManager = {
@@ -73,7 +75,7 @@ describe('SheetTableFormulaController', () => {
             dirtyRanges: [{
                 unitId: 'u1',
                 sheetId: 's1',
-                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+                range: { startRow: 0, endRow: 5, startColumn: 3, endColumn: 4 },
             }],
             clearDependencyTreeCache: { u1: { s1: '1' } },
         });
@@ -85,7 +87,9 @@ describe('SheetTableFormulaController', () => {
             tableName: 'Orders',
             reference: expect.objectContaining({
                 sheetId: 's1',
-                range: { startRow: 0, endRow: 5, startColumn: 0, endColumn: 2 },
+                range: { startRow: 0, endRow: 5, startColumn: 3, endColumn: 4 },
+                showHeader: true,
+                showFooter: true,
             }),
         }), { onlyLocal: true });
 
@@ -93,8 +97,17 @@ describe('SheetTableFormulaController', () => {
         expect(params.reference.titleMap).toEqual({ id: 0, amount: 1 });
         expect(JSON.parse(JSON.stringify(params))).toEqual(params);
 
+        table.isShowHeader.mockReturnValue(false);
+        table.isShowFooter.mockReturnValue(false);
         tableRangeChanged$.next({ unitId: 'u1', tableId: 't1' });
         expect(executeCommand).toHaveBeenCalledTimes(2);
+        expect(executeCommand.mock.calls[1][1].reference).toEqual({
+            range: { startRow: 0, endRow: 5, startColumn: 3, endColumn: 4 },
+            sheetId: 's1',
+            titleMap: { id: 0, amount: 1 },
+            showHeader: false,
+            showFooter: false,
+        });
 
         tableNameChanged$.next({ unitId: 'u1', tableId: 't1', oldTableName: 'Orders_Old' });
         expect(executeCommand).toHaveBeenNthCalledWith(3, RemoveSuperTableMutation.id, {

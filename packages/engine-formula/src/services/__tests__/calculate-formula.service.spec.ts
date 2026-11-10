@@ -15,8 +15,8 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { IConfigService, Injector, ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { IConfigService, Inject, Injector, ObjectMatrix } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IAllRuntimeData } from '../runtime.service';
 import { ErrorType } from '../../basics/error-type';
@@ -25,13 +25,14 @@ import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import { FORMULA_REF_TO_ARRAY_CACHE } from '../../engine/reference-object/base-reference-object';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction } from '../../functions/custom-function';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
 import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../feature-calculation-manager.service';
+import { FormulaCacheService } from '../formula-cache.service';
+import { FormulaResultService } from '../formula-result.service';
 import { IFunctionService } from '../function.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
 
@@ -184,10 +185,14 @@ function createService() {
     }
 
     class TestAstTreeBuilder {
+        constructor(@Inject(FormulaCacheService) readonly cacheService: FormulaCacheService) {}
         parse = astTreeBuilder.parse;
     }
 
     const injector = new Injector();
+    injector.add([FormulaCacheService]);
+    const formulaResultService = { applyResult: vi.fn(), applyTreeResult: vi.fn() };
+    injector.add([FormulaResultService, { useValue: formulaResultService } as never]);
     injector.add([IConfigService, { useClass: TestConfigService as never }]);
     injector.add([Lexer, { useClass: TestLexer as never }]);
     injector.add([IFormulaCurrentConfigService, { useClass: TestCurrentConfigService as never }]);
@@ -208,6 +213,7 @@ function createService() {
     return {
         service,
         mocks: {
+            formulaResultService,
             configService,
             lexer,
             currentConfigService,
@@ -220,8 +226,30 @@ function createService() {
 }
 
 describe('CalculateFormulaService', () => {
-    beforeEach(() => {
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
+    it('releases runtime data and rejects without a false completion when writeback throws, then calculates again', async () => {
+        const { service, mocks } = createService();
+        vi.spyOn(service as unknown as { _executeStep(): Promise<void> }, '_executeStep').mockResolvedValue();
+        const data = { ...mocks.runtimeService.getAllRuntimeData(), functionsExecutedState: FormulaExecutedStateType.SUCCESS };
+        mocks.runtimeService.getAllRuntimeData.mockReturnValue(data);
+        mocks.formulaResultService.applyResult.mockRejectedValueOnce(new Error('Writeback failed'));
+        const completed: IAllRuntimeData[] = [];
+        service.executionCompleteListener$.subscribe((value) => completed.push(value));
+        await expect(service.execute({} as never)).rejects.toThrow('Writeback failed');
+        expect(completed).toHaveLength(0);
+        expect(mocks.runtimeService.reset).toHaveBeenCalledTimes(2);
+        await service.execute({} as never);
+        expect(completed).toHaveLength(1);
+        expect(mocks.formulaResultService.applyResult).toHaveBeenCalledTimes(2);
+    });
+
+    it('applies only dependency metadata for a NOT_EXECUTED completion', async () => {
+        const { service, mocks } = createService();
+        vi.spyOn(service as unknown as { _executeStep(): Promise<void> }, '_executeStep').mockResolvedValue();
+        const data = { ...mocks.runtimeService.getAllRuntimeData(), functionsExecutedState: FormulaExecutedStateType.NOT_EXECUTED };
+        mocks.runtimeService.getAllRuntimeData.mockReturnValue(data);
+        await service.execute({} as never);
+        expect(mocks.formulaResultService.applyResult).not.toHaveBeenCalled();
+        expect(mocks.formulaResultService.applyTreeResult).toHaveBeenCalledExactlyOnceWith(data);
     });
 
     it('retains a queued scalar source when a preceding asynchronous dependency allows its cell to be cleared', async () => {

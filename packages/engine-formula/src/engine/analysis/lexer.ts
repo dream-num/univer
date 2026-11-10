@@ -18,7 +18,9 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable, Inject } from '@univerjs/core';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
+import { FormulaCacheService } from '../../services/formula-cache.service';
 import { IFunctionService } from '../../services/function.service';
+import { LexerNode } from './lexer-node';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {
@@ -26,25 +28,55 @@ export class Lexer extends Disposable {
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService,
-        @IFunctionService private readonly _functionService: IFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FormulaCacheService) private readonly _cacheService: FormulaCacheService
     ) {
         super();
     }
 
     treeBuilder(formulaString: string, transformSuffix = true, unitId?: Nullable<string>, refOffsetX = 0, refOffsetY = 0) {
-        if (this._definedNamesService.getAllDefinedNamesIsEmpty()) {
-            return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
+        const injectDefinedNameParam = this._definedNamesService.getAllDefinedNamesIsEmpty()
+            ? undefined
+            : {
+                unitId: unitId ?? this._formulaCurrentConfigService.getExecuteUnitId(),
+                sheetId: this._formulaCurrentConfigService.getExecuteSubUnitId(),
+                refOffsetX,
+                refOffsetY,
+                hasFunction: this._functionService.hasExecutor.bind(this._functionService),
+                getValueByName: this._definedNamesService.getValueByName.bind(this._definedNamesService),
+                getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
+                getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),
+            };
+        // LET/LAMBDA trees are rewritten with AST-specific runtime parameter bindings.
+        const isCacheable = transformSuffix === true && !/\b(?:LET|LAMBDA)\s*\(/iu.test(formulaString);
+        const cacheKey = injectDefinedNameParam == null
+            ? formulaString
+            : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${refOffsetX}\0${refOffsetY}\0${formulaString}`;
+        if (isCacheable) {
+            const lexerNode = this._cacheService.getLexerTree(cacheKey);
+            if (lexerNode && (!injectDefinedNameParam || !this._isDefinedNameDirty(formulaString, injectDefinedNameParam.unitId, lexerNode))) {
+                return lexerNode;
+            }
         }
 
-        return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, {
-            unitId: unitId ?? this._formulaCurrentConfigService.getExecuteUnitId(),
-            sheetId: this._formulaCurrentConfigService.getExecuteSubUnitId(),
-            refOffsetX,
-            refOffsetY,
-            hasFunction: this._functionService.hasExecutor.bind(this._functionService),
-            getValueByName: this._definedNamesService.getValueByName.bind(this._definedNamesService),
-            getDirtyDefinedNameMap: this._formulaCurrentConfigService.getDirtyDefinedNameMap.bind(this._formulaCurrentConfigService),
-            getSheetName: this._formulaCurrentConfigService.getSheetName.bind(this._formulaCurrentConfigService),
-        });
+        const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, injectDefinedNameParam);
+        if (isCacheable && lexerNode instanceof LexerNode) {
+            this._cacheService.setLexerTree(cacheKey, lexerNode, injectDefinedNameParam?.unitId ?? undefined);
+        }
+        return lexerNode;
+    }
+
+    private _isDefinedNameDirty(formulaString: string, unitId: Nullable<string>, lexerNode: LexerNode): boolean {
+        const definedNameMap = this._formulaCurrentConfigService.getDirtyDefinedNameMap();
+        if (unitId != null && definedNameMap[unitId] != null) {
+            const names = Object.keys(definedNameMap[unitId]!);
+            for (let i = 0, len = names.length; i < len; i++) {
+                const name = names[i];
+                if (formulaString.indexOf(name) > -1 || lexerNode.getDefinedNames().includes(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

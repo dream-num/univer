@@ -30,14 +30,11 @@ import {
     DataValidationType,
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     set,
     ThemeService,
     toDisposable,
@@ -50,21 +47,7 @@ import {
     DataValidatorRegistryService,
     UniverDataValidationPlugin,
 } from '@univerjs/data-validation';
-import {
-    ActiveDirtyManagerService,
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IActiveDirtyManagerService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISheetRowFilteredService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    RegisterOtherFormulaService,
-    SheetRowFilteredService,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
@@ -369,25 +352,19 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'sheets-data-validation-ui-item-test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
+            this._injector.replace([IDescriptionService, { useClass: TestDescriptionService }]);
             ([
                 [SheetsSelectionsService],
                 [SheetInterceptorService],
                 [SheetSkeletonService],
                 [ComponentManager],
                 [IEditorService, { useClass: TestEditorService }],
-                [IDescriptionService, { useClass: TestDescriptionService }],
                 [ICanvasColorService, { useClass: CanvasColorService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService as never }],
                 [IPlatformService, { useClass: PlatformService }],
@@ -399,19 +376,11 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
                 [WorksheetProtectionPointModel],
                 [WorksheetProtectionRuleModel],
                 [RangeProtectionRuleModel],
-                [FormulaDataModel],
-                [LexerTreeBuilder],
                 [RefRangeService],
-                [IFunctionService, { useClass: FunctionService }],
-                [IDefinedNamesService, { useClass: DefinedNamesService }],
-                [ISuperTableService, { useClass: SuperTableService }],
                 [DataValidationCacheService],
                 [DataValidationListCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
-                [RegisterOtherFormulaService],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
                 [SheetsDataValidationValidatorService],
                 [SheetDataValidationModel],
                 [IMarkSelectionService, { useClass: TestMarkSelectionService as never }],
@@ -448,7 +417,7 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
     themeService.setTheme(set(themeService.getCurrentTheme(), 'gray.1000', '#35322b'));
 
     univer.registerPlugin(UniverDataValidationPlugin);
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);

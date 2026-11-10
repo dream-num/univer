@@ -18,7 +18,7 @@ import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/cor
 import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, SheetTypes, UniverInstanceType } from '@univerjs/core';
 import { DocStateChangeManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
-import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
@@ -43,6 +43,11 @@ import { EditorBridgeRenderController } from '../editor-bridge.render-controller
 import { SheetsScrollRenderController } from '../scroll.render-controller';
 import { createChartRenderTestBed } from './chart-render-test-bed';
 
+class TestFormulaEnginePlugin extends UniverFormulaEnginePlugin {
+    // This render fixture needs formula providers without starting formula controllers.
+    override onReady(): void {}
+}
+
 describe('Chart activation with a real pending Grid edit', () => {
     it.each([
         { rangePicking: false, refuseRestore: false },
@@ -64,11 +69,10 @@ describe('Chart activation with a real pending Grid edit', () => {
             [SheetsScrollRenderController],
             [EditorBridgeRenderController],
         ]);
+        univer.registerPlugin(TestFormulaEnginePlugin, { notExecuteFormula: true });
         const providers: Dependency[] = [
             [ILayoutService, { useClass: DesktopLayoutService }],
             [ICellEditorManagerService, { useClass: CellEditorManagerService }],
-            [IFunctionService, { useClass: FunctionService }],
-            [LexerTreeBuilder],
             [DocStateEmitService],
             [DocStateChangeManagerService],
             [SheetCellEditorResizeService],

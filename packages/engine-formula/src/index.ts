@@ -52,7 +52,6 @@ export { type ISheetFormulaError } from './basics/error-type';
 export { FunctionType } from './basics/function';
 export type { IFunctionInfo, IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
-export { CELL_INVERTED_INDEX_CACHE } from './basics/inverted-index-cache';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { matchRefDrawToken } from './basics/match-token';
 export { isReferenceString } from './basics/regex';
@@ -170,11 +169,7 @@ export { generateRandomDependencyTreeId } from './engine/dependency/formula-depe
 export { Interpreter } from './engine/interpreter/interpreter';
 export { BaseReferenceObject } from './engine/reference-object/base-reference-object';
 export type { FunctionVariantType } from './engine/reference-object/base-reference-object';
-export {
-    AsyncArrayObject,
-    AsyncObject,
-    FORMULA_REF_TO_ARRAY_CACHE,
-} from './engine/reference-object/base-reference-object';
+export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
 export { extractFormulaError } from './engine/utils/cell';
@@ -277,6 +272,7 @@ export { FUNCTION_NAMES_UNIVER } from './functions/univer/function-names';
 export { getObjectValue } from './functions/util';
 export { functionWeb } from './functions/web/function-map';
 export { FUNCTION_NAMES_WEB } from './functions/web/function-names';
+export type { IFormulaDataSnapshot } from './models/formula-data-snapshot';
 export { FormulaDataModel } from './models/formula-data.model';
 export type { IRangeChange } from './models/formula-data.model';
 export { UniverFormulaEnginePlugin } from './plugin';
@@ -308,6 +304,7 @@ export { FormulaCalculationTriggerService, mergeDirtyData } from './services/for
 export { IFormulaChangesetCalculationService } from './services/formula-changeset-calculation.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaResultStatus } from './services/formula-common';
+export { FormulaResultService } from './services/formula-result.service';
 export { DescriptionService, IDescriptionService } from './services/formula/description.service';
 export type { ISearchItem, ISearchItemWithType } from './services/formula/description.service';
 export {
@@ -368,6 +365,7 @@ export {
     IFormulaUnitReferenceResolver,
     normalizeFormulaUnitName,
 } from './services/unit-reference-resolver.service';
+
 export type {
     FormulaUnitReferenceKind,
     IFormulaUnitReferenceResolution,

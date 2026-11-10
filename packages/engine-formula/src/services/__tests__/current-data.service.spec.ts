@@ -24,9 +24,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import type { IFormulaDatasetConfig } from '../../basics/common';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { FormulaDataModel } from '../../models/formula-data.model';
-import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
+import { FormulaCurrentConfigService, hasDeferredFormulaDataSnapshot, IFormulaCurrentConfigService } from '../current-data.service';
 import { ISheetRowFilteredService } from '../sheet-row-filtered.service';
 
 function createService(withCurrentWorkbook = true) {
@@ -107,7 +108,115 @@ function createService(withCurrentWorkbook = true) {
     };
 }
 
+function createSnapshotDataset(): Omit<IFormulaDatasetConfig, 'formulaData'> {
+    return {
+        allUnitData: {},
+        unitStylesData: {},
+        unitSheetNameMap: {},
+        arrayFormulaCellData: {},
+        arrayFormulaRange: {},
+        forceCalculate: false,
+        dirtyRanges: [],
+        dirtyNameMap: {},
+        dirtyDefinedNameMap: {},
+        dirtyUnitFeatureMap: {},
+        dirtyUnitOtherFormulaMap: {},
+    };
+}
+
 describe('FormulaCurrentConfigService', () => {
+    it('materializes captured formulas only for a formula read and caches their mutable owned root', () => {
+        const { service, formulaDataModel } = createService();
+        const data = { unit: { sheet: { 0: { 1: { f: '=A1+2' } } } } };
+        const materialize = vi.fn(() => data);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        service.loadWithFormulaDataSnapshot(createSnapshotDataset(), { materialize });
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        service.getUnitData();
+        service.getDirtyData();
+        service.getArrayFormulaRange();
+        expect(materialize).not.toHaveBeenCalled();
+        expect(formulaDataModel.getFormulaData).not.toHaveBeenCalled();
+        expect(service.getCalculationGeneration()).toBe(1);
+        expect(service.getFormulaData()).toBe(data);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        data.unit.sheet[0][1].f = '=LOCAL()';
+        expect(service.getFormulaData().unit?.sheet?.[0]?.[1]?.f).toBe('=LOCAL()');
+        expect(materialize).toHaveBeenCalledTimes(1);
+    });
+
+    it('retires pending snapshots on replacement, explicit registration, lite load and disposal', () => {
+        const { service, formulaDataModel } = createService();
+        const first = { materialize: vi.fn(() => ({ old: {} })) };
+        const secondData = { current: {} };
+        const second = { materialize: vi.fn(() => secondData) };
+        const config = createSnapshotDataset();
+        service.loadWithFormulaDataSnapshot(config, first);
+        service.loadWithFormulaDataSnapshot(config, second);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(service.getFormulaData()).toBe(secondData);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(first.materialize).not.toHaveBeenCalled();
+        expect(service.getCalculationGeneration()).toBe(2);
+
+        const unused = { materialize: vi.fn(() => ({ unused: {} })) };
+        const registered = { registered: {} };
+        service.loadWithFormulaDataSnapshot(config, unused);
+        service.registerFormulaData(registered);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(service.getFormulaData()).toBe(registered);
+        service.loadWithFormulaDataSnapshot(config, unused);
+        const explicit = { explicit: {} };
+        service.load({ ...config, formulaData: explicit });
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(service.getFormulaData()).toBe(explicit);
+        service.loadWithFormulaDataSnapshot(config, unused);
+        service.loadDataLite();
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(service.getFormulaData()).toEqual({ unitLite: { sheetLite: {} } });
+        expect(formulaDataModel.getFormulaData).toHaveBeenCalledTimes(1);
+        service.loadWithFormulaDataSnapshot(config, unused);
+        service.dispose();
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(service.getFormulaData()).toEqual({});
+        expect(unused.materialize).not.toHaveBeenCalled();
+    });
+
+    it('keeps the captured source available if materialization fails before producing a root', () => {
+        const { service } = createService();
+        const data = { unit: { sheet: {} } };
+        const materialize = vi.fn()
+            .mockImplementationOnce(() => { throw new Error('materialization failed'); })
+            .mockReturnValue(data);
+        service.loadWithFormulaDataSnapshot(createSnapshotDataset(), { materialize });
+        expect(() => service.getFormulaData()).toThrow('materialization failed');
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(service.getFormulaData()).toBe(data);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(false);
+        expect(service.getFormulaData()).toBe(data);
+        expect(materialize).toHaveBeenCalledTimes(2);
+    });
+
+    it('queries deferred ownership without observing a service Proxy or non-object values', () => {
+        const { service } = createService();
+        let calls = 0;
+        const proxy = new Proxy(service, {
+            get: () => {
+                calls++;
+                throw new Error('unexpected get');
+            },
+            getPrototypeOf: () => {
+                calls++;
+                throw new Error('unexpected prototype');
+            },
+        });
+        expect(hasDeferredFormulaDataSnapshot(proxy)).toBe(false);
+        expect(hasDeferredFormulaDataSnapshot(undefined)).toBe(false);
+        expect(hasDeferredFormulaDataSnapshot(null)).toBe(false);
+        expect(hasDeferredFormulaDataSnapshot(1)).toBe(false);
+        expect(calls).toBe(0);
+    });
+
     it('keeps conservative feature invalidation separate from ordinary formula calculation', () => {
         const bed = createFunctionTestBed();
         try {
@@ -118,6 +227,30 @@ describe('FormulaCurrentConfigService', () => {
             service.loadDirtyRangesAndExcludedCell([]);
             expect(service.getDirtyData(true).forceCalculation).toBe(false);
         } finally { bed.univer.dispose(); }
+    });
+
+    it('keeps reference invalidation independent of deferred formula materialization', () => {
+        const { service, formulaDataModel } = createService();
+        const materialize = vi.fn(() => ({ unit: { sheet: {} } }));
+        service.loadWithFormulaDataSnapshot({
+            ...createSnapshotDataset(),
+            dirtyReferenceUnits: ['unit'],
+        }, { materialize });
+
+        expect(service.getDirtyData().dirtyReferenceUnits).toEqual(['unit']);
+        expect(service.getDirtyData().forceCalculation).toBe(false);
+        expect(service.getDirtyData(true).forceCalculation).toBe(true);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(materialize).not.toHaveBeenCalled();
+        expect(formulaDataModel.getFormulaData).not.toHaveBeenCalled();
+
+        service.loadDirtyRangesAndExcludedCell([]);
+        expect(service.getDirtyData().dirtyReferenceUnits).toEqual([]);
+        expect(service.getDirtyData().forceCalculation).toBe(false);
+        expect(service.getDirtyData(true).forceCalculation).toBe(false);
+        expect(hasDeferredFormulaDataSnapshot(service)).toBe(true);
+        expect(materialize).not.toHaveBeenCalled();
+        service.dispose();
     });
 
     it('distinguishes transported filter exclusions from manual hiding and clears stale exclusions', () => {

@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, merge, Plugin, touchDependencies } from '@univerjs/core';
+import type { Dependency, Workbook } from '@univerjs/core';
+import {
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    merge,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config/config';
@@ -58,7 +67,9 @@ import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
+import { FormulaCacheService } from './services/formula-cache.service';
 import { FormulaCalculationTriggerService } from './services/formula-calculation-trigger.service';
+import { FormulaResultService } from './services/formula-result.service';
 import { DescriptionService, IDescriptionService } from './services/formula/description.service';
 import { FormulaCalculationSessionService } from './services/formula/formula-calculation-session.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/formula/register-function.service';
@@ -73,7 +84,10 @@ import { RegisterOtherFormulaService } from './services/register-other-formula.s
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from './services/sheet-row-filtered.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
-import { FormulaUnitReferenceResolver, IFormulaUnitReferenceResolver } from './services/unit-reference-resolver.service';
+import {
+    FormulaUnitReferenceResolver,
+    IFormulaUnitReferenceResolver,
+} from './services/unit-reference-resolver.service';
 
 export class UniverFormulaEnginePlugin extends Plugin {
     static override pluginName = 'UNIVER_ENGINE_FORMULA_PLUGIN';
@@ -130,6 +144,11 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
+        this._injector.add([FormulaCacheService]);
+        const cacheService = this._injector.get(FormulaCacheService);
+        cacheService.disposeWithMe(this._injector.get(IUniverInstanceService)
+            .getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .subscribe((workbook) => cacheService.clearUnit(workbook.getUnitId())));
         const shouldPerformComputing = !this._config.notExecuteFormula;
         // worker and main thread
         const dependencies: Dependency[] = [
@@ -160,6 +179,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
         if (shouldPerformComputing) {
             dependencies.push(
                 // Services
+                [FormulaResultService],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],

@@ -55,7 +55,9 @@ describe('Test cell', () => {
             },
         };
 
-        expect(getCellValue(cell)).toBe('line 1\r\nline 2');
+        expect(getCellValue(cell)).toBe('line 1\nline 2');
+        expect(cell.p?.body?.dataStream).toBe('line 1\rline 2\r\n');
+        expect(getCellValue({ v: 'line 1\r\nline 2' })).toBe('line 1\r\nline 2');
     });
 
     it('Function extractFormulaError', () => {

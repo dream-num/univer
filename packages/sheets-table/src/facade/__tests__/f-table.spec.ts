@@ -18,27 +18,15 @@ import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import {
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import {
     AddRangeThemeMutation,
     RefRangeService,
@@ -93,29 +81,18 @@ function createTableFacadeTestBed(dependencies: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([SheetSkeletonService]);
             injector.add([SheetRangeThemeModel]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([ISuperTableService, { useClass: SuperTableService }]);
             dependencies.forEach((dependency) => injector.add(dependency));
 
             const localeService = injector.get(LocaleService);
@@ -124,9 +101,11 @@ function createTableFacadeTestBed(dependencies: Dependency[]) {
 
             this._injector.get(SheetInterceptorService);
         }
+
+        override onReady(): void {}
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(sheet.getUnitId());
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);

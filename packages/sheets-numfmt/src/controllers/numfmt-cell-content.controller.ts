@@ -33,6 +33,7 @@ import {
     ObjectMatrix,
     Range,
     ThemeService,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
@@ -104,6 +105,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     });
                 });
             } else if (commandInfo.id === SetRangeValuesMutation.id) {
+                if (Tools.isEmptyObject(this._renderCache.getMatrix())) return;
                 const params = commandInfo.params as ISetRangeValuesMutationParams;
                 new ObjectMatrix(params.cellValue).forValue((row, col) => {
                     this._renderCache.realDeleteValue(row, col);

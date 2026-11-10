@@ -44,9 +44,20 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
+import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import { convertUnitDataToRuntime, copyUnitData } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ISheetRowFilteredService } from './sheet-row-filtered.service';
+
+const DEFERRED_FORMULA_DATA_SNAPSHOTS = new WeakSet<object>();
+
+/**
+ * Internal implementation bookkeeping, not an application integration API.
+ * Query deferred-input bookkeeping without observing service Proxy properties or getters.
+ */
+export function hasDeferredFormulaDataSnapshot(service: unknown): boolean {
+    return DEFERRED_FORMULA_DATA_SNAPSHOTS.has(service as object);
+}
 
 export interface IFormulaDirtyData {
     dirtyReferenceUnits?: string[];
@@ -67,6 +78,8 @@ export interface IFormulaDirtyData {
 
 export interface IFormulaCurrentConfigService {
     load(config: IFormulaDatasetConfig): void;
+    /** Internal engine capability to defer formula DTO materialization. */
+    loadWithFormulaDataSnapshot?(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): void;
 
     getUnitData(): IUnitData;
 
@@ -156,6 +169,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _arrayFormulaRange: IArrayFormulaRangeType = Object.create(null);
 
     private _formulaData: IFormulaData = Object.create(null);
+    private _formulaDataSnapshot: IFormulaDataSnapshot | undefined;
 
     private _sheetNameMap: IUnitSheetNameMap = Object.create(null);
 
@@ -206,6 +220,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._arrayFormulaCellData = Object.create(null);
         this._arrayFormulaRange = Object.create(null);
         this._formulaData = Object.create(null);
+        this._formulaDataSnapshot = undefined;
+        DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
         this._sheetNameMap = Object.create(null);
         this._unitNameMap = Object.create(null);
         this._externalReferences = Object.create(null);
@@ -249,7 +265,13 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._unitStylesData;
     }
 
-    getFormulaData() {
+    getFormulaData(): IFormulaData {
+        if (this._formulaDataSnapshot) {
+            const data = this._formulaDataSnapshot.materialize();
+            this._formulaData = data;
+            this._formulaDataSnapshot = undefined;
+            DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
+        }
         return this._formulaData;
     }
 
@@ -380,6 +402,15 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     load(config: IFormulaDatasetConfig) {
+        this._loadFormulaDataset(config);
+    }
+
+    /** Internal engine capability to defer formula DTO materialization. */
+    loadWithFormulaDataSnapshot(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): void {
+        this._loadFormulaDataset(config, snapshot);
+    }
+
+    private _loadFormulaDataset(config: IFormulaDatasetConfig | Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot?: IFormulaDataSnapshot): void {
         this._calculationGeneration++;
         this._calculationRowData = Object.create(null);
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
@@ -404,7 +435,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             this._applyUnitRowData(config.rowData);
         }
 
-        this._formulaData = config.formulaData;
+        this._formulaData = snapshot ? Object.create(null) : (config as IFormulaDatasetConfig).formulaData;
+        this._formulaDataSnapshot = snapshot;
+        if (snapshot) DEFERRED_FORMULA_DATA_SNAPSHOTS.add(this);
+        else DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
         this._dirtyIterationUnits = config.dirtyIterationUnits ?? [];
         this._dirtyReferenceUnits = config.dirtyReferenceUnits ?? [];
 
@@ -447,6 +481,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._unitNameMap = unitNameMap;
 
         this._formulaData = this._formulaDataModel.getFormulaData();
+        this._formulaDataSnapshot = undefined;
+        DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
         this._arrayFormulaCellData = convertUnitDataToRuntime(this._formulaDataModel.getArrayFormulaCellData());
         this._arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
 
@@ -490,6 +526,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     registerFormulaData(formulaData: IFormulaData) {
         this._formulaData = formulaData;
+        this._formulaDataSnapshot = undefined;
+        DEFERRED_FORMULA_DATA_SNAPSHOTS.delete(this);
     }
 
     registerSheetNameMap(sheetNameMap: IUnitSheetNameMap) {

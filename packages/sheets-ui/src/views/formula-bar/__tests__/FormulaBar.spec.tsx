@@ -32,16 +32,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import {
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    ISuperTableService,
-    LexerTreeBuilder,
-    SuperTableService,
-} from '@univerjs/engine-formula';
+import { IDefinedNamesService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AutoFillService,
@@ -281,14 +272,14 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
     const univer = new Univer();
     const injector = univer.__getInjector();
 
+    class TestPlugin extends UniverFormulaEnginePlugin {
+        override onReady(): void {}
+    }
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
+
     injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([FormulaDataModel]);
-    injector.add([LexerTreeBuilder, { useClass: LexerTreeBuilder }]);
     injector.add([ComponentManager, { useClass: ComponentManager }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([SheetsSelectionsService, { useClass: SheetsSelectionsService }]);

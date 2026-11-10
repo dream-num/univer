@@ -121,6 +121,8 @@ export class SheetTableFormulaController extends Disposable {
                 range: tableInfo.range,
                 sheetId: tableInfo.subUnitId,
                 titleMap,
+                showHeader: table.isShowHeader(),
+                showFooter: table.isShowFooter(),
             },
         }, { onlyLocal: true });
     }

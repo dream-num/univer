@@ -38,6 +38,7 @@ import { LexerNode } from '../analysis/lexer-node';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
 import { prefixHandler } from '../utils/prefix-handler';
 import { splitTableStructuredRef } from '../utils/reference';
+import { expandSheetSpan } from '../utils/three-dimensional-reference';
 import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -50,40 +51,17 @@ interface ITableReferenceDescriptor {
     columnStruct: string | undefined;
 }
 
-type ReferenceNodeCurrentConfigService = Pick<
-    IFormulaCurrentConfigService,
-    'getArrayFormulaCellData' | 'getArrayFormulaRange' | 'getSheetNameMap' | 'getUnitData' | 'getUnitStylesData'
->;
-
-type ReferenceNodeRuntimeService = Pick<
-    IFormulaRuntimeService,
-    | 'markExternalReferenceUnavailable'
-    | 'currentColumn'
-    | 'currentRow'
-    | 'currentSubUnitId'
-    | 'currentUnitId'
-    | 'getRuntimeArrayFormulaCellData'
-    | 'getRuntimeFeatureCellData'
-    | 'getUnitArrayFormula'
-    | 'getUnitData'
->;
-
-type ReferenceNodeSuperTableService = Pick<
-    ISuperTableService,
-    'getTableMap' | 'getTableOptionMap'
->;
-
 export class ReferenceNode extends BaseAstNode {
     private _refOffsetX = 0;
     private _refOffsetY = 0;
 
     constructor(
-        private _currentConfigService: ReferenceNodeCurrentConfigService,
-        private _runtimeService: ReferenceNodeRuntimeService,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _runtimeService: IFormulaRuntimeService,
         operatorString: string,
         private _referenceObjectType: ReferenceObjectType,
         private _unitReferenceResolver: IFormulaUnitReferenceResolver,
-        private _superTableService: ReferenceNodeSuperTableService,
+        private _superTableService: ISuperTableService,
         private _externalReferenceDataLoader: IFormulaExternalReferenceDataLoader,
         private _isPrepareMerge: boolean = false,
         private _tableReference?: ITableReferenceDescriptor
@@ -151,6 +129,14 @@ export class ReferenceNode extends BaseAstNode {
         }
 
         this._configureReferenceObject(referenceObject, currentConfigService, runtimeService);
+
+        if (!this._isPrepareMerge) {
+            const sheetRange = expandSheetSpan(referenceObject, currentConfigService);
+            if (sheetRange) {
+                this.setValue(sheetRange);
+                return;
+            }
+        }
 
         if (!this._isPrepareMerge && referenceObject.isExceedRange()) {
             this.setValue(ErrorValueObject.create(ErrorType.NAME));
@@ -224,8 +210,8 @@ export class ReferenceNode extends BaseAstNode {
 
     private _configureReferenceObject(
         referenceObject: BaseReferenceObject,
-        currentConfigService: ReferenceNodeCurrentConfigService,
-        runtimeService: ReferenceNodeRuntimeService
+        currentConfigService: IFormulaCurrentConfigService,
+        runtimeService: IFormulaRuntimeService
     ): void {
         referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
         referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
@@ -234,6 +220,7 @@ export class ReferenceNode extends BaseAstNode {
         referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
         referenceObject.setArrayFormulaRange(currentConfigService.getArrayFormulaRange());
         referenceObject.setRuntimeData(runtimeService.getUnitData());
+        referenceObject.setCalculationCache(runtimeService.getCalculationCache?.());
         referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
         referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
         referenceObject.setRuntimeArrayFormulaRange(runtimeService.getUnitArrayFormula());

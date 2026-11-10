@@ -14,29 +14,37 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { ICommandService, Injector, ObjectMatrix } from '@univerjs/core';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { ISetFormulaCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
 import type { IAllRuntimeData } from '../runtime.service';
 import { SetArrayFormulaDataMutation } from '../../commands/mutations/set-array-formula-data.mutation';
 import { SetFormulaCalculationResultMutation, SetFormulaDependencyCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../../commands/mutations/set-image-formula-data.mutation';
+import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaResultService } from '../formula-result.service';
+import { FormulaExecutedStateType, IFormulaRuntimeService } from '../runtime.service';
 
-function createWriter() {
-    const command = { executeCommand: vi.fn(async (_id: string, _params?: unknown, _options?: unknown) => true) };
+function createTestBed() {
+    const command = { executeCommand: vi.fn<ICommandService['executeCommand']>().mockResolvedValue(true) };
     const model = {
         clearPreviousArrayFormulaCellData: vi.fn(),
         mergeArrayFormulaCellData: vi.fn(),
         mergeArrayFormulaRange: vi.fn(),
         getArrayFormulaRange: () => ({}),
         getArrayFormulaCellData: () => ({}),
-    };
-    const runtime = { isStopExecution: vi.fn(() => false) };
-    const writer = new FormulaResultService(command as never, model as never, runtime as never);
+    } satisfies Pick<FormulaDataModel, 'clearPreviousArrayFormulaCellData' | 'mergeArrayFormulaCellData' | 'mergeArrayFormulaRange' | 'getArrayFormulaRange' | 'getArrayFormulaCellData'>;
+    const runtime = { isStopExecution: vi.fn(() => false) } satisfies Pick<IFormulaRuntimeService, 'isStopExecution'>;
+    const injector = new Injector([
+        [ICommandService, { useValue: command }],
+        [FormulaDataModel, { useValue: model }],
+        [IFormulaRuntimeService, { useValue: runtime }],
+        [FormulaResultService],
+    ]);
+    onTestFinished(() => injector.dispose());
     const cell = { v: 42 };
     const matrix = new ObjectMatrix({ 0: { 1: cell } });
-    const data = {
+    const data: IAllRuntimeData = {
         unitData: { book: { sheet: matrix } },
         unitOtherData: {},
         sourceFormulaData: {},
@@ -46,13 +54,17 @@ function createWriter() {
         clearArrayFormulaCellData: {},
         imageFormulaData: [],
         dependencyTreeModelData: [],
-    } as unknown as IAllRuntimeData;
-    return { command, model, runtime, writer, data, matrix, cell };
+        functionsExecutedState: FormulaExecutedStateType.SUCCESS,
+        runtimeFeatureRange: {},
+        runtimeFeatureCellData: {},
+    };
+    return { command, model, runtime, injector, data, matrix, cell };
 }
 
 describe('FormulaResultService', () => {
     it('orders array, image, dependency and cell results through the same writer', async () => {
-        const { writer, command, data } = createWriter();
+        const { injector, command, data } = createTestBed();
+        const writer = injector.get(FormulaResultService);
         data.imageFormulaData = [{ unitId: 'book', sheetId: 'sheet', row: 0, column: 1, imageId: 'image' }] as never;
         data.dependencyTreeModelData = [{ treeId: 7 }] as never;
         await writer.applyResult(data);
@@ -65,7 +77,8 @@ describe('FormulaResultService', () => {
     });
 
     it('submits Web runtime rows once, after metadata, with independent row containers and shared cells', async () => {
-        const { writer, command, data, matrix, cell } = createWriter();
+        const { injector, command, data, matrix, cell } = createTestBed();
+        const writer = injector.get(FormulaResultService);
         await writer.applyResult(data);
         expect(command.executeCommand.mock.calls.map(([id]) => id)).toEqual([
             SetArrayFormulaDataMutation.id,
@@ -80,7 +93,8 @@ describe('FormulaResultService', () => {
     });
 
     it('submits an already prepared batch without materializing or copying runtime rows', async () => {
-        const { writer, command, data, matrix, cell } = createWriter();
+        const { injector, command, data, matrix, cell } = createTestBed();
+        const writer = injector.get(FormulaResultService);
         const forValue = vi.spyOn(matrix, 'forValue');
         const result = { unitData: { book: { sheet: { 0: { 1: cell } } } }, unitOtherData: {} };
         await writer.applyResult(data, result);
@@ -89,7 +103,8 @@ describe('FormulaResultService', () => {
     });
 
     it.each(['stop', 'dispose'])('does not submit values after %s during metadata application', async (action) => {
-        const { writer, command, data, runtime } = createWriter();
+        const { injector, command, data, runtime } = createTestBed();
+        const writer = injector.get(FormulaResultService);
         command.executeCommand.mockImplementationOnce(async () => {
             if (action === 'stop') runtime.isStopExecution.mockReturnValue(true);
             else writer.dispose();

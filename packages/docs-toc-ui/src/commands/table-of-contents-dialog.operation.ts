@@ -18,6 +18,7 @@ import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
+    DocumentFlavor,
     ICommandService,
     IConfirmService,
     IUniverInstanceService,
@@ -59,7 +60,10 @@ function showNoHeadingsMessage(accessor: IAccessor): void {
 async function insertTableOfContents(accessor: IAccessor, value: IInsertTableOfContentsDialogValue, title?: string): Promise<boolean> {
     const doc = accessor.get(IUniverInstanceService)
         .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    if (!doc || countTableOfContentsHeadings(doc.getBody(), value.levels, doc.getSnapshot().styles) === 0) {
+    if (!doc || doc.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+        return false;
+    }
+    if (countTableOfContentsHeadings(doc.getBody(), value.levels, doc.getSnapshot().styles) === 0) {
         showNoHeadingsMessage(accessor);
         return false;
     }
@@ -83,7 +87,7 @@ export const InsertTableOfContentsOperation: ICommand<IInsertTableOfContentsOper
         }
         const doc = accessor.get(IUniverInstanceService)
             .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!doc) {
+        if (!doc || doc.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
             return false;
         }
         const confirmService = accessor.get(IConfirmService);
@@ -124,7 +128,7 @@ export const OpenTableOfContentsDialogOperation: ICommand = {
             .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const selection = accessor.get(DocSelectionManagerService).getActiveTextRange();
         const toc = findTableOfContentsAtOffset(doc?.getBody(), selection?.startOffset);
-        if (!doc || !toc || toc.properties?.locked === BooleanNumber.TRUE) {
+        if (!doc || doc.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL || !toc || toc.properties?.locked === BooleanNumber.TRUE) {
             return false;
         }
 
@@ -149,6 +153,9 @@ export const OpenTableOfContentsDialogOperation: ICommand = {
             },
             onConfirm: async () => {
                 try {
+                    if (doc.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
+                        return;
+                    }
                     await commandService.executeCommand(UpdateTableOfContentsCommand.id, {
                         unitId: doc.getUnitId(),
                         rangeId: toc.rangeId,

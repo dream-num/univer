@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { InsertTableOfContentsCommand } from '@univerjs/docs-toc';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
@@ -28,7 +28,7 @@ describe('InsertTableOfContentsOperation', () => {
     let univer: Univer;
     afterEach(() => univer?.dispose());
 
-    function createAccessor(body: IDocumentBody) {
+    function createAccessor(body: IDocumentBody, documentFlavor = DocumentFlavor.TRADITIONAL) {
         univer = new Univer();
         univer.registerPlugin(UniverDocsPlugin);
         const injector = univer.__getInjector();
@@ -36,7 +36,7 @@ describe('InsertTableOfContentsOperation', () => {
         // The native notification surface is unavailable in this headless test.
         injector.add([IMessageService, { useValue: { show, remove: vi.fn(), removeAll: vi.fn() } }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, { id: 'doc-1', body, documentStyle: {} });
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, { id: 'doc-1', body, documentStyle: { documentFlavor } });
         injector.get(IUniverInstanceService).focusUnit('doc-1');
         const locale = injector.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: enUS });
@@ -63,6 +63,18 @@ describe('InsertTableOfContentsOperation', () => {
         expect(await commands.executeCommand(InsertTableOfContentsOperation.id, { mode: 'automatic' })).toBe(false);
         expect(show).toHaveBeenCalledWith(expect.objectContaining({ content: enUS['docs-toc-ui'].tableOfContents.noHeadings }));
         expect(dispatched).toHaveLength(0);
+        subscription.dispose();
+    });
+
+    it('rejects automatic and custom insertion in modern docs without opening UI or dispatching edits', async () => {
+        const { commands, dispatched, show, subscription } = createAccessor({
+            dataStream: 'Heading\r\n',
+            paragraphs: [{ startIndex: 7, paragraphId: 'heading', paragraphStyle: { outlineLevel: 0 } }],
+        }, DocumentFlavor.MODERN);
+        expect(await commands.executeCommand(InsertTableOfContentsOperation.id, { mode: 'automatic' })).toBe(false);
+        expect(await commands.executeCommand(InsertTableOfContentsOperation.id, { mode: 'custom' })).toBe(false);
+        expect(dispatched).toHaveLength(0);
+        expect(show).not.toHaveBeenCalled();
         subscription.dispose();
     });
 

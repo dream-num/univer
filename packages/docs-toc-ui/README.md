@@ -36,6 +36,8 @@ univer.registerPlugin(UniverDocsTocUIPlugin);
 
 Register this package after Docs, Docs UI, Render Engine, and Docs TOC core packages.
 
+Table-of-contents editing controls are available only in traditional documents. Modern documents hide insertion and contextual management entries and reject these UI operations while retaining imported fields and their cached results.
+
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

@@ -16,20 +16,28 @@
 
 import type { DocumentDataModel, IAccessor, ICustomRange } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { BooleanNumber, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocStateChangeManagerService } from '@univerjs/docs';
 import { DeleteTableOfContentsCommand, findTableOfContentsAtOffset } from '@univerjs/docs-toc';
 import { disableMenuWithoutDocumentUnitPermission } from '@univerjs/docs-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     InsertTableOfContentsOperation,
     OpenTableOfContentsDialogOperation,
 } from '../commands/table-of-contents-dialog.operation';
 
 export const INSERT_TABLE_OF_CONTENTS_MENU_ID = 'doc.menu.insert-table-of-contents';
+
+function getTableOfContentsHiddenObservable(accessor: IAccessor): Observable<boolean> {
+    return combineLatest([
+        getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        accessor.get(IUniverInstanceService).getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
+        accessor.get(DocStateChangeManagerService).docStateChange$.pipe(startWith(null)),
+    ]).pipe(map(([hidden, doc]) => hidden || doc?.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL), distinctUntilChanged());
+}
 
 function getActiveTableOfContentsObservable(accessor: IAccessor): Observable<ICustomRange | undefined> {
     const selectionManager = accessor.get(DocSelectionManagerService);
@@ -38,7 +46,7 @@ function getActiveTableOfContentsObservable(accessor: IAccessor): Observable<ICu
         const emit = () => {
             const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
             const selection = selectionManager.getActiveTextRange();
-            subscriber.next(selection?.segmentId ? undefined : findTableOfContentsAtOffset(doc?.getBody(), selection?.startOffset));
+            subscriber.next(doc?.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL || selection?.segmentId ? undefined : findTableOfContentsAtOffset(doc.getBody(), selection?.startOffset));
         };
         emit();
         const selectionSubscription = selectionManager.textSelection$.subscribe(emit);
@@ -59,15 +67,17 @@ function getInsertTableOfContentsDisabledObservable(accessor: IAccessor): Observ
         const emit = () => {
             const doc = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
             const selection = selectionManager.getActiveTextRange();
-            subscriber.next(!selection || selection.startOffset !== selection.endOffset || Boolean(selection.segmentId) ||
+            subscriber.next(doc?.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL || !selection || selection.startOffset !== selection.endOffset || Boolean(selection.segmentId) ||
                 Boolean(findTableOfContentsAtOffset(doc?.getBody(), selection.startOffset)));
         };
         emit();
         const selectionSubscription = selectionManager.textSelection$.subscribe(emit);
         const unitSubscription = instanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe(emit);
+        const documentSubscription = accessor.get(DocStateChangeManagerService).docStateChange$.subscribe(emit);
         return () => {
             selectionSubscription.unsubscribe();
             unitSubscription.unsubscribe();
+            documentSubscription.unsubscribe();
         };
     });
 }
@@ -95,7 +105,7 @@ export function InsertTableOfContentsMenuFactory(accessor: IAccessor): IMenuSele
             permissionDisabled$,
             getInsertTableOfContentsDisabledObservable(accessor),
         ]).pipe(map(([permissionDisabled, unavailable]) => permissionDisabled || unavailable)),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getTableOfContentsHiddenObservable(accessor),
     };
 }
 

@@ -26,7 +26,7 @@ import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
-import type { IRotationHandleCandidate, IRotationHandlePlacement } from './transformer-rotation';
+import type { IRotationHandleCandidate, IRotationHandleObstacle, IRotationHandlePlacement } from './transformer-rotation';
 import type { Viewport } from './viewport';
 import { CURSOR_TYPE } from './basics/const';
 import { DeviceType } from './basics/i-events';
@@ -1870,7 +1870,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _updateRotationControls(): void {
         if (this._finishGesture) return;
-        this._updateControlIterator((control, object) => this._updateRotationControl(control as Group, object));
+        const obstaclesByViewport = new Map<Viewport, IRotationHandleObstacle[]>();
+        this._updateControlIterator((control, object) => this._updateRotationControl(control as Group, object, obstaclesByViewport));
     }
 
     private _getRotationViewport(control: Group): { viewport: Viewport; bounds: IBoundRectNoAngle; corners: Vector2[] } | undefined {
@@ -1912,7 +1913,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
     }
 
-    private _updateRotationControl(control: Group, applyObject: BaseObject): void {
+    private _updateRotationControl(control: Group, applyObject: BaseObject, obstaclesByViewport = new Map<Viewport, IRotationHandleObstacle[]>()): void {
         const controls = this._rotationControls.get(applyObject.oKey);
         if (!controls) return;
         const view = this._getRotationViewport(control);
@@ -1921,6 +1922,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
         const { viewport, bounds, corners } = view;
+        let obstacles = obstaclesByViewport.get(viewport);
+        if (!obstacles) {
+            obstacles = this._getRotationObstacles(viewport);
+            obstaclesByViewport.set(viewport, obstacles);
+        }
         const config = this._getConfig(applyObject);
         const transform = control.ancestorTransform;
         const toScreen = (point: Vector2) => viewport.getAbsoluteVector(transform.applyPoint(point));
@@ -1943,7 +1949,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             artworkRadius,
             preferred: candidate(config.rotateAnchorPosition),
             opposite: candidate(config.rotateAnchorPosition === 'top' ? 'bottom' : 'top'),
-            obstacles: [...this._getRotationObstacles(viewport), { ...center, radius: 0 }],
+            obstacles: [...obstacles, { ...center, radius: 0 }],
             previousSide: this._rotationSides.get(applyObject.oKey),
         });
         if (!placement) {

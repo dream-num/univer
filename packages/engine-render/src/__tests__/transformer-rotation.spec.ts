@@ -79,6 +79,26 @@ describe('placeRotationHandle', () => {
         expect(placement.attachment.x === 300 || placement.attachment.y === -50).toBe(true);
     });
 
+    it('keeps the nearest clear inset without scanning every distant candidate against every control', () => {
+        const layout = createLayout();
+        layout.preferred = { center: { x: 200, y: -100 }, attachment: { x: 200, y: -50 }, side: 'top' };
+        layout.opposite = { center: { x: 200, y: 500 }, attachment: { x: 200, y: 450 }, side: 'bottom' };
+        let coordinateReads = 0;
+        const distantControls = Array.from({ length: 1000 }, (_, index) => ({
+            get x() {
+                coordinateReads++;
+                return 1000 + index * 30;
+            },
+            y: 1000,
+            radius: 6,
+        }));
+        layout.obstacles = [{ x: 200, y: 30, radius: 8 }, ...distantControls];
+
+        expect(placeRotationHandle(layout)).toMatchObject({ center: { x: 178, y: 30 }, side: 'inset' });
+        // Bound collision work independently of machine speed for large drawing selections.
+        expect(coordinateReads).toBeLessThan(distantControls.length * 20);
+    });
+
     it('does not expose a clipped interaction target when the viewport is too small', () => {
         const layout = createLayout();
         layout.bounds.right = 40;

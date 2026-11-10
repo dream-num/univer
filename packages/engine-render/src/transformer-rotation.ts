@@ -140,10 +140,16 @@ export function placeRotationHandle(layout: IRotationHandleLayout): IRotationHan
         }
     }
 
-    const available = insetCandidates(layout, bounds).filter((point) => isClear(point, artworkRadius, obstacles));
-    if (!available.length) return;
-    const center = available.reduce((best, next) =>
-        distanceSquared(next, preferred.center) < distanceSquared(best, preferred.center) ? next : best
-    );
+    let center: IPoint | undefined;
+    let nearestDistance = Infinity;
+    for (const point of insetCandidates(layout, bounds)) {
+        const distance = distanceSquared(point, preferred.center);
+        // A farther candidate cannot improve placement, so skip its collision scan.
+        if (distance < nearestDistance && isClear(point, artworkRadius, obstacles)) {
+            center = point;
+            nearestDistance = distance;
+        }
+    }
+    if (!center) return;
     return { center, attachment: nearestAttachment(center, layout.corners), side: 'inset', adjusted: true };
 }

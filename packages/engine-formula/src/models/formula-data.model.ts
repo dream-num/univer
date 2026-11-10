@@ -118,7 +118,7 @@ function supportsCompactFormulaSnapshot(model: FormulaDataModel, isProxy?: (valu
         const name = SNAPSHOT_MODEL_METHODS[index][0];
         const method = SNAPSHOT_MODEL_METHODS[index][1];
         if (
-            typeof method !== 'function' || Object.hasOwn(model, name) ||
+            typeof method !== 'function' || Object.prototype.hasOwnProperty.call(model, name) ||
             Object.getOwnPropertyDescriptor(FormulaDataModel.prototype, name)?.value !== method
         ) {
             return false;
@@ -324,7 +324,7 @@ export class FormulaDataModel extends Disposable {
                 }
                 this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
                 if (compactData) {
-                    const compact = !Object.hasOwn(formulaData[unitId]!, sheetId);
+                    const compact = !Object.prototype.hasOwnProperty.call(formulaData[unitId]!, sheetId);
                     const result = buildSheetFormulaData(formulaData, unitId, sheetId, cellMatrix, compact);
                     this._formulaIdMapData[unitId] ??= Object.create(null);
                     this._formulaIdMapData[unitId]![sheetId] = result.formulaIdMap;

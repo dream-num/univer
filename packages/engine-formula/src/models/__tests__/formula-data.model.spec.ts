@@ -209,6 +209,20 @@ function readFormulaInput(model: FormulaDataModel, compact: boolean): IFormulaDa
 }
 
 describe('compact execution formula snapshots', () => {
+    it('captures and materializes formulas when Object.hasOwn is unavailable', () => {
+        const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=SUM(A1:A2)' } } });
+        try {
+            const expected = testBed.model.getFormulaData();
+            const descriptor = Object.getOwnPropertyDescriptor(Object, 'hasOwn')!;
+            let actual: IFormulaData | undefined;
+            try {
+                Object.defineProperty(Object, 'hasOwn', { ...descriptor, value: undefined });
+                actual = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)?.materialize();
+            } finally { Object.defineProperty(Object, 'hasOwn', descriptor); }
+            expect(actual).toEqual(expected);
+        } finally { testBed.univer.dispose(); }
+    });
+
     it('declines an own getFormulaData override before calling it, then preserves the legacy result', () => {
         const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=BEFORE()' } } });
         const customData = { custom: { sheet: { 0: { 0: { f: '=CUSTOM()' } } } } };

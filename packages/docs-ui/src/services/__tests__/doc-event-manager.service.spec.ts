@@ -30,6 +30,7 @@ import {
 import { DocLayoutExecutorService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CanvasColorService,
+    CURSOR_TYPE,
     Documents,
     ICanvasColorService,
     IRenderManagerService,
@@ -75,10 +76,16 @@ describe('custom-range hit testing with real document layout', () => {
         { length: 3, nested: false },
         { length: 1, nested: true },
         { length: 3, nested: true },
+        { length: 3, nested: false, bookmark: true },
+        { length: 3, nested: false, bookmarkedLink: true },
         ...['checkbox', 'date', 'dropDownList', 'comboBox', 'text', 'richText', 'picture', 'group', 'repeatingSection'].map((kind) => ({ length: 1, nested: false, kind })),
     ])('hits the innermost range including its final glyph: %j', (testCase) => {
         const { length, nested } = testCase;
         const kind = 'kind' in testCase ? testCase.kind : undefined;
+        const bookmark = 'bookmark' in testCase;
+        const bookmarkedLink = 'bookmarkedLink' in testCase;
+        const rangeType = bookmark ? CustomRangeType.BOOKMARK : CustomRangeType.HYPERLINK;
+        const interactive = !nested && !bookmark && kind !== 'group' && kind !== 'repeatingSection';
         const univer = new Univer();
         try {
             const injector = univer.__getInjector();
@@ -96,7 +103,10 @@ describe('custom-range hit testing with real document layout', () => {
                             { startIndex: 1, endIndex: length, rangeId: 'link', rangeType: CustomRangeType.SDT, properties: { kind: 'repeatingSectionItem', placement: 'block' } },
                             { startIndex: 1, endIndex: length, rangeId: 'parent', rangeType: CustomRangeType.SDT, properties: { kind: 'repeatingSection', placement: 'block' } },
                         ]
-                        : [{ startIndex: 1, endIndex: length, rangeId: 'link', rangeType: kind ? CustomRangeType.SDT : CustomRangeType.HYPERLINK, ...(kind ? { properties: { kind } } : {}) }],
+                        : [
+                            { startIndex: 1, endIndex: length, rangeId: 'link', rangeType: kind ? CustomRangeType.SDT : rangeType, ...(kind ? { properties: { kind } } : {}), ...(bookmark ? { properties: { bookmarkId: 'heading-target' } } : {}) },
+                            ...(bookmarkedLink ? [{ startIndex: 1, endIndex: length, rangeId: 'bookmark', rangeType: CustomRangeType.BOOKMARK, properties: { bookmarkId: 'heading-target' } }] : []),
+                        ],
                 },
                 documentStyle: {
                     documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -126,8 +136,16 @@ describe('custom-range hit testing with real document layout', () => {
             expect(service.isPointerOnInteractiveRange(
                 bounds.left + (bounds.right - bounds.left) * 0.75,
                 (bounds.top + bounds.bottom) / 2
-            )).toBe(!nested && kind !== 'group' && kind !== 'repeatingSection');
+            )).toBe(interactive);
             expect(service.isPointerOnInteractiveRange(bounds.right + 1, (bounds.top + bounds.bottom) / 2)).toBe(false);
+            render.scene.setCursor(CURSOR_TYPE.TEXT);
+            render.scene.onPointerMove$.emitEvent({
+                buttons: 0,
+                offsetX: bounds.left + (bounds.right - bounds.left) * 0.75,
+                offsetY: (bounds.top + bounds.bottom) / 2,
+                target: documents,
+            } as unknown as IPointerEvent);
+            expect(render.scene.getCursor()).toBe(bookmark ? CURSOR_TYPE.TEXT : CURSOR_TYPE.POINTER);
             const click = (x: number): void => {
                 const event = {
                     button: 0,
@@ -156,7 +174,7 @@ describe('custom-range hit testing with real document layout', () => {
             expect(service.isPointerOnInteractiveRange(
                 ((after.left + after.right) / 2 - viewport.viewportScrollX) * 0.7,
                 ((after.top + after.bottom) / 2 - viewport.viewportScrollY) * 0.7
-            )).toBe(!nested && kind !== 'group' && kind !== 'repeatingSection');
+            )).toBe(interactive);
             subscription.unsubscribe();
         } finally {
             univer.dispose();
@@ -410,6 +428,7 @@ function createDocEventManagerService() {
     const context = {
         unitId: 'doc-event',
         unit: {
+            getSnapshot: () => ({ body, documentStyle: {} }),
             getSelfOrHeaderFooterModel: () => ({
                 getBody: () => body,
             }),

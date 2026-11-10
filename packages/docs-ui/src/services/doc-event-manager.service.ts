@@ -517,7 +517,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         let preCursor = CURSOR_TYPE.TEXT;
         let pointing = false;
         this.disposeWithMe(this.hoverCustomRanges$.subscribe((ranges) => {
-            const nextPointing = ranges.some(({ range }) => range.rangeType !== CustomRangeType.FIELD);
+            const nextPointing = ranges.some(({ range }) => range.rangeType !== CustomRangeType.FIELD && range.rangeType !== CustomRangeType.BOOKMARK);
             if (nextPointing === pointing) {
                 return;
             }

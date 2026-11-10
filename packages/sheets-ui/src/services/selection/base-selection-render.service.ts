@@ -37,11 +37,11 @@ import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '
 import type { Theme } from '@univerjs/themes';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     convertCellToRange,
     createIdentifier,
     Disposable,
+    IConfigService,
     InterceptorManager,
     RANGE_TYPE,
     ThemeService,
@@ -55,8 +55,11 @@ import {
 } from '@univerjs/sheets';
 import { IPlatformService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { isSheetContextMenuGesture, isSheetMultiSelectModifier } from '../../common/selection-input';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
@@ -265,7 +268,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             columnHeaderHeight,
             columnHeaderHeightAndMarginTop,
         } = skeleton;
+        const config = this._injector.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         const control = new SelectionControl(scene, zIndex, this._selectionTheme, {
+            enableAutoFill: config?.enableFillHandle,
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,

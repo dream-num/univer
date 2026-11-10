@@ -40,6 +40,7 @@ export interface IUniverSheetsPresetConfig extends
     Pick<
         IUniverSheetsUIConfig,
         'maxAutoHeightCount'
+        | 'enableFillHandle'
         | 'clipboardConfig'
         | 'scrollConfig'
         | 'protectedRangeShadow'

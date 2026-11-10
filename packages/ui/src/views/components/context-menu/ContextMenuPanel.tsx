@@ -778,7 +778,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         event.preventDefault();
         event.stopPropagation();
 
-        const activeIndex = focusableButtons.findIndex((button) => button === activeElement);
+        const activeIndex = focusableButtons.findIndex((button) => button.contains(activeElement ?? null));
 
         if (event.key === 'Enter') {
             const button = activeIndex >= 0 ? focusableButtons[activeIndex] : getFirstMenuButtonByVisualOrder(focusableButtons);
@@ -1164,6 +1164,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const [keyboardSubmenuFocusRequested, setKeyboardSubmenuFocusRequested] = useState(false);
     const menuItemElementRef = useRef<HTMLDivElement | null>(null);
     const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+    const mouseDownOnInputRef = useRef(false);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
     const submenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pendingHoverActionRef = useRef<(() => void) | null>(null);
@@ -1447,6 +1448,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                         aria-haspopup={hasSubmenu ? 'menu' : undefined}
                         aria-expanded={hasSubmenu ? submenuVisible : undefined}
                         aria-controls={hasSubmenu ? submenuId : undefined}
+                        onMouseDownCapture={(event) => {
+                            mouseDownOnInputRef.current = event.target instanceof HTMLInputElement;
+                        }}
                         onKeyDown={(event) => {
                             const openDirection = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
                             if (!hasSubmenu || event.key !== openDirection) {
@@ -1461,6 +1465,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             setActiveSubmenuKey(menuKey);
                         }}
                         onClick={(event) => {
+                            // Text selection can end outside the input and dispatch a click on this button.
+                            if (event.detail > 0 && mouseDownOnInputRef.current) {
+                                return;
+                            }
                             pointerGraceRef.current?.cancel();
                             clearSubmenuCloseTimer();
                             if (hasSubmenu) {

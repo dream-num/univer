@@ -73,6 +73,7 @@ export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' 
 
 interface IPopupMenuItem {
     label: string;
+    icon?: string;
     index: number;
     commandId: string;
     commandParams: ICommandInfo['params'];

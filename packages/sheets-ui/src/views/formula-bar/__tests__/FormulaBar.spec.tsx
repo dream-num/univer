@@ -26,6 +26,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    SheetTypes,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -413,6 +414,71 @@ describe('FormulaBar', () => {
         container = undefined;
         currentBed = undefined;
         vi.unstubAllGlobals();
+    });
+
+    it.each([false, true])('blanks and disables cell controls on a Chart Sheet and restores GRID interaction (initial CHART: %s)', async (initialChart) => {
+        currentBed = createFormulaBarTestBed(undefined, true);
+        const { workbook, injector } = currentBed;
+        const grid = workbook.getActiveSheet();
+        workbook.addWorksheet('chart-sheet', 1, { id: 'chart-sheet', name: 'Chart', type: SheetTypes.CHART });
+        const chart = workbook.getSheetBySheetId('chart-sheet')!;
+        injector.get(ICommandService).syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: KeyCode.ESC,
+            unitId: UNIT_ID,
+        });
+        if (initialChart) {
+            workbook.setActiveSheet(chart);
+        }
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName={false} />, injector);
+        root = rendered.root;
+        container = rendered.container;
+        const input = container.querySelector<HTMLInputElement>('[data-u-comp="defined-name"] input')!;
+        const editorHost = container.querySelector<HTMLElement>('[data-editor-id]')!.parentElement!;
+        if (!initialChart) {
+            await act(async () => {
+                injector.get(IDefinedNamesService).setCurrentRange({
+                    unitId: UNIT_ID,
+                    sheetId: SHEET_ID,
+                    range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                });
+            });
+            expect(input.value).toBe('A1');
+            await clickElement(container.querySelector('[data-u-comp="defined-name"] a')!);
+            expect(document.querySelector('[data-u-comp="defined-name-overlay"]')).not.toBeNull();
+            await act(async () => workbook.setActiveSheet(chart));
+        }
+        expect(input.value).toBe('');
+        expect(input.disabled).toBe(true);
+        expect(document.querySelector('[data-u-comp="defined-name-overlay"]')).toBeNull();
+        expect(editorHost.style.visibility).toBe('hidden');
+        expect(editorHost.style.pointerEvents).toBe('none');
+        const fxEvents: boolean[] = [];
+        const subscription = injector.get(IFormulaEditorManagerService).fxBtnClick$.subscribe((value) => fxEvents.push(value));
+        await clickElement(getActionElement(container, 2));
+        await act(async () => editorHost.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true })));
+        expect(fxEvents).toEqual([]);
+        expect(injector.get(IEditorBridgeService).isVisible().visible).toBe(false);
+        expect(chart.getSnapshot().cellData).toEqual({});
+        await act(async () => workbook.setActiveSheet(grid));
+        expect(input.disabled).toBe(false);
+        expect(editorHost.style.visibility).not.toBe('hidden');
+        await clickElement(getActionElement(container, 2));
+        expect(fxEvents).toEqual([true]);
+        subscription.unsubscribe();
+    });
+
+    it('does not mount or refocus the mobile cell editor on CHART while the stale editor remains visible', async () => {
+        currentBed = createFormulaBarTestBed(undefined, true);
+        const { workbook, injector } = currentBed;
+        workbook.addWorksheet('chart-sheet', 1, { id: 'chart-sheet', name: 'Chart', type: SheetTypes.CHART });
+        workbook.setActiveSheet(workbook.getSheetBySheetId('chart-sheet')!);
+        const rendered = renderWithDependencies(<MobileFormulaBar />, injector);
+        root = rendered.root;
+        container = rendered.container;
+        expect(container.querySelector('[data-editor-id]')).toBeNull();
+        expect(injector.get(IEditorService).getFocusId()).not.toBe(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     });
 
     it.each([

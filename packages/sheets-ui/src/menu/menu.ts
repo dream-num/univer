@@ -168,7 +168,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Locale
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -237,6 +237,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem<Loca
                 worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
             },
+            true,
             true
         ),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
@@ -333,7 +334,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -354,7 +355,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -410,7 +411,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         workbookTypes: [WorkbookEditablePermission],
         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, true);
+    }, true, true);
 
     return {
         id: SetRangeFontFamilyCommand.id,
@@ -489,7 +490,7 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -540,7 +541,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, true),
+        }, true, true),
     };
 }
 

@@ -18,7 +18,13 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    applySheetDrawingPlacement,
+    ClearSheetDrawingTransformerOperation,
+    ISheetDrawingService,
+    SetSheetDrawingCommand,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 import { UndoRedoGroupService } from '@univerjs/ui';
 
 export interface IMoveDrawingsCommandParams {
@@ -43,11 +49,23 @@ export const MoveDrawingsCommand: ICommand = {
         }
 
         const unitId = drawings[0].unitId;
-        const positionedDrawings = drawings.flatMap((drawing) => {
+        const movableDrawings = drawings.flatMap((drawing) => {
+            const sheetDrawing = drawing as ISheetDrawing;
+            const { transform, anchorType = SheetDrawingAnchorType.Position } = sheetDrawing;
+            if (!transform) {
+                return [];
+            }
+
             const skeleton = sheetSkeletonService.getSkeleton(drawing.unitId, drawing.subUnitId);
-            return drawing.transform && skeleton ? [{ drawing: drawing as ISheetDrawing, skeleton }] : [];
+            if (anchorType !== SheetDrawingAnchorType.None && !skeleton) {
+                return [];
+            }
+
+            return [{ drawing: sheetDrawing, skeleton, anchorType }];
         });
-        if (positionedDrawings.length === 0) return false;
+        if (movableDrawings.length === 0) {
+            return false;
+        }
 
         let moveX = direction === Direction.LEFT ? -1 : direction === Direction.RIGHT ? 1 : 0;
         let moveY = direction === Direction.UP ? -1 : direction === Direction.DOWN ? 1 : 0;
@@ -55,7 +73,10 @@ export const MoveDrawingsCommand: ICommand = {
         let minY = -Infinity;
         let maxX = Infinity;
         let maxY = Infinity;
-        for (const { drawing, skeleton } of positionedDrawings) {
+        for (const { drawing, skeleton } of movableDrawings) {
+            if (!skeleton) {
+                continue;
+            }
             const { left = 0, top = 0, width = 0, height = 0 } = drawing.transform!;
             const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop, columnTotalWidth, rowTotalHeight } = skeleton;
             minX = Math.max(minX, rowHeaderWidthAndMarginLeft - left);
@@ -65,28 +86,38 @@ export const MoveDrawingsCommand: ICommand = {
         }
         moveX = Math.max(minX, Math.min(moveX, maxX));
         moveY = Math.max(minY, Math.min(moveY, maxY));
-        if (moveX === 0 && moveY === 0) return false;
+        if (moveX === 0 && moveY === 0) {
+            return false;
+        }
 
-        const newDrawings = positionedDrawings.map(({ drawing, skeleton }) => {
+        const newDrawings = movableDrawings.flatMap(({ drawing, skeleton, anchorType }) => {
             const transform = drawing.transform!;
-            const { left = 0, top = 0 } = transform;
-            const newTransform = { ...transform, left: left + moveX, top: top + moveY };
+            const { left = 0, top = 0, width = 0, height = 0 } = transform;
+            const bounds = { left: left + moveX, top: top + moveY, width, height };
 
-            return {
-                ...drawing,
-                transform: newTransform,
-                sheetTransform: transformToDrawingPosition(newTransform, skeleton),
-                axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton),
-            } as ISheetDrawing;
+            if (anchorType === SheetDrawingAnchorType.None) {
+                return [applySheetDrawingPlacement(drawing, { kind: anchorType, bounds })];
+            }
+            if (!skeleton) {
+                return [];
+            }
+
+            return [applySheetDrawingPlacement(drawing, { kind: anchorType, bounds }, skeleton)];
         });
 
+        if (newDrawings.length === 0) {
+            return false;
+        }
+
+        // Drawing history contains deltas, so grouped nudges must retain every update.
         const result = undoRedoGroupService.runTimed(
             unitId,
             `sheet-drawing:nudge:${drawings[0].subUnitId}:${drawings.map((drawing) => drawing.drawingId).sort().join(',')}`,
             () => commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
                 unitId,
                 drawings: newDrawings,
-            })
+            }),
+            'append'
         );
 
         if (result) {

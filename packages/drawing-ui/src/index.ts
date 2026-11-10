@@ -82,9 +82,6 @@ export {
     ObjectListPanelBase,
 } from './views/object-list-panel/ObjectListPanelBase';
 export type {
-    IDrawingObjectListItem,
-    IDrawingObjectListPanelLabels,
-    IDrawingObjectListPanelProps,
     IObjectListPanelBaseProps,
     IObjectListPanelItem,
     IObjectListPanelLabels,

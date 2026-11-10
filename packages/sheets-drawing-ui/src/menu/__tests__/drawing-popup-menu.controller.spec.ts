@@ -119,7 +119,6 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: str
                     id: 'sheet.operation.add-drawing-comment',
                     type: MenuItemType.BUTTON,
                     title: 'sheets-thread-comment-ui.menu.addComment',
-                    icon: 'InsertCommentDoubleIcon',
                 },
             }],
         } as never,
@@ -171,7 +170,6 @@ describe('DrawingPopupMenuController', () => {
             expect.objectContaining({
                 commandId: 'sheet.operation.add-drawing-comment',
                 label: 'sheets-thread-comment-ui.menu.addComment',
-                icon: 'InsertCommentDoubleIcon',
             }),
         ]));
 

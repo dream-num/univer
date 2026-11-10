@@ -48,6 +48,7 @@ import {
     RemoveColCommand,
     RemoveRowByRangeCommand,
     RemoveRowCommand,
+    ReorderRangeCommand,
     SetColHiddenCommand,
     SetColWidthCommand,
     SetRowHeightCommand,
@@ -507,6 +508,60 @@ describe('SheetDrawingTransformAffectedController', () => {
             { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
     });
+
+    it('moves a cell-anchored drawing with its source row when a range is reordered', () => {
+        const skeleton = createSkeleton({ rowHeights: [20, 30, 40, 50] });
+        const followsCell = createDrawing({
+            drawingId: 'follows-cell',
+            anchorType: SheetDrawingAnchorType.Position,
+            sheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 5, columnOffset: 2 },
+                to: { row: 2, column: 2, rowOffset: 9, columnOffset: 6 },
+            },
+        }, skeleton);
+        const absolute = createDrawing({
+            drawingId: 'absolute',
+            anchorType: SheetDrawingAnchorType.None,
+        }, skeleton);
+        const outsideColumns = createDrawing({
+            drawingId: 'outside-columns',
+            sheetTransform: {
+                from: { row: 1, column: 4, rowOffset: 0, columnOffset: 0 },
+                to: { row: 2, column: 5, rowOffset: 0, columnOffset: 0 },
+            },
+        }, skeleton);
+        const { controller, sheetDrawingService } = createController({
+            skeleton,
+            drawingData: {
+                [followsCell.drawingId]: followsCell,
+                [absolute.drawingId]: absolute,
+                [outsideColumns.drawingId]: outsideColumns,
+            },
+        });
+
+        const result = controller._reorderRangeInterceptor({
+            unitId: UNIT_ID,
+            subUnitId: SUB_UNIT_ID,
+            range: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 3 },
+            order: { 1: 3, 2: 1, 3: 2 },
+        });
+        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
+
+        expect(sheetDrawingService.getBatchUpdateOp.mock.calls[0][0]).toHaveLength(1);
+        expect(updatedDrawing).toMatchObject({
+            drawingId: 'follows-cell',
+            transform: {
+                left: followsCell.transform.left,
+                top: 55,
+                width: followsCell.transform.width,
+                height: followsCell.transform.height,
+            },
+            sheetTransform: {
+                from: { row: 2, column: 1, rowOffset: 5, columnOffset: 2 },
+            },
+        });
+        expect(result.redos).toContainEqual({ id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] });
+    });
 });
 
 describe('explicit deletion targets', () => {
@@ -660,6 +715,27 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(before);
         expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(after);
+    });
+
+    it('moves a position-anchored drawing with its source row through reorder undo and redo', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+        const before = structuredClone(getDrawing(service));
+
+        expect(await testBed.commandService.executeCommand(ReorderRangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 1, endRow: 4, startColumn: 0, endColumn: 3 },
+            order: { 1: 2, 2: 1, 3: 3, 4: 4 },
+        })).toBe(true);
+
+        const after = structuredClone(getDrawing(service));
+        expect(after.sheetTransform?.from.row).toBe(2);
+        expect(after.transform?.width).toBe(before.transform?.width);
+        expect(after.transform?.height).toBe(before.transform?.height);
+        expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(getDrawing(service)).toEqual(before);
+        expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(after);
     });
 

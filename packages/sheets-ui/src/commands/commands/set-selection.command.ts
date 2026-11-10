@@ -199,7 +199,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         const { direction, keycode } = params;
         const isReverse = direction === Direction.LEFT || direction === Direction.UP;
 
-        const selections = selectionsService.getCurrentSelections().concat();
+        let selections = selectionsService.getCurrentSelections().concat();
         const currentSelectionIndex = selections.findIndex((s) => s.primary);
         const selection = selections[currentSelectionIndex];
         if (!selection) {
@@ -333,6 +333,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         if (isLastCell) {
             selections[currentSelectionIndex].primary = null;
             selections[nextSelectionIndex] = resultRange;
+            // Keep the active range last for editing and permissions without changing the navigation cycle.
+            selections = selections.slice(nextSelectionIndex + 1).concat(selections.slice(0, nextSelectionIndex + 1));
             selectionsService.setSelections(unitId, sheetId, [], SelectionMoveType.MOVE_END);
         } else {
             selections[currentSelectionIndex] = resultRange;

@@ -25,7 +25,6 @@ import {
     RANGE_TYPE,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
     REF_SELECTIONS_ENABLED,
@@ -50,7 +49,6 @@ import type {
 } from '../set-selection.command';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
-import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import {
     ExpandSelectionCommand,
     JumpOver,
@@ -1098,97 +1096,38 @@ describe('Test commands used for change selections', () => {
             expectSelectionToBe(0, 1, 0, 1);
         });
 
-        it('should move active cell inside multi-selections and wrap to the next selection', async () => {
-            const refreshSelectionMoveEnd = vi.fn();
-            const renderManagerService = get(IRenderManagerService);
-            vi.spyOn(renderManagerService, 'getRenderUnitById').mockReturnValue({
-                with: (identifier: unknown) => {
-                    if (identifier === ISheetSelectionRenderService) {
-                        return { refreshSelectionMoveEnd };
-                    }
-
-                    return null;
-                },
-            } as never);
-
-            selectionManagerService.setSelections([
-                {
-                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
-                    primary: {
-                        startRow: 0,
-                        startColumn: 0,
-                        endRow: 0,
-                        endColumn: 0,
-                        actualRow: 0,
-                        actualColumn: 0,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                    },
-                    style: null,
-                },
-                {
-                    range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
-                    primary: {
-                        startRow: 1,
-                        startColumn: 0,
-                        endRow: 1,
-                        endColumn: 0,
-                        actualRow: 1,
-                        actualColumn: 0,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                    },
-                    style: null,
-                },
-            ]);
-
-            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
-                direction: Direction.RIGHT,
-                keycode: KeyCode.TAB,
-            });
-
-            let activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
-            expect(activeSelection?.range).toEqual({
-                startRow: 0,
-                startColumn: 0,
-                endRow: 0,
-                endColumn: 1,
+        it.each([
+            { name: 'Tab', keycode: KeyCode.TAB, direction: Direction.RIGHT, reverse: Direction.LEFT, vertical: false },
+            { name: 'Enter', keycode: KeyCode.ENTER, direction: Direction.DOWN, reverse: Direction.UP, vertical: true },
+        ])('cycles three ranges in both directions with $name and keeps the editing target current', async ({ keycode, direction, reverse, vertical }) => {
+            const worksheet = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+            const ranges = [0, 6, 12].map((start) => ({
+                startRow: start,
+                endRow: start + 1,
+                startColumn: start,
+                endColumn: start + 1,
                 rangeType: RANGE_TYPE.NORMAL,
-            });
-            expect(activeSelection?.primary?.startColumn).toBe(1);
+            }));
+            selectionManagerService.setSelections(ranges.map((range, index) => ({
+                range,
+                primary: index === ranges.length - 1 ? worksheet.getCellInfoInMergeData(13, 13) : null,
+                style: null,
+            })));
+            const offsets = vertical ? [[0, 0], [1, 0], [0, 1], [1, 1]] : [[0, 0], [0, 1], [1, 0], [1, 1]];
+            const cells = [0, 6, 12].flatMap((start) => offsets.map(([row, column]) => [start + row, start + column]));
 
-            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
-                direction: Direction.RIGHT,
-                keycode: KeyCode.TAB,
-            });
-
-            activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
-            expect(activeSelection?.range).toEqual({
-                startRow: 1,
-                startColumn: 0,
-                endRow: 1,
-                endColumn: 1,
-                rangeType: RANGE_TYPE.NORMAL,
-            });
-            expect(activeSelection?.primary?.startRow).toBe(1);
-            expect(activeSelection?.primary?.startColumn).toBe(0);
-
-            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
-                direction: Direction.LEFT,
-                keycode: KeyCode.TAB,
-            });
-
-            activeSelection = selectionManagerService.getCurrentSelections().find((selection) => selection.primary);
-            expect(activeSelection?.range).toEqual({
-                startRow: 0,
-                startColumn: 0,
-                endRow: 0,
-                endColumn: 1,
-                rangeType: RANGE_TYPE.NORMAL,
-            });
-            expect(activeSelection?.primary?.startRow).toBe(0);
-            expect(activeSelection?.primary?.startColumn).toBe(1);
-            expect(refreshSelectionMoveEnd).toHaveBeenCalledTimes(3);
+            for (const step of [direction, reverse]) {
+                const expected = step === direction ? cells : [...cells.slice(0, -1).reverse(), cells[cells.length - 1]];
+                for (const [row, column] of expected) {
+                    expect(await commandService.executeCommand(MoveSelectionEnterAndTabCommand.id, { direction: step, keycode })).toBe(true);
+                    const selections = selectionManagerService.getCurrentSelections();
+                    expect(selections.filter((selection) => selection.primary)).toHaveLength(1);
+                    expect(selections.map((selection) => selection.range)).toEqual(expect.arrayContaining(ranges));
+                    expect(selections).toHaveLength(ranges.length);
+                    expect(selectionManagerService.getCurrentLastSelection()?.primary).toMatchObject({ actualRow: row, actualColumn: column });
+                    expect(selectionManagerService.getCurrentLastSelectionPrimaryCell()).toMatchObject({ actualRow: row, actualColumn: column });
+                }
+            }
         });
 
         it('should remember tab origin for enter and stop at sheet boundaries', async () => {

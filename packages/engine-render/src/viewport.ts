@@ -1144,9 +1144,18 @@ export class Viewport {
         const scrollBarThicknessTotalSize = this.getScrollBar()?.totalSize ?? 0;
         const maxViewportScrollX = this._sceneWidthAfterScale - this._marginLeft * scaleX - freezeWidth * scaleX - width + scrollBarThicknessTotalSize;
         const maxViewportScrollY = this._sceneHeightAfterScale - this._marginTop * scaleY - freezeHeight * scaleY - height + scrollBarThicknessTotalSize;
+        // A centered page may fit on one axis while the other still scrolls. Keep the fitting
+        // axis at its padding origin (possibly negative) so scrolling does not undo centering.
+        // For scrolling axes, ensure the upper limit never falls below that origin.
+        const limitX = hasScrollableOverflow(this._sceneWCurrVpAfterScale, width)
+            ? Math.max(this._paddingStartX, maxViewportScrollX / scaleX)
+            : this._paddingStartX;
+        const limitY = hasScrollableOverflow(this._sceneHCurrVpAfterScale, height)
+            ? Math.max(this._paddingStartY, maxViewportScrollY / scaleY)
+            : this._paddingStartY;
         return {
-            viewportScrollX: Tools.clamp(viewportScrollX, this._paddingStartX, maxViewportScrollX / scaleX),
-            viewportScrollY: Tools.clamp(viewportScrollY, this._paddingStartY, maxViewportScrollY / scaleY),
+            viewportScrollX: Tools.clamp(viewportScrollX, this._paddingStartX, limitX),
+            viewportScrollY: Tools.clamp(viewportScrollY, this._paddingStartY, limitY),
             isLimitedX: viewportScrollX > maxViewportScrollX,
             isLimitedY: viewportScrollY > maxViewportScrollY,
         };

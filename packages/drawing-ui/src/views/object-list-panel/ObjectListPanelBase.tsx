@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ComponentProps, ComponentType, DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import type { ComponentProps, ComponentType, DragEvent, MouseEvent, ReactNode } from 'react';
 import { Button, clsx, Input, StateIconButton, Textarea } from '@univerjs/design';
 import {
     ArrowDownIcon,
@@ -26,7 +26,7 @@ import {
     MoreDownIcon,
     UnlockIcon,
 } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
 
 export interface IObjectListPanelCapabilities {
@@ -497,7 +497,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             labels={labels}
                                             permissionAction={renderPermissionAction?.(item)}
                                             showLock={!!onToggleSelectable && hasCapability(capabilities, item, 'selectable')}
-                                            showName={hasCapability(capabilities, item, 'name')}
                                             showVisible={hasCapability(capabilities, item, 'visible')}
                                             draggable={canReorder && hasCapability(capabilities, item, 'reorder') && !item.disabled && item.canReorder !== false}
                                             dragging={draggingId === item.id}
@@ -505,7 +504,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             onToggleExpanded={() => onToggleExpanded?.(item.id)}
                                             onToggleVisible={() => onSetVisible([item.id], !item.visible)}
                                             onToggleSelectable={() => onToggleSelectable?.(item.id)}
-                                            onCommitName={(value) => onCommitName(item.id, value)}
                                             onDragStart={() => setDraggingId(item.id)}
                                             onDragEnd={() => setDraggingId(null)}
                                             onDrop={() => handleDrop(item.id)}
@@ -535,7 +533,6 @@ export interface IObjectListRowProps {
     selected: boolean;
     labels: IObjectListPanelLabels;
     showLock: boolean;
-    showName: boolean;
     showVisible: boolean;
     draggable: boolean;
     dragging: boolean;
@@ -543,15 +540,16 @@ export interface IObjectListRowProps {
     onToggleExpanded: () => void;
     onToggleVisible: () => void;
     onToggleSelectable: () => void;
-    onCommitName: (value: string) => void;
     onDragStart: () => void;
     onDragEnd: () => void;
     onDrop: () => void;
 }
 
 function ObjectListRow(props: IObjectListRowProps) {
-    const { permissionAction, item, selected, labels, showLock, showName, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onDragStart, onDragEnd, onDrop } = props;
-    const { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown } = useObjectListRow(props);
+    const { permissionAction, item, selected, labels, showLock, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onDragStart, onDragEnd, onDrop } = props;
+    const disabled = item.disabled === true;
+    const level = item.level ?? 0;
+    const locked = item.selectable === false;
 
     return (
         <div
@@ -629,46 +627,21 @@ function ObjectListRow(props: IObjectListRowProps) {
                     </button>
                 )
                 : <span className="univer-size-5 univer-shrink-0" />}
-            {showName
-                ? (
-                    <Input
-                        key={item.name}
-                        className={clsx('univer-h-7 univer-w-0 univer-min-w-0 univer-flex-1', disabled && `
-                          univer-cursor-not-allowed
-                        `)}
-                        inputClass={clsx(
-                            `
-                              univer-min-w-0 univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap
-                              !univer-rounded !univer-border-transparent !univer-bg-transparent !univer-px-1
-                              univer-text-sm univer-text-gray-900 !univer-shadow-none
-                              focus:!univer-border-primary-500 focus:!univer-bg-gray-0 focus:!univer-ring-1
-                              focus:!univer-ring-primary-100
-                              disabled:!univer-bg-transparent disabled:univer-opacity-100
-                              dark:!univer-text-gray-100
-                              dark:focus:!univer-bg-gray-900 dark:focus:!univer-ring-primary-900
-                            `,
-                            '!univer-h-7',
-                            disabled && `
-                              univer-text-gray-400
-                              dark:!univer-text-gray-500
-                            `
-                        )}
-                        inputStyle={{ maxWidth: '100%', boxSizing: 'border-box' }}
-                        value={draftName}
-                        disabled={disabled}
-                        aria-label={labels.nameInput}
-                        onChange={setDraftName}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            if (!disabled) {
-                                onSelect(event.ctrlKey || event.metaKey);
-                            }
-                        }}
-                    />
-                )
-                : <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-px-1 univer-text-sm">{item.name}</span>}
+            <button
+                type="button"
+                className="
+                  univer-h-7 univer-min-w-0 univer-flex-1 univer-truncate univer-border-0 univer-bg-transparent
+                  univer-px-1 univer-text-start univer-text-sm univer-text-inherit
+                "
+                disabled={disabled}
+                aria-pressed={selected}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(event.ctrlKey || event.metaKey);
+                }}
+            >
+                {item.name}
+            </button>
             {permissionAction}
             {showLock && (
                 <StateIconButton
@@ -720,14 +693,7 @@ export function ObjectDetailsEditor(props: {
     onCommitDescription: (value: string) => void;
 }) {
     const { item, InputComponent = Input, descriptionClassName, labels, showName, showDescription, onCommitName, onCommitDescription } = props;
-    const [draftName, setDraftName] = useState(item?.name ?? '');
-    const [draftDescription, setDraftDescription] = useState(item?.description ?? '');
     const disabled = item?.disabled === true;
-
-    useEffect(() => {
-        setDraftName(item?.name ?? '');
-        setDraftDescription(item?.description ?? '');
-    }, [item?.description, item?.id, item?.name]);
 
     if (!item) {
         return (
@@ -770,13 +736,13 @@ export function ObjectDetailsEditor(props: {
                         {labels.name}
                     </span>
                     <InputComponent
-                        value={draftName}
+                        key={JSON.stringify([item.id, item.name])}
+                        defaultValue={item.name}
                         aria-label={labels.nameInput}
                         disabled={disabled}
-                        onChange={setDraftName}
-                        onBlur={() => {
-                            if (!disabled && normalizeText(draftName) !== item.name) {
-                                onCommitName(draftName);
+                        onBlur={(event) => {
+                            if (!disabled && normalizeText(event.currentTarget.value) !== item.name) {
+                                onCommitName(event.currentTarget.value);
                             }
                         }}
                         onKeyDown={(event) => {
@@ -799,14 +765,14 @@ export function ObjectDetailsEditor(props: {
                     </span>
                     <Textarea
                         className={clsx('univer-min-h-16 univer-resize-none univer-text-sm', descriptionClassName)}
-                        value={draftDescription}
+                        key={JSON.stringify([item.id, item.description])}
+                        defaultValue={item.description ?? ''}
                         disabled={disabled}
                         placeholder={labels.descriptionPlaceholder}
                         aria-label={labels.description}
-                        onChange={(event) => setDraftDescription(event.currentTarget.value)}
-                        onBlur={() => {
-                            if (!disabled && normalizeText(draftDescription) !== (item.description ?? '')) {
-                                onCommitDescription(draftDescription);
+                        onBlur={(event) => {
+                            if (!disabled && normalizeText(event.currentTarget.value) !== (item.description ?? '')) {
+                                onCommitDescription(event.currentTarget.value);
                             }
                         }}
                     />
@@ -814,46 +780,4 @@ export function ObjectDetailsEditor(props: {
             )}
         </div>
     );
-}
-
-export type IDrawingObjectListItem = IObjectListPanelItem;
-export type IDrawingObjectListPanelLabels = IObjectListPanelLabels;
-export type IDrawingObjectListPanelProps = IObjectListPanelBaseProps;
-export function useObjectListRow({ item, onCommitName }: Pick<IObjectListRowProps, 'item' | 'onCommitName'>) {
-    const [draftName, setDraftName] = useState(item.name);
-    const skipCommitOnBlurRef = useRef(false);
-    const disabled = item.disabled === true;
-    const level = item.level ?? 0;
-    const locked = item.selectable === false;
-
-    useEffect(() => {
-        setDraftName(item.name);
-    }, [item.name]);
-
-    const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
-        if (disabled) {
-            return;
-        }
-        if (skipCommitOnBlurRef.current) {
-            skipCommitOnBlurRef.current = false;
-            return;
-        }
-        if (event.currentTarget.value !== item.name) {
-            onCommitName(event.currentTarget.value);
-        }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            event.currentTarget.blur();
-            return;
-        }
-        if (event.key === 'Escape') {
-            skipCommitOnBlurRef.current = true;
-            setDraftName(item.name);
-            event.currentTarget.blur();
-        }
-    };
-
-    return { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown };
 }

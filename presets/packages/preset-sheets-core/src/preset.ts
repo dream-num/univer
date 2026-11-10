@@ -19,7 +19,6 @@ import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IUniverSheetsNumfmtConfig } from '@univerjs/sheets-numfmt';
 import type { IUniverSheetsUIConfig } from '@univerjs/sheets-ui';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverDocsPresetConfig, IUniverFormulaConfig, IUniverSheetsPresetConfig } from './types';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -33,7 +32,7 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-
+import type { IUniverDocsPresetConfig, IUniverFormulaConfig, IUniverSheetsPresetConfig } from './types';
 // NOTE: here we copy code from everything.ts. That file (along with the package itself) would be removed in the future.
 import '@univerjs/network/facade';
 import '@univerjs/sheets/facade';
@@ -143,8 +142,11 @@ export function UniverSheetsCorePreset(config: Partial<IUniverSheetsCorePresetCo
                 formulaBar,
                 footer,
                 allowArrowKeyWrapOnSheetBoundary: sheets?.allowArrowKeyWrapOnSheetBoundary,
+                selectionAnimation: sheets?.selectionAnimation,
                 maxAutoHeightCount: sheets?.maxAutoHeightCount,
+                enableFillHandle: sheets?.enableFillHandle,
                 clipboardConfig: sheets?.clipboardConfig,
+                warnBeforeDragOverwrite: sheets?.warnBeforeDragOverwrite,
                 scrollConfig: sheets?.scrollConfig,
                 protectedRangeShadow: sheets?.protectedRangeShadow ?? true,
                 protectedRangeUserSelector: sheets?.protectedRangeUserSelector,

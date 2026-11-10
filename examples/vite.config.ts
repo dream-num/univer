@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 const DEV_LOCALE_ENDPOINT = '/__univer_examples_locale';
 const DEV_LOCALE_EXPORT_SCRIPT = fileURLToPath(new URL('./scripts/export-locale.mts', import.meta.url));
 const DEV_LOCALE_PRODUCTS = new Set(['docs', 'sheets']);
-const DEV_TSX_IMPORT = fileURLToPath(import.meta.resolve('tsx'));
+const DEV_TSX_IMPORT = import.meta.resolve('tsx');
 const DEV_LOCALE_TAGS = new Set([
     'ar-SA',
     'ca-ES',

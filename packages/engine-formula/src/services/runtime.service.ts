@@ -139,7 +139,8 @@ export interface IFormulaRuntimeService {
     getCalculationCache?(): FormulaCalculationCache | undefined;
     clearInvertedIndexCache?(): void;
     releaseCalculationCache?(): void;
-    beginCircularReferences(): void;
+    /** Start empty when the engine will supply the complete current cycle set. */
+    beginCircularReferences(clearPrevious?: boolean): void;
     clearCircularReferenceCells(cells: { unitId: string; subUnitId: string; row: number; column: number }[]): void;
     recordCircularReferences(cells: ICircularReference[]): void;
     completeCircularReferences(): void;
@@ -498,8 +499,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearReferenceToRangeCache();
     }
 
-    beginCircularReferences(): void {
-        this._pendingCircularReferences = new Map(this._circularReferences);
+    beginCircularReferences(clearPrevious = false): void {
+        this._pendingCircularReferences = clearPrevious ? new Map() : new Map(this._circularReferences);
+        if (clearPrevious) return;
         if (this._pendingCircularReferences.size === 0 && hasDeferredFormulaDataSnapshot(this._currentConfigService)) return;
         const formulaData = this._currentConfigService.getFormulaData();
         for (const [key, cell] of this._pendingCircularReferences) {

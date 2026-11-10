@@ -97,6 +97,39 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('replaces authoritative circular diagnostics without reading formula input and preserves stopped state', () => {
+        const { injector, runtime } = createRuntimeService();
+        const config = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;
+        const previous = { unitId: 'unit', sheetId: 'sheet', row: 2, column: 3, groupId: 'old', iterations: 1 };
+        const current = { ...previous, row: 4, groupId: 'native', iterations: 5, converged: true };
+        runtime.recordCircularReferences([previous]);
+        runtime.completeCircularReferences();
+        const getter = vi.spyOn(config, 'getFormulaData');
+        try {
+            runtime.beginCircularReferences(true);
+            runtime.recordCircularReferences([current]);
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences).toEqual([current]);
+            current.iterations = 99;
+            expect(runtime.getRuntimeState().circularReferences?.[0].iterations).toBe(5);
+
+            runtime.beginCircularReferences(true);
+            runtime.recordCircularReferences([previous]);
+            runtime.stopExecution();
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences?.[0].groupId).toBe('native');
+
+            runtime.reset();
+            runtime.beginCircularReferences(true);
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences).toEqual([]);
+            expect(getter).not.toHaveBeenCalled();
+        } finally {
+            getter.mockRestore();
+            injector.dispose();
+        }
+    });
+
     it('preserves legacy empty-circle reads while deferring unused snapshots and filtering deleted formulas', () => {
         const { injector, runtime } = createRuntimeService();
         const config = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;

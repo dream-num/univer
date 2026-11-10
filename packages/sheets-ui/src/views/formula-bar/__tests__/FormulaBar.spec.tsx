@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IDefinedNamesService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AutoFillService,

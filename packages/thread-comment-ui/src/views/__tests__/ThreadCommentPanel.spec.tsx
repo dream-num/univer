@@ -139,6 +139,14 @@ class TestEditor {
         return this._record.focused;
     }
 
+    get docSelectionRenderService() {
+        return {
+            isFocusing: this.isFocus(),
+            getAllTextRanges: () => this.getSelectionRanges(),
+            getAllRectRanges: () => [],
+        };
+    }
+
     focus(): void {
         this._record.focused = true;
         this.focus$.next(undefined);

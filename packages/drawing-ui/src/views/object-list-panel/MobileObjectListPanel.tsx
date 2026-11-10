@@ -18,7 +18,7 @@ import type { ComponentProps } from 'react';
 import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon, EyelashIcon, LocateFixedIcon, LockIcon, MoreDownIcon, UnlockIcon } from '@univerjs/icons';
 import type { IObjectListPanelBaseProps, IObjectListRowProps } from './ObjectListPanelBase';
-import { hasCapability, ObjectDetailsEditor, useObjectListPanel, useObjectListRow } from './ObjectListPanelBase';
+import { hasCapability, ObjectDetailsEditor, useObjectListPanel } from './ObjectListPanelBase';
 
 const mobileIconButtonClassName = `
   univer-flex univer-size-11 univer-shrink-0 univer-items-center univer-justify-center univer-rounded-xl
@@ -230,7 +230,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                             labels={labels}
                                             permissionAction={renderPermissionAction?.(item)}
                                             showLock={!!onToggleSelectable && hasCapability(capabilities, item, 'selectable')}
-                                            showName={hasCapability(capabilities, item, 'name')}
+
                                             showVisible={hasCapability(capabilities, item, 'visible')}
                                             draggable={canReorder && hasCapability(capabilities, item, 'reorder') && !item.disabled && item.canReorder !== false}
                                             dragging={draggingId === item.id}
@@ -238,7 +238,7 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
                                             onToggleExpanded={() => onToggleExpanded?.(item.id)}
                                             onToggleVisible={() => onSetVisible([item.id], !item.visible)}
                                             onToggleSelectable={() => onToggleSelectable?.(item.id)}
-                                            onCommitName={(value) => onCommitName(item.id, value)}
+
                                             onDragStart={() => setDraggingId(item.id)}
                                             onDragEnd={() => setDraggingId(null)}
                                             onDrop={() => handleDrop(item.id)}
@@ -265,8 +265,10 @@ export function MobileObjectListPanel(props: IObjectListPanelBaseProps) {
 }
 
 function MobileObjectListRow(props: IObjectListRowProps) {
-    const { item, selected, labels, showLock, showName, showVisible, permissionAction, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable } = props;
-    const { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown } = useObjectListRow(props);
+    const { item, selected, labels, showLock, showVisible, permissionAction, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable } = props;
+    const disabled = item.disabled === true;
+    const level = item.level ?? 0;
+    const locked = item.selectable === false;
     return (
         <div
             className={clsx(`
@@ -302,25 +304,21 @@ function MobileObjectListRow(props: IObjectListRowProps) {
                     </button>
                 )
                 : <span className="univer-w-2 univer-shrink-0" />}
-            {showName
-                ? (
-                    <MobileObjectListInput
-                        className="univer-w-0 univer-min-w-0 univer-flex-1"
-                        value={draftName}
-                        disabled={disabled}
-                        aria-label={labels.nameInput}
-                        onChange={setDraftName}
-                        onBlur={handleBlur}
-                        onKeyDown={handleKeyDown}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            if (!disabled) {
-                                onSelect(false);
-                            }
-                        }}
-                    />
-                )
-                : <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-text-sm">{item.name}</span>}
+            <button
+                type="button"
+                className="
+                  univer-min-h-10 univer-min-w-0 univer-flex-1 univer-truncate univer-border-0 univer-bg-transparent
+                  univer-px-1 univer-text-start univer-text-base univer-text-inherit
+                "
+                disabled={disabled}
+                aria-pressed={selected}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(false);
+                }}
+            >
+                {item.name}
+            </button>
             {permissionAction}
             {showLock && (
                 <StateIconButton

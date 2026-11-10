@@ -17,7 +17,7 @@
 import { Vector2 } from '../basics/vector2';
 import { Rect } from './rect';
 
-const CONTROL_TOUCH_HIT_RADIUS = 22;
+export const CONTROL_TOUCH_HIT_RADIUS = 22;
 
 /** A precise mouse handle with a zoom-independent touch target. */
 export class Control extends Rect {

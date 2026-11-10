@@ -17,7 +17,7 @@
 import type { IFormulaData } from '../basics/common';
 
 /**
- * @experimental Optional calculation-engine capability; not a stable application API.
+ * Internal calculation-engine input; not an application or Facade API.
  * Ephemeral calculation input, not a serialized Workbook snapshot.
  * Materialization returns an owned, mutable formula DTO cached for subsequent reads.
  */

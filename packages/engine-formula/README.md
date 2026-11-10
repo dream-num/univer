@@ -42,7 +42,7 @@ Range-array and comparison-index invalidation uses the owning runtime's `clearAr
 
 ## Calculation input and result ownership
 
-Formula capture, load, and execution capabilities are experimental package integration APIs, rather than application or Facade APIs. Keep their declarations available to cooperating engines and validate the exact OSS, Pro, and engine versions together under the [API stability policy](../../docs/API_STABILITY.md).
+Formula capture, load, and execution capabilities are internal interfaces shared by cooperating calculation engines, not application or Facade APIs. Their exports and type declarations remain available for cross-package integration; this does not make them stable public extension points. Validate the exact OSS, Pro, and engine versions together under the [API stability policy](../../docs/API_STABILITY.md).
 
 `IFormulaDataSnapshot` captures ephemeral calculation input, not a persisted Workbook snapshot or a replacement for `IWorkbookData`. It preserves formula values even when the Workbook is edited later. `materialize()` returns an owned, mutable formula DTO and caches it for later reads. `FormulaCurrentConfigService` can defer materialization until `getFormulaData()`; another load, formula-data registration, or disposal replaces that deferred state.
 

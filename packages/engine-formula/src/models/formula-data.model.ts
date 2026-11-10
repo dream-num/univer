@@ -394,7 +394,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     /**
-     * @experimental Optional calculation-engine capability; customized model methods retain the eager DTO path.
+     * Internal calculation-engine capture; customized model methods retain the eager DTO path.
      * Reuse ordinary model traversal and metadata preparation, deferring per-formula DTO objects where possible.
      * The optional classifier is retained for cooperating engines that reject a proxied model before capture.
      */

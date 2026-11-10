@@ -71,11 +71,11 @@ export const DEFAULT_INTERVAL_COUNT = 500;
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export interface ICalculateFormulaService {
-    /** @experimental Explicit opt-in; legacy engines and RPC proxies keep the complete formula DTO input. */
+    /** Internal engine opt-in; engines without this capability and RPC proxies keep the complete formula DTO input. */
     readonly supportsFormulaDataSnapshot?: boolean;
-    /** @experimental Captures formula values for a cooperating in-process engine. */
+    /** Internal engine capability to capture formula values in the same runtime. */
     prepareFormulaDataSnapshot?(): IFormulaDataSnapshot | undefined;
-    /** @experimental Consumes the snapshot captured by the cooperating engine. */
+    /** Internal engine capability to execute the captured formula input. */
     executeWithFormulaDataSnapshot?(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): Promise<void>;
     readonly executionInProgressListener$: Observable<IExecutionInProgressParams>;
     readonly executionCompleteListener$: Observable<IAllRuntimeData>;

@@ -78,7 +78,7 @@ export interface IFormulaDirtyData {
 
 export interface IFormulaCurrentConfigService {
     load(config: IFormulaDatasetConfig): void;
-    /** @experimental Optional calculation-engine capability for a deferred formula DTO. */
+    /** Internal engine capability to defer formula DTO materialization. */
     loadWithFormulaDataSnapshot?(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): void;
 
     getUnitData(): IUnitData;
@@ -405,7 +405,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._loadFormulaDataset(config);
     }
 
-    /** @experimental Optional calculation-engine capability for a deferred formula DTO. */
+    /** Internal engine capability to defer formula DTO materialization. */
     loadWithFormulaDataSnapshot(config: Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot: IFormulaDataSnapshot): void {
         this._loadFormulaDataset(config, snapshot);
     }

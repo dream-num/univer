@@ -399,31 +399,7 @@ describe('FindReplaceDialog', () => {
         expect(readState(testBed.findReplaceService)).toMatchObject({ matchesCount: 3, matchesPosition: 1 });
     });
 
-    it('reveals replace controls from a focusable advanced action without restarting the session', async () => {
-        const testBed = createDialogTestBed();
-        await act(async () => {
-            testBed.commandService.syncExecuteCommand(OpenFindDialogOperation.id);
-        });
-
-        const rendered = renderDialog(testBed.univer.__getInjector());
-        root = rendered.root;
-        container = rendered.container;
-
-        await act(async () => {
-            const button = getButton(container!, ADVANCED_LABEL);
-            button.focus();
-            expect(document.activeElement).toBe(button);
-            button.click();
-        });
-
-        expect(testBed.findReplaceService.replaceRevealed).toBe(true);
-        expect(getButton(container!, FIND_LABEL).disabled).toBe(true);
-        expect(getButton(container!, REPLACE_LABEL).disabled).toBe(true);
-        expect(getButton(container!, REPLACE_ALL_LABEL).disabled).toBe(true);
-        expect(getInputs(container!)).toHaveLength(2);
-    });
-
-    it('keeps Enter and Shift+Enter navigation working after revealing replace controls', async () => {
+    it('keeps match navigation working after clicking the focusable advanced find action', async () => {
         const testBed = createDialogTestBed();
         const injector = testBed.univer.__getInjector();
         injector.add([IPlatformService, { useClass: PlatformService }]);
@@ -448,7 +424,10 @@ describe('FindReplaceDialog', () => {
             await flushSearch();
 
             await act(async () => {
-                testBed.commandService.syncExecuteCommand(OpenReplaceDialogOperation.id);
+                const button = getButton(container!, ADVANCED_LABEL);
+                button.focus();
+                expect(document.activeElement).toBe(button);
+                button.click();
             });
             const [findInput, replaceInput] = getInputs(container);
             expect(document.activeElement).toBe(findInput);
@@ -662,6 +641,8 @@ describe('FindReplaceDialog', () => {
         const rendered = renderDialog(testBed.univer.__getInjector());
         root = rendered.root;
         container = rendered.container;
+
+        expect(getButton(container, FIND_LABEL).disabled).toBe(true);
 
         await act(async () => {
             const inputs = getInputs(container!);

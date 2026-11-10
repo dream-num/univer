@@ -60,7 +60,7 @@ import {
     UpdateCommentCommand,
     UpdateCommentMutation,
 } from '@univerjs/thread-comment';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { IShortcutService, ISidebarService, RediContext, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -567,6 +567,22 @@ describe('ThreadCommentTree', () => {
         container?.remove();
         root = undefined;
         container = undefined;
+    });
+
+    it.each([undefined, 'fallback.png'])('renders an imported author without a missing-image request (fallback: %s)', (fallback) => {
+        const testBed = createTreeTestBed([LocaleService]);
+        const locale = testBed.injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        testBed.injector.get(IConfigService).setConfig(UI_PLUGIN_CONFIG_KEY, { avatarFallback: fallback });
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'imported-author', personId: 'unknown', authorName: 'Imported Author' }));
+        const rendered = renderDefaultTree(testBed.injector, 'imported-author');
+        root = rendered.root;
+        container = rendered.container;
+        const avatar = getRootCommentItem(container, 'imported-author').firstElementChild as HTMLElement;
+        expect(avatar.style.backgroundImage).toBe(fallback ? 'url("fallback.png")' : '');
+        expect(container.innerHTML).not.toContain('url(&quot;undefined&quot;)');
     });
 
     it('keeps timestamps left-to-right inside RTL comment rows', () => {

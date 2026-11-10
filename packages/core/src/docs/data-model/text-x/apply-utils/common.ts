@@ -915,6 +915,9 @@ export function insertCustomDecorations(
     textLength: number,
     currentIndex: number
 ) {
+    if (body.customDecorations == null && !insertBody.customDecorations?.length) {
+        return;
+    }
     if (!body.customDecorations) {
         body.customDecorations = [];
     }

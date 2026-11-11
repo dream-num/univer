@@ -19,13 +19,6 @@
 import type { ICustomRange, IDocumentBody, IDocumentData, IStyleData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    IParsedCellValueByClipboard,
-    IUniverSheetCopyDataModel,
-} from '../type';
-import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import {
     createDocumentModelWithStyle,
     createParagraphId,
@@ -40,6 +33,13 @@ import {
     skipParseTagNames,
 } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    IParsedCellValueByClipboard,
+    IUniverSheetCopyDataModel,
+} from '../type';
+import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
 
@@ -500,6 +500,7 @@ export class HtmlToUSMService {
                 let cellStyle = '';
                 const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
                 const colSpan = Number(cell.getAttribute('colSpan')) || 1;
+                const ignoreColSpan = /(?:^|;)\s*mso-ignore\s*:\s*colspan\s*(?:;|$)/i.test(cell.getAttribute('style') ?? '');
 
                 cellStyle = this._getStyle(cell as HTMLElement, rowStyle);
 
@@ -572,7 +573,8 @@ export class HtmlToUSMService {
 
                 const cellValue = {
                     rowSpan,
-                    colSpan,
+                    // Excel uses ignored spans for text overflow. Keep their layout width without creating a merge.
+                    colSpan: ignoreColSpan ? 1 : colSpan,
                     content: cellText,
                     style: cellStyle,
                     richTextParma: {

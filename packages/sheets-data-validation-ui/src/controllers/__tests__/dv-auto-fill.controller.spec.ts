@@ -15,7 +15,7 @@
  */
 
 import type { ISheetAutoFillHook } from '@univerjs/sheets';
-import { DataValidationType, Direction, Range } from '@univerjs/core';
+import { DataValidationType, Direction, Range, RANGE_TYPE } from '@univerjs/core';
 import { AddDataValidationMutation } from '@univerjs/data-validation';
 import { AUTO_FILL_APPLY_TYPE } from '@univerjs/sheets';
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
@@ -131,5 +131,38 @@ describe('DataValidationAutoFillController', () => {
         }
         expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 0, 0)?.uid).toBe('decimal-rule');
         expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 1, 0)).toBeUndefined();
+    });
+
+    it('keeps a whole column rule whole when data is filled inside it', async () => {
+        await testBed.commandService.executeCommand(AddDataValidationMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: {
+                uid: 'whole-column-rule',
+                type: DataValidationType.DECIMAL,
+                formula1: '1',
+                ranges: [{ startRow: 0, endRow: 199_999, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }],
+            },
+        });
+        const location = {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            source: { rows: [0], cols: [0] },
+            target: { rows: [1], cols: [0] },
+        };
+
+        // auto fill first clears the target and then copies the source range back: the net coverage
+        // of the rule is unchanged, so a whole column rule must stay a whole column rule
+        const result = hook.onFillData?.(location, Direction.DOWN, AUTO_FILL_APPLY_TYPE.COPY);
+        if (!result) {
+            throw new Error('Data validation autofill did not return mutations');
+        }
+        for (const mutation of result.redos) {
+            await testBed.commandService.executeCommand(mutation.id, mutation.params);
+        }
+
+        expect(testBed.dataValidationModel.getRuleById(testBed.unitId, testBed.subUnitId, 'whole-column-rule')?.ranges).toEqual([
+            { startRow: 0, endRow: 199_999, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
+        ]);
     });
 });

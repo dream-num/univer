@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ICommandService } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
@@ -47,6 +47,8 @@ function createControllerTestBed(editLocation = createEditLocation()) {
     let injector: Injector;
     const renderContext = {
         unitId: 'test',
+        // The skeleton manager follows the workbook active sheet, so the context has to reference the real workbook.
+        unit: undefined as unknown as Workbook,
         scene: {
             onTransformChange$: {
                 subscribeEvent: () => ({ dispose: vi.fn() }),
@@ -67,6 +69,7 @@ function createControllerTestBed(editLocation = createEditLocation()) {
             { useFactory: createFormulaEditorShowController },
         ],
     ]);
+    renderContext.unit = testBed.sheet;
     activeUniver = testBed.univer;
     injector = testBed.univer.__getInjector();
     testBed.sheet.addWorksheet('sheet2', 1, { id: 'sheet2', name: 'Sheet2', cellData: {} });

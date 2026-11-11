@@ -630,8 +630,14 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _rangeToBounds(ranges: IRange[]) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
-        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
+        // Backstop for a stale or disposed current skeleton: the manager now follows the active worksheet, but a
+        // mutation can still arrive while the skeleton param is in flux, and a dirty-bounds miss is harmless.
+        const param = this._sheetSkeletonManagerService.getCurrentParam();
+        if (!param) {
+            return [];
+        }
+
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = param.skeleton;
 
         const dirtyBounds: IViewportInfos[] = [];
         for (const r of ranges) {

@@ -965,19 +965,16 @@ export class FormulaDataModel extends Disposable {
                 const sheetId = worksheet.getSheetId();
                 const cellMatrix = worksheet.getCellMatrix();
 
-                // Keep the model state getFormulaData() refreshes, without building a DTO entry per formula.
-                this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
                 const formulaIdMap: Record<string, IFormulaIdMap> = Object.create(null);
+                // Resolve followers against all anchors, including anchors after their followers.
+                this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix, formulaIdMap);
                 const columnRanges: IColumnRowRanges = Object.create(null);
                 cellMatrix.forValue((row, column, cell) => {
                     const formulaString = cell?.f || '';
                     const formulaId = cell?.si || '';
                     const checkFormulaString = isFormulaString(formulaString);
-                    const checkFormulaId = isFormulaId(formulaId);
-                    if (checkFormulaString && checkFormulaId) {
-                        formulaIdMap[formulaId] = { f: formulaString, r: row, c: column };
-                    }
-                    if (!(checkFormulaString || checkFormulaId) || (cell?.v !== undefined && cell?.v !== null)) {
+                    const hasSharedAnchor = isFormulaId(formulaId) && formulaIdMap[formulaId] !== undefined;
+                    if (!(checkFormulaString || hasSharedAnchor) || (cell?.v !== undefined && cell?.v !== null)) {
                         return;
                     }
                     pushContinuousRow(columnRanges, row, column);
@@ -1042,15 +1039,23 @@ export class FormulaDataModel extends Disposable {
         return dirtyRanges;
     }
 
-    private _initSheetArrayFormulaData(unitId: string, sheetId: string, cellMatrix: ObjectMatrix<Nullable<ICellData>>) {
+    private _initSheetArrayFormulaData(
+        unitId: string,
+        sheetId: string,
+        cellMatrix: ObjectMatrix<Nullable<ICellData>>,
+        formulaIdMap?: Record<string, IFormulaIdMap>
+    ) {
         let arrayFormulaRangeMatrix: Nullable<ObjectMatrix<IRange>>;
         let arrayFormulaCellDataMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>>;
         const formulaIds = new Set<string>();
 
-        cellMatrix.forValue((_, __, cell) => {
+        cellMatrix.forValue((row, column, cell) => {
             const formulaId = cell?.si;
-            if (isFormulaString(cell?.f) && isFormulaId(formulaId)) {
-                formulaIds.add(String(formulaId));
+            const formula = cell?.f;
+            if (isFormulaString(formula) && isFormulaId(formulaId)) {
+                const id = String(formulaId);
+                formulaIds.add(id);
+                if (formulaIdMap) formulaIdMap[id] = { f: formula!, r: row, c: column };
             }
         });
 

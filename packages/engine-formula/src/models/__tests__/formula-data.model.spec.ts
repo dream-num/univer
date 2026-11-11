@@ -2414,6 +2414,9 @@ describe('formula dirty ranges', () => {
                     1: { 0: { f: '=2', v: 2 }, 2: { si: 'shared' }, 3: { v: 5 } },
                     2: { 0: { f: '=3' }, 2: { si: 'shared', v: 0 } },
                     3: { 0: { f: '=4' }, 1: { f: '=A4', v: null }, 2: { si: 'shared' } },
+                    4: { 2: { si: 'orphan' } },
+                    5: { 2: { si: 'late' } },
+                    6: { 2: { f: '=B7', si: 'late' } },
                 },
             },
             sheet2: {
@@ -2462,6 +2465,7 @@ describe('formula dirty ranges', () => {
                 { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 3, endRow: 3, startColumn: 1, endColumn: 1 } },
                 { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 0, endRow: 1, startColumn: 2, endColumn: 2 } },
                 { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 3, endRow: 3, startColumn: 2, endColumn: 2 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 5, endRow: 6, startColumn: 2, endColumn: 2 } },
                 { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 0, endRow: 0, startColumn: 4, endColumn: 4 } },
                 { unitId: 'test', sheetId: 'sheet2', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 } },
             ]);

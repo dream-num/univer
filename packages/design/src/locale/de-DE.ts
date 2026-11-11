@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'OK',
         },
         GradientColorPicker: {
+            add: 'Farbverlaufstopp hinzufügen',
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Winkel',

@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'OK',
         },
         GradientColorPicker: {
+            add: 'Aggiungi punto sfumatura',
             linear: 'Lineare',
             radial: 'Radiale',
             angular: 'Angolare',

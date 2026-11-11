@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'باشه',
         },
         GradientColorPicker: {
+            add: 'افزودن نقطه گرادیان',
             linear: 'خطی',
             radial: 'شعاعی',
             angular: 'زاویه‌ای',

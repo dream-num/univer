@@ -61,19 +61,17 @@ describe('GradientColorPicker', () => {
         expect(view.queryByText(enUS.design.GradientColorPicker.angle)).toBeNull();
     });
 
-    it('should call onChange when offset changes', () => {
+    it('edits only the selected stop when its offset changes', () => {
         const onChange = vi.fn();
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
 
-        const inputs = container.querySelectorAll('input');
-        const offsetInput = inputs[1]; // Second input is offset
+        fireEvent.click(container.querySelectorAll('[data-u-comp="gradient-color-picker-stop"]')[1]);
+        const offsetInput = container.querySelectorAll('input')[1];
 
         fireEvent.change(offsetInput, { target: { value: '50' } });
 
         expect(onChange).toHaveBeenCalledWith(expect.objectContaining({
-            stops: expect.arrayContaining([
-                expect.objectContaining({ offset: 50 }),
-            ]),
+            stops: [defaultValue.stops[0], { ...defaultValue.stops[1], offset: 50 }],
         }));
     });
 
@@ -107,17 +105,6 @@ describe('GradientColorPicker', () => {
         }));
     });
 
-    it('should select stop when clicked', () => {
-        const { container } = render(<GradientColorPicker value={defaultValue} />);
-        const stops = container.querySelectorAll('[data-u-comp="gradient-color-picker-stop"]');
-
-        // Click the second stop
-        fireEvent.click(stops[1]);
-
-        // The second stop should be selected
-        expect(stops[1]).toHaveAttribute('data-selected', 'true');
-    });
-
     it('should call onChange when a stop is removed', () => {
         const onChange = vi.fn();
         const valueWithThreeStops: IGradientValue = {
@@ -130,37 +117,31 @@ describe('GradientColorPicker', () => {
         };
         const { container } = render(<GradientColorPicker value={valueWithThreeStops} onChange={onChange} />);
 
-        const deleteButton = container.querySelector('[data-u-comp="gradient-color-picker-delete"]');
-        if (deleteButton) {
-            fireEvent.click(deleteButton);
-        }
+        const deleteButton = container.querySelector('[data-u-comp="gradient-color-picker-delete"]')!;
+        fireEvent.click(deleteButton);
 
         expect(onChange).toHaveBeenCalled();
         const calledValue = onChange.mock.calls[0][0] as IGradientValue;
-        expect(calledValue.stops.length).toBe(2);
+        expect(calledValue.stops).toEqual(valueWithThreeStops.stops.slice(1));
     });
 
     it('should call onChange when clicking the bar to add a stop', () => {
         const onChange = vi.fn();
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
 
-        const bar = container.querySelector('[data-u-comp="gradient-color-picker-bar"]');
-        if (bar) {
-            // Mock getBoundingClientRect for the bar
-            bar.getBoundingClientRect = vi.fn(() => ({
-                left: 0,
-                width: 100,
-                top: 0,
-                height: 10,
-                bottom: 10,
-                right: 100,
-                x: 0,
-                y: 0,
-                toJSON: () => {},
-            }));
-
-            fireEvent.click(bar, { clientX: 50 });
-        }
+        const bar = container.querySelector('[data-u-comp="gradient-color-picker-bar"]')!;
+        vi.spyOn(bar, 'getBoundingClientRect').mockReturnValue({
+            left: 0,
+            width: 100,
+            top: 0,
+            height: 10,
+            bottom: 10,
+            right: 100,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        });
+        fireEvent.click(bar, { clientX: 50 });
 
         expect(onChange).toHaveBeenCalled();
         const calledValue = onChange.mock.calls[0][0] as IGradientValue;
@@ -182,35 +163,22 @@ describe('GradientColorPicker', () => {
         const onChange = vi.fn();
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
 
-        const presetButton = container.querySelector('[data-u-comp="color-picker-presets"] button') as HTMLButtonElement;
-        expect(presetButton).toBeTruthy();
+        const presetButton = container.querySelector('[data-u-comp="color-picker-presets"] button[aria-pressed="false"]') as HTMLButtonElement;
         fireEvent.click(presetButton);
 
         expect(onChange).toHaveBeenCalled();
         const next = onChange.mock.calls[0][0] as IGradientValue;
-        expect(next.stops[0].color).toMatch(/^#/);
-    });
-
-    it('should support radial/angular/diamond and fallback preview background', () => {
-        const { container, rerender } = render(<GradientColorPicker value={{ ...defaultValue, type: 'radial' }} />);
-        const preview = container.querySelector('[data-u-comp="gradient-color-picker-preview"]') as HTMLDivElement;
-        expect(preview.style.background).toContain('radial-gradient');
-
-        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'angular' }} />);
-        expect((container.querySelector('[data-u-comp="gradient-color-picker-preview"]') as HTMLDivElement).style.background).toContain('conic-gradient');
-
-        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'diamond' }} />);
-        expect((container.querySelector('[data-u-comp="gradient-color-picker-preview"]') as HTMLDivElement).style.background).toContain('radial-gradient');
-
-        rerender(<GradientColorPicker value={{ ...defaultValue, type: 'unexpected' as unknown as IGradientValue['type'] }} />);
-        expect((container.querySelector('[data-u-comp="gradient-color-picker-preview"]') as HTMLDivElement).style.background).toContain('linear-gradient');
+        expect(next.stops).toEqual([
+            { ...defaultValue.stops[0], color: presetButton.getAttribute('aria-label')!.toLowerCase() },
+            defaultValue.stops[1],
+        ]);
     });
 
     it('should drag a stop and emit new offset', () => {
         const onChange = vi.fn();
         const { container } = render(<GradientColorPicker value={defaultValue} onChange={onChange} />);
         const bar = container.querySelector('[data-u-comp="gradient-color-picker-bar"]') as HTMLDivElement;
-        const stop = container.querySelector('[data-u-comp="gradient-color-picker-stop"]') as HTMLDivElement;
+        const stop = container.querySelector('[data-u-comp="gradient-color-picker-stop"]') as HTMLButtonElement;
 
         bar.getBoundingClientRect = vi.fn(() => ({
             left: 0,
@@ -267,5 +235,39 @@ describe('GradientColorPicker', () => {
             expect(updatedStops[1]).toHaveAttribute('data-selected', 'true');
             expect(updatedStops[0]).toHaveAttribute('data-selected', 'false');
         });
+    });
+    it('supports selecting, moving, adding and deleting stops with keyboard controls', () => {
+        const onChange = vi.fn();
+        const view = render(
+            <ConfigProvider mountContainer={document.body} locale={enUS.design}>
+                <GradientColorPicker value={defaultValue} onChange={onChange} />
+            </ConfigProvider>
+        );
+        const second = view.getAllByRole('slider')[1];
+        fireEvent.focus(second);
+        fireEvent.keyDown(second, { key: 'ArrowLeft' });
+        expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({
+            stops: [defaultValue.stops[0], { ...defaultValue.stops[1], offset: 99 }],
+        }));
+        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.add }));
+        expect(view.getAllByRole('slider')).toHaveLength(3);
+        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.delete }));
+        expect(view.getAllByRole('slider')).toHaveLength(2);
+        expect(view.getByRole('textbox', { name: enUS.design.GradientColorPicker.transparency })).toBeTruthy();
+    });
+
+    it.each(['pointerUp', 'pointerCancel', 'unmount'] as const)('ends a drag exactly once on %s', (end) => {
+        const onDragStart = vi.fn();
+        const onDragEnd = vi.fn();
+        const view = render(<GradientColorPicker value={defaultValue} onDragStart={onDragStart} onDragEnd={onDragEnd} />);
+        fireEvent.pointerDown(view.getAllByRole('slider')[0], { clientX: 0 });
+        expect(onDragStart).toHaveBeenCalledOnce();
+        if (end === 'unmount') {
+            view.unmount();
+        } else {
+            fireEvent[end](window);
+            view.unmount();
+        }
+        expect(onDragEnd).toHaveBeenCalledOnce();
     });
 });

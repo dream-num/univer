@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'OK',
         },
         GradientColorPicker: {
+            add: 'Adicionar ponto de gradiente',
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Angular',

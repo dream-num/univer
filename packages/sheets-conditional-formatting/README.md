@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-conditional-formatting` | `UniverSheetsConditionalFormatting` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-conditional-formatting` | `UniverSheetsConditionalFormatting` | No | Yes | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-conditional-formatting
 npm install @univerjs/sheets-conditional-formatting
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -42,6 +42,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-conditional-formatting-ui` when users need menus and rule-management panels.
+- Import `@univerjs/sheets-conditional-formatting/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

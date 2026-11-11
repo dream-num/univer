@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                      | CSS | Locales | Facade entry |
-| ---------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-core` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-docs-core` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/preset-docs-core
 # or
 npm install @univerjs/preset-docs-core
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

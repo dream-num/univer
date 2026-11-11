@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/engine-render` | `UniverEngineRender` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/engine-render` | `UniverEngineRender` | No | No | No | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/engine-render
 npm install @univerjs/engine-render
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -30,7 +30,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 univer.registerPlugin(UniverRenderEnginePlugin);
 ```
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverRenderEnginePlugin` from `@univerjs/engine-render`.
 

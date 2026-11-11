@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/watermark` | `UniverWatermark` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/watermark` | `UniverWatermark` | No | No | Yes | No |
 
 ## Installation
 
@@ -20,15 +20,19 @@ pnpm add @univerjs/watermark
 npm install @univerjs/watermark
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 
 univer.registerPlugin(UniverWatermarkPlugin);
 ```
+
+## Integration Notes
+
+- Import `@univerjs/watermark/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/protocol` | `UniverProtocol` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/protocol` | `UniverProtocol` | No | No | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/protocol
 # or
 npm install @univerjs/protocol
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

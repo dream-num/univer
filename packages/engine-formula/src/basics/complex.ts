@@ -22,6 +22,21 @@ Decimal.prototype.cos = function (): Decimal {
     return new Decimal(Math.cos(num));
 };
 
+/**
+ * Finds the sign that separates the real and imaginary parts. A sign at the
+ * start of the string or right after the exponent marker of a number such as
+ * `1e-7` belongs to that number, so it is skipped.
+ */
+function findSignIndex(inumberStr: string, sign: '+' | '-'): number {
+    for (let i = 1; i < inumberStr.length; i++) {
+        if (inumberStr[i] === sign && inumberStr[i - 1] !== 'e' && inumberStr[i - 1] !== 'E') {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 export class Complex {
     static getComplex(realNum: number, iNum: number, suffix: string): number | string {
         const _realNum = new Decimal(realNum).toSignificantDigits(15).toNumber();
@@ -86,16 +101,8 @@ export class Complex {
             return;
         }
 
-        let plus = inumberStr.indexOf('+');
-        let minus = inumberStr.indexOf('-');
-
-        if (plus === 0) {
-            plus = inumberStr.indexOf('+', 1);
-        }
-
-        if (minus === 0) {
-            minus = inumberStr.indexOf('-', 1);
-        }
+        const plus = findSignIndex(inumberStr, '+');
+        const minus = findSignIndex(inumberStr, '-');
 
         const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
         const unit = last === 'i' || last === 'j';
@@ -155,16 +162,8 @@ export class Complex {
 
         inumberStr = inumberStr.replace('+i', '+1i').replace('-i', '-1i').replace('+j', '+1j').replace('-j', '-1j');
 
-        let plus = inumberStr.indexOf('+');
-        let minus = inumberStr.indexOf('-');
-
-        if (plus === 0) {
-            plus = inumberStr.indexOf('+', 1);
-        }
-
-        if (minus === 0) {
-            minus = inumberStr.indexOf('-', 1);
-        }
+        const plus = findSignIndex(inumberStr, '+');
+        const minus = findSignIndex(inumberStr, '-');
 
         const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
         const unit = last === 'i' || last === 'j';

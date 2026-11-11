@@ -18,14 +18,12 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, Inject, SheetTypes } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -41,9 +39,8 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
             return;
         }
 
-        const { unitId } = this._context;
+        const { scene, unitId } = this._context;
         const { skeleton } = param;
-        const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
 
         if (skeleton == null || scene == null) {
             return;

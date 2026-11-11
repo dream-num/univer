@@ -18,7 +18,6 @@ import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
 import {
     CommandType,
     fromCallback,
@@ -44,6 +43,7 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
+import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
@@ -83,6 +83,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
     private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
+    private _displayFilterModel: FilterModel | null | undefined;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -101,7 +102,17 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     override dispose(): void {
         super.dispose();
+        this._displayFilterModel = undefined;
         this._disposeRendering();
+    }
+
+    /** Changes only this render context; undefined restores the worksheet filter. */
+    setDisplayFilterModel(model: FilterModel | null | undefined): void {
+        if (this._displayFilterModel === model) {
+            return;
+        }
+        this._displayFilterModel = model;
+        this._refreshRendering(this._currentRenderParams);
     }
 
     private _initRenderer(): void {
@@ -112,18 +123,16 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         // Subscribe to skeleton change and filter model change.
         this._sheetSkeletonManagerService.currentSkeleton$.pipe(
             switchMap((skeletonParams) => {
-                if (!skeletonParams) return of(null);
+                if (!skeletonParams) {
+                    return of(null);
+                }
 
                 const { unit: workbook, unitId } = this._context;
                 const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
-                const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
-                const getParams = (): ISheetsFilterRenderParams => ({
-                    unitId,
-                    worksheetId,
-                    filterModel,
-                    range: filterModel?.getRange(),
-                    skeleton: skeletonParams.skeleton,
-                });
+                const getParams = (): ISheetsFilterRenderParams => {
+                    const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
+                    return { unitId, worksheetId, filterModel, range: filterModel?.getRange(), skeleton: skeletonParams.skeleton };
+                };
 
                 return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) =>
@@ -145,6 +154,10 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _refreshRendering(renderParams: ISheetsFilterRenderParams | null): void {
         this._disposeRendering();
+        const model = this._displayFilterModel;
+        if (renderParams && model !== undefined && (!model || model.subUnitId === renderParams.worksheetId)) {
+            renderParams = { ...renderParams, filterModel: model ?? undefined, range: model?.getRange() };
+        }
         if (!renderParams || !renderParams.range) {
             return;
         }

@@ -74,7 +74,6 @@ describe('background extension', () => {
 
         const worksheet = {
             getMergedCellRange: vi.fn(() => []),
-            getRowVisible: vi.fn(() => true),
             getColVisible: vi.fn(() => true),
             getSpanModel: vi.fn(() => ({
                 getMergeDataIndex: vi.fn(() => -1),
@@ -83,6 +82,7 @@ describe('background extension', () => {
 
         const skeletonBase = {
             worksheet,
+            getRowVisible: vi.fn(() => true),
             rowHeightAccumulation: [20],
             columnWidthAccumulation: [40],
             columnTotalWidth: 40,
@@ -136,9 +136,9 @@ describe('background extension', () => {
         backgroundPositions.setValue(0, 0, createCellInfo());
 
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
                 getMergedCellRange: vi.fn(() => []),
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
                 getSpanModel: vi.fn(() => ({
                     getMergeDataIndex: vi.fn(() => -1),
@@ -177,7 +177,6 @@ describe('background extension', () => {
         const getMergeDataIndex = vi.fn(() => -1);
         const worksheet = {
             getMergedCellRange: vi.fn(() => []),
-            getRowVisible: vi.fn(() => true),
             getColVisible: vi.fn(() => true),
             getSpanModel: vi.fn(() => ({
                 getMergeDataIndex,
@@ -185,6 +184,7 @@ describe('background extension', () => {
         };
         const skeleton = {
             worksheet,
+            getRowVisible: vi.fn(() => true),
             stylesCache: {
                 background: { '#ff0000': bgMatrix },
                 backgroundPositions: new ObjectMatrix(),
@@ -220,9 +220,9 @@ describe('background extension', () => {
         const bgMatrix = createBgMatrix([[1, 1, '1']], 4);
 
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
                 getMergedCellRange: vi.fn(() => []),
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
                 getSpanModel: vi.fn(() => ({
                     getMergeDataIndex: vi.fn(() => -1),
@@ -261,9 +261,9 @@ describe('background extension', () => {
         const mergedRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
 
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
                 getMergedCellRange: vi.fn(() => [mergedRange]),
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
                 getSpanModel: vi.fn(() => ({
                     getMergeDataIndex: vi.fn(() => -1),
@@ -300,8 +300,8 @@ describe('background extension', () => {
         const rect = vi.fn();
 
         const skeleton = {
+            getRowVisible: vi.fn(() => true),
             worksheet: {
-                getRowVisible: vi.fn(() => true),
                 getColVisible: vi.fn(() => true),
             },
         } as any;
@@ -321,11 +321,11 @@ describe('background extension', () => {
         expect(rect).not.toHaveBeenCalled();
 
         bgContext.viewRanges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
-        skeleton.worksheet.getRowVisible = vi.fn(() => false);
+        skeleton.getRowVisible = vi.fn(() => false);
         const rowHidden = extension.renderBGByCell(bgContext, 0, 0);
         expect(rowHidden).toBe(true);
 
-        skeleton.worksheet.getRowVisible = vi.fn(() => true);
+        skeleton.getRowVisible = vi.fn(() => true);
         bgContext.viewRanges = [{ startRow: 10, endRow: 10, startColumn: 10, endColumn: 10 }];
         bgContext.skipRenderRangeCheck = true;
         const skippedRangeCheck = extension.renderBGByCell(bgContext, 0, 0);
@@ -347,11 +347,11 @@ describe('background extension', () => {
             },
         });
 
-        skeleton.worksheet.getRowVisible = vi.fn(() => false);
+        skeleton.getRowVisible = vi.fn(() => false);
         const mergedRowHidden = extension.renderBGByCell(bgContext, 0, 0);
         expect(mergedRowHidden).toBe(true);
 
-        skeleton.worksheet.getRowVisible = vi.fn(() => true);
+        skeleton.getRowVisible = vi.fn(() => true);
         skeleton.worksheet.getColVisible = vi.fn(() => false);
         const mergedColHidden = extension.renderBGByCell(bgContext, 0, 0);
         expect(mergedColHidden).toBe(true);

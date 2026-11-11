@@ -65,7 +65,7 @@ export class FWorksheetSortMixin extends FWorksheet implements IFWorksheetSortMi
             hasTitle: false,
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-        });
+        }, { fromFacade: true });
         return this;
     }
 }

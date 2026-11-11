@@ -86,6 +86,7 @@ function createService(options?: {
             },
         },
         sheetSkeletonService: {
+            getDisplaySkeleton: vi.fn(() => undefined),
             getSkeleton: vi.fn(() => null),
         },
         renderManagerService: {
@@ -123,6 +124,7 @@ function createService(options?: {
     }
 
     class TestSheetSkeletonService {
+        getDisplaySkeleton = mocks.sheetSkeletonService.getDisplaySkeleton;
         getSkeleton = mocks.sheetSkeletonService.getSkeleton;
     }
 

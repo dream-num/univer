@@ -25,22 +25,13 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     ISetRangeValuesMutationParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyPastePayload,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-} from '../../services/clipboard/type';
-import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import {
     createDocumentModelWithStyle,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -67,7 +58,7 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeCommand,
     InsertColMutation,
@@ -85,6 +76,16 @@ import {
 } from '@univerjs/sheets';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyPastePayload,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '../../services/clipboard/type';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -295,14 +296,17 @@ export class SheetClipboardController extends RxDisposable {
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
+        let currentSkeleton: SpreadsheetSkeleton | undefined;
         return {
             id: PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY,
             isDefaultHook: true,
             onBeforeCopy(unitId, subUnitId) {
                 currentSheet = self._getWorksheet(unitId, subUnitId);
+                const manager = getFocusedRenderForUnit(self._renderManagerService, unitId)?.with(SheetSkeletonManagerService);
+                currentSkeleton = manager?.hasProjection(subUnitId) ? manager.getSkeleton(subUnitId) ?? undefined : undefined;
             },
             onCopyCellContent(row: number, col: number): string {
-                const cell = currentSheet!.getCell(row, col);
+                const cell = currentSkeleton ? currentSkeleton.getCell(row, col) : currentSheet!.getCell(row, col);
 
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
                     return convertBodyToHtml(cell.p);
@@ -546,12 +550,9 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
-        const currentSkeleton = withCurrentTypeOfRenderer(
-            UniverInstanceType.UNIVER_SHEET,
-            SheetSkeletonManagerService,
-            this._instanceService,
-            this._renderManagerService
-        )?.getCurrentParam();
+        const workbook = this._instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const render = workbook && getFocusedRenderForUnit(this._renderManagerService, workbook.getUnitId());
+        const currentSkeleton = render?.with(SheetSkeletonManagerService).getCurrentParam();
 
         if (currentSkeleton == null) {
             return null;

@@ -569,6 +569,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
         getCurrentParam: () => ({ unitId: sheet.getUnitId(), sheetId: 'sheet1', skeleton }),
         getCurrentSkeleton: () => skeleton,
         getSkeletonParam: (_sheetId: string) => ({ skeleton }),
+        isProjectionPending: () => false,
         attachRangeWithCoord: (range: { startRow: number; startColumn: number; endRow: number; endColumn: number; rangeType?: unknown }) => {
             const { startRow, startColumn, endRow, endColumn, rangeType } = range;
             const startCell = skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);

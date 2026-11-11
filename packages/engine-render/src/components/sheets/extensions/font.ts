@@ -317,7 +317,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         if (notInMergeRange) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
             if (!visibleRow) {
                 return true;
             }
@@ -330,7 +330,7 @@ export class Font extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
+                const visibleRow = spreadsheetSkeleton.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;
@@ -359,7 +359,7 @@ export class Font extends SheetExtension {
         // For cells with render extensions, isSkip may be updated by render interceptors.
         // Plain cells avoid the extra worksheet lookup on every scroll repaint.
         if (fontCache.cellData?.fontRenderExtension) {
-            const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+            const cellData = spreadsheetSkeleton.getCell(row, col) as ICellDataForSheetInterceptor || {};
             if (cellData?.fontRenderExtension?.isSkip) {
                 return true;
             }
@@ -538,7 +538,7 @@ export class Font extends SheetExtension {
                 horizontalAlignOverFlow = HorizontalAlign.RIGHT;
             }
         }
-        // const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        // const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.getCell(row, col) as ICellDataForSheetInterceptor || {};
         const rightOffset = fontCache?.cellData?.fontRenderExtension?.rightOffset ?? 0;
         const leftOffset = fontCache?.cellData?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;

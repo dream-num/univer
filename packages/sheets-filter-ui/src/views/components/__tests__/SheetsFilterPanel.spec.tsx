@@ -17,6 +17,7 @@
 import type { IDisposable, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { ComponentProps } from 'react';
 import type { Root } from 'react-dom/client';
 import {
     awaitTime,
@@ -184,11 +185,11 @@ async function openPanel(testBed: ReturnType<typeof createFilterPanelViewTestBed
     await awaitTime(20);
 }
 
-async function renderPanel(root: Root, testBed: ReturnType<typeof createFilterPanelViewTestBed>) {
+async function renderPanel(root: Root, testBed: ReturnType<typeof createFilterPanelViewTestBed>, props?: ComponentProps<typeof FilterPanel>) {
     await act(async () => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <FilterPanel />
+                <FilterPanel {...props} />
             </RediContext.Provider>
         );
         await awaitTime(20);
@@ -354,6 +355,36 @@ describe('FilterPanel', () => {
         root = undefined;
         container = undefined;
         currentTestBed = undefined;
+    });
+
+    it('keeps embedded criteria on failed apply and clear, then closes after a successful retry', async () => {
+        currentTestBed = createFilterPanelViewTestBed(WithValuesAndEmptyFilterModelFactory());
+        await openPanel(currentTestBed);
+        let succeed = false;
+        let closeCount = 0;
+        currentTestBed.panelService.setupCol(currentTestBed.filterService.activeFilterModel!, 0, {
+            applyCriteria: async () => succeed,
+        });
+        await awaitTime(0);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        await renderPanel(root, currentTestBed, { onClose: () => closeCount++, showSyncSwitch: false });
+        const model = currentTestBed.panelService.filterByModel;
+        for (const label of ['Confirm', 'Clear Filter']) {
+            await act(async () => {
+                clickElement(getButton(container!, label));
+                await awaitTime(0);
+            });
+            expect(closeCount).toBe(0);
+            expect(currentTestBed.panelService.filterByModel).toBe(model);
+        }
+        succeed = true;
+        await act(async () => {
+            clickElement(getButton(container!, 'Confirm'));
+            await awaitTime(0);
+        });
+        expect(closeCount).toBe(1);
     });
 
     it('clears existing value criteria and closes the panel from the footer action', async () => {

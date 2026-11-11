@@ -15,11 +15,11 @@
  */
 
 import type { ICellWithCoord, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { Range } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
-import { Range } from '@univerjs/core';
 import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -204,7 +204,7 @@ export class Background extends SheetExtension {
 
         if (!isMerged && !isMergedMainCell) {
             // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row);
             if (!visibleRow) return true;
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
@@ -213,7 +213,7 @@ export class Background extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(r);
+                const visibleRow = spreadsheetSkeleton.getRowVisible(r);
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;

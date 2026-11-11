@@ -24,11 +24,11 @@ import type {
     UniverInstanceType,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { Disposable, Inject, Injector, isClassDependencyItem, LookUp } from '@univerjs/core';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
-import { Disposable, Inject, Injector, isClassDependencyItem, LookUp } from '@univerjs/core';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
 /**
  * Public interface of a {@link RenderUnit}.
@@ -37,6 +37,7 @@ import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
  */
 export interface IRender {
     unitId: string;
+    renderId?: string;
     type: UniverInstanceType;
     engine: Engine;
     scene: Scene;
@@ -93,6 +94,7 @@ export class RenderUnit extends Disposable implements IRender {
     readonly activated$ = this._activated$.pipe(distinctUntilChanged());
 
     get unitId(): string { return this._renderContext.unitId; }
+    get renderId(): string | undefined { return this._renderContext.renderId; }
     get type(): UniverInstanceType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
@@ -111,7 +113,7 @@ export class RenderUnit extends Disposable implements IRender {
     get components(): Map<string, RenderComponentType> { return this._renderContext.components; }
 
     constructor(
-        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit'> & { createUnitOptions?: ICreateUnitOptions },
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' | 'renderId'> & { createUnitOptions?: ICreateUnitOptions },
         @Inject(Injector) parentInjector: Injector
     ) {
         super();
@@ -126,6 +128,7 @@ export class RenderUnit extends Disposable implements IRender {
         this._renderContext = {
             unit: init.unit,
             unitId: init.unit.getUnitId(),
+            renderId: init.renderId,
             type: init.unit.type,
             components: new Map(),
             mainComponent: null,

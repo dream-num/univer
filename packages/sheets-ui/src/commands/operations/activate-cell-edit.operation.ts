@@ -15,15 +15,20 @@
  */
 
 import type { IOperation } from '@univerjs/core';
+import { CommandType, Injector } from '@univerjs/core';
+import { SheetSkeletonService } from '@univerjs/sheets';
 import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
-
-import { CommandType } from '@univerjs/core';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetActivateCellEditOperation: IOperation<ICurrentEditCellParam> = {
     id: 'sheet.operation.set-activate-cell-edit',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
+        const injector = accessor.get(Injector);
+        if (injector.has(SheetSkeletonService) &&
+            injector.get(SheetSkeletonService).isSceneProjectionPending(params.scene, params.sheetId)) {
+            return false;
+        }
         const editorBridgeService = accessor.get(IEditorBridgeService);
         editorBridgeService.setEditCell(params);
         return true;

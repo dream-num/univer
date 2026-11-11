@@ -65,8 +65,8 @@ import {
     TableNumberCompareTypeEnum,
     TableStringCompareTypeEnum,
 } from '@univerjs/sheets-table';
-import { IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, IShortcutService, RediContext } from '@univerjs/ui';
+import { IMarkSelectionService, SheetCanvasPopManagerService, SheetsUIPart } from '@univerjs/sheets-ui';
+import { IDialogService, IShortcutService, IUIPartsService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -87,6 +87,10 @@ import { SheetTableThemePanel } from '../SheetTableThemePanel';
 
 const IEditorService = createIdentifier<TestEditorService>('univer.editor.service');
 const IDescriptionService = createIdentifier<TestDescriptionService>('formula.description-service');
+
+function TableSourceEmbed(props: Record<string, unknown>) {
+    return <button data-table-source={JSON.stringify(props)} onClick={props.onClose as () => void} />;
+}
 
 class TestComponentController extends SheetsTableComponentController {
     closeCount = 0;
@@ -483,6 +487,7 @@ function createTestBed(): ITestBed {
         override onStarting(): void {
             const dependencies: Dependency[] = [
                 [TableManager],
+                [IUIPartsService, { useClass: UIPartsService }],
                 [SheetTableService],
                 [SheetsTableUiService],
                 [SheetsSortService, { useClass: SheetsSortService }],
@@ -1055,6 +1060,35 @@ describe('sheet table view components', () => {
         expect(document.querySelector('input')).toBeTruthy();
         expect(document.body.textContent).toContain('Confirm');
         expect(document.body.textContent).toContain('Cancel');
+    });
+
+    it.each([false, true])('passes the captured table source and close action to embeds (mobile: %s)', (mobile) => {
+        testBed = createTestBed();
+        const controller = mobile
+            ? testBed.injector.get(SheetsTableMobileComponentController) as TestMobileComponentController
+            : testBed.injector.get(SheetsTableComponentController) as TestComponentController;
+        controller.setCurrentTableFilterInfo({
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            column: 1,
+        });
+        testBed.injector.get(IUIPartsService).registerComponent(SheetsUIPart.FILTER_PANEL_EMBED_POINT, () => TableSourceEmbed);
+        const rendered = renderWithRediContext(testBed, mobile ? <MobileSheetTableFilterPanel /> : <SheetTableFilterPanel />);
+        root = rendered.root;
+        container = rendered.container;
+
+        const embedButton = container.querySelector<HTMLButtonElement>('[data-table-source]')!;
+        expect(JSON.parse(embedButton.dataset.tableSource!)).toMatchObject({
+            range: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 },
+            colIndex: 1,
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+        });
+        act(() => embedButton.click());
+        expect(controller.closeCount).toBe(1);
     });
 
     it('edits an existing color filter in the desktop table filter panel', () => {

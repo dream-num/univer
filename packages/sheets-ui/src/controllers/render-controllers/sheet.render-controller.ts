@@ -37,6 +37,7 @@ import type {
     IViewportInfos,
     Scene,
 } from '@univerjs/engine-render';
+import type { ISetColDataMutationParams, ISetRowDataMutationParams } from '@univerjs/sheets';
 import {
     CommandType,
     ICommandService,
@@ -62,7 +63,9 @@ import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
     MoveRangeMutation,
+    SetColDataMutation,
     SetRangeValuesMutation,
+    SetRowDataMutation,
 } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
@@ -79,6 +82,18 @@ import { SheetsRenderService } from '../../services/sheets-render.service';
 interface ISetWorksheetMutationParams {
     unitId: string;
     subUnitId: string;
+}
+
+function changesRowOrColumnDimensions(command: ICommandInfo): boolean {
+    if (command.id === SetRowDataMutation.id) {
+        const { rowData } = command.params as ISetRowDataMutationParams;
+        return Object.values(rowData).some((row) => row == null || 'h' in row || 'ah' in row || 'ia' in row || 'hd' in row);
+    }
+    if (command.id === SetColDataMutation.id) {
+        const { columnData } = command.params as ISetColDataMutationParams;
+        return Object.values(columnData).some((column) => column == null || 'w' in column || 'hd' in column);
+    }
+    return false;
 }
 
 export interface ITelemetryData {
@@ -454,6 +469,14 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _initRerenderScheduler(): void {
+        this.disposeWithMe(this._sheetSkeletonManagerService.projectionChanged$.subscribe((sheetId) => {
+            if (sheetId === this._context.unit.getActiveSheet()?.getSheetId()) {
+                const { mainComponent, scene } = this._context;
+                this._spreadsheetViewports(scene).forEach((viewport) => viewport.markDirty(true));
+                mainComponent?.makeDirty(true);
+                scene.makeDirty(true);
+            }
+        }));
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) return null;
 
@@ -500,7 +523,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const { unit: workbook } = this._context;
             const { id: commandId } = command;
 
-            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || changesRowOrColumnDimensions(command) ||
+                this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
                 const params = command.params;
                 const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
                 // const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();

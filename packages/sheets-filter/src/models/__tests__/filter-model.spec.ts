@@ -16,8 +16,8 @@
 
 import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { FilterColumn, generateFilterFn } from '../filter-model';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FilterColumn, FilterModel, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';
 
 describe('Test filter model and related utils', () => {
@@ -91,6 +91,30 @@ describe('Test filter model and related utils', () => {
         let filterColumn: FilterColumn;
         let get: Injector['get'];
 
+        it('reuses column results only before the excluded filter column', () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const sheet = workbook.getSheetBySheetId('sheet1')!;
+            const model = FilterModel.deserialize('test', 'sheet1', sheet, {
+                ref: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 1 },
+                filterColumns: [
+                    { colId: 0, filters: { filters: ['nonempty'] } },
+                    { colId: 1, filters: { filters: ['123'] } },
+                ],
+            });
+            try {
+                const cachedRows = new Map(model.getAllFilterColumns().map(([column, filter]) => [column, filter.filteredOutRows!]));
+                const firstCalc = vi.spyOn(model.getFilterColumn(0)!, 'calc');
+                const secondCalc = vi.spyOn(model.getFilterColumn(1)!, 'calc');
+                expect(model.getFilteredOutRowsExceptCol(1, cachedRows)).toEqual(new Set([1, 2]));
+                expect(firstCalc).not.toHaveBeenCalled();
+                expect(secondCalc).not.toHaveBeenCalled();
+                expect(model.getFilteredOutRowsExceptCol(0, cachedRows)).toEqual(new Set([2]));
+                expect(secondCalc).toHaveBeenCalledOnce();
+            } finally {
+                model.dispose();
+            }
+        });
+
         beforeEach(() => {
             const testBed = createFilterModelTestBed({
                 id: 'test',
@@ -124,7 +148,7 @@ describe('Test filter model and related utils', () => {
 
         afterEach(() => {
             univer.dispose();
-            filterColumn.dispose();
+            filterColumn?.dispose();
         });
 
         it('should not calc when filter fn or range is not set', () => {

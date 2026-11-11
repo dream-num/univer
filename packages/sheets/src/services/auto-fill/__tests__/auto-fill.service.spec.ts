@@ -16,10 +16,12 @@
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import { Direction, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IAutoFillRule } from '../type';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../__tests__/util';
 import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
+import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { SheetsSelectionsService } from '../../selections/selection.service';
 import { AutoFillService } from '../auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../type';
@@ -36,6 +38,7 @@ describe('AutoFillService', () => {
         const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
             [SheetsSelectionsService],
             [AutoFillService],
+            [SheetSkeletonService],
         ]);
 
         univer = testBed.univer;
@@ -184,6 +187,27 @@ describe('AutoFillService', () => {
         expect(result).toBe(true);
         expect(service.direction).toBe(Direction.DOWN);
         expect(service.autoFillLocation?.unitId).toBe(unitId);
+    });
+
+    it('resolves fill source and destination using the same display projection', async () => {
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>(unitId)!;
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles());
+        skeleton.setProjection({ isRowFiltered: (row) => row === 1 || row === 4, getCell: () => undefined });
+        const display = new Spreadsheet('test', skeleton);
+        univer.__getInjector().add([IRenderManagerService, { useValue: {
+            getRenderUnitById: () => ({ mainComponent: display }),
+        } as never }]);
+        try {
+            const source = { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 };
+            const target = { ...source, endRow: 5 };
+            expect(await service.triggerAutoFill(unitId, subUnitId, source, target, AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+            expect(service.autoFillLocation?.source.rows).toEqual([0, 2]);
+            expect(service.autoFillLocation?.target.rows).toEqual([3, 5]);
+        } finally {
+            display.dispose();
+            skeleton.dispose();
+        }
     });
 
     it('should replay previous undo mutations before next fill', () => {

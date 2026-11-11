@@ -102,6 +102,8 @@ function createSpreadsheetSkeleton() {
 
     return {
         worksheet,
+        getRowVisible: worksheet.getRowVisible,
+        getCell: worksheet.getCell,
         overflowCache,
         rowHeightAccumulation: [20, 40, 60],
         columnWidthAccumulation: [40, 80, 120],
@@ -754,7 +756,7 @@ describe('font extension', () => {
         spreadsheetSkeleton.stylesCache = { fontMatrix };
         spreadsheetSkeleton.columnTotalWidth = 120;
         spreadsheetSkeleton.rowTotalHeight = 60;
-        spreadsheetSkeleton.worksheet.getCell = vi.fn((row: number, col: number) => {
+        spreadsheetSkeleton.getCell = vi.fn((row: number, col: number) => {
             if (row === 2 && col === 2) {
                 return { v: 'skip', fontRenderExtension: { isSkip: true } };
             }
@@ -798,7 +800,7 @@ describe('font extension', () => {
         expect(mergedSkip).toBe(true);
 
         const hiddenSkeleton = createSpreadsheetSkeleton();
-        hiddenSkeleton.worksheet.getRowVisible = vi.fn(() => false);
+        hiddenSkeleton.getRowVisible = vi.fn(() => false);
         const hiddenResult = font._renderFontEachCell(
             {
                 ...renderFontCtx,
@@ -864,7 +866,7 @@ describe('font extension', () => {
         fontMatrix.setValue(0, 0, createFontCache({
             cellData: { v: 'text', t: CellValueType.STRING },
         }));
-        const getCellSpy = vi.spyOn(spreadsheetSkeleton.worksheet, 'getCell');
+        const getCellSpy = vi.spyOn(spreadsheetSkeleton, 'getCell');
         vi.spyOn(font, '_renderText').mockImplementation(() => undefined);
 
         const result = font._renderFontEachCell({
@@ -932,7 +934,7 @@ describe('font extension', () => {
         fontMatrix.setValue(0, 0, createFontCache({
             cellData: { v: 'text', t: CellValueType.STRING, fontRenderExtension: {} },
         }));
-        vi.spyOn(spreadsheetSkeleton.worksheet, 'getCell').mockReturnValue({
+        vi.spyOn(spreadsheetSkeleton, 'getCell').mockReturnValue({
             v: 'text',
             t: CellValueType.STRING,
             fontRenderExtension: { isSkip: true },

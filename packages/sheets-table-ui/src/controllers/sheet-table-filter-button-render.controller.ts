@@ -17,7 +17,6 @@
 import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetSheetTableMutationParams, ITableRangeWithState } from '@univerjs/sheets-table';
-import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
 import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
 import {
     INTERCEPTOR_POINT,
@@ -25,9 +24,10 @@ import {
     SheetInterceptorService,
     SheetRangeThemeModel,
 } from '@univerjs/sheets';
-import { SetSheetTableMutation, TableManager } from '@univerjs/sheets-table';
+import { SetSheetTableMutation, SheetsTableButtonStateEnum, TableManager } from '@univerjs/sheets-table';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
+import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
 import {
     FILTER_ICON_PADDING,
     FILTER_ICON_SIZE,
@@ -66,6 +66,7 @@ const computeIconTop = (
 export class SheetsTableFilterButtonRenderController extends RxDisposable implements IRenderModule {
     private _buttonRenderDisposable: IDisposable | null = null;
     private _tableFilterButtonShapes: SheetsTableFilterButtonShape[] = [];
+    private _displayFilterState?: { tableId: string; columns: ReadonlySet<number> };
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -83,7 +84,32 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
 
     override dispose(): void {
         super.dispose();
+        this._displayFilterState = undefined;
         this._disposeRendering();
+    }
+
+    /** Column indices are relative to the table range; undefined restores the public filter indicators. */
+    public setDisplayFilterState(state: { tableId: string; columns: ReadonlySet<number> } | undefined): void {
+        const current = this._displayFilterState;
+        if (current?.tableId === state?.tableId
+            && current?.columns.size === state?.columns.size
+            && (!current || Array.from(current.columns).every((column) => state!.columns.has(column)))) {
+            return;
+        }
+        this._displayFilterState = state && { tableId: state.tableId, columns: new Set(state.columns) };
+        const { unit: workbook, unitId } = this._context;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+        this._disposeRendering();
+        if (!skeleton) {
+            return;
+        }
+        const worksheetId = workbook.getActiveSheet()?.getSheetId() ?? '';
+        this._renderButtons({
+            unitId,
+            worksheetId,
+            tableFilterRanges: this._tableManager.getSheetFilterRangeWithState(unitId, worksheetId),
+            skeleton,
+        });
     }
 
     private _initRenderer(): void {
@@ -197,7 +223,12 @@ export class SheetsTableFilterButtonRenderController extends RxDisposable implem
                 if (cellHeight <= FILTER_ICON_PADDING || cellWidth <= FILTER_ICON_PADDING) {
                     continue;
                 }
-                const state = states[col - startColumn];
+                let state = states[col - startColumn];
+                if (this._displayFilterState?.tableId === tableId) {
+                    state = this._displayFilterState.columns.has(col - startColumn)
+                        ? SheetsTableButtonStateEnum.FilteredSortNone
+                        : SheetsTableButtonStateEnum.FilterNoneSortNone;
+                }
                 const iconStartX = endX - FILTER_ICON_SIZE - FILTER_ICON_PADDING;
                 const iconStartY = computeIconTop(startY, endY, cellHeight, verticalAlign);
                 const props: ISheetsTableFilterButtonShapeProps = {

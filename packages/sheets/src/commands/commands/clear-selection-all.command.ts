@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { generateNullCell, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -47,7 +47,11 @@ export const ClearSelectionAllCommand: ICommand<IClearSelectionAllCommandParams>
         if (!ranges?.length) return false;
 
         const sheetSkeletonService = accessor.get(SheetSkeletonService);
-        const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        if (sheetSkeletonService.isDisplayProjectionPending(unitId, subUnitId)) {
+            return false;
+        }
+        const displaySkeleton = sheetSkeletonService.getDisplaySkeleton(unitId, subUnitId);
+        const skeleton = displaySkeleton ?? sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!skeleton) return false;
 
         const commandService = accessor.get(ICommandService);
@@ -58,7 +62,8 @@ export const ClearSelectionAllCommand: ICommand<IClearSelectionAllCommandParams>
         const undoMutations: IMutationInfo[] = [];
 
         // clear style and content
-        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId);
+        const isRowFiltered = displaySkeleton ? (row: number) => displaySkeleton.getRowFiltered(row) : undefined;
+        const visibleRanges = getVisibleRanges(ranges, accessor, unitId, subUnitId, isRowFiltered);
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,

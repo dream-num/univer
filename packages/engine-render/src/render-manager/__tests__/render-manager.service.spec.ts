@@ -15,12 +15,14 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { Engine } from '../../engine';
+import { UniverRenderEnginePlugin } from '../../plugin';
 import {
     getCurrentTypeOfRenderer,
+    IRenderManagerService,
     isDisposable,
     RenderManagerService,
     withCurrentTypeOfRenderer,
@@ -28,6 +30,38 @@ import {
 import { RenderUnit } from '../render-unit';
 
 describe('render manager service', () => {
+    it('keeps two render contexts for the same workbook independently disposable', () => {
+        const univer = new Univer();
+        try {
+            univer.registerPlugin(UniverRenderEnginePlugin);
+            const workbook = univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                id: 'shared-book',
+                name: 'Book',
+                appVersion: '',
+                locale: LocaleType.EN_US,
+                sheetOrder: [],
+                sheets: {},
+                styles: {},
+            });
+            const service = univer.__getInjector().get(IRenderManagerService);
+            const unitId = workbook.getUnitId();
+            const first = service.createRender(unitId);
+            const second = service.createRender(unitId, { embeddedRender: true }, 'shared-book-right');
+            expect(service.getRenderUnitById(unitId)).toBe(first);
+            expect(service.getRenderUnitById('shared-book-right')).toBe(second);
+            expect(second.unitId).toBe(unitId);
+            expect(first.scene).not.toBe(second.scene);
+            service.focusRender?.('shared-book-right');
+            expect(service.getFocusedRenderByUnitId?.(unitId)).toBe(second);
+            service.removeRender('shared-book-right');
+            expect(second.isDisposed()).toBe(true);
+            expect(first.isDisposed()).toBe(false);
+            expect(service.getFocusedRenderByUnitId?.(unitId)).toBe(first);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('marks render components dirty when the theme changes', () => {
         const darkMode$ = new Subject<boolean>();
         const currentTheme$ = new Subject();

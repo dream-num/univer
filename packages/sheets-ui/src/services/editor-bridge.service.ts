@@ -40,6 +40,7 @@ import {
     convertTransformToOffsetX,
     convertTransformToOffsetY,
     DeviceInputEventType,
+    getFocusedRenderForUnit,
     IRenderManagerService,
 } from '@univerjs/engine-render';
 import {
@@ -214,12 +215,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
+        const renderUnit = getFocusedRenderForUnit(this._renderManagerService, unitId);
         if (!renderUnit) {
             return;
         }
 
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
+        const skeleton = this._sheetSkeletonService.getDisplaySkeleton(unitId, sheetId, scene)
+            ?? this._sheetSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) {
             return;
         }
@@ -361,12 +363,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
+        const renderUnit = getFocusedRenderForUnit(this._renderManagerService, unitId);
         if (!renderUnit) {
             return;
         }
 
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
+        const displaySkeleton = this._sheetSkeletonService.getDisplaySkeleton(unitId, sheetId, scene);
+        const skeleton = displaySkeleton ?? this._sheetSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) {
             return;
         }
@@ -402,10 +405,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         };
 
         let documentLayoutObject: Nullable<IDocumentLayoutObject>;
-        const cell = this._sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(
-            worksheet.getCell(startRow, startColumn),
-            location
-        );
+        const displayCell = displaySkeleton
+            ? displaySkeleton.getCell(startRow, startColumn)
+            : worksheet.getCell(startRow, startColumn);
+        const cell = this._sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(displayCell, location);
 
         documentLayoutObject = cell && worksheet.getCellDocumentModelWithFormula(cell, location.row, location.col);
 

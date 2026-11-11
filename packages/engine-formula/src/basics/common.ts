@@ -282,6 +282,8 @@ export interface IFormulaDatasetConfig {
     calculationSettings?: Record<string, IWorkbookCalculationSettings>;
     isCalculateTreeModel?: boolean;
     rowData?: IUnitRowData; // Include rows hidden by filters
+    /** Effective filter exclusions by workbook and sheet. An empty array overrides public filters. */
+    filteredOutRows?: Readonly<Record<string, Readonly<Record<string, readonly number[]>>>>;
 }
 
 export enum ConcatenateType {

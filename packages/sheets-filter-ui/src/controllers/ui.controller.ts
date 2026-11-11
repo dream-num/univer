@@ -34,6 +34,7 @@ import {
     CloseFilterPanelOperation,
     FILTER_PANEL_OPENED_KEY,
     OpenFilterPanelOperation,
+    RequestOpenFilterPanelOperation,
 } from '../commands/operations/sheets-filter.operation';
 import { menuSchema } from '../menu/schema';
 import { ISheetsFilterPanelService } from '../services/sheets-filter-panel.service';
@@ -99,6 +100,7 @@ export class SheetsFilterUIDesktopController extends RxDisposable {
             SmartToggleSheetsFilterCommand,
             ChangeFilterByOperation,
             OpenFilterPanelOperation,
+            RequestOpenFilterPanelOperation,
             CloseFilterPanelOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));

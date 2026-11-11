@@ -31,7 +31,7 @@ import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SheetsTableComponentController } from '../../../controllers/sheet-table-component.controller';
-import { OpenTableFilterPanelOperation } from '../open-table-filter-dialog.opration';
+import { OpenTableFilterPanelOperation, RequestOpenTableFilterPanelOperation } from '../open-table-filter-dialog.opration';
 
 interface IAttachedPopup {
     row: number;
@@ -132,6 +132,7 @@ function createTestBed(): ITestBed {
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(OpenTableFilterPanelOperation);
+    commandService.registerCommand(RequestOpenTableFilterPanelOperation);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(SheetTableService).addTable(
@@ -178,7 +179,7 @@ describe('OpenTableFilterPanelOperation', () => {
         testBed = createTestBed();
         const commandService = testBed.get(ICommandService);
 
-        await expect(commandService.executeCommand(OpenTableFilterPanelOperation.id, {
+        await expect(commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, {
             unitId: testBed.workbook.getUnitId(),
             subUnitId: 'sheet1',
             tableId: 'table-orders',
@@ -194,5 +195,28 @@ describe('OpenTableFilterPanelOperation', () => {
             column: 2,
         });
         expect((testBed.get(SheetCanvasPopManagerService) as unknown as TestSheetCanvasPopManagerService).attachedPopups).toEqual([{ row: 0, column: 2 }]);
+    });
+
+    it('lets a local view handle the table request without opening the public popup', async () => {
+        testBed = createTestBed();
+        const commandService = testBed.get(ICommandService);
+        const listener = commandService.beforeCommandExecuted((command) => {
+            if (command.id === RequestOpenTableFilterPanelOperation.id) {
+                (command.params as { handled?: boolean }).handled = true;
+            }
+            if (command.id === OpenTableFilterPanelOperation.id) {
+                throw new Error('Public table filter must not be opened');
+            }
+        });
+
+        await expect(commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, {
+            unitId: testBed.workbook.getUnitId(),
+            subUnitId: 'sheet1',
+            tableId: 'table-orders',
+            row: 0,
+            col: 2,
+        })).resolves.toBe(true);
+        expect(testBed.get(SheetsTableComponentController).getCurrentTableFilterInfo()).toBeNull();
+        listener.dispose();
     });
 });

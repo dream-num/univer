@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import { DocumentDataModel } from '@univerjs/core';
-import { expect, it } from 'vitest';
+import { DocumentDataModel, Injector } from '@univerjs/core';
+import { afterEach, beforeEach, expect, it } from 'vitest';
 import { getDocumentHeaderFooterReferenceResolver, registerDocumentHeaderFooterReferenceResolver } from '../header-footer-reference';
 
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
+
 it('owns reference resolvers per model and keeps a newer registration when the previous owner disposes', () => {
-    const first = new DocumentDataModel({ id: 'first', body: { dataStream: '\r\n' }, documentStyle: {} });
-    const second = new DocumentDataModel({ id: 'second', body: { dataStream: '\r\n' }, documentStyle: {} });
+    const first = testInjector.createInstance(DocumentDataModel, { id: 'first', body: { dataStream: '\r\n' }, documentStyle: {} });
+    const second = testInjector.createInstance(DocumentDataModel, { id: 'second', body: { dataStream: '\r\n' }, documentStyle: {} });
     const older = registerDocumentHeaderFooterReferenceResolver(first, () => ({ dataStream: 'older' }));
     const resolver = () => ({ dataStream: 'newer' });
     const newer = registerDocumentHeaderFooterReferenceResolver(first, resolver);

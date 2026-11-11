@@ -19,6 +19,7 @@ import {
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
+    Injector,
     LocaleService,
     LocaleType,
     PositionedObjectLayoutType,
@@ -33,7 +34,7 @@ import {
     setDocsTableRenderViewportProvider,
     Transform,
 } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -43,6 +44,12 @@ import {
     pushToPoints,
 } from '../convert-text-range';
 import { getAnchorBounding, getLineBounding } from '../text-range';
+
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
 
 describe('selection convert text range helpers', () => {
     it.each(([undefined, 'hard', 'rendered'] as const).flatMap((pageBreak) => [false, true].map((collapsed) => ({ pageBreak, collapsed }))))('uses visible field metrics after a hidden boundary (page break: $pageBreak, collapsed: $collapsed)', ({ pageBreak, collapsed }) => {
@@ -67,7 +74,7 @@ describe('selection convert text range helpers', () => {
             ? `${DataStreamTreeTokenType.CUSTOM_RANGE_START}Before\r${DataStreamTreeTokenType.PAGE_BREAK}`
             : DataStreamTreeTokenType.CUSTOM_RANGE_START;
         const dataStream = `${prefix}i${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r\n`;
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'reference-marker-caret',
             body: {
                 dataStream,
@@ -97,14 +104,14 @@ describe('selection convert text range helpers', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const view = new DocumentViewModel(model);
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, locale);
         try {
             skeleton.calculate();
             const positions = findDocRangeNodePositions(skeleton, prefix.length, prefix.length)!;
             const start = positions.startPosition;
             const glyph = skeleton.getSkeletonData()!.pages[start.page].sections[start.section].columns[start.column].lines[start.line].divides[start.divide].glyphGroup[start.glyph];
-            const converter = new NodePositionConvertToCursor({
+            const converter = univer.__getInjector().createInstance(NodePositionConvertToCursor, {
                 docsLeft: 0,
                 docsTop: 0,
                 pageLayoutType: PageLayoutType.VERTICAL,
@@ -206,7 +213,7 @@ describe('selection convert text range helpers', () => {
             divide: 0,
             glyph: 0,
         };
-        const converter = new NodePositionConvertToCursor({
+        const converter = testInjector.createInstance(NodePositionConvertToCursor, {
             docsLeft: 0,
             docsTop: 0,
             pageLayoutType: 0,

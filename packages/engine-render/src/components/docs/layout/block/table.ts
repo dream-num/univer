@@ -929,6 +929,103 @@ function getRowFirstLineHeight(row: IDocumentSkeletonRow): number {
     return Number.isFinite(minimum) ? minimum : 0;
 }
 
+function reconcileTableRowFragments(
+    rowSkeletons: IDocumentSkeletonRow[],
+    rowHeights: number[],
+    rowSource: ITableRow,
+    viewModel: DocumentViewModel,
+    lastCellPageIndexes: Map<number, number>,
+    availableHeight: number,
+    canRowSplit: boolean,
+    traditional: boolean,
+    precomputedRow?: IDocumentSkeletonRow
+): void {
+    if (traditional && rowSkeletons.length > 1 && precomputedRow &&
+        precomputedRow.parent?.hasPageBreak !== true &&
+        precomputedRow.height <= availableHeight &&
+        rowSkeletons[0].cells.some((cell, column) =>
+            !isCoveredTableCell(rowSource.tableCells[column]) &&
+            cell.height === 0 && (precomputedRow.cells[column]?.height ?? 0) > 0
+        )) {
+        // A paragraph constraint can move all text in one cell off the first
+        // fragment. Keep its sibling cells with it when the whole row fits.
+        rowSkeletons.splice(0, rowSkeletons.length, precomputedRow);
+        rowHeights.splice(0, rowHeights.length, precomputedRow.height);
+    }
+
+    if (traditional && canRowSplit && rowSkeletons.length > 1) {
+        for (let index = 0; index < rowSkeletons.length - 1; index++) {
+            const fragment = rowSkeletons[index];
+            let trimmed = false;
+            fragment.cells.forEach((cell, column) => {
+                if (lastCellPageIndexes.get(column) === index && getCellPageLayoutHeight(cell, viewModel, rowSource) > availableHeight && trimCompletedCellAfterSpacing(cell)) {
+                    trimmed = true;
+                }
+            });
+            if (trimmed) {
+                rowHeights[index] = fragment.cells.reduce((height, cell, column) => isCoveredTableCell(rowSource.tableCells[column])
+                    ? height
+                    : Math.max(height, getCellPageLayoutHeight(cell, viewModel, rowSource)), 0);
+            }
+        }
+    }
+}
+
+function sizeTableRowFragments(
+    rowSkeletons: IDocumentSkeletonRow[],
+    rowHeights: number[],
+    table: ITable,
+    row: number,
+    cache: ICreateTableCache,
+    availableHeight: number,
+    pageContentHeight: number,
+    traditional: boolean
+): void {
+    const { hRule, val } = table.tableRows[row].trHeight;
+    if (hRule === TableRowHeightRule.AT_LEAST && rowHeights.length > 0) {
+        // Word also reserves the row minimum on its final continuation. Earlier
+        // fragments can use the space left on their page without padding it again.
+        const contentHeight = traditional
+            ? rowHeights[rowHeights.length - 1]
+            : rowHeights.reduce((total, height) => total + height, 0);
+        rowHeights[rowHeights.length - 1] += Math.max(0, getRowMinimumHeight(table, row, traditional) - contentHeight);
+    }
+
+    for (const rowSke of rowSkeletons) {
+        // Update row height.
+        const rowIndex = rowSkeletons.indexOf(rowSke);
+
+        if (hRule === TableRowHeightRule.EXACT) {
+            rowHeights[rowIndex] = val.v + getSeparatedRowHeightInset(table, row);
+        }
+
+        rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], rowIndex === 0 ? availableHeight : pageContentHeight);
+
+        let left = getOmittedGridWidth(table, rowSke.index, 'before');
+        // Set row height to cell page height.
+        for (let col = 0; col < rowSke.cells.length; col++) {
+            const cellPageSkeleton = rowSke.cells[col];
+            if (cellPageSkeleton == null) {
+                continue;
+            }
+
+            cellPageSkeleton.left = left;
+            cellPageSkeleton.pageHeight = rowHeights[rowIndex];
+
+            if (shouldAdvanceTableCellLeft(table, rowSke.index, col)) {
+                left += cellPageSkeleton.pageWidth;
+            }
+
+            cache.tableWidth = Math.max(cache.tableWidth, left);
+        }
+
+        cache.tableWidth = Math.max(cache.tableWidth, left + getOmittedGridWidth(table, rowSke.index, 'after'));
+
+        // Set row Skeleton height.
+        rowSke.height = rowHeights[rowIndex];
+    }
+}
+
 function dealWithTableRow(
     ctx: ILayoutContext,
     curPage: IDocumentSkeletonPage,
@@ -950,7 +1047,6 @@ function dealWithTableRow(
     const traditional = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
     const { firstBorderHeight, minimumHeight, firstCellPageHeight, pageContentHeight, availableHeight, canRowSplit, suppressContinuationTopSpacing } =
         getTableRowPageHeights(curPage, skeTables, table, row, cache, traditional, isRepeatRow);
-    const { hRule, val } = rowSource.trHeight;
     const precomputedRowFits = !isRepeatRow && cellPageHeights == null && canReusePrecomputedTableRow(curPage, cache, rowSource, precomputedRow, firstBorderHeight, minimumHeight);
     const rowSkeletons: IDocumentSkeletonRow[] = precomputedRowFits ? [precomputedRow] : [];
     let curTableSkeleton = getCurTableSkeleton(skeTables);
@@ -1031,78 +1127,8 @@ function dealWithTableRow(
         }
     }
 
-    if (traditional && rowSkeletons.length > 1 && precomputedRow &&
-        precomputedRow.parent?.hasPageBreak !== true &&
-        precomputedRow.height <= availableHeight &&
-        rowSkeletons[0].cells.some((cell, column) =>
-            !isCoveredTableCell(rowSource.tableCells[column]) &&
-            cell.height === 0 && (precomputedRow.cells[column]?.height ?? 0) > 0
-        )) {
-        // A paragraph constraint can move all text in one cell off the first
-        // fragment. Keep its sibling cells with it when the whole row fits.
-        rowSkeletons.splice(0, rowSkeletons.length, precomputedRow);
-        rowHeights.splice(0, rowHeights.length, precomputedRow.height);
-    }
-
-    if (traditional && canRowSplit && rowSkeletons.length > 1) {
-        for (let index = 0; index < rowSkeletons.length - 1; index++) {
-            const fragment = rowSkeletons[index];
-            let trimmed = false;
-            fragment.cells.forEach((cell, column) => {
-                if (lastCellPageIndexes.get(column) === index && getCellPageLayoutHeight(cell, viewModel, rowSource) > availableHeight && trimCompletedCellAfterSpacing(cell)) {
-                    trimmed = true;
-                }
-            });
-            if (trimmed) {
-                rowHeights[index] = fragment.cells.reduce((height, cell, column) => isCoveredTableCell(rowSource.tableCells[column])
-                    ? height
-                    : Math.max(height, getCellPageLayoutHeight(cell, viewModel, rowSource)), 0);
-            }
-        }
-    }
-
-    if (hRule === TableRowHeightRule.AT_LEAST && rowHeights.length > 0) {
-        // Word also reserves the row minimum on its final continuation. Earlier
-        // fragments can use the space left on their page without padding it again.
-        const contentHeight = traditional
-            ? rowHeights[rowHeights.length - 1]
-            : rowHeights.reduce((total, height) => total + height, 0);
-        rowHeights[rowHeights.length - 1] += Math.max(0, getRowMinimumHeight(table, row, traditional) - contentHeight);
-    }
-
-    for (const rowSke of rowSkeletons) {
-        // Update row height.
-        const rowIndex = rowSkeletons.indexOf(rowSke);
-
-        if (hRule === TableRowHeightRule.EXACT) {
-            rowHeights[rowIndex] = val.v + getSeparatedRowHeightInset(table, row);
-        }
-
-        rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], rowIndex === 0 ? availableHeight : pageContentHeight);
-
-        let left = getOmittedGridWidth(table, rowSke.index, 'before');
-        // Set row height to cell page height.
-        for (let col = 0; col < rowSke.cells.length; col++) {
-            const cellPageSkeleton = rowSke.cells[col];
-            if (cellPageSkeleton == null) {
-                continue;
-            }
-
-            cellPageSkeleton.left = left;
-            cellPageSkeleton.pageHeight = rowHeights[rowIndex];
-
-            if (shouldAdvanceTableCellLeft(table, rowSke.index, col)) {
-                left += cellPageSkeleton.pageWidth;
-            }
-
-            cache.tableWidth = Math.max(cache.tableWidth, left);
-        }
-
-        cache.tableWidth = Math.max(cache.tableWidth, left + getOmittedGridWidth(table, rowSke.index, 'after'));
-
-        // Set row Skeleton height.
-        rowSke.height = rowHeights[rowIndex];
-    }
+    reconcileTableRowFragments(rowSkeletons, rowHeights, rowSource, viewModel, lastCellPageIndexes, availableHeight, canRowSplit, traditional, precomputedRow);
+    sizeTableRowFragments(rowSkeletons, rowHeights, table, row, cache, availableHeight, pageContentHeight, traditional);
 
     if (!isRepeatRow && cache.notes) {
         let nextHeights: number[] | undefined;

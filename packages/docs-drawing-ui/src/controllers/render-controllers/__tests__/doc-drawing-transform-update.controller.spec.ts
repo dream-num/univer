@@ -1618,7 +1618,7 @@ describe('DocDrawingTransformUpdateController', () => {
             skeletonManager.getSkeleton().makeDirty(true);
             skeletonManager.recalculate();
             injector.add([IEditorService, { useClass: EditorService }]);
-            render.mainComponent = new Documents(`${unitId}-document`);
+            render.mainComponent = injector.createInstance(Documents, `${unitId}-document`);
             render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
             render.with(DocDrawingTransformUpdateController);
             const commands = injector.get(ICommandService);

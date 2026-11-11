@@ -103,6 +103,32 @@ function createControllerTestBed(initialFormulaComputing?: CalculationMode) {
     return testBed;
 }
 
+function setTwoByTwoArrayFormula(formulaDataModel: FormulaDataModel): void {
+    formulaDataModel.setArrayFormulaRange({
+        test: {
+            sheet1: {
+                5: {
+                    5: { startRow: 5, startColumn: 5, endRow: 6, endColumn: 6 },
+                },
+            },
+        },
+    });
+    formulaDataModel.setArrayFormulaCellData({
+        test: {
+            sheet1: {
+                5: {
+                    5: { v: 1 },
+                    6: { v: 2 },
+                },
+                6: {
+                    5: { v: 3 },
+                    6: { v: 4 },
+                },
+            },
+        },
+    });
+}
+
 describe('UpdateFormulaController', () => {
     let testBed: ReturnType<typeof createControllerTestBed>;
     let commandService: ICommandService;
@@ -992,6 +1018,50 @@ describe('UpdateFormulaController', () => {
             },
         });
         expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(true);
+    });
+
+    it('should not sync array formula data when a formula edit leaves array formulas unchanged', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        const arrayFormulaRange = formulaDataModel.getArrayFormulaRange();
+        const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData();
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                8: {
+                    0: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getFormulaData().test?.sheet1?.[8]?.[0]).toMatchObject({ f: '=A1' });
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetFormulaDataMutation.id)).toBe(true);
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(false);
+        expect(formulaDataModel.getArrayFormulaRange()).toBe(arrayFormulaRange);
+        expect(formulaDataModel.getArrayFormulaCellData()).toBe(arrayFormulaCellData);
+    });
+
+    it('should sync array formula data when a formula edit replaces an array formula anchor', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        // Replacing a multi-cell array anchor also marks its former range dirty.
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                5: {
+                    5: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getArrayFormulaRange().test?.sheet1?.[5]?.[5]).toBeUndefined();
+        const notification = executeCommandSpy.mock.calls.find(([id]) => id === SetArrayFormulaDataMutation.id);
+        expect(notification?.[2]).toMatchObject({ onlyLocal: true, remove: true });
     });
 
     it('should initialize formula data for added sheets and workbooks, then clear removed sheets', async () => {

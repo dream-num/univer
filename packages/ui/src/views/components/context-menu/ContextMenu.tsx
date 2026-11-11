@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
-import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
+import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
+import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';

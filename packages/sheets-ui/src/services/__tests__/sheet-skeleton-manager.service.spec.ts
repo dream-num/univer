@@ -15,6 +15,8 @@
  */
 
 import {
+    BooleanNumber,
+    CellValueType,
     ConfigService,
     ContextService,
     DesktopLogService,
@@ -37,7 +39,7 @@ import {
     RenderManagerService,
     SHEET_VIEWPORT_KEY,
 } from '@univerjs/engine-render';
-import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
@@ -52,6 +54,8 @@ class TestSheetSkeletonService {
     setScene(_unitId: string, scene: unknown) {
         TestSheetSkeletonService.scene = scene;
     }
+
+    clearDisplayProjectionPending() {}
 
     getSkeletonsByUnitId() {
         return [TestSheetSkeletonService.skeleton];
@@ -161,6 +165,102 @@ describe('SheetSkeletonManagerService', () => {
         workbook.setActiveSheet(workbook.getSheetBySheetId('sheet-b')!);
         expect(service.getCurrentParam()?.sheetId).toBe('sheet-b');
         expect(service.getCurrentSkeleton()?.worksheet).toBe(workbook.getSheetBySheetId('sheet-b'));
+    });
+
+    it('isolates projected row layout and formula values between render contexts', () => {
+        const injector = new Injector();
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([LocaleService]);
+        injector.add([ThemeService]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetSkeletonManagerService]);
+        const instances = injector.get(IUniverInstanceService) as UniverInstanceService;
+        const workbook = injector.createInstance(Workbook, {
+            id: 'unit-1',
+            sheets: {
+                'sheet-1': {
+                    id: 'sheet-1',
+                    rowCount: 4,
+                    defaultRowHeight: 20,
+                    rowData: { 1: { hd: BooleanNumber.TRUE } },
+                    cellData: {
+                        0: { 0: { f: '=SUM(A2:A3)', t: CellValueType.NUMBER, v: 180 } },
+                        1: { 0: { t: CellValueType.NUMBER, v: 181 } },
+                    },
+                },
+            },
+            sheetOrder: ['sheet-1'],
+        });
+        injector.get(SheetSkeletonService);
+        injector.get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+            handler: (value, { row }, next) => next(value || row === 3),
+        });
+        instances.__addUnit(workbook);
+        const createManager = (renderId = 'unit-1') => injector.createInstance(SheetSkeletonManagerService, {
+            unit: workbook,
+            unitId: 'unit-1',
+            renderId,
+            type: UniverInstanceType.UNIVER_SHEET,
+            scene: {
+                onTransformChange$: { subscribeEvent: () => ({ dispose: () => {} }) },
+            },
+        } as never);
+        const first = createManager();
+        const second = createManager('companion');
+        try {
+            first.setCurrent({ sheetId: 'sheet-1' });
+            second.setCurrent({ sheetId: 'sheet-1' });
+            const firstBase = first.getCurrentSkeleton()!;
+            const secondBase = second.getCurrentSkeleton()!;
+            const firstHeaderHeight = firstBase.columnHeaderHeight;
+            secondBase.columnHeaderHeight = firstHeaderHeight + 10;
+            expect(firstBase.columnHeaderHeight).toBe(firstHeaderHeight);
+            first.setProjectionPending('sheet-1', true);
+            expect(first.isProjectionPending('sheet-1')).toBe(true);
+            expect(second.isProjectionPending('sheet-1')).toBe(false);
+            first.setProjection('sheet-1', {
+                isRowFiltered: (row) => row === 0,
+                getCell: (row, column) => {
+                    if (column !== 0 || row === 2) {
+                        return undefined;
+                    }
+                    return row === 0 ? { v: 150, t: CellValueType.NUMBER } : null;
+                },
+            });
+            first.setProjectionPending('sheet-1', false);
+            second.setProjection('sheet-1', {
+                isRowFiltered: (row) => row === 2,
+                getCell: (row, column) => row === 0 && column === 0 ? { v: 120, t: CellValueType.NUMBER } : undefined,
+            });
+
+            const firstSkeleton = first.getCurrentSkeleton()!;
+            const secondSkeleton = second.getCurrentSkeleton()!;
+            expect(firstSkeleton.rowHeightAccumulation).toEqual([0, 0, 20, 40]);
+            expect(secondSkeleton.rowHeightAccumulation).toEqual([20, 20, 20, 40]);
+            expect(firstSkeleton.getRowIndexByOffsetY(firstSkeleton.columnHeaderHeight + 5, 1, { x: 0, y: 0 })).toBe(2);
+            expect(secondSkeleton.getRowIndexByOffsetY(secondSkeleton.columnHeaderHeight + 5, 1, { x: 0, y: 0 })).toBe(0);
+            expect(first.getCurrentSkeleton()?.getCell(0, 0)).toMatchObject({ f: '=SUM(A2:A3)', v: 150 });
+            expect(first.getCurrentSkeleton()?.getCell(1, 0)?.v).toBeUndefined();
+            expect(second.getCurrentSkeleton()?.getCell(0, 0)?.v).toBe(120);
+            expect(second.getCurrentSkeleton()?.getCell(1, 0)?.v).toBe(181);
+            expect(workbook.getActiveSheet()?.getCellRaw(0, 0)?.v).toBe(180);
+
+            first.setProjection('sheet-1', undefined);
+            expect(first.getCurrentSkeleton()?.rowHeightAccumulation).toEqual([20, 20, 40, 40]);
+            expect(first.getCurrentSkeleton()?.getCell(0, 0)?.v).toBe(180);
+            expect(second.getCurrentSkeleton()?.getCell(0, 0)?.v).toBe(120);
+
+            second.setProjection('sheet-1', undefined);
+            expect(second.getCurrentSkeleton()?.columnHeaderHeight).toBe(firstHeaderHeight + 10);
+        } finally {
+            first.dispose();
+            second.dispose();
+            injector.dispose();
+        }
     });
 
     it('sets the current worksheet skeleton and marks it dirty for recalculation', () => {

@@ -29,7 +29,6 @@ import type {
     RenderManagerService,
     Scene,
     Spreadsheet,
-    SpreadsheetSkeleton,
 } from '@univerjs/engine-render';
 import type { ICellPermission, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import {
@@ -67,7 +66,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
             disposableCollection.dispose();
             if (skeletonParam) {
-                this._bindEvents(skeletonParam.skeleton, disposableCollection);
+                this._bindEvents(disposableCollection);
             }
         };
 
@@ -76,11 +75,13 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         this.disposeWithMe(disposableCollection);
     }
 
-    private _getActiveRender(evt: IPointerEvent | IMouseEvent, skeleton: SpreadsheetSkeleton, scene: Scene) {
+    private _getActiveRender(evt: IPointerEvent | IMouseEvent, scene: Scene) {
         const { offsetX, offsetY } = evt;
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
+        // An earlier pointer handler can replace and dispose the display skeleton.
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+        if (!worksheet || !skeleton || skeleton.worksheet !== worksheet) {
             return;
         }
 
@@ -121,15 +122,15 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         }
     }
 
-    private _bindEvents(skeleton: SpreadsheetSkeleton, disposableCollection: DisposableCollection) {
-        const currentRender = this._renderManagerService.getRenderUnitById(this._context.unitId);
+    private _bindEvents(disposableCollection: DisposableCollection) {
+        const currentRender = this._renderManagerService.getRenderUnitById(this._context.renderId ?? this._context.unitId);
         if (!currentRender?.mainComponent) {
             return;
         }
 
         const spreadsheet = currentRender.mainComponent as Spreadsheet;
         const disposable = spreadsheet.onPointerDown$.subscribeEvent((evt) => {
-            const activeRenderInfo = this._getActiveRender(evt, skeleton, currentRender.scene);
+            const activeRenderInfo = this._getActiveRender(evt, currentRender.scene);
             if (!activeRenderInfo) {
                 return;
             }
@@ -151,15 +152,15 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
             activeRender.onPointerDown?.(cellContext, evt);
         });
         const moveDisposable = fromEventSubject(spreadsheet.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
-            this._handlePointerMove(evt, skeleton, currentRender.scene);
+            this._handlePointerMove(evt, currentRender.scene);
         });
 
         disposable && disposableCollection.add(disposable);
         disposableCollection.add(moveDisposable);
     }
 
-    private _handlePointerMove(evt: IPointerEvent | IMouseEvent, skeleton: SpreadsheetSkeleton, scene: Scene) {
-        const activeRenderInfo = this._getActiveRender(evt, skeleton, scene);
+    private _handlePointerMove(evt: IPointerEvent | IMouseEvent, scene: Scene) {
+        const activeRenderInfo = this._getActiveRender(evt, scene);
         if (activeRenderInfo) {
             const [activeRender, cellContext] = activeRenderInfo;
             if (this._enterActiveRender?.render === activeRender) {

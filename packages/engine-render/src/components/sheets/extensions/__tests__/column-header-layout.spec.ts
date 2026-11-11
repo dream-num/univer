@@ -15,7 +15,24 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import type { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { ColumnHeaderLayout } from '../column-header-layout';
+
+describe('display header style', () => {
+    it('keeps view colors out of printing and restores configured header styles', () => {
+        const layout = new ColumnHeaderLayout({ headerStyle: { backgroundColor: '#eee', fontColor: '#222' } });
+        const skeleton = {} as SpreadsheetSkeleton;
+        const other = {} as SpreadsheetSkeleton;
+        const normal = layout.getHeaderStyle('sheet-1', false, skeleton);
+        const printing = layout.getHeaderStyle('sheet-1', true);
+        layout.setDisplayStyle(skeleton, { backgroundColor: '#333', fontColor: '#fff' });
+        expect(layout.getHeaderStyle('sheet-1', false, skeleton)).toMatchObject({ backgroundColor: '#333', fontColor: '#fff' });
+        expect(layout.getHeaderStyle('sheet-1', true, skeleton)).toEqual(printing);
+        expect(layout.getHeaderStyle('sheet-1', false, other)).toEqual(normal);
+        layout.setDisplayStyle(skeleton, undefined);
+        expect(layout.getHeaderStyle('sheet-1', false, skeleton)).toEqual(normal);
+    });
+});
 
 function createCtx() {
     return {

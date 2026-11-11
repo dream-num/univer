@@ -15,11 +15,11 @@
  */
 
 import type { IMouseEvent } from '@univerjs/engine-render';
-import type { IOpenTableFilterPanelOperationParams } from '../../../commands/operations/open-table-filter-dialog.opration';
 import { CommandType, ICommandService, Univer } from '@univerjs/core';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
 import { afterEach, describe, expect, it } from 'vitest';
-import { OpenTableFilterPanelOperation } from '../../../commands/operations/open-table-filter-dialog.opration';
+import type { IOpenTableFilterPanelOperationParams } from '../../../commands/operations/open-table-filter-dialog.opration';
+import { OpenTableFilterPanelOperation, RequestOpenTableFilterPanelOperation } from '../../../commands/operations/open-table-filter-dialog.opration';
 import { SheetsTableFilterButtonShape } from '../table-filter-button.shape';
 
 function createPointerEvent(button: number): IMouseEvent {
@@ -42,6 +42,7 @@ describe('sheet table filter button shape', () => {
     function createShape(executedParams: IOpenTableFilterPanelOperationParams[]): SheetsTableFilterButtonShape {
         univer = new Univer();
         const commandService = univer.__getInjector().get(ICommandService);
+        commandService.registerCommand(RequestOpenTableFilterPanelOperation);
         commandService.registerCommand({
             id: OpenTableFilterPanelOperation.id,
             type: CommandType.OPERATION,

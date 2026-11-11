@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService } from '@univerjs/core';
+import { Injector, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
@@ -48,7 +48,7 @@ describe('sheets-ui basic operations', () => {
 
     it('SetActivateCellEditOperation should update current edit cell state', () => {
         const setEditCell = vi.fn();
-        const accessor = createAccessor([[IEditorBridgeService, { setEditCell }]]);
+        const accessor = createAccessor([[Injector, new Injector()], [IEditorBridgeService, { setEditCell }]]);
 
         expect(SetActivateCellEditOperation.handler(accessor, { unitId: 'u1' } as any)).toBe(true);
         expect(setEditCell).toHaveBeenCalledWith({ unitId: 'u1' });

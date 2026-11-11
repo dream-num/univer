@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { TableManager } from '@univerjs/sheets-table';
 import { SheetsTableComponentController } from '../../controllers/sheet-table-component.controller';
 
@@ -26,6 +26,12 @@ export interface IOpenTableFilterPanelOperationParams {
     subUnitId: string;
     tableId: string;
 }
+
+export interface IRequestOpenTableFilterPanelOperationParams extends IOpenTableFilterPanelOperationParams {
+    /** Set by a beforeCommandExecuted listener when an alternative panel handles this request. */
+    handled?: boolean;
+}
+
 export const OpenTableFilterPanelOperation: ICommand<IOpenTableFilterPanelOperationParams> = {
     type: CommandType.OPERATION,
     id: 'sheet.operation.open-table-filter-panel',
@@ -46,36 +52,19 @@ export const OpenTableFilterPanelOperation: ICommand<IOpenTableFilterPanelOperat
         sheetsTableComponentController.openOrToggleFilterPanel({ unitId, subUnitId, row, tableId, column: col });
 
         return true;
+    },
+};
 
-        // const tableRange = table.getRange();
-        // const tableFilter = table.getTableFilterColumn(col - tableRange.startColumn);
-
-        // const dialogServiceProps = {
-        //     id: UNIVER_SHEET_TABLE_FILTER_PANEL_ID,
-        //     draggable: true,
-        //     width: 312,
-        //     dialogStyles: {
-        //         header: { padding: '16px 16px 0', height: 0 },
-        //         body: { padding: '0 16px 16px' },
-        //     },
-        //     closable: false,
-        //     children: {
-        //         label: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
-        //         unitId,
-        //         subUnitId,
-        //         key: `${row}-${col}-${tableId || ''}`,
-        //         tableFilter,
-        //         tableId,
-        //         columnIndex: col - tableRange.startColumn,
-        //     },
-
-        //     onClose: (): void => {
-        //         dialogService.close(UNIVER_SHEET_TABLE_FILTER_PANEL_ID);
-        //     },
-        //     destroyOnClose: true,
-        // };
-        // dialogService.open(dialogServiceProps);
-
-        // return true;
+export const RequestOpenTableFilterPanelOperation: ICommand<IRequestOpenTableFilterPanelOperationParams> = {
+    id: 'sheet.operation.request-open-table-filter-panel',
+    type: CommandType.OPERATION,
+    async handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        if (params.handled) {
+            return true;
+        }
+        return accessor.get(ICommandService).executeCommand(OpenTableFilterPanelOperation.id, params);
     },
 };

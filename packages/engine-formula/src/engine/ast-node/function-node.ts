@@ -81,6 +81,10 @@ export class FunctionNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
+    override needsFilteredOutRows() {
+        return this._functionExecutor.needsFilteredOutRows;
+    }
+
     override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
         return this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
     }

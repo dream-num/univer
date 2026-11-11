@@ -17,9 +17,6 @@
 import type { IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import type { IFilterConditionFormParams } from '../../models/conditions';
-import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
 import {
     awaitTime,
     CommandType,
@@ -35,6 +32,9 @@ import {
 import { InsertColMutation } from '@univerjs/sheets';
 import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import type { IFilterConditionFormParams } from '../../models/conditions';
+import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
 import {
     E_ITEMS,
     ITEMS,
@@ -158,6 +158,59 @@ describe('test "SheetsFilterPanelService"', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('routes criteria through the supplied committer across filter modes without changing the public filter', async () => {
+        prepare(WithValuesFilterModelFactory());
+        const filterModel = sheetsFilterService.activeFilterModel!;
+        const before = filterModel.getFilterColumn(0)?.getColumnData();
+        const applyCriteria = vitest.fn().mockResolvedValue(false);
+        sheetsFilterPanelService.setupCol(filterModel, 0, { applyCriteria });
+        await awaitTime(0);
+        const valuesModel = sheetsFilterPanelService.filterByModel!;
+        expect(await valuesModel.clear()).toBe(false);
+        expect(sheetsFilterPanelService.filterByModel).toBe(valuesModel);
+        sheetsFilterPanelService.changeFilterBy(FilterBy.CONDITIONS);
+        expect(await sheetsFilterPanelService.filterByModel!.apply()).toBe(false);
+        sheetsFilterPanelService.changeFilterBy(FilterBy.COLORS);
+        await awaitTime(0);
+        expect(await sheetsFilterPanelService.filterByModel!.clear()).toBe(false);
+        expect(applyCriteria).toHaveBeenCalledTimes(3);
+        expect(applyCriteria).toHaveBeenLastCalledWith({ unitId: 'test', subUnitId: 'sheet1', col: 0, criteria: null });
+        expect(filterModel.getFilterColumn(0)?.getColumnData()).toEqual(before);
+        sheetsFilterPanelService.terminate();
+        expect(await valuesModel.apply()).toBe(false);
+    });
+
+    it('retains embedded input when a structural change moves its captured column', async () => {
+        prepare(WithValuesFilterModelFactory());
+        const filterModel = sheetsFilterService.activeFilterModel!;
+        const applyCriteria = vitest.fn().mockResolvedValue(false);
+        sheetsFilterPanelService.setupCol(filterModel, 0, { applyCriteria });
+        sheetsFilterPanelService.changeFilterBy(FilterBy.CONDITIONS);
+        const model = sheetsFilterPanelService.filterByModel!;
+        expect(commandService.syncExecuteCommand(InsertColMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 999, startColumn: 0, endColumn: 0 },
+        } as IInsertColMutationParams)).toBe(true);
+        expect(sheetsFilterPanelService.filterByModel).toBe(model);
+        expect(await model.apply()).toBe(false);
+        expect(applyCriteria).toHaveBeenCalledWith(expect.objectContaining({ col: 0 }));
+    });
+
+    it('does not install an asynchronously created model after closing or switching modes', async () => {
+        prepare(WithValuesFilterModelFactory());
+        const filterModel = sheetsFilterService.activeFilterModel!;
+        sheetsFilterPanelService.setupCol(filterModel, 0);
+        sheetsFilterPanelService.changeFilterBy(FilterBy.CONDITIONS);
+        const conditions = sheetsFilterPanelService.filterByModel;
+        await awaitTime(0);
+        expect(sheetsFilterPanelService.filterByModel).toBe(conditions);
+        sheetsFilterPanelService.changeFilterBy(FilterBy.VALUES);
+        sheetsFilterPanelService.terminate();
+        await awaitTime(0);
+        expect(sheetsFilterPanelService.filterByModel).toBeNull();
     });
 
     describe('test filter by conditions', () => {

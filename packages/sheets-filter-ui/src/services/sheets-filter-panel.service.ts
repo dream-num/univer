@@ -17,12 +17,25 @@
 import type { IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
-import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
-import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    ColorKit,
+    createIdentifier,
+    Disposable,
+    ICommandService,
+    ILogService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    Quantity,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { RefRangeService } from '@univerjs/sheets';
 import { FilterBy, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
+import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { FilterConditionItems } from '../models/conditions';
 import { statisticFilterByValueItems } from '../models/utils';
 import { getFilterTreeByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
@@ -55,6 +68,11 @@ export interface IFilterByColorItem {
     checked?: boolean;
 }
 
+export interface ISheetsFilterPanelOptions {
+    applyCriteria?: (params: ISetSheetsFilterCriteriaCommandParams) => Promise<boolean>;
+    getCachedColumnRows?: () => ReadonlyMap<number, ReadonlySet<number>> | undefined;
+}
+
 export interface ISheetsFilterPanelService {
     readonly col: number;
     readonly col$: Observable<number>;
@@ -65,7 +83,7 @@ export interface ISheetsFilterPanelService {
     readonly filterModel: Nullable<FilterModel>;
     readonly hasCriteria$: Observable<boolean>;
 
-    setupCol(filterModel: FilterModel, col: number): void;
+    setupCol(filterModel: FilterModel, col: number, options?: ISheetsFilterPanelOptions): void;
     changeFilterBy(filterBy: FilterBy): boolean;
     terminate(): boolean;
 }
@@ -108,22 +126,30 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
     readonly col$ = this._col$.asObservable();
     get col(): number { return this._col$.getValue(); }
 
+    private _options: ISheetsFilterPanelOptions | undefined;
+    private _setupVersion = 0;
+
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
+        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
     }
 
     override dispose(): void {
+        this.terminate();
+        super.dispose();
+        this._col$.complete();
         this._filterBy$.complete();
         this._filterByModel$.complete();
         this._hasCriteria$.complete();
     }
 
-    setupCol(filterModel: FilterModel, col: number): void {
+    setupCol(filterModel: FilterModel, col: number, options?: ISheetsFilterPanelOptions): void {
         this.terminate();
 
+        this._options = options;
         this._filterModel = filterModel;
         this._col$.next(col);
 
@@ -181,6 +207,8 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
     }
 
     terminate(): boolean {
+        this._options = undefined;
+        this._disposePreviousModel();
         this._filterModel = null;
         this._col$.next(-1);
 
@@ -196,6 +224,10 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
 
     private _listenToFilterHeaderChange(filterModel: FilterModel, col: number): void {
         this._disposeFilterHeaderChangeListener();
+        // Embedded editors validate their captured source on apply and retain unconfirmed input.
+        if (this._options?.applyCriteria) {
+            return;
+        }
 
         const unitId = filterModel.unitId;
         const subUnitId = filterModel.subUnitId;
@@ -224,14 +256,29 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
         this._disposePreviousModel();
 
         const range = filterModel.getRange();
-        if (range.startRow === range.endRow) return false;
+        if (range.startRow === range.endRow) {
+            return false;
+        }
 
-        const filterByModel = await ByValuesModel.fromFilterColumn(
-            this._injector,
-            filterModel,
-            col
-        );
+        const setupVersion = this._setupVersion;
+        let filterByModel: ByValuesModel;
+        try {
+            filterByModel = await ByValuesModel.fromFilterColumn(this._injector, filterModel, col, this._options?.getCachedColumnRows?.());
+        } catch (error) {
+            if (setupVersion === this._setupVersion) {
+                this._logService.error(error);
+            }
+            return false;
+        }
 
+        if (setupVersion !== this._setupVersion) {
+            filterByModel.dispose();
+            return false;
+        }
+
+        if (this._options?.applyCriteria) {
+            filterByModel.applyCriteria = this._options.applyCriteria;
+        }
         this.filterByModel = filterByModel;
         this._filterBy$.next(FilterBy.VALUES);
 
@@ -243,14 +290,29 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
         this._disposePreviousModel();
 
         const range = filterModel.getRange();
-        if (range.startRow === range.endRow) return false;
+        if (range.startRow === range.endRow) {
+            return false;
+        }
 
-        const filterByModel = await ByColorsModel.fromFilterColumn(
-            this._injector,
-            filterModel,
-            col
-        );
+        const setupVersion = this._setupVersion;
+        let filterByModel: ByColorsModel;
+        try {
+            filterByModel = await ByColorsModel.fromFilterColumn(this._injector, filterModel, col, this._options?.getCachedColumnRows?.());
+        } catch (error) {
+            if (setupVersion === this._setupVersion) {
+                this._logService.error(error);
+            }
+            return false;
+        }
 
+        if (setupVersion !== this._setupVersion) {
+            filterByModel.dispose();
+            return false;
+        }
+
+        if (this._options?.applyCriteria) {
+            filterByModel.applyCriteria = this._options.applyCriteria;
+        }
         this.filterByModel = filterByModel;
         this._filterBy$.next(FilterBy.COLORS);
 
@@ -262,7 +324,9 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
         this._disposePreviousModel();
 
         const range = filterModel.getRange();
-        if (range.startRow === range.endRow) return false;
+        if (range.startRow === range.endRow) {
+            return false;
+        }
 
         const model = ByConditionsModel.fromFilterColumn(
             this._injector,
@@ -271,6 +335,9 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
             filterModel.getFilterColumn(col)
         );
 
+        if (this._options?.applyCriteria) {
+            model.applyCriteria = this._options.applyCriteria;
+        }
         this.filterByModel = model;
         this._filterBy$.next(FilterBy.CONDITIONS);
 
@@ -280,6 +347,8 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
     }
 
     private _disposePreviousModel(): void {
+        this._setupVersion++;
+        this._disposeFilterHeaderChangeListener();
         this._filterByModel?.dispose();
         this.filterByModel = null;
     }
@@ -295,6 +364,9 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
  * 2. User toggles "Filter By"
  */
 export class ByConditionsModel extends Disposable implements IFilterByModel {
+    applyCriteria = (params: ISetSheetsFilterCriteriaCommandParams): Promise<boolean> =>
+        this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, params);
+
     /**
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
@@ -350,9 +422,11 @@ export class ByConditionsModel extends Disposable implements IFilterByModel {
     }
 
     clear(): Promise<boolean> {
-        if (this._disposed) return Promise.resolve(false);
+        if (this._disposed) {
+            return Promise.resolve(false);
+        }
 
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,
@@ -364,10 +438,12 @@ export class ByConditionsModel extends Disposable implements IFilterByModel {
      * Apply the filter condition to the target filter column.
      */
     async apply(): Promise<boolean> {
-        if (this._disposed) return false;
+        if (this._disposed) {
+            return false;
+        }
 
         const filterColumn = FilterConditionItems.mapToFilterColumn(this.conditionItem, this.filterConditionFormParams);
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,
@@ -424,6 +500,9 @@ export class ByConditionsModel extends Disposable implements IFilterByModel {
  * 2. User toggles "Filter By"
  */
 export class ByValuesModel extends Disposable implements IFilterByModel {
+    applyCriteria = (params: ISetSheetsFilterCriteriaCommandParams): Promise<boolean> =>
+        this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, params);
+
     /**
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
@@ -434,7 +513,12 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
      *
      * @returns the model to control the panel's state
      */
-    static async fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): Promise<ByValuesModel> {
+    static async fromFilterColumn(
+        injector: Injector,
+        filterModel: FilterModel,
+        col: number,
+        cachedRows?: ReadonlyMap<number, ReadonlySet<number>>
+    ): Promise<ByValuesModel> {
         const univerInstanceService = injector.get(IUniverInstanceService);
         const localeService = injector.get(LocaleService);
         const generateFilterValuesService = injector.get(ISheetsGenerateFilterValuesService, Quantity.OPTIONAL);
@@ -452,7 +536,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const filters = filterColumn?.getColumnData().filters;
         const alreadyChecked = new Set(filters?.filters);
         const blankChecked = !!(filters && filters.blank);
-        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
+        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col, cachedRows);
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
         let items: IFilterByValueWithTreeItem[];
@@ -558,6 +642,8 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
     }
 
     override dispose(): void {
+        super.dispose();
+        this._manuallyUpdateFilterItems$.complete();
         this._rawFilterItems$.complete();
         this._searchString$.complete();
     }
@@ -610,9 +696,11 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
 
     // #region ByValuesModel apply methods
     clear(): Promise<boolean> {
-        if (this._disposed) return Promise.resolve(false);
+        if (this._disposed) {
+            return Promise.resolve(false);
+        }
 
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,
@@ -643,7 +731,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         if (noChecked) {
             throw new Error('[ByValuesModel]: no checked items!');
         } else if (allChecked) {
-            return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            return this.applyCriteria({
                 unitId: this._filterModel.unitId,
                 subUnitId: this._filterModel.subUnitId,
                 col: this.col,
@@ -665,7 +753,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
             }
         }
 
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,
@@ -688,6 +776,9 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
  * 2. User toggles "Filter By"
  */
 export class ByColorsModel extends Disposable implements IFilterByModel {
+    applyCriteria = (params: ISetSheetsFilterCriteriaCommandParams): Promise<boolean> =>
+        this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, params);
+
     /**
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
@@ -698,7 +789,12 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
      *
      * @returns the model to control the panel's state
      */
-    static async fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): Promise<ByColorsModel> {
+    static async fromFilterColumn(
+        injector: Injector,
+        filterModel: FilterModel,
+        col: number,
+        cachedRows?: ReadonlyMap<number, ReadonlySet<number>>
+    ): Promise<ByColorsModel> {
         const univerInstanceService = injector.get(IUniverInstanceService);
 
         const { unitId, subUnitId } = filterModel;
@@ -711,7 +807,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
         const range = filterModel.getRange();
         const column = col;
         const colorFilters = filterModel.getFilterColumn(col)?.getColumnData().colorFilters;
-        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
+        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col, cachedRows);
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
         const cellFillColors = new Map<string, IFilterByColorItem>();
@@ -787,6 +883,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
         super.dispose();
 
         this._cellFillColors$.complete();
+        this._cellTextColors$.complete();
     }
 
     deltaCol(offset: number): void {
@@ -797,9 +894,11 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
 
     // #region ByColorsModel apply methods
     clear(): Promise<boolean> {
-        if (this._disposed) return Promise.resolve(false);
+        if (this._disposed) {
+            return Promise.resolve(false);
+        }
 
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,
@@ -876,7 +975,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
 
         if (cellFillColorsChecked.length === 0 && cellTextColorsChecked.length === 0) {
             // If no colors are checked, we clear the filter.
-            return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            return this.applyCriteria({
                 unitId: this._filterModel.unitId,
                 subUnitId: this._filterModel.subUnitId,
                 col: this.col,
@@ -896,7 +995,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
             };
         }
 
-        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+        return this.applyCriteria({
             unitId: this._filterModel.unitId,
             subUnitId: this._filterModel.subUnitId,
             col: this.col,

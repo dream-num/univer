@@ -21,6 +21,7 @@ import { describe, expect, it } from 'vitest';
 import type { IOrderRule } from '../../../services/interface';
 import type { ISortRangeCommandParams } from '../sheets-sort.command';
 import { SortType } from '../../../services/interface';
+import { SheetsSortService } from '../../../services/sheets-sort.service';
 import { SortRangeCommand } from '../sheets-sort.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -198,4 +199,35 @@ describe('SortRangeCommand with mixed cell types', () => {
 
         expect(await sortRows({ cells }, SortType.ASC)).toEqual([1, 0, 2, 3, 4]);
     });
+});
+
+it('blocks local sorting while allowing resolved reorder mutations and sorting after release', () => {
+    const { get, sheet, univer } = createCommandTestBed();
+    try {
+        const commands = get(ICommandService);
+        commands.registerCommand(SetSelectionsOperation);
+        commands.registerCommand(ReorderRangeCommand);
+        commands.registerCommand(ReorderRangeMutation);
+        const location = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 },
+        };
+        const sort = { ...location, hasTitle: false, orderRules: [{ colIndex: 0, type: SortType.DESC }] };
+        const worksheet = sheet.getActiveSheet()!;
+        const guard = get(SheetsSortService).registerSortGuard(({ unitId, subUnitId }) =>
+            unitId !== location.unitId || subUnitId !== location.subUnitId
+        );
+        expect(commands.syncExecuteCommand(SortRangeCommand.id, sort)).toBe(false);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe(1);
+
+        expect(commands.syncExecuteCommand(ReorderRangeMutation.id, { ...location, order: { 0: 1, 1: 0 } }, { fromChangeset: true })).toBe(true);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe(2);
+        guard.dispose();
+
+        expect(commands.syncExecuteCommand(SortRangeCommand.id, { ...sort, orderRules: [{ colIndex: 0, type: SortType.ASC }] })).toBe(true);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe(1);
+    } finally {
+        univer.dispose();
+    }
 });

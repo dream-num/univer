@@ -21,8 +21,9 @@ import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-form
 import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
+import { SheetsSortService } from '../../services/sheets-sort.service';
 import '@univerjs/sheets/facade';
-import '@univerjs/sheets-sort/facade';
+import '../index';
 
 describe('sheets-sort facade', () => {
     let univer: Univer;
@@ -52,7 +53,8 @@ describe('sheets-sort facade', () => {
         univer.dispose();
     });
 
-    it('sorts a selected range by a facade column spec relative to the range', () => {
+    it('sorts a public Facade range by relative columns even when UI sorting is blocked', () => {
+        get(SheetsSortService).registerSortGuard(() => false);
         const worksheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
 
         worksheet.getRange('A1:C6').sort({ column: 1, ascending: true });
@@ -63,7 +65,8 @@ describe('sheets-sort facade', () => {
         expect(getData(5, 1)?.v).toBe(20);
     });
 
-    it('sorts the whole worksheet and emits before/after sort events with user-facing columns', () => {
+    it('sorts a public Facade worksheet and emits sort events even when UI sorting is blocked', () => {
+        get(SheetsSortService).registerSortGuard(() => false);
         const events: Array<{ phase: string; column: number; ascending: boolean }> = [];
         const beforeDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeSort, (params) => {
             events.push({

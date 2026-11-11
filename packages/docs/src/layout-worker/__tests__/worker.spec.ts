@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import { createDocumentModelWithStyle, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor, JSONX, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TextX, TextXActionType, UpdateDocsAttributeType } from '@univerjs/core';
+import { createDocumentModelWithStyle, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor, Injector, JSONX, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TextX, TextXActionType, UpdateDocsAttributeType } from '@univerjs/core';
 import { getFontStyleString, invalidateDocumentFontMetrics } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocLayoutSessionStatus } from '../../services/doc-layout-executor.service';
 import { DocsLayoutWorkerPerformanceTracker } from '../performance-tracker';
 import { DocsLayoutWorkerRuntime } from '../worker';
+
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector([[DocsLayoutWorkerRuntime]]);
+});
+afterEach(() => testInjector.dispose());
 
 function stubOffscreenCanvas(): void {
     vi.stubGlobal('OffscreenCanvas', class {
@@ -777,7 +783,7 @@ describe('DocsLayoutWorkerRuntime', () => {
                 customRanges: [createRange(index + 3)],
             },
         }]));
-        const runtime = new DocsLayoutWorkerRuntime();
+        const runtime = testInjector.get(DocsLayoutWorkerRuntime);
         const unitId = sourceModel.getUnitId();
         await runtime.createSession({
             unitId,
@@ -880,7 +886,7 @@ describe('DocsLayoutWorkerRuntime', () => {
                 },
             },
         };
-        const runtime = new DocsLayoutWorkerRuntime();
+        const runtime = testInjector.get(DocsLayoutWorkerRuntime);
         const unitId = sourceModel.getUnitId();
         await runtime.createSession({
             unitId,

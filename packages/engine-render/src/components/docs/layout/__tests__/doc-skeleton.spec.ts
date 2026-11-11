@@ -1052,7 +1052,8 @@ describe('doc skeleton', () => {
             actualBoundingBoxAscent: 15,
             actualBoundingBoxDescent: 4,
         });
-        const dataModel = new DocumentDataModel({
+        const univer = new Univer();
+        const dataModel = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'drawingml-runtime-layout',
             body: {
                 dataStream: 'a b\r\n',
@@ -1067,7 +1068,7 @@ describe('doc skeleton', () => {
             documentStyle: { pageSize: { width: 300, height: 300 } },
         });
         const snapshot = structuredClone(dataModel.getSnapshot());
-        const univer = new Univer();
+
         const locale = univer.__getInjector().get(LocaleService);
         const skeleton = DocumentSkeleton.create(new DocumentViewModel(dataModel), locale);
         const firstLine = () => skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0];
@@ -7612,8 +7613,8 @@ describe('doc skeleton', () => {
 
     it.each(['header', 'footer'] as const)('retains %s ownership through overlapping table position lookups', (kind) => {
         const univer = new Univer();
-        const model = new DocumentDataModel({ id: 'overlapping-story-tables', body: { dataStream: 'A\r\n' } });
-        const view = new DocumentViewModel(model);
+        const model = univer.__getInjector().createInstance(DocumentDataModel, { id: 'overlapping-story-tables', body: { dataStream: 'A\r\n' } });
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const stories = (['header', 'footer'] as const).map((name, index) => {
@@ -7664,7 +7665,7 @@ describe('doc skeleton', () => {
         const end = DataStreamTreeTokenType.CUSTOM_RANGE_END;
         const dataStream = `${start}${cached}${end}\r\n`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'expanded-reference-source-boundaries',
             body: {
                 dataStream,
@@ -7701,7 +7702,7 @@ describe('doc skeleton', () => {
                         .serialize()),
                 },
         });
-        const view = new DocumentViewModel(model);
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
         try {
             skeleton.calculate();
@@ -7727,7 +7728,7 @@ describe('doc skeleton', () => {
         const start = DataStreamTreeTokenType.CUSTOM_RANGE_START;
         const end = DataStreamTreeTokenType.CUSTOM_RANGE_END;
         const dataStream = `${start}1${end}\uFFFC\r\n`;
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'projected-note-formula',
             body: {
                 dataStream,
@@ -7758,7 +7759,7 @@ describe('doc skeleton', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const view = new DocumentViewModel(model);
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const noteView = view.getNoteTreeMap().get('note')!;
         const interception = noteView.registerCustomRangeInterceptor({
             getCustomRange: (index) => {
@@ -7804,7 +7805,7 @@ describe('doc skeleton', () => {
             },
             documentStyle: { pageSize: { width: 200, height: 200 } },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         const notifications: boolean[] = [];
         const subscription = skeleton.dirty$.subscribe(() => notifications.push(skeleton.dirty));
         try {
@@ -7850,9 +7851,9 @@ describe('doc skeleton', () => {
                 textStyle: { ff: 'Times New Roman', fs: 10 },
             },
         };
-        const model = new DocumentDataModel(snapshot);
+        const model = univer.__getInjector().createInstance(DocumentDataModel, snapshot);
         const source = JSON.stringify(model.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         const storyLines = () => {
             const data = skeleton.getSkeletonData()!;
             const stories = storyType === 'header' ? data.skeHeaders : data.skeFooters;
@@ -7922,11 +7923,11 @@ describe('doc skeleton', () => {
                 textStyle: { ff: 'Arial', fs: 9 },
             },
         };
-        const model = new DocumentDataModel(snapshot);
+        const model = univer.__getInjector().createInstance(DocumentDataModel, snapshot);
         const original = JSON.stringify(model.getSnapshot());
         const locale = univer.__getInjector().get(LocaleService);
         locale.setLocale(LocaleType.EN_US);
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), locale);
         try {
             skeleton.calculate();
             const data = skeleton.getSkeletonData()!;
@@ -8002,9 +8003,9 @@ describe('doc skeleton', () => {
                 textStyle: { ff: 'Arial', fs: 9 },
             },
         };
-        const model = new DocumentDataModel(snapshot);
+        const model = univer.__getInjector().createInstance(DocumentDataModel, snapshot);
         const original = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
         const storyGeometry = () => {
             const data = skeleton.getSkeletonData()!;
@@ -8061,9 +8062,9 @@ describe('doc skeleton', () => {
                 textStyle: { ff: 'Word body-edge regression', fs: 11 },
             },
         };
-        const model = new DocumentDataModel(snapshot);
+        const model = univer.__getInjector().createInstance(DocumentDataModel, snapshot);
         const original = JSON.stringify(model.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             skeleton.calculate();
             const { pages } = skeleton.getSkeletonData()!;
@@ -8093,7 +8094,7 @@ describe('doc skeleton', () => {
         const univer = new Univer();
         try {
             for (const [indent, hanging] of [[0, 0], [48, 0], [48, 48], [96, 0], [96, 96]]) {
-                const model = new DocumentDataModel({
+                const model = univer.__getInjector().createInstance(DocumentDataModel, {
                     id: 'story-column-anchor',
                     body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }] },
                     documentStyle: {
@@ -8132,7 +8133,7 @@ describe('doc skeleton', () => {
                         },
                     } },
                 });
-                const view = new DocumentViewModel(model);
+                const view = univer.__getInjector().createInstance(DocumentViewModel, model);
                 const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
                 const before = JSON.stringify(model.getSnapshot());
                 try {
@@ -8167,7 +8168,7 @@ describe('doc skeleton', () => {
         const dataStream = 'FIRST BODY PAGE\rSECOND BODY PAGE\r\nTHIRD BODY PAGE\rFOURTH BODY PAGE\r\n';
         const header = 'DEFAULT=\u001FLOCKED\u001E\rARABIC=\u001FLOCKED\u001E\rTAIL\r\n';
         const starts = [...header.matchAll(/\u001F/g)].map((match) => match.index);
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'multi-paragraph-section-header',
             body: {
                 dataStream,
@@ -8190,7 +8191,7 @@ describe('doc skeleton', () => {
             } } },
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 600, height: 800 }, marginTop: 200, marginBottom: 50, marginLeft: 50, marginRight: 50, marginHeader: 10, defaultHeaderId: 'header', textStyle: { ff: 'Arial', fs: 11 } },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             skeleton.calculate();
             const data = skeleton.getSkeletonData()!;
@@ -8221,7 +8222,7 @@ describe('doc skeleton', () => {
         const locale = univer.__getInjector().get(LocaleService);
         locale.setLocale(LocaleType.EN_US);
         const content = restart ? `${'B\r'.repeat(9)}\n${'B\r'.repeat(9)}\n` : `${'B\r'.repeat(pages)}\n`;
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'shared-header-page-width',
             body: {
                 dataStream: content,
@@ -8242,7 +8243,7 @@ describe('doc skeleton', () => {
             } } },
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                compatibilitySettings: { compatibilityMode: 15 },
+                compatibilitySettings: { compatibilityMode: '15' },
                 pageSize: { width: width + 32, height: 400 },
                 marginLeft: 16,
                 marginRight: 16,
@@ -8254,10 +8255,10 @@ describe('doc skeleton', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, locale);
-        const incrementalModel = new DocumentDataModel(Tools.deepClone(model.getSnapshot()));
-        const incrementalViewModel = new DocumentViewModel(incrementalModel);
+        const incrementalModel = univer.__getInjector().createInstance(DocumentDataModel, Tools.deepClone(model.getSnapshot()));
+        const incrementalViewModel = univer.__getInjector().createInstance(DocumentViewModel, incrementalModel);
         const incremental = DocumentSkeleton.create(incrementalViewModel, locale);
         try {
             skeleton.calculate();
@@ -8339,7 +8340,7 @@ describe('doc skeleton', () => {
             } } },
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
-                compatibilitySettings: { compatibilityMode: 15 },
+                compatibilitySettings: { compatibilityMode: '15' },
                 pageNumberStart: firstPageNumber,
                 pageNumberFormat,
                 pageSize: { width: contentWidth + 32, height: 400 },
@@ -8354,8 +8355,8 @@ describe('doc skeleton', () => {
                 defaultFooterId: 'footer',
             },
         };
-        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
-        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        const main = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, snapshot)), locale);
+        const incremental = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, snapshot)), locale);
         try {
             main.calculate();
             const generation = incremental.startIncrementalLayout();
@@ -8402,7 +8403,7 @@ describe('doc skeleton', () => {
             dataStream: 'Rule\r\n',
             paragraphs: [{ paragraphId: 'rule', startIndex: 4, paragraphStyle: { borderTop: border, shading: { backgroundColor: { rgb: '#DDDDDD' } } } }],
         };
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'early-story-decoration',
             body: { dataStream: `${content}\n`, paragraphs: [...content.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `body-${index}`, startIndex: match.index })) },
             headers: story === 'header' ? { story: { headerId: 'story', body } } : undefined,
@@ -8421,7 +8422,7 @@ describe('doc skeleton', () => {
                 defaultFooterId: story === 'footer' ? 'story' : undefined,
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), locale);
         try {
             const generation = skeleton.startIncrementalLayout();
             let progress = skeleton.stepIncrementalLayout(generation, 0, 1);
@@ -8450,7 +8451,7 @@ describe('doc skeleton', () => {
         mockCanvasTextMetrics(12);
         const univer = new Univer();
         const content = 'Este documento contiene información sobre la configuración y la administración de los servicios.';
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'inherited-hyphenation-suppression',
             body: {
                 dataStream: `${content}\r\n`,
@@ -8469,8 +8470,8 @@ describe('doc skeleton', () => {
                 defaultParagraphStyle: { suppressHyphenation: BooleanNumber.TRUE },
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
-        const hyphen = new Hyphen();
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
+        const hyphen = univer.__getInjector().createInstance(Hyphen);
         (skeleton as unknown as { _hyphen: Hyphen })._hyphen = hyphen;
         const loader = vi.spyOn(PATTERN_LOADERS, Lang.Es);
         try {
@@ -8542,7 +8543,7 @@ describe('doc skeleton', () => {
                 marginRight: 10,
             },
         };
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), localeService);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, snapshot)), localeService);
         try {
             if (incremental) {
                 completeIncrementalLayout(skeleton);
@@ -8586,7 +8587,8 @@ describe('doc skeleton', () => {
         const verticalPadding = overrides ? 8 : padding * 2;
         const rowHeight = 50 + verticalPadding + (spacing == null ? 2 : 4 + spacing * 2);
         const outerHeight = spacing == null ? 2 : (spacing + 2) * 2;
-        const model = new DocumentDataModel({
+        const univer = new Univer();
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'word-minimum-row-margins',
             body: {
                 dataStream,
@@ -8644,10 +8646,10 @@ describe('doc skeleton', () => {
                 marginRight: 0,
             },
         });
-        const univer = new Univer();
+
         const localeService = univer.__getInjector().get(LocaleService);
         localeService.setLocale(LocaleType.EN_US);
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), localeService);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), localeService);
         const before = JSON.stringify(model.getSnapshot());
         try {
             if (incremental) {
@@ -8673,7 +8675,7 @@ describe('doc skeleton', () => {
         const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'cell-fit-boundary',
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height }, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0, paragraphLineGapDefault: 0 },
             body: {
@@ -8697,7 +8699,7 @@ describe('doc skeleton', () => {
                 },
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             if (incremental) {
                 completeIncrementalLayout(skeleton);
@@ -8733,7 +8735,7 @@ describe('doc skeleton', () => {
         const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
         const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'contextual-table-spacing',
             body: {
                 dataStream,
@@ -8789,7 +8791,7 @@ describe('doc skeleton', () => {
                 marginRight: 0,
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         const before = JSON.stringify(model.getSnapshot());
         try {
             if (incremental) {
@@ -8845,7 +8847,7 @@ describe('doc skeleton', () => {
         const dataStream = `Lead${T.PARAGRAPH}${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
         const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'cell-trailing-space-at-page-edge',
             body: {
                 dataStream,
@@ -8874,7 +8876,7 @@ describe('doc skeleton', () => {
             } },
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 100, height: pageHeight }, marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 0, textStyle: { ff: 'Arial', fs: 11 } },
         });
-        const view = new DocumentViewModel(model);
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
         const before = JSON.stringify(model.getSnapshot());
         try {
@@ -8915,7 +8917,7 @@ describe('doc skeleton', () => {
         const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'row-start-minimum',
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -8962,7 +8964,7 @@ describe('doc skeleton', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             if (incremental) {
                 completeIncrementalLayout(skeleton);
@@ -9004,7 +9006,7 @@ describe('doc skeleton', () => {
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const widths = [113.4, 94.46666666666664, 151.2, 300.2];
         const univer = new Univer();
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel({
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'multi-column-table-caret',
             body: {
                 dataStream,
@@ -9068,7 +9070,7 @@ describe('doc skeleton', () => {
             });
             const univer = new Univer();
             const localeService = univer.__getInjector().get(LocaleService);
-            const documentModel = new DocumentDataModel({
+            const documentModel = univer.__getInjector().createInstance(DocumentDataModel, {
                 id: 'continued-section-first-page-stories',
                 body: {
                     dataStream,
@@ -9110,7 +9112,7 @@ describe('doc skeleton', () => {
                 },
             });
             const snapshot = Tools.deepClone(documentModel.getSnapshot());
-            const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+            const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, documentModel), localeService);
             try {
                 if (sliced) {
                     completeIncrementalLayout(skeleton);
@@ -9145,7 +9147,7 @@ describe('doc skeleton', () => {
         const second = `Question presented${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
-        const documentModel = new DocumentDataModel({
+        const documentModel = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'continuous-section-after-page-break',
             body: {
                 dataStream: `${first}${second}`,
@@ -9175,7 +9177,7 @@ describe('doc skeleton', () => {
             },
         });
         const snapshot = Tools.deepClone(documentModel.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, documentModel), localeService);
         if (sliced) {
             completeIncrementalLayout(skeleton);
         } else {
@@ -9201,7 +9203,7 @@ describe('doc skeleton', () => {
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
-        const documentModel = new DocumentDataModel({
+        const documentModel = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'section-page-number-parity',
             body: {
                 dataStream: `${first}${second}`,
@@ -9235,7 +9237,7 @@ describe('doc skeleton', () => {
             headers: { header: { headerId: 'header', body: { dataStream: 'Header\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'header-p' }] } } },
             footers: { footer: { footerId: 'footer', body: { dataStream: 'Footer\r\n', paragraphs: [{ startIndex: 6, paragraphId: 'footer-p' }] } } },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, documentModel), localeService);
 
         if (sliced) {
             completeIncrementalLayout(skeleton);
@@ -9312,8 +9314,8 @@ describe('doc skeleton', () => {
                 defaultFooterId: 'footer',
             },
         };
-        const main = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
-        const incremental = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale);
+        const main = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, snapshot)), locale);
+        const incremental = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, snapshot)), locale);
         try {
             main.calculate();
             const generation = incremental.startIncrementalLayout();
@@ -9366,7 +9368,7 @@ describe('doc skeleton', () => {
         const tableStream = `${T.TABLE_START}${rowStream}${rowStream}${T.TABLE_END}`;
         const dataStream = `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'contextual-table-spacing',
             body: {
                 dataStream,
@@ -9421,7 +9423,7 @@ describe('doc skeleton', () => {
                 marginRight: 0,
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             if (incremental) {
                 completeIncrementalLayout(skeleton);
@@ -9467,7 +9469,7 @@ describe('doc skeleton', () => {
         const stream = `${T.TABLE_START}${rows.map((text) => `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`).join('')}${T.TABLE_END}`;
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'row-start-minimum',
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -9513,7 +9515,7 @@ describe('doc skeleton', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, model), univer.__getInjector().get(LocaleService));
         try {
             if (incremental) {
                 completeIncrementalLayout(skeleton);
@@ -9554,7 +9556,7 @@ describe('doc skeleton', () => {
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const widths = [113.4, 94.46666666666664, 151.2, 300.2];
         const univer = new Univer();
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel({
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'multi-column-table-caret',
             body: {
                 dataStream,
@@ -9608,7 +9610,7 @@ describe('doc skeleton', () => {
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
-        const documentModel = new DocumentDataModel({
+        const documentModel = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'section-page-number-parity',
             body: {
                 dataStream: `${first}${second}`,
@@ -9636,7 +9638,7 @@ describe('doc skeleton', () => {
                 marginRight: 20,
             },
         });
-        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const skeleton = DocumentSkeleton.create(univer.__getInjector().createInstance(DocumentViewModel, documentModel), localeService);
 
         skeleton.calculate();
 

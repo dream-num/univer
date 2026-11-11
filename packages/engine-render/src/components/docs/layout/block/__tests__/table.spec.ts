@@ -180,7 +180,7 @@ describe('table utilities', () => {
     it.each([false, true].flatMap((traditional) => [false, true].flatMap((omittedColumn) => [false, true]
         .map((directOverride) => ({ traditional, omittedColumn, directOverride })))))('resolves editable table and row border defaults ($traditional/$omittedColumn/$directOverride)', ({ traditional, omittedColumn, directOverride }) => {
         const border = (width: number) => ({ color: { rgb: '#123456' }, width: { v: width } });
-        const cells = [{ ...(directOverride ? { borderTop: border(7), borderLeft: border(0) } : {}) }];
+        const cells = [directOverride ? { borderTop: border(7), borderLeft: border(0) } : {}];
         if (!omittedColumn) {
             cells.push({});
         }

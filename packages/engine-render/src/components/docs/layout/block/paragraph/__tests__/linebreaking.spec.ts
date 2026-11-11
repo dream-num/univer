@@ -105,7 +105,7 @@ function referenceSpacingBaseline(scenario: IReferenceSpacingScenario): number {
     locale.setLocale(LocaleType.EN_US);
     locale.setDirection('ltr');
     const fieldStart = first.length + target.indexOf('\x1F');
-    const model = new DocumentDataModel({
+    const model = univer.__getInjector().createInstance(DocumentDataModel, {
         id: 'reference-auto-spacing',
         body: {
             dataStream: stream,
@@ -178,7 +178,7 @@ function referenceSpacingBaseline(scenario: IReferenceSpacingScenario): number {
         },
     });
     const before = JSON.stringify(model.getSnapshot());
-    const viewModel = new DocumentViewModel(model);
+    const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
     const skeleton = DocumentSkeleton.create(viewModel, locale);
     try {
         skeleton.calculate();
@@ -2176,7 +2176,7 @@ describe('linebreaking', () => {
         const lines = curPage.sections[0].columns[0].lines;
         const line = lines[lines.length - 1];
         const skeleton = DocumentSkeleton.create(viewModel, ctx.docsConfig.localeService);
-        const documents = new Documents('word-hanging-border', skeleton);
+        const documents = bed.injector.createInstance(Documents, 'word-hanging-border', skeleton);
         const draw = vi.spyOn(documents as unknown as {
             _drawBorder: (...args: unknown[]) => void;
         }, '_drawBorder').mockImplementation(() => undefined);
@@ -2988,7 +2988,7 @@ describe('linebreaking', () => {
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
         const measureLine = (largeWhitespace: boolean) => {
-            const model = new DocumentDataModel({
+            const model = univer.__getInjector().createInstance(DocumentDataModel, {
                 id: `whitespace-height-${leading}-${largeWhitespace}`,
                 body: {
                     dataStream: stream,
@@ -3015,7 +3015,7 @@ describe('linebreaking', () => {
                 },
             });
             const before = JSON.stringify(model.getSnapshot());
-            const viewModel = new DocumentViewModel(model);
+            const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
             const skeleton = DocumentSkeleton.create(viewModel, locale);
             try {
                 skeleton.calculate();
@@ -3047,7 +3047,7 @@ describe('linebreaking', () => {
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: `wrapped-tabs-${documentFlavor}`,
             body: {
                 dataStream: stream,
@@ -3067,7 +3067,7 @@ describe('linebreaking', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, locale);
         try {
             skeleton.calculate();
@@ -3104,7 +3104,7 @@ describe('linebreaking', () => {
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: `section-boundary-${documentFlavor}-${sectionType}-${boundary}`,
             body: {
                 dataStream: stream,
@@ -3130,7 +3130,7 @@ describe('linebreaking', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, locale);
         try {
             skeleton.calculate();
@@ -3169,7 +3169,7 @@ describe('linebreaking', () => {
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
         locale.setDirection('ltr');
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: `manual-break-reference-${marker}-${split}-${visible}`,
             body: {
                 dataStream: stream,
@@ -3199,7 +3199,7 @@ describe('linebreaking', () => {
             },
         });
         const before = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, locale);
         try {
             skeleton.calculate();

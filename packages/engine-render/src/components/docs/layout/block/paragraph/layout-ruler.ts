@@ -1867,36 +1867,18 @@ function _clearOverflowedParagraphDrawings(
     }
 }
 
-function _lineOperator(
+function _reflowCompletedWhitespaceLine(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     isParagraphFirstShapedText: boolean,
-    breakPointType: BreakPointType = BreakPointType.Normal,
-    defaultSpanMetrics?: IDefaultSpanMetrics
-) {
-    let lastPage = getLastPage(pages);
-    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
-    const columnInfo = _getOrCreateLineColumn(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, breakPointType);
-    lastPage = getLastPage(pages);
-    // Todo: columnInfo does not exist when demo4 is imported, return first
-    if (!columnInfo) {
-        return;
-    }
-
-    const column = columnInfo.column;
-
-    // If the page width < marginLeft + marginRight, will trigger infinity loop, so return it first.
-    // The best solution is to do data checks and data repairs, and pass the correct data to the render layer.
-    if (column.width <= 0) {
-        console.error('The column width is less than 0, need to adjust page width to make it great than 0');
-        return;
-    }
-
+    breakPointType: BreakPointType,
+    defaultSpanMetrics: IDefaultSpanMetrics | undefined,
+    column: IDocumentSkeletonColumn
+): boolean {
     const preLine = getLastLineByColumn(column);
-
     if (preLine?.paragraphIndex === paragraphConfig.paragraphIndex && preLine.lineHeight === 0 &&
         preLine.divides.every((divide) => divide.isFull) &&
         isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
@@ -1943,8 +1925,77 @@ function _lineOperator(
                 breakPointType,
                 defaultSpanMetrics
             );
-            return;
+            return true;
         }
+    }
+    return false;
+}
+
+function _getLineOverflowHeight(
+    lastPage: IDocumentSkeletonPage,
+    paragraphConfig: IParagraphConfig,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    isParagraphFirstShapedText: boolean,
+    metrics: ReturnType<typeof _getParagraphLineMetrics>,
+    lineHeight: number
+): number {
+    const { paragraphStyle, paragraphEnd, spaceBelowApply, borderBottomSpace, wordAutoLeading } = metrics;
+    // Empty paragraphs and a wrapped paragraph's final continuation carry their
+    // after-spacing with the mark. Short sibling cells can end at the page edge.
+    const cellParagraphEndSpace = lastPage.type === DocumentSkeletonPageType.CELL &&
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
+        glyphGroup.length > 0 &&
+        ((isParagraphFirstShapedText && glyphGroup.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH)) ||
+            (!isParagraphFirstShapedText && paragraphEnd && paragraphStyle.afterAutoSpacing !== BooleanNumber.TRUE))
+        ? Math.max(0, spaceBelowApply)
+        : 0;
+    // Blank multiple-line leading can hang below the last body line. Keep cell
+    // height and painted paragraph borders inside their full layout extent.
+    const trailingLeading = lastPage.type === DocumentSkeletonPageType.BODY && borderBottomSpace === 0 ? wordAutoLeading : 0;
+    return lineHeight - trailingLeading + cellParagraphEndSpace;
+}
+
+function _getLineOverflowTolerance(lastPage: IDocumentSkeletonPage, paragraphConfig: IParagraphConfig): number {
+    // Visible text must fit paginated body and cell bounds; blank trailing leading is excluded above.
+    return (lastPage.type === DocumentSkeletonPageType.CELL ||
+        lastPage.type === DocumentSkeletonPageType.BODY) &&
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+        ? 1e-6
+        : LINE_LAYOUT_OVERFLOW_TOLERANCE;
+}
+
+function _lineOperator(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    breakPointType: BreakPointType = BreakPointType.Normal,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+) {
+    let lastPage = getLastPage(pages);
+    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
+    const columnInfo = _getOrCreateLineColumn(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, breakPointType);
+    lastPage = getLastPage(pages);
+    // Todo: columnInfo does not exist when demo4 is imported, return first
+    if (!columnInfo) {
+        return;
+    }
+
+    const column = columnInfo.column;
+
+    // If the page width < marginLeft + marginRight, will trigger infinity loop, so return it first.
+    // The best solution is to do data checks and data repairs, and pass the correct data to the render layer.
+    if (column.width <= 0) {
+        console.error('The column width is less than 0, need to adjust page width to make it great than 0');
+        return;
+    }
+
+    const preLine = getLastLineByColumn(column);
+
+    if (_reflowCompletedWhitespaceLine(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics, column)) {
+        return;
     }
 
     const previousLineHeight = preLine?.lineHeight;
@@ -1957,6 +2008,7 @@ function _lineOperator(
         pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
+    const lineMetrics = _getParagraphLineMetrics(ctx, glyphGroup, lastPage, column, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, defaultSpanMetrics);
     const {
         paragraphStyle,
         spacingRule,
@@ -1977,8 +2029,7 @@ function _lineOperator(
         borderTopSpace,
         borderBottomSpace,
         minimumLineLeading,
-        wordAutoLeading,
-    } = _getParagraphLineMetrics(ctx, glyphGroup, lastPage, column, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, defaultSpanMetrics);
+    } = lineMetrics;
     const { indentFirstLine, hanging, indentStart, indentEnd } = paragraphStyle;
 
     const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
@@ -2071,26 +2122,9 @@ function _lineOperator(
         glyphGroup
     );
     const availableSectionHeight = footnoteBodyLimit == null ? section.height : Math.min(section.height, footnoteBodyLimit - section.top);
-    // Empty paragraphs and a wrapped paragraph's final continuation carry their
-    // after-spacing with the mark. Short sibling cells can end at the page edge.
-    const cellParagraphEndSpace = lastPage.type === DocumentSkeletonPageType.CELL &&
-        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
-        glyphGroup.length > 0 &&
-        ((isParagraphFirstShapedText && glyphGroup.every((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH)) ||
-            (!isParagraphFirstShapedText && paragraphEnd && paragraphStyle.afterAutoSpacing !== BooleanNumber.TRUE))
-        ? Math.max(0, spaceBelowApply)
-        : 0;
-    // Blank multiple-line leading can hang below the last body line. Keep cell
-    // height and painted paragraph borders inside their full layout extent.
-    const trailingLeading = lastPage.type === DocumentSkeletonPageType.BODY && borderBottomSpace === 0 ? wordAutoLeading : 0;
-    // Visible text must fit paginated body and cell bounds; blank trailing leading is excluded above.
-    const lineOverflowTolerance = (lastPage.type === DocumentSkeletonPageType.CELL ||
-        lastPage.type === DocumentSkeletonPageType.BODY) &&
-        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
-        ? 1e-6
-        : LINE_LAYOUT_OVERFLOW_TOLERANCE;
+    const lineOverflowTolerance = _getLineOverflowTolerance(lastPage, paragraphConfig);
     const lineOverflowsSection = !clipsSameParagraphInlineDrawing &&
-        lineHeight - trailingLeading + cellParagraphEndSpace + newLineTop - availableSectionHeight > lineOverflowTolerance;
+        _getLineOverflowHeight(lastPage, paragraphConfig, glyphGroup, isParagraphFirstShapedText, lineMetrics, lineHeight) + newLineTop - availableSectionHeight > lineOverflowTolerance;
 
     if (
         (lineOverflowsSection &&

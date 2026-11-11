@@ -122,10 +122,10 @@ describe('custom-range hit testing with real document layout', () => {
             render.deactivate();
             render.addRenderDependencies([[DocSkeletonManagerService]]);
             const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
-            const documents = new Documents('custom-range-document', skeleton);
+            const documents = injector.createInstance(Documents, 'custom-range-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
-            const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene);
+            const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene);
             render.addRenderDependencies([[DocEventManagerService]]);
             const service = render.with(DocEventManagerService);
             const clicks: string[] = [];

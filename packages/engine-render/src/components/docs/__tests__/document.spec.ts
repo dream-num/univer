@@ -25,6 +25,7 @@ import {
     DocumentDataModel,
     DocumentFlavor,
     HorizontalAlign,
+    Injector,
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -456,7 +457,7 @@ describe('documents render', () => {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 240 }, marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 0 },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-        const documents = new Documents('narrow-print-page', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        const documents = bed.injector.createInstance(Documents, 'narrow-print-page', skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
         try {
             skeleton.calculate();
             documents.transformByState({ left: 570, top: 20, scaleX: scale, scaleY: scale });
@@ -500,7 +501,7 @@ describe('documents render', () => {
             },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-        const documents = new Documents('note-paint-position', skeleton);
+        const documents = bed.injector.createInstance(Documents, 'note-paint-position', skeleton);
         try {
             skeleton.calculate();
             const note = skeleton.getSkeletonData()!.pages.flatMap((page) => page.notes ?? []).find((note) => note.noteId === 'note')!;
@@ -801,7 +802,7 @@ describe('documents render', () => {
                 },
             });
             const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-            const documents = new Documents('minimum-paragraph-border', skeleton);
+            const documents = bed.injector.createInstance(Documents, 'minimum-paragraph-border', skeleton);
             const ctx = canvas.getContext();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             const move = vi.spyOn(ctx, 'moveTo');
@@ -1280,7 +1281,7 @@ describe('documents render', () => {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-        const documents = new Documents('pixel-paragraph-border', skeleton);
+        const documents = bed.injector.createInstance(Documents, 'pixel-paragraph-border', skeleton);
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const line = page.sections[0].columns[0].lines[1];
         line.borderTop = { color: { rgb: '#000000' }, width: 2 / 3 };
@@ -1318,7 +1319,7 @@ describe('documents render', () => {
     ))('positions measured Word separator after paragraph spacing ($documentFlavor/$between/$materializedAfter)', ({ documentFlavor, between, materializedAfter }) => {
         const bed = createParagraphLayoutTestBed('Paragraph', { documentStyle: { documentFlavor } });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-        const documents = new Documents('paragraph-separator-spacing', skeleton);
+        const documents = bed.injector.createInstance(Documents, 'paragraph-separator-spacing', skeleton);
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const line = page.sections[0].columns[0].lines[1];
         const border = { color: { rgb: '#000000' }, width: 1, padding: 4, dashStyle: DashStyleType.SOLID };
@@ -1353,7 +1354,8 @@ describe('documents render', () => {
 
     it('paints the thick stroke, gap and thin stroke of a Word compound paragraph border', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as unknown as DocumentSkeleton;
-        const documents = new Documents('compound-paragraph-border', skeleton);
+        const injector = new Injector();
+        const documents = injector.createInstance(Documents, 'compound-paragraph-border', skeleton);
         const host = documents as unknown as {
             _drawBorder: () => void;
             _getDocumentFlavor: () => DocumentFlavor;
@@ -1393,6 +1395,7 @@ describe('documents render', () => {
             );
         } finally {
             documents.dispose();
+            injector.dispose();
         }
     });
 
@@ -1745,7 +1748,7 @@ describe('documents render', () => {
         const dataStream = `${stream}${T.PARAGRAPH}${T.SECTION_BREAK}`;
         const univer = new Univer();
         const border = { color: { rgb: '#112233' }, width: { v: 2 } };
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'separated-cell-ink',
             body: {
                 dataStream,
@@ -1773,9 +1776,9 @@ describe('documents render', () => {
             } },
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 300 }, marginLeft: 20, marginRight: 20, marginTop: 20, marginBottom: 20 },
         });
-        const view = new DocumentViewModel(model);
+        const view = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, univer.__getInjector().get(LocaleService));
-        const documents = new Documents('separated-cell-ink', skeleton, { pageLayoutType: PageLayoutType.VERTICAL, pageMarginLeft: 0, pageMarginTop: 0 });
+        const documents = univer.__getInjector().createInstance(Documents, 'separated-cell-ink', skeleton, { pageLayoutType: PageLayoutType.VERTICAL, pageMarginLeft: 0, pageMarginTop: 0 });
         const ctx = canvas.getContext();
         const strokes = vi.spyOn(ctx, 'stroke');
         const rectangles = vi.spyOn(ctx, 'rect');
@@ -1917,7 +1920,7 @@ describe('documents render', () => {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
-        const documents = new Documents('print-table-viewport', skeleton);
+        const documents = bed.injector.createInstance(Documents, 'print-table-viewport', skeleton);
         const page = createPage(pageType, '');
         attachTable(page);
         const table = page.skeTables.get('table-1')!;
@@ -1935,7 +1938,7 @@ describe('documents render', () => {
             : null);
         setDocsTableRenderViewportProvider(provider);
         const ctx = printing
-            ? new UniverPrintingContext(canvas.getContext()._context)
+            ? bed.injector.createInstance(UniverPrintingContext, canvas.getContext()._context)
             : canvas.getContext();
         const rect = vi.spyOn(ctx, 'rectByPrecision');
         const stroke = vi.spyOn(ctx, 'stroke');
@@ -2959,7 +2962,7 @@ describe('documents render', () => {
             } }],
             sectionBreaks: [{ startIndex: 7, sectionId: 'story-section' }],
         };
-        const model = new DocumentDataModel({
+        const model = univer.__getInjector().createInstance(DocumentDataModel, {
             id: 'story-decoration-origin',
             body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }], sectionBreaks: [{ startIndex: 5, sectionId: 'body-section' }] },
             headers: story === 'header' ? { header: { headerId: 'header', body } } : {},
@@ -2979,9 +2982,9 @@ describe('documents render', () => {
             },
         });
         const original = JSON.stringify(model.getSnapshot());
-        const viewModel = new DocumentViewModel(model);
+        const viewModel = univer.__getInjector().createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(viewModel, univer.__getInjector().get(LocaleService));
-        const documents = new Documents(model.getUnitId(), skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
+        const documents = univer.__getInjector().createInstance(Documents, model.getUnitId(), skeleton, { pageMarginLeft: 0, pageMarginTop: 0 });
         try {
             skeleton.calculate();
             const data = skeleton.getSkeletonData()!;

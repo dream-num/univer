@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { CustomRangeType, DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, Injector, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DataStreamTreeNode } from '../data-stream-tree-node';
 import { DocumentEditArea, DocumentViewModel, parseDataStreamToTree } from '../document-view-model';
+
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
 
 interface ITreeNodeSnapshot {
     blocks: number[];
@@ -987,13 +993,13 @@ describe('DocumentViewModel', () => {
 
 describe('custom range lookup across long reference stories', () => {
     it('preserves first-array priority, inclusive boundaries and edits for cached custom ranges', () => {
-        const model = new DocumentDataModel({ body: { dataStream: `${'x'.repeat(300)}\r\n`, customRanges: [
+        const model = testInjector.createInstance(DocumentDataModel, { body: { dataStream: `${'x'.repeat(300)}\r\n`, customRanges: [
             { rangeId: 'inner', rangeType: CustomRangeType.BOOKMARK, startIndex: 110, endIndex: 120 },
             { rangeId: 'later', rangeType: CustomRangeType.BOOKMARK, startIndex: 200, endIndex: 220 },
             { rangeId: 'outer', rangeType: CustomRangeType.BOOKMARK, startIndex: 100, endIndex: 250 },
             { rangeId: 'point', rangeType: CustomRangeType.BOOKMARK, startIndex: 50, endIndex: 50 },
         ] } });
-        const view = new DocumentViewModel(model);
+        const view = testInjector.createInstance(DocumentViewModel, model);
         try {
             const queries = [99, 100, 109.5, 110, 120, 120.5, 199, 200, 220, 220.5, 250, 251, 50, 49.5];
             for (const index of [...queries, ...queries.slice().reverse()]) {
@@ -1016,7 +1022,7 @@ describe('custom range lookup across long reference stories', () => {
     });
 
     it('does not rescan every reference range for each character of a long story', () => {
-        const model = new DocumentDataModel({ body: { dataStream: `${'x'.repeat(10000)}\r\n`, customRanges:
+        const model = testInjector.createInstance(DocumentDataModel, { body: { dataStream: `${'x'.repeat(10000)}\r\n`, customRanges:
             Array.from({ length: 32 }, (_, index) => ({ rangeId: `r${index}`, rangeType: CustomRangeType.BOOKMARK, startIndex: 100 + index * 100, endIndex: 110 + index * 100 })) } });
         let boundReads = 0;
         for (const range of model.getBody()!.customRanges!) {
@@ -1029,7 +1035,7 @@ describe('custom range lookup across long reference stories', () => {
                 },
             });
         }
-        const view = new DocumentViewModel(model);
+        const view = testInjector.createInstance(DocumentViewModel, model);
         try {
             for (let index = 0; index < 10000; index++) {
                 const range = view.getCustomRangeRaw(index);

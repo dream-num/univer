@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { IDocumentData, Injector } from '@univerjs/core';
+import { DocumentDataModel, LocaleService, PRESET_LIST_TYPE, Univer } from '@univerjs/core';
+import { afterEach } from 'vitest';
 import type { IDocumentSkeletonPage } from '../../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../../view-model/data-stream-tree-node';
 import type { ILayoutContext } from '../../../tools';
-import { DocumentDataModel, LocaleService, PRESET_LIST_TYPE, Univer } from '@univerjs/core';
 import { DocumentViewModel } from '../../../../view-model/document-view-model';
 import { Hyphen } from '../../../hyphenation/hyphen';
 import { LanguageDetector } from '../../../hyphenation/language-detector';
@@ -27,6 +28,7 @@ import { createSkeletonPage } from '../../../model/page';
 import { getNullSkeleton, prepareSectionBreakConfig } from '../../../tools';
 
 export interface IParagraphLayoutTestBed {
+    injector: Injector;
     dataModel: DocumentDataModel;
     viewModel: DocumentViewModel;
     ctx: ILayoutContext;
@@ -35,12 +37,16 @@ export interface IParagraphLayoutTestBed {
     curPage: IDocumentSkeletonPage;
 }
 
-function getLocaleService(): LocaleService {
-    const univer = new Univer();
-    return univer.__getInjector().get(LocaleService);
-}
+const runtimes = new Set<Univer>();
+afterEach(() => {
+    for (const runtime of runtimes) {
+        runtime.dispose();
+    }
+    runtimes.clear();
+});
 
 function createDocModel(
+    injector: Injector,
     content: string,
     overrides: { body?: Record<string, unknown>; documentStyle?: Record<string, unknown>; [key: string]: unknown } = {}
 ): DocumentDataModel {
@@ -68,10 +74,11 @@ function createDocModel(
             ...documentStyleOverride,
         },
     };
-    return new DocumentDataModel(documentData as unknown as Partial<IDocumentData>);
+    injector.add([DocumentDataModel, { useFactory: () => injector.createInstance(DocumentDataModel, documentData as unknown as Partial<IDocumentData>) }]);
+    return injector.get(DocumentDataModel);
 }
 
-function createLayoutContext(viewModel: DocumentViewModel): ILayoutContext {
+function createLayoutContext(viewModel: DocumentViewModel, localeService: LocaleService): ILayoutContext {
     const dataModel = viewModel.getDataModel();
     const { documentStyle, drawings, lists: customLists = {} } = dataModel;
     const lists = { ...PRESET_LIST_TYPE, ...customLists };
@@ -82,7 +89,7 @@ function createLayoutContext(viewModel: DocumentViewModel): ILayoutContext {
         footerTreeMap,
         lists,
         drawings,
-        localeService: getLocaleService(),
+        localeService,
         paragraphLineGapDefault: documentStyle.paragraphLineGapDefault ?? 0,
         defaultTabStop: documentStyle.defaultTabStop ?? 10.5,
         documentTextStyle: documentStyle.textStyle ?? {},
@@ -134,6 +141,7 @@ function createInitialPage(ctx: ILayoutContext, sectionBreakConfig: ISectionBrea
 }
 
 export interface ISectionLayoutTestBed {
+    injector: Injector;
     dataModel: DocumentDataModel;
     viewModel: DocumentViewModel;
     ctx: ILayoutContext;
@@ -146,14 +154,19 @@ export function createParagraphLayoutTestBed(
     content: string,
     overrides: { body?: Record<string, unknown>; documentStyle?: Record<string, unknown>; [key: string]: unknown } = {}
 ): IParagraphLayoutTestBed {
-    const dataModel = createDocModel(content, overrides);
-    const viewModel = new DocumentViewModel(dataModel);
-    const ctx = createLayoutContext(viewModel);
+    const univer = new Univer();
+    runtimes.add(univer);
+    const injector = univer.__getInjector();
+    const dataModel = createDocModel(injector, content, overrides);
+    injector.add([DocumentViewModel, { useFactory: () => injector.createInstance(DocumentViewModel, dataModel) }]);
+    const viewModel = injector.get(DocumentViewModel);
+    const ctx = createLayoutContext(viewModel, injector.get(LocaleService));
     const paragraphNode = getFirstParagraphNode(viewModel);
     const sectionBreakConfig = prepareSectionBreakConfig(ctx, 0);
     const curPage = createInitialPage(ctx, sectionBreakConfig);
 
     return {
+        injector,
         dataModel,
         viewModel,
         ctx,
@@ -200,14 +213,20 @@ export function createSectionLayoutTestBed(
         },
     };
 
-    const dataModel = new DocumentDataModel(documentData as unknown as Partial<IDocumentData>);
-    const viewModel = new DocumentViewModel(dataModel);
-    const ctx = createLayoutContext(viewModel);
+    const univer = new Univer();
+    runtimes.add(univer);
+    const injector = univer.__getInjector();
+    injector.add([DocumentDataModel, { useFactory: () => injector.createInstance(DocumentDataModel, documentData as unknown as Partial<IDocumentData>) }]);
+    injector.add([DocumentViewModel, { useFactory: () => injector.createInstance(DocumentViewModel, injector.get(DocumentDataModel)) }]);
+    const dataModel = injector.get(DocumentDataModel);
+    const viewModel = injector.get(DocumentViewModel);
+    const ctx = createLayoutContext(viewModel, injector.get(LocaleService));
     const sectionNode = viewModel.getChildren()[0];
     const sectionBreakConfig = prepareSectionBreakConfig(ctx, 0);
     const curPage = createInitialPage(ctx, sectionBreakConfig);
 
     return {
+        injector,
         dataModel,
         viewModel,
         ctx,

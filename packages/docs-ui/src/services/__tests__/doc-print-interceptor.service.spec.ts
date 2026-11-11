@@ -122,7 +122,7 @@ describe('DocPrintInterceptorService', () => {
             paragraphs: [{ startIndex: 1, paragraphId: `${blockId}-p` }],
             customBlocks: [{ startIndex: 0, blockId }],
         });
-        const model = new DocumentDataModel({
+        const model = injector.createInstance(DocumentDataModel, {
             id: 'group-print',
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 400 }, marginTop: 60, marginBottom: 60, marginLeft: 20, marginRight: 20, marginHeader: 10, marginFooter: 10, defaultHeaderId: 'header', defaultFooterId: 'footer' },
             body: {
@@ -137,7 +137,7 @@ describe('DocPrintInterceptorService', () => {
             drawings: { ...groupDrawings('first'), ...groupDrawings('second'), ...groupDrawings('header'), ...groupDrawings('footer'), ...groupDrawings('unanchored') },
             notes: { note: { noteId: 'note', type: 'footnote', body: story('note-group'), drawings: groupDrawings('note-group') } },
         });
-        const view = new DocumentViewModel(model);
+        const view = injector.createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, injector.get(LocaleService));
         try {
             skeleton.calculate();
@@ -178,14 +178,14 @@ describe('DocPrintInterceptorService', () => {
             layoutType: PositionedObjectLayoutType.INLINE,
             docTransform: { angle: 0, size: { width: 40, height: 20 }, positionH: { relativeFrom: 0 }, positionV: { relativeFrom: 0 } },
         });
-        const model = new DocumentDataModel({
+        const model = injector.createInstance(DocumentDataModel, {
             id: 'single-print',
             documentStyle: { documentFlavor, pageSize: { width: 300, height: 400 } },
             body: { dataStream: '\b\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'body-p' }], sectionBreaks: [{ startIndex: 2, sectionId: 'body-s' }], customBlocks: [{ startIndex: 0, blockId: 'body-image' }] },
             headers: { unused: { headerId: 'unused', body: { dataStream: '\b\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'header-p' }], customBlocks: [{ startIndex: 0, blockId: 'header-image' }] } } },
             drawings: { 'body-image': drawing('body-image'), 'header-image': drawing('header-image') },
         });
-        const view = new DocumentViewModel(model);
+        const view = injector.createInstance(DocumentViewModel, model);
         const skeleton = DocumentSkeleton.create(view, locale);
         try {
             skeleton.calculate();

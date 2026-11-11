@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { CustomRangeType, DocStyleType, DocumentFlavor } from '../../../types/interfaces/i-document-data';
 import { DocumentDataModel } from '../document-data-model';
@@ -22,6 +23,12 @@ import { JSONX } from '../json-x/json-x';
 import { validateDocumentStructure } from '../text-x/structure-validator';
 import { TextX } from '../text-x/text-x';
 import { getRichTextEditPath } from '../text-x/utils';
+
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
 
 function body(text: string): IDocumentBody {
     return {
@@ -35,7 +42,7 @@ function body(text: string): IDocumentBody {
 }
 
 function createDocument(): DocumentDataModel {
-    return new DocumentDataModel({
+    return testInjector.createInstance(DocumentDataModel, {
         id: 'doc',
         body: {
             ...body('A\uFFFCB'),
@@ -48,7 +55,7 @@ function createDocument(): DocumentDataModel {
 
 describe('public document metadata', () => {
     it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('persists named aliases and typed properties through edits, undo and reload (%s)', (documentFlavor) => {
-        const document = new DocumentDataModel({
+        const document = testInjector.createInstance(DocumentDataModel, {
             id: 'metadata',
             body: body('Text'),
             documentStyle: { documentFlavor },
@@ -70,7 +77,7 @@ describe('public document metadata', () => {
             const aliasEdit = jsonX.replaceOp(['styles', 'DOCXHeading', 'aliases'], ['Original'], ['Edited']);
             const aliasUndo = JSONX.invertWithDoc(aliasEdit, document.getSnapshot());
             document.apply(aliasEdit);
-            const restored = new DocumentDataModel(JSON.parse(JSON.stringify(document.getSnapshot())));
+            const restored = testInjector.createInstance(DocumentDataModel, JSON.parse(JSON.stringify(document.getSnapshot())));
             try {
                 expect(restored.getSnapshot().customProperties).toEqual({
                     ...before.customProperties,
@@ -92,7 +99,7 @@ describe('public document metadata', () => {
 
 describe('document footnote segments', () => {
     it('inherits shared document styles in headers and footers without duplicating persisted definitions', () => {
-        const document = new DocumentDataModel({
+        const document = testInjector.createInstance(DocumentDataModel, {
             id: 'doc',
             body: body('Body'),
             documentStyle: { textStyle: { ff: 'Calibri', fs: 11 } },
@@ -153,7 +160,7 @@ describe('document footnote segments', () => {
         const edit = JSONX.getInstance().editOp(new TextX().insert(2, { dataStream: '前文' }).serialize(), ['body']);
         document.apply(edit);
         expect(document.getBody()?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 3, properties: { noteId: 'note' } });
-        const restored = new DocumentDataModel(document.getSnapshot());
+        const restored = testInjector.createInstance(DocumentDataModel, document.getSnapshot());
         expect(restored.getSelfOrHeaderFooterModel('note')?.getBody()).toEqual(document.getSnapshot().notes?.note.body);
         expect(restored.getSnapshot().noteSettings?.footnote).toEqual(document.getSnapshot().noteSettings?.footnote);
         expect(validateDocumentStructure(restored.getSnapshot())).toEqual([]);

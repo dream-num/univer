@@ -15,13 +15,13 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IRange } from '@univerjs/core';
+import { Direction, RANGE_TYPE } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { IRemoveSheetMutationParams } from '../../../basics';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import type { IRemoveRowColCommand } from '../type';
-import { Direction, RANGE_TYPE } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
 import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
@@ -1276,7 +1276,7 @@ describe('test ref-range move', () => {
             }]);
         });
 
-        it('should handle insertion at the start of the range', () => {
+        it('should shift the range down when insertion is at the first row of the range', () => {
             const info: ICommandInfo<IInsertRowCommandParams> = {
                 params: {
                     range: { startRow: 5, endRow: 7, startColumn: 0, endColumn: 5 },
@@ -1291,7 +1291,7 @@ describe('test ref-range move', () => {
             const result = handleInsertRowCommon(info, targetRange);
 
             expect(result).toEqual([{
-                startRow: 5,
+                startRow: 8, // 5 + (7 - 5 + 1): inserting above the range shifts it
                 endRow: 13, // 10 + (7 - 5 + 1)
                 startColumn: 2,
                 endColumn: 8,
@@ -1404,7 +1404,7 @@ describe('test ref-range move', () => {
             }]);
         });
 
-        it('should handle insertion at the start of the range', () => {
+        it('should shift the range right when insertion is at the first column of the range', () => {
             const info: ICommandInfo<IInsertColCommandParams> = {
                 params: {
                     range: { startRow: 0, endRow: 5, startColumn: 5, endColumn: 7 },
@@ -1421,7 +1421,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual([{
                 startRow: 2,
                 endRow: 8,
-                startColumn: 5,
+                startColumn: 8, // 5 + (7 - 5 + 1): inserting to the left of the range shifts it
                 endColumn: 13, // 10 + (7 - 5 + 1)
             }]);
         });

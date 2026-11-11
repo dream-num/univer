@@ -80,7 +80,7 @@
         "@univerjs/protocol": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "rxjs": "7.8.2",
-        "tsrs": "0.20.1-ts7.1.0-beta",
-        "vitest": "^5.0.5"
+        "tsrs": "0.23.0-ts7.1.0-beta",
+        "vitest": "^5.1.0"
     }
 }

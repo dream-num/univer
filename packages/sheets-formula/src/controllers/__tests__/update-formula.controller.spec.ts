@@ -1045,6 +1045,8 @@ describe('UpdateFormulaController', () => {
 
     it('should sync array formula data when a formula edit replaces an array formula anchor', async () => {
         setTwoByTwoArrayFormula(formulaDataModel);
+        // Replacing a multi-cell array anchor also marks its former range dirty.
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
 
         await commandService.executeCommand(SetRangeValuesMutation.id, {

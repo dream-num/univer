@@ -37,8 +37,6 @@ import type {
     ISetTextWrapCommandParams,
     IToggleGridlinesCommandParams,
 } from '@univerjs/sheets';
-import type { FDefinedName } from './f-defined-name';
-import type { FWorkbook } from './f-workbook';
 import {
     BooleanNumber,
     covertCellValue,
@@ -91,6 +89,8 @@ import {
     SheetsSelectionsService,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
+import type { FDefinedName } from './f-defined-name';
+import type { FWorkbook } from './f-workbook';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from './const';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
@@ -499,8 +499,8 @@ export class FWorksheet extends FBaseInitialable {
                 unitId: this._workbook.getUnitId(),
                 sheetId: sheet.getSheetId(),
                 // Use the current range instead of the future actual range to match Apps Script behavior.
-                // Users can create the latest range in real time when needed.
-                rangeType: RANGE_TYPE.NORMAL,
+                // Users can create the latest range in real time when needed. The range type is kept so
+                // that a whole column/row range keeps behaving like one.
                 startRow: parsedRange.rangeType === RANGE_TYPE.COLUMN ? 0 : parsedRange.startRow,
                 endRow: parsedRange.rangeType === RANGE_TYPE.COLUMN ? sheet.getMaxRows() - 1 : parsedRange.endRow,
                 startColumn: parsedRange.rangeType === RANGE_TYPE.ROW ? 0 : parsedRange.startColumn,

@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: '확인',
         },
         GradientColorPicker: {
+            add: '그라데이션 중지점 추가',
             linear: '선형',
             radial: '방사형',
             angular: '각도형',

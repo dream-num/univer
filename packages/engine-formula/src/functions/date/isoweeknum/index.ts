@@ -65,7 +65,15 @@ export class Isoweeknum extends BaseFunction {
         } else if (yearStartWeekDay <= 4) {
             yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
         } else {
-            yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
+            yearWeekStartSerialNumber = yearStartSerialNumber + (8 - yearStartWeekDay);
+        }
+
+        const nextYearStartSerialNumber = excelDateSerial(new Date(Date.UTC(currentYear + 1, 0, 1)), this.getDateSystem());
+        const nextYearStartWeekDay = getWeekDayByDateSerialNumber(nextYearStartSerialNumber, this.getDateSystem());
+
+        // The last days of December belong to week 1 when the next year starts on Monday to Thursday.
+        if (nextYearStartWeekDay >= 1 && nextYearStartWeekDay <= 4 && dateSerialNumber >= nextYearStartSerialNumber - (nextYearStartWeekDay - 1)) {
+            return NumberValueObject.create(1);
         }
 
         if (dateSerialNumber < yearWeekStartSerialNumber) {
@@ -78,7 +86,7 @@ export class Isoweeknum extends BaseFunction {
             } else if (yearStartWeekDay <= 4) {
                 yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
             } else {
-                yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
+                yearWeekStartSerialNumber = yearStartSerialNumber + (8 - yearStartWeekDay);
             }
         }
 

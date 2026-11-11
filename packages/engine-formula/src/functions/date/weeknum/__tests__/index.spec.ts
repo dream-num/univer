@@ -51,6 +51,12 @@ describe('Test weeknum function', () => {
             expect(result2.getValue()).toStrictEqual(52);
         });
 
+        it('return type 21 follows ISO 8601 at year boundaries', () => {
+            const returnType = NumberValueObject.create(21);
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30'), returnType).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2021-1-4'), returnType).getValue()).toBe(1);
+        });
+
         it('uses the 1904 epoch when serial is zero', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
             expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(1)).getValue()).toBe(0);

@@ -43,6 +43,12 @@ describe('Test isoweeknum function', () => {
             expect(result.getValue()).toStrictEqual(52);
         });
 
+        it('follows ISO 8601 at year boundaries', () => {
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2021-1-4')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2021-2-1')).getValue()).toBe(5);
+        });
+
         it('uses the 1904 epoch when serial is zero', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
             expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBe(52);

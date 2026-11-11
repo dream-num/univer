@@ -24,21 +24,32 @@ export interface IRangeAnchor {
 
 export class ConditionalFormattingRangeTransformService {
     subtractRanges(sourceRanges: IRange[], rangesToSubtract: IRange[]) {
-        return Rectangle.mergeRanges(Rectangle.subtractMulti(sourceRanges, rangesToSubtract));
+        return this._keepCoveredRangeType(
+            Rectangle.mergeRanges(Rectangle.subtractMulti(sourceRanges, rangesToSubtract)),
+            sourceRanges
+        );
     }
 
     addRanges(sourceRanges: IRange[], rangesToAdd: IRange[]) {
-        return Rectangle.mergeRanges([...sourceRanges, ...rangesToAdd]);
+        return this._keepCoveredRangeType(
+            Rectangle.mergeRanges([...sourceRanges, ...rangesToAdd]),
+            sourceRanges
+        );
     }
 
     applyRangeDelta(sourceRanges: IRange[], rangesToSubtract: IRange[], rangesToAdd: IRange[]) {
         const ranges = rangesToSubtract.length
-            ? this.subtractRanges(sourceRanges, rangesToSubtract)
+            ? Rectangle.mergeRanges(Rectangle.subtractMulti(sourceRanges, rangesToSubtract))
             : sourceRanges;
 
-        return rangesToAdd.length
-            ? this.addRanges(ranges, rangesToAdd)
+        const merged = rangesToAdd.length
+            ? Rectangle.mergeRanges([...ranges, ...rangesToAdd])
             : ranges;
+
+        // the delta is applied to the original ranges: when the net coverage is unchanged (auto fill
+        // or paste back into the same cells) the whole column/row type has to survive, even though
+        // the intermediate subtract/add results are plain coordinates
+        return this._keepCoveredRangeType(merged, sourceRanges);
     }
 
     copyIntersectingRanges(sourceRanges: IRange[], sourceRange: IRange, targetAnchor: IRangeAnchor) {
@@ -66,5 +77,23 @@ export class ConditionalFormattingRangeTransformService {
             startColumn: range.startColumn + offset.col,
             endColumn: range.endColumn + offset.col,
         };
+    }
+
+    /**
+     * Rebuilding ranges from coordinates drops `rangeType`. A result range that still covers exactly
+     * the same cells as a whole column/row source has to keep that type, otherwise a rule that was
+     * not actually changed (for example adding an already covered range) degrades to concrete rows.
+     * Results that no longer match a source range are genuine partial coverage and stay concrete.
+     */
+    private _keepCoveredRangeType(ranges: IRange[], sourceRanges: IRange[]) {
+        return ranges.map((range) => {
+            const source = sourceRanges.find((item) => item.rangeType
+                && item.startRow === range.startRow
+                && item.endRow === range.endRow
+                && item.startColumn === range.startColumn
+                && item.endColumn === range.endColumn);
+
+            return source ? { ...range, rangeType: source.rangeType } : range;
+        });
     }
 }

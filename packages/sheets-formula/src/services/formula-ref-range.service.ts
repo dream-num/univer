@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { EffectRefRangeParams, IInsertColCommandParams, IInsertRowCommandParams } from '@univerjs/sheets';
+import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
-import { getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import { EffectRefRangId, getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
 
@@ -31,6 +31,53 @@ export type RangeFormulaChangeCallback = (infos: { formulas: string[]; ranges: I
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
+
+interface IRangeFormulaItem {
+    formulas: { newFormula: string; orginFormula: string }[];
+    ranges: IRange[];
+    key: string;
+}
+
+/**
+ * An inserted row or column that lands inside a registered range stays part of that range, the
+ * same way {@link handleCommonDefaultRangeChangeWithEffectRefCommands} expands a range when the
+ * insertion happens inside it. `registerRangeFormula` splits a range into the segments that are
+ * affected by a command, and an inserted block is not part of any segment, so it has to be
+ * collected separately, otherwise the inserted cells would silently drop out of the range.
+ */
+function getInsertedBlocks(command: EffectRefRangeParams, ranges: IRange[]): IRange[] {
+    const params = command.params as IInsertRowCommandParams | IInsertColCommandParams | undefined;
+    if (!params?.range) {
+        return [];
+    }
+
+    switch (command.id) {
+        case EffectRefRangId.InsertRowCommandId: {
+            const { startRow, endRow } = params.range;
+            return ranges
+                .filter((range) => startRow > range.startRow && startRow <= range.endRow)
+                .map((range) => ({
+                    startRow,
+                    endRow,
+                    startColumn: range.startColumn,
+                    endColumn: range.endColumn,
+                }));
+        }
+        case EffectRefRangId.InsertColCommandId: {
+            const { startColumn, endColumn } = params.range;
+            return ranges
+                .filter((range) => startColumn > range.startColumn && startColumn <= range.endColumn)
+                .map((range) => ({
+                    startRow: range.startRow,
+                    endRow: range.endRow,
+                    startColumn,
+                    endColumn,
+                }));
+        }
+        default:
+            return [];
+    }
+}
 
 function getFormulaKeyOffset(lexerTreeBuilder: LexerTreeBuilder, formulaString: string, refOffsetX: number, refOffsetY: number) {
     const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
@@ -252,6 +299,11 @@ export class FormulaRefRangeService extends Disposable {
         const formulaDeps = formulas.map((formula) => this._getFormulaDependcy(unitId, subUnitId, formula, oldRanges));
         // eslint-disable-next-line max-lines-per-function
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
+            const wholeRangeResult = this._transformWholeRangeFormulas(unitId, subUnitId, oldRanges, formulas, commandInfo);
+            if (wholeRangeResult) {
+                return callback(wholeRangeResult);
+            }
+
             const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
             if (!effectedRanges) {
                 return {
@@ -307,7 +359,7 @@ export class FormulaRefRangeService extends Disposable {
                 noEffectRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
 
                 // 3. calculate every effected range to get new range and new formula
-                const keyMap = new Map<string, { formulas: { newFormula: string }[]; ranges: IRange[] }[]>();
+                const keyMap = new Map<string, IRangeFormulaItem[]>();
                 for (let i = 0; i < ranges.length; i++) {
                     const range = ranges[i];
                     const currentRow = range.startRow;
@@ -379,6 +431,10 @@ export class FormulaRefRangeService extends Disposable {
                     }
                 }
 
+                // 4.1 the inserted row/column block itself is not part of any segment but stays
+                //     covered by the range it was inserted into
+                this._appendInsertedBlockItems(keyMap, commandInfo, oldRanges, formulas, oldRanges[0], originKey);
+
                 // 5. merge effected ranges and get new formula,
                 //    if origin formula was same, means these ranges can use same formula
                 const res = [];
@@ -421,5 +477,64 @@ export class FormulaRefRangeService extends Disposable {
         });
 
         return disposableCollection;
+    }
+
+    /**
+     * A whole column/row/sheet range keeps its anchor, so it is adjusted as a single range:
+     * segmenting it would both split the rule and drop the range type.
+     *
+     * @returns the single rule range to apply, or `undefined` when the regular segmentation applies
+     */
+    private _transformWholeRangeFormulas(
+        unitId: string,
+        subUnitId: string,
+        oldRanges: IRange[],
+        formulas: string[],
+        commandInfo: EffectRefRangeParams
+    ): { formulas: string[]; ranges: IRange[] }[] | undefined {
+        const ruleRangeType = oldRanges[0]?.rangeType ?? RANGE_TYPE.NORMAL;
+        if (ruleRangeType === RANGE_TYPE.NORMAL || !oldRanges.every((range) => range.rangeType === ruleRangeType)) {
+            return undefined;
+        }
+
+        const ranges = handleCommonDefaultRangeChangeWithEffectRefCommands(oldRanges[0], commandInfo);
+        if (!ranges.length) {
+            return [];
+        }
+
+        return [{
+            formulas: formulas.map((formula) => (isFormulaString(formula) ? this.transformFormulaByEffectCommand(unitId, subUnitId, formula, commandInfo) : formula)),
+            ranges,
+        }];
+    }
+
+    private _appendInsertedBlockItems(
+        keyMap: Map<string, IRangeFormulaItem[]>,
+        commandInfo: EffectRefRangeParams,
+        oldRanges: IRange[],
+        formulas: string[],
+        origin: IRange,
+        originKey: string
+    ) {
+        for (const block of getInsertedBlocks(commandInfo, oldRanges)) {
+            const offsetRow = block.startRow - origin.startRow;
+            const offsetColumn = block.startColumn - origin.startColumn;
+            const blockFormulas = formulas.map((formula) => ({
+                newFormula: isFormulaString(formula) ? this._lexerTreeBuilder.moveFormulaRefOffset(formula, offsetColumn, offsetRow) : formula,
+                orginFormula: formula,
+            }));
+            const item: IRangeFormulaItem = {
+                formulas: blockFormulas,
+                ranges: [block],
+                key: originKey,
+            };
+            const items = keyMap.get(item.key);
+
+            if (items) {
+                items.push(item);
+            } else {
+                keyMap.set(item.key, [item]);
+            }
+        }
     }
 }

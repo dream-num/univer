@@ -58,7 +58,15 @@ const SNAPSHOT_OUTPUT_METHODS = [
 
 interface ICompactFormulaChunk {
     coordinates: Uint32Array;
+    /** Own formula text; '' for shared-formula followers. */
     formulas: string[];
+    /** Shared-formula id per entry, created with the chunk's first shared-formula cell. */
+    formulaIds?: Array<string | undefined>;
+    /**
+     * The sheet's formula id map once it is complete. Followers resolve against it to the same
+     * `{ f, si, x, y }` items the object path writes; before that they keep the object path's raw shape.
+     */
+    formulaIdMap?: Record<string, IFormulaIdMap>;
 }
 
 type CompactFormulaData = Record<string, Record<string, ICompactFormulaChunk[]>>;
@@ -74,17 +82,37 @@ function materializeCompactFormulaSheet(
         const chunk = chunks.pop()!;
         for (let index = chunk.formulas.length - 1; index >= 0; index--) {
             const rowNumber = chunk.coordinates[index * 2];
+            const column = chunk.coordinates[index * 2 + 1];
+            const item = compactFormulaItem(chunk, index, rowNumber, column);
+            // A follower without its shared formula is dropped, as the object path deletes it.
+            if (!item) continue;
             if (previousRow !== rowNumber) {
                 if (row) Object.setPrototypeOf(row, Object.prototype);
                 row = Object.create(null);
                 matrix[rowNumber] = row!;
                 previousRow = rowNumber;
             }
-            row![chunk.coordinates[index * 2 + 1]] = { f: chunk.formulas[index] };
+            row![column] = item;
         }
     }
     // Captured coordinates were own data properties before any later prototype setters.
     if (row) Object.setPrototypeOf(row, Object.prototype);
+}
+
+function compactFormulaItem(
+    chunk: ICompactFormulaChunk,
+    index: number,
+    row: number,
+    column: number
+): Nullable<IFormulaDataItem> {
+    const f = chunk.formulas[index];
+    const si = chunk.formulaIds?.[index];
+    if (si === undefined) return { f };
+    if (f !== '') return { f, si };
+    const formulaIdMap = chunk.formulaIdMap;
+    if (!formulaIdMap) return { f: '', si };
+    const formulaInfo = formulaIdMap[si];
+    return formulaInfo ? { f: formulaInfo.f, si, x: column - formulaInfo.c, y: row - formulaInfo.r } : null;
 }
 
 class CompactFormulaDataSnapshot implements IFormulaDataSnapshot {
@@ -1164,15 +1192,17 @@ function buildSheetFormulaData(
 
         if (compactChunks) {
             const ordinaryFormula = typeof formulaString === 'string' && formulaId === '';
+            // Shared formulas: the anchor keeps its text, followers resolve against the formula id map.
+            const sharedFormula = typeof formulaString === 'string' && typeof formulaId === 'string' && checkFormulaId;
             const orderedCoordinates = r > previousRow || (r === previousRow && c > previousColumn);
             if (
-                ordinaryFormula && orderedCoordinates &&
+                (ordinaryFormula || sharedFormula) && orderedCoordinates &&
                 Number.isInteger(r) && r >= 0 && r <= 0xFFFF_FFFF &&
                 Number.isInteger(c) && c >= 0 && c <= 0xFFFF_FFFF
             ) {
                 previousRow = r;
                 previousColumn = c;
-                if (checkFormulaString) {
+                if (sharedFormula || checkFormulaString) {
                     let chunk = compactChunks[compactChunks.length - 1];
                     if (!chunk || chunk.formulas.length * 2 === chunk.coordinates.length) {
                         const size = compactChunks.length === 0 ? 128 : COMPACT_FORMULA_CHUNK_SIZE;
@@ -1182,7 +1212,13 @@ function buildSheetFormulaData(
                     const index = chunk.formulas.length;
                     chunk.coordinates[index * 2] = r;
                     chunk.coordinates[index * 2 + 1] = c;
-                    chunk.formulas.push(formulaString);
+                    if (sharedFormula) {
+                        chunk.formulas.push(checkFormulaString ? formulaString : '');
+                        (chunk.formulaIds ??= [])[index] = formulaId;
+                        if (checkFormulaString) formulaIdMap[formulaId] = { f: formulaString, r, c };
+                    } else {
+                        chunk.formulas.push(formulaString);
+                    }
                 }
                 return;
             }
@@ -1208,6 +1244,12 @@ function buildSheetFormulaData(
     ) {
         materializeCompactFormulaSheet(compactChunks, sheetFormulaDataMatrix.getMatrix());
         compactChunks = undefined;
+    }
+
+    if (compactChunks?.some((chunk) => chunk.formulaIds)) {
+        // The snapshot resolves followers later, against the map as it is now.
+        const resolution: Record<string, IFormulaIdMap> = Object.assign(Object.create(null), formulaIdMap);
+        for (const chunk of compactChunks) chunk.formulaIdMap = resolution;
     }
 
     if (!compactChunks) {

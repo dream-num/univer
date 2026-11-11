@@ -209,6 +209,43 @@ function readFormulaInput(model: FormulaDataModel, compact: boolean): IFormulaDa
 }
 
 describe('compact execution formula snapshots', () => {
+    it('compacts shared formulas and materializes the same items as getFormulaData', () => {
+        const cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {
+            0: { 0: { v: 1 }, 1: { f: '=A1*2', si: 'shared' }, 2: { f: '=SUM(A1:B1)' } },
+            1: { 0: { v: 2 }, 1: { si: 'shared' }, 2: { si: 'orphan' } },
+            2: { 0: { v: 3 }, 1: { si: 'shared', v: 6 }, 3: { f: 'text', si: 'shared' } },
+            // A follower before its anchor resolves against the finished map.
+            3: { 1: { si: 'late' } },
+            4: { 1: { f: '=A5+1', si: 'late' } },
+        };
+        const testBed = createCompactFormulaTestBed(cellData);
+        try {
+            const expected = testBed.model.getFormulaData();
+            const snapshot = testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy);
+            expect(snapshot).toBeDefined();
+            // Edits after capture do not reach the snapshot.
+            testBed.worksheet.getCellMatrix().getValue(0, 1)!.f = '=A1*3';
+            const actual = snapshot!.materialize();
+            expect(actual).toEqual(expected);
+            expect(actual.test!.sheet1![1]![1]).toEqual({ f: '=A1*2', si: 'shared', x: 0, y: 1 });
+            expect(actual.test!.sheet1![3]![1]).toEqual({ f: '=A5+1', si: 'late', x: 0, y: -1 });
+            expect(actual.test!.sheet1![1]![2]).toBeUndefined();
+            expect(actual.test!.sheet1![2]![3]).toEqual({ f: '=A1*2', si: 'shared', x: 2, y: 2 });
+        } finally { testBed.univer.dispose(); }
+    });
+
+    it('keeps the object path result when a shared formula follows an uncompactable cell', () => {
+        const testBed = createCompactFormulaTestBed({
+            0: { 1: { f: '=A1*2', si: 'shared' } },
+            1: { 1: { si: 'shared' }, 2: { f: '=B2', si: 7 as unknown as string } },
+            2: { 1: { si: 'shared' } },
+        });
+        try {
+            const expected = testBed.model.getFormulaData();
+            expect(testBed.model.tryCreateFormulaDataSnapshot(nodeUtilTypes.isProxy)?.materialize()).toEqual(expected);
+        } finally { testBed.univer.dispose(); }
+    });
+
     it('captures and materializes formulas when Object.hasOwn is unavailable', () => {
         const testBed = createCompactFormulaTestBed({ 0: { 0: { f: '=SUM(A1:A2)' } } });
         try {

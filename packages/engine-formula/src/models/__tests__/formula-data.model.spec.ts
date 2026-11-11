@@ -2363,3 +2363,77 @@ describe('Test formula data model', () => {
         });
     });
 });
+
+describe('formula dirty ranges', () => {
+    const DIRTY_RANGE_WORKBOOK_DATA: IWorkbookData = {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'Sheet1',
+                cellData: {
+                    0: { 0: { f: '=1' }, 2: { f: '=B1', si: 'shared' }, 4: { f: '=SEQUENCE(2)', ref: 'E1:E2' } },
+                    1: { 0: { f: '=2', v: 2 }, 2: { si: 'shared' }, 3: { v: 5 } },
+                    2: { 0: { f: '=3' }, 2: { si: 'shared', v: 0 } },
+                    3: { 0: { f: '=4' }, 1: { f: '=A4', v: null }, 2: { si: 'shared' } },
+                },
+            },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Sheet2',
+                cellData: {
+                    5: { 1: { f: '=Sheet1!A1' } },
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: ['sheet1', 'sheet2'],
+        styles: {},
+    };
+
+    function observe(model: FormulaDataModel) {
+        return {
+            dirtyRanges: model.getFormulaDirtyRanges(),
+            arrayFormulaRange: model.getArrayFormulaRange(),
+            arrayFormulaCellData: model.getArrayFormulaCellData(),
+            sharedFormulas: [1, 2, 3].map((row) => model.getFormulaStringByCell(row, 2, 'sheet1', 'test')),
+        };
+    }
+
+    it('reads cells directly and matches the formula data path of a customized model', () => {
+        const standard = createCommandTestBed(Tools.deepClone(DIRTY_RANGE_WORKBOOK_DATA));
+        const customized = createCommandTestBed(Tools.deepClone(DIRTY_RANGE_WORKBOOK_DATA));
+        let formulaDataReads = 0;
+        class CustomFormulaDataModel extends FormulaDataModel {
+            override getFormulaData(): IFormulaData {
+                formulaDataReads++;
+                return super.getFormulaData();
+            }
+        }
+        const customizedModel = customized.get(FormulaDataModel);
+        Object.setPrototypeOf(customizedModel, CustomFormulaDataModel.prototype);
+        try {
+            const expected = observe(customizedModel);
+            expect(formulaDataReads).toBe(1);
+            const actual = observe(standard.get(FormulaDataModel));
+            expect(actual).toEqual(expected);
+            expect(actual.dirtyRanges).toEqual([
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 2, endRow: 3, startColumn: 0, endColumn: 0 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 3, endRow: 3, startColumn: 1, endColumn: 1 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 0, endRow: 1, startColumn: 2, endColumn: 2 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 3, endRow: 3, startColumn: 2, endColumn: 2 } },
+                { unitId: 'test', sheetId: 'sheet1', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 0, endRow: 0, startColumn: 4, endColumn: 4 } },
+                { unitId: 'test', sheetId: 'sheet2', range: { rangeType: RANGE_TYPE.NORMAL, startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 } },
+            ]);
+            expect(actual.arrayFormulaRange.test?.sheet1?.[0]?.[4]).toEqual(expect.objectContaining({ startRow: 0, endRow: 1, startColumn: 4, endColumn: 4 }));
+            expect(actual.sharedFormulas).toEqual(['=B2', '=B3', '=B4']);
+        } finally {
+            Object.setPrototypeOf(customizedModel, FormulaDataModel.prototype);
+            standard.univer.dispose();
+            customized.univer.dispose();
+        }
+    });
+});

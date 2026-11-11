@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
-import { getLeftTopPlaceholderSize } from '../sheet.render-controller';
+import { getLeftTopPlaceholderSize, SheetRenderController } from '../sheet.render-controller';
 import { SheetSkeletonRenderController } from '../skeleton.render-controller';
 import { SheetsZoomRenderController } from '../zoom.render-controller';
 import { createChartRenderTestBed } from './chart-render-test-bed';
@@ -36,6 +36,20 @@ describe('SheetRenderController', () => {
             width: 86,
             height: 60,
         });
+    });
+
+    it('skips dirty bounds once the removed sheet has no skeleton param left', () => {
+        const { render, workbook, activate } = createChartRenderTestBed();
+        activate('grid');
+
+        const controller = render.with(SheetRenderController) as unknown as {
+            _rangeToBounds: (ranges: { startRow: number; endRow: number; startColumn: number; endColumn: number }[]) => unknown;
+        };
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+
+        expect(controller._rangeToBounds([range])).toHaveLength(1);
+        expect(workbook.removeSheet('grid')).toBe(true);
+        expect(controller._rangeToBounds([range])).toEqual([]);
     });
 });
 

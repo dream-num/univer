@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                            | CSS | Locales | Facade entry |
-| ---------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-hyper-link` | Yes |   Yes   |      No      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-docs-hyper-link` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-docs-hyper-link
 npm install @univerjs/preset-docs-hyper-link
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -30,6 +28,10 @@ import { UniverDocsHyperLinkPreset } from '@univerjs/preset-docs-hyper-link';
 // Use with createUniver:
 // createUniver({ presets: [UniverDocsHyperLinkPreset()] });
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

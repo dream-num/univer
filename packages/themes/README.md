@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/themes` | `UniverThemes` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/themes` | `UniverThemes` | No | No | No | No |
 
 ## Installation
 
@@ -20,13 +20,15 @@ pnpm add @univerjs/themes
 npm install @univerjs/themes
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
 import { darkBlueTheme, defaultTheme, blueTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

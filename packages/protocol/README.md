@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/protocol` | `UniverProtocol` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/protocol` | `UniverProtocol` | No | No | No | No |
 
 ## Installation
 
@@ -20,13 +20,15 @@ pnpm add @univerjs/protocol
 npm install @univerjs/protocol
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
 import type { IWorkbookMeta } from '@univerjs/protocol';
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

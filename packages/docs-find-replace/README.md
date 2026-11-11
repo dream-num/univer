@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-find-replace` | `UniverDocsFindReplace` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/docs-find-replace` | `UniverDocsFindReplace` | No | No | No | No |
 
 ## Installation
 
@@ -21,6 +21,8 @@ npm install @univerjs/docs-find-replace @univerjs/find-replace
 ```
 
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -41,6 +43,8 @@ univer.registerPlugin(UniverDocsFindReplacePlugin);
 ```
 
 ## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 Register the shared find-and-replace plugin before the Docs adapter so it can provide the common UI, locale strings, and services. Configure the rest of the Docs plugin stack before adding these two plugins.
 

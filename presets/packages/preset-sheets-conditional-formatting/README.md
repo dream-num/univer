@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                          | CSS | Locales | Facade entry |
-| ------------------------------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-conditional-formatting` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-conditional-formatting` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-sheets-conditional-formatting
 npm install @univerjs/preset-sheets-conditional-formatting
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -30,6 +28,10 @@ import { UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets
 // Use with createUniver:
 // createUniver({ presets: [UniverSheetsConditionalFormattingPreset()] });
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

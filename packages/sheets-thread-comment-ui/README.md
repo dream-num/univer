@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-thread-comment-ui` | `UniverSheetsThreadCommentUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-thread-comment-ui` | `UniverSheetsThreadCommentUi` | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-thread-comment-ui @univerjs/thread-comment-ui
 npm install @univerjs/sheets-thread-comment-ui @univerjs/thread-comment-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -43,6 +43,10 @@ const univer = new Univer({
 univer.registerPlugin(UniverThreadCommentUIPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

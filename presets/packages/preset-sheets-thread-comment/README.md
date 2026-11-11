@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                  | CSS | Locales | Facade entry |
-| ---------------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-thread-comment` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-thread-comment` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-sheets-thread-comment
 npm install @univerjs/preset-sheets-thread-comment
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -30,6 +28,10 @@ import { UniverSheetsThreadCommentPreset } from '@univerjs/preset-sheets-thread-
 // Use with createUniver:
 // createUniver({ presets: [UniverSheetsThreadCommentPreset()] });
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

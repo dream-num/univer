@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/thread-comment` | `UniverThreadComment` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/thread-comment` | `UniverThreadComment` | No | No | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/thread-comment
 npm install @univerjs/thread-comment
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
@@ -75,6 +75,8 @@ if (thread) {
 `personId` defaults to the current identity in `UserManagerService`. Agent and human identities intentionally share that user-management boundary.
 
 ## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 Product-specific packages such as `@univerjs/sheets-thread-comment` and `@univerjs/docs-thread-comment-ui` build on this shared layer.
 

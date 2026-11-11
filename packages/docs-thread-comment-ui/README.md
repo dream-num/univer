@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-thread-comment-ui` | `UniverDocsThreadCommentUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/docs-thread-comment-ui` | `UniverDocsThreadCommentUi` | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/docs-thread-comment @univerjs/docs-thread-comment-ui @univerj
 npm install @univerjs/docs-thread-comment @univerjs/docs-thread-comment-ui @univerjs/thread-comment-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -49,6 +49,8 @@ await range?.createCommentAsync('Verify this introduction.', { id: 'review-intro
 ```
 
 ## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 Register the shared thread-comment UI plugin before the Docs adapter. Use `@univerjs/docs-thread-comment` for headless model commands and Facade APIs; this UI package adds menus, rendering, and the shared side panel. The underlying `@univerjs/thread-comment` plugin is registered automatically as a dependency.
 

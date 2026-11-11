@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                        | CSS | Locales | Facade entry |
-| ------------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-sort` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-sort` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-sheets-sort
 npm install @univerjs/preset-sheets-sort
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -30,6 +28,10 @@ import { UniverSheetsSortPreset } from '@univerjs/preset-sheets-sort';
 // Use with createUniver:
 // createUniver({ presets: [UniverSheetsSortPreset()] });
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

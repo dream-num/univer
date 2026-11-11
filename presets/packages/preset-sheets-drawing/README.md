@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                           | CSS | Locales | Facade entry |
-| --------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-drawing` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-drawing` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-sheets-drawing
 npm install @univerjs/preset-sheets-drawing
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -30,6 +28,10 @@ import { UniverSheetsDrawingPreset } from '@univerjs/preset-sheets-drawing';
 // Use with createUniver:
 // createUniver({ presets: [UniverSheetsDrawingPreset()] });
 ```
+
+## Integration Notes
+
+Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
 
 ## Resources
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
-import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
+import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
+import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -97,17 +97,16 @@ export function DesktopContextMenu() {
             layoutService={activeLayoutService}
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
-                const { label: id, commandId, value } = params;
+                const { label, id, commandId, value } = params;
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
 
-                if (activeCommandService) {
-                    activeCommandService.executeCommand(commandId ?? id as string, commandParams);
-                }
+                const execution = activeCommandService?.executeCommand(commandId ?? id ?? label as string, commandParams);
 
                 activeLayoutService.focus();
 
                 handleClose();
+                return execution;
             }}
         />
     );

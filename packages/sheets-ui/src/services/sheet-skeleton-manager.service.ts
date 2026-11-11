@@ -57,6 +57,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._sheetSkeletonService.setScene(unitId, scene);
 
         this._initSkeletonsRegisterGetCellHeight(unitId);
+        this._initActiveSheetSync();
     }
 
     private _initSkeletonsRegisterGetCellHeight(unitId: string) {
@@ -65,6 +66,30 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         this.disposeWithMe(
             this._sheetSkeletonService.buildSkeleton$.subscribe((skeleton) => skeleton.registerGetCellHeight())
+        );
+    }
+
+    /**
+     * Keep the tracked skeleton on the active worksheet once the tracked one is gone.
+     *
+     * Removing a worksheet disposes its skeleton and drops its param immediately, while `_sheetId` is only
+     * updated by the next skeleton-change command. That leaves the manager pointing at a dead sheet for the
+     * whole `RemoveSheetCommand` redo sequence, so consumers either read a disposed skeleton or nothing at all.
+     */
+    private _initActiveSheetSync() {
+        this.disposeWithMe(
+            this._context.unit.activeSheet$.subscribe((worksheet) => {
+                if (!worksheet || !this._sheetId || worksheet.getSheetId() === this._sheetId) {
+                    return;
+                }
+
+                // The tracked worksheet still exists: a skeleton-change command owns this transition.
+                if (this._getSkeletonParam(this._sheetId)) {
+                    return;
+                }
+
+                this._setCurrent(worksheet.getSheetId());
+            })
         );
     }
 

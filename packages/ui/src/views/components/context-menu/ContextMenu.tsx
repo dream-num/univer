@@ -97,16 +97,17 @@ export function DesktopContextMenu() {
             layoutService={activeLayoutService}
             onRequestClose={handleClose}
             onOptionSelect={(params) => {
-                const { label, id, commandId, value } = params;
+                const { label: id, commandId, value } = params;
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
 
-                const execution = activeCommandService?.executeCommand(commandId ?? id ?? label as string, commandParams);
+                if (activeCommandService) {
+                    activeCommandService.executeCommand(commandId ?? id as string, commandParams);
+                }
 
                 activeLayoutService.focus();
 
                 handleClose();
-                return execution;
             }}
         />
     );

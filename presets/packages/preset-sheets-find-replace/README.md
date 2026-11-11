@@ -29,10 +29,6 @@ import { UniverSheetsFindReplacePreset } from '@univerjs/preset-sheets-find-repl
 // createUniver({ presets: [UniverSheetsFindReplacePreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

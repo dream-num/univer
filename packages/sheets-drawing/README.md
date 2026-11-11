@@ -32,8 +32,6 @@ univer.registerPlugin(UniverSheetsDrawingPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-drawing-ui` when users need drawing interactions in the sheet UI.
 - Import `@univerjs/sheets-drawing/facade` when using this package through Univer Facade APIs.
 

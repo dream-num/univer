@@ -26,10 +26,6 @@ npm install @univerjs/themes
 import { darkBlueTheme, defaultTheme, blueTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

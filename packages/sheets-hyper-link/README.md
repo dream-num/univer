@@ -41,8 +41,6 @@ univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-hyper-link-ui` when users need hyperlink editing UI.
 - Import `@univerjs/sheets-hyper-link/facade` when using this package through Univer Facade APIs.
 

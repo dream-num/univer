@@ -36,10 +36,6 @@ univer.registerPlugin(UniverDocsTocUIPlugin);
 
 Register this package after Docs, Docs UI, Render Engine, and Docs TOC core packages.
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

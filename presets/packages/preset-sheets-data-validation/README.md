@@ -29,10 +29,6 @@ import { UniverSheetsDataValidationPreset } from '@univerjs/preset-sheets-data-v
 // createUniver({ presets: [UniverSheetsDataValidationPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

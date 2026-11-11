@@ -36,10 +36,6 @@ await range?.createCommentAsync('Verify this introduction.', { id: 'review-intro
 
 Use `@univerjs/docs-thread-comment-ui` separately when menus, canvas decorations, or the shared side panel are required.
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

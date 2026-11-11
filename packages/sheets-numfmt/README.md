@@ -32,8 +32,6 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-numfmt-ui` when users need number-format menus and editors.
 - Import `@univerjs/sheets-numfmt/facade` when using this package through Univer Facade APIs.
 

@@ -51,8 +51,6 @@ univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Register this package with `@univerjs/engine-formula` and `@univerjs/sheets` before adding formula UI packages.
 - Import `@univerjs/sheets-formula/facade` when using this package through Univer Facade APIs.
 

@@ -44,8 +44,6 @@ univer.registerPlugin(UniverDocsFindReplacePlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Register the shared find-and-replace plugin before the Docs adapter so it can provide the common UI, locale strings, and services. Configure the rest of the Docs plugin stack before adding these two plugins.
 
 Phase one searches and replaces literal text in the current document body, including tables. It excludes headers, footers, comments, drawings, regular expressions, formatting search, special characters, result sidebars, presets, and Facade APIs.

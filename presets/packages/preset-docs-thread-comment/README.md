@@ -29,10 +29,6 @@ import { UniverDocsThreadCommentPreset } from '@univerjs/preset-docs-thread-comm
 // createUniver({ presets: [UniverDocsThreadCommentPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

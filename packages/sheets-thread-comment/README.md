@@ -32,8 +32,6 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-thread-comment-ui` when users need comment UI in sheets.
 - Import `@univerjs/sheets-thread-comment/facade` when using this package through Univer Facade APIs.
 

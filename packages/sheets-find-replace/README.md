@@ -32,8 +32,6 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/find-replace` to share find and replace infrastructure across Univer surfaces.
 - Import `@univerjs/sheets-find-replace/facade` when using this package through Univer Facade APIs.
 

@@ -34,10 +34,6 @@ Use this package with `@univerjs/docs-toc-ui` when users need Ribbon, context-me
 
 The updater currently evaluates outline-based TOC instructions (`\\o`). Other Word TOC switches are retained in FIELD metadata but are not all evaluated.
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

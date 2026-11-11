@@ -44,14 +44,12 @@ univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 - Load the locale resources from `@univerjs/engine-formula/locale/<language>` for each language enabled by your application.
 - Import `@univerjs/engine-formula/facade` when using this package through Univer Facade APIs.
+- Custom calculation engines must await `FormulaResultService` before emitting completion. Subclasses of `CalculateFormulaService` must pass this service to the base constructor.
 
 ## Resources
 
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/engine-formula)
 - [GitHub repository](https://github.com/dream-num/univer)
-- [Integration guide](./docs/integration.md)

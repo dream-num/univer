@@ -29,10 +29,6 @@ import { UniverSheetsHyperLinkPreset } from '@univerjs/preset-sheets-hyper-link'
 // createUniver({ presets: [UniverSheetsHyperLinkPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

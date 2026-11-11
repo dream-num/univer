@@ -29,10 +29,6 @@ import { UniverSheetsDrawingPreset } from '@univerjs/preset-sheets-drawing';
 // createUniver({ presets: [UniverSheetsDrawingPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

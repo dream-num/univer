@@ -53,8 +53,6 @@ univer.registerPlugin(UniverSheetsTablePlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-table-ui` when users need table controls in the sheet UI.
 - Import `@univerjs/sheets-table/facade` when using this package through Univer Facade APIs.
 
@@ -63,4 +61,3 @@ Use this package with `@univerjs/sheets-table-ui` when users need table controls
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-table)
 - [GitHub repository](https://github.com/dream-num/univer)
-- [Integration guide](./docs/integration.md)

@@ -50,8 +50,6 @@ await range?.createCommentAsync('Verify this introduction.', { id: 'review-intro
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Register the shared thread-comment UI plugin before the Docs adapter. Use `@univerjs/docs-thread-comment` for headless model commands and Facade APIs; this UI package adds menus, rendering, and the shared side panel. The underlying `@univerjs/thread-comment` plugin is registered automatically as a dependency.
 
 ## Resources

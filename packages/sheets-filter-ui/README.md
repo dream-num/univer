@@ -51,10 +51,6 @@ import { UniverSheetsFilterUIWorkerPlugin } from '@univerjs/sheets-filter-ui/wor
 univer.registerPlugin(UniverSheetsFilterUIWorkerPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

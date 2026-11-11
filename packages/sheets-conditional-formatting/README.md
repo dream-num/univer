@@ -41,8 +41,6 @@ univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-conditional-formatting-ui` when users need menus and rule-management panels.
 - Import `@univerjs/sheets-conditional-formatting/facade` when using this package through Univer Facade APIs.
 

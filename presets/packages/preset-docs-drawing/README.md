@@ -29,10 +29,6 @@ import { UniverDocsDrawingPreset } from '@univerjs/preset-docs-drawing';
 // createUniver({ presets: [UniverDocsDrawingPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

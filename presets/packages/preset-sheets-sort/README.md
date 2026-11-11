@@ -29,10 +29,6 @@ import { UniverSheetsSortPreset } from '@univerjs/preset-sheets-sort';
 // createUniver({ presets: [UniverSheetsSortPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

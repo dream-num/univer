@@ -39,10 +39,6 @@ const univer = new Univer({
 univer.registerPlugin(UniverDataValidationPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

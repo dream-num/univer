@@ -41,8 +41,6 @@ univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-data-validation-ui` when users need validation dialogs, dropdowns, and error UI.
 - Import `@univerjs/sheets-data-validation/facade` when using this package through Univer Facade APIs.
 

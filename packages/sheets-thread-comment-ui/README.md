@@ -44,10 +44,6 @@ univer.registerPlugin(UniverThreadCommentUIPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

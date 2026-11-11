@@ -26,10 +26,6 @@ npm install @univerjs/telemetry
 import { ITelemetryService } from '@univerjs/telemetry';
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

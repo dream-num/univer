@@ -26,10 +26,6 @@ npm install @univerjs/protocol
 import type { IWorkbookMeta } from '@univerjs/protocol';
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

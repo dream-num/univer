@@ -53,8 +53,6 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/sheets-filter-ui` when users need filter menus and panels.
 - Import `@univerjs/sheets-filter/facade` when using this package through Univer Facade APIs.
 

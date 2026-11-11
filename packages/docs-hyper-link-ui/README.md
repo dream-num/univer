@@ -36,8 +36,6 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Register this package after the Docs, Docs UI, and Docs hyperlink core packages.
 
 ## Resources

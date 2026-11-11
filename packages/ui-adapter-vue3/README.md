@@ -30,10 +30,6 @@ import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';
 univer.registerPlugin(UniverVue3AdapterPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

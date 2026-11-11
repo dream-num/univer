@@ -32,8 +32,6 @@ const univer = new Univer({
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 - Import `@univerjs/core/facade` when using this package through Univer Facade APIs.
 
 ## Resources

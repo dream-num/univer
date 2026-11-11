@@ -34,13 +34,8 @@ univer.registerPlugin(UniverDrawingUIPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/drawing-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-- [Integration guide](./docs/integration.md)

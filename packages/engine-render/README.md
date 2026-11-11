@@ -42,10 +42,6 @@ import { DocumentLayoutSession } from '@univerjs/engine-render/worker';
 
 `DocumentLayoutSession` is a layout utility, not a plugin. For Docs layout workers, use the [Docs worker setup](../docs/README.md#worker-usage), which manages the session lifecycle.
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

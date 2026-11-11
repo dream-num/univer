@@ -29,10 +29,6 @@ import { UniverSheetsConditionalFormattingPreset } from '@univerjs/preset-sheets
 // createUniver({ presets: [UniverSheetsConditionalFormattingPreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

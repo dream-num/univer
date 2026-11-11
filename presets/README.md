@@ -41,8 +41,6 @@ univerAPI.createWorkbook({ name: 'Workbook' });
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 - Install the presets needed by your document type and merge their locale resources for each enabled language.
 - Import styles from the selected presets. This composition package has no stylesheet or independent Facade/Worker subpath.
 - Register each plugin through either a preset or the `plugins` option; do not register the same plugin through both.

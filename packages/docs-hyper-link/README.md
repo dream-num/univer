@@ -32,8 +32,6 @@ univer.registerPlugin(UniverDocsHyperLinkPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 Use this package with `@univerjs/docs-hyper-link-ui` when users need hyperlink editing UI.
 
 ## Resources

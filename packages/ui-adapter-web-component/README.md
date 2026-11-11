@@ -42,10 +42,6 @@ class MyPopup extends HTMLElement {
 univerAPI.registerComponent('my-popup', MyPopup, { framework: 'web-component' });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

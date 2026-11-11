@@ -30,13 +30,8 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 univer.registerPlugin(UniverDrawingPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/drawing)
 - [GitHub repository](https://github.com/dream-num/univer)
-- [Integration guide](./docs/integration.md)

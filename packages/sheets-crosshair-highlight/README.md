@@ -36,8 +36,6 @@ univer.registerPlugin(UniverSheetsCrosshairHighlightPlugin);
 
 ## Integration Notes
 
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 - Import `@univerjs/sheets-crosshair-highlight/facade` when using this package through Univer Facade APIs.
 
 ## Resources

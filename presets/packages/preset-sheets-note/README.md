@@ -29,10 +29,6 @@ import { UniverSheetsNotePreset } from '@univerjs/preset-sheets-note';
 // createUniver({ presets: [UniverSheetsNotePreset()] });
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

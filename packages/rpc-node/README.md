@@ -48,10 +48,6 @@ import { UniverRPCNodeWorkerPlugin } from '@univerjs/rpc-node/worker';
 univer.registerPlugin(UniverRPCNodeWorkerPlugin);
 ```
 
-## Integration Notes
-
-Keep all `@univerjs/*` and `@univerjs-pro/*` packages on the same version.
-
 ## Resources
 
 - [Documentation](https://docs.univer.ai)

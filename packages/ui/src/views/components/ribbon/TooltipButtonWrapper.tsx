@@ -42,8 +42,10 @@ import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
+import { ITransientUIService } from '../../../services/transient-ui/transient-ui.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { getEmbedBoundaryOwner, keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
+import { useTransientUI } from '../../../utils/use-transient-ui';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { FONT_FAMILY_ITEM_COMPONENT } from '../../font-family/FontFamilyItem';
 
@@ -128,8 +130,22 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         ? toolbarDropdownContext.openDropdownKey === dropdownKey
         : localDropdownVisible;
 
+    const transientUI = useTransientUI(() => {
+        if (dropdownVisible) {
+            triggerFocusRef.current = null;
+            if (dropdownKey && toolbarDropdownContext) {
+                toolbarDropdownContext.setOpenDropdownKey(null);
+            } else {
+                setLocalDropdownVisible(false);
+            }
+        }
+    });
+    const openRevisionRef = useRef(transientUI.revision);
+
     const handleChangeDropdownVisible = useCallback((visible: boolean) => {
         if (visible) {
+            if (transientUI.suspended) return;
+            openRevisionRef.current = transientUI.revision;
             const active = spanRef.current?.ownerDocument.activeElement;
             triggerFocusRef.current = active instanceof HTMLElement && spanRef.current?.contains(active) ? active : null;
         }
@@ -138,9 +154,13 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         } else {
             setLocalDropdownVisible(visible);
         }
-    }, [dropdownKey, toolbarDropdownContext]);
+    }, [dropdownKey, toolbarDropdownContext, transientUI]);
 
     const restoreTriggerFocus = useCallback((event: Event) => {
+        if (openRevisionRef.current !== transientUI.revision || transientUI.suspended) {
+            event.preventDefault();
+            return;
+        }
         const trigger = triggerFocusRef.current;
         triggerFocusRef.current = null;
         if (!trigger?.isConnected) return;
@@ -149,7 +169,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
             event.preventDefault();
             trigger.focus({ preventScroll: true });
         }
-    }, []);
+    }, [transientUI]);
 
     const contextValue = useMemo(() => ({
         dropdownVisible,
@@ -313,6 +333,8 @@ export function DropdownMenuWrapper({
     dropdownMenuComponent?: ComponentType<IDropdownMenuProps>;
 }) {
     const { dropdownVisible, setDropdownVisible, restoreTriggerFocus } = useContext(TooltipWrapperContext);
+    const transientUI = useDependency(ITransientUIService);
+    const openRevisionRef = useRef(transientUI.revision);
     const shortcutService = useDependency(IShortcutService);
     const contextService = useDependency(IContextService);
     const instanceService = useDependency(IUniverInstanceService);
@@ -404,6 +426,8 @@ export function DropdownMenuWrapper({
 
     function handleVisibleChange(visible: boolean) {
         if (visible) {
+            if (transientUI.suspended) return;
+            openRevisionRef.current = transientUI.revision;
             const element = document.activeElement;
             const workbook = contextService.getContextValue(FOCUSING_SHEET)
                 ? instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
@@ -424,6 +448,10 @@ export function DropdownMenuWrapper({
     function handleCloseAutoFocus(event: Event) {
         const editorFocus = editorFocusRef.current;
         editorFocusRef.current = null;
+        if (openRevisionRef.current !== transientUI.revision || transientUI.suspended) {
+            event.preventDefault();
+            return;
+        }
         if (sheetTargetRef.current && !sheetTargetRef.current.valid) {
             event.preventDefault();
             const activeElement = document.activeElement;

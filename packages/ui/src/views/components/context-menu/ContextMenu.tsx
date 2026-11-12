@@ -22,6 +22,7 @@ import { IContextMenuService } from '../../../services/contextmenu/contextmenu.s
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
+import { ITransientUIService } from '../../../services/transient-ui/transient-ui.service';
 import { useDependency } from '../../../utils/di';
 import { AnchoredContextMenu } from './AnchoredContextMenu';
 
@@ -29,6 +30,8 @@ const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
 
 export function DesktopContextMenu() {
     const [visible, setVisible] = useState(false);
+    const pendingOpenRef = useRef<number | null>(null);
+    const transientUI = useDependency(ITransientUIService);
     const [menuType, setMenuType] = useState('');
     const [anchorRect, setAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
     const [menuContext, setMenuContext] = useState<IContextMenuTriggerContext | undefined>();
@@ -53,13 +56,18 @@ export function DesktopContextMenu() {
 
         return () => {
             disposables.dispose();
+            if (pendingOpenRef.current !== null) cancelAnimationFrame(pendingOpenRef.current);
         };
     }, [contextMenuService]);
 
     /** A function to open context menu with given position and menu type. */
     function handleContextMenu(event: ContextMenuEvent, menuType: string, context?: IContextMenuTriggerContext) {
-        setVisible(false);
-        requestAnimationFrame(() => {
+        handleClose();
+        if (transientUI.suspended) return;
+        const revision = transientUI.revision;
+        pendingOpenRef.current = requestAnimationFrame(() => {
+            pendingOpenRef.current = null;
+            if (transientUI.suspended || revision !== transientUI.revision) return;
             setMenuType(menuType);
             setMenuContext(context);
             setAnchorRect({
@@ -72,6 +80,10 @@ export function DesktopContextMenu() {
     }
 
     function handleClose() {
+        if (pendingOpenRef.current !== null) {
+            cancelAnimationFrame(pendingOpenRef.current);
+            pendingOpenRef.current = null;
+        }
         setVisible(false);
     }
 
@@ -101,11 +113,12 @@ export function DesktopContextMenu() {
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
 
+                const revision = transientUI.revision;
                 if (activeCommandService) {
                     activeCommandService.executeCommand(commandId ?? id as string, commandParams);
                 }
 
-                activeLayoutService.focus();
+                if (revision === transientUI.revision && !transientUI.suspended) activeLayoutService.focus();
 
                 handleClose();
             }}

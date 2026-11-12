@@ -42,6 +42,13 @@ Exported plugin classes:
 ## Integration Notes
 
 - Import `@univerjs/ui/facade` when using this package through Univer Facade APIs.
+- Both UI plugins register `ITransientUIService`. Opening an independent sidebar or dialog dismisses
+  host menus; nested formatting dropdowns remain available. Custom replacing views should resolve
+  this service from their host injector and hold the disposable returned by `suspend()` until exit,
+  including cancellation and failure. Use `dismiss()` for a one-time handoff without suspension.
+- Custom hosts that render toolbar or context-menu components with a manually assembled injector
+  must register `[ITransientUIService, { useClass: TransientUIService }]`. Keep persistent form state
+  and independent views outside transient menu components, which are unmounted during a handoff.
 
 ## Resources
 

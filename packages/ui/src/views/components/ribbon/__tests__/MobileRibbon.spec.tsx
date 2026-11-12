@@ -24,6 +24,7 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { BehaviorSubject, of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
+import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { IWorkbenchService } from '../../../../services/workbench/workbench.service';
 import { MobileRibbon } from '../MobileRibbon';
 
@@ -33,6 +34,7 @@ describe('MobileRibbon', () => {
     it('keeps a stable hook order when the sheet workbench becomes ready', () => {
         const rootUnitType$ = new BehaviorSubject<UniverInstanceType | null>(null);
         const injector = new Injector([
+            [ITransientUIService, { useClass: TransientUIService }],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, {
                 useValue: {
@@ -55,6 +57,7 @@ describe('MobileRibbon', () => {
     it('keeps a stable hook order when the docs workbench becomes ready', () => {
         const rootUnitType$ = new BehaviorSubject<UniverInstanceType | null>(null);
         const injector = new Injector([
+            [ITransientUIService, { useClass: TransientUIService }],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, {
                 useValue: {

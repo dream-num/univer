@@ -49,6 +49,7 @@ import { IMenuManagerService, MenuManagerService } from '../../../../services/me
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
+import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from '../../../font-family/FontFamilyItem';
 import {
@@ -79,7 +80,7 @@ function renderWithDependencies(
     element: ReactElement,
     menuItems: ReturnType<IMenuManagerService['getMenuByPositionKey']> = []
 ) {
-    const injector = new Injector();
+    const injector = new Injector([[ITransientUIService, { useClass: TransientUIService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
@@ -233,7 +234,7 @@ describe('DropdownMenuLabel', () => {
 
 describe('DropdownWrapper', () => {
     it('keeps an enabled dropdown open when a sibling is disabled', () => {
-        const { getByRole, queryByText } = render(
+        const { getByRole, queryByText } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="disabled-dropdown">
                     <DropdownWrapper disabled overlay={<div>Disabled content</div>}>
@@ -254,7 +255,7 @@ describe('DropdownWrapper', () => {
     });
 
     it('opens toward the left in RTL layouts', async () => {
-        const { findByText, getByRole } = render(
+        const { findByText, getByRole } = renderWithDependencies(
             <ConfigProvider direction="rtl" mountContainer={document.body}>
                 <ToolbarDropdownProvider>
                     <TooltipWrapper dropdownKey="test-dropdown">
@@ -273,7 +274,7 @@ describe('DropdownWrapper', () => {
     });
 
     it('closes on an outside pointerdown even when no click follows', async () => {
-        const { findByText, getByRole, queryByText } = render(
+        const { findByText, getByRole, queryByText } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="test-dropdown">
                     <DropdownWrapper overlay={<div>Dropdown content</div>}>
@@ -291,7 +292,7 @@ describe('DropdownWrapper', () => {
     });
 
     it('keeps the toolbar dropdown open when interacting with a nested portaled dropdown', () => {
-        const { getByRole } = render(
+        const { getByRole } = renderWithDependencies(
             <ConfigProvider mountContainer={document.body}>
                 <ToolbarDropdownProvider>
                     <TooltipWrapper dropdownKey="border-dropdown">

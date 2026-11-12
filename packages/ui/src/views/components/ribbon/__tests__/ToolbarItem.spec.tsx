@@ -37,6 +37,7 @@ import { IMenuManagerService } from '../../../../services/menu/menu-manager.serv
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
+import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { ToolbarItem } from '../ToolbarItem';
 
@@ -77,7 +78,7 @@ class TestLogService {
 const testInjectors: Injector[] = [];
 
 function renderWithDependencies(element: ReactElement) {
-    const injector = new Injector();
+    const injector = new Injector([[ITransientUIService, { useClass: TransientUIService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);

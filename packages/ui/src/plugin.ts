@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverUIConfig } from './config/config';
 import {
     DependentOn,
     generateRandomId,
@@ -31,6 +30,7 @@ import {
     touchDependencies,
 } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { IUniverUIConfig } from './config/config';
 import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';
@@ -42,6 +42,7 @@ import { FeatureSearchController } from './controllers/feature-search/feature-se
 import { FormatPainterController } from './controllers/format-painter.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
+import { TransientUIController } from './controllers/transient-ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -80,6 +81,7 @@ import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
+import { ITransientUIService, TransientUIService } from './services/transient-ui/transient-ui.service';
 import { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 import { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 
@@ -127,6 +129,8 @@ export class UniverUIPlugin extends Plugin {
             [ComponentsController],
             [ThemeSwitcherService],
             [UndoRedoGroupService],
+            [ITransientUIService, { useClass: TransientUIService }],
+            [TransientUIController],
             [ZIndexManager],
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
@@ -177,6 +181,7 @@ export class UniverUIPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
+            [TransientUIController],
             [SharedController],
             [FormatPainterController],
             [FeatureSearchController],

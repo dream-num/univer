@@ -171,19 +171,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
             }
-
-            // if (command.id === SetRangeValuesMutation.id) {
-            //     const params = command.params as ISetRangeValuesMutationParams;
-            //     const { cellValue, unitId, subUnitId } = params;
-            //     if (!cellValue) return;
-            //     const editCell = this._editorBridgeService.getEditLocation();
-            //     if (editCell) {
-            //         const { unitId: editingUnitId, sheetId: editingSheetId, row, column } = editCell;
-            //         if (unitId === editingUnitId && subUnitId === editingSheetId && cellValue && cellValue[row] && Object.prototype.hasOwnProperty.call(cellValue[row], column)) {
-            //             this._editorBridgeService.refreshEditCellState();
-            //         }
-            //     }
-            // }
         }));
 
         d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {

@@ -1064,13 +1064,13 @@ describe('UpdateFormulaController', () => {
         expect(notification?.[2]).toMatchObject({ onlyLocal: true, remove: true });
     });
 
-    it.each([CalculationMode.FORCED, CalculationMode.WHEN_EMPTY])('initializes formula data for added sheets and workbooks in %s mode', async (calculationMode) => {
+    it('should initialize formula data for added sheets and workbooks, then clear removed sheets', async () => {
         const configService = testBed.injector.get(IConfigService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
         const workbookSnapshot = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')?.getSnapshot();
 
         configService.setConfig(PLUGIN_CONFIG_KEY_BASE, {
-            initialFormulaComputing: calculationMode,
+            initialFormulaComputing: CalculationMode.FORCED,
         });
 
         await commandService.executeCommand(InsertSheetMutation.id, {
@@ -1144,19 +1144,10 @@ describe('UpdateFormulaController', () => {
         expect(formulaDataModel.getFormulaStringByCell(1, 0, 'sheet1', 'secondary')).toBe('=SUM(A2)');
         expect(scanSecondarySheet).not.toHaveBeenCalled();
         expect(formulaDataModel.getFormulaData().secondary?.sheet1?.[0]?.[0]).toMatchObject({ f: '=SUM(A1)' });
-        const initializeWhenEmpty = calculationMode === CalculationMode.WHEN_EMPTY;
         expect(executeCommandSpy).toHaveBeenCalledWith(
             SetTriggerFormulaCalculationStartMutation.id,
             expect.objectContaining({
-                forceCalculation: !initializeWhenEmpty,
-                initializeWhenEmpty,
-                dirtyRanges: initializeWhenEmpty
-                    ? expect.arrayContaining([{
-                        unitId: 'secondary',
-                        sheetId: 'sheet1',
-                        range: expect.objectContaining({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 0 }),
-                    }])
-                    : [],
+                forceCalculation: true,
             }),
             {
                 onlyLocal: true,

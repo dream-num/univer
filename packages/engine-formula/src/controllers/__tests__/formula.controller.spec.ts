@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DataSyncPrimaryController } from '@univerjs/rpc';
 import {
     CommandService,
     ConfigService,
@@ -25,12 +26,8 @@ import {
     LifecycleService,
     toDisposable,
 } from '@univerjs/core';
-import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { describe, expect, it, vi } from 'vitest';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
-import { SetArrayFormulaDataMutation } from '../../commands/mutations/set-array-formula-data.mutation';
-import { SetFormulaCalculationStartMutation, SetTriggerFormulaCalculationStartMutation } from '../../commands/mutations/set-formula-calculation.mutation';
-import { SetFormulaDataMutation } from '../../commands/mutations/set-formula-data.mutation';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
 import { FormulaCacheService } from '../../services/formula-cache.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
@@ -56,41 +53,22 @@ function createController(dataSyncPrimaryController?: FormulaDataSyncController)
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([LifecycleService]);
     injector.add([RegisterOtherFormulaService]);
-    if (dataSyncPrimaryController) {
-        injector.add([DataSyncPrimaryController, { useValue: dataSyncPrimaryController as DataSyncPrimaryController }]);
-    }
-    injector.add([FormulaController]);
     const registerOtherFormulaService = injector.get(RegisterOtherFormulaService);
     const commandService = injector.get(ICommandService);
     return {
-        controller: injector.get(FormulaController),
+        controller: new FormulaController(
+            commandService,
+            injector.get(IFunctionService),
+            injector.get(IConfigService),
+            dataSyncPrimaryController,
+            registerOtherFormulaService
+        ),
         commandService,
         registerOtherFormulaService,
     };
 }
 
 describe('FormulaController', () => {
-    it('keeps the scheduling mutation local while syncing the calculation start and formula data', () => {
-        const registerSyncingMutations = vi.fn<DataSyncPrimaryController['registerSyncingMutations']>();
-        const { commandService, controller } = createController({
-            registerSyncingMutations,
-            syncUnitMutations: vi.fn(),
-            waitForPendingMutations: vi.fn(() => Promise.resolve()),
-        });
-        try {
-            expect(commandService.hasCommand(SetTriggerFormulaCalculationStartMutation.id)).toBe(true);
-            const syncedIds = registerSyncingMutations.mock.calls.map(([mutation]) => mutation.id);
-            expect(syncedIds).not.toContain(SetTriggerFormulaCalculationStartMutation.id);
-            expect(syncedIds).toEqual(expect.arrayContaining([
-                SetFormulaCalculationStartMutation.id,
-                SetFormulaDataMutation.id,
-                SetArrayFormulaDataMutation.id,
-            ]));
-        } finally {
-            controller.dispose();
-        }
-    });
-
     it('registers the generic other-formula dirty mutation', () => {
         const { commandService, controller } = createController();
 

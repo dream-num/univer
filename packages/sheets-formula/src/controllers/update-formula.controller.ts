@@ -327,10 +327,9 @@ export class UpdateFormulaController extends Disposable {
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
-        const initializeWhenEmpty = calculationMode === CalculationMode.WHEN_EMPTY;
 
         // loop all sheets cell data, and get the dirty data
-        const dirtyRanges: IUnitRange[] = initializeWhenEmpty ? this._formulaDataModel.getFormulaDirtyRanges() : [];
+        const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
         const dirtyNameMap: IDirtyUnitSheetNameMap = Object.create(null);
         const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = Object.create(null);
@@ -340,7 +339,6 @@ export class UpdateFormulaController extends Disposable {
 
         return {
             forceCalculation,
-            initializeWhenEmpty,
             dirtyRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,

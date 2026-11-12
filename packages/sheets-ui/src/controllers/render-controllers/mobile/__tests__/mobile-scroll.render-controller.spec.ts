@@ -17,13 +17,17 @@
 // @vitest-environment jsdom
 
 import { ICommandService, RANGE_TYPE } from '@univerjs/core';
-import { ObjectType, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { DeviceType, ObjectType, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createChartRenderTestBed } from '../../__tests__/chart-render-test-bed';
 import { createRenderTestBed } from '../../__tests__/render-test-bed';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../../commands/commands/set-scroll.command';
 import { SetZoomRatioCommand } from '../../../../commands/commands/set-zoom-ratio.command';
+import { SetScrollOperation } from '../../../../commands/operations/scroll.operation';
+import { SetZoomRatioOperation } from '../../../../commands/operations/set-zoom-ratio.operation';
 import { SheetScrollManagerService } from '../../../../services/scroll-manager.service';
+import { SheetsZoomRenderController } from '../../zoom.render-controller';
 import { MobileSheetsScrollRenderController } from '../mobile-scroll.render-controller';
 
 const scrollControllers: MobileSheetsScrollRenderController[] = [];
@@ -58,14 +62,11 @@ function createController() {
     const transformerChangeEnd$ = new Subject<unknown>();
     let sceneObjectsEvented = true;
     let sceneOverlayOwnsTouch = false;
-    const drawing = { oKey: 'drawing', ancestorGroup: null, objectType: ObjectType.RECT };
-    const selectedDrawings = new Map();
     const transformer = {
         changeStart$: transformerChangeStart$,
         changeEnd$: transformerChangeEnd$,
         moveOnlyWhenSelected: false,
         resetProps: vi.fn(),
-        getSelectedObjectMap: () => selectedDrawings,
     };
     const scrollStates = new Map<string, any>();
     const scrollManagerService = {
@@ -136,7 +137,7 @@ function createController() {
     });
     Object.defineProperty(scene, 'pick', {
         configurable: true,
-        value: () => sceneOverlayOwnsTouch ? drawing : null,
+        value: () => sceneOverlayOwnsTouch ? scene : null,
     });
 
     const controller = injector.createInstance(MobileSheetsScrollRenderController, context as any);
@@ -146,10 +147,6 @@ function createController() {
         canvasElement,
         canvasListeners,
         controller,
-        drawing,
-        selectedDrawings,
-        transformer,
-        setDrawingType: (type: ObjectType) => { drawing.objectType = type; },
         executeCommand,
         rawScrollInfo$,
         renderManagerService,
@@ -173,31 +170,129 @@ function createController() {
     };
 }
 
+function createRealMobileFixture(zoomRatio = 1) {
+    const fixture = createChartRenderTestBed([
+        [SheetScrollManagerService],
+        [SheetsZoomRenderController],
+        [MobileSheetsScrollRenderController],
+    ], false, { rowCount: 1000, columnCount: 100, zoomRatio, freeze: { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 } });
+    for (const command of [ScrollCommand, SetScrollRelativeCommand, SetScrollOperation, SetZoomRatioCommand, SetZoomRatioOperation]) {
+        fixture.commands.registerCommand(command);
+    }
+    const execute = vi.spyOn(fixture.commands, 'executeCommand');
+    let time = 1000;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => time);
+    const canvas = fixture.render.engine.getCanvasElement();
+    const pointerCaptures = new Set<number>();
+    Object.defineProperties(canvas, {
+        setPointerCapture: { value: (id: number) => pointerCaptures.add(id) },
+        hasPointerCapture: { value: (id: number) => pointerCaptures.has(id) },
+        releasePointerCapture: { value: (id: number) => pointerCaptures.delete(id) },
+    });
+    const touch = (type: string, touches: Array<{ clientX: number; clientY: number }>) => {
+        const event = new Event(type, { cancelable: true });
+        Object.defineProperty(event, 'touches', { value: touches });
+        canvas.dispatchEvent(event);
+        return event;
+    };
+    const pointer = (type: string, id: number, x: number, y: number, pointerType = 'touch', isPrimary = false, target: EventTarget = canvas) => {
+        const event = new MouseEvent(type, { clientX: x, clientY: y, cancelable: true });
+        Object.defineProperties(event, {
+            pointerType: { value: pointerType },
+            pointerId: { value: id },
+            isPrimary: { value: isPrimary },
+        });
+        target.dispatchEvent(event);
+        return event;
+    };
+    const advance = (milliseconds = 16) => {
+        time += milliseconds;
+    };
+    const settle = () => Promise.all(execute.mock.results.filter((result) => result.type === 'return').map((result) => result.value));
+    const scrollCalls = () => execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id);
+    const swipe = async () => {
+        touch('touchstart', [{ clientX: 180, clientY: 300 }]);
+        for (let i = 1; i <= 6; i++) {
+            advance();
+            touch('touchmove', [{ clientX: 180, clientY: 300 - i * 20 }]);
+            await settle();
+        }
+        advance();
+        touch('touchend', []);
+        execute.mockClear();
+    };
+    const frame = (milliseconds = 16) => {
+        advance(milliseconds);
+        fixture.render.engine._beginFrame(time);
+    };
+    const addDrawing = (type: ObjectType) => {
+        const injector = fixture.render.getInjector!();
+        injector.add([Rect, {
+            useFactory: () => injector.createInstance(Rect, 'gesture-drawing', {
+                left: 0,
+                top: 0,
+                width: 1000,
+                height: 1000,
+                fill: '#ffffff',
+            }),
+        }]);
+        const drawing = injector.get(Rect);
+        drawing.setObjectType(type);
+        fixture.render.scene.addObject(drawing, 10);
+        return drawing;
+    };
+    const dispose = () => {
+        fixture.univer.dispose();
+        clock.mockRestore();
+    };
+    return {
+        ...fixture,
+        advance,
+        addDrawing,
+        canvas,
+        dispose,
+        execute,
+        touch,
+        pointer,
+        settle,
+        scrollCalls,
+        swipe,
+        frame,
+        controller: fixture.render.with(MobileSheetsScrollRenderController),
+        viewport: fixture.render.scene.getMainViewport(),
+    };
+}
+
 describe('MobileSheetsScrollRenderController', () => {
-    it.each([0.5, 1, 2])('filters cross-axis touch drift before applying zoom %s and allows turns and diagonals', (zoom) => {
-        const { canvasListeners, executeCommand, sheet, testBed } = createController();
-        vi.spyOn(sheet.getActiveSheet(), 'getZoomRatio').mockReturnValue(zoom);
-        const now = vi.spyOn(performance, 'now').mockReturnValue(0);
-        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 180, clientY: 180 }]);
-        now.mockReturnValue(16);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 179, clientY: 160 }]);
-        expect(executeCommand).toHaveBeenLastCalledWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 / zoom });
+    it.each([0.5, 1, 2])('filters cross-axis touch drift before applying zoom %s and allows turns and diagonals', async (zoom) => {
+        const { advance, execute, scrollCalls, touch, settle, viewport } = createRealMobileFixture(zoom);
+        touch('touchstart', [{ clientX: 180, clientY: 180 }]);
+        advance();
+        touch('touchmove', [{ clientX: 179, clientY: 160 }]);
+        await settle();
+        expect(scrollCalls().at(-1)?.[1]).toEqual({ offsetX: 0, offsetY: 20 / zoom });
+        expect(viewport.viewportScrollX).toBe(0);
+        expect(viewport.viewportScrollY).toBeCloseTo(20 / zoom);
 
-        now.mockReturnValue(32);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 159, clientY: 161 }]);
-        expect(executeCommand).toHaveBeenLastCalledWith(SetScrollRelativeCommand.id, { offsetX: 20 / zoom, offsetY: 0 });
+        advance();
+        touch('touchmove', [{ clientX: 159, clientY: 161 }]);
+        await settle();
+        expect(scrollCalls().at(-1)?.[1]).toEqual({ offsetX: 20 / zoom, offsetY: 0 });
+        expect(viewport.viewportScrollX).toBeCloseTo(20 / zoom);
+        expect(viewport.viewportScrollY).toBeCloseTo(20 / zoom);
 
-        now.mockReturnValue(48);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 139, clientY: 141 }]);
-        expect(executeCommand).toHaveBeenLastCalledWith(SetScrollRelativeCommand.id, { offsetX: 20 / zoom, offsetY: 20 / zoom });
+        advance();
+        touch('touchmove', [{ clientX: 139, clientY: 141 }]);
+        await settle();
+        expect(scrollCalls().at(-1)?.[1]).toEqual({ offsetX: 20 / zoom, offsetY: 20 / zoom });
+        expect(viewport.viewportScrollX).toBeCloseTo(40 / zoom);
+        expect(viewport.viewportScrollY).toBeCloseTo(40 / zoom);
 
-        dispatchTouchEvent(canvasListeners, 'touchcancel', []);
-        executeCommand.mockClear();
-        now.mockReturnValue(64);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 119, clientY: 121 }]);
-        expect(executeCommand).not.toHaveBeenCalled();
-        now.mockRestore();
-        testBed.univer.dispose();
+        touch('touchcancel', []);
+        execute.mockClear();
+        advance();
+        touch('touchmove', [{ clientX: 119, clientY: 121 }]);
+        expect(execute).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -208,172 +303,157 @@ describe('MobileSheetsScrollRenderController', () => {
         { name: 'balanced diagonal', moves: [[-20, -20], [-20, -20]], axis: 'y' },
         { name: 'small horizontal release jitter', moves: [[0, -20], [0, -20], [-1, 0]], axis: 'y' },
         { name: 'small vertical release jitter', moves: [[-20, 0], [-20, 0], [0, -1]], axis: 'x' },
-    ])('keeps inertia on one recent dominant axis after $name', ({ moves, axis }) => {
-        const { canvasListeners, executeCommand, testBed } = createController();
-        const frames: FrameRequestCallback[] = [];
-        const raf = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
-            frames.push(callback);
-            return frames.length;
-        });
-        let time = 0;
-        const now = vi.spyOn(performance, 'now').mockImplementation(() => time);
-        const touch = { clientX: 180, clientY: 180 };
-        dispatchTouchEvent(canvasListeners, 'touchstart', [{ ...touch }]);
+    ])('keeps inertia on one recent dominant axis after $name', async ({ moves, axis }) => {
+        const { advance, execute, frame, scrollCalls, settle, touch, viewport } = createRealMobileFixture();
+        const point = { clientX: 180, clientY: 180 };
+        touch('touchstart', [{ ...point }]);
         for (const [x, y] of moves) {
-            time += 16;
-            touch.clientX += x;
-            touch.clientY += y;
-            dispatchTouchEvent(canvasListeners, 'touchmove', [{ ...touch }]);
+            advance();
+            point.clientX += x;
+            point.clientY += y;
+            touch('touchmove', [{ ...point }]);
+            await settle();
         }
-        time += 16;
-        dispatchTouchEvent(canvasListeners, 'touchend', []);
-        executeCommand.mockClear();
-        expect(frames.length).toBeGreaterThan(0);
-        frames.shift()!(time + 16);
-        frames.shift()!(time + 32);
-        const offsets = executeCommand.mock.lastCall![1] as { offsetX: number; offsetY: number };
-        expect(executeCommand.mock.lastCall![0]).toBe(SetScrollRelativeCommand.id);
-        expect(executeCommand.mock.lastCall![2]).toEqual({ fromMobileInertia: true });
+        advance();
+        touch('touchend', []);
+        const released = { x: viewport.viewportScrollX, y: viewport.viewportScrollY };
+        execute.mockClear();
+        frame();
+        await settle();
+        const inertia = scrollCalls().at(-1)!;
+        const offsets = inertia[1] as { offsetX: number; offsetY: number };
+        expect(inertia[2]).toEqual({ fromMobileInertia: true });
         expect(axis === 'x' ? offsets.offsetY : offsets.offsetX).toBe(0);
         expect(axis === 'x' ? offsets.offsetX : offsets.offsetY).toBeGreaterThan(0);
-        dispatchTouchEvent(canvasListeners, 'touchcancel', []);
-        now.mockRestore();
-        raf.mockRestore();
-        testBed.univer.dispose();
+        expect(axis === 'x' ? viewport.viewportScrollY : viewport.viewportScrollX).toBe(axis === 'x' ? released.y : released.x);
+        expect(axis === 'x' ? viewport.viewportScrollX : viewport.viewportScrollY).toBeGreaterThan(axis === 'x' ? released.x : released.y);
+        touch('touchcancel', []);
     });
 
-    it('navigates DOM drawings through forwarded touch pointers without changing mouse gestures', () => {
-        const { canvasListeners, executeCommand, setDrawingType, setSceneOverlayOwnsTouch, testBed } = createController();
-        setSceneOverlayOwnsTouch(true);
-        setDrawingType(ObjectType.CHART);
-        const now = vi.spyOn(performance, 'now').mockReturnValue(0);
-        const send = (type: string, pointerType: string, pointerId: number, clientX: number, clientY: number) => {
-            const event = new MouseEvent(type, { clientX, clientY });
-            Object.defineProperties(event, { pointerType: { value: pointerType }, pointerId: { value: pointerId } });
-            canvasListeners.get(type)!(event);
-        };
-        send('pointerdown', 'mouse', 1, 120, 120);
-        now.mockReturnValue(16);
-        send('pointermove', 'mouse', 1, 90, 80);
-        send('pointerup', 'mouse', 1, 90, 80);
-        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+    it('navigates DOM drawings through forwarded touch pointers without changing mouse gestures', async () => {
+        const { addDrawing, advance, execute, pointer, render, settle, viewport, workbook } = createRealMobileFixture();
+        const drawing = addDrawing(ObjectType.CHART);
+        expect(render.scene.pick(Vector2.FromArray([120, 120]), DeviceType.Touch)).toBe(drawing);
+        pointer('pointerdown', 1, 120, 120, 'mouse');
+        advance();
+        pointer('pointermove', 1, 90, 80, 'mouse');
+        pointer('pointerup', 1, 90, 80, 'mouse');
+        expect(execute).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+        expect(viewport.viewportScrollY).toBe(0);
 
-        send('pointerdown', 'touch', 1, 120, 120);
-        now.mockReturnValue(32);
-        send('pointermove', 'touch', 1, 90, 80);
-        expect(executeCommand).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 30, offsetY: 40 });
-        now.mockReturnValue(48);
-        send('pointermove', 'touch', 1, 89, 60);
-        expect(executeCommand).toHaveBeenLastCalledWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 });
-        send('pointercancel', 'touch', 1, 89, 60);
-        executeCommand.mockClear();
-        send('pointermove', 'touch', 1, 60, 40);
-        expect(executeCommand).not.toHaveBeenCalled();
+        pointer('pointerdown', 1, 120, 120);
+        advance();
+        pointer('pointermove', 1, 90, 80);
+        await settle();
+        expect(execute).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 30, offsetY: 40 });
+        expect(viewport.viewportScrollY).toBe(40);
+        advance();
+        pointer('pointermove', 1, 89, 60);
+        await settle();
+        expect(execute).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 });
+        expect(viewport.viewportScrollY).toBe(60);
+        pointer('pointercancel', 1, 89, 60);
+        execute.mockClear();
+        pointer('pointermove', 1, 60, 40);
+        expect(execute).not.toHaveBeenCalled();
 
-        setDrawingType(ObjectType.DRAWING_DOM);
-        send('pointerdown', 'touch', 1, 120, 120);
-        now.mockReturnValue(48);
-        send('pointermove', 'touch', 1, 120, 100);
-        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
-        send('pointerdown', 'touch', 2, 220, 120);
-        send('pointermove', 'touch', 2, 260, 120);
-        expect(executeCommand).toHaveBeenCalledWith(SetZoomRatioCommand.id, expect.objectContaining({ zoomRatio: 1.4 }));
-        send('pointerup', 'touch', 2, 260, 120);
-        send('pointerup', 'touch', 1, 120, 120);
-
-        now.mockRestore();
-        testBed.univer.dispose();
+        drawing.setObjectType(ObjectType.DRAWING_DOM);
+        pointer('pointerdown', 1, 120, 120);
+        advance();
+        pointer('pointermove', 1, 120, 100);
+        expect(execute).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+        expect(viewport.viewportScrollY).toBe(60);
+        pointer('pointerdown', 2, 220, 120);
+        pointer('pointermove', 2, 260, 120);
+        await settle();
+        expect(execute).toHaveBeenCalledWith(SetZoomRatioCommand.id, expect.objectContaining({ zoomRatio: 1.4 }));
+        expect(workbook.getActiveSheet().getZoomRatio()).toBe(1.4);
+        pointer('pointerup', 2, 260, 120);
+        pointer('pointerup', 1, 120, 120);
     });
 
-    it.each(['captured-up', 'missing-up'])('does not interpret a new single chart touch as pinch after %s', (release) => {
-        const { canvasListeners, executeCommand, setDrawingType, setSceneOverlayOwnsTouch, testBed } = createController();
-        setSceneOverlayOwnsTouch(true);
-        setDrawingType(ObjectType.CHART);
-        const now = vi.spyOn(performance, 'now').mockReturnValue(0);
-        const send = (type: string, id: number, x: number, y: number, trusted = false) => {
-            canvasListeners.get(type)!({
-                type,
-                pointerType: 'touch',
-                pointerId: id,
-                isPrimary: true,
-                isTrusted: trusted,
-                clientX: x,
-                clientY: y,
-                preventDefault: vi.fn(),
-            } as unknown as Event);
-        };
-        send('pointerdown', 1, 120, 120);
-        now.mockReturnValue(16);
-        send('pointermove', 1, 120, 100);
+    it.each(['captured-up', 'missing-up'])('does not interpret a new single chart touch as pinch after %s', async (release) => {
+        const addListener = vi.spyOn(HTMLCanvasElement.prototype, 'addEventListener');
+        const { addDrawing, advance, canvas, execute, pointer, render, settle, viewport } = createRealMobileFixture();
+        const drawing = addDrawing(ObjectType.CHART);
+        expect(render.scene.pick(Vector2.FromArray([120, 120]), DeviceType.Touch)).toBe(drawing);
+        pointer('pointerdown', 1, 120, 120, 'touch', true);
+        advance();
+        pointer('pointermove', 1, 120, 100);
+        await settle();
         if (release === 'captured-up') {
             // Native capture can deliver the up directly to the host canvas, without a DOM clone.
-            send('pointerup', 1, 120, 100, true);
-            executeCommand.mockClear();
-            now.mockReturnValue(24);
-            send('pointermove', 1, 120, 80);
-            expect(executeCommand).not.toHaveBeenCalled();
+            const canvasPointerUp = addListener.mock.calls.findLast(([type], index) => (
+                type === 'pointerup' && addListener.mock.contexts[index] === canvas
+            ))![1] as EventListener;
+            // DOM dispatch cannot create trusted events; supply the native capture boundary directly.
+            canvasPointerUp({
+                type: 'pointerup',
+                pointerType: 'touch',
+                pointerId: 1,
+                isTrusted: true,
+                preventDefault: vi.fn(),
+            } as unknown as Event);
+            execute.mockClear();
+            advance(8);
+            pointer('pointermove', 1, 120, 80);
+            expect(execute).not.toHaveBeenCalled();
         }
-        executeCommand.mockClear();
-        now.mockReturnValue(32);
-        send('pointerdown', 2, 220, 220);
-        now.mockReturnValue(48);
-        send('pointermove', 2, 220, 200);
-        expect(executeCommand).not.toHaveBeenCalledWith(SetZoomRatioCommand.id, expect.anything());
-        expect(executeCommand).toHaveBeenLastCalledWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 });
-        send('pointercancel', 2, 220, 100);
-        now.mockRestore();
-        testBed.univer.dispose();
+        execute.mockClear();
+        advance();
+        pointer('pointerdown', 2, 220, 220, 'touch', true);
+        advance();
+        const released = viewport.viewportScrollY;
+        pointer('pointermove', 2, 220, 200);
+        await settle();
+        expect(execute).not.toHaveBeenCalledWith(SetZoomRatioCommand.id, expect.anything());
+        expect(execute).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 20 });
+        expect(viewport.viewportScrollY).toBe(released + 20);
+        pointer('pointercancel', 2, 220, 100);
     });
 
-    it.each(['pointerup', 'pointercancel'])('cleans forwarded chart touches when %s occurs outside the canvas', (type) => {
+    it.each(['pointerup', 'pointercancel'])('cleans forwarded chart touches when %s occurs outside the canvas', async (type) => {
         const removeListener = vi.spyOn(document, 'removeEventListener');
-        const { canvasListeners, controller, executeCommand, setDrawingType, setSceneOverlayOwnsTouch, testBed } = createController();
-        setSceneOverlayOwnsTouch(true);
-        setDrawingType(ObjectType.CHART);
-        const now = vi.spyOn(performance, 'now').mockReturnValue(0);
-        const pointer = (eventType: string, x: number, y: number) => {
-            const event = new MouseEvent(eventType, { clientX: x, clientY: y });
-            Object.defineProperties(event, { pointerType: { value: 'touch' }, pointerId: { value: 1 } });
-            return event;
-        };
-        canvasListeners.get('pointerdown')!(pointer('pointerdown', 120, 120));
-        now.mockReturnValue(16);
-        canvasListeners.get('pointermove')!(pointer('pointermove', 120, 100));
-        document.dispatchEvent(pointer(type, 120, 100));
-        executeCommand.mockClear();
-        now.mockReturnValue(32);
-        canvasListeners.get('pointermove')!(pointer('pointermove', 120, 80));
-        expect(executeCommand).not.toHaveBeenCalled();
+        const { addDrawing, advance, controller, execute, pointer, render, settle, viewport } = createRealMobileFixture();
+        const drawing = addDrawing(ObjectType.CHART);
+        expect(render.scene.pick(Vector2.FromArray([120, 120]), DeviceType.Touch)).toBe(drawing);
+        pointer('pointerdown', 1, 120, 120);
+        advance();
+        pointer('pointermove', 1, 120, 100);
+        await settle();
+        pointer(type, 1, 120, 100, 'touch', false, document);
+        execute.mockClear();
+        advance();
+        pointer('pointermove', 1, 120, 80);
+        expect(execute).not.toHaveBeenCalled();
+        expect(viewport.viewportScrollY).toBe(20);
         controller.dispose();
-        testBed.univer.dispose();
         expect(removeListener).toHaveBeenCalledWith('pointerup', expect.any(Function), true);
         expect(removeListener).toHaveBeenCalledWith('pointercancel', expect.any(Function), true);
-        now.mockRestore();
-        removeListener.mockRestore();
     });
 
-    it.each([ObjectType.IMAGE, ObjectType.SHAPE, ObjectType.CHART, ObjectType.DRAWING_DOM])('scrolls over unselected drawings of type %s but yields after they are selected', (type) => {
-        const { canvasListeners, drawing, executeCommand, selectedDrawings, setDrawingType, setSceneOverlayOwnsTouch, testBed, transformer } = createController();
-        setSceneOverlayOwnsTouch(true);
-        setDrawingType(type);
-        const now = vi.spyOn(performance, 'now');
-        now.mockReturnValueOnce(0).mockReturnValueOnce(16).mockReturnValueOnce(32);
+    it.each([ObjectType.IMAGE, ObjectType.SHAPE, ObjectType.CHART, ObjectType.DRAWING_DOM])('scrolls over unselected drawings of type %s but yields after they are selected', async (type) => {
+        const { addDrawing, advance, execute, render, settle, touch, viewport } = createRealMobileFixture();
+        const drawing = addDrawing(type);
+        const transformer = render.scene.getTransformerByCreate();
+        expect(render.scene.pick(Vector2.FromArray([120, 120]), DeviceType.Touch)).toBe(drawing);
+        expect(transformer.moveOnlyWhenSelected).toBe(true);
+        touch('touchstart', [{ clientX: 120, clientY: 120 }]);
+        advance();
+        touch('touchmove', [{ clientX: 90, clientY: 80 }]);
+        await settle();
+        expect(execute).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 30, offsetY: 40 });
+        expect(viewport.viewportScrollY).toBe(40);
 
-        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }]);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }]);
-
-        expect(transformer.resetProps).toHaveBeenCalledWith({ moveOnlyWhenSelected: true });
-        expect(executeCommand).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 30, offsetY: 40 });
-
-        dispatchTouchEvent(canvasListeners, 'touchend', []);
-        executeCommand.mockClear();
-        selectedDrawings.set(drawing.oKey, drawing);
-        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }]);
-        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }]);
-
-        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
-        now.mockRestore();
-        testBed.univer.dispose();
+        touch('touchend', []);
+        execute.mockClear();
+        transformer.setSelectedControl(drawing);
+        expect(transformer.getSelectedObjectMap().has(drawing.oKey)).toBe(true);
+        touch('touchstart', [{ clientX: 120, clientY: 120 }]);
+        advance();
+        touch('touchmove', [{ clientX: 90, clientY: 80 }]);
+        expect(execute).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+        expect(viewport.viewportScrollY).toBe(40);
     });
 
     it('scrolls the selected range into view based on the current viewport bounds', () => {
@@ -595,6 +675,102 @@ describe('MobileSheetsScrollRenderController', () => {
 
         now.mockRestore();
         testBed.univer.dispose();
+    });
+
+    it.each([0.5, 1, 2])('keeps the same fling endpoint across refresh rates and dropped frames at zoom %s', async (zoom) => {
+        const distances: number[] = [];
+        for (const intervals of [[1000 / 60], [1000 / 30], [1000 / 120], [8, 40, 15, 100, 5]]) {
+            const { controller, dispose, execute, frame, scrollCalls, settle, swipe, viewport } = createRealMobileFixture(zoom);
+            await swipe();
+            const releaseY = viewport.viewportScrollY;
+            for (let i = 0; i < 150; i++) {
+                frame(intervals[i % intervals.length]);
+                await settle();
+            }
+            distances.push(viewport.viewportScrollY - releaseY);
+            expect(distances.at(-1)).toBeGreaterThan(0);
+            const completedCalls = scrollCalls().length;
+            expect(completedCalls).toBeGreaterThan(0);
+            execute.mockClear();
+            frame();
+            await settle();
+            expect(execute).not.toHaveBeenCalled();
+            controller.dispose();
+            dispose();
+        }
+        for (const distance of distances) {
+            expect(distance).toBeCloseTo(distances[0], 9);
+        }
+    });
+
+    it.each([false, true])('stops at a blocked viewport after pending geometry work=%s', async (pendingGeometry) => {
+        const { advance, commands, execute, frame, scrollCalls, settle, touch, viewport } = createRealMobileFixture();
+        await commands.executeCommand(ScrollCommand.id, { sheetViewStartRow: 999, offsetY: 0 });
+        const edge = viewport.viewportScrollY;
+        expect(edge).toBeGreaterThan(0);
+        touch('touchstart', [{ clientX: 180, clientY: 180 }]);
+        advance();
+        touch('touchmove', [{ clientX: 180, clientY: 140 }]);
+        await settle();
+        advance();
+        touch('touchend', []);
+        execute.mockClear();
+        viewport.markDirty(pendingGeometry);
+        viewport.markForceDirty(false);
+        for (let i = 0; i < 10; i++) {
+            frame();
+            await settle();
+            viewport.markDirty(false);
+        }
+        expect(scrollCalls()).toHaveLength(pendingGeometry ? 2 : 1);
+        expect(viewport.viewportScrollY).toBe(edge);
+        execute.mockClear();
+        frame();
+        await settle();
+        expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('commits inertia before paint and waits for an asynchronous command without overlapping updates', async () => {
+        const { swipe, frame, settle, execute, viewport, controller } = createRealMobileFixture();
+        await swipe();
+        const released = viewport.viewportScrollY;
+        expect(released).toBeGreaterThan(0);
+        frame();
+        frame();
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toHaveLength(1);
+        await settle();
+        expect(viewport.viewportScrollY).toBeGreaterThan(released);
+        const beforeDispose = viewport.viewportScrollY;
+        controller.dispose();
+        frame();
+        await settle();
+        expect(viewport.viewportScrollY).toBe(beforeDispose);
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toHaveLength(1);
+    });
+
+    it.each(['touchcancel', 'touchstart', 'pinch', 'drawing', 'deactivate'])('cancels a pending inertia frame on %s', async (action) => {
+        const { swipe, frame, settle, execute, render, touch, viewport, controller } = createRealMobileFixture();
+        await swipe();
+        const released = viewport.viewportScrollY;
+        if (action === 'drawing') {
+            const injector = render.getInjector!();
+            injector.add([Rect, { useFactory: () => injector.createInstance(Rect, 'inertia-drawing', { left: 10, top: 10, width: 40, height: 40 }) }]);
+            const drawing = injector.get(Rect);
+            render.scene.addObject(drawing);
+            render.scene.getTransformerByCreate().activeAnObject(drawing);
+        } else if (action === 'deactivate') {
+            render.deactivate();
+        } else if (action === 'pinch') {
+            touch('touchstart', [{ clientX: 120, clientY: 140 }, { clientX: 180, clientY: 140 }]);
+        } else {
+            touch(action, action === 'touchstart' ? [{ clientX: 180, clientY: 140 }] : []);
+        }
+        execute.mockClear();
+        frame();
+        await settle();
+        expect(execute).not.toHaveBeenCalled();
+        expect(viewport.viewportScrollY).toBe(released);
+        controller.dispose();
     });
 
     it('yields an active touch gesture to shape adjustment controls', () => {

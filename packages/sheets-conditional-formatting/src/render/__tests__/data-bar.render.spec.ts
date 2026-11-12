@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { UniverRenderingContext } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataBar } from '../data-bar.render';
 
 function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
@@ -41,16 +42,32 @@ function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
 }
 
 describe('data bar local rasterization', () => {
-    afterEach(() => vi.restoreAllMocks());
+    let injector: Injector;
+
+    beforeEach(() => {
+        injector = new Injector([[DataBar]]);
+    });
+
+    afterEach(() => {
+        injector.dispose();
+        vi.restoreAllMocks();
+    });
+
+    function createContext(native: CanvasRenderingContext2D): UniverRenderingContext {
+        injector.add([UniverRenderingContext, {
+            useFactory: () => injector.createInstance(UniverRenderingContext, native),
+        }]);
+        return injector.get(UniverRenderingContext);
+    }
 
     it('keeps physical resolution and fractional geometry, then releases the owned bitmap', () => {
         const canvas = document.createElement('canvas');
         const native = nativeContext(canvas);
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return nativeContext(this);
         });
-        const bar = new DataBar();
+        const bar = injector.get(DataBar);
         const draw = vi.fn();
         Reflect.get(bar, '_drawAtLocalOrigin').call(bar, context, 10, 20, 54, 25, draw);
 
@@ -69,7 +86,7 @@ describe('data bar local rasterization', () => {
 
     it('restores the destination context when submitting a bar bitmap throws', () => {
         const native = nativeContext(document.createElement('canvas'));
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return nativeContext(this);
         });
@@ -77,7 +94,7 @@ describe('data bar local rasterization', () => {
         vi.mocked(native.drawImage).mockImplementation(() => {
             throw failure;
         });
-        const bar = new DataBar();
+        const bar = injector.get(DataBar);
         try {
             expect(() => Reflect.get(bar, '_drawAtLocalOrigin').call(bar, context, 10, 20, 54, 25, vi.fn()))
                 .toThrow(failure);
@@ -90,13 +107,13 @@ describe('data bar local rasterization', () => {
 
     it.each(['printing', 'alpha', 'large'])('preserves native drawing for %s', (mode) => {
         const native = nativeContext(document.createElement('canvas'));
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         if (mode === 'printing') {
             context.__mode = 'printing';
         } else if (mode === 'alpha') {
             context.globalAlpha = 0.5;
         }
-        const bar = new DataBar();
+        const bar = injector.get(DataBar);
         const draw = vi.fn();
         const width = mode === 'large' ? 1_000_000 : 54;
         Reflect.get(bar, '_drawAtLocalOrigin').call(bar, context, 10, 20, width, 25, draw);

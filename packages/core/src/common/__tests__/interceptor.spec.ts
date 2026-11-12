@@ -14,13 +14,32 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AsyncInterceptorManager, createAsyncInterceptorKey, createInterceptorKey, InterceptorManager } from '../interceptor';
+
+let injector: Injector;
+beforeEach(() => {
+    injector = new Injector();
+});
+afterEach(() => injector.dispose());
+
+function createManager<P extends ConstructorParameters<typeof InterceptorManager>[0]>(points: P) {
+    const Manager = InterceptorManager<P>;
+    injector.add([Manager, { useFactory: () => injector.createInstance(Manager, points) }]);
+    return injector.get(Manager);
+}
+
+function createAsyncManager<P extends ConstructorParameters<typeof AsyncInterceptorManager>[0]>(points: P) {
+    const Manager = AsyncInterceptorManager<P>;
+    injector.add([Manager, { useFactory: () => injector.createInstance(Manager, points) }]);
+    return injector.get(Manager);
+}
 
 describe('Test interceptor', () => {
     it('should return "true" when each interceptor returns true ', async () => {
         const INTERCEPTOR_KEY = createAsyncInterceptorKey<boolean, boolean>('test');
-        const interceptor = new AsyncInterceptorManager({ INTERCEPTOR_KEY });
+        const interceptor = createAsyncManager({ INTERCEPTOR_KEY });
 
         interceptor.interceptAsync(interceptor.getInterceptPoints().INTERCEPTOR_KEY, {
             priority: 0,
@@ -42,7 +61,7 @@ describe('Test interceptor', () => {
 
     it('should return "false" when one of the interceptor returns false', async () => {
         const INTERCEPTOR_KEY = createAsyncInterceptorKey<boolean, boolean>('test');
-        const interceptor = new AsyncInterceptorManager({ INTERCEPTOR_KEY });
+        const interceptor = createAsyncManager({ INTERCEPTOR_KEY });
 
         interceptor.interceptAsync(interceptor.getInterceptPoints().INTERCEPTOR_KEY, {
             priority: 0,
@@ -66,7 +85,7 @@ describe('Test interceptor', () => {
 describe('interceptor subscription cleanup', () => {
     it('can release a synchronous registration after its manager is disposed', () => {
         const key = createInterceptorKey<boolean, boolean>('late-cleanup');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const handler = { handler: () => true };
         const release = manager.intercept(key, handler);
         manager.dispose();
@@ -76,7 +95,7 @@ describe('interceptor subscription cleanup', () => {
 
     it('can release an asynchronous registration after its manager is disposed', async () => {
         const key = createAsyncInterceptorKey<boolean, boolean>('late-cleanup');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const handler = { handler: async () => true };
         const release = await manager.interceptAsync(key, handler);
         manager.dispose();
@@ -88,7 +107,7 @@ describe('interceptor subscription cleanup', () => {
 describe('synchronous interceptor lifecycle', () => {
     it('preserves priority, context, filtering and cached chains when unregistering', () => {
         const key = createInterceptorKey<number, number>('chain');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const calls: string[] = [];
         manager.intercept(key, {
             priority: 0,
@@ -123,7 +142,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('preserves short circuiting and propagates handler errors', () => {
         const key = createInterceptorKey<boolean, null>('validation');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const tail = vi.fn(() => true);
         manager.intercept(key, { priority: 0, handler: tail });
         const release = manager.intercept(key, { priority: 10, handler: () => false });
@@ -143,7 +162,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('does not remove another registration when an old callback is called twice', () => {
         const key = createInterceptorKey<boolean, null>('repeated-release');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const handler = { handler: () => true };
         const release = manager.intercept(key, handler);
         const releaseOther = manager.intercept(key, handler);
@@ -156,7 +175,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('rejects registration and chain creation after terminal disposal', () => {
         const key = createInterceptorKey<boolean, null>('terminal');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const handler = { handler: () => true };
         const release = manager.intercept(key, handler);
         manager.dispose();
@@ -173,7 +192,7 @@ describe('synchronous interceptor lifecycle', () => {
     it('only unregisters from the requested interception point', () => {
         const first = createInterceptorKey<boolean, null>('first');
         const second = createInterceptorKey<boolean, null>('second');
-        const manager = new InterceptorManager({ first, second });
+        const manager = createManager({ first, second });
         const handler = { handler: () => true };
         const release = manager.intercept(first, handler);
         manager.intercept(second, handler);
@@ -184,7 +203,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('rejects later invocations of cached and filtered chains after disposal', () => {
         const key = createInterceptorKey<boolean, null>('cached-chain');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const handler = vi.fn(() => true);
         manager.intercept(key, { handler });
         const chain = manager.fetchThroughInterceptors(key);
@@ -197,7 +216,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('remains terminal when an owned cleanup throws', () => {
         const key = createInterceptorKey<boolean, null>('cleanup-error');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         const release = manager.intercept(key, { handler: () => true });
         const error = new Error('cleanup failed');
         manager.disposeWithMe(() => {
@@ -211,7 +230,7 @@ describe('synchronous interceptor lifecycle', () => {
 
     it('lets a running chain finish when a handler disposes the manager', () => {
         const key = createInterceptorKey<number, null>('in-flight');
-        const manager = new InterceptorManager({ key });
+        const manager = createManager({ key });
         manager.intercept(key, {
             priority: 10,
             handler: (value, _context, next) => {
@@ -228,7 +247,7 @@ describe('synchronous interceptor lifecycle', () => {
 describe('asynchronous interceptor lifecycle', () => {
     it('preserves priority, context, filtering and cached chains when unregistering', async () => {
         const key = createAsyncInterceptorKey<number, number>('chain');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const calls: string[] = [];
         await manager.interceptAsync(key, {
             priority: 0,
@@ -263,7 +282,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('preserves short circuiting and propagates handler errors', async () => {
         const key = createAsyncInterceptorKey<boolean, null>('validation');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const tail = vi.fn(async () => true);
         await manager.interceptAsync(key, { priority: 0, handler: tail });
         const release = await manager.interceptAsync(key, { priority: 10, handler: async () => false });
@@ -283,7 +302,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('does not remove another registration when an old callback is called twice', async () => {
         const key = createAsyncInterceptorKey<boolean, null>('repeated-release');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const handler = { handler: async () => true };
         const release = await manager.interceptAsync(key, handler);
         const releaseOther = await manager.interceptAsync(key, handler);
@@ -296,7 +315,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('rejects registration and chain creation after terminal disposal', async () => {
         const key = createAsyncInterceptorKey<boolean, null>('terminal');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const handler = { handler: async () => true };
         const release = await manager.interceptAsync(key, handler);
         manager.dispose();
@@ -313,7 +332,7 @@ describe('asynchronous interceptor lifecycle', () => {
     it('only unregisters from the requested interception point', async () => {
         const first = createAsyncInterceptorKey<boolean, null>('first');
         const second = createAsyncInterceptorKey<boolean, null>('second');
-        const manager = new AsyncInterceptorManager({ first, second });
+        const manager = createAsyncManager({ first, second });
         const handler = { handler: async () => true };
         const release = await manager.interceptAsync(first, handler);
         await manager.interceptAsync(second, handler);
@@ -324,7 +343,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('rejects later invocations of cached and filtered chains after disposal', async () => {
         const key = createAsyncInterceptorKey<boolean, null>('cached-chain');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const handler = vi.fn(async () => true);
         await manager.interceptAsync(key, { handler });
         const chain = manager.fetchThroughAsyncInterceptors(key);
@@ -337,7 +356,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('remains terminal when an owned cleanup throws', async () => {
         const key = createAsyncInterceptorKey<boolean, null>('cleanup-error');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         const release = await manager.interceptAsync(key, { handler: async () => true });
         const error = new Error('cleanup failed');
         manager.disposeWithMe(() => {
@@ -351,7 +370,7 @@ describe('asynchronous interceptor lifecycle', () => {
 
     it('lets an in-flight chain complete after terminal disposal', async () => {
         const key = createAsyncInterceptorKey<number, null>('in-flight');
-        const manager = new AsyncInterceptorManager({ key });
+        const manager = createAsyncManager({ key });
         let resume = () => {};
         const pending = new Promise<void>((resolve) => {
             resume = resolve;

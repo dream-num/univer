@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ObjectMatrix } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { BooleanNumber, Injector, ObjectMatrix } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Canvas } from '../../../canvas';
 import type { UniverRenderingContext2D } from '../../../context';
 import { UniverRenderingContext } from '../../../context';
 import { Spreadsheet } from '../spreadsheet';
+
+let injector: Injector;
+beforeEach(() => {
+    injector = new Injector();
+});
+afterEach(() => injector.dispose());
+
+function createSpreadsheet(key: string): Spreadsheet {
+    injector.add([Spreadsheet, { useFactory: () => injector.createInstance(Spreadsheet, key) }]);
+    return injector.get(Spreadsheet);
+}
 
 describe('native compound grid fallback', () => {
     it.each([
@@ -31,7 +42,7 @@ describe('native compound grid fallback', () => {
         { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: true, disabled: false, expected: false },
         { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: false, disabled: true, expected: false },
     ])('uses the native fallback only for affected geometry: %j', (scenario) => {
-        const sheet = new Spreadsheet('native-grid-fallback');
+        const sheet = createSpreadsheet('native-grid-fallback');
         const overflowCache = new ObjectMatrix();
         if (scenario.overflow) {
             overflowCache.setValue(1, 1, { startRow: 1, endRow: 1, startColumn: 1, endColumn: 4 });
@@ -54,7 +65,7 @@ describe('native compound grid fallback', () => {
     });
 
     it('ignores offscreen and historical cuts while finding an offscreen horizontal overflow anchor', () => {
-        const sheet = new Spreadsheet('visible-native-grid-cuts');
+        const sheet = createSpreadsheet('visible-native-grid-cuts');
         const overflowCache = new ObjectMatrix();
         overflowCache.setValue(0, 0, { startRow: 0, endRow: 0, startColumn: 0, endColumn: 100 });
         overflowCache.setValue(42, 70, { startRow: 42, endRow: 42, startColumn: 70, endColumn: 75 });
@@ -125,7 +136,7 @@ function callApplyCache(
     ctx: ReturnType<typeof createMockCtx>,
     ...rect: [number, number, number, number, number, number, number, number]
 ) {
-    const spreadsheet = new Spreadsheet('sheet-apply-cache-test');
+    const spreadsheet = createSpreadsheet('sheet-apply-cache-test');
     (spreadsheet as unknown as ISpreadsheetApplyCache)._applyCache(
         cacheCanvas as unknown as Canvas,
         ctx as unknown as UniverRenderingContext2D,
@@ -248,9 +259,9 @@ describe('spreadsheet _applyCache blit clipping', () => {
 
 describe('spreadsheet native cache gridline interiors', () => {
     it.each(['opaque', 'alpha', 'translucent', 'fractional', 'shadow', 'dash', 'filter', 'color-space'])('preserves native corners, style composition and texture bounds for %s', (mode) => {
-        const spreadsheet = new Spreadsheet('native-grid-test');
+        const spreadsheet = createSpreadsheet('native-grid-test');
         const native = document.createElement('canvas').getContext('2d')!;
-        const ctx = new UniverRenderingContext(native);
+        const ctx = injector.createInstance(UniverRenderingContext, native);
         ctx.setTransform(1.5, 0, 0, 1.5, mode === 'fractional' ? 0.51 : 0.5, mode === 'fractional' ? 0.51 : 0.5);
         ctx.lineWidth = 2 / 3;
         native.strokeStyle = mode === 'translucent' ? 'rgba(29,78,216,0.5)' : '#1d4ed8';
@@ -292,9 +303,9 @@ describe('spreadsheet native cache gridline interiors', () => {
     });
 
     it('restores native drawing state when an interior repair throws', () => {
-        const spreadsheet = new Spreadsheet('native-grid-error');
+        const spreadsheet = createSpreadsheet('native-grid-error');
         const native = document.createElement('canvas').getContext('2d')!;
-        const ctx = new UniverRenderingContext(native);
+        const ctx = injector.createInstance(UniverRenderingContext, native);
         ctx.setTransform(1, 0, 0, 1, 0.5, 0.5);
         native.strokeStyle = '#1d4ed8';
         native.fillStyle = '#be123c';

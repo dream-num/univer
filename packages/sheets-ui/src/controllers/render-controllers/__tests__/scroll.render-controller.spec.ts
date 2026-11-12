@@ -15,7 +15,7 @@
  */
 
 import type { IWheelEvent } from '@univerjs/engine-render';
-import { CommandType, Direction, FOCUSING_SHEET, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, FOCUSING_SHEET, ICommandService, IContextService } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -57,6 +57,36 @@ function flushWheelFrame() {
     const callback = pendingAnimationFrames.shift();
     expect(callback).toBeDefined();
     callback!(performance.now());
+}
+
+function createRealScrollFixture() {
+    const fixture = createChartRenderTestBed([
+        [SheetScrollManagerService],
+        [SheetsScrollRenderController],
+    ], false, { rowCount: 1000, columnCount: 100, zoomRatio: 1, freeze: { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 } });
+    for (const command of [ScrollCommand, SetScrollRelativeCommand, SetScrollOperation]) {
+        fixture.commands.registerCommand(command);
+    }
+    const execute = vi.spyOn(fixture.commands, 'executeCommand');
+    const wheel = (deltaX: number, deltaY: number) => fixture.render.scene.onMouseWheel$.emitEvent({
+        deltaX,
+        deltaY,
+        ctrlKey: false,
+        shiftKey: false,
+        preventDefault: () => {},
+    } as IWheelEvent);
+    const frame = async () => {
+        fixture.render.engine._beginFrame(performance.now());
+        await Promise.all(execute.mock.results.filter((result) => result.type === 'return').map((result) => result.value));
+    };
+    return {
+        ...fixture,
+        controller: fixture.render.with(SheetsScrollRenderController),
+        viewport: fixture.render.scene.getMainViewport(),
+        execute,
+        wheel,
+        frame,
+    };
 }
 
 describe('SheetsScrollRenderController', () => {
@@ -306,34 +336,85 @@ describe('SheetsScrollRenderController', () => {
         void controller;
     });
 
-    it('locks cross-axis jitter and coalesces wheel events into one engine frame', () => {
-        const scrollManagerService = createScrollManagerServiceMock();
+    it('locks cross-axis jitter and coalesces wheel events into one engine frame', async () => {
+        const { execute, wheel, frame, viewport } = createRealScrollFixture();
+        wheel(8, 20);
+        wheel(20, 8);
+        expect(execute).not.toHaveBeenCalled();
+        await frame();
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toEqual([
+            [SetScrollRelativeCommand.id, { offsetX: 20, offsetY: 20 }],
+        ]);
+        expect([viewport.viewportScrollX, viewport.viewportScrollY]).toEqual([20, 20]);
+    });
+
+    it('flushes accumulated wheel input before the next engine paint and cancels it on disposal', async () => {
+        const { execute, wheel, frame, controller, viewport } = createRealScrollFixture();
+        wheel(0, 10);
+        wheel(0, 20);
+        expect(execute).not.toHaveBeenCalled();
+        await frame();
+        expect(viewport.viewportScrollY).toBe(30);
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toHaveLength(1);
+        wheel(0, 40);
+        controller.dispose();
+        await frame();
+        expect(viewport.viewportScrollY).toBe(30);
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toHaveLength(1);
+    });
+
+    it('does not invalidate the scene again when wheel input cannot move a clean viewport', async () => {
+        const { render, wheel, frame, viewport } = createRealScrollFixture();
+        await frame();
+        render.scene.makeDirty(false);
+        for (const view of render.scene.getViewports()) {
+            view.markDirty(false);
+            view.markForceDirty(false);
+        }
+        const dirty = vi.spyOn(render.scene, 'makeDirty');
+        const scrolling = vi.spyOn(render.scene, 'makeDirtyForScrolling');
+        wheel(0, -20);
+        await frame();
+        expect(viewport.viewportScrollY).toBe(0);
+        expect(dirty).not.toHaveBeenCalled();
+        expect(scrolling).not.toHaveBeenCalled();
+    });
+
+    it('retains the animation-frame fallback when the host has no engine frame signal', () => {
         const testBed = createRenderTestBed({
-            dependencies: [[SheetScrollManagerService, { useValue: scrollManagerService }]],
+            dependencies: [[SheetScrollManagerService, { useValue: createScrollManagerServiceMock() }]],
         });
-        const { context, scene, contextService } = testBed;
-        const commandService = testBed.get(ICommandService);
-        const executeSpy = vi.spyOn(commandService, 'executeCommand');
-
+        const { scene, context, contextService, injector } = testBed;
+        vi.spyOn(scene, 'getEngine').mockReturnValue({ width: 800, height: 600 } as any);
+        const execute = vi.spyOn(injector.get(ICommandService), 'executeCommand').mockResolvedValue(true);
+        injector.add([SheetsScrollRenderController, { useFactory: () => injector.createInstance(SheetsScrollRenderController, context as any) }]);
+        const controller = injector.get(SheetsScrollRenderController);
         contextService.setContextValue(FOCUSING_SHEET, true);
-
-        const controller = testBed.injector.createInstance(SheetsScrollRenderController, context as any);
-        const preventDefault = vi.fn();
-
         scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 8, deltaY: 20, preventDefault },
-            { stopPropagation: () => { } }
+            { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 12, preventDefault: vi.fn() },
+            { stopPropagation: vi.fn() }
         );
-        scene.onMouseWheel$.emit(
-            { ctrlKey: false, shiftKey: false, deltaX: 20, deltaY: 8, preventDefault },
-            { stopPropagation: () => { } }
-        );
-        flushWheelFrame();
+        expect(execute).not.toHaveBeenCalled();
+        expect(pendingAnimationFrames).toHaveLength(1);
+        flushWheelFrame(scene);
+        expect(execute).toHaveBeenCalledExactlyOnceWith(SetScrollRelativeCommand.id, { offsetX: 0, offsetY: 12 });
+        controller.dispose();
+        testBed.univer.dispose();
+    });
 
-        expect(executeSpy).toHaveBeenCalledTimes(1);
-        expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 20, offsetY: 20 });
-
-        void controller;
+    it.each(['deactivate', 'worksheet', 'focus'])('drops queued wheel input after changing %s', async (change) => {
+        const { render, injector, activate, execute, wheel, frame, viewport } = createRealScrollFixture();
+        wheel(0, 40);
+        if (change === 'deactivate') {
+            render.deactivate();
+        } else if (change === 'worksheet') {
+            activate('chart');
+        } else {
+            injector.get(IContextService).setContextValue(FOCUSING_SHEET, false);
+        }
+        await frame();
+        expect(execute.mock.calls.filter(([id]) => id === SetScrollRelativeCommand.id)).toHaveLength(0);
+        expect(viewport.viewportScrollY).toBe(0);
     });
 
     it('updates scroll state from viewport events and executes ScrollCommand when scrolling bar', () => {

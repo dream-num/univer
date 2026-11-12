@@ -17,7 +17,10 @@
 import { Injector, ThemeService } from '@univerjs/core';
 import { Rect } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { RangeProtectionRenderExtension } from '../range-protection.render';
 import { RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../range-protection.render';
+
+const EXTENSIONS: Array<new (theme: ThemeService) => RangeProtectionRenderExtension> = [RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderExtension];
 
 describe('range protection assets', () => {
     let image: HTMLImageElement;
@@ -30,10 +33,13 @@ describe('range protection assets', () => {
 
     afterEach(() => vi.restoreAllMocks());
 
-    it.each([RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderExtension])('invalidates cached protection pixels on load for %s', (Extension) => {
-        const injector = new Injector([[ThemeService]]);
-        const extension = new Extension(injector.get(ThemeService));
-        const parent = new Rect('protection-parent');
+    it.each(EXTENSIONS)('invalidates cached protection pixels on load for %s', (Extension) => {
+        const injector = new Injector([
+            [ThemeService],
+            [Extension, { useFactory: (container: Injector, theme: ThemeService) => container.createInstance(Extension, theme), deps: [Injector, ThemeService] }],
+        ]);
+        const extension = injector.get(Extension);
+        const parent = injector.createInstance(Rect, 'protection-parent', {});
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         try {
@@ -48,10 +54,13 @@ describe('range protection assets', () => {
         }
     });
 
-    it.each([RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderExtension])('disconnects pending protection image loads for %s', (Extension) => {
-        const injector = new Injector([[ThemeService]]);
-        const extension = new Extension(injector.get(ThemeService));
-        const parent = new Rect('disposed-protection-parent');
+    it.each(EXTENSIONS)('disconnects pending protection image loads for %s', (Extension) => {
+        const injector = new Injector([
+            [ThemeService],
+            [Extension, { useFactory: (container: Injector, theme: ThemeService) => container.createInstance(Extension, theme), deps: [Injector, ThemeService] }],
+        ]);
+        const extension = injector.get(Extension);
+        const parent = injector.createInstance(Rect, 'disposed-protection-parent', {});
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         extension.dispose();

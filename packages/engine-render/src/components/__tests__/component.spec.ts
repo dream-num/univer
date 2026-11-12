@@ -15,14 +15,23 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SHEET_EXTENSION_TYPE } from '../sheets/extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from '../sheets/sheet.render-skeleton';
 import { RenderComponent } from '../component';
 import { ComponentExtension } from '../extension';
 import { Font } from '../sheets/extensions/font';
 
+let injector: Injector;
+
 describe('RenderComponent', () => {
+    beforeEach(() => {
+        injector = new Injector([[Font]]);
+    });
+
+    afterEach(() => injector.dispose());
+
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
@@ -37,8 +46,12 @@ describe('RenderComponent', () => {
                 return super.canReuseViewportCache() && this.enabled;
             }
         }
-        const component = new RenderComponent<unknown, string, unknown>('conditional-component');
-        const extension = new ConditionalExtension();
+        const component = injector.createChild([[RenderComponent, { useFactory: function createTestInstance() {
+            return injector.createInstance(RenderComponent<unknown, string, unknown>, 'conditional-component');
+        } }]]).get(RenderComponent<unknown, string, unknown>);
+        const extension = injector.createChild([[ConditionalExtension, { useFactory: function createTestInstance() {
+            return injector.createInstance(ConditionalExtension);
+        } }]]).get(ConditionalExtension);
         component.viewportCacheReusable = true;
         component.register(extension);
         try {
@@ -53,7 +66,9 @@ describe('RenderComponent', () => {
     });
 
     it.each([undefined, true])('keeps flag-only extensions without a callable eligibility method on the full path (%s)', (method) => {
-        const component = new RenderComponent<unknown, string, unknown>('legacy-component');
+        const component = injector.createChild([[RenderComponent, { useFactory: function createTestInstance() {
+            return injector.createInstance(RenderComponent<unknown, string, unknown>, 'legacy-component');
+        } }]]).get(RenderComponent<unknown, string, unknown>);
         component.viewportCacheReusable = true;
         component.register({
             uKey: 'legacy-extension',
@@ -70,13 +85,17 @@ describe('RenderComponent', () => {
 
     it('does not inherit built-in cache eligibility through an unknown replacement subclass', () => {
         class UnknownFont extends Font {}
-        const component = new RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>('replacement-component');
+        const component = injector.createChild([[RenderComponent, { useFactory: function createTestInstance() {
+            return injector.createInstance(RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>, 'replacement-component');
+        } }]]).get(RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>);
         component.viewportCacheReusable = true;
-        const known = new Font();
+        const known = injector.get(Font);
         component.register(known);
         try {
             expect(component.canReuseViewportCache()).toBe(true);
-            component.register(new UnknownFont());
+            component.register(injector.createChild([[UnknownFont, { useFactory: function createTestInstance() {
+                return injector.createInstance(UnknownFont);
+            } }]]).get(UnknownFont));
             expect(component.canReuseViewportCache()).toBe(false);
         } finally {
             component.dispose();
@@ -89,8 +108,10 @@ describe('RenderComponent', () => {
         vi.stubGlobal('Image', vi.fn(function () {
             return image;
         }));
-        const component = new RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>('component');
-        const extension = new Font();
+        const component = injector.createChild([[RenderComponent, { useFactory: function createTestInstance() {
+            return injector.createInstance(RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>, 'component');
+        } }]]).get(RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]>);
+        const extension = injector.get(Font);
         const dispose = vi.spyOn(extension, 'dispose');
         const dirty = vi.spyOn(component, 'makeDirty');
         component.register(extension);

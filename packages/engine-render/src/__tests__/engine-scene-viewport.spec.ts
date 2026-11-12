@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
+import { Injector, Tools } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURSOR_TYPE } from '../basics/const';
 import { DeviceType, PointerInput } from '../basics/i-events';
@@ -22,10 +22,13 @@ import { Vector2 } from '../basics/vector2';
 import { Engine } from '../engine';
 import { Group } from '../group';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../scene';
+import { DumbCanvasColorService, ICanvasColorService } from '../services/canvas-color.service';
 import { Rect } from '../shape/rect';
 import { ScrollBar } from '../shape/scroll-bar';
 import { Viewport } from '../viewport';
 import { setupRenderTestEnv } from './render-test-utils';
+
+let injector: Injector;
 
 interface IFixture {
     engine: Engine;
@@ -65,10 +68,12 @@ function createFixture(): IFixture {
     container.style.border = '1px solid transparent';
     document.body.appendChild(container);
 
-    const engine = new Engine('unit-a', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+    const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+        return injector.createInstance(Engine, 'unit-a', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+    } }]]).get(Engine);
     engine.mount(container, false);
 
-    const scene = new Scene('scene-a', engine);
+    const scene = injector.createInstance(Scene, 'scene-a', engine);
     scene.transformByState({
         width: 700,
         height: 500,
@@ -76,7 +81,7 @@ function createFixture(): IFixture {
         scaleY: 1,
     });
 
-    const viewport = new Viewport(MAIN_VIEW_PORT_KEY, scene, {
+    const viewport = injector.createInstance(Viewport, MAIN_VIEW_PORT_KEY, scene, {
         left: 0,
         top: 0,
         width: 300,
@@ -87,13 +92,13 @@ function createFixture(): IFixture {
         bufferEdgeY: 6,
     });
 
-    new ScrollBar(viewport, {
+    injector.createInstance(ScrollBar, viewport, {
         mainScene: scene,
         barSize: 12,
         thumbMargin: 2,
     });
 
-    const rect = new Rect('rect-main', {
+    const rect = injector.createInstance(Rect, 'rect-main', {
         left: 10,
         top: 10,
         width: 100,
@@ -105,7 +110,7 @@ function createFixture(): IFixture {
     rect.zIndex = 1;
     scene.addObject(rect, 1);
 
-    const child = new Rect('rect-child', {
+    const child = injector.createInstance(Rect, 'rect-child', {
         left: 120,
         top: 40,
         width: 60,
@@ -114,7 +119,7 @@ function createFixture(): IFixture {
         stroke: '#111111',
         strokeWidth: 1,
     });
-    const group = new Group('group-main', child);
+    const group = injector.createInstance(Group, 'group-main', child);
     group.transformByState({ left: 40, top: 20 });
     scene.addObject(group, 2);
 
@@ -127,12 +132,14 @@ function createFixture(): IFixture {
 }
 
 function createViewportCacheFixture(bottom = 40, dpr = 1) {
-    const engine = new Engine('viewport-cache-engine', { elementWidth: 320, elementHeight: 180, dpr });
-    const scene = new Scene('viewport-cache-scene', engine);
+    const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+        return injector.createInstance(Engine, 'viewport-cache-engine', { elementWidth: 320, elementHeight: 180, dpr });
+    } }]]).get(Engine);
+    const scene = injector.createInstance(Scene, 'viewport-cache-scene', engine);
     scene.transformByState({ width: 700, height: 500, scaleX: 1, scaleY: 1 });
-    const top = new Viewport('viewMainTop', scene, { left: 0, top: 0, width: 300, height: bottom, active: true, allowCache: true });
-    const main = new Viewport(MAIN_VIEW_PORT_KEY, scene, { left: 0, top: bottom, width: 300, height: 180 - bottom, active: true, allowCache: true });
-    const object = new Rect('viewport-cache-rect', { left: 5, top: 5, width: 40, height: 20, fill: '#44aa66' });
+    const top = injector.createInstance(Viewport, 'viewMainTop', scene, { left: 0, top: 0, width: 300, height: bottom, active: true, allowCache: true });
+    const main = injector.createInstance(Viewport, MAIN_VIEW_PORT_KEY, scene, { left: 0, top: bottom, width: 300, height: 180 - bottom, active: true, allowCache: true });
+    const object = injector.createInstance(Rect, 'viewport-cache-rect', { left: 5, top: 5, width: 40, height: 20, fill: '#44aa66' });
     object.viewportCacheReusable = true;
     scene.addObject(object, 1);
     scene.enableLayerCache(1);
@@ -149,7 +156,6 @@ function createViewportCacheFixture(bottom = 40, dpr = 1) {
     };
     const dispose = () => {
         scene.dispose();
-        engine.dispose();
     };
     return { engine, scene, top, main, object, retained, painted, rootClear, scroll, dispose };
 }
@@ -158,11 +164,13 @@ describe('engine scene viewport extra', () => {
     let env: ReturnType<typeof setupRenderTestEnv>;
 
     beforeEach(() => {
+        injector = new Injector([[ICanvasColorService, { useClass: DumbCanvasColorService }]]);
         env = setupRenderTestEnv();
         vi.useFakeTimers();
     });
 
     afterEach(() => {
+        injector.dispose();
         vi.runOnlyPendingTimers();
         vi.useRealTimers();
         env.restore();
@@ -292,10 +300,12 @@ describe('engine scene viewport extra', () => {
             const container = document.createElement('div');
             document.body.appendChild(container);
 
-            const engine = new Engine('unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+                return injector.createInstance(Engine, 'unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            } }]]).get(Engine);
             engine.mount(container, false);
 
-            const scene = new Scene('scene-wheel', engine);
+            const scene = injector.createInstance(Scene, 'scene-wheel', engine);
             scene.transformByState({
                 width: 700,
                 height: 500,
@@ -303,7 +313,7 @@ describe('engine scene viewport extra', () => {
                 scaleY: 1,
             });
 
-            const viewport = new Viewport('doc-like-vp', scene, {
+            const viewport = injector.createInstance(Viewport, 'doc-like-vp', scene, {
                 left: 0,
                 top: 0,
                 right: 0,
@@ -311,7 +321,7 @@ describe('engine scene viewport extra', () => {
                 active: true,
             });
 
-            new ScrollBar(viewport);
+            injector.createInstance(ScrollBar, viewport);
             scene.scale(scale, scale);
             viewport.resetCanvasSizeAndUpdateScroll();
 
@@ -322,7 +332,6 @@ describe('engine scene viewport extra', () => {
 
             const delta = viewport.viewportScrollY;
             scene.dispose();
-            engine.dispose();
             container.remove();
 
             return delta;
@@ -332,6 +341,30 @@ describe('engine scene viewport extra', () => {
         const doubleScaleDelta = getViewportWheelDelta(2);
 
         expect(doubleScaleDelta * 2).toBeCloseTo(normalScaleDelta, 3);
+    });
+
+    it('keeps clamped scroll notifications without repainting an unchanged clean viewport', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: 0 });
+        viewport.markDirty(false);
+        viewport.markForceDirty(false);
+        const dirty = vi.spyOn(viewport.getScrollBar()!, 'makeDirty');
+        const notified = vi.fn();
+        const subscription = viewport.onScrollAfter$.subscribeEvent(notified);
+
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: -20 });
+        expect(viewport.viewportScrollY).toBe(0);
+        expect(dirty).not.toHaveBeenCalled();
+        expect(notified).toHaveBeenCalledTimes(1);
+
+        viewport.markForceDirty(true);
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: -20 });
+        expect(dirty).toHaveBeenCalledExactlyOnceWith(true, true);
+        expect(notified).toHaveBeenCalledTimes(2);
+
+        subscription.unsubscribe();
+        scene.dispose();
+        container.remove();
     });
 
     it('locks out minor cross-axis wheel jitter in viewport scrolling', () => {
@@ -352,7 +385,6 @@ describe('engine scene viewport extra', () => {
         expect(viewport.viewportScrollX).toBeGreaterThan(20);
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -376,7 +408,6 @@ describe('engine scene viewport extra', () => {
         expect(viewport.viewportScrollY).toBeGreaterThan(20);
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -449,7 +480,6 @@ describe('engine scene viewport extra', () => {
         expect(engine.getCanvasElement().parentElement).toBe(container);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('preserves engine and layer caches only for a pending scroll render', () => {
@@ -473,13 +503,12 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, undefined);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
-        const rowHeaderViewport = new Viewport('viewRowBottom', scene, {
+        const rowHeaderViewport = injector.createInstance(Viewport, 'viewRowBottom', scene, {
             left: 0,
             top: 20,
             width: 47,
@@ -487,7 +516,7 @@ describe('engine scene viewport extra', () => {
             active: true,
             allowCache: true,
         });
-        new Viewport('viewColumnRight', scene, {
+        injector.createInstance(Viewport, 'viewColumnRight', scene, {
             left: 46,
             top: 0,
             width: 260,
@@ -520,7 +549,6 @@ describe('engine scene viewport extra', () => {
         expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('uses a full render after an after-render observer mutates the engine canvas', () => {
@@ -564,7 +592,6 @@ describe('engine scene viewport extra', () => {
 
         subscription.unsubscribe();
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps cheap content live during a large scrollbar seek', () => {
@@ -610,7 +637,6 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(2);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps content live while its render cost stays within the seek budget', () => {
@@ -639,7 +665,6 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(2);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps expensive content stable until a large scrollbar seek settles', () => {
@@ -672,13 +697,12 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(1);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('scrolls independent viewport regions for a frozen sheet render', () => {
         const { engine, scene, viewport, container } = createFixture();
         viewport.setViewportSize({ left: 100, width: 200 });
-        const frozenViewport = new Viewport('viewMainLeft', scene, {
+        const frozenViewport = injector.createInstance(Viewport, 'viewMainLeft', scene, {
             left: 0,
             top: 0,
             width: 100,
@@ -708,7 +732,6 @@ describe('engine scene viewport extra', () => {
         expect(clearCanvasSpy).not.toHaveBeenCalled();
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -797,7 +820,6 @@ describe('engine scene viewport extra', () => {
 
         scene.detachControl();
         scene.dispose();
-        engine.dispose();
     });
 
     it('uses canvas-relative client coordinates to pick touch targets', () => {
@@ -828,11 +850,12 @@ describe('engine scene viewport extra', () => {
         expect(pick).toHaveBeenCalledWith(expect.objectContaining({ x: 18, y: 20 }), DeviceType.Touch);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('throws when subscribing clientRect$ without mounting container', () => {
-        const engine = new Engine('unit-b', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+            return injector.createInstance(Engine, 'unit-b', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        } }]]).get(Engine);
         const onError = vi.fn();
         engine.clientRect$.subscribe({
             error: onError,
@@ -842,11 +865,12 @@ describe('engine scene viewport extra', () => {
                 message: '[Engine]: cannot subscribe to rect changes when container is not set!',
             })
         );
-        engine.dispose();
     });
 
     it('estimates the display frame interval without following isolated long frames', () => {
-        const engine = new Engine('unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+            return injector.createInstance(Engine, 'unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        } }]]).get(Engine);
         let timestamp = 0;
         engine._endFrame(timestamp);
         for (const interval of [8, 8, 8, 16]) {
@@ -855,7 +879,6 @@ describe('engine scene viewport extra', () => {
         }
 
         expect(engine.getEstimatedFrameInterval()).toBe(8);
-        engine.dispose();
     });
 
     it('covers scene/viewport utility and early-return branches', () => {
@@ -874,7 +897,7 @@ describe('engine scene viewport extra', () => {
         expect(scene.getLayerMaxZIndex()).toBeGreaterThanOrEqual(1);
         expect(scene.findLayerByZIndex(999)).toBeUndefined();
 
-        const extraRect = new Rect('rect-extra', {
+        const extraRect = injector.createInstance(Rect, 'rect-extra', {
             left: 1,
             top: 1,
             width: 5,
@@ -891,13 +914,13 @@ describe('engine scene viewport extra', () => {
         expect(scene.removeObject('rect-extra')).toBe(scene);
         expect(scene.removeObjects(['rect-main'] as any)).toBe(scene);
 
-        const orphan = new Rect('orphan', { left: 0, top: 0, width: 2, height: 2 });
+        const orphan = injector.createInstance(Rect, 'orphan', { left: 0, top: 0, width: 2, height: 2 });
         const emitSpy = vi.spyOn(orphan.onIsAddedToParent$, 'emitEvent');
         scene.setObjectBehavior(orphan);
         expect(orphan.parent).toBe(scene);
         expect(emitSpy).toHaveBeenCalled();
 
-        const tempViewport = new Viewport('temp-vp', scene, {
+        const tempViewport = injector.createInstance(Viewport, 'temp-vp', scene, {
             left: 1,
             top: 1,
             width: 20,
@@ -952,7 +975,7 @@ describe('engine scene viewport extra', () => {
         expect(viewport.scrollByViewportDeltaVal({ viewportScrollX: 1, viewportScrollY: 1 })).toBeUndefined();
         viewport.enable();
 
-        const viewportNoScrollBar = new Viewport('temp-vp-2', scene, {
+        const viewportNoScrollBar = injector.createInstance(Viewport, 'temp-vp-2', scene, {
             left: 0,
             top: 0,
             width: 20,
@@ -974,7 +997,6 @@ describe('engine scene viewport extra', () => {
         viewportNoScrollBar.dispose();
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('does not bridge non-overlapping cache bounds when calculating cache diff', () => {
@@ -988,7 +1010,6 @@ describe('engine scene viewport extra', () => {
         expect(diffBounds).toEqual([currentBound]);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('expands cache diff strips only toward retained cache content', () => {
@@ -1038,6 +1059,5 @@ describe('engine scene viewport extra', () => {
         ]);
 
         scene.dispose();
-        engine.dispose();
     });
 });

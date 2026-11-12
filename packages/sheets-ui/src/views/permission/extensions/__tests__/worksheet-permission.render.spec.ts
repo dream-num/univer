@@ -31,9 +31,12 @@ describe('worksheet protection assets', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it.each([WorksheetProtectionRenderExtension])('invalidates cached protection pixels on load for %s', (Extension) => {
-        const injector = new Injector([[ThemeService]]);
-        const extension = new Extension(injector.get(ThemeService));
-        const parent = new Rect('protection-parent');
+        const injector = new Injector([
+            [ThemeService],
+            [Extension, { useFactory: (container: Injector, theme: ThemeService) => container.createInstance(Extension, theme), deps: [Injector, ThemeService] }],
+        ]);
+        const extension = injector.get(Extension);
+        const parent = injector.createInstance(Rect, 'protection-parent', {});
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         try {
@@ -49,9 +52,12 @@ describe('worksheet protection assets', () => {
     });
 
     it.each([WorksheetProtectionRenderExtension])('disconnects pending protection image loads for %s', (Extension) => {
-        const injector = new Injector([[ThemeService]]);
-        const extension = new Extension(injector.get(ThemeService));
-        const parent = new Rect('disposed-protection-parent');
+        const injector = new Injector([
+            [ThemeService],
+            [Extension, { useFactory: (container: Injector, theme: ThemeService) => container.createInstance(Extension, theme), deps: [Injector, ThemeService] }],
+        ]);
+        const extension = injector.get(Extension);
+        const parent = injector.createInstance(Rect, 'disposed-protection-parent', {});
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         extension.dispose();

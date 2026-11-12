@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes, ObjectMatrix } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { BORDER_TYPE } from '../../../../basics/const';
 import { UniverRenderingContext } from '../../../../context';
+import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { BorderRowCache } from '../border-row-cache';
 
 describe('prepared native border row blits', () => {
+    let univer: Univer;
     let cache: BorderRowCache;
     let ctx: UniverRenderingContext;
     let skeleton: SpreadsheetSkeleton;
@@ -32,33 +34,47 @@ describe('prepared native border row blits', () => {
     let paintingRow = 0;
 
     beforeEach(() => {
-        cache = new BorderRowCache();
-        ctx = new UniverRenderingContext(document.createElement('canvas').getContext('2d')!);
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([BorderRowCache]);
+        injector.add([UniverRenderingContext, {
+            useFactory: () => injector.createInstance(UniverRenderingContext, document.createElement('canvas').getContext('2d')!),
+        }]);
+        cache = injector.get(BorderRowCache);
+        ctx = injector.get(UniverRenderingContext);
         ctx.setTransform(1.5, 0, 0, 1.5, 0.5, 0.5);
-        const border = new ObjectMatrix();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'border-row-cache',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 2,
+                    columnCount: 10,
+                    defaultRowHeight: 2,
+                    defaultColumnWidth: 24,
+                    rowHeader: { width: 46, hidden: BooleanNumber.TRUE },
+                    columnHeader: { height: 20, hidden: BooleanNumber.TRUE },
+                    cellData: Object.fromEntries(Array.from({ length: 2 }, (_, row) => [row, Object.fromEntries(Array.from({ length: 10 }, (_, col) => [col, {
+                        s: { bd: {
+                            t: { s: BorderStyleTypes.THIN, cl: { rgb: '#123456' } },
+                            r: { s: BorderStyleTypes.THIN, cl: { rgb: '#123456' } },
+                        } },
+                    }]))])),
+                },
+            },
+        });
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+        }]);
+        skeleton = injector.get(SpreadsheetSkeleton);
+        skeleton.calculate();
         for (let row = 0; row < 2; row++) {
             for (let col = 0; col < 10; col++) {
-                border.setValue(row, col, {
-                    [BORDER_TYPE.TOP]: { type: BORDER_TYPE.TOP, style: BorderStyleTypes.THIN, color: '#123456' },
-                    [BORDER_TYPE.RIGHT]: { type: BORDER_TYPE.RIGHT, style: BorderStyleTypes.THIN, color: '#123456' },
-                });
+                const style = skeleton.worksheet.getComposedCellStyle(row, col);
+                skeleton._setBorderStylesCache(row, col, style, undefined);
             }
         }
-        skeleton = {
-            rowHeightAccumulation: [2, 4],
-            columnWidthAccumulation: Array.from({ length: 10 }, (_, col) => (col + 1) * 24),
-            overflowCache: new ObjectMatrix(),
-            stylesCache: { border },
-            worksheet: { getRowVisible: () => true, getColVisible: () => true },
-            getCellWithCoordByIndex: (row: number, col: number) => ({
-                startX: col * 24,
-                endX: (col + 1) * 24,
-                startY: row * 2,
-                endY: (row + 1) * 2,
-                isMerged: false,
-                isMergedMainCell: false,
-            }),
-        } as unknown as SpreadsheetSkeleton;
         resolved = '#123456';
         paint.mockClear();
         sprite = document.createElement('canvas');
@@ -77,7 +93,7 @@ describe('prepared native border row blits', () => {
     });
 
     afterEach(() => {
-        cache.dispose();
+        univer.dispose();
         vi.restoreAllMocks();
     });
 
@@ -147,10 +163,10 @@ describe('prepared native border row blits', () => {
             skeleton.overflowCache.setValue(0, 0, range);
         }
         if (reason === 'hidden') {
-            vi.spyOn(skeleton.worksheet, 'getColVisible').mockReturnValue(false);
+            skeleton.worksheet.getColumnManager().getColumnData()[0] = { hd: BooleanNumber.TRUE };
         }
         if (reason === 'merged') {
-            vi.spyOn(skeleton, 'getCellWithCoordByIndex').mockReturnValue({ isMerged: true } as never);
+            skeleton.worksheet.getSpanModel().add({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
         }
         if (reason === 'double' || reason === 'diagonal') {
             skeleton.stylesCache.border!.getValue(0, 0)![BORDER_TYPE.TOP] = {

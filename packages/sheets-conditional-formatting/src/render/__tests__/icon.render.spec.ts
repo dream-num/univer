@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { Rect, UniverRenderingContext } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConditionalFormattingIcon } from '../icon.render';
@@ -41,20 +42,33 @@ function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
 }
 
 describe('conditional formatting icon assets', () => {
+    let injector: Injector;
     let images: HTMLImageElement[];
 
     beforeEach(() => {
+        injector = new Injector([[ConditionalFormattingIcon]]);
         images = [];
         vi.spyOn(HTMLImageElement.prototype, 'src', 'set').mockImplementation(function (this: HTMLImageElement) {
             images.push(this);
         });
     });
 
-    afterEach(() => vi.restoreAllMocks());
+    afterEach(() => {
+        injector.dispose();
+        vi.restoreAllMocks();
+    });
+
+    function createContext(native: CanvasRenderingContext2D): UniverRenderingContext {
+        injector.add([UniverRenderingContext, {
+            useFactory: () => injector.createInstance(UniverRenderingContext, native),
+        }]);
+        return injector.get(UniverRenderingContext);
+    }
 
     it('invalidates the cached parent when icons finish loading', () => {
-        const extension = new ConditionalFormattingIcon();
-        const parent = new Rect('icon-parent');
+        const extension = injector.get(ConditionalFormattingIcon);
+        injector.add([Rect, { useFactory: () => injector.createInstance(Rect, 'icon-parent', {}) }]);
+        const parent = injector.get(Rect);
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         try {
@@ -75,8 +89,9 @@ describe('conditional formatting icon assets', () => {
     });
 
     it('disconnects pending image loads when disposed', () => {
-        const extension = new ConditionalFormattingIcon();
-        const parent = new Rect('disposed-icon-parent');
+        const extension = injector.get(ConditionalFormattingIcon);
+        injector.add([Rect, { useFactory: () => injector.createInstance(Rect, 'disposed-icon-parent', {}) }]);
+        const parent = injector.get(Rect);
         const dirty = vi.spyOn(parent, 'makeDirty');
         extension.parent = parent;
         extension.dispose();
@@ -94,7 +109,7 @@ describe('conditional formatting icon assets', () => {
 
     it('preserves native resolution and fractional placement, reuses one bitmap and releases it on disposal', () => {
         const native = nativeContext(document.createElement('canvas'));
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         vi.spyOn(context, 'getSystemType').mockReturnValue('Linux');
         const contexts = new Map<HTMLCanvasElement, CanvasRenderingContext2D>();
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
@@ -102,7 +117,7 @@ describe('conditional formatting icon assets', () => {
             contexts.set(this, paint);
             return paint;
         });
-        const extension = new ConditionalFormattingIcon();
+        const extension = injector.get(ConditionalFormattingIcon);
         const image = images[0];
         try {
             const draw = Reflect.get(extension, '_drawIcon').bind(extension);
@@ -124,7 +139,7 @@ describe('conditional formatting icon assets', () => {
 
     it.each(['mac', 'printing', 'alpha', 'composition', 'color-space', 'shadow', 'filter', 'rotation', 'large', 'unavailable'])('keeps native icon drawing for %s', (mode) => {
         const native = nativeContext(document.createElement('canvas'));
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         vi.spyOn(context, 'getSystemType').mockReturnValue(mode === 'mac' ? 'Mac' : 'Linux');
         if (mode === 'printing') {
             context.__mode = 'printing';
@@ -151,7 +166,7 @@ describe('conditional formatting icon assets', () => {
             vi.spyOn(native, 'getTransform').mockReturnValue({ a: 1000, b: 0, c: 0, d: 1000, e: 0, f: 0 } as DOMMatrix);
         }
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
-        const extension = new ConditionalFormattingIcon();
+        const extension = injector.get(ConditionalFormattingIcon);
         try {
             Reflect.get(extension, '_drawIcon').call(extension, context, images[0], 10, 20);
             expect(native.drawImage).toHaveBeenCalledExactlyOnceWith(images[0], 10, 20, 15, 15);
@@ -162,7 +177,7 @@ describe('conditional formatting icon assets', () => {
 
     it('restores destination state when bitmap submission throws', () => {
         const native = nativeContext(document.createElement('canvas'));
-        const context = new UniverRenderingContext(native);
+        const context = createContext(native);
         vi.spyOn(context, 'getSystemType').mockReturnValue('Linux');
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return nativeContext(this);
@@ -170,7 +185,7 @@ describe('conditional formatting icon assets', () => {
         vi.mocked(native.drawImage).mockImplementation(() => {
             throw new Error('Icon submission failed');
         });
-        const extension = new ConditionalFormattingIcon();
+        const extension = injector.get(ConditionalFormattingIcon);
         try {
             expect(() => Reflect.get(extension, '_drawIcon').call(extension, context, images[0], 10, 20)).toThrow('Icon submission failed');
             expect(native.save).toHaveBeenCalledOnce();

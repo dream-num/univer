@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { UniverRenderingContext } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConditionalFormattingRasterCache } from '../conditional-formatting-raster-cache';
 
 function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
@@ -40,17 +41,29 @@ function nativeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
     return context;
 }
 
+let injector: Injector;
+
 function fixture() {
     const native = nativeContext(document.createElement('canvas'));
-    const context = new UniverRenderingContext(native);
+    injector.add([UniverRenderingContext, {
+        useFactory: () => injector.createInstance(UniverRenderingContext, native),
+    }]);
+    const context = injector.get(UniverRenderingContext);
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
         return nativeContext(this);
     });
-    return { native, context, cache: new ConditionalFormattingRasterCache() };
+    return { native, context, cache: injector.get(ConditionalFormattingRasterCache) };
 }
 
 describe('conditional formatting immutable rasters', () => {
-    afterEach(() => vi.restoreAllMocks());
+    beforeEach(() => {
+        injector = new Injector([[ConditionalFormattingRasterCache]]);
+    });
+
+    afterEach(() => {
+        injector.dispose();
+        vi.restoreAllMocks();
+    });
 
     it('reuses equal physical phases, but separates geometry, content and style', () => {
         const { cache, context, native } = fixture();
@@ -116,13 +129,27 @@ describe('conditional formatting immutable rasters', () => {
 
     it.each(['printing', 'alpha', 'composition', 'rotation', 'shadow', 'filter', 'gradient-style', 'oversized'])('retains native fallback for %s', (mode) => {
         const { cache, context, native } = fixture();
-        if (mode === 'printing') context.__mode = 'printing';
-        if (mode === 'alpha') native.globalAlpha = 0.5;
-        if (mode === 'composition') native.globalCompositeOperation = 'destination-out';
-        if (mode === 'rotation') vi.spyOn(native, 'getTransform').mockReturnValue({ a: 1, b: 1, c: 0, d: 1 } as DOMMatrix);
-        if (mode === 'shadow') native.shadowBlur = 2;
-        if (mode === 'filter') native.filter = 'blur(2px)';
-        if (mode === 'gradient-style') native.fillStyle = {} as CanvasGradient;
+        if (mode === 'printing') {
+            context.__mode = 'printing';
+        }
+        if (mode === 'alpha') {
+            native.globalAlpha = 0.5;
+        }
+        if (mode === 'composition') {
+            native.globalCompositeOperation = 'destination-out';
+        }
+        if (mode === 'rotation') {
+            vi.spyOn(native, 'getTransform').mockReturnValue({ a: 1, b: 1, c: 0, d: 1 } as DOMMatrix);
+        }
+        if (mode === 'shadow') {
+            native.shadowBlur = 2;
+        }
+        if (mode === 'filter') {
+            native.filter = 'blur(2px)';
+        }
+        if (mode === 'gradient-style') {
+            native.fillStyle = {} as CanvasGradient;
+        }
         const draw = vi.fn();
         cache.draw(context, 10, 20, mode === 'oversized' ? 1_000_000 : 24, 12, '', draw);
         expect(draw).toHaveBeenCalledExactlyOnceWith(context, 10, 20);

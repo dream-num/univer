@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import type { ICellData, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, LocaleService, LocaleType, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IIconSetType } from '../../models/icon-map';
 import { DataBar } from '../data-bar.render';
 import { ConditionalFormattingIcon } from '../icon.render';
 
 function createCtx() {
     const gradient = { addColorStop: vi.fn() };
-    return {
+    const native = {
+        canvas: document.createElement('canvas'),
         save: vi.fn(),
         restore: vi.fn(),
         beginPath: vi.fn(),
@@ -37,55 +40,77 @@ function createCtx() {
         fillStyle: '',
         strokeStyle: '',
         lineWidth: 0,
-        gradient,
-    } as any;
+        getTransform: vi.fn(),
+    } as unknown as CanvasRenderingContext2D;
+    const injector = univer.__getInjector();
+    injector.add([UniverRenderingContext, {
+        useFactory: () => injector.createInstance(UniverRenderingContext, native),
+    }]);
+    const context = injector.get(UniverRenderingContext);
+    for (const method of ['save', 'restore', 'beginPath', 'fill', 'stroke', 'drawImage', 'createLinearGradient'] as const) {
+        vi.spyOn(context, method);
+    }
+    return Object.assign(context, { gradient });
 }
 
-function createCellBounds(row: number, col: number, overrides?: Record<string, unknown>) {
-    const startX = col * 80;
-    const startY = row * 24;
-    return {
-        startRow: row,
-        endRow: row,
-        startColumn: col,
-        endColumn: col,
-        startX,
-        endX: startX + 80,
-        startY,
-        endY: startY + 24,
-        isMerged: false,
-        isMergedMainCell: false,
-        mergeInfo: {
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
-            startX,
-            endX: startX + 80,
-            startY,
-            endY: startY + 24,
-        },
-        ...overrides,
-    };
-}
+let univer: Univer;
 
-function createSkeleton(cells: Record<string, unknown>, hiddenRows = new Set<number>(), hiddenCols = new Set<number>()) {
-    return {
-        rowColumnSegment: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
-        worksheet: {
-            getUnitId: () => 'unit-1',
-            getSheetId: () => 'sheet-1',
-            getMergeData: () => [],
-            getMergedCellRange: () => [],
-            getRowVisible: (row: number) => !hiddenRows.has(row),
-            getColVisible: (col: number) => !hiddenCols.has(col),
-            getCell: vi.fn((row: number, col: number) => cells[`${row},${col}`]),
+function createSkeleton(
+    cells: Record<string, unknown>,
+    hiddenRows = new Set<number>(),
+    hiddenCols = new Set<number>(),
+    mergeData: IRange[] = [],
+    size = { width: 80, height: 24 }
+) {
+    const cellData = new ObjectMatrix<ICellData>();
+    for (const [position, cell] of Object.entries(cells)) {
+        const [row, column] = position.split(',').map(Number);
+        cellData.setValue(row, column, cell as ICellData);
+    }
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheetOrder: ['sheet-1'],
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                name: 'Sheet',
+                rowCount: Math.max(3, ...mergeData.map((range) => range.endRow + 1)),
+                columnCount: Math.max(3, ...mergeData.map((range) => range.endColumn + 1)),
+                defaultColumnWidth: size.width,
+                defaultRowHeight: size.height,
+                rowData: Object.fromEntries([...hiddenRows].map((row) => [row, { hd: BooleanNumber.TRUE }])),
+                columnData: Object.fromEntries([...hiddenCols].map((column) => [column, { hd: BooleanNumber.TRUE }])),
+                cellData: cellData.getMatrix(),
+                mergeData,
+            },
         },
-        getCellWithCoordByIndex: (row: number, col: number) => createCellBounds(row, col),
-    } as any;
+    });
+    const injector = univer.__getInjector();
+    injector.add([SpreadsheetSkeleton, {
+        useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+    }]);
+    const skeleton = injector.get(SpreadsheetSkeleton);
+    vi.spyOn(skeleton.worksheet, 'getCell');
+    return skeleton;
 }
 
 describe('conditional formatting render extensions', () => {
+    beforeEach(() => {
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DataBar]);
+        injector.add([ConditionalFormattingIcon]);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.restoreAllMocks();
+    });
+
     it('draws data bars for positive and negative cell values in visible cells', () => {
         const ctx = createCtx();
         const skeleton = createSkeleton({
@@ -118,7 +143,7 @@ describe('conditional formatting render extensions', () => {
             },
         }, new Set([1]));
 
-        new DataBar().draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
+        univer.__getInjector().get(DataBar).draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
             { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
         ]);
 
@@ -133,7 +158,7 @@ describe('conditional formatting render extensions', () => {
 
     it('skips data bar drawing when worksheet is missing or bar dimensions collapse', () => {
         const ctx = createCtx();
-        const dataBar = new DataBar();
+        const dataBar = univer.__getInjector().get(DataBar);
         expect(dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, { worksheet: undefined } as any, [])).toBe(false);
 
         (dataBar as any)._drawRectWithRoundedCorner(ctx, 0, 0, 0, 10, true, true, true, true);
@@ -154,7 +179,7 @@ describe('conditional formatting render extensions', () => {
                 },
             },
         });
-        const dataBar = new DataBar();
+        const dataBar = univer.__getInjector().get(DataBar);
         const resolver = vi.fn(() => []);
         dataBar.setRenderRangeResolver(resolver);
 
@@ -179,7 +204,7 @@ describe('conditional formatting render extensions', () => {
                 },
             },
         });
-        const dataBar = new DataBar();
+        const dataBar = univer.__getInjector().get(DataBar);
         const resolver = vi.fn<() => IRange[] | null>(() => null);
         dataBar.setRenderRangeResolver(resolver);
 
@@ -188,7 +213,7 @@ describe('conditional formatting render extensions', () => {
         expect(ctx.fill).toHaveBeenCalledTimes(1);
 
         resolver.mockReturnValue([]);
-        skeleton.worksheet.getMergeData = () => [ranges[0]] as never;
+        skeleton.worksheet.setMergeData([ranges[0]]);
         dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
 
         expect(resolver).toHaveBeenCalledTimes(2);
@@ -196,11 +221,9 @@ describe('conditional formatting render extensions', () => {
     });
 
     it.each(['dataBar', 'icon'])('does not scan merged cells without %s rules', (kind) => {
-        const skeleton = createSkeleton({});
         const merge = { startRow: 0, endRow: 100000, startColumn: 0, endColumn: 20 };
-        skeleton.worksheet.getMergeData = () => [merge];
-        skeleton.worksheet.getMergedCellRange = () => [merge];
-        const extension = kind === 'dataBar' ? new DataBar() : new ConditionalFormattingIcon();
+        const skeleton = createSkeleton({}, undefined, undefined, [merge]);
+        const extension = kind === 'dataBar' ? univer.__getInjector().get(DataBar) : univer.__getInjector().get(ConditionalFormattingIcon);
         const resolver = vi.fn(() => []);
         extension.setRenderRangeResolver(resolver);
 
@@ -222,14 +245,8 @@ describe('conditional formatting render extensions', () => {
                 dataBar: { color: '#2f56ef', value: 75, startPoint: 0, isGradient: false },
                 iconSet: { iconType: IIconSetType.threeArrows, iconId: '0' },
             },
-        }, new Set([10]), new Set([4]));
-        skeleton.worksheet.getMergeData = () => [merge];
-        skeleton.worksheet.getMergedCellRange = () => [merge];
-        skeleton.getCellWithCoordByIndex = (row: number, col: number) => createCellBounds(row, col, {
-            isMerged: true,
-            mergeInfo: { ...merge, startX: 0, endX: 1680, startY: 0, endY: 2400000 },
-        });
-        const extension = kind === 'dataBar' ? new DataBar() : new ConditionalFormattingIcon();
+        }, new Set([10]), new Set([4]), [merge]);
+        const extension = kind === 'dataBar' ? univer.__getInjector().get(DataBar) : univer.__getInjector().get(ConditionalFormattingIcon);
         if (extension instanceof ConditionalFormattingIcon) {
             (extension as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, document.createElement('img'));
         }
@@ -242,16 +259,16 @@ describe('conditional formatting render extensions', () => {
 
         expect(resolver).toHaveBeenCalledOnce();
         expect(kind === 'dataBar' ? ctx.fill : ctx.drawImage).toHaveBeenCalledOnce();
-        expect(skeleton.worksheet.getCell.mock.calls.length).toBeLessThanOrEqual(4);
-        expect(skeleton.worksheet.getCell.mock.calls).toEqual(expect.arrayContaining([[11, 5], [0, 0]]));
-        expect(skeleton.worksheet.getCell.mock.calls.every(([row, col]: [number, number]) => (
+        expect(vi.mocked(skeleton.worksheet.getCell).mock.calls.length).toBeLessThanOrEqual(4);
+        expect(vi.mocked(skeleton.worksheet.getCell).mock.calls).toEqual(expect.arrayContaining([[11, 5], [0, 0]]));
+        expect(vi.mocked(skeleton.worksheet.getCell).mock.calls.every(([row, col]: [number, number]) => (
             (row === 0 && col === 0) || (row >= 11 && row <= 12 && col === 5)
         ))).toBe(true);
     });
 
     it('draws configured conditional-formatting icons and skips unavailable icons', () => {
         const ctx = createCtx();
-        const icon = new ConditionalFormattingIcon();
+        const icon = univer.__getInjector().get(ConditionalFormattingIcon);
         const nativeImage = document.createElement('img');
         (icon as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, nativeImage);
 
@@ -289,7 +306,7 @@ describe('conditional formatting render extensions', () => {
 
     it('skips icon drawing for missing worksheet and cells too small for the icon', () => {
         const ctx = createCtx();
-        const icon = new ConditionalFormattingIcon();
+        const icon = univer.__getInjector().get(ConditionalFormattingIcon);
         const nativeImage = document.createElement('img');
         (icon as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, nativeImage);
 
@@ -303,21 +320,7 @@ describe('conditional formatting render extensions', () => {
                     isShowValue: true,
                 },
             },
-        });
-        skeleton.getCellWithCoordByIndex = () => createCellBounds(0, 0, {
-            endX: 10,
-            endY: 10,
-            mergeInfo: {
-                startRow: 0,
-                endRow: 0,
-                startColumn: 0,
-                endColumn: 0,
-                startX: 0,
-                endX: 10,
-                startY: 0,
-                endY: 10,
-            },
-        }) as any;
+        }, undefined, undefined, [], { width: 10, height: 10 });
 
         icon.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
             { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
@@ -328,7 +331,7 @@ describe('conditional formatting render extensions', () => {
     it('skips icon cell visits when a configured rule-range resolver confirms no matching rule', () => {
         const ctx = createCtx();
         const skeleton = createSkeleton({});
-        const icon = new ConditionalFormattingIcon();
+        const icon = univer.__getInjector().get(ConditionalFormattingIcon);
         const resolver = vi.fn(() => []);
         icon.setRenderRangeResolver(resolver);
 

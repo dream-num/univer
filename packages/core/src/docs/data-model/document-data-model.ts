@@ -440,7 +440,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
                 changedInheritedNoteStyles = true;
             }
         });
-        this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
+        // Inserted bodies must not alias pending collaboration or history payloads.
+        this.snapshot = JSONX.apply(this.snapshot, Tools.deepClone(actions)) as unknown as IDocumentData;
         this._markMutation();
         if (changedInheritedNoteStyles || previousNotes !== this.snapshot.notes || changedNotes.size > 0) {
             this._initializeNoteModels(changedInheritedNoteStyles ? undefined : previousNotes, changedNotes);

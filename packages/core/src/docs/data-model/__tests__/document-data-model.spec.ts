@@ -17,6 +17,8 @@
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
+import { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import { Tools } from '../../../shared/tools';
 import { CustomRangeType, DocStyleType, DocumentFlavor } from '../../../types/interfaces/i-document-data';
 import { DocumentDataModel } from '../document-data-model';
 import { JSONX } from '../json-x/json-x';
@@ -54,6 +56,39 @@ function createDocument(): DocumentDataModel {
 }
 
 describe('public document metadata', () => {
+    it.each([UpdateDocsAttributeType.COVER, UpdateDocsAttributeType.REPLACE])('preserves imported section identity during property edits and peer replay (%s)', (coverType) => {
+        const data = { id: 'legacy-sections', body: body('Body') };
+        data.body.sectionBreaks![0].sectionId = 'legacy-section';
+        const document = testInjector.createInstance(DocumentDataModel, Tools.deepClone(data));
+        const peer = testInjector.createInstance(DocumentDataModel, Tools.deepClone(data));
+        const text = new TextX().retain(5).retain(1, {
+            dataStream: '',
+            sectionBreaks: [{ startIndex: 0, sectionId: 'legacy-section', columnProperties: [{ width: 100, paddingEnd: 0 }] }],
+        }, coverType);
+        const actions = JSONX.getInstance().editOp(text.serialize(), ['body']);
+        document.apply(actions);
+        peer.apply(Tools.deepClone(actions));
+        expect(document.getBody()?.sectionBreaks?.[0].sectionId).toBe('legacy-section');
+        expect(document.getSnapshot()).toEqual(peer.getSnapshot());
+    });
+
+    it.each(['headers', 'footers', 'notes'] as const)('keeps pending %s creation actions immutable after segment typing', (collection) => {
+        const document = testInjector.createInstance(DocumentDataModel, {
+            id: 'pending-segment',
+            body: body('Body'),
+            [collection]: {},
+        });
+        const segment = collection === 'notes'
+            ? { noteId: 'segment', type: 'footnote', body: body('') }
+            : { [collection === 'headers' ? 'headerId' : 'footerId']: 'segment', body: body('') };
+        const creation = JSONX.getInstance().insertOp([collection, 'segment'], segment);
+        const pending = Tools.deepClone(creation);
+        document.apply(creation);
+        document.apply(JSONX.getInstance().editOp(new TextX().insert(6, { dataStream: 'Header' }).serialize(), [collection, 'segment', 'body']));
+        expect(document.getSnapshot()[collection]?.segment.body?.dataStream).toBe('Header\r\n');
+        expect(creation).toEqual(pending);
+    });
+
     it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('persists named aliases and typed properties through edits, undo and reload (%s)', (documentFlavor) => {
         const document = testInjector.createInstance(DocumentDataModel, {
             id: 'metadata',

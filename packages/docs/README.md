@@ -45,6 +45,7 @@ univer.registerPlugin(UniverDocsWorkerPlugin);
 ## Integration Notes
 
 - Import `@univerjs/docs/facade` when using this package through Univer Facade APIs.
+- Commands that record their own undo item can set `skipHistory: true` on `RichTextEditingMutation` to retain collaboration without adding automatic history. The existing `noHistory` option suppresses both streams. These options are transient command parameters and do not change stored documents or collaboration payloads.
 
 ## Resources
 

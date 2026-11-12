@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { DateSystem, isRealNum } from '@univerjs/core';
 import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
-import { DateSystem, isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { regexTestArrayValue } from '../../basics/regex';
@@ -114,6 +114,10 @@ export class ArrayValueObject extends BaseValueObject {
     withCalculationCache(cache: FormulaCalculationCache | undefined): this {
         this._calculationCache = cache;
         return this;
+    }
+
+    getCalculationCache() {
+        return this._calculationCache;
     }
 
     /**

@@ -441,4 +441,62 @@ describe('Conditional aggregate indexed equality semantics', () => {
         range.set(0, 0, StringValueObject.create('Beta'));
         expect(getPairedRangeAndCriteriaResult([range, criteria], params).map((row) => row[0].getValue())).toEqual([0, 2]);
     });
+
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s aggregates indexed positions like a single criterion evaluation',
+        (formulaName) => {
+            const keys = ArrayValueObject.createByArray([['a'], ['b'], ['a'], ['c'], ['b'], ['a']]);
+            const amounts = ArrayValueObject.createByArray([[1], [2], [3], [4], [5], [6]]);
+            const criteria = ArrayValueObject.createByArray([['a'], ['b'], ['x'], [null]]);
+            const params = {
+                formulaName,
+                maxRowLength: 4,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: amounts,
+            };
+            const result = getPairedRangeAndCriteriaResult([keys, criteria], params);
+            const expected = [StringValueObject.create('a'), StringValueObject.create('b'), StringValueObject.create('x'), NullValueObject.create()]
+                .map((criterion) => getPairedRangeAndCriteriaResult([keys, criterion], { ...params, maxRowLength: 1, maxColumnLength: 1 })[0][0].getValue());
+            expect(result.map((row) => row[0].getValue())).toEqual(expected);
+        }
+    );
+
+    it('evaluates the repeated blank cells of a whole-column criteria range once', () => {
+        const size = 200;
+        const keyCount = 20;
+        const range = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [`k${i % keyCount}`]));
+        const amounts = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i + 1]));
+        const criteria = ArrayValueObject.createByArray([
+            ...Array.from({ length: keyCount }, (_, i) => [`k${i}`]),
+            ...Array.from({ length: 80 }, () => [null]),
+        ]);
+        const params = {
+            formulaName: 'SUMIFS',
+            maxRowLength: 100,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        };
+
+        const reads = vi.spyOn(range, 'get');
+        try {
+            const result = getPairedRangeAndCriteriaResult([range, criteria], params);
+            const expected = Array.from({ length: 100 }, (_, i) => {
+                if (i >= keyCount) {
+                    return 0;
+                }
+                let total = 0;
+                for (let row = i; row < size; row += keyCount) {
+                    total += row + 1;
+                }
+                return total;
+            });
+            expect(result.map((row) => row[0].getValue())).toEqual(expected);
+            // Blank criteria repeat, so they must reuse one evaluation instead of rescanning per cell.
+            expect(reads.mock.calls.length).toBeLessThan(size * 10);
+        } finally {
+            reads.mockRestore();
+        }
+    });
 });

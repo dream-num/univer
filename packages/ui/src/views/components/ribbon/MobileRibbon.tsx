@@ -33,7 +33,7 @@ import { RibbonPosition, RibbonStartGroup } from '../../../services/menu/types';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { IWorkbenchService } from '../../../services/workbench/workbench.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { useTransientUI } from '../../../utils/use-transient-ui';
+import { useMenuHost } from '../../../utils/use-menu-host';
 import { ComponentContainer } from '../ComponentContainer';
 import { MobileToolbarItem } from './MobileToolbarItem';
 
@@ -396,7 +396,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
     const { headerMenuComponents, headerMenu = true, ribbon } = props;
     const [moreOpen, setMoreOpen] = useState(false);
     const moreTriggerRef = useRef<HTMLButtonElement>(null);
-    const transientUI = useTransientUI(() => setMoreOpen(false));
+    const menuHost = useMenuHost(() => setMoreOpen(false));
     const { mountContainer } = useContext(ConfigContext);
     const localeService = useDependency(LocaleService);
     const startGroup = ribbon.find((group) => group.key === RibbonPosition.START);
@@ -493,7 +493,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                           dark:active:!univer-bg-gray-700
                         `)}
                         onClick={() => {
-                            if (!transientUI.suspended) setMoreOpen((open) => !open);
+                            if (!menuHost.suspended) setMoreOpen((open) => !open);
                         }}
                     >
                         <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />

@@ -45,14 +45,12 @@ import {
     IUIRuntimeScopeService,
     UIRuntimeScopeService,
 } from '../../../../services/runtime-scope/ui-runtime-scope.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { DesktopContextMenu } from '../ContextMenu';
 
 const injectors: Injector[] = [];
 
 function createInjector() {
     const injector = new Injector([
-        [ITransientUIService, { useClass: TransientUIService }],
         [IConfigService, { useClass: ConfigService }],
         [IContextService, { useClass: ContextService }],
         [ILogService, { useClass: DesktopLogService }],
@@ -85,11 +83,11 @@ describe('DesktopContextMenu', () => {
         locale.setDirection('ltr');
         injector.get(ILayoutService).registerRootContainerElement(document.body);
         const contextMenuService = injector.get(IContextMenuService);
-        const transientUI = injector.get(ITransientUIService);
+        const menuHost = injector.get(IContextMenuHostService);
         render(<RediContext.Provider value={{ injector }}><DesktopContextMenu /></RediContext.Provider>);
         act(() => {
             contextMenuService.triggerContextMenu({ clientX: 20, clientY: 20, stopPropagation() {} }, 'table');
-            transientUI.suspend().dispose();
+            menuHost.suspend().dispose();
         });
         await act(async () => {
             await new Promise(requestAnimationFrame);

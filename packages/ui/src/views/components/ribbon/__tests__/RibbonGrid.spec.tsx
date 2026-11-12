@@ -26,10 +26,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { RibbonGrid } from '../RibbonGrid';
 
@@ -41,7 +41,7 @@ let compactWidths: Record<string, number> = {};
 
 function mountGrid(groups: IMenuSchema[]) {
     const injector = new Injector([
-        [ITransientUIService, { useClass: TransientUIService }],
+        [IContextMenuHostService, { useClass: ContextMenuHostService }],
         [ComponentManager],
         [IconManager, { useValue: { get: () => null } }],
         [LocaleService, { useValue: { t: (key: string) => key } }],

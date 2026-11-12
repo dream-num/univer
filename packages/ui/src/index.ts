@@ -151,7 +151,6 @@ export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.servic
 export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';
 export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
-export { ITransientUIService, TransientUIService } from './services/transient-ui/transient-ui.service';
 export { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 export { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 export * from './utils';

@@ -43,13 +43,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { FontService, IFontService } from '../../../../services/font.service';
 import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from '../../../font-family/FontFamilyItem';
 import {
@@ -77,7 +77,7 @@ function NestedDialogDropdown() {
 }
 
 function renderWithDependencies(element: ReactElement) {
-    const injector = new Injector([[ITransientUIService, { useClass: TransientUIService }]]);
+    const injector = new Injector([[IContextMenuHostService, { useClass: ContextMenuHostService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService]);
     injector.add([ILogService, { useClass: DesktopLogService }]);

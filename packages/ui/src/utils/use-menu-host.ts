@@ -15,20 +15,20 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { ITransientUIService } from '../services/transient-ui/transient-ui.service';
+import { IContextMenuHostService } from '../services/contextmenu/contextmenu-host.service';
 import { useDependency } from './di';
 
-export function useTransientUI(onDismiss: () => void): ITransientUIService {
-    const service = useDependency(ITransientUIService);
-    const callbackRef = useRef(onDismiss);
-    callbackRef.current = onDismiss;
+export function useMenuHost(onClose: () => void): IContextMenuHostService {
+    const service = useDependency(IContextMenuHostService);
+    const callbackRef = useRef(onClose);
+    callbackRef.current = onClose;
 
     useEffect(() => {
-        const subscription = service.dismissed$.subscribe(() => callbackRef.current());
+        const registration = service.registerMenu(Symbol('menu'), () => callbackRef.current());
         if (service.suspended) {
             callbackRef.current();
         }
-        return () => subscription.unsubscribe();
+        return () => registration.dispose();
     }, [service]);
 
     return service;

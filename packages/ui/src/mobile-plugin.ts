@@ -39,9 +39,9 @@ import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { MOBILE_UI_MODE } from './const';
 import { ErrorController } from './controllers/error/error.controller';
 import { FormatPainterController } from './controllers/format-painter.controller';
+import { MenuDismissController } from './controllers/menu-dismiss.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
-import { TransientUIController } from './controllers/transient-ui.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -78,7 +78,6 @@ import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
-import { ITransientUIService, TransientUIService } from './services/transient-ui/transient-ui.service';
 import { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 import { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 
@@ -128,8 +127,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [MobileComponentsController],
             [ThemeSwitcherService],
             [UndoRedoGroupService],
-            [ITransientUIService, { useClass: TransientUIService }],
-            [TransientUIController],
+            [MenuDismissController],
             [IWorkbenchService, { useClass: WorkbenchService }],
             [ZIndexManager],
             [IUIPartsService, { useClass: UIPartsService }],
@@ -180,7 +178,7 @@ export class UniverMobileUIPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
-            [TransientUIController],
+            [MenuDismissController],
             [SharedController],
             [FormatPainterController],
         ]);

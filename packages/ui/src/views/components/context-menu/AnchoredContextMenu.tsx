@@ -21,7 +21,6 @@ import type { IValueOption } from '../../../services/menu/menu';
 import type { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { useDependency } from '../../../utils/di';
-import { useTransientUI } from '../../../utils/use-transient-ui';
 import { CONTEXT_MENU_SUBMENU_PORTAL_ATTR, ContextMenuPanel } from './ContextMenuPanel';
 
 export interface IContextMenuAnchorRect {
@@ -65,12 +64,6 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
     const visibleRef = useRef(visible);
     const menuTypeRef = useRef(menuType);
     const focusReturnTargetRef = useRef<HTMLElement | null>(null);
-    const transientUI = useTransientUI(() => {
-        focusReturnTargetRef.current = null;
-        if (visibleRef.current) {
-            onRequestCloseRef.current();
-        }
-    });
 
     useEffect(() => {
         onRequestCloseRef.current = onRequestClose;
@@ -83,8 +76,9 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
     menuTypeRef.current = menuType;
 
     useEffect(() => {
-        const disposable = contextMenuHostService.registerMenu(hostId, () => {
-            onRequestCloseRef.current();
+        const disposable = contextMenuHostService.registerMenu(hostId, (restoreFocus) => {
+            if (!restoreFocus) focusReturnTargetRef.current = null;
+            if (visibleRef.current) onRequestCloseRef.current();
         });
 
         return () => {
@@ -95,7 +89,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     useLayoutEffect(() => {
         if (visible) {
-            if (transientUI.suspended) {
+            if (contextMenuHostService.suspended) {
                 focusReturnTargetRef.current = null;
                 onRequestCloseRef.current();
                 return;
@@ -127,7 +121,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         }
         focusReturnTargetRef.current = null;
         contextMenuHostService.deactivateMenu(hostId);
-    }, [contextMenuHostService, hostId, transientUI, visible]);
+    }, [contextMenuHostService, hostId, visible]);
 
     useEffect(() => {
         if (!visible) {
@@ -195,7 +189,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     return (
         <Popup
-            visible={visible && !!anchorRect && !transientUI.suspended}
+            visible={visible && !!anchorRect && !contextMenuHostService.suspended}
             offset={offset}
             overflowVisible
             placementY={anchorVertical === 'top' ? 'above' : 'below'}

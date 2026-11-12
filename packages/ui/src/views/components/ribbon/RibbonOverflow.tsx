@@ -20,7 +20,7 @@ import { MoreDownIcon, MoreHorizontalIcon, MoreVerticalIcon } from '@univerjs/ic
 import { useContext, useRef, useState } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../utils/di';
-import { useTransientUI } from '../../../utils/use-transient-ui';
+import { useMenuHost } from '../../../utils/use-menu-host';
 import { groupRibbonOverflowItems } from './ribbon-grid-layout';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
@@ -40,7 +40,7 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
     const restoreFocusRef = useRef(true);
     const label = localeService.t('ui.ribbon.more');
 
-    const transientUI = useTransientUI(() => {
+    const menuHost = useMenuHost(() => {
         restoreFocusRef.current = false;
         setOpenedGroups(null);
     });
@@ -49,7 +49,7 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
         <Dropdown
             open={open}
             onOpenChange={(visible) => {
-                if (visible && transientUI.suspended) return;
+                if (visible && menuHost.suspended) return;
                 if (visible) restoreFocusRef.current = true;
                 setOpenedGroups(visible ? groups : null);
             }}

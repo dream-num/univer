@@ -31,13 +31,13 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { IIconProps } from '../../../../common/icon-manager';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
 import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { ToolbarItem } from '../ToolbarItem';
 
@@ -78,7 +78,7 @@ class TestLogService {
 const testInjectors: Injector[] = [];
 
 function renderWithDependencies(element: ReactElement) {
-    const injector = new Injector([[ITransientUIService, { useClass: TransientUIService }]]);
+    const injector = new Injector([[IContextMenuHostService, { useClass: ContextMenuHostService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);

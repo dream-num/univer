@@ -26,8 +26,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
-import { TransientUIController } from '../../../../controllers/transient-ui.controller';
+import { MenuDismissController } from '../../../../controllers/menu-dismiss.controller';
 import enUS from '../../../../locale/en-US';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
@@ -37,7 +38,6 @@ import { IUIPartsService, UIPartsService } from '../../../../services/parts/part
 import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
 import { RibbonOverflow } from '../RibbonOverflow';
 
@@ -47,8 +47,8 @@ function mountOverflow(groups: IMenuSchema[]) {
     const executeCommand = vi.fn(async () => true);
     const injector = new Injector([
         [ComponentManager],
-        [TransientUIController],
-        [ITransientUIService, { useClass: TransientUIService }],
+        [MenuDismissController],
+        [IContextMenuHostService, { useClass: ContextMenuHostService }],
         [IconManager, { useValue: { get: () => null } }],
         [LocaleService],
         [ICommandService, { useValue: { executeCommand } }],
@@ -67,7 +67,7 @@ function mountOverflow(groups: IMenuSchema[]) {
     locale.load({ [LocaleType.EN_US]: enUS });
     locale.setLocale(LocaleType.EN_US);
     locale.setDirection('ltr');
-    injector.get(TransientUIController);
+    injector.get(MenuDismissController);
     injector.get(ComponentManager).register('FontField', () => <input aria-label="Font" defaultValue="Arial" />);
     const ConnectedOverflow = connectInjector(RibbonOverflow, injector) as ComponentType<{ groups: IMenuSchema[]; grid?: boolean }>;
     return { ...render(
@@ -104,10 +104,10 @@ describe('RibbonOverflow', () => {
             item: { id: 'history', type: MenuItemType.BUTTON, title: 'History' },
         }] }];
         const { injector, getByRole, queryByRole, executeCommand } = mountOverflow(groups);
-        const transientUI = injector.get(ITransientUIService);
-        let viewer: ReturnType<ITransientUIService['suspend']> | undefined;
+        const menuHost = injector.get(IContextMenuHostService);
+        let viewer: ReturnType<IContextMenuHostService['suspend']> | undefined;
         executeCommand.mockImplementationOnce(async () => {
-            viewer = transientUI.suspend();
+            viewer = menuHost.suspend();
             return true;
         });
         fireEvent.click(getByRole('button', { name: 'More' }));

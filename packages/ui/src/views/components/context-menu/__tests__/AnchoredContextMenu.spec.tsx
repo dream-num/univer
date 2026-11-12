@@ -41,7 +41,6 @@ import { ContextMenuHostService, IContextMenuHostService } from '../../../../ser
 import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { AnchoredContextMenu } from '../AnchoredContextMenu';
 
 const injectors: Injector[] = [];
@@ -59,7 +58,6 @@ function renderWithDependencies(element: ReactElement, options?: Parameters<type
         [IMenuManagerService, { useClass: MenuManagerService }],
         [ILayoutService, { useClass: DesktopLayoutService }],
         [IContextMenuHostService, { useClass: ContextMenuHostService }],
-        [ITransientUIService, { useClass: TransientUIService }],
         [LocaleService],
         [ComponentManager],
         [IconManager],
@@ -232,7 +230,7 @@ describe('AnchoredContextMenu', () => {
         );
         const { injector, rerender } = renderWithDependencies(renderMenu(true));
         screen.getByRole('textbox', { name: 'Menu value' }).focus();
-        act(() => injector.get(ITransientUIService).suspend());
+        act(() => injector.get(IContextMenuHostService).suspend());
         expect(close).toHaveBeenCalledOnce();
         rerender(renderMenu(false));
         expect(document.activeElement).not.toBe(editor);

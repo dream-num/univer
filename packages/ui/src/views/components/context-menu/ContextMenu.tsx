@@ -18,11 +18,11 @@ import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
 import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
+import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
-import { ITransientUIService } from '../../../services/transient-ui/transient-ui.service';
 import { useDependency } from '../../../utils/di';
 import { AnchoredContextMenu } from './AnchoredContextMenu';
 
@@ -31,7 +31,7 @@ const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
 export function DesktopContextMenu() {
     const [visible, setVisible] = useState(false);
     const pendingOpenRef = useRef<number | null>(null);
-    const transientUI = useDependency(ITransientUIService);
+    const menuHost = useDependency(IContextMenuHostService);
     const [menuType, setMenuType] = useState('');
     const [anchorRect, setAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
     const [menuContext, setMenuContext] = useState<IContextMenuTriggerContext | undefined>();
@@ -63,11 +63,11 @@ export function DesktopContextMenu() {
     /** A function to open context menu with given position and menu type. */
     function handleContextMenu(event: ContextMenuEvent, menuType: string, context?: IContextMenuTriggerContext) {
         handleClose();
-        if (transientUI.suspended) return;
-        const revision = transientUI.revision;
+        if (menuHost.suspended) return;
+        const revision = menuHost.revision;
         pendingOpenRef.current = requestAnimationFrame(() => {
             pendingOpenRef.current = null;
-            if (transientUI.suspended || revision !== transientUI.revision) return;
+            if (menuHost.suspended || revision !== menuHost.revision) return;
             setMenuType(menuType);
             setMenuContext(context);
             setAnchorRect({
@@ -113,12 +113,12 @@ export function DesktopContextMenu() {
                 const rawParams = typeof params.params === 'function' ? params.params() : params.params;
                 const commandParams = typeof rawParams === 'undefined' ? { value } : rawParams;
 
-                const revision = transientUI.revision;
+                const revision = menuHost.revision;
                 if (activeCommandService) {
                     activeCommandService.executeCommand(commandId ?? id as string, commandParams);
                 }
 
-                if (revision === transientUI.revision && !transientUI.suspended) activeLayoutService.focus();
+                if (revision === menuHost.revision && !menuHost.suspended) activeLayoutService.focus();
 
                 handleClose();
             }}

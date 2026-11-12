@@ -30,16 +30,16 @@ import {
 } from '@univerjs/core';
 import {
     ComponentManager,
+    ContextMenuHostService,
     IconManager,
+    IContextMenuHostService,
     ILayoutService,
     IMenuManagerService,
     IShortcutService,
-    ITransientUIService,
     MenuItemType,
     MenuManagerPosition,
     MenuManagerService,
     RediContext,
-    TransientUIService,
 } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -171,7 +171,7 @@ function createToolbarTestBed() {
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService]);
-    injector.add([ITransientUIService, { useClass: TransientUIService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);

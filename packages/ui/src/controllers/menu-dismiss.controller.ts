@@ -15,20 +15,20 @@
  */
 
 import { Disposable } from '@univerjs/core';
+import { IContextMenuHostService } from '../services/contextmenu/contextmenu-host.service';
 import { IDialogService } from '../services/dialog/dialog.service';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
-import { ITransientUIService } from '../services/transient-ui/transient-ui.service';
 
-export class TransientUIController extends Disposable {
+export class MenuDismissController extends Disposable {
     constructor(
         @IDialogService dialogService: IDialogService,
         @ISidebarService sidebarService: ISidebarService,
-        @ITransientUIService transientUIService: ITransientUIService
+        @IContextMenuHostService menuHostService: IContextMenuHostService
     ) {
         super();
         this.disposeWithMe(sidebarService.sidebarOptions$.subscribe((options) => {
             if (options.visible) {
-                transientUIService.dismiss();
+                menuHostService.closeAll();
             }
         }));
         let openDialogIds = new Set<string>();
@@ -37,7 +37,7 @@ export class TransientUIController extends Disposable {
             const opening = [...nextIds].some((id) => !openDialogIds.has(id));
             openDialogIds = nextIds;
             if (opening) {
-                transientUIService.dismiss();
+                menuHostService.closeAll();
             }
         }));
     }

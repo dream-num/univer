@@ -25,6 +25,7 @@ import {
     ILogService,
     Injector,
     LocaleService,
+    LocaleType,
     toDisposable,
 } from '@univerjs/core';
 import {
@@ -33,10 +34,12 @@ import {
     ILayoutService,
     IMenuManagerService,
     IShortcutService,
+    ITransientUIService,
     MenuItemType,
     MenuManagerPosition,
     MenuManagerService,
     RediContext,
+    TransientUIService,
 } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -46,6 +49,7 @@ import {
     SetInlineFormatBoldCommand,
     SetInlineFormatTextBackgroundColorCommand,
 } from '../../../commands/commands/inline-format.command';
+import enUS from '../../../locale/en-US';
 import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../../menu/menu';
 import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { FloatToolbar, resolveFloatToolbarMenus } from '../FloatToolbar';
@@ -81,12 +85,6 @@ class TestMenuManagerService {
             return this._ribbonMenus;
         }
         return [];
-    }
-}
-
-class TestLocaleService {
-    t(key: string): string {
-        return key;
     }
 }
 
@@ -172,12 +170,17 @@ function createToolbarTestBed() {
     injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([LocaleService]);
+    injector.add([ITransientUIService, { useClass: TransientUIService }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     return {
         injector,

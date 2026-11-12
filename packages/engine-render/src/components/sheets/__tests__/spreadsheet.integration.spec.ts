@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IDocumentData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     BorderStyleTypes,
@@ -40,11 +40,13 @@ import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
+import { DumbCanvasColorService, ICanvasColorService } from '../../../services/canvas-color.service';
 import { Viewport } from '../../../viewport';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 import { Background } from '../extensions/background';
 import { Border } from '../extensions/border';
 import { Font } from '../extensions/font';
+import { Marker } from '../extensions/marker';
 import { SHEET_EXTENSION_TYPE, SheetExtension } from '../extensions/sheet-extension';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
 import {
@@ -179,6 +181,7 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
 
     const univer = new Univer();
     const injector = univer.__getInjector();
+    injector.add([ICanvasColorService, { useClass: DumbCanvasColorService }]);
     const get = injector.get.bind(injector);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
@@ -193,9 +196,9 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     container.style.height = '360px';
     document.body.appendChild(container);
 
-    const engine = new Engine('sheet-render-engine', { elementWidth: 620, elementHeight: 340, dpr: 1 });
+    const engine = injector.createInstance(Engine, 'sheet-render-engine', { elementWidth: 620, elementHeight: 340, dpr: 1 });
     engine.mount(container, false);
-    const scene = new Scene('sheet-render-scene', engine);
+    const scene = injector.createInstance(Scene, 'sheet-render-scene', engine);
     scene.transformByState({
         width: 1800,
         height: 1200,
@@ -203,7 +206,7 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
         scaleY: 1,
     });
 
-    const viewport = new Viewport(MAIN_VIEW_PORT_KEY, scene, {
+    const viewport = injector.createInstance(Viewport, MAIN_VIEW_PORT_KEY, scene, {
         left: 0,
         top: 0,
         width: 420,
@@ -219,8 +222,8 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     const spreadsheet = new Spreadsheet('sheet-component', skeleton, true);
     scene.addObject(spreadsheet, 1);
 
-    const mainCanvas = new Canvas({ width: 640, height: 360, pixelRatio: 1 });
-    const cacheCanvas = new Canvas({ width: 700, height: 420, pixelRatio: 1 });
+    const mainCanvas = injector.createInstance(Canvas, { width: 640, height: 360, pixelRatio: 1 });
+    const cacheCanvas = injector.createInstance(Canvas, { width: 700, height: 420, pixelRatio: 1 });
 
     return {
         univer,
@@ -373,9 +376,9 @@ describe('spreadsheet integration', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         expect(spreadsheet.backgroundExtension).toBeInstanceOf(Background);
         expect(spreadsheet.borderExtension).toBeInstanceOf(Border);
-        const background = new RenderOrderProbe('ConsumerBackground', 1, SHEET_EXTENSION_TYPE.BACKGROUND);
-        const early = new RenderOrderProbe('ConsumerBeforeText', 25, SHEET_EXTENSION_TYPE.GRID);
-        const late = new RenderOrderProbe('ConsumerAfterBorder', 70, SHEET_EXTENSION_TYPE.GRID);
+        const background = fixture.univer.__getInjector().createInstance(RenderOrderProbe, 'ConsumerBackground', 1, SHEET_EXTENSION_TYPE.BACKGROUND);
+        const early = fixture.univer.__getInjector().createInstance(RenderOrderProbe, 'ConsumerBeforeText', 25, SHEET_EXTENSION_TYPE.GRID);
+        const late = fixture.univer.__getInjector().createInstance(RenderOrderProbe, 'ConsumerAfterBorder', 70, SHEET_EXTENSION_TYPE.GRID);
         spreadsheet.register(background, early, late);
         const backgroundDraw = vi.spyOn(background, 'draw');
         const earlyDraw = vi.spyOn(early, 'draw');
@@ -884,18 +887,9 @@ describe('spreadsheet integration', () => {
             viewportInfo.diffBounds.map((bound) => skeleton.getRangeByViewBound(bound))
         );
 
-        const fontExtension = { uKey: 'DefaultFontExtension', draw: vi.fn() };
-        const borderExtension = { uKey: 'DefaultBorderExtension', draw: vi.fn() };
-        (spreadsheet as any)._fontExtension = fontExtension;
-        (spreadsheet as any)._borderExtension = borderExtension;
-        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([
-            fontExtension,
-            borderExtension,
-            {
-                uKey: 'MockSheetExtension',
-                draw: extensionDraw,
-            },
-        ]);
+        vi.mocked(spreadsheet.getExtensionsByOrder).mockRestore();
+        const fontDraw = vi.spyOn(spreadsheet.fontExtension, 'draw');
+        const borderDraw = vi.spyOn(spreadsheet.borderExtension, 'draw');
         spreadsheet.draw(context, viewportInfo);
         const cacheRange = skeleton.getCacheRangeByViewport(viewportInfo);
         const overflowSafeRanges = viewportInfo.diffBounds.map((bound) => ({
@@ -903,18 +897,10 @@ describe('spreadsheet integration', () => {
             startColumn: cacheRange.startColumn,
             endColumn: cacheRange.endColumn,
         }));
-        expect(fontExtension.draw.mock.calls.at(-1)?.[4].viewRanges).toEqual(overflowSafeRanges);
-        const borderRanges = viewportInfo.diffBounds.map((bound) => skeleton.getRangeByViewBound(createBound(
-            bound.left - 2,
-            bound.top - 2,
-            bound.right + 2,
-            bound.bottom + 2
-        )));
-        expect(borderExtension.draw.mock.calls.at(-1)?.[4].viewRanges).toEqual(borderRanges);
-        expect(borderExtension.draw.mock.calls.at(-1)?.[3]).toEqual(borderRanges);
-        expect(extensionDraw.mock.calls.at(-1)?.[4].viewRanges).toEqual(
-            viewportInfo.diffBounds.map((bound) => skeleton.getRangeByViewBound(bound))
-        );
+        expect(fontDraw.mock.calls.at(-1)?.[4].viewRanges).toEqual(overflowSafeRanges);
+        const borderRanges = [{ startRow: 1, endRow: 4, startColumn: 0, endColumn: 2 }];
+        expect(borderDraw.mock.calls.at(-1)?.[4].viewRanges).toEqual(borderRanges);
+        expect(borderDraw.mock.calls.at(-1)?.[3]).toEqual(borderRanges);
         (spreadsheet as any)._refreshIncrementalState = false;
 
         spreadsheet.paintNewAreaForScrolling(viewportInfo, {
@@ -948,7 +934,7 @@ describe('spreadsheet integration', () => {
 
         expect(spreadsheet.getDocuments()).toBeDefined();
 
-        const noSkeletonSpreadsheet = new Spreadsheet('no-skeleton');
+        const noSkeletonSpreadsheet = fixture.univer.__getInjector().createInstance(Spreadsheet, 'no-skeleton');
         expect(noSkeletonSpreadsheet.draw(context, viewportInfo)).toBeUndefined();
         expect(noSkeletonSpreadsheet.isHit(Vector2.FromArray([10, 10]))).toBe(false);
         expect(noSkeletonSpreadsheet.getNoMergeCellPositionByIndex(0, 0)).toEqual({
@@ -972,7 +958,7 @@ describe('spreadsheet integration', () => {
         });
 
         skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
-        const fontExtension = new Font();
+        const fontExtension = fixture.univer.__getInjector().createInstance(Font);
         spreadsheet.register(fontExtension);
         Reflect.set(spreadsheet, '_fontExtension', fontExtension);
         Reflect.set(skeleton, '_incrementalFontRenderRanges', [{
@@ -1015,6 +1001,45 @@ describe('spreadsheet integration', () => {
             endColumn: cacheRange.endColumn,
         }));
         expect(border.mock.calls.at(-1)?.[4].viewRanges).toEqual(expected);
+    });
+
+    it.each([
+        SHEET_VIEWPORT_KEY.VIEW_MAIN,
+        SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT,
+        SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+    ])('keeps incremental border owners inside the full paint range for %s', (viewportKey) => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, {
+            viewportKey,
+            cacheBound: createBound(118, 76, 262, 124),
+            diffBounds: [createBound(116, 74, 264, 126)],
+            isDirty: 0,
+            isForceDirty: false,
+        });
+        skeleton.setStylesCache(info);
+        const border = vi.spyOn(spreadsheet.borderExtension, 'draw');
+        spreadsheet.draw(mainCanvas.getContext(), info);
+        const fullRanges = border.mock.calls.at(-1)![4].viewRanges;
+        Reflect.set(spreadsheet, '_refreshIncrementalState', true);
+        spreadsheet.draw(mainCanvas.getContext(), info);
+        expect(border.mock.calls.at(-1)![4].viewRanges).toEqual(fullRanges);
+        expect(border.mock.calls.at(-1)![3]).toEqual(fullRanges);
+    });
+
+    it('does not paint border owners outside the full cache range', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, {
+            cacheBound: createBound(118, 76, 262, 124),
+            diffBounds: [createBound(900, 900, 1000, 1000)],
+            isDirty: 0,
+            isForceDirty: false,
+        });
+        skeleton.setStylesCache(info);
+        const border = vi.spyOn(spreadsheet.borderExtension, 'draw');
+        Reflect.set(spreadsheet, '_refreshIncrementalState', true);
+        spreadsheet.draw(mainCanvas.getContext(), info);
+        expect(border.mock.calls.at(-1)![3]).toEqual([]);
+        expect(border.mock.calls.at(-1)![4].viewRanges).toEqual([]);
     });
 
     it('skips merge gridline cleanup during merge-free drawing', () => {
@@ -1125,30 +1150,30 @@ describe('spreadsheet integration', () => {
     });
 
     it.each([false, true])('includes an off-strip merged feature through a visible cell, hidden=%s', (hidden) => {
-        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
-        const merge = { startRow: 0, endRow: 6, startColumn: 0, endColumn: 4 };
-        const markerDraw = vi.fn();
-        vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([merge]);
-        vi.spyOn(skeleton.worksheet, 'getMergedCellRange').mockReturnValue([merge]);
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        sheet.mergeData = [{ startRow: 0, endRow: 6, startColumn: 0, endColumn: 4 }];
+        const cell: ICellDataForSheetInterceptor = { markers: { tr: { color: '#ff0000', size: 4 } } };
+        sheet.cellData = { 0: { 0: cell } };
         if (hidden) {
-            vi.spyOn(skeleton.worksheet, 'getRowVisible').mockImplementation((row) => row !== 1);
-            vi.spyOn(skeleton.worksheet, 'getColVisible').mockImplementation((column) => column !== 0);
+            sheet.rowData = { 1: { hd: BooleanNumber.TRUE } };
+            sheet.columnData = { 0: { hd: BooleanNumber.TRUE } };
         }
-        skeleton.stylesCache.fontMatrix.reset();
-        vi.spyOn(skeleton.worksheet, 'getCell').mockImplementation((row, column) => (
-            row === 0 && column === 0 ? { markers: { tr: { color: '#ff0000', size: 4 } } } : undefined
-        ));
-        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([{
-            draw: markerDraw,
-            uKey: 'DefaultMarkerExtension',
-        }]);
-        (spreadsheet as any)._refreshIncrementalState = true;
+        fixture = createFixture(data);
+        const { spreadsheet, scene, cacheCanvas, mainCanvas } = fixture;
+        const injector = fixture.univer.__getInjector();
+        injector.add([Marker]);
+        const marker = injector.get(Marker);
+        spreadsheet.register(marker);
+        const markerDraw = vi.spyOn(marker, 'draw');
+        const fill = vi.spyOn(mainCanvas.getContext(), 'fill');
+        Reflect.set(spreadsheet, '_refreshIncrementalState', true);
         spreadsheet.draw(mainCanvas.getContext(), createViewportInfo(scene, cacheCanvas, {
             diffBounds: [createBound(100, 60, 220, 140)],
             diffCacheBounds: [createBound(100, 60, 220, 140)],
         }), true);
-        (spreadsheet as any)._refreshIncrementalState = false;
-
+        Reflect.set(spreadsheet, '_refreshIncrementalState', false);
         expect(markerDraw).toHaveBeenCalledOnce();
         expect(markerDraw.mock.calls[0][3]).toContainEqual({
             startRow: hidden ? 2 : 1,
@@ -1156,6 +1181,7 @@ describe('spreadsheet integration', () => {
             startColumn: hidden ? 1 : 0,
             endColumn: hidden ? 1 : 0,
         });
+        expect(fill).toHaveBeenCalled();
     });
 
     it('does not skip conditional-formatting render extensions during sparse scans', () => {
@@ -1742,7 +1768,7 @@ describe('spreadsheet integration', () => {
     it('uses backing-store cache size when detecting large scroll jumps', () => {
         const { spreadsheet, skeleton, mainCanvas, scene } = fixture;
         const context = mainCanvas.getContext();
-        const cacheCanvas = new Canvas({ width: 700, height: 420, pixelRatio: 1.5 });
+        const cacheCanvas = fixture.univer.__getInjector().createInstance(Canvas, { width: 700, height: 420, pixelRatio: 1.5 });
         vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([]);
         context.setTransform(1.5, 0, 0, 1.5, 0, 0);
         const viewportInfo = createViewportInfo(scene, cacheCanvas, {
@@ -2328,7 +2354,7 @@ describe('spreadsheet integration', () => {
         const mainCtx = mainCanvas.getContext() as any;
         const mainCache = viewport.canvas!;
         mainCache.setSize(460, 280, 1);
-        const frozenViewport = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+        const frozenViewport = fixture.univer.__getInjector().createInstance(Viewport, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             left: 0,
             top: 0,
             width: 80,

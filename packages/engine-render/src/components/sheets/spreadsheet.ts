@@ -431,7 +431,7 @@ export class Spreadsheet extends SheetComponent {
             }))
             : viewRanges;
         const borderViewRanges = this._refreshIncrementalState && diffRanges.length > 0
-            ? this._getBorderRenderRanges(spreadsheetSkeleton, viewportInfo, overflowSafeViewRanges, hasMergeData)
+            ? this._getBorderRenderRanges(spreadsheetSkeleton, viewportInfo, overflowSafeViewRanges, hasMergeData, cacheRange)
             : viewRanges;
         const extensions = this.getExtensionsByOrder();
         const backgroundExtensions = extensions.filter((extension) => extension.type === SHEET_EXTENSION_TYPE.BACKGROUND);
@@ -503,7 +503,8 @@ export class Spreadsheet extends SheetComponent {
         skeleton: SpreadsheetSkeleton,
         viewportInfo: IViewportInfo,
         overflowSafeRanges: IRange[],
-        hasMergeData: boolean
+        hasMergeData: boolean,
+        cacheRange: IRange
     ): IRange[] {
         if (this.isPrinting) {
             return overflowSafeRanges;
@@ -527,7 +528,13 @@ export class Spreadsheet extends SheetComponent {
                 }
             }
         }
-        return ranges;
+        // Keep halo owners within the full paint's range so frozen edges cannot gain extra strokes.
+        return ranges.map((range) => ({
+            startRow: Math.max(range.startRow, cacheRange.startRow),
+            endRow: Math.min(range.endRow, cacheRange.endRow),
+            startColumn: Math.max(range.startColumn, cacheRange.startColumn),
+            endColumn: Math.min(range.endColumn, cacheRange.endColumn),
+        })).filter((range) => range.startRow <= range.endRow && range.startColumn <= range.endColumn);
     }
 
     addRenderFrameTimeMetricToScene(timeKey: string, val: number, scene: Scene) {

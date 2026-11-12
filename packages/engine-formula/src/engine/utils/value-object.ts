@@ -458,22 +458,31 @@ const MAX_REPEATED_CRITERIA_RESULTS = 4096;
  * per cell.
  */
 function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string {
-    return criteria.map((value) => {
-        if (value == null || value.isNull()) {
-            return 'n';
-        }
-        if (value.isBoolean()) {
-            return `b:${value.getValue()}`;
-        }
-        if (value.isNumber()) {
-            return `#:${stripErrorMargin(Number(value.getValue()))}`;
-        }
-        if (value.isError()) {
-            return `e:${value.getValue()}`;
-        }
-        // Text criteria may be parsed as dates, which depends on the date system.
-        return `s:${value.getDateSystem()}:${value.getValue()}`;
-    }).join('\u0000');
+    let key = '';
+    for (const value of criteria) {
+        const segment = getCriteriaKeySegment(value);
+        // Length-prefix every segment: criteria text may contain the separator, and an
+        // ambiguous join would let two different tuples share one cache entry.
+        key += `${segment.length}:${segment}`;
+    }
+    return key;
+}
+
+function getCriteriaKeySegment(value: Nullable<BaseValueObject>): string {
+    if (value == null || value.isNull()) {
+        return 'n';
+    }
+    if (value.isBoolean()) {
+        return `b:${value.getValue()}`;
+    }
+    if (value.isNumber()) {
+        return `#:${String(stripErrorMargin(Number(value.getValue())))}`;
+    }
+    if (value.isError()) {
+        return `e:${value.getValue()}`;
+    }
+    // Text criteria may be parsed as dates, which depends on the date system.
+    return `s:${value.getDateSystem()}:${value.getValue()}`;
 }
 
 function getCriteriaPositions(

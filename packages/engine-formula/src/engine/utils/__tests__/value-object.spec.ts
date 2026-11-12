@@ -462,6 +462,32 @@ describe('Conditional aggregate indexed equality semantics', () => {
         }
     );
 
+    it('keeps repeated criteria keys distinct when text contains the key separator', () => {
+        // Excel stores U+0000 in OOXML as `_x0000_`, so imported cells can contain it.
+        // These two criteria tuples must not share a cache key.
+        const nul = String.fromCharCode(0);
+        const firstKey = `A${nul}s:date1900:B`;
+        const secondKey = `B${nul}s:date1900:C`;
+        const keys = ArrayValueObject.createByArray([[firstKey], ['A']]);
+        const groups = ArrayValueObject.createByArray([['C'], [secondKey]]);
+        const amounts = ArrayValueObject.createByArray([[31], [37]]);
+
+        const result = getPairedRangeAndCriteriaResult([
+            keys,
+            ArrayValueObject.createByArray([[firstKey], ['A']]),
+            groups,
+            ArrayValueObject.createByArray([['C'], [secondKey]]),
+        ], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([31, 37]);
+    });
+
     it('evaluates the repeated blank cells of a whole-column criteria range once', () => {
         const size = 200;
         const keyCount = 20;

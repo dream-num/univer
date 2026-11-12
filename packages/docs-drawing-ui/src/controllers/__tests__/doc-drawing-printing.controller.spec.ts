@@ -222,7 +222,7 @@ describe('DocDrawingPrintingController with real layout and drawing services', (
     }
 
     it('prints table-cell images with their host page and omits the other body page', () => {
-        const render = vi.spyOn(univer.__getInjector().get(DrawingRenderService), 'renderDrawing');
+        const render = vi.spyOn(univer.__getInjector().get(DrawingRenderService), 'renderImages');
         const page = skeleton.getSkeletonData()!.pages[0];
         expect(page.skeTables.get('table')!.rows[0].cells[0].skeDrawings.has('cell-image')).toBe(true);
         collect(0);

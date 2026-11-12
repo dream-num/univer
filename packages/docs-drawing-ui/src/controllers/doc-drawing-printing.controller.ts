@@ -15,6 +15,7 @@
  */
 
 import type { IDocFloatDom } from '@univerjs/docs-drawing';
+import type { IImageData } from '@univerjs/drawing';
 import { Disposable, DOC_DRAWING_PRINTING_COMPONENT_KEY, DrawingTypeEnum, Inject, Injector } from '@univerjs/core';
 import { DocPrintInterceptorService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -53,7 +54,7 @@ export class DocDrawingPrintingController extends Disposable {
                                 }
                                 const drawing = this._docPrintInterceptorService.getDrawingForPrint(skeleton, subUnitData.data[id]);
                                 if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
-                                    this._drawingRenderService.renderDrawing(drawing, scene, { interactive: false });
+                                    this._drawingRenderService.renderImages(drawing as IImageData, scene, { interactive: false });
                                 }
                             });
                         }

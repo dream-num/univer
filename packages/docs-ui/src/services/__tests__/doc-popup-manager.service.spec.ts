@@ -180,11 +180,13 @@ describe('popup anchors with real document layout', () => {
             expect(popupService.popups).toHaveLength(0);
             pendingRange.startOffset = 1;
             pendingRange.endOffset = 2;
+            skeleton.makeDirty(true);
             skeleton.calculate();
             expect(popupService.popups).toHaveLength(1);
             expect(popupService.popups[0][1].anchorRect).toEqual(expect.objectContaining({ right: expect.any(Number) }));
             pendingRange.startOffset = 1000;
             pendingRange.endOffset = 1001;
+            skeleton.makeDirty(true);
             skeleton.calculate();
             expect(popupService.popups).toHaveLength(0);
             pendingPopup.dispose();

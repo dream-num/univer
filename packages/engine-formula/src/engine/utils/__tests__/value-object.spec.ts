@@ -530,6 +530,53 @@ describe('Conditional aggregate indexed equality semantics', () => {
         expect(result.map((row) => row[0].getValue())).toEqual([7, 0]);
     });
 
+    it('keeps date-formatted serials that round to different dates distinct', () => {
+        // Date comparison rounds the serial at 1e-8, so these two values land on
+        // different dates even though they scale to the same 12-digit number.
+        const lower = 45000.00000000499;
+        const upper = 45000.000000005006;
+        const range = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(lower, 'yyyy-mm-dd')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(7)]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = ArrayValueObject.create({
+            calculateValueList: [
+                [NumberValueObject.create(lower, 'yyyy-mm-dd')],
+                [NumberValueObject.create(upper, 'yyyy-mm-dd')],
+            ],
+            rowCount: 2,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        const result = getPairedRangeAndCriteriaResult([range, criteria], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([7, 0]);
+    });
+
     it('evaluates the repeated blank cells of a whole-column criteria range once', () => {
         const size = 200;
         const keyCount = 20;

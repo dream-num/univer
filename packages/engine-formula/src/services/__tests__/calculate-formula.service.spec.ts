@@ -857,4 +857,53 @@ describe('executeFormulas conditional aggregate criteria', () => {
             { value: [[7], [0]], formula: '=SUMIFS(B1:B1,A1:A1,D1:D2)' },
         ]);
     });
+
+    it('keeps date-formatted serials that round to different dates distinct', async () => {
+        // 45000.00000000499 and 45000.000000005006 scale to the same 12-digit number
+        // but date comparison rounds them onto different dates.
+        const lower = 45000.00000000499;
+        const upper = 45000.000000005006;
+        const workbook: IWorkbookData = {
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: '',
+            sheetOrder: ['sheet1'],
+            styles: {},
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: lower, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                            1: { v: 7, t: CellValueType.NUMBER },
+                            3: { v: lower, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                        },
+                        1: {
+                            3: { v: upper, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                        },
+                    },
+                },
+            },
+        };
+
+        const testBed = createCommandTestBed(workbook);
+        testBed.get(IFunctionService).registerExecutors(new Sumifs(FUNCTION_NAMES_MATH.SUMIFS));
+        const service = testBed.get(ICalculateFormulaService);
+
+        const result = await service.executeFormulas({
+            [testBed.unitId]: {
+                [testBed.sheetId]: {
+                    0: { 4: ['=SUMIFS(B1:B1,A1:A1,D1:D2)'] },
+                },
+            },
+        }, testBed.sheetData as never);
+
+        expect(result[testBed.unitId]?.[testBed.sheetId]?.[0]?.[4]).toEqual([
+            { value: [[7], [0]], formula: '=SUMIFS(B1:B1,A1:A1,D1:D2)' },
+        ]);
+    });
 });

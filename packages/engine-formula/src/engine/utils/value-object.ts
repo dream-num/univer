@@ -476,11 +476,14 @@ function getCriteriaKeySegment(value: Nullable<BaseValueObject>): string {
         return `b:${value.getValue()}`;
     }
     if (value.isNumber()) {
-        const serial = String(stripErrorMargin(Number(value.getValue())));
-        // A date-formatted serial compares differently from a plain number: date
-        // comparisons round the serial, and text cells are converted through the date
-        // system. Keep the pattern in the key so the two can never share an entry.
         const pattern = value.getPattern();
+        // Keep the exact double. Every comparison is a function of it, but two values
+        // that `stripErrorMargin` folds together can still compare differently: date
+        // comparisons round the serial at 1e-8 before comparing, so 45000.00000000499
+        // and 45000.000000005006 land on different dates.
+        const serial = String(value.getValue());
+        // A date-formatted serial also compares differently from a plain number of the
+        // same value, so the pattern is part of the key.
         return pattern ? `#:${pattern}:${serial}` : `#:${serial}`;
     }
     if (value.isError()) {

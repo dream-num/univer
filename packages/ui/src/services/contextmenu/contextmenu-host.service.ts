@@ -94,9 +94,7 @@ export class ContextMenuHostService extends Disposable implements IContextMenuHo
     closeAll(): void {
         ++this._revision;
         this._activeMenuId$.next(null);
-        for (const hide of [...this._menuMap.values()]) {
-            hide(false);
-        }
+        Array.from(this._menuMap.values()).forEach((hide) => hide(false));
     }
 
     suspend(): IDisposable {

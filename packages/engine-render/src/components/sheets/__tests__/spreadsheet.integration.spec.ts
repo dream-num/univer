@@ -189,7 +189,9 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     get(ILogService).setLogLevel(LogLevel.SILENT);
 
     const worksheet = workbook.getActiveSheet()!;
-    const skeleton = injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()).calculate() as SpreadsheetSkeleton;
+    injector.add([SpreadsheetSkeleton, { useFactory: () => injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()) }]);
+    const skeleton = get(SpreadsheetSkeleton);
+    skeleton.calculate();
 
     const container = document.createElement('div');
     container.style.width = '640px';
@@ -284,6 +286,64 @@ describe('spreadsheet integration', () => {
         expect(getShrinkToFitScale(80, 100, 12)).toBe(1);
         expect(getShrinkToFitScale(200, 100, 12)).toBe(0.5);
         expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
+    });
+
+    it.each([
+        { system: 'Linux', scale: 1.5, merges: true, overflow: false, hidden: false, disabled: false, expected: true },
+        { system: 'Linux', scale: 1.5, merges: false, overflow: true, hidden: false, disabled: false, expected: true },
+        { system: 'Mac', scale: 1.5, merges: true, overflow: true, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 2, merges: true, overflow: true, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: false, overflow: false, hidden: false, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: true, disabled: false, expected: false },
+        { system: 'Linux', scale: 1.5, merges: true, overflow: true, hidden: false, disabled: true, expected: false },
+    ])('uses the native grid fallback only for affected geometry: %j', (scenario) => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheetData = data.sheets['sheet-1'];
+        sheetData.cellData = {};
+        sheetData.mergeData = scenario.merges ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [];
+        sheetData.showGridlines = scenario.hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, mainCanvas, scene, cacheCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        vi.spyOn(Tools, 'getSystemType').mockReturnValue(scenario.system);
+        context.setTransform(scenario.scale, 0, 0, scenario.scale, 0, 0);
+        if (scenario.overflow) {
+            skeleton.overflowCache.setValue(1, 1, { startRow: 1, endRow: 1, startColumn: 1, endColumn: 4 });
+        }
+        Reflect.set(spreadsheet, '_forceDisableGridlines', scenario.disabled);
+        const viewport = createViewportInfo(scene, cacheCanvas);
+        expect(Reflect.get(spreadsheet, '_requiresNativeGridlineRepaint').call(spreadsheet, context, skeleton, viewport, scenario.merges)).toBe(scenario.expected);
+    });
+
+    it('ignores historical grid cuts while finding an offscreen horizontal overflow anchor', () => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        Object.assign(data.sheets['sheet-1'], { rowCount: 100, columnCount: 128, cellData: {}, mergeData: [], rowData: {}, columnData: {} });
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, mainCanvas, scene, cacheCanvas, workbook } = fixture;
+        const context = mainCanvas.getContext();
+        vi.spyOn(Tools, 'getSystemType').mockReturnValue('Linux');
+        context.setTransform(1.5, 0, 0, 1.5, 0, 0);
+        const { overflowCache, columnWidthAccumulation: columns, rowHeightAccumulation: rows } = skeleton;
+        overflowCache.setValue(0, 0, { startRow: 0, endRow: 0, startColumn: 0, endColumn: 100 });
+        overflowCache.setValue(42, 70, { startRow: 42, endRow: 42, startColumn: 70, endColumn: 75 });
+        const getRow = vi.spyOn(overflowCache, 'getRow');
+        const getMergedCellRange = vi.spyOn(workbook.getActiveSheet()!, 'getMergedCellRange');
+        const cacheBound = {
+            left: columns[19] + skeleton.rowHeaderWidthAndMarginLeft + 1,
+            right: columns[25] + skeleton.rowHeaderWidthAndMarginLeft - 1,
+            top: rows[39] + skeleton.columnHeaderHeightAndMarginTop + 1,
+            bottom: rows[44] + skeleton.columnHeaderHeightAndMarginTop - 1,
+        };
+        const viewport = createViewportInfo(scene, cacheCanvas, { cacheBound });
+        expect(skeleton.getRangeByViewBound(cacheBound)).toMatchObject({ startRow: 40, endRow: 44, startColumn: 20, endColumn: 25 });
+        const requiresRepaint = Reflect.get(spreadsheet, '_requiresNativeGridlineRepaint').bind(spreadsheet);
+        expect(requiresRepaint(context, skeleton, viewport, true)).toBe(false);
+        expect(getMergedCellRange).toHaveBeenCalledExactlyOnceWith(40, 20, 44, 25);
+        expect(getRow.mock.calls.map(([row]) => row)).toEqual([40, 41, 42, 43, 44]);
+        overflowCache.setValue(42, 0, { startRow: 42, endRow: 42, startColumn: 0, endColumn: 20 });
+        expect(requiresRepaint(context, skeleton, viewport, false)).toBe(true);
     });
 
     it.each(['invalidate', 'clear'])('rejects viewport reuse after a font metrics %s without font load events', (action) => {

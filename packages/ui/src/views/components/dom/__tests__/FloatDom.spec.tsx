@@ -432,7 +432,7 @@ describe('FloatDomSingle', () => {
 
     it.each(['ctrlKey', 'metaKey'] as const)('cancels native %s wheel zoom while forwarding the gesture once', async (modifier) => {
         const onWheel = vi.fn();
-        const layer = { ...createFloatDom(), onWheel };
+        const layer = { ...createFloatDom(), preventBrowserZoom: true, onWheel };
         const rendered = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
         try {
             const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
@@ -456,13 +456,17 @@ describe('FloatDomSingle', () => {
         const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
         const service = rendered.injector.get(CanvasFloatDomService);
         try {
-            act(() => service.addFloatDom(createFloatDom()));
+            act(() => service.addFloatDom({ ...createFloatDom(), preventBrowserZoom: true }));
             const inner = await waitFor(() => document.getElementById('float-1') as HTMLDivElement);
             const gesture = () => {
                 const event = new Event('gesturechange', { bubbles: true, cancelable: true });
                 fireEvent(inner, event);
                 return event.defaultPrevented;
             };
+            expect(gesture()).toBe(true);
+            act(() => service.updateFloatDom('float-1', { preventBrowserZoom: false }));
+            expect(gesture()).toBe(false);
+            act(() => service.updateFloatDom('float-1', { preventBrowserZoom: true }));
             expect(gesture()).toBe(true);
             act(() => service.updateFloatDom('float-1', { eventPassThrough: false }));
             expect(gesture()).toBe(false);
@@ -479,7 +483,7 @@ describe('FloatDomSingle', () => {
     it('binds zoom cancellation after a delayed first position mounts the layer', async () => {
         const position$ = new Subject<IFloatDomLayout>();
         const initial = createFloatDom();
-        const rendered = renderWithDependencies(<FloatDomSingle id="dom-1" layer={{ ...initial, position$ }} />);
+        const rendered = renderWithDependencies(<FloatDomSingle id="dom-1" layer={{ ...initial, position$, preventBrowserZoom: true }} />);
         try {
             expect(document.getElementById('dom-1')).toBeNull();
             act(() => position$.next((initial.position$ as BehaviorSubject<IFloatDomLayout>).value));

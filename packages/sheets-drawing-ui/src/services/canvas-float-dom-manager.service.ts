@@ -1445,6 +1445,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         domId,
                         componentKey: floatDomParam.componentKey,
                         eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, 'inactive'),
+                        preventBrowserZoom: true,
                         preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
                         onPointerDown: (evt) => {
                             if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
@@ -2160,6 +2161,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
+                preventBrowserZoom: true,
                 componentKey: floatDomParam.componentKey,
                 onPointerDown: () => { },
                 onPointerMove: () => { },
@@ -2403,6 +2405,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
+                preventBrowserZoom: true,
                 componentKey: floatDomParam.componentKey,
                 onPointerDown: () => { },
                 onPointerMove: () => { },

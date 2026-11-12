@@ -1172,6 +1172,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
             fixture.manager.addFloatDomToColumnHeader(1, options, { width: 100, height: 40 }, 'wheel-card');
         }
         const layer = findFloatDom(fixture.get(CanvasFloatDomService), 'wheel-card')!;
+        expect(layer.preventBrowserZoom).toBe(true);
         const unconsumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
         layer.onWheel(unconsumed);
         expect(unconsumed.defaultPrevented).toBe(false);

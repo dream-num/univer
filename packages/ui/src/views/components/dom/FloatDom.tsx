@@ -81,10 +81,10 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
 
     useEffect(() => {
         // React's passive wheel listener cannot cancel the native event copied to the host canvas.
-        if (forwardEvents && domRef.current) {
+        if (forwardEvents && layer.preventBrowserZoom && domRef.current) {
             return preventBrowserZoomInContainers([domRef.current]);
         }
-    }, [forwardEvents, position]);
+    }, [forwardEvents, layer.preventBrowserZoom, position]);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {

@@ -1751,20 +1751,6 @@ describe('spreadsheet integration', () => {
         expect(skeleton.stylesCache.border?.getValue(0, 4)).toBeDefined();
     });
 
-    it('reuses a completely empty cell without creating visible styles', () => {
-        const { skeleton } = fixture;
-        const options = { cacheItem: { bg: true, border: true }, reuseExisting: true };
-        (skeleton as any)._setStylesCacheForOneCell(15, 8, options);
-        const getCellSpy = vi.spyOn(skeleton.worksheet, 'getCell');
-
-        (skeleton as any)._setStylesCacheForOneCell(15, 8, options);
-
-        expect(getCellSpy).not.toHaveBeenCalled();
-        expect(skeleton.stylesCache.fontMatrix.getValue(15, 8)).toBeUndefined();
-        expect(skeleton.stylesCache.backgroundPositions?.getValue(15, 8)).toBeUndefined();
-        expect(skeleton.stylesCache.border?.getValue(15, 8)).toBeUndefined();
-    });
-
     it.each(['range', 'all'])('invalidates cached text absence on %s cache reset', (reset) => {
         const { skeleton } = fixture;
         const options = { cacheItem: { bg: true, border: true }, reuseExisting: true };

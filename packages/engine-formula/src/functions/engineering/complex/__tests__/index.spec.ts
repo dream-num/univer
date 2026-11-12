@@ -38,6 +38,14 @@ describe('Test complex function', () => {
             expect(result2.getValue()).toBe(3);
         });
 
+        it('Formats a tiny real part like Excel', () => {
+            const realNum = NumberValueObject.create(1e-7);
+            const iNum = NumberValueObject.create(-1);
+            const suffix = StringValueObject.create('i');
+            const result = testFunction.calculate(realNum, iNum, suffix);
+            expect(result.getValue()).toBe('0.0000001-i');
+        });
+
         it('Value is number string', () => {
             const realNum = StringValueObject.create('-0.5');
             const iNum = NumberValueObject.create(4);

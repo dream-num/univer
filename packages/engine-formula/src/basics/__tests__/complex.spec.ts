@@ -47,4 +47,34 @@ describe('Test complex', () => {
         expect(new Complex('1+2-3i').isError()).toBe(true);
         expect(new Complex('1-2+3i').isError()).toBe(true);
     });
+
+    it('Writes tiny numbers in plain decimal notation', () => {
+        expect(Complex.getComplex(1e-7, -1, 'i')).toBe('0.0000001-i');
+        expect(Complex.getComplex(1e-7, 1, 'i')).toBe('0.0000001+i');
+    });
+
+    it('Rounds to 15 significant digits', () => {
+        expect(Complex.getComplex(2 / 3, 1, 'i')).toBe('0.666666666666667+i');
+        expect(Complex.getComplex(0.1 + 0.2, 1, 'i')).toBe('0.3+i');
+    });
+
+    it('Omits the coefficient of a unit imaginary part', () => {
+        expect(Complex.getComplex(0, 1, 'i')).toBe('i');
+        expect(Complex.getComplex(0, -1, 'i')).toBe('-i');
+        expect(Complex.getComplex(1, -1, 'i')).toBe('1-i');
+        expect(Complex.getComplex(1, 1, 'i')).toBe('1+i');
+    });
+
+    it('Keeps plain notation while it fits in 21 characters', () => {
+        expect(Complex.getComplex(1e-19, 1, 'i')).toBe('0.0000000000000000001+i');
+        expect(Complex.getComplex(1e20, 1, 'i')).toBe('100000000000000000000+i');
+        expect(Complex.getComplex(0.0000123456789012345, 1, 'i')).toBe('0.0000123456789012345+i');
+    });
+
+    it('Falls back to scientific notation past that width', () => {
+        expect(Complex.getComplex(1e-20, 1, 'i')).toBe('1E-20+i');
+        expect(Complex.getComplex(1.5e-19, 1, 'i')).toBe('1.5E-19+i');
+        expect(Complex.getComplex(0.00000123456789012345, 1, 'i')).toBe('1.23456789012345E-06+i');
+        expect(Complex.getComplex(1e21, 1, 'i')).toBe('1E+21+i');
+    });
 });

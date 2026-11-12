@@ -29,7 +29,7 @@ describe('Test imtan function', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe('-4.10750577733132e-11+1.00000000006335i');
+            expect(result.getValue()).toBe('-4.10750577733132E-11+1.00000000006335i');
         });
 
         it('Value is large numbers', () => {

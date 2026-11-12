@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICellData } from '@univerjs/core';
-import { IConfigService, Inject, Injector, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IWorkbookData } from '@univerjs/core';
+import { CellValueType, IConfigService, Inject, Injector, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IAllRuntimeData } from '../runtime.service';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { createCommandTestBed } from '../../engine/analysis/__tests__/create-command-test-bed';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction } from '../../functions/custom-function';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
+import { Sumifs } from '../../functions/math/sumifs';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
@@ -803,5 +806,104 @@ describe('CalculateFormulaService', () => {
         await expect(service.getInRangeFormulas([])).resolves.toEqual([{ treeId: 4 }]);
         await expect(service.getDependentsAndInRangeFormulas([])).resolves.toEqual({ dependents: [], inRanges: [] });
         expect(mocks.currentConfigService.loadDataLite).toHaveBeenCalledTimes(5);
+    });
+});
+
+describe('executeFormulas conditional aggregate criteria', () => {
+    it('keeps a date-formatted serial distinct from a plain number', async () => {
+        // Date comparisons round the serial, so a date-formatted `1` matches a
+        // date-formatted 1.000000001 while a plain `1` does not. Both values are
+        // criteria for the same array formula, so they must not share a cache key.
+        const workbook: IWorkbookData = {
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: '',
+            sheetOrder: ['sheet1'],
+            styles: {},
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1.000000001, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                            1: { v: 7, t: CellValueType.NUMBER },
+                            3: { v: 1, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                        },
+                        1: {
+                            3: { v: 1, t: CellValueType.NUMBER },
+                        },
+                    },
+                },
+            },
+        };
+
+        const testBed = createCommandTestBed(workbook);
+        testBed.get(IFunctionService).registerExecutors(new Sumifs(FUNCTION_NAMES_MATH.SUMIFS));
+        const service = testBed.get(ICalculateFormulaService);
+
+        const result = await service.executeFormulas({
+            [testBed.unitId]: {
+                [testBed.sheetId]: {
+                    0: { 4: ['=SUMIFS(B1:B1,A1:A1,D1:D2)'] },
+                },
+            },
+        }, testBed.sheetData as never);
+
+        expect(result[testBed.unitId]?.[testBed.sheetId]?.[0]?.[4]).toEqual([
+            { value: [[7], [0]], formula: '=SUMIFS(B1:B1,A1:A1,D1:D2)' },
+        ]);
+    });
+
+    it('keeps date-formatted serials that round to different dates distinct', async () => {
+        // 45000.00000000499 and 45000.000000005006 scale to the same 12-digit number
+        // but date comparison rounds them onto different dates.
+        const lower = 45000.00000000499;
+        const upper = 45000.000000005006;
+        const workbook: IWorkbookData = {
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: '',
+            sheetOrder: ['sheet1'],
+            styles: {},
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: lower, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                            1: { v: 7, t: CellValueType.NUMBER },
+                            3: { v: lower, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                        },
+                        1: {
+                            3: { v: upper, t: CellValueType.NUMBER, s: { n: { pattern: 'yyyy-mm-dd' } } },
+                        },
+                    },
+                },
+            },
+        };
+
+        const testBed = createCommandTestBed(workbook);
+        testBed.get(IFunctionService).registerExecutors(new Sumifs(FUNCTION_NAMES_MATH.SUMIFS));
+        const service = testBed.get(ICalculateFormulaService);
+
+        const result = await service.executeFormulas({
+            [testBed.unitId]: {
+                [testBed.sheetId]: {
+                    0: { 4: ['=SUMIFS(B1:B1,A1:A1,D1:D2)'] },
+                },
+            },
+        }, testBed.sheetData as never);
+
+        expect(result[testBed.unitId]?.[testBed.sheetId]?.[0]?.[4]).toEqual([
+            { value: [[7], [0]], formula: '=SUMIFS(B1:B1,A1:A1,D1:D2)' },
+        ]);
     });
 });

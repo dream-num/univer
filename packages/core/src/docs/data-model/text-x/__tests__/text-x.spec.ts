@@ -16,19 +16,57 @@
 
 import { describe, expect, it } from 'vitest';
 import type { IDocumentBody, IDocumentData } from '../../../../types/interfaces/i-document-data';
-import type { IInsertAction, IRetainAction } from '../action-types';
+import type { IInsertAction, IRetainAction, TextXAction } from '../action-types';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { CustomDecorationType, CustomRangeType, DocumentBlockRangeType, SpecialCharacterKind } from '../../../../types/interfaces/i-document-data';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
-import { TextXActionType } from '../action-types';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
 import { TextX } from '../text-x';
 import { composeBody, getBodySlice } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it.each(['left', 'right'] as const)('keeps paragraph-boundary identities after concurrent inline input (%s)', (priority) => {
+        for (const prefix of ['', 'Earlier\r']) {
+            const original: IDocumentBody = {
+                dataStream: `${prefix}Intro\r\n`,
+                paragraphs: [
+                    ...(prefix ? [{ startIndex: prefix.length - 1, paragraphId: 'earlier' }] : []),
+                    { startIndex: prefix.length + 5, paragraphId: 'original' },
+                ],
+            };
+            const offset: TextXAction[] = prefix ? [{ t: TextXActionType.RETAIN, len: prefix.length }] : [];
+            const inline = TextX.makeInvertible([...offset, {
+                t: TextXActionType.INSERT,
+                len: 6,
+                body: { dataStream: 'Alice ' },
+            }], original);
+            const paragraph = TextX.makeInvertible([...offset, {
+                t: TextXActionType.INSERT,
+                len: 4,
+                body: { dataStream: 'Bob\r', paragraphs: [{ startIndex: 3, paragraphId: 'para_inserted' }] },
+            }], original);
+            const apply = (first: TextXAction[], second: TextXAction[]) => {
+                const body = Tools.deepClone(original);
+                TextX.apply(body, JSON.parse(JSON.stringify(first)));
+                TextX.apply(body, JSON.parse(JSON.stringify(second)));
+                return body;
+            };
+            const left = apply(inline, TextX.transform(paragraph, inline, priority));
+            const right = apply(paragraph, TextX.transform(inline, paragraph, priority === 'left' ? 'right' : 'left'));
+            expect(left).toEqual(right);
+            expect(left.paragraphs!.map((item) => item.paragraphId)).toEqual([
+                ...(prefix ? ['earlier'] : []),
+                'para_inserted',
+                'original',
+            ]);
+            expect(left).not.toHaveProperty(PRESERVE_INSERTED_PARAGRAPH_IDS);
+        }
+    });
+
     it('keeps peer formatting and nested fields when undoing heading metadata without text edits', () => {
         const body: IDocumentBody = {
             dataStream: 'Heading\rTail\r\n',

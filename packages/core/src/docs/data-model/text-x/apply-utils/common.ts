@@ -259,7 +259,7 @@ export function normalizeInsertedParagraphIdsForDocument(
     }
 ) {
     if (!paragraphs || !insertParagraphs?.length) {
-        return;
+        return false;
     }
 
     const splitParagraph = getParagraphSplitByInsert(paragraphs, currentIndex, options.dataStream);
@@ -322,6 +322,7 @@ export function normalizeInsertedParagraphIdsForDocument(
             options.reservedParagraphIds?.add(insertParagraph.paragraphId);
         }
     }
+    return splitParagraph != null;
 }
 
 function collectParagraphIds(paragraphs: IParagraph[] | undefined): Set<string> {

@@ -22,6 +22,7 @@ import {
     CustomRangeType,
     HorizontalAlign,
     ILogService,
+    Injector,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
@@ -130,6 +131,7 @@ const workbookDataFactory = (): IWorkbookData => ({
 });
 
 interface IFixture {
+    rootInjector: Injector;
     univer: Univer;
     workbook: Workbook;
     skeleton: SpreadsheetSkeleton;
@@ -179,7 +181,8 @@ function createViewportInfo(scene: Scene, cacheCanvas: Canvas, overrides?: Parti
 function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     const renderEnv = setupRenderTestEnv();
 
-    const univer = new Univer();
+    const rootInjector = new Injector([[Univer]]);
+    const univer = rootInjector.get(Univer);
     const injector = univer.__getInjector();
     injector.add([ICanvasColorService, { useClass: DumbCanvasColorService }]);
     const get = injector.get.bind(injector);
@@ -228,6 +231,7 @@ function createFixture(data: IWorkbookData = workbookDataFactory()): IFixture {
     const cacheCanvas = injector.createInstance(Canvas, { width: 700, height: 420, pixelRatio: 1 });
 
     return {
+        rootInjector,
         univer,
         workbook,
         skeleton,
@@ -249,7 +253,7 @@ function disposeFixture(fixture: IFixture) {
     fixture.engine.dispose();
     fixture.mainCanvas.dispose();
     fixture.cacheCanvas.dispose();
-    fixture.univer.dispose();
+    fixture.rootInjector.dispose();
     fixture.restoreEnv();
     fixture.container.remove();
 }
@@ -1221,6 +1225,82 @@ describe('spreadsheet integration', () => {
         expect(line).toHaveBeenCalledWith(54, 0);
         expect(line.mock.calls.some(([left]) => left === 100)).toBe(mode !== 'plain');
         expect(context.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: -162.5, f: 100.5 });
+    });
+
+    it('redraws uncropped text from beyond an adjacent row when its ink enters the damage strip', () => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        sheet.mergeData = [];
+        sheet.rowData = {};
+        sheet.columnData = {};
+        sheet.rowCount = 200;
+        sheet.defaultRowHeight = 4;
+        sheet.defaultColumnWidth = 500;
+        sheet.cellData = { 4: {
+            0: { v: 'TALL SOURCE', s: { fs: 72, ff: 'Vertical overflow test', tb: WrapStrategy.OVERFLOW } },
+            1: { v: 'TALL OTHER', s: { fs: 72, ff: 'Vertical overflow test', tb: WrapStrategy.OVERFLOW } },
+        } };
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        // Canvas in JSDOM cannot measure glyph ink. Keep FontCache real and replace that native boundary only.
+        FontCache.getMeasureText('', '12px sans-serif');
+        const measurement: CanvasRenderingContext2D = Reflect.get(FontCache, '_context');
+        const measure = vi.isMockFunction(measurement.measureText)
+            ? vi.mocked(measurement.measureText).getMockImplementation()!
+            : measurement.measureText;
+        vi.spyOn(measurement, 'measureText').mockImplementation((text) => {
+            const metrics = measure.call(measurement, text);
+            return measurement.font.includes('Vertical overflow test')
+                ? {
+                    ...metrics,
+                    width: metrics.width,
+                    fontBoundingBoxAscent: 80,
+                    fontBoundingBoxDescent: 16,
+                    actualBoundingBoxAscent: 75,
+                    actualBoundingBoxDescent: 15,
+                }
+                : metrics;
+        });
+        FontCache.invalidateMetrics((font) => font.includes('Vertical overflow test'));
+        const info = createViewportInfo(scene, cacheCanvas, { cacheBound: createBound(0, 0, 1000, 500) });
+        skeleton.setStylesCache(info);
+        const context = mainCanvas.getContext();
+        const fill = vi.spyOn(context._context, 'fillText');
+        const font = spreadsheet.getExtensionByKey('DefaultFontExtension') as Font;
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        font.draw(context, { scaleX: 1, scaleY: 1 }, skeleton, [range], {
+            viewRanges: [range],
+            viewBound: info.cacheBound,
+            checkOutOfViewBound: true,
+            hasMergeData: false,
+            textClipBound: createBound(0, 0, 500, 4),
+            viewportKey: info.viewportKey,
+        });
+        try {
+            expect(fill.mock.calls.map(([text]) => text)).toContain('TALL SOURCE');
+            const reads = vi.spyOn(skeleton.stylesCache.fontMatrix, 'getValue');
+            const farRange = { startRow: 150, endRow: 150, startColumn: 0, endColumn: 0 };
+            font.draw(context, { scaleX: 1, scaleY: 1 }, skeleton, [farRange], {
+                viewRanges: [farRange],
+                viewBound: createBound(0, skeleton.columnHeaderHeightAndMarginTop + 400, 1000, skeleton.columnHeaderHeightAndMarginTop + 800),
+                checkOutOfViewBound: true,
+                hasMergeData: false,
+                textClipBound: createBound(0, 600, 500, 604),
+                viewportKey: info.viewportKey,
+            });
+            // A previously visited large font must not expand an unrelated cache's source-row scan.
+            expect(reads).toHaveBeenCalled();
+            expect(reads.mock.calls.every(([row]) => row === 150)).toBe(true);
+            skeleton.resetRangeCache([{ startRow: 4, endRow: 4, startColumn: 0, endColumn: 0 }]);
+            expect(skeleton.getPlainTextVerticalOverflow()).toBeGreaterThan(0);
+            skeleton.resetRangeCache([{ startRow: 4, endRow: 4, startColumn: 1, endColumn: 1 }]);
+            expect(skeleton.getPlainTextVerticalOverflow()).toBe(0);
+            skeleton.resetCache();
+            expect(skeleton.getPlainTextVerticalOverflow()).toBe(0);
+        } finally {
+            FontCache.invalidateMetrics((font) => font.includes('Vertical overflow test'));
+        }
     });
 
     it.each(['x', 'y'])('skips plain overflow glyphs wholly outside the physical %s damage clip', (axis) => {

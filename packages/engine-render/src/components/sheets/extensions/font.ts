@@ -225,6 +225,28 @@ export class Font extends SheetExtension {
             endColumn: range.endColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW,
         }, lastRowIndex, lastColIndex));
         const rangesToScan = fontRenderRanges?.length ? fontRenderRanges : expandedViewRanges;
+        const verticalOverflow = ctx.__mode !== 'printing' && moreBoundsInfo.textClipBound
+            ? spreadsheetSkeleton.getPlainTextVerticalOverflow(moreBoundsInfo.viewBound)
+            : 0;
+        const sourceRange = verticalOverflow ? spreadsheetSkeleton.getRangeByViewBound(moreBoundsInfo.viewBound) : null;
+        const expandPlainTextRows = (range: IRange): IRange => {
+            if (!verticalOverflow || !sourceRange) return range;
+            const top = rowHeightAccumulation[range.startRow - 1] ?? 0;
+            const bottom = rowHeightAccumulation[range.endRow] ?? top;
+            const rows = spreadsheetSkeleton.getRangeByViewBound({
+                left: 0,
+                right: 0,
+                top: Math.floor(top - verticalOverflow) - 1 + spreadsheetSkeleton.columnHeaderHeightAndMarginTop,
+                bottom: Math.ceil(bottom + verticalOverflow) + 1 + spreadsheetSkeleton.columnHeaderHeightAndMarginTop,
+            });
+            return {
+                ...range,
+                startRow: Math.max(sourceRange.startRow, rows.startRow),
+                endRow: Math.min(sourceRange.endRow, rows.endRow),
+            };
+        };
+        const plainTextRanges = verticalOverflow ? (diffRanges.length ? diffRanges : rangesToScan).map(expandPlainTextRows) : [];
+        const extraPlainCells = verticalOverflow ? new Set<string>() : null;
         const renderFontContext = {
             ctx,
             scale,
@@ -234,7 +256,7 @@ export class Font extends SheetExtension {
             rowTotalHeight,
             viewRanges: fontRenderRanges?.length ? viewRanges : expandedViewRanges,
             checkOutOfViewBound: checkOutOfViewBound || true,
-            diffRanges,
+            diffRanges: verticalOverflow ? plainTextRanges : diffRanges,
             spreadsheetSkeleton,
         } as IRenderFontContext;
         ctx.save();
@@ -268,7 +290,8 @@ export class Font extends SheetExtension {
             }
 
             const { startRow, endRow, startColumn, endColumn } = range;
-            for (let row = startRow; row <= endRow; row++) {
+            const scan = expandPlainTextRows(range);
+            for (let row = scan.startRow; row <= scan.endRow; row++) {
                 const rowStartPosition = rowHeightAccumulation[row - 1] ?? 0;
                 const rowEndPosition = rowHeightAccumulation[row] ?? rowStartPosition;
                 const rowGap = spreadsheetSkeleton.gapConfig?.rowGaps?.[row]?.size ?? 0;
@@ -281,6 +304,16 @@ export class Font extends SheetExtension {
                     const fontCache = fontMatrix.getValue(row, col);
                     if (!fontCache) {
                         continue;
+                    }
+                    if (row < startRow || row > endRow) {
+                        // Only uncropped plain text can contribute ink from these source rows.
+                        if (inViewRanges(rangesToScan, row, col) || !inViewRanges(plainTextRanges, row, col)
+                            || !this._canRenderPlainTextWithoutClip(fontCache)) {
+                            continue;
+                        }
+                        const key = `${row}:${col}`;
+                        if (extraPlainCells?.has(key)) continue;
+                        extraPlainCells?.add(key);
                     }
 
                     if (spanModel && spanModel.getMergeDataIndex(row, col) !== -1) {
@@ -473,7 +506,7 @@ export class Font extends SheetExtension {
         return false;
     };
 
-    private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
+    private _canRenderPlainTextWithoutClip(fontCache: IFontCacheItem): boolean {
         const { cellData, documentSkeleton, textFitsCurrentCell, vertexAngle = 0, centerAngle = 0, wrapStrategy } = fontCache;
         if (!textFitsCurrentCell) {
             return false;
@@ -497,6 +530,12 @@ export class Font extends SheetExtension {
             return false;
         }
 
+        return true;
+    }
+
+    private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
+        if (!this._canRenderPlainTextWithoutClip(fontCache)) return false;
+        const cellData = fontCache.cellData!;
         const padding = fontCache.style?.pd ?? DEFAULT_PADDING_DATA;
         const paddingLeft = padding.l ?? DEFAULT_PADDING_DATA.l;
         const paddingRight = padding.r ?? DEFAULT_PADDING_DATA.r;

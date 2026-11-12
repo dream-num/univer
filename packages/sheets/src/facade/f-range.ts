@@ -419,6 +419,9 @@ export class FRange extends FBaseInitialable {
     /**
      * Return first cell style in this range.
      *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getCellStyles} once instead of calling this method for each cell.
+     *
      * @param {GetStyleType} [type] - The type of the style to get. 'row' means get the composed style of row, col and
      * default worksheet style. 'col' means get the composed style of col, row and default worksheet style.
      * 'cell' means get the style of cell without merging row style, col style and default worksheet style.
@@ -472,6 +475,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Return first cell value in this range
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getValues} once instead of calling this method for each cell.
+     *
      * @returns {CellValue | null} The cell value
      * @example
      * ```ts
@@ -489,6 +496,10 @@ export class FRange extends FBaseInitialable {
     getValue(): CellValue | null;
     /**
      * Return first cell value in this range
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getValues} once instead of calling this method for each cell.
+     *
      * @param {true} includeRichText Pass `true` to return a `RichTextValue` for rich-text content instead of plain text.
      * @returns {CellValue | RichTextValue | null} The cell value
      * @example
@@ -519,6 +530,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the raw value of the top-left cell in the range. Empty cells return `null`.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getRawValues} once instead of calling this method for each cell.
+     *
      * @returns {Nullable<CellValue>} The raw value of the cell. Returns `null` if the cell is empty.
      * @example
      * ```ts
@@ -544,6 +559,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the displayed value of the top-left cell in the range. The value is a String. Empty cells return an empty string.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getDisplayValues} once instead of calling this method for each cell.
+     *
      * @returns {string} The displayed value of the cell. Returns an empty string if the cell is empty.
      * @example
      * ```ts
@@ -743,6 +762,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Return first cell model data in this range
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getCellDataGrid} once instead of calling this method for each cell.
+     *
      * @returns {ICellData | null} The cell model data
      * @example
      * ```ts
@@ -879,6 +902,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the formula (A1 notation) of the top-left cell in the range, or an empty string if the cell is empty or doesn't contain a formula.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getFormulas} once instead of calling this method for each cell.
+     *
      * @returns {string} The formula for the cell.
      * @example
      * ```ts
@@ -933,6 +960,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets whether text wrapping is enabled for top-left cell in the range.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getWraps} once instead of calling this method for each cell.
+     *
      * @returns {boolean} whether text wrapping is enabled for the cell.
      * @example
      * ```ts
@@ -993,6 +1024,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the horizontal alignment of the top-left cell as `left`, `center`, or `normal` (right alignment).
      * Default and other core alignment values return `general`, which is not accepted by `setHorizontalAlignment()`.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getHorizontalAlignments} once instead of calling this method for each cell.
+     *
      * @returns {string} The horizontal alignment of the text in the cell.
      * @example
      * ```ts
@@ -1029,6 +1064,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns `top`, `middle`, or `bottom` for the top-left cell; unspecified alignment returns `general`.
      * `general` is a getter result and is not accepted by `setVerticalAlignment()`.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getVerticalAlignments} once instead of calling this method for each cell.
+     *
      * @returns {string} The vertical alignment of the text in the cell.
      * @example
      * ```ts
@@ -1062,7 +1101,12 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Set custom meta data for first cell in current range.
+     * Set the same custom metadata for every cell in the current range.
+     *
+     * For the same metadata across multiple cells, call this method once on the entire target range.
+     * For different metadata per cell, prefer {@link FRange.setCustomMetaDatas} with a two-dimensional
+     * array matching the range dimensions instead of calling this method for each cell.
+     *
      * @param {CustomData} data The custom meta data
      * @returns {FRange} This range, for chaining
      * @example
@@ -1126,6 +1170,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the custom meta data for the cell at the start of this range.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getCustomMetaDatas} once instead of calling this method for each cell.
+     *
      * @returns {CustomData | null} The custom meta data
      * @example
      * ```ts
@@ -1164,6 +1212,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets basic border properties for the current range.
+     *
+     * For borders on multiple cells, call this method once on the full target range. Border types such as
+     * outer and inner are relative to that range, so applying them to each cell can produce different borders.
+     *
      * @param {BorderType} type The type of border to apply
      * @param {BorderStyleTypes} style The border style
      * @param {string} [color] Optional border color in CSS notation
@@ -1195,6 +1247,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the background color of the top-left cell in the range.
+     *
+     * For multiple cells, create the target range with {@link FWorksheet.getRange} and call
+     * {@link FRange.getBackgrounds} once instead of calling this method for each cell.
+     *
      * @returns {string} The color code of the background.
      * @example
      * ```ts
@@ -1229,6 +1285,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set background color for current range.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {string} color The background color
      * @returns {FRange} This range, for chaining
      * @example
@@ -1257,6 +1317,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set background color for current range.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {string} color The background color
      * @returns {FRange} This range, for chaining
      * @example
@@ -1275,6 +1339,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set rotation for text in current range.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {number} rotation - The rotation angle in degrees
      * @returns This range, for chaining
      * @example
@@ -1298,6 +1366,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the value or specified cell properties for every cell in this range.
+     *
+     * For the same value or cell-data update across multiple cells, call this method once on the entire
+     * target range. For different values or updates per cell, prefer {@link FRange.setValues} with a
+     * two-dimensional array or sparse matrix instead of calling this method for each cell.
      *
      * There are two input modes:
      *
@@ -1370,6 +1442,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Sets the value or specified cell properties of the top-left cell in this range.
      * Uses the same scalar parsing and cell-data update rules as {@link FRange.setValue}.
+     *
+     * For multiple cells, prefer {@link FRange.setValues} on the target range with a two-dimensional array
+     * or sparse matrix. To apply the same value to the entire range, use {@link FRange.setValue} once.
+     *
      * @param {CellValue | ICellData} value  The scalar content or cell-data update to apply to the top-left cell only.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1408,6 +1484,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the rich text value for the cell at the start of this range.
+     *
+     * For multiple cells, prefer {@link FRange.setRichTextValues} on the target range with a two-dimensional
+     * array matching its dimensions instead of calling this method for each cell.
+     *
      * @param {RichTextValue | IDocumentData} value The rich text value
      * @returns {FRange} The range
      * @example
@@ -1486,6 +1566,10 @@ export class FRange extends FBaseInitialable {
      * Set the cell wrap of the given range.
      * Pass `true` to set `WrapStrategy.WRAP`, or `false` to reset to `WrapStrategy.UNSPECIFIED`.
      * Use `setWrapStrategy()` to explicitly select clipping or overflow behavior.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {boolean} isWrapEnabled Whether to enable wrap
      * @returns {FRange} this range, for chaining
      * @example
@@ -1511,6 +1595,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets whether cells shrink their font size to fit the cell width.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {boolean} enabled Whether to enable shrink-to-fit for this range.
      * @returns {FRange} This range, for chaining.
      * @example
@@ -1531,6 +1619,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the text wrapping strategy for the cells in the range.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {WrapStrategy} strategy The text wrapping strategy
      * @returns {FRange} this range, for chaining
      * @example
@@ -1556,6 +1648,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {FVerticalAlignment} alignment The vertical alignment
      * @returns {FRange} this range, for chaining
      * @example
@@ -1581,6 +1677,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Sets the horizontal alignment for the range using `left`, `center`, or `normal`.
      * These parameter names follow Google Apps Script. In Univer, `normal` means right alignment; `right` is not accepted.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {FHorizontalAlignment} alignment The horizontal alignment: `left`, `center`, or `normal` (right alignment).
      * @returns {FRange} this range, for chaining
      * @example
@@ -1606,6 +1706,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Sets cell values or specified cell properties using an array or a sparse matrix.
      * Each entry follows the scalar parsing and cell-data update rules of {@link FRange.setValue}.
+     *
+     * For multiple cells, pass all values or cell-data updates in one call instead of calling this method
+     * on individual cell ranges. Use a matching two-dimensional array for a rectangle, or a sparse matrix
+     * with absolute worksheet coordinates for non-contiguous cells.
      *
      * A two-dimensional array is relative to this range's top-left cell and must match its dimensions.
      * A sparse matrix uses absolute, zero-based worksheet row and column keys. Only supplied entries
@@ -1651,6 +1755,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font weight for the given range (normal/bold),
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {FontWeight|null} fontWeight The font weight, either 'normal' or 'bold'; a null value resets the font weight.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1693,6 +1801,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font style for the given range ('italic' or 'normal').
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {FontStyle|null} fontStyle The font style, either 'italic' or 'normal'; a null value resets the font style.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1735,6 +1847,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font line style of the given range ('underline', 'line-through', or 'none').
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {FontLine|null} fontLine The font line style, either 'underline', 'line-through', or 'none'; a null value resets the font line style.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1813,6 +1929,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font family, such as "Arial" or "Helvetica".
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {string|null} fontFamily The font family to set; a null value resets the font family.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1843,6 +1963,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font size, with the size being the point size to use.
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {number|null} size A font size in point size. A null value resets the font size.
      * @returns {FRange} This range, for chaining
      * @example
@@ -1873,6 +1997,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font color in CSS notation (such as '#ffffff' or 'white').
+     *
+     * To apply the same setting to multiple cells, create the full target range with {@link FWorksheet.getRange}
+     * and call this method once instead of calling it on each cell separately.
+     *
      * @param {string|null} color The font color in CSS notation (such as '#ffffff' or 'white'); a null value resets the color.
      * @returns {FRange} This range, for chaining
      * @example
@@ -2416,6 +2544,10 @@ export class FRange extends FBaseInitialable {
     /**
      * Clears the range content and formatting, or only one of them as specified by the options.
      * Both content and formatting are cleared when both flags are true or both are false.
+     *
+     * To clear multiple cells, create the full target range with {@link FWorksheet.getRange} and call this
+     * method once instead of clearing each cell separately.
+     *
      * @param {IFacadeClearOptions} [options] - Options for clearing the range. If not provided, the contents and formatting are cleared both.
      * @param {boolean} [options.contentsOnly] - If true, the contents of the range are cleared. Effective only when `formatOnly` is false. Defaults to false.
      * @param {boolean} [options.formatOnly] - Clears only formatting when true and `contentsOnly` is false. Defaults to false.
@@ -2454,6 +2586,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Clears content of the range, while preserving formatting information.
+     *
+     * To clear multiple cells, create the full target range with {@link FWorksheet.getRange} and call this
+     * method once instead of clearing each cell separately.
+     *
      * @returns {FRange} This range, for chaining.
      * @example
      * ```typescript
@@ -2477,6 +2613,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Clears formatting information of the range, while preserving contents.
+     *
+     * To clear multiple cells, create the full target range with {@link FWorksheet.getRange} and call this
+     * method once instead of clearing each cell separately.
+     *
      * @returns {FRange} This range, for chaining.
      * @example
      * ```typescript
@@ -2847,6 +2987,11 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Updates the formula for this range. The given formula must be in A1 notation.
+     *
+     * For the same formula string across multiple cells, call this method once on the entire target range.
+     * For different formulas per cell, prefer {@link FRange.setFormulas} with a two-dimensional array
+     * matching the range dimensions instead of calling this method for each cell.
+     *
      * @param {string} formula - A string representing the formula to set for the cell.
      * @returns {FRange} This range instance for chaining.
      * @example

@@ -26,6 +26,10 @@ export type SortColumnSpec = { column: number; ascending: boolean } | number;
 export interface IFRangeSheetsSortMixin {
     /**
      * Sorts the cells in the given range, by column(s) and order specified.
+     *
+     * To sort by multiple columns, pass all sort specifications in priority order in one array and call
+     * this method once on the full target range. Repeated single-column sorts can change the intended priority.
+     *
      * @param {SortColumnSpec | SortColumnSpec[]} column The column index with order or an array of column indexes with order. The range first column index is 0.
      * @returns {FRange} The range itself for chaining.
      * @example

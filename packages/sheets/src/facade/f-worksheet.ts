@@ -556,6 +556,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row after the given row position.
+     *
+     * To insert multiple rows, prefer {@link FWorksheet.insertRowsAfter} with the full count
+     * instead of repeatedly calling this method.
+     *
      * @param {number} afterPosition - The existing row after which the new row should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -574,6 +578,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row before the given row position.
+     *
+     * To insert multiple rows, prefer {@link FWorksheet.insertRowsBefore} with the full count
+     * instead of repeatedly calling this method.
+     *
      * @param {number} beforePosition - The existing row before which the new row should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -592,6 +600,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts one or more consecutive blank rows in a sheet starting at the specified location.
+     *
+     * For multiple consecutive rows, pass the full `numRows` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} rowIndex - The existing row before which rows are inserted. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
      * @param {number} [numRows] - The positive number of rows to insert.
      * @returns {FWorksheet} This sheet, for chaining.
@@ -704,6 +716,11 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Deletes the row at the given row position.
+     *
+     * For consecutive rows, prefer {@link FWorksheet.deleteRows} with the full count. For
+     * non-contiguous rows, use {@link FWorksheet.deleteRowsByPoints} so shifting indices are handled
+     * without a manual loop over this method.
+     *
      * @param {number} rowPosition - The position of the row, starting at 0 for the first row.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -814,6 +831,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides the rows in the given range.
+     *
+     * For multiple rows, pass an FRange spanning all target rows in one call. If you already have
+     * a starting index and count, use {@link FWorksheet.hideRows} instead of calling this method for each row.
+     *
      * @param {FRange} row - The row range to hide.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -844,6 +865,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides one or more consecutive rows starting at the given index. Use 0-index for this method
+     *
+     * For multiple consecutive rows, pass the full `numRow` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} rowIndex - The starting index of the rows to hide
      * @param {number} [numRow] - The number of rows to hide
      * @returns {FWorksheet} This sheet, for chaining.
@@ -878,6 +903,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Make the row in the given range visible.
+     *
+     * For multiple rows, pass an FRange spanning all target rows in one call. If you already have
+     * a starting index and count, use {@link FWorksheet.showRows} instead of calling this method for each row.
+     *
      * @param {FRange} row - The range to unhide, if hidden.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
@@ -908,6 +937,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Unhides one or more consecutive rows starting at the given zero-based index.
+     *
+     * For multiple consecutive rows, pass the full `numRows` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} rowIndex - The starting index of the rows
      * @param {number} [numRows] - The number of rows
      * @returns {FWorksheet} This worksheet instance for chaining
@@ -943,6 +976,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the row height of the given row in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
+     *
+     * For the same height across consecutive rows, prefer {@link FWorksheet.setRowHeights} with the full
+     * row count instead of calling this method for each row.
+     *
      * @param {number} rowPosition - The row position to change.
      * @param {number} height - The height in pixels to set it to.
      * @returns {FWorksheet} This worksheet instance for chaining
@@ -1213,6 +1250,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a column after the given column position.
+     *
+     * To insert multiple columns, prefer {@link FWorksheet.insertColumnsAfter} with the full count
+     * instead of repeatedly calling this method.
+     *
      * @param {number} afterPosition - The column after which the new column should be added, starting at 0 for the first column
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
@@ -1231,6 +1272,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a column before the given column position.
+     *
+     * To insert multiple columns, prefer {@link FWorksheet.insertColumnsBefore} with the full count
+     * instead of repeatedly calling this method.
+     *
      * @param {number} beforePosition - The column before which the new column should be added, starting at 0 for the first column
      * @returns {FWorksheet} This worksheet instance for chaining
      * @example
@@ -1249,6 +1294,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts one or more consecutive blank columns in a sheet starting at the specified location.
+     *
+     * For multiple consecutive columns, pass the full `numColumns` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} columnIndex - The index indicating where to insert a column, starting at 0 for the first column
      * @param {number} [numColumns] - The number of columns to insert
      * @returns {FWorksheet} This sheet, for chaining
@@ -1356,6 +1405,11 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Deletes the column at the given column position.
+     *
+     * For consecutive columns, prefer {@link FWorksheet.deleteColumns} with the full count. For
+     * non-contiguous columns, use {@link FWorksheet.deleteColumnsByPoints} so shifting indices are handled
+     * without a manual loop over this method.
+     *
      * @param {number} columnPosition - The position of the column, starting at 0 for the first column
      * @returns {FWorksheet} This sheet, for chaining
      * @example
@@ -1466,6 +1520,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides the column or columns in the given range.
+     *
+     * For multiple columns, pass an FRange spanning all target columns in one call. If you already have
+     * a starting index and count, use {@link FWorksheet.hideColumns} instead of calling this method for each column.
+     *
      * @param {FRange} column - The column range to hide
      * @returns {FWorksheet} This sheet, for chaining
      * @example
@@ -1496,6 +1554,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides one or more consecutive columns starting at the given index. Use 0-index for this method
+     *
+     * For multiple consecutive columns, pass the full `numColumn` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} columnIndex - The starting index of the columns to hide
      * @param {number} [numColumn] - The number of columns to hide
      * @returns {FWorksheet} This sheet, for chaining
@@ -1531,6 +1593,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Show the column in the given range.
+     *
+     * For multiple columns, pass an FRange spanning all target columns in one call. If you already have
+     * a starting index and count, use {@link FWorksheet.showColumns} instead of calling this method for each column.
+     *
      * @param {FRange} column - The range to unhide, if hidden
      * @returns {FWorksheet} This sheet, for chaining
      * @example
@@ -1561,6 +1627,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Show one or more consecutive columns starting at the given index. Use 0-index for this method
+     *
+     * For multiple consecutive columns, pass the full `numColumns` in one call instead of looping
+     * with the default count of one.
+     *
      * @param {number} columnIndex - The starting index of the columns to unhide
      * @param {number} [numColumns] - The number of columns to unhide
      * @returns {FWorksheet} This sheet, for chaining
@@ -1596,6 +1666,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the width of the given column in pixels.
+     *
+     * For the same width across consecutive columns, prefer {@link FWorksheet.setColumnWidths} with the
+     * full column count instead of calling this method for each column.
+     *
      * @param {number} columnPosition - The position of the given column to set
      * @param {number} width - The width in pixels to set it to
      * @returns {FWorksheet} This sheet, for chaining

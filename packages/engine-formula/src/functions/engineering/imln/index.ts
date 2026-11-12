@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -39,7 +39,7 @@ export class Imln extends BaseFunction {
 
         const inumberValue = `${inumberObject.getValue()}`;
 
-        const complex = new Complex(inumberValue);
+        const complex = new Complex(inumberValue, this.getDateSystem());
 
         if (complex.isError()) {
             return ErrorValueObject.create(ErrorType.NUM);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean, checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -62,7 +62,7 @@ export class Imlog extends BaseFunction {
         const inumberValue = `${inumberObject.getValue()}`;
         const baseValue = +baseObject.getValue();
 
-        const complex = new Complex(inumberValue);
+        const complex = new Complex(inumberValue, this.getDateSystem());
 
         if (complex.isError()) {
             return ErrorValueObject.create(ErrorType.NUM);

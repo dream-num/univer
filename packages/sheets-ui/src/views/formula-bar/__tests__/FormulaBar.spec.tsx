@@ -47,8 +47,10 @@ import {
 } from '@univerjs/sheets';
 import {
     ComponentManager,
+    ContextMenuHostService,
     DesktopLayoutService,
     DesktopSidebarService,
+    IContextMenuHostService,
     ILayoutService,
     ISidebarService,
     IUIPartsService,
@@ -297,6 +299,7 @@ function createFormulaBarTestBed(cellStyle?: IStyleData, realEditorServices = fa
         injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
         injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
         injector.add([IEditorService, { useClass: EditorService }]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     } else {
         injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);

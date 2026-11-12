@@ -15,12 +15,16 @@
  */
 
 import type { ReactElement } from 'react';
-import type { IDialogPartMethodOptions } from '../interface';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDialogPartMethodOptions } from '../interface';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
@@ -32,6 +36,7 @@ import { DialogPart } from '../DialogPart';
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([LocaleService]);

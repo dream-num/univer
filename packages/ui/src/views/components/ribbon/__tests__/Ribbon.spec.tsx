@@ -27,14 +27,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
-import { IDialogService } from '../../../../services/dialog/dialog.service';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { RibbonPosition } from '../../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
 import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
-import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { Ribbon } from '../Ribbon';
 
 describe('Ribbon override chrome', () => {
@@ -59,9 +58,8 @@ describe('Ribbon override chrome', () => {
 
     it('renders a title-only placeholder without the empty toolbar row', () => {
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
-            [IDialogService, { useValue: { getDialogs$: () => new Subject() } }],
-            [ISidebarService, { useValue: { sidebarOptions$: new Subject() } }],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, { useValue: createEmptyRibbonService() }],
             [IRibbonOverrideService, {
@@ -100,9 +98,8 @@ describe('Ribbon override chrome', () => {
             children: [],
         }];
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
-            [IDialogService, { useValue: { getDialogs$: () => new Subject() } }],
-            [ISidebarService, { useValue: { sidebarOptions$: new Subject() } }],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, { useValue: createRibbonService(ribbon, RibbonPosition.INSERT) }],
             [IRibbonOverrideService, {
@@ -190,9 +187,8 @@ describe('Ribbon override chrome', () => {
             setFakeToolbarVisible: (visible: boolean) => fakeToolbarVisible$.next(visible),
         };
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
-            [IDialogService, { useValue: { getDialogs$: () => new Subject() } }],
-            [ISidebarService, { useValue: { sidebarOptions$: new Subject() } }],
             [IconManager, { useValue: { get: () => null } }],
             [ICommandService, { useValue: { executeCommand: () => {} } }],
             [ILayoutService, { useValue: { focus: () => {} } }],

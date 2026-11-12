@@ -33,6 +33,7 @@ import { RibbonPosition, RibbonStartGroup } from '../../../services/menu/types';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { IWorkbenchService } from '../../../services/workbench/workbench.service';
 import { useDependency, useObservable } from '../../../utils/di';
+import { useMenuHost } from '../../../utils/use-menu-host';
 import { ComponentContainer } from '../ComponentContainer';
 import { MobileToolbarItem } from './MobileToolbarItem';
 
@@ -395,6 +396,7 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
     const { headerMenuComponents, headerMenu = true, ribbon } = props;
     const [moreOpen, setMoreOpen] = useState(false);
     const moreTriggerRef = useRef<HTMLButtonElement>(null);
+    const menuHost = useMenuHost(() => setMoreOpen(false));
     const { mountContainer } = useContext(ConfigContext);
     const localeService = useDependency(LocaleService);
     const startGroup = ribbon.find((group) => group.key === RibbonPosition.START);
@@ -443,7 +445,6 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                           [&_button]:!univer-w-full [&_button]:!univer-justify-start [&_button]:!univer-gap-3
                           [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
                         "
-                        onClick={() => setMoreOpen(false)}
                     >
                         <MobileToolbarItem {...schema.item!} grid showLabel preserveStrokeWidth />
                     </div>
@@ -491,7 +492,9 @@ function MobileCompactTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                           dark:!univer-text-gray-200
                           dark:active:!univer-bg-gray-700
                         `)}
-                        onClick={() => setMoreOpen((open) => !open)}
+                        onClick={() => {
+                            if (!menuHost.suspended) setMoreOpen((open) => !open);
+                        }}
                     >
                         <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />
                     </button>

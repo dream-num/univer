@@ -75,6 +75,28 @@ afterEach(() => {
 });
 
 describe('DesktopContextMenu', () => {
+    it('discards a deferred open when another view takes over, even if it exits before the next frame', async () => {
+        const injector = createInjector();
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        injector.get(ILayoutService).registerRootContainerElement(document.body);
+        const contextMenuService = injector.get(IContextMenuService);
+        const menuHost = injector.get(IContextMenuHostService);
+        render(<RediContext.Provider value={{ injector }}><DesktopContextMenu /></RediContext.Provider>);
+        act(() => {
+            contextMenuService.triggerContextMenu({ clientX: 20, clientY: 20, stopPropagation() {} }, 'table');
+            menuHost.suspend().dispose();
+        });
+        await act(async () => {
+            await new Promise(requestAnimationFrame);
+        });
+        expect(contextMenuService.visible).toBe(false);
+        act(() => contextMenuService.triggerContextMenu({ clientX: 20, clientY: 20, stopPropagation() {} }, 'table'));
+        await waitFor(() => expect(contextMenuService.visible).toBe(true));
+    });
+
     it.each([
         { id: 'insert-row', commandId: undefined, scoped: false },
         { id: 'table.insert-row', commandId: undefined, scoped: false },

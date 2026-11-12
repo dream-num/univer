@@ -17,11 +17,10 @@
 import { LocaleService } from '@univerjs/core';
 import { borderTopClassName, clsx, ConfigContext, Dropdown } from '@univerjs/design';
 import { MoreDownIcon, MoreHorizontalIcon, MoreVerticalIcon } from '@univerjs/icons';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
-import { IDialogService } from '../../../services/dialog/dialog.service';
-import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency } from '../../../utils/di';
+import { useMenuHost } from '../../../utils/use-menu-host';
 import { groupRibbonOverflowItems } from './ribbon-grid-layout';
 import { toolbarButtonClassName } from './ToolbarButton';
 import { ToolbarItem } from './ToolbarItem';
@@ -34,8 +33,6 @@ interface IRibbonOverflowProps {
 
 export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
     const localeService = useDependency(LocaleService);
-    const dialogService = useDependency(IDialogService);
-    const sidebarService = useDependency(ISidebarService);
     const { direction } = useContext(ConfigContext);
     const [openedGroups, setOpenedGroups] = useState<IMenuSchema[] | null>(null);
     const open = openedGroups === groups;
@@ -43,28 +40,16 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
     const restoreFocusRef = useRef(true);
     const label = localeService.t('ui.ribbon.more');
 
-    useEffect(() => {
-        if (!open) return;
-        const closeForPanel = () => {
-            restoreFocusRef.current = false;
-            setOpenedGroups(null);
-        };
-        const sidebar = sidebarService.sidebarOptions$.subscribe((options) => {
-            if (options.visible) closeForPanel();
-        });
-        const dialogs = dialogService.getDialogs$().subscribe((options) => {
-            if (options.some((dialog) => dialog.open)) closeForPanel();
-        });
-        return () => {
-            sidebar.unsubscribe();
-            dialogs.unsubscribe();
-        };
-    }, [open, dialogService, sidebarService]);
+    const menuHost = useMenuHost(() => {
+        restoreFocusRef.current = false;
+        setOpenedGroups(null);
+    });
 
     return (
         <Dropdown
             open={open}
             onOpenChange={(visible) => {
+                if (visible && menuHost.suspended) return;
                 if (visible) restoreFocusRef.current = true;
                 setOpenedGroups(visible ? groups : null);
             }}

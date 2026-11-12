@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-import type { IDialogPartMethodOptions } from '../../../views/components/dialog-part/interface';
 import { Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDialogPartMethodOptions } from '../../../views/components/dialog-part/interface';
+import { ContextMenuHostService, IContextMenuHostService } from '../../contextmenu/contextmenu-host.service';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../parts/parts.service';
 import { DesktopDialogService } from '../desktop-dialog.service';
 import { IDialogService } from '../dialog.service';
 
-function createService(): IDialogService {
+const injectors: Injector[] = [];
+
+function createInjector(): Injector {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
-    return injector.get(IDialogService);
+    injectors.push(injector);
+    return injector;
 }
 
 describe('DesktopDialogService', () => {
+    afterEach(() => {
+        injectors.splice(0).forEach((injector) => injector.dispose());
+    });
+
     it('tracks opened dialogs and closes only the requested dialog', () => {
-        const service = createService();
+        const injector = createInjector();
+        const service = injector.get(IDialogService);
         const snapshots: IDialogPartMethodOptions[][] = [];
         const sub = service.getDialogs$().subscribe((options) => snapshots.push(options));
 
@@ -43,7 +53,8 @@ describe('DesktopDialogService', () => {
     });
 
     it('keeps excepted dialogs open when closing all', () => {
-        const service = createService();
+        const injector = createInjector();
+        const service = injector.get(IDialogService);
         const snapshots: IDialogPartMethodOptions[][] = [];
         const sub = service.getDialogs$().subscribe((options) => snapshots.push(options));
 
@@ -55,10 +66,33 @@ describe('DesktopDialogService', () => {
         sub.unsubscribe();
     });
 
+    it('dismisses menus before opening or reopening a dialog, but preserves them during updates and closing', () => {
+        const injector = createInjector();
+        const service = injector.get(IDialogService);
+        const menuHost = injector.get(IContextMenuHostService);
+        const hide = vi.fn();
+        menuHost.registerMenu('format', hide);
+        const activeMenus: Array<string | null> = [];
+        service.getDialogs$().subscribe(() => activeMenus.push(menuHost.activeMenuId));
+
+        menuHost.activateMenu('format');
+        service.open({ id: 'format-dialog' });
+        expect(hide).toHaveBeenCalledExactlyOnceWith(false);
+        expect(activeMenus).toEqual([null]);
+
+        menuHost.activateMenu('format');
+        service.open({ id: 'format-dialog', width: 500 });
+        service.close('format-dialog');
+        expect(hide).toHaveBeenCalledTimes(1);
+        expect(menuHost.activeMenuId).toBe('format');
+
+        service.open({ id: 'format-dialog' });
+        expect(hide).toHaveBeenCalledTimes(2);
+        expect(activeMenus.at(-1)).toBeNull();
+    });
+
     it('registers the global dialog UI part when constructed', () => {
-        const injector = new Injector();
-        injector.add([IUIPartsService, { useClass: UIPartsService }]);
-        injector.add([IDialogService, { useClass: DesktopDialogService }]);
+        const injector = createInjector();
 
         injector.get(IDialogService);
         expect(injector.get(IUIPartsService).getComponents(BuiltInUIPart.GLOBAL).size).toBe(1);

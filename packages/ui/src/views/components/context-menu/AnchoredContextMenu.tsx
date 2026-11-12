@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { Popup } from '@univerjs/design';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type { ILayoutService } from '../../../services/layout/layout.service';
 import type { IValueOption } from '../../../services/menu/menu';
 import type { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { Popup } from '@univerjs/design';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { useDependency } from '../../../utils/di';
 import { CONTEXT_MENU_SUBMENU_PORTAL_ATTR, ContextMenuPanel } from './ContextMenuPanel';
@@ -76,8 +76,9 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
     menuTypeRef.current = menuType;
 
     useEffect(() => {
-        const disposable = contextMenuHostService.registerMenu(hostId, () => {
-            onRequestCloseRef.current();
+        const disposable = contextMenuHostService.registerMenu(hostId, (restoreFocus) => {
+            if (!restoreFocus) focusReturnTargetRef.current = null;
+            if (visibleRef.current) onRequestCloseRef.current();
         });
 
         return () => {
@@ -88,6 +89,11 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     useLayoutEffect(() => {
         if (visible) {
+            if (contextMenuHostService.suspended) {
+                focusReturnTargetRef.current = null;
+                onRequestCloseRef.current();
+                return;
+            }
             const ownerDocument = contentRef.current?.ownerDocument ?? document;
             const activeElement = ownerDocument.activeElement;
             const isFocusInMenu = activeElement !== null
@@ -183,7 +189,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     return (
         <Popup
-            visible={visible && !!anchorRect}
+            visible={visible && !!anchorRect && !contextMenuHostService.suspended}
             offset={offset}
             overflowVisible
             placementY={anchorVertical === 'top' ? 'above' : 'below'}

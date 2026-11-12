@@ -16,6 +16,10 @@
 
 import { Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../services/contextmenu/contextmenu-host.service';
 import { ShortcutPanelService } from '../../../services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from '../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -27,6 +31,7 @@ describe('ToggleShortcutPanelOperation', () => {
     beforeEach(() => {
         injector = new Injector([
             [ShortcutPanelService],
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ISidebarService, { useClass: DesktopSidebarService }],
         ]);
     });

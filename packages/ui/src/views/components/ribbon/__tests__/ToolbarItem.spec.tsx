@@ -31,6 +31,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { IIconProps } from '../../../../common/icon-manager';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
@@ -77,7 +78,7 @@ class TestLogService {
 const testInjectors: Injector[] = [];
 
 function renderWithDependencies(element: ReactElement) {
-    const injector = new Injector();
+    const injector = new Injector([[IContextMenuHostService, { useClass: ContextMenuHostService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);

@@ -19,43 +19,29 @@
  */
 
 import { act, cleanup, render } from '@testing-library/react';
-import { Injector, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { Injector, LocaleService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { BehaviorSubject, of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
+import enUS from '../../../../locale/en-US';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
 import { IWorkbenchService } from '../../../../services/workbench/workbench.service';
 import { MobileRibbon } from '../MobileRibbon';
 
+const injectors: Injector[] = [];
+
 describe('MobileRibbon', () => {
-    afterEach(cleanup);
-
-    it('keeps a stable hook order when the sheet workbench becomes ready', () => {
-        const rootUnitType$ = new BehaviorSubject<UniverInstanceType | null>(null);
-        const injector = new Injector([
-            [LocaleService, { useValue: { t: (key: string) => key } }],
-            [IRibbonService, {
-                useValue: {
-                    ribbon$: of([]),
-                    activatedTab$: of(''),
-                    setActivatedTab: () => {},
-                },
-            }],
-            [IWorkbenchService, { useValue: { rootUnitType$ } }],
-        ]);
-        const ConnectedMobileRibbon = connectInjector(MobileRibbon, injector);
-
-        render(<ConnectedMobileRibbon />);
-
-        expect(() => {
-            act(() => rootUnitType$.next(UniverInstanceType.UNIVER_SHEET));
-        }).not.toThrow();
+    afterEach(() => {
+        cleanup();
+        injectors.splice(0).forEach((injector) => injector.dispose());
     });
 
-    it('keeps a stable hook order when the docs workbench becomes ready', () => {
+    it.each([UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC])('keeps a stable hook order when workbench %s becomes ready', (unitType) => {
         const rootUnitType$ = new BehaviorSubject<UniverInstanceType | null>(null);
         const injector = new Injector([
-            [LocaleService, { useValue: { t: (key: string) => key } }],
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
+            [LocaleService],
             [IRibbonService, {
                 useValue: {
                     ribbon$: of([]),
@@ -65,12 +51,17 @@ describe('MobileRibbon', () => {
             }],
             [IWorkbenchService, { useValue: { rootUnitType$ } }],
         ]);
+        injectors.push(injector);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
         const ConnectedMobileRibbon = connectInjector(MobileRibbon, injector);
 
         render(<ConnectedMobileRibbon />);
 
         expect(() => {
-            act(() => rootUnitType$.next(UniverInstanceType.UNIVER_DOC));
+            act(() => rootUnitType$.next(unitType));
         }).not.toThrow();
     });
 });

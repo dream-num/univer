@@ -185,7 +185,14 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(3, 0)).toBeUndefined();
     });
 
-    it.each(['mso-ignore:colspan', 'color: red; MSO-IGNORE: COLSPAN;'])('keeps Excel overflow cells separate: %s', (style) => {
+    // Real Excel output keeps the marker between other declarations, and `mso-ignore` takes a property list.
+    it.each([
+        'mso-ignore:colspan',
+        'color: red; MSO-IGNORE: COLSPAN;',
+        'height:14.0pt;mso-ignore:colspan;width:104pt',
+        'mso-ignore: colspan padding',
+        'mso-ignore:rowspan,colspan',
+    ])('keeps Excel overflow cells separate: %s', (style) => {
         const converter = new HtmlToUSMService({ getCurrentSkeleton: () => null });
         const { cellMatrix } = converter.convert(`
             <table>
@@ -202,7 +209,13 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(1, 2)?.v).toBe('Third');
     });
 
-    it.each(['', 'mso-ignore:padding', '--mso-ignore:colspan'])('preserves real merged cells: %s', (style) => {
+    it.each([
+        '',
+        'mso-ignore:padding',
+        '--mso-ignore:colspan',
+        'mso-ignore-colspan:1',
+        'mso-ignore:colspanx',
+    ])('preserves real merged cells: %s', (style) => {
         const converter = new HtmlToUSMService({ getCurrentSkeleton: () => null });
         const { cellMatrix } = converter.convert(`
             <table>

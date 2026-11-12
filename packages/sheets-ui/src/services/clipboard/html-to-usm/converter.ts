@@ -500,7 +500,7 @@ export class HtmlToUSMService {
                 let cellStyle = '';
                 const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
                 const colSpan = Number(cell.getAttribute('colSpan')) || 1;
-                const ignoreColSpan = /(?:^|;)\s*mso-ignore\s*:\s*colspan\s*(?:;|$)/i.test(cell.getAttribute('style') ?? '');
+                const ignoreColSpan = isIgnoredColSpan(cell);
 
                 cellStyle = this._getStyle(cell as HTMLElement, rowStyle);
 
@@ -991,6 +991,35 @@ function decodeHTMLEntities(input: string): string {
 
 function normalizePlainCellText(input: string): string {
     return input.replace(/[\r\n]/g, '').replace(/\u00A0/g, ' ');
+}
+
+/**
+ * Excel marks text-overflow spans with `mso-ignore:colspan`, meaning the span only keeps the
+ * visual width and must not become a merged range. `mso-*` declarations are dropped by CSSOM,
+ * so the raw attribute is the only place the marker survives.
+ */
+function isIgnoredColSpan(cell: Element): boolean {
+    const style = cell.getAttribute('style');
+    if (!style) {
+        return false;
+    }
+
+    return style.split(';').some((declaration) => {
+        const separator = declaration.indexOf(':');
+        if (separator === -1) {
+            return false;
+        }
+
+        // Compare the whole name so the `--mso-ignore` custom property does not match.
+        if (textTrim(declaration.slice(0, separator)).toLowerCase() !== 'mso-ignore') {
+            return false;
+        }
+
+        return textTrim(declaration.slice(separator + 1))
+            .toLowerCase()
+            .split(/[,\s]+/)
+            .some((property) => property === 'colspan');
+    });
 }
 
 function extractStyleProperty(styleString?: string, propertyName?: string) {

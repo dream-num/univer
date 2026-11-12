@@ -817,7 +817,113 @@ export class Spreadsheet extends SheetComponent {
                 }
             }
         }
-        return repaintBounds;
+        return this._addNativeTextClipRepairBounds(repaintBounds, viewportInfo, mainCtx);
+    }
+
+    private _addNativeTextClipRepairBounds(
+        repaintBounds: IRepaintBound[],
+        viewportInfo: IViewportInfo,
+        mainCtx: UniverRenderingContext2D
+    ): IRepaintBound[] {
+        if (!repaintBounds.length) {
+            return repaintBounds;
+        }
+        const previous = this._getReusableScrollCacheState(mainCtx, viewportInfo);
+        const skeleton = this.getSkeleton();
+        if (!previous || !skeleton || (!viewportInfo.diffX && !viewportInfo.diffY)) {
+            return repaintBounds;
+        }
+        const current = this._getScrollCacheState(mainCtx, viewportInfo);
+        const columns = skeleton.columnWidthAccumulation;
+        const rows = skeleton.rowHeightAccumulation;
+        const headerX = skeleton.rowHeaderWidthAndMarginLeft;
+        const headerY = skeleton.columnHeaderHeightAndMarginTop;
+        const bounds: IRepaintBound[] = [];
+        const addBound = (bound: IBoundRectNoAngle, repairsMerge: boolean, repairsNativeText = false) => {
+            const clipped = getIntersectBound(bound, viewportInfo.cacheBound);
+            if (clipped) {
+                appendRepaintBound(bounds, { bound: clipped, repairsMerge, repairsNativeText });
+            }
+        };
+        const getBound = (range: IRange): IBoundRectNoAngle => ({
+            // Include bordering ink so a repaired join is never combined with its older antialiasing.
+            left: (columns[range.startColumn - 1] ?? 0) + headerX - SCROLL_REPAIR_INK_HALO / current.scaleX,
+            right: columns[range.endColumn] + headerX + SCROLL_REPAIR_INK_HALO / current.scaleX,
+            top: (rows[range.startRow - 1] ?? 0) + headerY - SCROLL_REPAIR_INK_HALO / current.scaleY,
+            bottom: rows[range.endRow] + headerY + SCROLL_REPAIR_INK_HALO / current.scaleY,
+        });
+        const addRange = (range: IRange) => {
+            addBound(getBound(range), false, true);
+            for (const merge of skeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn)) {
+                addBound(getBound(merge), true, true);
+            }
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                const values = skeleton.overflowCache.getRow(row);
+                for (const column in values) {
+                    const overflow = values[Number(column)];
+                    if (overflow.startColumn <= range.endColumn && overflow.endColumn >= range.startColumn) {
+                        addBound(getBound({
+                            startRow: row,
+                            endRow: row,
+                            startColumn: Math.min(Number(column), overflow.startColumn),
+                            endColumn: Math.max(Number(column), overflow.endColumn),
+                        }), false, true);
+                    }
+                }
+            }
+        };
+        for (const { bound, repairsMerge } of repaintBounds) {
+            addBound(bound, repairsMerge);
+        }
+        const nativeClipRanges = this._fontExtension.getNativeTextClipRepairRanges(skeleton)
+            .map((range) => ({ range, bound: getIntersectBound(getBound(range), viewportInfo.cacheBound) }));
+        let expanded = true;
+        while (expanded) {
+            expanded = false;
+            for (const { range, bound } of nativeClipRanges) {
+                if (!bound || !bounds.some((item) => getIntersectBound(item.bound, bound))
+                    || bounds.some((item) => item.bound.left <= bound.left && item.bound.right >= bound.right
+                        && item.bound.top <= bound.top && item.bound.bottom >= bound.bottom)) {
+                    continue;
+                }
+                // Clipping native rotated or shrink-to-fit text changes its antialiasing; repair its complete cell clip.
+                addRange(range);
+                expanded = true;
+            }
+        }
+        return bounds;
+    }
+
+    private _requiresNativeFrozenEdgeRepaint(
+        mainCtx: UniverRenderingContext2D,
+        viewportInfo: IViewportInfo,
+        repaintBounds: IRepaintBound[]
+    ): boolean {
+        const vertical = viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT && viewportInfo.diffY !== 0;
+        const horizontal = viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP && viewportInfo.diffX !== 0;
+        if (!mainCtx._context || (!vertical && !horizontal)) {
+            return false;
+        }
+        const { a, d } = mainCtx.getTransform();
+        const cache = viewportInfo.cacheBound;
+        // Native joins at a frozen band's unbuffered edges cannot mix old and newly clipped coverage.
+        return repaintBounds.some(({ bound, repairsNativeText }) => repairsNativeText
+            && ((vertical && (bound.left <= cache.left + SCROLL_REPAIR_INK_HALO / a || bound.right >= cache.right - SCROLL_REPAIR_INK_HALO / a))
+                || (horizontal && (bound.top <= cache.top + SCROLL_REPAIR_INK_HALO / d || bound.bottom >= cache.bottom - SCROLL_REPAIR_INK_HALO / d))));
+    }
+
+    private _requiresGapStripeRepaint(skeleton: SpreadsheetSkeleton, viewportInfo: IViewportInfo): boolean {
+        const { rowGaps, colGaps } = skeleton.gapConfig ?? {};
+        const { diffX, diffY } = viewportInfo;
+        if ((!diffX || !rowGaps) && (!diffY || !colGaps)) {
+            return false;
+        }
+        const range = skeleton.getCacheRangeByViewport(viewportInfo);
+        // Gap stripes start at the drawing range's edge; translated pixels can retain an older phase.
+        return (diffX !== 0 && Object.entries(rowGaps ?? {}).some(([row, gap]) =>
+            gap.size > 0 && Number(row) >= range.startRow && Number(row) <= range.endRow))
+            || (diffY !== 0 && Object.entries(colGaps ?? {}).some(([col, gap]) =>
+                gap.size > 0 && Number(col) >= range.startColumn && Number(col) <= range.endColumn));
     }
 
     private _requiresNativeGridlineRepaint(ctx: UniverRenderingContext2D, skeleton: SpreadsheetSkeleton, viewportInfo: IViewportInfo, hasMergeData: boolean): boolean {

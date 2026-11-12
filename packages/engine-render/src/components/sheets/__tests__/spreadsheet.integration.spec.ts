@@ -2028,6 +2028,163 @@ describe('spreadsheet integration', () => {
         }
     });
 
+    it.each(['x', 'y'])('keeps text repairs local when the native origin crosses a precision band on %s scroll', (axis) => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const ctx = mainCanvas.getContext();
+        ctx.setTransform(12, 0, 0, 12, axis === 'x' ? 1056 : 0, axis === 'y' ? 1104 : 0);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        ctx.setTransform(12, 0, 0, 12, axis === 'x' ? 410 : 0, axis === 'y' ? 458 : 0);
+        const info = createViewportInfo(scene, viewport.canvas!, {
+            diffBounds: [axis === 'x' ? createBound(400, 0, 420, 240) : createBound(0, 220, 420, 240)],
+            diffCacheBounds: [],
+            diffX: axis === 'x' ? -646 / 12 : 0,
+            diffY: axis === 'y' ? -646 / 12 : 0,
+            shouldCacheUpdate: 0,
+            isDirty: 0,
+        });
+        const repaint = spreadsheet as unknown as {
+            _getRepaintBounds(info: IViewportInfo, merges: IBoundRectNoAngle[], context: typeof ctx): { bound: IBoundRectNoAngle }[];
+        };
+        const nativeClipRanges = vi.spyOn(spreadsheet.getExtensionByKey('DefaultFontExtension') as Font, 'getNativeTextClipRepairRanges');
+        const bounds = repaint._getRepaintBounds(info, [], ctx);
+        expect(bounds).toEqual([]);
+        expect(nativeClipRanges).not.toHaveBeenCalled();
+        const point = axis === 'x' ? { x: 142, y: 40 } : { x: 82, y: 112 };
+        expect(bounds.some(({ bound }) => bound.left < point.x && bound.right > point.x
+            && bound.top < point.y && bound.bottom > point.y)).toBe(false);
+        // Panning over existing buffer pixels needs no refill; actual exposed cache pixels still do.
+        const refillBounds = repaint._getRepaintBounds({
+            ...info,
+            shouldCacheUpdate: 1,
+            diffCacheBounds: info.diffBounds,
+        }, [], ctx);
+        expect(nativeClipRanges).toHaveBeenCalledOnce();
+        const exposedPoint = axis === 'x' ? { x: 410, y: 40 } : { x: 82, y: 230 };
+        expect(refillBounds.some(({ bound }) => bound.left < exposedPoint.x && bound.right > exposedPoint.x
+            && bound.top < exposedPoint.y && bound.bottom > exposedPoint.y)).toBe(true);
+        const repairedArea = refillBounds.reduce((area, { bound }) => area + (bound.right - bound.left) * (bound.bottom - bound.top), 0);
+        const cacheArea = (info.cacheBound.right - info.cacheBound.left) * (info.cacheBound.bottom - info.cacheBound.top);
+        expect(repairedArea).toBeLessThan(cacheArea * 0.2);
+    });
+
+    it.each(['x', 'y'])('keeps retained cells cached within a stable native precision band on %s scroll', (axis) => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const ctx = mainCanvas.getContext();
+        ctx.setTransform(12, 0, 0, 12, 9856, 9904);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        ctx.setTransform(12, 0, 0, 12, axis === 'x' ? 9844 : 9856, axis === 'y' ? 9892 : 9904);
+        const info = createViewportInfo(scene, viewport.canvas!, {
+            diffBounds: [axis === 'x' ? createBound(400, 0, 420, 240) : createBound(0, 220, 420, 240)],
+            diffCacheBounds: [],
+            diffX: axis === 'x' ? -1 : 0,
+            diffY: axis === 'y' ? -1 : 0,
+            shouldCacheUpdate: 0,
+            isDirty: 0,
+        });
+        const repaint = spreadsheet as unknown as {
+            _getRepaintBounds(info: IViewportInfo, merges: IBoundRectNoAngle[], context: typeof ctx): { bound: IBoundRectNoAngle }[];
+        };
+        expect(repaint._getRepaintBounds(info, [], ctx).some(({ bound }) => bound.left < 142 && bound.right > 142
+            && bound.top < 40 && bound.bottom > 40)).toBe(false);
+    });
+
+    it('keeps native rotated glyphs whole when a repair halo touches their cell clip', () => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        skeleton.setStylesCache(createViewportInfo(scene, canvas));
+        const ctx = mainCanvas.getContext();
+        ctx.setTransform(12, 0, 0, 12, 9856, 9904);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        ctx.setTransform(12, 0, 0, 12, 9856, 9892);
+        const info = createViewportInfo(scene, viewport.canvas!, {
+            diffBounds: [createBound(117.9, 51.9, 125, 60)],
+            diffCacheBounds: [createBound(117.9, 51.9, 125, 60)],
+            diffX: 0,
+            diffY: -1,
+            shouldCacheUpdate: 1,
+            isDirty: 0,
+        });
+        const repaint = spreadsheet as unknown as {
+            _getRepaintBounds(info: IViewportInfo, merges: IBoundRectNoAngle[], context: typeof ctx): { bound: IBoundRectNoAngle }[];
+        };
+        expect(repaint._getRepaintBounds(info, [], ctx).some(({ bound }) => bound.left < 142 && bound.right > 142
+            && bound.top < 75 && bound.bottom > 75)).toBe(true);
+    });
+
+    it('keeps the full native cell clip when a repair halo reaches shrink-to-fit text', () => {
+        const { spreadsheet, skeleton, viewport, scene, mainCanvas, workbook } = fixture;
+        const canvas = viewport.canvas!;
+        canvas.setSize(700, 420, 1);
+        const worksheet = workbook.getActiveSheet()!;
+        const cell = worksheet.getCell(0, 3)!;
+        vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({ width: 240 } as TextMetrics);
+        skeleton._setFontStylesCache(0, 3, cell, worksheet.getComposedCellStyleByCellData(0, 3, cell)!);
+        skeleton.setStylesCache(createViewportInfo(scene, canvas));
+        expect(skeleton.stylesCache.fontMatrix.getValue(0, 3)?.shrinkScale).toBeLessThan(1);
+        const ctx = mainCanvas.getContext();
+        ctx.setTransform(12, 0, 0, 12, 9856, 9904);
+        spreadsheet.renderByViewports(ctx, createViewportInfo(scene, canvas), skeleton);
+        ctx.setTransform(12, 0, 0, 12, 9856, 9892);
+        const info = createViewportInfo(scene, viewport.canvas!, {
+            diffBounds: [createBound(229.9, 28, 240, 40)],
+            diffCacheBounds: [createBound(229.9, 28, 240, 40)],
+            diffX: 0,
+            diffY: -1,
+            shouldCacheUpdate: 1,
+            isDirty: 0,
+        });
+        const repaint = spreadsheet as unknown as {
+            _getRepaintBounds(info: IViewportInfo, merges: IBoundRectNoAngle[], context: typeof ctx): { bound: IBoundRectNoAngle }[];
+        };
+        expect(repaint._getRepaintBounds(info, [], ctx).some(({ bound }) => bound.left < 290 && bound.right > 290
+            && bound.top < 40 && bound.bottom > 40)).toBe(true);
+    });
+
+    it.each([SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP])(
+        'preserves native fixed-edge coverage when text repair reaches %s',
+        (viewportKey) => {
+            const { spreadsheet, skeleton, viewport, scene, mainCanvas } = fixture;
+            const getViewport = scene.getViewport.bind(scene);
+            vi.spyOn(scene, 'getViewport').mockImplementation((key) => key === viewportKey ? viewport : getViewport(key));
+            const canvas = viewport.canvas!;
+            canvas.setSize(700, 420, 1);
+            skeleton.setStylesCache(createViewportInfo(scene, canvas));
+            const ctx = mainCanvas.getContext();
+            const vertical = viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT;
+            const bounds = vertical ? createBound(118, 28, 166, 240) : createBound(46, 52, 302, 76);
+            const initial = createViewportInfo(scene, canvas, {
+                viewportKey,
+                viewBound: bounds,
+                cacheBound: bounds,
+                bufferEdgeX: 0,
+                bufferEdgeY: 0,
+            });
+            spreadsheet.renderByViewports(ctx, initial, skeleton);
+            spreadsheet.makeDirty(false);
+            spreadsheet.makeForceDirty(false);
+            ctx.translate(vertical ? 0 : -10, vertical ? -10 : 0);
+            const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+            const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+            spreadsheet.renderByViewports(ctx, {
+                ...initial,
+                diffX: vertical ? 0 : -10,
+                diffY: vertical ? -10 : 0,
+                diffBounds: [vertical ? createBound(118, 51.9, 166, 60) : createBound(117.9, 52, 125, 76)],
+                diffCacheBounds: [vertical ? createBound(118, 51.9, 166, 60) : createBound(117.9, 52, 125, 76)],
+                isDirty: 0,
+                isForceDirty: false,
+                shouldCacheUpdate: 1,
+            }, skeleton);
+            expect(refresh).toHaveBeenCalledOnce();
+            expect(paint).not.toHaveBeenCalled();
+        }
+    );
+
     it('rebuilds style coverage after a range reset even when the viewport stays in place', () => {
         const { skeleton, scene, cacheCanvas } = fixture;
         const info = createViewportInfo(scene, cacheCanvas);

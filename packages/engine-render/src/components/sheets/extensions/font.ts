@@ -215,6 +215,8 @@ export class Font extends SheetExtension {
             spreadsheetSkeleton,
         } as IRenderFontContext;
         ctx.save();
+        const deviceClip = ctx.__mode === 'printing' ? undefined : moreBoundsInfo.textClipBound;
+        const transform = deviceClip ? ctx.getTransform() : undefined;
 
         const mergeData = spreadsheetSkeleton.worksheet.getMergeData();
         const hasMerge = mergeData.length > 0;
@@ -260,6 +262,22 @@ export class Font extends SheetExtension {
 
                     if (spanModel && spanModel.getMergeDataIndex(row, col) !== -1) {
                         continue;
+                    }
+                    if (deviceClip && transform && transform.a > 0 && transform.d > 0 && !transform.b && !transform.c
+                        && !fontCache.documentSkeleton && !fontCache.vertexAngle && !fontCache.centerAngle
+                        && fontCache.textFitsCurrentCell === false && !fontCache.cellData?.fontRenderExtension) {
+                        const overflow = spreadsheetSkeleton.overflowCache.getValue(row, col);
+                        if (overflow) {
+                            // Plain overflowing text is clipped to these cells. Keep a physical ink halo at the damage edge.
+                            const left = (columnWidthAccumulation[Math.min(col, overflow.startColumn) - 1] ?? 0) * transform.a + transform.e;
+                            const right = columnWidthAccumulation[Math.max(col, overflow.endColumn)] * transform.a + transform.e;
+                            const top = (rowHeightAccumulation[Math.min(row, overflow.startRow) - 1] ?? 0) * transform.d + transform.f;
+                            const bottom = rowHeightAccumulation[Math.max(row, overflow.endRow)] * transform.d + transform.f;
+                            if (right + 2 < deviceClip.left || left - 2 > deviceClip.right
+                                || bottom + 2 < deviceClip.top || top - 2 > deviceClip.bottom) {
+                                continue;
+                            }
+                        }
                     }
                     const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                     if (!cellInfo) {

@@ -466,7 +466,7 @@ export class Spreadsheet extends SheetComponent {
         this._gridlineCache.draw(ctx, () => {
             this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
                 drawBackgroundExtensions(clearedRanges, clearedRanges);
-            }, repairNativeGridlines);
+            }, repairNativeGridlines, textClipBound);
         });
 
         for (const extension of gridExtensions) {
@@ -1375,7 +1375,8 @@ export class Spreadsheet extends SheetComponent {
         ctx: UniverRenderingContext2D,
         hasMergeData = true,
         redrawBackgrounds?: (ranges: IRange[]) => void,
-        repairNativeGridlines = false
+        repairNativeGridlines = false,
+        deviceClipBound?: IBoundRectNoAngle
     ) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
@@ -1500,7 +1501,7 @@ export class Spreadsheet extends SheetComponent {
                 mergeCellRanges.push(...mergeRangeInVisible);
             }
         }
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges, redrawBackgrounds, repairNativeGridlines);
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges, redrawBackgrounds, repairNativeGridlines, deviceClipBound);
 
         // clear line of overflow cell
         this._clearRectangle(
@@ -1509,7 +1510,8 @@ export class Spreadsheet extends SheetComponent {
             columnWidthAccumulation,
             overflowCache.toNativeArray(),
             redrawBackgrounds,
-            repairNativeGridlines
+            repairNativeGridlines,
+            deviceClipBound
         );
 
         // Draw gap areas AFTER merge/overflow clearing so gap visuals are always on top
@@ -1527,40 +1529,64 @@ export class Spreadsheet extends SheetComponent {
         columnWidthAccumulation: number[],
         cellRanges?: IRange[],
         redrawBackgrounds?: (ranges: IRange[]) => void,
-        repairNativeGridlines = false
+        repairNativeGridlines = false,
+        deviceClipBound?: IBoundRectNoAngle
     ) {
         if (!cellRanges?.length) {
             return;
         }
         const bounds: IBoundRectNoAngle[] = [];
-        for (const range of cellRanges) {
-            const { startRow, endRow, startColumn, endColumn } = range;
+        const clearedRanges: IRange[] = [];
+        const m = ctx.getTransform();
+        const clearDevicePixels = ctx.__mode !== 'printing' && m.a > 0 && m.d > 0 && !m.b && !m.c;
+        const native = ctx._context;
+        const cullClip = deviceClipBound && clearDevicePixels && native.globalCompositeOperation === 'source-over'
+            && !native.shadowBlur && !native.shadowOffsetX && !native.shadowOffsetY
+            && (!native.filter || native.filter === 'none')
+            ? deviceClipBound
+            : undefined;
+        const inkPadding = Math.ceil(ctx.lineWidth * Math.max(m.a, m.d) * 2) + 2;
+        if (clearDevicePixels) {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        try {
+            for (const range of cellRanges) {
+                const { startRow, endRow, startColumn, endColumn } = range;
 
-            const startY = rowHeightAccumulation[startRow - 1] ?? 0;
-            const endY = rowHeightAccumulation[endRow] ?? rowHeightAccumulation[rowHeightAccumulation.length - 1];
+                const startY = rowHeightAccumulation[startRow - 1] ?? 0;
+                const endY = rowHeightAccumulation[endRow] ?? rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-            const startX = columnWidthAccumulation[startColumn - 1] ?? 0;
-            const endX =
-                columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
+                const startX = columnWidthAccumulation[startColumn - 1] ?? 0;
+                const endX =
+                    columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-            const m = ctx.getTransform();
-            if (ctx.__mode !== 'printing' && m.a > 0 && m.d > 0 && !m.b && !m.c) {
-                // A fractional clear repeatedly attenuates grid intersections as cached pixels are repaired.
-                const left = Math.round(Math.round(startX * m.a) + m.e);
-                const top = Math.round(Math.round(startY * m.d) + m.f);
-                const right = Math.round(Math.round(endX * m.a) + m.e);
-                const bottom = Math.round(Math.round(endY * m.d) + m.f);
-                ctx.save();
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.clearRect(left, top, right - left, bottom - top);
-                ctx.restore();
-            } else {
-                ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
+                if (clearDevicePixels) {
+                    // A fractional clear repeatedly attenuates grid intersections as cached pixels are repaired.
+                    const left = Math.round(Math.round(startX * m.a) + m.e);
+                    const top = Math.round(Math.round(startY * m.d) + m.f);
+                    const right = Math.round(Math.round(endX * m.a) + m.e);
+                    const bottom = Math.round(Math.round(endY * m.d) + m.f);
+                    if (cullClip && (right + inkPadding < cullClip.left || left - inkPadding > cullClip.right
+                        || bottom + inkPadding < cullClip.top || top - inkPadding > cullClip.bottom)) {
+                        continue;
+                    }
+                    ctx.clearRect(left, top, right - left, bottom - top);
+                } else {
+                    ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
+                }
+                bounds.push({ left: startX, top: startY, right: endX, bottom: endY });
+                clearedRanges.push(range);
             }
-            bounds.push({ left: startX, top: startY, right: endX, bottom: endY });
+        } finally {
+            if (clearDevicePixels) {
+                ctx.restore();
+            }
         }
 
-        redrawBackgrounds?.(cellRanges);
+        if (clearedRanges.length) {
+            redrawBackgrounds?.(cullClip ? clearedRanges : cellRanges);
+        }
 
         for (const { left, top, right, bottom } of bounds) {
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.

@@ -111,7 +111,7 @@ export class RenderPrimitiveCache extends Disposable {
                 if (cached) {
                     return cached;
                 }
-                let method = (...args: unknown[]) => Reflect.apply(value, target, args);
+                let method = value.bind(target) as (...args: unknown[]) => unknown;
                 if (key === 'beginPath') {
                     method = () => {
                         path.points.length = 0;

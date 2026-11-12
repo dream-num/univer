@@ -1097,13 +1097,28 @@ describe('spreadsheet integration', () => {
         context.setTransform(1.5, 0, 0, 1.5, -162.5, 100.5);
         const clear = vi.spyOn(context, 'clearRect');
         const line = vi.spyOn(context, 'moveToByPrecision');
-        const repaint = vi.fn();
-        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
-        (spreadsheet as any)._clearRectangle(context, [25], [54], ranges, repaint);
+        const save = vi.spyOn(context._context, 'save');
+        const restore = vi.spyOn(context._context, 'restore');
+        const ranges = [
+            { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
+        ];
+        let repainted = false;
+        const repaint = (clearedRanges: typeof ranges) => {
+            expect(clearedRanges).toBe(ranges);
+            expect(clear).toHaveBeenCalledTimes(2);
+            expect(context.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: -162.5, f: 100.5 });
+            repainted = true;
+        };
+        (spreadsheet as any)._clearRectangle(context, [25, 50], [54, 100], ranges, repaint);
 
-        expect(clear).toHaveBeenCalledWith(-162, 101, 81, 38);
+        expect(clear).toHaveBeenNthCalledWith(1, -162, 101, 81, 38);
+        expect(clear).toHaveBeenNthCalledWith(2, -81, 139, 69, 37);
+        expect(save).toHaveBeenCalledOnce();
+        expect(restore).toHaveBeenCalledOnce();
         expect(line).toHaveBeenCalledWith(0, 0);
-        expect(repaint).toHaveBeenCalledWith(ranges);
+        expect(line).toHaveBeenCalledWith(54, 25);
+        expect(repainted).toBe(true);
         expect(context.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: -162.5, f: 100.5 });
     });
 
@@ -1118,6 +1133,89 @@ describe('spreadsheet integration', () => {
         const clear = vi.spyOn(context, 'clearRectByPrecision');
         (spreadsheet as any)._clearRectangle(context, [25], [54], [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
         expect(clear).toHaveBeenCalledWith(0, 0, 54, 25);
+    });
+
+    it.each(['plain', 'shadow', 'filter', 'composite'])('keeps overflow repair ink and unsupported effects: %s', (mode) => {
+        const { spreadsheet, mainCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        context.setTransform(1.5, 0, 0, 1.5, -162.5, 100.5);
+        const clear = vi.spyOn(context, 'clearRect');
+        const line = vi.spyOn(context, 'moveToByPrecision');
+        if (mode === 'shadow') context._context.shadowOffsetX = -100;
+        if (mode === 'filter') context._context.filter = 'blur(10px)';
+        if (mode === 'composite') context._context.globalCompositeOperation = 'copy';
+        const ranges = [0, 1, 2].map((column) => ({ startRow: 0, endRow: 0, startColumn: column, endColumn: column }));
+        let repainted: typeof ranges = [];
+        const target = spreadsheet as unknown as {
+            _clearRectangle(ctx: typeof context, rows: number[], columns: number[], ranges: typeof repainted,
+                redraw: (ranges: typeof repainted) => void, repair: boolean, clip: IBoundRectNoAngle): void;
+        };
+        const redraw = (cleared: typeof ranges) => {
+            repainted = cleared;
+        };
+        target._clearRectangle(context, [25], [54, 100, 150], ranges, redraw, false, { left: -80, top: 101, right: -60, bottom: 139 });
+        // The first range's bordering ink can reach the strip; the distant third range cannot.
+        expect(clear).toHaveBeenCalledTimes(mode === 'plain' ? 2 : 3);
+        expect(repainted).toEqual(mode === 'plain' ? ranges.slice(0, 2) : ranges);
+        expect(line).toHaveBeenCalledWith(0, 0);
+        expect(line).toHaveBeenCalledWith(54, 0);
+        expect(line.mock.calls.some(([left]) => left === 100)).toBe(mode !== 'plain');
+        expect(context.getTransform()).toMatchObject({ a: 1.5, d: 1.5, e: -162.5, f: 100.5 });
+    });
+
+    it.each(['x', 'y'])('skips plain overflow glyphs wholly outside the physical %s damage clip', (axis) => {
+        disposeFixture(fixture);
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1'];
+        sheet.mergeData = [];
+        sheet.rowData = {};
+        sheet.columnData = {};
+        sheet.cellData = {
+            0: { 0: { v: 'left-'.repeat(30) }, 6: { v: 'right-'.repeat(30) } },
+            6: { 0: { v: 'bottom-'.repeat(30) } },
+        };
+        fixture = createFixture(data);
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const info = createViewportInfo(scene, cacheCanvas, { cacheBound: createBound(0, 0, 1000, 500) });
+        skeleton.setStylesCache(info);
+        const context = mainCanvas.getContext();
+        context.setTransform(1.34, 0, 0, 1.34, 10, 20);
+        const fill = vi.spyOn(context._context, 'fillText');
+        const clip = axis === 'x'
+            ? createBound(432 * 1.34 + 13, 20, 864 * 1.34 + 10, 24 * 1.34 + 20)
+            : createBound(10, 144 * 1.34 + 23, 864 * 1.34 + 10, 168 * 1.34 + 20);
+        const font = spreadsheet.getExtensionByKey('DefaultFontExtension') as Font;
+        const render = (textClipBound?: IBoundRectNoAngle) => {
+            fill.mockClear();
+            font.draw(context, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+                viewRanges: [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 11 }],
+                checkOutOfViewBound: true,
+                hasMergeData: false,
+                textClipBound,
+                viewportKey: info.viewportKey,
+            });
+            return fill.mock.calls.map(([value]) => value).join('');
+        };
+        const text = render(clip);
+        expect(text).toContain(axis === 'x' ? 'right-' : 'bottom-');
+        expect(text).not.toContain('left-');
+        expect(text).not.toContain(axis === 'x' ? 'bottom-' : 'right-');
+        const fullText = render();
+        expect(fullText).toContain('left-');
+        expect(fullText).toContain('right-');
+        expect(fullText).toContain('bottom-');
+        if (axis === 'x') {
+            // Retain a cell ending one physical pixel outside the damage edge.
+            const overflow = skeleton.overflowCache.getValue(0, 0)!;
+            const renderCell = vi.spyOn(font, '_renderFontEachCell');
+            render({ ...clip, left: skeleton.columnWidthAccumulation[overflow.endColumn] * 1.34 + 11 });
+            expect(renderCell.mock.calls.some(([, row, column]) => row === 0 && column === 0)).toBe(true);
+        }
+        context.__mode = 'printing';
+        const printedText = render(clip);
+        expect(printedText).toContain('left-');
+        expect(printedText).toContain('right-');
+        expect(printedText).toContain('bottom-');
     });
 
     it.each([false, true])('skips absent sparse extensions on merged sheets, repair=%s', (repair) => {

@@ -123,16 +123,17 @@ export class DataBar extends SheetExtension {
                 ctx.strokeStyle = color;
                 const fillColor = ctx.fillStyle;
                 const strokeColor = ctx.strokeStyle;
+                // Destination setters resolve raw colors; bitmap contexts need the already-resolved colors.
                 this._drawAtLocalOrigin(ctx, x0, y0, dataBarWidth, height, (paint, x, y) => {
                     if (isGradient) {
                         const gradient = paint.createLinearGradient(x, y, x + dataBarWidth, y);
                         gradient.addColorStop(0, positive ? color : 'rgb(255 255 255)');
                         gradient.addColorStop(1, positive ? 'rgb(255 255 255)' : color);
                         paint.fillStyle = gradient;
-                        paint.strokeStyle = strokeColor;
+                        paint.strokeStyle = paint === ctx ? color : strokeColor;
                         paint.lineWidth = 1;
                     } else {
-                        paint.fillStyle = fillColor;
+                        paint.fillStyle = paint === ctx ? color : fillColor;
                     }
                     this._drawRectWithRoundedCorner(paint, x, y, dataBarWidth, height, !positive, positive, positive, !positive);
                     if (isGradient) {

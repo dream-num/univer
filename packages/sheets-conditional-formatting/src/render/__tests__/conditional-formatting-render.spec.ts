@@ -15,14 +15,14 @@
  */
 
 import type { ICellData, IRange, IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber, LocaleService, LocaleType, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
-import { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
+import { BooleanNumber, LocaleService, LocaleType, ObjectMatrix, ThemeService, Univer, UniverInstanceType } from '@univerjs/core';
+import { CanvasColorService, ICanvasColorService, SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IIconSetType } from '../../models/icon-map';
 import { DataBar } from '../data-bar.render';
 import { ConditionalFormattingIcon } from '../icon.render';
 
-function createCtx() {
+function createCtx(canvasColorService?: ICanvasColorService) {
     const gradient = { addColorStop: vi.fn() };
     const native = {
         canvas: document.createElement('canvas'),
@@ -44,7 +44,7 @@ function createCtx() {
     } as unknown as CanvasRenderingContext2D;
     const injector = univer.__getInjector();
     injector.add([UniverRenderingContext, {
-        useFactory: () => injector.createInstance(UniverRenderingContext, native),
+        useFactory: () => injector.createInstance(UniverRenderingContext, native, { canvasColorService }),
     }]);
     const context = injector.get(UniverRenderingContext);
     for (const method of ['save', 'restore', 'beginPath', 'fill', 'stroke', 'drawImage', 'createLinearGradient'] as const) {
@@ -109,6 +109,33 @@ describe('conditional formatting render extensions', () => {
     afterEach(() => {
         univer.dispose();
         vi.restoreAllMocks();
+    });
+
+    it.each([
+        { darkMode: false, isGradient: false },
+        { darkMode: false, isGradient: true },
+        { darkMode: true, isGradient: false },
+        { darkMode: true, isGradient: true },
+    ])('resolves native data bar colors once (dark: $darkMode, gradient: $isGradient)', ({ darkMode, isGradient }) => {
+        const injector = univer.__getInjector();
+        injector.get(ThemeService).setDarkMode(darkMode);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const colors = injector.get(ICanvasColorService);
+        const color = '#38bdf8';
+        const expected = colors.getRenderColor(color);
+        const ctx = createCtx(colors);
+        ctx.__mode = 'printing';
+        const skeleton = createSkeleton({
+            '0,0': { dataBar: { color, value: 75, startPoint: 0, isGradient, isShowValue: true } },
+        });
+        skeleton.calculate();
+
+        injector.get(DataBar).draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
+            { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        ]);
+
+        expect(isGradient ? ctx._context.strokeStyle : ctx._context.fillStyle).toBe(expected);
+        expect(ctx.fill).toHaveBeenCalledOnce();
     });
 
     it('draws data bars for positive and negative cell values in visible cells', () => {

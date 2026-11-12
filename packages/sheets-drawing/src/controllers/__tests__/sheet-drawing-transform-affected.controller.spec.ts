@@ -54,7 +54,9 @@ import {
     SetRowHiddenCommand,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
+    SetWorksheetColWidthMutation,
     SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowHeightMutation,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
@@ -1099,13 +1101,83 @@ describe('sheet drawing transforms without UI plugins', () => {
             ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }],
             value: 40,
         })).toBe(true);
+        // Placements are refreshed after the size mutations, in a microtask.
+        await Promise.resolve();
         const after = structuredClone(getDrawing(service));
         expect(after.transform?.height).toBeGreaterThan(before.transform?.height ?? 0);
 
         expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+        await Promise.resolve();
         expect(getDrawing(service)).toEqual(before);
         expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+        await Promise.resolve();
         expect(getDrawing(service)).toEqual(after);
+    });
+
+    it.each([
+        ['set row height', SetRowHeightCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }],
+            value: 60,
+        }],
+        ['set column width', SetColWidthCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 0, endRow: 19, startColumn: 2, endColumn: 2 }],
+            value: 160,
+        }],
+        ['drag row height', DeltaRowHeightCommand.id, { anchorRow: 2, deltaY: 40 }],
+        ['drag column width', DeltaColumnWidthCommand.id, { anchorCol: 2, deltaX: 50 }],
+    ])('%s emits only size mutations and refreshes drawings locally', async (_name, commandId, params) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const before = structuredClone(getDrawing(service));
+        testBed.get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+        }]);
+        const mutationIds: string[] = [];
+        const listener = testBed.commandService.onCommandExecuted(({ id }) => mutationIds.push(id));
+
+        expect(await testBed.commandService.executeCommand(commandId, params)).toBe(true);
+        listener.dispose();
+
+        // Collaboration sends every executed mutation. Derived placements stay out of the
+        // changeset, so collaborators resizing different rows or columns do not conflict.
+        expect(mutationIds).not.toContain(SetDrawingApplyMutation.id);
+        expect(getDrawing(service).sheetTransform).toEqual(before.sheetTransform);
+        expect(getDrawing(service).transform).not.toEqual(before.transform);
+    });
+
+    it('refreshes drawings when a replica applies size mutations from other collaborators', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+        const before = structuredClone(getDrawing(service));
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        const rowHeight = worksheet.getRowHeight(0);
+        const columnWidth = worksheet.getColumnWidth(0);
+
+        // Two size mutations from different collaborators, both above or left of the drawing.
+        expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 19 }],
+            rowHeight: rowHeight + 30,
+        }, { fromCollab: true })).toBe(true);
+        expect(testBed.commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ranges: [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 }],
+            colWidth: columnWidth + 40,
+        }, { fromCollab: true })).toBe(true);
+        await Promise.resolve();
+
+        const after = getDrawing(service);
+        expect(after.sheetTransform).toEqual(before.sheetTransform);
+        expect(after.transform).toEqual({
+            ...before.transform,
+            top: before.transform!.top! + 30,
+            left: before.transform!.left! + 40,
+        });
     });
 
     it('updates placement through a command and round-trips through undo and redo', async () => {

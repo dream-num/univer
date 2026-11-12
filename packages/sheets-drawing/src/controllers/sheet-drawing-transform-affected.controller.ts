@@ -47,8 +47,6 @@ import {
     convertPositionCellToSheetOverGrid,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
-    DeltaColumnWidthCommand,
-    DeltaRowHeightCommand,
     getSheetCommandTarget,
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -62,8 +60,6 @@ import {
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
-    SetColWidthCommand,
-    SetRowHeightCommand,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
@@ -110,10 +106,10 @@ const UPDATE_COMMANDS = [
     InsertRangeMoveDownCommand.id,
     InsertRangeMoveRightCommand.id,
 
-    DeltaRowHeightCommand.id,
-    SetRowHeightCommand.id,
-    DeltaColumnWidthCommand.id,
-    SetColWidthCommand.id,
+    // Row height and column width commands are not listed: resizing keeps every anchor, so each
+    // replica refreshes drawing placements locally after the size mutations (see
+    // `_sheetRefreshListener`). Writing the derived placements into the command would put absolute
+    // values into the changeset, and two collaborators resizing different rows would conflict.
 
     SetRowHiddenCommand.id,
     SetSpecificRowsVisibleCommand.id,
@@ -216,19 +212,13 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         id === SetRowHiddenCommand.id ||
                         id === SetSpecificRowsVisibleCommand.id ||
                         id === SetColHiddenCommand.id ||
-                        id === SetSpecificColsVisibleCommand.id ||
-                        id === DeltaRowHeightCommand.id ||
-                        id === DeltaColumnWidthCommand.id ||
-                        id === SetRowHeightCommand.id ||
-                        id === SetColWidthCommand.id
+                        id === SetSpecificColsVisibleCommand.id
                     ) {
                         const { unitId, subUnitId, ranges } = params as
                             | ISetRowHiddenMutationParams
                             | ISetSpecificRowsVisibleCommandParams
                             | ISetColHiddenMutationParams
-                            | ISetSpecificColsVisibleCommandParams
-                            | ISetWorksheetRowHeightMutationParams
-                            | ISetWorksheetColWidthMutationParams;
+                            | ISetSpecificColsVisibleCommandParams;
                         return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
                     }
 

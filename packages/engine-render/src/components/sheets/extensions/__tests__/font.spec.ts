@@ -1017,7 +1017,7 @@ describe('font extension', () => {
         expect(renderCellSpy).toHaveBeenCalledOnce();
     });
 
-    it.each([true, false])('preserves native overflow rasterization outside damage repairs: %s', (hasClip) => {
+    it.each([undefined, 0, 19])('preserves native overflow glyph output for damage clip %s', (clipTop) => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });
         const testInjector = univer.__getInjector();
@@ -1052,9 +1052,18 @@ describe('font extension', () => {
         const ctx = testInjector.get(UniverRenderingContext2D);
         const skeleton = testInjector.get(SpreadsheetSkeleton);
         const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
-        const clip = hasClip ? { left: 0, top: 19, right: 120, bottom: 60 } : undefined;
-        const raster = vi.spyOn(Reflect.get(font, '_primitiveCache'), 'draw');
-        const text = vi.spyOn(ctx._context, 'fillText');
+        const clip = clipTop === undefined ? undefined : { left: 0, top: clipTop, right: 120, bottom: 60 };
+        const text = [vi.spyOn(ctx._context, 'fillText')];
+        const getContext = vi.isMockFunction(HTMLCanvasElement.prototype.getContext)
+            ? vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!
+            : HTMLCanvasElement.prototype.getContext;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement, ...args) {
+            const native = Reflect.apply(getContext, this, args);
+            if (native && 'fillText' in native) {
+                text.push(vi.spyOn(native, 'fillText'));
+            }
+            return native;
+        });
         try {
             skeleton.calculate();
             const worksheet = workbook.getActiveSheet()!;
@@ -1066,12 +1075,11 @@ describe('font extension', () => {
                 viewportKey: 'viewMain',
                 textClipBound: clip,
             });
-            expect(raster).toHaveBeenCalledTimes(hasClip ? 1 : 0);
-            if (hasClip) {
-                expect(raster).toHaveBeenCalledWith(ctx, expect.any(Function), clip);
-            } else {
-                expect(text).toHaveBeenCalledWith('overflow text beyond the cell'.repeat(4), expect.any(Number), expect.any(Number));
-            }
+            expect(text.flatMap((paint) => paint.mock.calls)).toContainEqual([
+                'overflow text beyond the cell'.repeat(4),
+                expect.any(Number),
+                expect.any(Number),
+            ]);
         } finally {
             univer.dispose();
             environment.restore();

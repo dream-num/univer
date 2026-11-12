@@ -107,8 +107,98 @@ describe('conditional formatting render extensions', () => {
     });
 
     afterEach(() => {
+        vi.unstubAllGlobals();
         univer.dispose();
         vi.restoreAllMocks();
+    });
+
+    it.each(['safari', 'iphone', 'printing', 'server'])('draws real data bars natively on %s', (mode) => {
+        const ctx = createCtx();
+        Object.assign(ctx._context, {
+            globalAlpha: 1,
+            globalCompositeOperation: 'source-over',
+            shadowColor: 'rgba(0, 0, 0, 0)',
+            getLineDash: () => [],
+        });
+        vi.mocked(ctx._context.getTransform).mockReturnValue({ a: 3, b: 0, c: 0, d: 3, e: 0.5, f: 0.5 } as DOMMatrix);
+        const skeleton = createSkeleton({
+            '0,0': { dataBar: { color: '#38bdf8', value: 75, startPoint: 0, isGradient: false, isShowValue: true } },
+        });
+        skeleton.calculate();
+        const allocation = vi.spyOn(document, 'createElement');
+        if (mode === 'safari' || mode === 'iphone') {
+            vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(mode === 'safari' ? 'Safari' : 'iPhone Chrome Safari');
+        } else {
+            vi.stubGlobal('navigator', undefined);
+            if (mode === 'printing') {
+                ctx.__mode = 'printing';
+            } else {
+                vi.stubGlobal('document', undefined);
+            }
+        }
+
+        univer.__getInjector().get(DataBar).draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
+            { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+        ]);
+
+        expect(ctx.fill).toHaveBeenCalledOnce();
+        expect(ctx._context.moveTo).toHaveBeenCalled();
+        expect(allocation).not.toHaveBeenCalled();
+        expect(ctx.drawImage).not.toHaveBeenCalled();
+    });
+
+    it('reuses real bar rasters, separates changed bar styles and releases owned images on disposal', () => {
+        const ctx = createCtx();
+        const smoothing: boolean[] = [];
+        Object.assign(ctx._context, {
+            imageSmoothingEnabled: true,
+            globalAlpha: 1,
+            globalCompositeOperation: 'source-over',
+            shadowColor: 'rgba(0, 0, 0, 0)',
+            getLineDash: () => [],
+            setTransform: vi.fn(),
+        });
+        vi.mocked(ctx._context.save).mockImplementation(() => {
+            smoothing.push(ctx._context.imageSmoothingEnabled);
+        });
+        vi.mocked(ctx._context.restore).mockImplementation(() => {
+            ctx._context.imageSmoothingEnabled = smoothing.pop()!;
+        });
+        vi.mocked(ctx._context.getTransform).mockReturnValue({ a: 3, b: 0, c: 0, d: 3, e: -162.5, f: 100.5 } as DOMMatrix);
+        vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Chrome Safari');
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return {
+                ...ctx._context,
+                canvas: this,
+                fill: vi.fn(),
+                stroke: vi.fn(),
+                drawImage: vi.fn(),
+                setLineDash: vi.fn(),
+            } as CanvasRenderingContext2D;
+        });
+        const skeleton = createSkeleton({
+            '0,0': { dataBar: { color: '#38bdf8', value: 75, startPoint: 0, isGradient: false, isShowValue: true } },
+        });
+        skeleton.calculate();
+        const bar = univer.__getInjector().get(DataBar);
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
+        bar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+        const bitmap = vi.mocked(ctx._context.drawImage).mock.calls[0][0] as HTMLCanvasElement;
+        bar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+        expect(vi.mocked(ctx._context.drawImage).mock.calls[1][0]).toBe(bitmap);
+        expect(bitmap.width).toBeGreaterThan(1);
+        expect(bitmap.height).toBeGreaterThan(1);
+        expect(ctx.fill).not.toHaveBeenCalled();
+        const cell = skeleton.worksheet.getCellRaw(0, 0)!;
+        skeleton.worksheet.getCellMatrix().setValue(0, 0, {
+            ...cell,
+            dataBar: { color: '#f45531', value: -75, startPoint: 100, isGradient: true, isShowValue: true },
+        } as ICellData);
+        bar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+        const changed = vi.mocked(ctx._context.drawImage).mock.calls[2][0] as HTMLCanvasElement;
+        expect(changed).not.toBe(bitmap);
+        bar.dispose();
+        expect([bitmap.width, bitmap.height, changed.width, changed.height]).toEqual([0, 0, 0, 0]);
     });
 
     it.each([

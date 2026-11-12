@@ -165,7 +165,9 @@ describe('conditional formatting icon assets', () => {
         if (mode === 'large') {
             vi.spyOn(native, 'getTransform').mockReturnValue({ a: 1000, b: 0, c: 0, d: 1000, e: 0, f: 0 } as DOMMatrix);
         }
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return mode === 'unavailable' ? null : nativeContext(this);
+        });
         const extension = injector.get(ConditionalFormattingIcon);
         try {
             Reflect.get(extension, '_drawIcon').call(extension, context, images[0], 10, 20);

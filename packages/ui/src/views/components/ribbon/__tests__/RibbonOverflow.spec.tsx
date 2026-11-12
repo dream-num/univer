@@ -26,7 +26,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
-import { MenuDismissController } from '../../../../controllers/menu-dismiss.controller';
 import enUS from '../../../../locale/en-US';
 import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
@@ -47,7 +46,6 @@ function mountOverflow(groups: IMenuSchema[]) {
     const executeCommand = vi.fn(async () => true);
     const injector = new Injector([
         [ComponentManager],
-        [MenuDismissController],
         [IContextMenuHostService, { useClass: ContextMenuHostService }],
         [IconManager, { useValue: { get: () => null } }],
         [LocaleService],
@@ -67,7 +65,6 @@ function mountOverflow(groups: IMenuSchema[]) {
     locale.load({ [LocaleType.EN_US]: enUS });
     locale.setLocale(LocaleType.EN_US);
     locale.setDirection('ltr');
-    injector.get(MenuDismissController);
     injector.get(ComponentManager).register('FontField', () => <input aria-label="Font" defaultValue="Arial" />);
     const ConnectedOverflow = connectInjector(RibbonOverflow, injector) as ComponentType<{ groups: IMenuSchema[]; grid?: boolean }>;
     return { ...render(

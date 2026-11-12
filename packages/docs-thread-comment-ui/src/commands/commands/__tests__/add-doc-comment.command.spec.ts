@@ -33,7 +33,7 @@ import {
     ThreadCommentModel,
 } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { ContextMenuHostService, DesktopSidebarService, IContextMenuHostService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddDocCommentComment } from '../add-doc-comment.command';
 import '@univerjs/docs-thread-comment/facade';
@@ -101,6 +101,7 @@ describe('AddDocCommentComment', () => {
         injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
         injector.add([ThreadCommentModel]);
         injector.add([ThreadCommentFacadeService]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ThreadCommentPanelService]);
 

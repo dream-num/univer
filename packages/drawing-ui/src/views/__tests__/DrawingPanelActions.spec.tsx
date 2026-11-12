@@ -21,7 +21,19 @@ import type { Root } from 'react-dom/client';
 import { ArrangeTypeEnum, CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { ComponentManager, IconManager, IDialogService, IMenuManagerService, IUIPartsService, MenuManagerService, MobileDialogService, RediContext, UIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    ContextMenuHostService,
+    IconManager,
+    IContextMenuHostService,
+    IDialogService,
+    IMenuManagerService,
+    IUIPartsService,
+    MenuManagerService,
+    MobileDialogService,
+    RediContext,
+    UIPartsService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -122,6 +134,7 @@ describe('drawing panel actions', () => {
         injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
         injector.add([DrawingImageClipService]);
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([IDialogService, { useClass: MobileDialogService }]);
         injector.get(IconManager).register({ DrawingEditIcon: () => <span /> });
 

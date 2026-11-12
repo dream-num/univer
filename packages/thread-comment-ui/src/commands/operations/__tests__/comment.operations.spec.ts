@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, Univer } from '@univerjs/core';
-import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { ContextMenuHostService, DesktopSidebarService, IContextMenuHostService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentPanelService } from '../../../services/thread-comment-panel.service';
 import { SetActiveCommentOperation } from '../comment.operations';
@@ -28,6 +28,7 @@ describe('SetActiveCommentOperation', () => {
     beforeEach(() => {
         univer = new Univer();
         const injector = univer.__getInjector();
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ThreadCommentPanelService]);
 

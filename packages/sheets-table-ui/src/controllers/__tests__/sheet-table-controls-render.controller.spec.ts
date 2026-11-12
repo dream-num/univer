@@ -56,8 +56,10 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import {
+    ContextMenuHostService,
     DesktopDialogService,
     DesktopSidebarService,
+    IContextMenuHostService,
     IDialogService,
     ISidebarService,
     IUIPartsService,
@@ -113,6 +115,7 @@ function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRe
     injector.add([SheetCanvasPopManagerService, { useValue: { attachPopupByPosition } as unknown as SheetCanvasPopManagerService }]);
     injector.add([ISheetSelectionRenderService, { useValue: { resetSelectionsByModelData: vi.fn() } as unknown as ISheetSelectionRenderService }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     const unit = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {

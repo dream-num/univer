@@ -39,7 +39,6 @@ import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { MOBILE_UI_MODE } from './const';
 import { ErrorController } from './controllers/error/error.controller';
 import { FormatPainterController } from './controllers/format-painter.controller';
-import { MenuDismissController } from './controllers/menu-dismiss.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
@@ -127,7 +126,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [MobileComponentsController],
             [ThemeSwitcherService],
             [UndoRedoGroupService],
-            [MenuDismissController],
             [IWorkbenchService, { useClass: WorkbenchService }],
             [ZIndexManager],
             [IUIPartsService, { useClass: UIPartsService }],
@@ -178,7 +176,6 @@ export class UniverMobileUIPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
-            [MenuDismissController],
             [SharedController],
             [FormatPainterController],
         ]);

@@ -21,6 +21,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
@@ -30,6 +34,7 @@ import { Sidebar } from '../Sidebar';
 
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([LocaleService]);

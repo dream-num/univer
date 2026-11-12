@@ -38,7 +38,14 @@ import {
     SheetTableService,
     TableManager,
 } from '@univerjs/sheets-table';
-import { DesktopDialogService, IDialogService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import {
+    ContextMenuHostService,
+    DesktopDialogService,
+    IContextMenuHostService,
+    IDialogService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { afterEach, describe, expect, it } from 'vitest';
 import { openRangeSelector, OpenTableSelectorOperation } from '../open-table-selector.operation';
 
@@ -103,6 +110,7 @@ function createTestBed(createWorkbook = true): ITestBed {
                 [SheetTableService],
                 [IDefinedNamesService, { useClass: DefinedNamesService }],
                 [IUIPartsService, { useClass: UIPartsService }],
+                [IContextMenuHostService, { useClass: ContextMenuHostService }],
                 [IDialogService, { useClass: DesktopDialogService }],
             ];
             dependencies.forEach((dependency) => this._injector.add(dependency));

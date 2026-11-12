@@ -40,7 +40,6 @@ import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
 import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
 import { FormatPainterController } from './controllers/format-painter.controller';
-import { MenuDismissController } from './controllers/menu-dismiss.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
@@ -128,7 +127,6 @@ export class UniverUIPlugin extends Plugin {
             [ComponentsController],
             [ThemeSwitcherService],
             [UndoRedoGroupService],
-            [MenuDismissController],
             [ZIndexManager],
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
@@ -179,7 +177,6 @@ export class UniverUIPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
-            [MenuDismissController],
             [SharedController],
             [FormatPainterController],
             [FeatureSearchController],

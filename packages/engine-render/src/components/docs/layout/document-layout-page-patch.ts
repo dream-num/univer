@@ -15,6 +15,7 @@
  */
 
 import type { IDocDrawingBase, IDocumentData, IReferenceSource, ITable, ITableRow } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -331,7 +332,9 @@ function requireTableSource(
         throw new Error(`Document layout publication is missing table source "${sourceId}".`);
     }
     const resolved = resolveTableCellSpacing(tableSource, snapshot);
-    return source.resolvedTableColumns == null ? resolved : { ...resolved, tableColumns: source.resolvedTableColumns };
+    return source.resolvedTableColumns == null || Tools.diffValue(source.resolvedTableColumns, resolved.tableColumns)
+        ? resolved
+        : { ...resolved, tableColumns: source.resolvedTableColumns };
 }
 
 function hydrateTable(

@@ -28,11 +28,14 @@ import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { TransientUIController } from '../../../../controllers/transient-ui.controller';
 import enUS from '../../../../locale/en-US';
+import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
 import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
+import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { ITransientUIService, TransientUIService } from '../../../../services/transient-ui/transient-ui.service';
 import { connectInjector } from '../../../../utils/di';
@@ -41,8 +44,6 @@ import { RibbonOverflow } from '../RibbonOverflow';
 const injectors: Injector[] = [];
 
 function mountOverflow(groups: IMenuSchema[]) {
-    const sidebarOptions$ = new Subject<{ visible: boolean }>();
-    const dialogs$ = new Subject<Array<{ id: string; open: boolean }>>();
     const executeCommand = vi.fn(async () => true);
     const injector = new Injector([
         [ComponentManager],
@@ -57,8 +58,9 @@ function mountOverflow(groups: IMenuSchema[]) {
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IMenuManagerService, { useValue: { menuChanged$: new Subject(), getMenuByPositionKey: () => [] } }],
         [IShortcutService, { useValue: { shortcutChanged$: new Subject(), getShortcutDisplayOfCommand: () => null, forceEscape: () => ({ dispose: () => {} }) } }],
-        [IDialogService, { useValue: { getDialogs$: () => dialogs$ } }],
-        [ISidebarService, { useValue: { sidebarOptions$ } }],
+        [IDialogService, { useClass: DesktopDialogService }],
+        [ISidebarService, { useClass: DesktopSidebarService }],
+        [IUIPartsService, { useClass: UIPartsService }],
     ]);
     injectors.push(injector);
     const locale = injector.get(LocaleService);
@@ -73,7 +75,7 @@ function mountOverflow(groups: IMenuSchema[]) {
             <input id="editor" aria-label="Editor" />
             <ConnectedOverflow groups={groups} grid />
         </>
-    ), injector, executeCommand, sidebarOptions$, dialogs$, ConnectedOverflow };
+    ), injector, executeCommand, ConnectedOverflow };
 }
 
 function createGroups(disabled$ = new BehaviorSubject(false)): IMenuSchema[] {
@@ -122,20 +124,15 @@ describe('RibbonOverflow', () => {
         const disabled$ = new BehaviorSubject(false);
         const { getByRole, executeCommand } = mountOverflow(createGroups(disabled$));
         fireEvent.click(getByRole('button', { name: 'More' }));
+        fireEvent.change(getByRole('textbox', { name: 'Font' }), { target: { value: 'Courier New' } });
         fireEvent.click(getByRole('button', { name: 'Bold' }));
+        expect((getByRole('textbox', { name: 'Font' }) as HTMLInputElement).value).toBe('Courier New');
         expect(executeCommand).toHaveBeenCalledWith('bold', undefined);
         expect(document.activeElement).toBe(getByRole('textbox', { name: 'Editor' }));
         expect(getByRole('dialog', { name: 'More' })).toBeTruthy();
         act(() => disabled$.next(true));
         fireEvent.click(getByRole('button', { name: 'Bold' }));
         expect(executeCommand).toHaveBeenCalledTimes(1);
-    });
-
-    it('preserves custom controls without duplicating their label', () => {
-        const { getByRole, queryByText } = mountOverflow(createGroups());
-        fireEvent.click(getByRole('button', { name: 'More' }));
-        expect(getByRole('textbox', { name: 'Font' }).getAttribute('value')).toBe('Arial');
-        expect(queryByText('Font family')).toBeNull();
     });
 
     it('closes nested selectors before More and returns keyboard focus to their triggers', async () => {
@@ -158,13 +155,26 @@ describe('RibbonOverflow', () => {
     });
 
     it.each(['sidebar', 'dialog'] as const)('closes when an independent %s opens', async (surface) => {
-        const { getByRole, queryByRole, sidebarOptions$, dialogs$ } = mountOverflow(createGroups());
+        const { getByRole, queryByRole, injector } = mountOverflow(createGroups());
         fireEvent.click(getByRole('button', { name: 'More' }));
         act(() => {
-            if (surface === 'sidebar') sidebarOptions$.next({ visible: true });
-            else dialogs$.next([{ id: 'format', open: true }]);
+            if (surface === 'sidebar') {
+                injector.get(ISidebarService).open({ id: 'format' });
+            } else {
+                injector.get(IDialogService).open({ id: 'format' });
+            }
         });
         await waitFor(() => expect(queryByRole('dialog')).toBeNull());
+        fireEvent.click(getByRole('button', { name: 'More' }));
+        act(() => {
+            if (surface === 'sidebar') {
+                injector.get(ISidebarService).close();
+            } else {
+                injector.get(IDialogService).open({ id: 'format', width: 500 });
+                injector.get(IDialogService).close('format');
+            }
+        });
+        expect(getByRole('dialog', { name: 'More' })).toBeTruthy();
     });
 
     it('replaces an open menu when its groups change', () => {

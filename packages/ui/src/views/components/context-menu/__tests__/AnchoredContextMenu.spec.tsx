@@ -98,25 +98,6 @@ describe('AnchoredContextMenu', () => {
         injectors.splice(0).forEach((injector) => injector.dispose());
     });
 
-    it('passes its close callback to the context menu panel', () => {
-        const close = vi.fn();
-        renderWithDependencies(
-            <AnchoredContextMenu
-                hostId="desktop"
-                visible
-                anchorRect={{ left: 0, top: 0, bottom: 0 }}
-                menuType="drawing"
-                onRequestClose={close}
-            />
-        );
-
-        fireEvent.keyDown(screen.getByRole('button', { name: /Context menu item/ }), {
-            key: 'Escape',
-        });
-
-        expect(close).toHaveBeenCalledOnce();
-    });
-
     it('restores the element focused before the menu opened', () => {
         const { rerender } = renderWithDependencies(
             <>

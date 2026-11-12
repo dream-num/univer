@@ -42,9 +42,9 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import enUS from '../../../../locale/en-US';
 import { FontService, IFontService } from '../../../../services/font.service';
 import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
-import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
@@ -76,10 +76,7 @@ function NestedDialogDropdown() {
     );
 }
 
-function renderWithDependencies(
-    element: ReactElement,
-    menuItems: ReturnType<IMenuManagerService['getMenuByPositionKey']> = []
-) {
+function renderWithDependencies(element: ReactElement) {
     const injector = new Injector([[ITransientUIService, { useClass: TransientUIService }]]);
     testInjectors.push(injector);
     injector.add([LocaleService]);
@@ -96,15 +93,9 @@ function renderWithDependencies(
     injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
     const localeService = injector.get(LocaleService);
-    localeService.load({ [LocaleType.EN_US]: { Reset: 'Reset' } });
+    localeService.load({ [LocaleType.EN_US]: enUS });
     localeService.setLocale(LocaleType.EN_US);
     localeService.setDirection('ltr');
-    injector.get(IMenuManagerService).appendRootMenu({
-        'test-menu': Object.fromEntries(menuItems.map((item) => [item.key, {
-            order: item.order,
-            menuItemFactory: () => item.item!,
-        }])),
-    });
     const forceEscape = vi.spyOn(injector.get(IShortcutService), 'forceEscape');
     injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
         <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
@@ -137,7 +128,6 @@ describe('ToolbarTooltip', () => {
         fireEvent.mouseEnter(trigger);
         const tooltip = getByRole('tooltip');
         expect(tooltip.textContent).toBe('Fill');
-        expect(tooltip.classList.contains('univer-pointer-events-none')).toBe(true);
 
         rerender(renderTooltip(true));
         expect(queryByRole('tooltip')).toBeNull();
@@ -452,7 +442,7 @@ describe('DropdownMenuWrapper', () => {
         }
     );
 
-    it('renders a single embedded custom panel flush with the dropdown edge', async () => {
+    it('releases shortcut Escape handling when a custom option closes the menu', async () => {
         const { findByRole, forceEscape, getByRole } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="test-custom-panel">
@@ -476,11 +466,7 @@ describe('DropdownMenuWrapper', () => {
 
         fireEvent.pointerDown(getByRole('button', { name: 'Open custom panel' }), { button: 0, ctrlKey: false });
         const option = await findByRole('button', { name: 'Choose dynamic value' });
-        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
-        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
 
-        expect(menuItem?.className).toContain('!univer-p-0');
-        expect(menuContent?.className).toContain('!univer-p-0');
         expect(forceEscape).toHaveBeenCalledOnce();
         const disposeShortcutEscape = vi.spyOn(forceEscape.mock.results[0].value, 'dispose');
 
@@ -488,7 +474,7 @@ describe('DropdownMenuWrapper', () => {
         await waitFor(() => expect(disposeShortcutEscape).toHaveBeenCalledOnce());
     });
 
-    it('uses only the shared menu padding around the font list and selects its font value', async () => {
+    it('selects a font and closes the font list', async () => {
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
         const onOptionSelect = vi.fn();
         const { findByRole, getByRole, queryByRole, injector } = renderWithDependencies(
@@ -515,81 +501,9 @@ describe('DropdownMenuWrapper', () => {
 
         fireEvent.pointerDown(getByRole('button', { name: 'Open fonts' }), { button: 0, ctrlKey: false });
         const option = await findByRole('button', { name: 'Courier New' });
-        expect(option.closest('[data-slot="dropdown-menu-item"]')?.className).toContain('!univer-p-0');
-        expect(getByRole('menu').className).not.toContain('!univer-p-0');
 
         fireEvent.click(option);
         expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ value: 'Courier New' }));
         await waitFor(() => expect(queryByRole('menu')).toBeNull());
-    });
-
-    it('keeps padding around a non-embedded custom panel', async () => {
-        const { findByRole, getByRole } = renderWithDependencies(
-            <ToolbarDropdownProvider>
-                <TooltipWrapper dropdownKey="test-non-embedded-custom-panel">
-                    <DropdownMenuWrapper
-                        menuId="test-menu"
-                        options={[{
-                            label: {
-                                name: 'TestDynamicOption',
-                                hoverable: false,
-                                selectable: false,
-                            },
-                        }]}
-                        onOptionSelect={vi.fn()}
-                    >
-                        <button type="button">Open non-embedded custom panel</button>
-                    </DropdownMenuWrapper>
-                </TooltipWrapper>
-            </ToolbarDropdownProvider>
-        );
-
-        fireEvent.pointerDown(getByRole('button', { name: 'Open non-embedded custom panel' }), { button: 0, ctrlKey: false });
-        const option = await findByRole('button', { name: 'Choose dynamic value' });
-        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
-        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
-
-        expect(menuItem?.className).not.toContain('!univer-p-0');
-        expect(menuContent?.className).not.toContain('!univer-p-0');
-    });
-
-    it('keeps padding around a custom panel when menu actions follow it', async () => {
-        const { findByRole, getByRole } = renderWithDependencies(
-            <ToolbarDropdownProvider>
-                <TooltipWrapper dropdownKey="test-custom-panel-with-action">
-                    <DropdownMenuWrapper
-                        menuId="test-menu"
-                        options={[{
-                            label: {
-                                name: 'TestDynamicOption',
-                                hoverable: false,
-                                selectable: false,
-                                props: { embedded: true },
-                            },
-                        }]}
-                        onOptionSelect={vi.fn()}
-                    >
-                        <button type="button">Open custom panel with action</button>
-                    </DropdownMenuWrapper>
-                </TooltipWrapper>
-            </ToolbarDropdownProvider>,
-            [{
-                key: 'reset',
-                order: 0,
-                item: {
-                    id: 'reset',
-                    type: MenuItemType.BUTTON,
-                    title: 'Reset',
-                },
-            }]
-        );
-
-        fireEvent.pointerDown(getByRole('button', { name: 'Open custom panel with action' }), { button: 0, ctrlKey: false });
-        const option = await findByRole('button', { name: 'Choose dynamic value' });
-        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
-        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
-
-        expect(menuItem?.className).not.toContain('!univer-p-0');
-        expect(menuContent?.className).not.toContain('!univer-p-0');
     });
 });

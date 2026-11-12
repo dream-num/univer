@@ -16,7 +16,6 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { ICollaborator } from '@univerjs/protocol';
-import type { LocaleKey } from '../../../locale/types';
 import {
     IAuthzIoService,
     IUniverInstanceService,
@@ -24,17 +23,17 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { Avatar, borderClassName, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Avatar, borderClassName, Button, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { IDialogService, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import {
     UNIVER_SHEET_PERMISSION_USER_DIALOG,
     UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
 } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
-import { UserEmptyBase64 } from '../user-dialog/constant';
 
 export interface IPermissionDetailUserPartProps {
     editState: EditStateEnum;
@@ -82,7 +81,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
         sheetPermissionUserManagerService.setCanEditUserList(userList.filter((user) => user.subject?.userID !== currentUser.userID));
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
-            title: { title: '' },
+            title: { title: localeService.t<LocaleKey>('sheets-ui.permission.panel.addPerson') },
             children: { label: UNIVER_SHEET_PERMISSION_USER_DIALOG },
             width: 'auto',
             closable: false,
@@ -152,16 +151,18 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             {editState === EditStateEnum.DesignedUserCanEdit && (
                 <div
                     className={clsx(`
-                      univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-overflow-y-auto univer-rounded-lg
+                      univer-mb-2 univer-box-border univer-flex univer-flex-col univer-overflow-y-auto univer-rounded-lg
                       univer-p-3
-                    `, borderClassName, userListClassName)}
+                    `, selectUserList?.length ? 'univer-h-[270px]' : 'univer-h-44', borderClassName, userListClassName)}
                 >
                     <div className="univer-flex univer-items-center univer-justify-between univer-text-sm">
                         <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.designedPerson')}</span>
-                        <span className="univer-cursor-pointer univer-text-primary-600" onClick={handleAddPerson}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.addPerson')}</span>
+                        <Button variant="link" className="univer-h-auto univer-p-0" onClick={handleAddPerson}>
+                            {localeService.t<LocaleKey>('sheets-ui.permission.panel.addPerson')}
+                        </Button>
                     </div>
                     <div className="univer-my-2 univer-h-px univer-bg-gray-200" />
-                    <div className="univer-flex-1">
+                    <div className="univer-flex univer-flex-1 univer-flex-col">
                         {selectUserList?.length > 0
                             ? selectUserList.map((item) => {
                                 return (
@@ -207,13 +208,15 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                             : (
                                 <div
                                     className={`
-                                      univer-flex univer-h-full univer-flex-col univer-items-center
-                                      univer-justify-center
+                                      univer-flex univer-min-h-24 univer-flex-1 univer-items-center
+                                      univer-justify-center univer-px-2 univer-text-center
                                     `}
                                 >
-                                    <img width={240} height={120} src={UserEmptyBase64} alt="" />
                                     <p
-                                        className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400"
+                                        className={`
+                                          univer-m-0 univer-max-w-60 univer-text-sm univer-text-gray-500
+                                          dark:!univer-text-gray-200
+                                        `}
                                     >
                                         {localeService.t<LocaleKey>('sheets-ui.permission.dialog.userEmpty')}
                                     </p>

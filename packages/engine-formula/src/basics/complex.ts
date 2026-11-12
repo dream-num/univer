@@ -37,24 +37,74 @@ function findSignIndex(inumberStr: string, sign: '+' | '-'): number {
     return -1;
 }
 
+/**
+ * Excel prints the parts of a complex number with at most 15 significant
+ * digits and keeps plain decimal notation while the text fits in 21
+ * characters, e.g. `0.0000001` and `100000000000000000000`. Longer values fall
+ * back to scientific notation such as `1.23456789012345E-06`.
+ *
+ * The whole conversion stays inside Decimal so the rounded value is never
+ * turned into a double and formatted again, which can round a second time.
+ */
+const MAX_FIXED_LENGTH = 21;
+
+function formatComplexNumber(value: Decimal): string {
+    if (!value.isFinite()) {
+        return value.toString();
+    }
+
+    if (value.isZero()) {
+        return '0';
+    }
+
+    const sign = value.isNegative() ? '-' : '';
+    const abs = value.abs().toSignificantDigits(15, Decimal.ROUND_HALF_UP);
+    const fixed = abs.toFixed();
+
+    if (fixed.length <= MAX_FIXED_LENGTH) {
+        return `${sign}${fixed}`;
+    }
+
+    const [mantissa, exponent] = abs.toExponential().split('e');
+    const power = Number(exponent);
+    const exponentText = `${power < 0 ? '-' : '+'}${Math.abs(power).toString().padStart(2, '0')}`;
+
+    return `${sign}${mantissa}E${exponentText}`;
+}
+
+/**
+ * Formats the imaginary part. Excel omits the coefficient of the unit, so `1`
+ * and `-1` render as `i` and `-i`.
+ */
+function formatImaginaryNumber(iValue: Decimal, suffix: string): string {
+    if (iValue.eq(1)) {
+        return suffix;
+    }
+
+    if (iValue.eq(-1)) {
+        return `-${suffix}`;
+    }
+
+    return `${formatComplexNumber(iValue)}${suffix}`;
+}
+
 export class Complex {
     static getComplex(realNum: number, iNum: number, suffix: string): number | string {
-        const _realNum = new Decimal(realNum).toSignificantDigits(15).toNumber();
-        const _iNum = new Decimal(iNum).toSignificantDigits(15).toNumber();
+        const realValue = new Decimal(realNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
+        const iValue = new Decimal(iNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const _suffix = suffix === '' ? 'i' : suffix;
 
         let result: number | string;
 
-        if (_realNum === 0 && _iNum === 0) {
+        if (realValue.isZero() && iValue.isZero()) {
             result = 0;
-        } else if (_realNum === 0) {
-            result = _iNum === 1 ? _suffix : `${_iNum}${_suffix}`;
-        } else if (_iNum === 0) {
-            result = _realNum;
+        } else if (realValue.isZero()) {
+            result = formatImaginaryNumber(iValue, _suffix);
+        } else if (iValue.isZero()) {
+            result = realValue.toNumber();
         } else {
-            const sign = _iNum > 0 ? '+' : '';
-            const suffixStr = _iNum === 1 ? _suffix : `${_iNum}${_suffix}`;
-            result = `${_realNum}${sign}${suffixStr}`;
+            const sign = iValue.gt(0) ? '+' : '';
+            result = `${formatComplexNumber(realValue)}${sign}${formatImaginaryNumber(iValue, _suffix)}`;
         }
 
         return result;
@@ -388,9 +438,11 @@ export class Complex {
     }
 
     Ln(): number | string {
-        const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
-        const realNum = Decimal.ln(abs).toNumber();
-        const iNum = Decimal.acos(new Decimal(this._realNum).div(abs)).toNumber();
+        // Keep the real part and the argument in double precision so the
+        // result matches Excel, including ln|z| when |z| is close to 1.
+        // atan2 also carries the sign of the imaginary part.
+        const realNum = Math.log(Math.hypot(this._realNum, this._iNum));
+        const iNum = Math.atan2(this._iNum, this._realNum);
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }

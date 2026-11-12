@@ -29,7 +29,7 @@ describe('Test imcsc function', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe('-0.0000117836687482814-0.00000348576140783804i');
+            expect(result.getValue()).toBe('-0.0000117836687482814-3.48576140783804E-06i');
         });
 
         it('Value is large numbers', () => {

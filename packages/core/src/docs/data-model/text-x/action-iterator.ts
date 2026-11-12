@@ -17,6 +17,7 @@
 /* eslint-disable no-param-reassign */
 
 import type { TextXAction } from './action-types';
+import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { TextXActionType } from './action-types';
 import { getBodySliceForSplitTextXAction } from './utils';
@@ -69,11 +70,20 @@ export class ActionIterator {
                 });
             } else {
                 // handle condition: (nextAction.t === TextXActionType.INSERT || nextAction.t === TextXActionType.RETAIN && nextAction.body)
+                const body = getBodySliceForSplitTextXAction(nextAction.body!, offset, offset + length, false);
+                if (
+                    nextAction.t === TextXActionType.RETAIN &&
+                    nextAction.coverType === UpdateDocsAttributeType.REPLACE &&
+                    nextAction.body?.paragraphs != null
+                ) {
+                    // An empty replacement still clears paragraphs inside this slice.
+                    body.paragraphs ??= [];
+                }
 
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
-                    body: getBodySliceForSplitTextXAction(nextAction.body!, offset, offset + length, false),
+                    body,
                 });
             }
         } else {

@@ -488,6 +488,48 @@ describe('Conditional aggregate indexed equality semantics', () => {
         expect(result.map((row) => row[0].getValue())).toEqual([31, 37]);
     });
 
+    it('keeps date-formatted serials distinct from plain numbers in cached criteria', () => {
+        // Date comparisons round the serial, so `1` formatted as a date matches a
+        // date-formatted 1.000000001 while a plain `1` does not.
+        const range = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(1.000000001, 'yyyy-mm-dd')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(7)]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(1, 'yyyy-mm-dd')], [NumberValueObject.create(1)]],
+            rowCount: 2,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        const result = getPairedRangeAndCriteriaResult([range, criteria], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([7, 0]);
+    });
+
     it('evaluates the repeated blank cells of a whole-column criteria range once', () => {
         const size = 200;
         const keyCount = 20;

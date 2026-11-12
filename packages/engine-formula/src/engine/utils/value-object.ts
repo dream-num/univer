@@ -476,7 +476,12 @@ function getCriteriaKeySegment(value: Nullable<BaseValueObject>): string {
         return `b:${value.getValue()}`;
     }
     if (value.isNumber()) {
-        return `#:${String(stripErrorMargin(Number(value.getValue())))}`;
+        const serial = String(stripErrorMargin(Number(value.getValue())));
+        // A date-formatted serial compares differently from a plain number: date
+        // comparisons round the serial, and text cells are converted through the date
+        // system. Keep the pattern in the key so the two can never share an entry.
+        const pattern = value.getPattern();
+        return pattern ? `#:${pattern}:${serial}` : `#:${serial}`;
     }
     if (value.isError()) {
         return `e:${value.getValue()}`;

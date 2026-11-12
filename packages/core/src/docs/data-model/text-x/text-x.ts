@@ -75,12 +75,17 @@ function normalizeInsertActionParagraphIds(
     currentIndex: number,
     reservedParagraphIds: Set<string>
 ) {
-    normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
+    const splitsParagraph = normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
         freshenSplitParagraph: false,
         preserveExplicitParagraphIds: Boolean((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
         reservedParagraphIds,
         dataStream: doc.dataStream,
     });
+    // Concurrent inline input can move a paragraph-boundary insertion inside the
+    // paragraph. Preserve its resolved identities instead of treating it as a split.
+    if (body.paragraphs?.length && !splitsParagraph) {
+        Reflect.set(body, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
+    }
 }
 
 export type TPriority = 'left' | 'right';

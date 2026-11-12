@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { Complex } from '../complex';
+
+/**
+ * `2-3` is the text to number conversion of February 3 of the current year,
+ * just like Excel, so the expected serial cannot be a constant.
+ */
+function februaryThirdSerial(dateSystem: DateSystem = DateSystem.Date1900): number {
+    return excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 1, 3)), dateSystem);
+}
 
 describe('Test complex', () => {
     it('Parses a real part written with an exponent', () => {
@@ -43,9 +52,62 @@ describe('Test complex', () => {
         expect(complex.getINum()).toBe(-1);
     });
 
-    it('Keeps rejecting two separators', () => {
-        expect(new Complex('1+2-3i').isError()).toBe(true);
+    it('Keeps the sign after the first one inside the imaginary part', () => {
+        const complex = new Complex('1+2-3i');
+
+        expect(complex.isError()).toBe(false);
+        expect(complex.getRealNum()).toBe(1);
+        expect(complex.getINum()).toBe(februaryThirdSerial());
+
+        const negated = new Complex('1-2-3i');
+
+        expect(negated.isError()).toBe(false);
+        expect(negated.getRealNum()).toBe(1);
+        expect(negated.getINum()).toBe(-februaryThirdSerial());
+    });
+
+    it('Rejects a sign inside the imaginary part that is not a number', () => {
         expect(new Complex('1-2+3i').isError()).toBe(true);
+        expect(new Complex('1+2+3i').isError()).toBe(true);
+    });
+
+    it('Reads a date part with the workbook date system', () => {
+        const complex = new Complex('1+2-3i', DateSystem.Date1904);
+
+        expect(complex.isError()).toBe(false);
+        expect(complex.getRealNum()).toBe(1);
+        expect(complex.getINum()).toBe(februaryThirdSerial(DateSystem.Date1904));
+    });
+
+    it('Reads the parts with the text to number conversion of a cell', () => {
+        const percent = new Complex('1+50%i');
+
+        expect(percent.isError()).toBe(false);
+        expect(percent.getRealNum()).toBe(1);
+        expect(percent.getINum()).toBe(0.5);
+
+        const spaced = new Complex(' 1+2i ');
+
+        expect(spaced.isError()).toBe(false);
+        expect(spaced.getRealNum()).toBe(1);
+        expect(spaced.getINum()).toBe(2);
+
+        const currency = new Complex('1+$2i');
+
+        expect(currency.isError()).toBe(false);
+        expect(currency.getRealNum()).toBe(1);
+        expect(currency.getINum()).toBe(2);
+
+        const grouped = new Complex('1+1,234i');
+
+        expect(grouped.isError()).toBe(false);
+        expect(grouped.getRealNum()).toBe(1);
+        expect(grouped.getINum()).toBe(1234);
+    });
+
+    it('Rejects a part that is not a finite number', () => {
+        expect(new Complex('1+0x10i').isError()).toBe(true);
+        expect(new Complex('1+Infinity i').isError()).toBe(true);
     });
 
     it('Writes tiny numbers in plain decimal notation', () => {

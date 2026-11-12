@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -44,8 +44,8 @@ export class Imsub extends BaseFunction {
         const inumber1Value = `${inumber1Object.getValue()}`;
         const inumber2Value = `${inumber2Object.getValue()}`;
 
-        const complex1 = new Complex(inumber1Value);
-        const complex2 = new Complex(inumber2Value);
+        const complex1 = new Complex(inumber1Value, this.getDateSystem());
+        const complex2 = new Complex(inumber2Value, this.getDateSystem());
 
         if (complex1.isError() || complex2.isError()) {
             return ErrorValueObject.create(ErrorType.NUM);

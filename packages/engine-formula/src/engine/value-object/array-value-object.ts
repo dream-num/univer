@@ -167,6 +167,8 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _flattenCache: Nullable<ArrayValueObject>;
 
+    private _cacheVersion: number = 0;
+
     /**
      * The default value of the array, null values in comparison results support setting to false
      */
@@ -265,6 +267,10 @@ export class ArrayValueObject extends BaseValueObject {
         this._legacyImplicitForAggregate = value;
     }
 
+    getCacheVersion() {
+        return this._cacheVersion;
+    }
+
     override getArrayValue() {
         return this._values;
     }
@@ -279,6 +285,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     setDefaultValue(value: Nullable<BaseValueObject>) {
+        this._clearCache();
         this._defaultValue = value;
     }
 
@@ -1418,6 +1425,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _clearCache() {
+        this._cacheVersion++;
         this._flattenCache = null;
         this._sliceCache.clear();
     }

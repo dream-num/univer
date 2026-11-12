@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData } from '@univerjs/core';
+import { CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
-import { CellValueType, LocaleType } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { IAllRuntimeData } from '../../../../services/runtime.service';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { ICalculateFormulaService } from '../../../../services/calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
+import { DependencyManagerService, IDependencyManagerService } from '../../../../services/dependency-manager.service';
+import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../../../../services/feature-calculation-manager.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { Concatenate } from '../../../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../../../text/function-names';
 import { getObjectValue } from '../../../util';
@@ -329,5 +333,82 @@ describe('Test sumifs function', () => {
             const result = await calculate('=SUMIFS(J1:J5,K1:K5,"<>",K1:K5,"<>*")');
             expect(result).toBe(140);
         });
+    });
+
+    it('calculates repeated whole-column SUMIFS formulas with trailing blanks without stalling', async () => {
+        const dataRows = 2500;
+        const summaryRows = 300;
+        const dataCells: Record<number, Record<number, ICellData>> = { 0: { 0: { v: 'key' }, 1: { v: 'amount' } } };
+        for (let i = 0; i < dataRows; i++) {
+            dataCells[i + 1] = { 0: { v: `k${i % summaryRows}` }, 1: { v: i + 1 } };
+        }
+
+        const summaryCells: Record<number, Record<number, ICellData>> = { 0: { 0: { v: 'key' }, 1: { v: 'total' } } };
+        const formulaMap: Record<number, Record<number, { f: string }>> = {};
+        for (let i = 0; i < summaryRows; i++) {
+            const formula = '=SUMIFS(Data!B:B,Data!A:A,$A:$A)';
+            summaryCells[i + 1] = { 0: { v: `k${i}` }, 1: { f: formula } };
+            formulaMap[i + 1] = { 1: { f: formula } };
+        }
+        summaryCells[0][2] = { f: '=SUMIFS(Data!B:B,Data!A:A,$A:$A)' };
+        formulaMap[0] = { 2: { f: '=SUMIFS(Data!B:B,Data!A:A,$A:$A)' } };
+
+        const testBed = createFunctionTestBed({
+            id: 'test',
+            name: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            sheetOrder: ['summary', 'data'],
+            styles: {},
+            sheets: {
+                summary: { id: 'summary', name: 'Summary', rowCount: 1000, columnCount: 10, cellData: summaryCells },
+                data: { id: 'data', name: 'Data', rowCount: dataRows + 100, columnCount: 10, cellData: dataCells },
+            },
+        }, [
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDependencyManagerService, { useClass: DependencyManagerService }],
+        ]);
+
+        try {
+            testBed.get(IFunctionService).registerExecutors(new Sumifs(FUNCTION_NAMES_MATH.SUMIFS));
+            const calculateService = testBed.get(ICalculateFormulaService);
+            let runtimeData!: IAllRuntimeData;
+            const completed = new Promise<void>((resolve) => {
+                const sub = calculateService.executionCompleteListener$.subscribe((data) => {
+                    runtimeData = data;
+                    sub.unsubscribe();
+                    resolve();
+                });
+            });
+
+            await calculateService.execute({
+                allUnitData: {
+                    test: {
+                        summary: { cellData: new ObjectMatrix(summaryCells), rowCount: 1000, columnCount: 10, rowData: {}, columnData: {} },
+                        data: { cellData: new ObjectMatrix(dataCells), rowCount: dataRows + 100, columnCount: 10, rowData: {}, columnData: {} },
+                    },
+                },
+                unitSheetNameMap: { test: { Summary: 'summary', Data: 'data' } },
+                unitStylesData: {},
+                formulaData: { test: { summary: formulaMap, data: {} } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            });
+            await completed;
+
+            expect(runtimeData.unitData.test?.summary?.getValue(1, 1)?.v).toBe(ErrorType.SPILL);
+            expect(runtimeData.unitData.test?.summary?.getValue(summaryRows, 1)?.v).toBe(ErrorType.SPILL);
+            expect(runtimeData.arrayFormulaCellData?.test?.summary?.getValue(1, 2)?.v).toBe(10809);
+            expect(runtimeData.arrayFormulaCellData?.test?.summary?.getValue(summaryRows, 2)?.v).toBe(10800);
+            expect(runtimeData.arrayFormulaCellData?.test?.summary?.getValue(summaryRows + 1, 2)?.v).toBe(0);
+        } finally {
+            testBed.univer.dispose();
+        }
     });
 });

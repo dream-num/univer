@@ -441,4 +441,156 @@ describe('Conditional aggregate indexed equality semantics', () => {
         range.set(0, 0, StringValueObject.create('Beta'));
         expect(getPairedRangeAndCriteriaResult([range, criteria], params).map((row) => row[0].getValue())).toEqual([0, 2]);
     });
+
+    it('preserves semantics across blanks, empty strings, booleans, errors, and repeated non-exact criteria', () => {
+        const keys = ArrayValueObject.create({
+            calculateValueList: [
+                [NullValueObject.create()],
+                [StringValueObject.create('')],
+                [NumberValueObject.create(0)],
+                [BooleanValueObject.create(false)],
+                [BooleanValueObject.create(true)],
+                [StringValueObject.create('TRUE')],
+                [StringValueObject.create('k1')],
+                [ErrorValueObject.create(ErrorType.NA)],
+            ],
+            rowCount: 8,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: [
+                [NumberValueObject.create(1)],
+                [NumberValueObject.create(2)],
+                [NumberValueObject.create(4)],
+                [NumberValueObject.create(8)],
+                [NumberValueObject.create(16)],
+                [NumberValueObject.create(32)],
+                [NumberValueObject.create(64)],
+                [NumberValueObject.create(128)],
+            ],
+            rowCount: 8,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteriaList = [
+            NullValueObject.create(),
+            StringValueObject.create(''),
+            StringValueObject.create('='),
+            NumberValueObject.create(0),
+            BooleanValueObject.create(false),
+            StringValueObject.create('=TRUE'),
+            StringValueObject.create('k*'),
+            StringValueObject.create('>10'),
+            ErrorValueObject.create(ErrorType.NA),
+            NullValueObject.create(),
+            StringValueObject.create(''),
+            StringValueObject.create('k*'),
+            ErrorValueObject.create(ErrorType.NA),
+        ];
+        const criteria = ArrayValueObject.create({
+            calculateValueList: criteriaList.map((value) => [value]),
+            rowCount: criteriaList.length,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        for (const formulaName of ['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'] as const) {
+            const params = {
+                formulaName,
+                maxRowLength: criteriaList.length,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: formulaName === 'COUNTIFS' ? undefined : amounts,
+            };
+            const actual = getPairedRangeAndCriteriaResult([keys, criteria], params).map((row) => row[0].getValue());
+            const expected = criteriaList.map((criterion) =>
+                getPairedRangeAndCriteriaResult([keys, criterion], { ...params, maxRowLength: 1 })[0][0].getValue()
+            );
+            expect(actual).toEqual(expected);
+        }
+    });
+
+    it('avoids rescanning the lookup range for repeated trailing blank cells and invalidates on updates', () => {
+        const dataRows = 2600;
+        const criteriaRows = 1000;
+        const range = ArrayValueObject.create({
+            calculateValueList: Array.from({ length: dataRows }, (_, r) => [
+                r < 2500 ? StringValueObject.create(`k${r % 300}`) : NullValueObject.create(),
+            ]),
+            rowCount: dataRows,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: Array.from({ length: dataRows }, (_, r) => [
+                r < 2500 ? NumberValueObject.create(r + 1) : NullValueObject.create(),
+            ]),
+            rowCount: dataRows,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = ArrayValueObject.create({
+            calculateValueList: Array.from({ length: criteriaRows }, (_, r) => [
+                r < 300 ? StringValueObject.create(`k${r}`) : NullValueObject.create(),
+            ]),
+            rowCount: criteriaRows,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        const reads = vi.spyOn(ArrayValueObject.prototype, 'get');
+        try {
+            const first = getPairedRangeAndCriteriaResult([range, criteria], {
+                formulaName: 'SUMIFS',
+                maxRowLength: criteriaRows,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: amounts,
+            });
+            expect(reads.mock.calls.length).toBeLessThan(10000);
+            expect(first[0][0].getValue()).toBe(10809);
+            expect(first[999][0].getValue()).toBe(0);
+
+            amounts.set(0, 0, NumberValueObject.create(100));
+            const updatedTarget = getPairedRangeAndCriteriaResult([range, criteria], {
+                formulaName: 'SUMIFS',
+                maxRowLength: criteriaRows,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: amounts,
+            });
+            expect(updatedTarget[0][0].getValue()).toBe(10908);
+
+            criteria.set(999, 0, StringValueObject.create('k0'));
+            const updatedCriteria = getPairedRangeAndCriteriaResult([range, criteria], {
+                formulaName: 'SUMIFS',
+                maxRowLength: criteriaRows,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: amounts,
+            });
+            expect(updatedCriteria[999][0].getValue()).toBe(10908);
+        } finally {
+            reads.mockRestore();
+        }
+    });
 });

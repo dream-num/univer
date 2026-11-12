@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
+import type { DateSystem, ICellData, Nullable } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { CellValueType } from '@univerjs/core';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
@@ -26,9 +26,8 @@ import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
-import { expandArrayValueObject } from './array-object';
 import { isWildcard, normalizeTextForComparison } from './compare';
-import { stripErrorMargin } from './math-kit';
+import { plus, stripErrorMargin } from './math-kit';
 import {
     booleanObjectIntersection,
     createCriteriaValueObject,
@@ -316,10 +315,79 @@ export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject):
     return ArrayValueObject.createByArray([[valueObject.getValue()]]);
 }
 
-function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
-    const keys: Array<string | number> = [];
+type EqualityIndexKey = string | number | symbol;
+type EqualityPosition = [number, number];
+type EqualityIndex = Map<EqualityIndexKey, EqualityPosition[]>;
+
+interface IParsedCriteriaCondition {
+    criteriaValueObject: BaseValueObject;
+    operator: compareToken;
+    criteriaObject: BaseValueObject;
+    isBlankStringCriteria: boolean;
+    isWildcardCriteria: boolean;
+}
+
+interface IArraySnapshot {
+    value: ArrayValueObject;
+    version: number;
+    dateSystem: DateSystem;
+}
+
+interface ICachedPairedResult {
+    formulaName: string;
+    isNumberSensitive: boolean;
+    maxRowLength: number;
+    maxColumnLength: number;
+    targetSnapshot: IArraySnapshot | null;
+    rangeSnapshots: IArraySnapshot[];
+    criteriaSnapshots: Array<IArraySnapshot | string>;
+    results: BaseValueObject[][];
+}
+
+const NULL_EQUALITY_KEY = Symbol('NULL_EQUALITY');
+const EMPTY_STRING_EQUALITY_KEY = Symbol('EMPTY_STRING_EQUALITY');
+const TRUE_EQUALITY_KEY = Symbol('TRUE_EQUALITY');
+const FALSE_EQUALITY_KEY = Symbol('FALSE_EQUALITY');
+const MAX_PAIRED_RESULT_CACHE_ENTRIES = 16;
+
+const equalityIndexCache = new WeakMap<ArrayValueObject, {
+    version: number;
+    dateSystem: DateSystem;
+    index: EqualityIndex;
+}>();
+
+const pairedResultCache = new WeakMap<ArrayValueObject, ICachedPairedResult[]>();
+
+function captureArraySnapshot(value: ArrayValueObject): IArraySnapshot {
+    return {
+        value,
+        version: value.getCacheVersion(),
+        dateSystem: value.getDateSystem(),
+    };
+}
+
+function matchesArraySnapshot(snapshot: IArraySnapshot, value: ArrayValueObject): boolean {
+    return snapshot.value === value &&
+        snapshot.version === value.getCacheVersion() &&
+        snapshot.dateSystem === value.getDateSystem();
+}
+
+function getEqualityValueKeys(value: BaseValueObject): EqualityIndexKey[] {
+    if (value.isNull()) {
+        return [NULL_EQUALITY_KEY];
+    }
+
+    if (value.isBoolean()) {
+        return [value.getValue() ? TRUE_EQUALITY_KEY : FALSE_EQUALITY_KEY];
+    }
+
+    const keys: EqualityIndexKey[] = [];
     if (value.isString()) {
-        keys.push(normalizeTextForComparison(String(value.getValue())));
+        const raw = String(value.getValue());
+        if (raw === '') {
+            return [EMPTY_STRING_EQUALITY_KEY];
+        }
+        keys.push(normalizeTextForComparison(raw));
     } else if (!value.isNumber()) {
         return keys;
     }
@@ -331,13 +399,13 @@ function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
     return keys;
 }
 
-function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array<[number, number]>> {
-    const index = new Map<string | number, Array<[number, number]>>();
+function buildEqualityIndex(range: ArrayValueObject): EqualityIndex {
+    const index: EqualityIndex = new Map();
     range.iterator((value, row, column) => {
         if (!value) {
             return;
         }
-        const position: [number, number] = [row, column];
+        const position: EqualityPosition = [row, column];
         for (const key of getEqualityValueKeys(value)) {
             let matches = index.get(key);
             if (!matches) {
@@ -350,11 +418,24 @@ function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array
     return index;
 }
 
+function getOrBuildEqualityIndex(range: ArrayValueObject): EqualityIndex {
+    const version = range.getCacheVersion();
+    const dateSystem = range.getDateSystem();
+    const cached = equalityIndexCache.get(range);
+    if (cached && cached.version === version && cached.dateSystem === dateSystem) {
+        return cached.index;
+    }
+
+    const index = buildEqualityIndex(range);
+    equalityIndexCache.set(range, { version, dateSystem, index });
+    return index;
+}
+
 function getIndexedPositions(
-    index: Map<string | number, Array<[number, number]>>,
-    keys: Array<string | number>,
+    index: EqualityIndex,
+    keys: EqualityIndexKey[],
     range: ArrayValueObject
-): Array<[number, number]> | undefined {
+): EqualityPosition[] | undefined {
     const buckets = keys.map((key) => index.get(key) ?? []);
     const candidateCount = buckets.reduce((count, bucket) => count + bucket.length, 0);
     // ponytail: conservatively bound candidate copies; refine overlapping buckets only if profiling warrants it.
@@ -367,20 +448,17 @@ function getIndexedPositions(
     return Array.from(new Set(buckets.flat())).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 }
 
-function pickRangePositions(range: ArrayValueObject, positions: Array<[number, number]>): ArrayValueObject {
-    return ArrayValueObject.create({
-        calculateValueList: positions.map(([row, column]) => [range.get(row, column)]),
-        rowCount: positions.length,
-        columnCount: 1,
-        unitId: '',
-        sheetId: '',
-        row: -1,
-        column: -1,
-    });
-}
-
-function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string | number> | undefined {
-    if (!criteria || (!criteria.isString() && !criteria.isNumber())) {
+function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): EqualityIndexKey[] | undefined {
+    if (!criteria) {
+        return undefined;
+    }
+    if (criteria.isNull()) {
+        return [NULL_EQUALITY_KEY];
+    }
+    if (criteria.isBoolean()) {
+        return [criteria.getValue() ? TRUE_EQUALITY_KEY : FALSE_EQUALITY_KEY];
+    }
+    if (!criteria.isString() && !criteria.isNumber()) {
         return undefined;
     }
 
@@ -390,46 +468,446 @@ function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string
     if (operator !== compareToken.EQUALS || value.isDateFormat()) {
         return undefined;
     }
+    if (value.isNull()) {
+        return [NULL_EQUALITY_KEY];
+    }
+    if (value.isBoolean()) {
+        return [value.getValue() ? TRUE_EQUALITY_KEY : FALSE_EQUALITY_KEY];
+    }
 
-    // Blanks and wildcard patterns retain the full comparison path.
-    if (value.isString() && (value.getValue() === '' || isWildcard(String(value.getValue())))) {
-        return undefined;
+    // Wildcard patterns retain the full comparison path; blank text matches both blanks and "".
+    if (value.isString()) {
+        const text = String(value.getValue());
+        if (text === '') {
+            return [NULL_EQUALITY_KEY, EMPTY_STRING_EQUALITY_KEY];
+        }
+        if (isWildcard(text)) {
+            return undefined;
+        }
     }
 
     const keys = getEqualityValueKeys(value);
     return keys.length > 0 ? keys : undefined;
 }
 
-function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string | number | undefined {
-    if (criteria.length === 0 || criteria.some((value) => getExactCriteriaKeys(value) === undefined)) {
+function getSingleCriteriaCacheKey(value: Nullable<BaseValueObject>): string | undefined {
+    if (!value) {
+        return 'u';
+    }
+    if (value.isNull()) {
+        return 'n';
+    }
+    if (value.isBoolean()) {
+        return value.getValue() ? 'b:1' : 'b:0';
+    }
+    if (value.isError()) {
+        return `e:${value.getValue()}`;
+    }
+    if (value.isNumber()) {
+        const number = Number(value.getValue());
+        const normalized = number === 0 ? 0 : number;
+        return `d:${normalized}:${value.isDateFormat() ? `1:${value.getDateSystem()}` : '0'}`;
+    }
+    if (value.isString()) {
+        return `s:${value.getDateSystem()}:${value.isDateFormat() ? '1' : '0'}:${value.getValue()}`;
+    }
+    return undefined;
+}
+
+function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string | undefined {
+    if (criteria.length === 0) {
         return undefined;
     }
-    const values = criteria.map((value) => value!.getValue());
-    return values.length === 1 ? values[0] as string | number : JSON.stringify(values);
+    if (criteria.length === 1) {
+        return getSingleCriteriaCacheKey(criteria[0]);
+    }
+    const keys: string[] = [];
+    for (const value of criteria) {
+        const key = getSingleCriteriaCacheKey(value);
+        if (key === undefined) {
+            return undefined;
+        }
+        keys.push(key);
+    }
+    return JSON.stringify(keys);
+}
+
+interface IRangeCriteriaSource {
+    range: ArrayValueObject;
+    criteria: BaseValueObject;
+    isArray: boolean;
+    rowCount: number;
+    columnCount: number;
+    constantCriteria: BaseValueObject | undefined;
+    constantCondition: IParsedCriteriaCondition | undefined;
+}
+
+const NA_ERROR_OBJECT = ErrorValueObject.create(ErrorType.NA);
+
+function getCriteriaValueAt(source: IRangeCriteriaSource, rowIndex: number, columnIndex: number): Nullable<BaseValueObject> {
+    if (source.constantCriteria !== undefined) {
+        return source.constantCriteria;
+    }
+
+    const { criteria, rowCount, columnCount } = source;
+    const criteriaArray = criteria as ArrayValueObject;
+    if (rowCount === 1 && columnCount === 1) {
+        return criteriaArray.get(0, 0);
+    }
+    if (rowCount === 1 && columnIndex < columnCount) {
+        return criteriaArray.get(0, columnIndex);
+    }
+    if (columnCount === 1 && rowIndex < rowCount) {
+        return criteriaArray.get(rowIndex, 0);
+    }
+    if (rowIndex >= rowCount || columnIndex >= columnCount) {
+        return NA_ERROR_OBJECT;
+    }
+    return criteriaArray.get(rowIndex, columnIndex);
 }
 
 function getCriteriaPositions(
-    pairs: Array<{ range: ArrayValueObject; criteriaArray: ArrayValueObject }>,
-    indexes: Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>,
+    pairs: IRangeCriteriaSource[],
+    indexes: Map<ArrayValueObject, EqualityIndex>,
     row: number,
     column: number
-): Array<[number, number]> | undefined {
-    for (const { range, criteriaArray } of pairs) {
-        const keys = getExactCriteriaKeys(criteriaArray.get(row, column));
+): EqualityPosition[] | undefined {
+    for (const pair of pairs) {
+        const keys = getExactCriteriaKeys(getCriteriaValueAt(pair, row, column));
         if (!keys) {
             continue;
         }
-        let index = indexes.get(range);
+        let index = indexes.get(pair.range);
         if (!index) {
-            index = buildEqualityIndex(range);
-            indexes.set(range, index);
+            index = getOrBuildEqualityIndex(pair.range);
+            indexes.set(pair.range, index);
         }
-        const positions = getIndexedPositions(index, keys, range);
+        const positions = getIndexedPositions(index, keys, pair.range);
         // ponytail: stop at the first selective index; compare all criteria on its candidates.
         if (positions !== undefined) {
             return positions;
         }
     }
+}
+
+function parseCriteriaCondition(criteriaValueObject: BaseValueObject): IParsedCriteriaCondition {
+    const [operator, criteriaObject] = criteriaValueObject.isString()
+        ? findCompareToken(`${criteriaValueObject.getValue()}`, criteriaValueObject.getDateSystem())
+        : [compareToken.EQUALS, criteriaValueObject];
+
+    return {
+        criteriaValueObject,
+        operator,
+        criteriaObject,
+        isBlankStringCriteria: criteriaObject.isString() && criteriaObject.getValue() === '',
+        isWildcardCriteria: criteriaObject.isString() && isWildcard(`${criteriaObject.getValue()}`),
+    };
+}
+
+function matchesSingleCellCondition(
+    rangeValueObject: Nullable<BaseValueObject>,
+    condition: IParsedCriteriaCondition,
+    isNumberSensitive: boolean
+): boolean {
+    if (!rangeValueObject) {
+        return false;
+    }
+
+    let compareCell: BaseValueObject;
+    if (rangeValueObject.isError()) {
+        compareCell = rangeValueObject;
+    } else if (condition.criteriaObject.isError()) {
+        compareCell = condition.criteriaObject;
+    } else {
+        compareCell = rangeValueObject.compare(condition.criteriaObject, condition.operator);
+    }
+
+    const finalCell = isNumberSensitive
+        ? filterSameValueObjectCell(
+            compareCell,
+            rangeValueObject,
+            condition.criteriaObject,
+            condition.operator,
+            condition.isBlankStringCriteria,
+            condition.isWildcardCriteria
+        )
+        : compareCell;
+
+    return finalCell.isBoolean() && finalCell.getValue() === true;
+}
+
+function matchesAllConditionsAtPosition(
+    conditions: Array<{ range: ArrayValueObject; condition: IParsedCriteriaCondition | undefined }>,
+    row: number,
+    column: number,
+    isNumberSensitive: boolean
+): boolean {
+    for (const { range, condition } of conditions) {
+        if (!condition) {
+            continue;
+        }
+        if (!matchesSingleCellCondition(range.get(row, column), condition, isNumberSensitive)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+interface ICandidateAggregateState {
+    matchedCount: number;
+    numericCount: number;
+    numericSum: number;
+    sumAccumulator: BaseValueObject | undefined;
+    bestNumericValue: number;
+    bestObject: BaseValueObject | undefined;
+}
+
+function formatAggregateError(formulaName: string, error: BaseValueObject, numericCount: number): BaseValueObject {
+    return formulaName === 'AVERAGEIFS'
+        ? error.divided(NumberValueObject.create(numericCount))
+        : error;
+}
+
+function accumulateSumValue(
+    formulaName: string,
+    targetValue: BaseValueObject,
+    state: ICandidateAggregateState
+): BaseValueObject | undefined {
+    state.numericCount++;
+    const val = +targetValue.getValue();
+    if (state.sumAccumulator === undefined && Number.isFinite(state.numericSum) && Number.isFinite(val)) {
+        state.numericSum = plus(state.numericSum, val);
+        if (!Number.isFinite(state.numericSum)) {
+            return formatAggregateError(formulaName, ErrorValueObject.create(ErrorType.NUM), state.numericCount);
+        }
+        return undefined;
+    }
+
+    state.sumAccumulator ??= NumberValueObject.create(state.numericSum);
+    state.sumAccumulator = state.sumAccumulator.plus(targetValue);
+    if (state.sumAccumulator.isError()) {
+        return formatAggregateError(formulaName, state.sumAccumulator, state.numericCount);
+    }
+    return undefined;
+}
+
+function updateExtremeValue(
+    formulaName: string,
+    targetValue: BaseValueObject,
+    state: ICandidateAggregateState
+): void {
+    const val = Number(targetValue.getValue());
+    if (formulaName === 'MAXIFS') {
+        if (state.bestNumericValue < val) {
+            state.bestNumericValue = val;
+            state.bestObject = targetValue;
+        }
+        return;
+    }
+
+    if (Number.isFinite(val)) {
+        if (state.bestNumericValue > val) {
+            state.bestNumericValue = val;
+            state.bestObject = targetValue;
+        }
+        return;
+    }
+
+    const cmp = (state.bestObject ?? NumberValueObject.create(state.bestNumericValue)).isGreaterThan(targetValue);
+    if (cmp.isBoolean() && cmp.getValue()) {
+        state.bestNumericValue = val;
+        state.bestObject = targetValue;
+    }
+}
+
+function finalizeCandidateAggregate(formulaName: string, state: ICandidateAggregateState): BaseValueObject | undefined {
+    switch (formulaName) {
+        case 'SUMIFS':
+            return state.sumAccumulator ?? NumberValueObject.create(state.numericSum);
+        case 'AVERAGEIFS':
+            return state.numericCount === 0
+                ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO)
+                : (state.sumAccumulator ?? NumberValueObject.create(state.numericSum)).divided(NumberValueObject.create(state.numericCount));
+        case 'MAXIFS':
+            return state.matchedCount === 0 ? NumberValueObject.create(0) : (state.bestObject ?? NumberValueObject.create(Number.NEGATIVE_INFINITY));
+        case 'MINIFS':
+            return state.matchedCount === 0 ? NumberValueObject.create(0) : (state.bestObject ?? NumberValueObject.create(Number.POSITIVE_INFINITY));
+    }
+}
+
+function evaluateIndexedCandidates(
+    formulaName: string,
+    conditions: Array<{ range: ArrayValueObject; condition: IParsedCriteriaCondition | undefined }>,
+    positions: EqualityPosition[],
+    targetRange: ArrayValueObject | undefined,
+    isNumberSensitive: boolean
+): BaseValueObject | undefined {
+    if (formulaName === 'COUNTIFS') {
+        let matchedCount = 0;
+        for (const [row, column] of positions) {
+            if (matchesAllConditionsAtPosition(conditions, row, column, isNumberSensitive)) {
+                matchedCount++;
+            }
+        }
+        return NumberValueObject.create(matchedCount);
+    }
+
+    if (!targetRange) {
+        return undefined;
+    }
+
+    const state: ICandidateAggregateState = {
+        matchedCount: 0,
+        numericCount: 0,
+        numericSum: 0,
+        sumAccumulator: undefined,
+        bestNumericValue: formulaName === 'MAXIFS' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+        bestObject: undefined,
+    };
+
+    for (const [row, column] of positions) {
+        if (!matchesAllConditionsAtPosition(conditions, row, column, isNumberSensitive)) {
+            continue;
+        }
+
+        state.matchedCount++;
+        const targetValue = targetRange.get(row, column);
+        if (targetValue == null || targetValue.isString() || targetValue.isBoolean() || targetValue.isNull()) {
+            continue;
+        }
+        if (targetValue.isError()) {
+            return formatAggregateError(formulaName, targetValue, state.numericCount);
+        }
+
+        if (formulaName === 'SUMIFS' || formulaName === 'AVERAGEIFS') {
+            const error = accumulateSumValue(formulaName, targetValue, state);
+            if (error) {
+                return error;
+            }
+        } else {
+            updateExtremeValue(formulaName, targetValue, state);
+        }
+    }
+
+    return finalizeCandidateAggregate(formulaName, state);
+}
+
+function matchesCachedEntryPairs(entry: ICachedPairedResult, variants: BaseValueObject[]): boolean {
+    if (entry.rangeSnapshots.length * 2 !== variants.length) {
+        return false;
+    }
+
+    for (let i = 0; i < entry.rangeSnapshots.length; i++) {
+        if (!matchesArraySnapshot(entry.rangeSnapshots[i], variants[i * 2] as ArrayValueObject)) {
+            return false;
+        }
+        const criteria = variants[i * 2 + 1];
+        const snapshot = entry.criteriaSnapshots[i];
+        if (criteria.isArray()) {
+            if (typeof snapshot === 'string' || !matchesArraySnapshot(snapshot, criteria as ArrayValueObject)) {
+                return false;
+            }
+        } else if (typeof snapshot !== 'string' || snapshot !== getSingleCriteriaCacheKey(criteria)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function matchesCachedEntry(
+    entry: ICachedPairedResult,
+    variants: BaseValueObject[],
+    formulaName: string,
+    maxRowLength: number,
+    maxColumnLength: number,
+    isNumberSensitive: boolean,
+    targetRange?: ArrayValueObject
+): boolean {
+    if (
+        entry.formulaName !== formulaName ||
+        entry.isNumberSensitive !== isNumberSensitive ||
+        entry.maxRowLength !== maxRowLength ||
+        entry.maxColumnLength !== maxColumnLength
+    ) {
+        return false;
+    }
+    if (targetRange) {
+        if (!entry.targetSnapshot || !matchesArraySnapshot(entry.targetSnapshot, targetRange)) {
+            return false;
+        }
+    } else if (entry.targetSnapshot !== null) {
+        return false;
+    }
+    return matchesCachedEntryPairs(entry, variants);
+}
+
+function getCachedPairedResult(
+    variants: BaseValueObject[],
+    formulaName: string,
+    maxRowLength: number,
+    maxColumnLength: number,
+    isNumberSensitive: boolean,
+    targetRange?: ArrayValueObject
+): BaseValueObject[][] | undefined {
+    const anchor = targetRange ?? (variants[0] as ArrayValueObject);
+    const entries = pairedResultCache.get(anchor);
+    if (!entries) {
+        return undefined;
+    }
+
+    for (const entry of entries) {
+        if (matchesCachedEntry(entry, variants, formulaName, maxRowLength, maxColumnLength, isNumberSensitive, targetRange)) {
+            return entry.results.map((row) => row.slice());
+        }
+    }
+
+    return undefined;
+}
+
+function setCachedPairedResult(
+    variants: BaseValueObject[],
+    formulaName: string,
+    maxRowLength: number,
+    maxColumnLength: number,
+    isNumberSensitive: boolean,
+    results: BaseValueObject[][],
+    targetRange?: ArrayValueObject
+): void {
+    const rangeSnapshots: IArraySnapshot[] = [];
+    const criteriaSnapshots: Array<IArraySnapshot | string> = [];
+    for (let i = 0; i < variants.length; i += 2) {
+        rangeSnapshots.push(captureArraySnapshot(variants[i] as ArrayValueObject));
+        const criteria = variants[i + 1];
+        if (criteria.isArray()) {
+            criteriaSnapshots.push(captureArraySnapshot(criteria as ArrayValueObject));
+        } else {
+            const scalarKey = getSingleCriteriaCacheKey(criteria);
+            if (scalarKey === undefined) {
+                return;
+            }
+            criteriaSnapshots.push(scalarKey);
+        }
+    }
+
+    const anchor = targetRange ?? (variants[0] as ArrayValueObject);
+    let entries = pairedResultCache.get(anchor);
+    if (!entries) {
+        entries = [];
+        pairedResultCache.set(anchor, entries);
+    }
+    if (entries.length >= MAX_PAIRED_RESULT_CACHE_ENTRIES) {
+        entries.shift();
+    }
+    entries.push({
+        formulaName,
+        isNumberSensitive,
+        maxRowLength,
+        maxColumnLength,
+        targetSnapshot: targetRange ? captureArraySnapshot(targetRange) : null,
+        rangeSnapshots,
+        criteriaSnapshots,
+        results: results.map((row) => row.slice()),
+    });
 }
 
 function getConditionalAggregateResult(
@@ -460,10 +938,109 @@ function getConditionalAggregateResult(
     }
 }
 
+function buildRangeCriteriaSources(variants: BaseValueObject[]): IRangeCriteriaSource[] {
+    const sources: IRangeCriteriaSource[] = [];
+    for (let i = 0; i < variants.length; i += 2) {
+        const range = variants[i] as ArrayValueObject;
+        const criteria = variants[i + 1];
+        const isArray = criteria.isArray();
+        const rowCount = isArray ? (criteria as ArrayValueObject).getRowCount() : 1;
+        const columnCount = isArray ? (criteria as ArrayValueObject).getColumnCount() : 1;
+        const isConstantScalar = !isArray || (rowCount === 1 && columnCount === 1);
+        const constantCriteria = isConstantScalar
+            ? (isArray ? (criteria as ArrayValueObject).get(0, 0) : criteria) ?? undefined
+            : undefined;
+
+        sources.push({
+            range,
+            criteria,
+            isArray,
+            rowCount,
+            columnCount,
+            constantCriteria,
+            constantCondition: constantCriteria ? parseCriteriaCondition(constantCriteria) : undefined,
+        });
+    }
+    return sources;
+}
+
+function evaluateFullScanCell(
+    formulaName: string,
+    sources: IRangeCriteriaSource[],
+    rowIndex: number,
+    columnIndex: number,
+    isNumberSensitive: boolean,
+    targetRange?: ArrayValueObject
+): BaseValueObject | undefined {
+    let finalCompareResult: ArrayValueObject | undefined;
+    for (const source of sources) {
+        const criteriaValueObject = getCriteriaValueAt(source, rowIndex, columnIndex);
+        if (!criteriaValueObject) {
+            continue;
+        }
+
+        let compareResult = valueObjectCompare(source.range, criteriaValueObject) as ArrayValueObject;
+        if (isNumberSensitive) {
+            compareResult = filterSameValueObjectResult(compareResult, source.range, criteriaValueObject);
+        }
+        finalCompareResult = finalCompareResult === undefined
+            ? compareResult
+            : booleanObjectIntersection(finalCompareResult, compareResult);
+    }
+
+    return getConditionalAggregateResult(formulaName, finalCompareResult as ArrayValueObject, targetRange);
+}
+
+function evaluateCriteriaCellResult(
+    formulaName: string,
+    sources: IRangeCriteriaSource[],
+    arrayPairs: IRangeCriteriaSource[],
+    equalityIndexes: Map<ArrayValueObject, EqualityIndex>,
+    rowIndex: number,
+    columnIndex: number,
+    useEqualityIndex: boolean,
+    isNumberSensitive: boolean,
+    targetRange?: ArrayValueObject
+): BaseValueObject | undefined {
+    const positions = useEqualityIndex
+        ? getCriteriaPositions(arrayPairs, equalityIndexes, rowIndex, columnIndex)
+        : undefined;
+    if (positions === undefined) {
+        return evaluateFullScanCell(formulaName, sources, rowIndex, columnIndex, isNumberSensitive, targetRange);
+    }
+    if (positions.length === 0) {
+        return formulaName === 'AVERAGEIFS'
+            ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO)
+            : NumberValueObject.create(0);
+    }
+
+    const conditions = sources.map((source) => {
+        if (source.constantCondition) {
+            return { range: source.range, condition: source.constantCondition };
+        }
+        const criteriaValueObject = getCriteriaValueAt(source, rowIndex, columnIndex);
+        return {
+            range: source.range,
+            condition: criteriaValueObject ? parseCriteriaCondition(criteriaValueObject) : undefined,
+        };
+    });
+    return evaluateIndexedCandidates(formulaName, conditions, positions, targetRange, isNumberSensitive);
+}
+
+function resolveCellCriteriaCacheKey(
+    arrayPairs: IRangeCriteriaSource[],
+    rowIndex: number,
+    columnIndex: number
+): string | undefined {
+    if (arrayPairs.length === 1) {
+        return getSingleCriteriaCacheKey(getCriteriaValueAt(arrayPairs[0], rowIndex, columnIndex));
+    }
+    return getCriteriaCacheKey(arrayPairs.map((pair) => getCriteriaValueAt(pair, rowIndex, columnIndex)));
+}
+
 /**
  * Get the paired range and criteria result for COUNTIFS, SUMIFS, etc.
  */
-// eslint-disable-next-line max-lines-per-function
 export function getPairedRangeAndCriteriaResult(
     variants: BaseValueObject[],
     params: {
@@ -475,112 +1052,191 @@ export function getPairedRangeAndCriteriaResult(
     }
 ) {
     const { formulaName, maxRowLength, maxColumnLength, isNumberSensitive = false, targetRange } = params;
-
-    // Align all criteria values to the same dimension as the maximum criteria range.
-    const rangeAndCriteriaArrays: Array<{
-        range: ArrayValueObject;
-        criteriaArray: ArrayValueObject;
-    }> = [];
-
-    for (let i = 0; i < variants.length; i++) {
-        if (i % 2 === 1) {
-            continue;
-        }
-
-        const range = variants[i] as ArrayValueObject;
-        const criteria = variants[i + 1];
-        const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
-
-        rangeAndCriteriaArrays.push({
-            range,
-            criteriaArray,
-        });
+    if (variants.length === 0) {
+        return [];
     }
 
-    if (rangeAndCriteriaArrays.length === 0) {
+    const isArrayCriteria = maxRowLength * maxColumnLength > 1;
+    if (isArrayCriteria) {
+        const cachedPaired = getCachedPairedResult(
+            variants,
+            formulaName,
+            maxRowLength,
+            maxColumnLength,
+            isNumberSensitive,
+            targetRange
+        );
+        if (cachedPaired) {
+            return cachedPaired;
+        }
+    }
+
+    const rangeAndCriteriaSources = buildRangeCriteriaSources(variants);
+    if (rangeAndCriteriaSources.length === 0) {
         return [];
     }
 
     const results: BaseValueObject[][] = [];
-    const arrayPairs = rangeAndCriteriaArrays.filter((_, index) => {
-        const criteria = variants[index * 2 + 1];
-        return criteria.isArray() &&
-            (criteria as ArrayValueObject).getRowCount() * (criteria as ArrayValueObject).getColumnCount() > 1;
-    });
-    const useEqualityIndex = isNumberSensitive && maxRowLength * maxColumnLength > 1 && arrayPairs.length > 0;
-    const repeatedResults = new Map<string | number, BaseValueObject>();
-    const equalityIndexes = new Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>();
+    const arrayPairs = rangeAndCriteriaSources.filter((source) =>
+        source.isArray && source.rowCount * source.columnCount > 1
+    );
+    const useArrayCache = isArrayCriteria && arrayPairs.length > 0;
+    const useEqualityIndex = isNumberSensitive && useArrayCache;
+    const repeatedResults = new Map<string, BaseValueObject>();
+    const equalityIndexes = new Map<ArrayValueObject, EqualityIndex>();
 
-    /**
-     * Iterate through all criteria values for each dimension, calculate the comparison result with the corresponding range, and then calculate the Boolean intersection of all comparison results as the final result for that dimension criteria value.
-     * Then calculate this dimension criteria value's result.
-     * This avoiding store the all dimension comparison result in memory and then calculating all dimension criteria value's result, which may cause memory overflow when the range is large and there are multiple dimension criteria.
-     * For example, `=COUNTIFS(Q$3:Q$10002,C$3:C$5002,R$3:R$10002,L6)`.
-     */
-    const firstPair = rangeAndCriteriaArrays[0];
-    firstPair.criteriaArray.iterator((_, rowIndex, columnIndex) => {
-        let finalCompareResult: ArrayValueObject | undefined;
-        let positions: Array<[number, number]> | undefined;
-        const cacheKey = useEqualityIndex
-            ? getCriteriaCacheKey(arrayPairs.map(({ criteriaArray }) => criteriaArray.get(rowIndex, columnIndex)))
-            : undefined;
-        const cached = cacheKey === undefined ? undefined : repeatedResults.get(cacheKey);
-        if (cached) {
-            results[rowIndex] ??= [];
-            results[rowIndex][columnIndex] = cached;
-            return;
-        }
+    for (let rowIndex = 0; rowIndex < maxRowLength; rowIndex++) {
+        const rowResults: BaseValueObject[] = [];
+        results[rowIndex] = rowResults;
 
-        if (useEqualityIndex) {
-            positions = getCriteriaPositions(arrayPairs, equalityIndexes, rowIndex, columnIndex);
-            if (positions?.length === 0) {
-                results[rowIndex] ??= [];
-                results[rowIndex][columnIndex] = formulaName === 'AVERAGEIFS'
-                    ? ErrorValueObject.create(ErrorType.DIV_BY_ZERO)
-                    : NumberValueObject.create(0);
-                return;
-            }
-        }
-
-        rangeAndCriteriaArrays.forEach(({ range: sourceRange, criteriaArray }) => {
-            // Preserve paired row/column offsets and reuse the existing comparison semantics.
-            const range = positions === undefined ? sourceRange : pickRangePositions(sourceRange, positions);
-            const criteriaValueObject = criteriaArray.get(rowIndex, columnIndex);
-
-            if (!criteriaValueObject) {
-                return;
+        for (let columnIndex = 0; columnIndex < maxColumnLength; columnIndex++) {
+            const cacheKey = useArrayCache ? resolveCellCriteriaCacheKey(arrayPairs, rowIndex, columnIndex) : undefined;
+            const cached = cacheKey === undefined ? undefined : repeatedResults.get(cacheKey);
+            if (cached) {
+                rowResults[columnIndex] = cached;
+                continue;
             }
 
-            // range must be an ArrayValueObject, criteria must be a BaseValueObject
-            let compareResult = valueObjectCompare(range, criteriaValueObject) as ArrayValueObject;
-
-            // When comparing non-numbers and numbers, countifs does not take the result
-            if (isNumberSensitive) {
-                compareResult = filterSameValueObjectResult(compareResult, range, criteriaValueObject);
+            const result = evaluateCriteriaCellResult(
+                formulaName,
+                rangeAndCriteriaSources,
+                arrayPairs,
+                equalityIndexes,
+                rowIndex,
+                columnIndex,
+                useEqualityIndex,
+                isNumberSensitive,
+                targetRange
+            );
+            rowResults[columnIndex] = result as BaseValueObject;
+            if (cacheKey !== undefined && result) {
+                repeatedResults.set(cacheKey, result);
             }
-
-            if (finalCompareResult === undefined) {
-                finalCompareResult = compareResult;
-                return;
-            }
-
-            finalCompareResult = booleanObjectIntersection(finalCompareResult, compareResult);
-        });
-
-        const aggregateRange = positions === undefined || !targetRange ? targetRange : pickRangePositions(targetRange, positions);
-        const result = getConditionalAggregateResult(formulaName, finalCompareResult as ArrayValueObject, aggregateRange);
-
-        if (!results[rowIndex]) {
-            results[rowIndex] = [];
         }
+    }
 
-        results[rowIndex][columnIndex] = result as BaseValueObject;
-        if (cacheKey !== undefined && result) {
-            repeatedResults.set(cacheKey, result);
-        }
-    });
-
+    if (isArrayCriteria) {
+        setCachedPairedResult(variants, formulaName, maxRowLength, maxColumnLength, isNumberSensitive, results, targetRange);
+    }
     return results;
+}
+
+function filterStringLessOrderCell(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaText: string,
+    isEmptyStringRange: boolean
+): BaseValueObject | undefined {
+    if (criteriaText !== '' && isEmptyStringRange) {
+        return BooleanValueObject.create(true);
+    }
+    if (criteriaText !== '' && (rangeValueObject == null || rangeValueObject.isNull())) {
+        return BooleanValueObject.create(false);
+    }
+    if (rangeValueObject?.isString() && isSameLowerBoundBucket(rangeValueObject.getValue() as string, criteriaText)) {
+        return BooleanValueObject.create(false);
+    }
+    return undefined;
+}
+
+function filterStringInequalityCell(
+    valueObject: BaseValueObject,
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken,
+    isBlankStringCriteria: boolean,
+    isWildcardCriteria: boolean
+): BaseValueObject | undefined {
+    const isOrderOperator = operator === compareToken.GREATER_THAN ||
+        operator === compareToken.GREATER_THAN_OR_EQUAL ||
+        operator === compareToken.LESS_THAN ||
+        operator === compareToken.LESS_THAN_OR_EQUAL;
+
+    if (isBlankStringCriteria && isOrderOperator) {
+        return BooleanValueObject.create(false);
+    }
+
+    const isEmptyStringRange = Boolean(rangeValueObject?.isString() && rangeValueObject.getValue() === '');
+    if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && isEmptyStringRange) {
+        return BooleanValueObject.create(true);
+    }
+    if (isWildcardCriteria && isEmptyStringRange) {
+        return valueObject;
+    }
+
+    const isLessOperator = operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL;
+    if (!isLessOperator || !criteriaObject.isString()) {
+        return undefined;
+    }
+
+    return filterStringLessOrderCell(rangeValueObject, criteriaObject.getValue() as string, isEmptyStringRange);
+}
+
+function filterNumericCoercionCell(
+    rangeValueObject: BaseValueObject,
+    criteriaObject: BaseValueObject,
+    operator: compareToken
+): BaseValueObject | undefined {
+    if (rangeValueObject.isNumber() && criteriaObject.isString()) {
+        const criteriaNumber = createCriteriaValueObject(`${criteriaObject.getValue()}`, criteriaObject.getDateSystem());
+        if (criteriaNumber.isNumber()) {
+            return rangeValueObject.compare(criteriaNumber, operator);
+        }
+    }
+
+    if (operator !== compareToken.NOT_EQUAL && criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject.isString()) {
+        const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+        if (rangeNumber.isNumber()) {
+            return rangeNumber.compare(criteriaObject, operator);
+        }
+    }
+
+    return undefined;
+}
+
+function filterSameValueObjectCell(
+    valueObject: BaseValueObject,
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken,
+    isBlankStringCriteria: boolean,
+    isWildcardCriteria: boolean
+): BaseValueObject {
+    const stringDecision = filterStringInequalityCell(
+        valueObject,
+        rangeValueObject,
+        criteriaObject,
+        operator,
+        isBlankStringCriteria,
+        isWildcardCriteria
+    );
+    if (stringDecision !== undefined) {
+        return stringDecision;
+    }
+
+    if (rangeValueObject) {
+        const numericDecision = filterNumericCoercionCell(rangeValueObject, criteriaObject, operator);
+        if (numericDecision !== undefined) {
+            return numericDecision;
+        }
+        if (isSameValueObjectType(rangeValueObject, criteriaObject)) {
+            return valueObject;
+        }
+        if (rangeValueObject.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
+            return BooleanValueObject.create(true);
+        }
+        /**
+         * Equality criteria coerce numeric text; numeric inequality criteria
+         * retain the distinction between text cells and numeric cells.
+         */
+        if (operator === compareToken.EQUALS && criteriaObject.isNumber() && rangeValueObject.isString()) {
+            const rangeNumber = createCriteriaValueObject(`${rangeValueObject.getValue()}`, rangeValueObject.getDateSystem());
+            if (rangeNumber.isNumber()) {
+                return rangeNumber.compare(criteriaObject, operator);
+            }
+        }
+    }
+
+    return BooleanValueObject.create(operator === compareToken.NOT_EQUAL);
 }
 
 /**
@@ -594,121 +1250,19 @@ export function filterSameValueObjectResult(
     const [operator, criteriaObject] = criteria.isString()
         ? findCompareToken(`${criteria.getValue()}`, criteria.getDateSystem())
         : [compareToken.EQUALS, criteria];
+    const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
+    const isWildcardCriteria = criteriaObject.isString() && isWildcard(`${criteriaObject.getValue()}`);
 
-    return array.mapValue((valueObject, r, c) => {
-        const rangeValueObject = range.get(r, c);
-        const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
-
-        if (
-            isBlankStringCriteria &&
-            (
-                operator === compareToken.GREATER_THAN ||
-                operator === compareToken.GREATER_THAN_OR_EQUAL ||
-                operator === compareToken.LESS_THAN ||
-                operator === compareToken.LESS_THAN_OR_EQUAL
-            )
-        ) {
-            return BooleanValueObject.create(false);
-        }
-
-        if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
-            return BooleanValueObject.create(true);
-        }
-
-        if (
-            criteriaObject.isString() &&
-            isWildcard(`${criteriaObject.getValue()}`) &&
-            rangeValueObject?.isString() &&
-            rangeValueObject.getValue() === ''
-        ) {
-            return valueObject;
-        }
-
-        if (
-            criteriaObject.isString() &&
-            criteriaObject.getValue() !== '' &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            rangeValueObject?.isString() &&
-            rangeValueObject.getValue() === ''
-        ) {
-            return BooleanValueObject.create(true);
-        }
-
-        if (
-            criteriaObject.isString() &&
-            criteriaObject.getValue() !== '' &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            (rangeValueObject == null || rangeValueObject.isNull())
-        ) {
-            return BooleanValueObject.create(false);
-        }
-
-        if (
-            criteriaObject.isString() &&
-            rangeValueObject?.isString() &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            isSameLowerBoundBucket(rangeValueObject.getValue() as string, criteriaObject.getValue() as string)
-        ) {
-            return BooleanValueObject.create(false);
-        }
-
-        if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
-            const criteriaNumber = createCriteriaValueObject(`${criteriaObject.getValue()}`, criteriaObject.getDateSystem());
-
-            if (criteriaNumber.isNumber()) {
-                return rangeValueObject.compare(criteriaNumber, operator);
-            }
-        }
-
-        if (operator !== compareToken.NOT_EQUAL && criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
-            const rangeNumber = rangeValueObject.convertToNumberObjectValue();
-
-            if (rangeNumber.isNumber()) {
-                return rangeNumber.compare(criteriaObject, operator);
-            }
-        }
-
-        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
-            return valueObject;
-        }
-
-        if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
-            return BooleanValueObject.create(true);
-        }
-
-        /**
-         * Equality criteria coerce numeric text; numeric inequality criteria
-         * retain the distinction between text cells and numeric cells.
-         * Other operators require both valueObjects to be of the same type.
-         * For example:
-         * | A1    | B1  |
-         * | '123' | 123 |
-         *
-         * =COUNTIF(A1:B1, '=123') will return 2
-         * =COUNTIF(A1:B1, '<>1') will return 2
-         * =COUNTIF(A1:B1, '>1') will return 1
-         * =COUNTIF(A1:B1, '<=123') will return 1
-         */
-        if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
-            if (operator === compareToken.EQUALS && criteriaObject.isNumber() && rangeValueObject?.isString()) {
-                const rangeNumber = createCriteriaValueObject(`${rangeValueObject.getValue()}`, rangeValueObject.getDateSystem());
-
-                if (rangeNumber.isNumber()) {
-                    return rangeNumber.compare(criteriaObject, operator);
-                }
-            }
-
-            if (operator === compareToken.EQUALS) {
-                return BooleanValueObject.create(false);
-            }
-
-            if (operator === compareToken.NOT_EQUAL) {
-                return BooleanValueObject.create(true);
-            }
-        }
-
-        return BooleanValueObject.create(false);
-    });
+    return array.mapValue((valueObject, r, c) =>
+        filterSameValueObjectCell(
+            valueObject,
+            range.get(r, c),
+            criteriaObject,
+            operator,
+            isBlankStringCriteria,
+            isWildcardCriteria
+        )
+    );
 }
 
 function isSameLowerBoundBucket(rangeValue: string, criteriaValue: string): boolean {

@@ -22,6 +22,7 @@ import type { IPaddingData } from '../types/interfaces/i-style-data';
 import type { Styles } from './styles';
 import type {
     ICellData,
+    ICellDataForSheetInterceptor,
     ICellInfo,
     ICellWithCoord,
     IColumnData,
@@ -134,7 +135,98 @@ export interface IGetRowColByPosOptions {
     firstMatch?: boolean;
 }
 
+/** Session-local data read by one worksheet display. */
+export interface ISheetDisplayProjection {
+    /** The display is waiting for a result and must not read worksheet content. */
+    readonly placeholder?: boolean;
+    /** The complete immutable filter mask, when available for layout reuse. */
+    readonly filteredOutRows?: ReadonlySet<number>;
+    isRowFiltered(row: number): boolean;
+    /** Undefined uses the public value. Null clears the displayed value. */
+    getCell(row: number, column: number): Pick<ICellData, 'v' | 't'> | null | undefined;
+}
+
+interface IProjectedRowLayout {
+    filteredOutRows: ReadonlySet<number>;
+    rowTotalHeight: number;
+    rowHeightAccumulation: number[];
+}
+
+function sameFilterMask(left: ReadonlySet<number> | undefined, right: ReadonlySet<number> | undefined): boolean {
+    if (!left || !right || left.size !== right.size) {
+        return false;
+    }
+    if (left === right) {
+        return true;
+    }
+    for (const row of left) {
+        if (!right.has(row)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export class SheetSkeleton extends Skeleton {
+    private _projection?: ISheetDisplayProjection;
+    private _projectedRowLayout?: IProjectedRowLayout;
+
+    setProjection(projection: ISheetDisplayProjection): void {
+        const previous = this._projection;
+        this._projection = projection;
+        if (previous?.placeholder || projection.placeholder || !sameFilterMask(previous?.filteredOutRows, projection.filteredOutRows)) {
+            super.makeDirty(true);
+        }
+    }
+
+    override makeDirty(state: boolean): void {
+        if (state) {
+            this._projectedRowLayout = undefined;
+        }
+        super.makeDirty(state);
+    }
+
+    getDisplayProjection(): ISheetDisplayProjection | undefined {
+        return this._projection;
+    }
+
+    getRowFiltered(row: number): boolean {
+        return this._projection?.isRowFiltered(row) ?? this.worksheet.getRowFiltered(row);
+    }
+
+    getRowVisible(row: number): boolean {
+        if (this._projection) {
+            return !this._projection.isRowFiltered(row) && this.worksheet.getRowRawVisible(row);
+        }
+        return this.worksheet.getRowVisible(row);
+    }
+
+    getCell(row: number, column: number): Nullable<ICellDataForSheetInterceptor> {
+        if (this._projection?.placeholder) {
+            return null;
+        }
+        const override = this.getCellDisplayOverride(row, column);
+        if (override === undefined) {
+            return this.worksheet.getCell(row, column);
+        }
+        return this.worksheet.getCellForDisplay(row, column, override);
+    }
+
+    /** Returns undefined for public values and null for cells cleared by the projection. */
+    getCellDisplayOverride(row: number, column: number): ReturnType<ISheetDisplayProjection['getCell']> {
+        return this._projection?.getCell(row, column);
+    }
+
+    /** Keeps formula and style data while reading the unformatted display value. */
+    getCellRawForDisplay(row: number, column: number): Nullable<ICellData> {
+        if (this._projection?.placeholder) {
+            return null;
+        }
+        const cell = this.worksheet.getCellRaw(row, column);
+        const override = this.getCellDisplayOverride(row, column);
+        return override === undefined ? cell : { ...cell, v: override?.v, t: override?.t };
+    }
+
     /**
      * Avoid using `IWorksheetData` directly when an API is provided by `Worksheet`, otherwise
      * `ViewModel` will not work.
@@ -411,7 +503,7 @@ export class SheetSkeleton extends Skeleton {
         for (let r = 0; r < rowCount; r++) {
             let rowHeight = fallbackHeight;
 
-            if (this.worksheet.getRowFiltered(r)) {
+            if (this.getRowFiltered(r)) {
                 rowHeight = 0;
             } else if (data[r] != null) {
                 const rowDataItem = data[r];
@@ -510,7 +602,7 @@ export class SheetSkeleton extends Skeleton {
         let cumWidth = 0;
         const direction = startColumn > endColumn ? -1 : 1;
         for (let column = startColumn; direction === 1 ? column <= endColumn : column >= endColumn; column += direction) {
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this.getCell(row, column);
             if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
@@ -558,8 +650,14 @@ export class SheetSkeleton extends Skeleton {
             columnHeader,
         } = this._worksheetData;
 
-        const { rowTotalHeight, rowHeightAccumulation } =
-            this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
+        const filteredOutRows = this._projection?.filteredOutRows;
+        const cached = this._projectedRowLayout;
+        const rowLayout = cached && sameFilterMask(cached.filteredOutRows, filteredOutRows)
+            ? cached
+            : this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
+        if (filteredOutRows) {
+            this._projectedRowLayout = { filteredOutRows, ...rowLayout };
+        }
 
         const { columnTotalWidth, columnWidthAccumulation } =
             this._generateColumnMatrixCache(
@@ -577,8 +675,8 @@ export class SheetSkeleton extends Skeleton {
                 ? columnHeader.height
                 : 0;
 
-        this._rowTotalHeight = rowTotalHeight;
-        this._rowHeightAccumulation = rowHeightAccumulation;
+        this._rowTotalHeight = rowLayout.rowTotalHeight;
+        this._rowHeightAccumulation = rowLayout.rowHeightAccumulation;
         this._columnTotalWidth = columnTotalWidth;
         this._columnWidthAccumulation = columnWidthAccumulation;
 
@@ -1140,6 +1238,7 @@ export class SheetSkeleton extends Skeleton {
     override dispose(): void {
         super.dispose();
         this._gapConfigChanged$.complete();
+        this._projectedRowLayout = undefined;
 
         this._rowHeightAccumulation = [];
         this._columnWidthAccumulation = [];

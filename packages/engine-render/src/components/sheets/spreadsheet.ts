@@ -15,6 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
+import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
@@ -26,7 +27,6 @@ import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getColor } from '../../basics/tools';
 import { Canvas } from '../../canvas';
@@ -89,7 +89,7 @@ function scanSparseExtensionFeatures(spreadsheetSkeleton: SpreadsheetSkeleton, r
 
     for (const range of ranges) {
         for (let row = range.startRow; row <= range.endRow; row++) {
-            if (!worksheet.getRowVisible(row)) {
+            if (!spreadsheetSkeleton.getRowVisible(row)) {
                 continue;
             }
 
@@ -103,7 +103,7 @@ function scanSparseExtensionFeatures(spreadsheetSkeleton: SpreadsheetSkeleton, r
                     markers?: unknown;
                     selectionProtection?: unknown[];
                 }>;
-                const cell = cachedCell ?? (worksheet.getCell(row, col) as Nullable<{
+                const cell = cachedCell ?? (spreadsheetSkeleton.getCell(row, col) as Nullable<{
                     customRender?: unknown[];
                     markers?: unknown;
                     selectionProtection?: unknown[];
@@ -340,7 +340,7 @@ export class Spreadsheet extends SheetComponent {
      */
     override draw(ctx: UniverRenderingContext2D, viewportInfo: IViewportInfo, isMergeRepair = false) {
         const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
+        if (!spreadsheetSkeleton || spreadsheetSkeleton.getDisplayProjection()?.placeholder) {
             return;
         }
         const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
@@ -937,7 +937,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor, worksheet } = spreadsheetSkeleton;
+        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -997,7 +997,7 @@ export class Spreadsheet extends SheetComponent {
         //#region draw horizontal lines
         for (let r = rowStart; r <= rowEnd; r++) {
             if (hasMergeData) {
-                if (worksheet.getRowVisible(r) === false) {
+                if (spreadsheetSkeleton.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
                         mergeVisibleRanges.push({
                             startRow: mergeVisibleRangeStartRow,

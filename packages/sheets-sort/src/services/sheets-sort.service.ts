@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-import type { ISortOption } from './interface';
 import {
     Disposable,
+    EventSubject,
+    fromEventSubject,
     ICommandService,
     Inject,
     IUniverInstanceService,
     Rectangle,
+    toDisposable,
 } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
+import type { ISortOption } from './interface';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
 
 export class SheetsSortService extends Disposable {
     private _compareFns: ICellValueCompareFn[] = [];
+    private readonly _sortGuards = new Map<(location: ISheetRangeLocation) => boolean, (() => void) | undefined>();
+    private readonly _sortGuardsChanged = new EventSubject<number>();
+    readonly sortGuardsChanged$ = fromEventSubject(this._sortGuardsChanged);
+    private _guardRevision = 0;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -39,6 +46,40 @@ export class SheetsSortService extends Disposable {
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
+    }
+
+    override dispose(): void {
+        this._sortGuards.clear();
+        this._sortGuardsChanged.complete();
+        super.dispose();
+    }
+
+    /** Guards local sort commands before they resolve to shared reorder mutations. */
+    registerSortGuard(guard: (location: ISheetRangeLocation) => boolean, onBlocked?: () => void): IDisposable {
+        this._sortGuards.set(guard, onBlocked);
+        this.notifySortGuardsChanged();
+        return toDisposable(() => {
+            this._sortGuards.delete(guard);
+            this.notifySortGuardsChanged();
+        });
+    }
+
+    notifySortGuardsChanged(): void {
+        if (!this._disposed) {
+            this._sortGuardsChanged.emitEvent(++this._guardRevision);
+        }
+    }
+
+    canSort(location: ISheetRangeLocation, notify = false): boolean {
+        for (const [guard, onBlocked] of this._sortGuards) {
+            if (!guard(location)) {
+                if (notify) {
+                    onBlocked?.();
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     mergeCheck(location: ISheetRangeLocation) {

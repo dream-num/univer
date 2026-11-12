@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     CellValueType,
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
-    Plugin,
     RANGE_TYPE,
-    touchDependencies,
+    Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FormulaDataModel, FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
+import { FormulaDataModel, FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     INumfmtService,
+    NumfmtService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { IStatusBarService, StatusBarService } from '../../services/status-bar.service';
 import { StatusBarController } from '../status-bar.controller';
 
@@ -51,7 +52,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     name: '',
     appVersion: '0.15.4',
     locale: LocaleType.EN_US,
-    styles: {},
+    styles: { number: { n: { pattern: '0.00' } } },
     sheets: {
         [sheetId]: {
             id: sheetId,
@@ -60,7 +61,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
             columnCount: 10,
             cellData: {
                 0: {
-                    0: { t: CellValueType.NUMBER, v: 1 },
+                    0: { t: CellValueType.NUMBER, v: 1, s: 'number' },
                 },
                 1: {
                     0: { t: CellValueType.NUMBER, v: 2 },
@@ -75,36 +76,20 @@ function createTestBed() {
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    class TestPlugin extends Plugin {
-        static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.UNIVER_SHEET;
+    injector.add([SheetsSelectionsService]);
+    injector.add([IStatusBarService, { useClass: StatusBarService }]);
+    injector.add([INumfmtService, { useClass: NumfmtService }]);
+    injector.add([FormulaDataModel]);
+    injector.add([LexerTreeBuilder]);
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([SheetSkeletonService]);
+    injector.add([StatusBarController]);
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
-        override onStarting(): void {
-            ([
-                [SheetsSelectionsService],
-                [IStatusBarService, { useClass: StatusBarService }],
-                [INumfmtService, { useValue: { getValue: () => ({ pattern: '0.00' }) } }],
-                [FormulaDataModel, { useValue: { getArrayFormulaCellData: () => undefined } }],
-                [StatusBarController],
-            ] as Dependency[]).forEach((d) => this._injector.add(d));
-
-            touchDependencies(this._injector, [
-                [StatusBarController],
-            ]);
-        }
-    }
-
-    univer.registerPlugin(TestPlugin);
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, TEST_WORKBOOK_DATA);
+    get(SheetSkeletonService);
     get(SheetsSelectionsService);
-    get(StatusBarController);
+    get(IRenderManagerService).registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(TEST_WORKBOOK_DATA));
 
     // Trigger SheetsSelectionsService's current workbook stream.
     get(IUniverInstanceService).focusUnit(unitId);
@@ -136,11 +121,13 @@ describe('StatusBarController', () => {
     });
 
     afterEach(() => {
-        vi.useRealTimers();
         univer.dispose();
+        vi.restoreAllMocks();
+        vi.useRealTimers();
     });
 
     it('updates status bar values on selection changes and cell updates within selection', () => {
+        get(StatusBarController);
         const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
 
@@ -201,5 +188,72 @@ describe('StatusBarController', () => {
 
         // Business sanity: workbook data actually updated.
         expect(workbook.getActiveSheet()!.getCellRaw(0, 0)?.v).toBe(10);
+    });
+
+    it('recalculates the existing selection from visible rows and projected formula values', () => {
+        get(StatusBarController);
+        // Happy DOM does not implement a canvas backend.
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        const renders = get(IRenderManagerService);
+        const render = renders.createRender(unitId);
+        const skeletons = render.with(SheetSkeletonManagerService);
+        get(FormulaDataModel).setArrayFormulaCellData({
+            [unitId]: {
+                [sheetId]: {
+                    2: { 0: { v: 80, t: CellValueType.NUMBER } },
+                    4: { 0: { v: 9, t: CellValueType.NUMBER } },
+                },
+            },
+        });
+        expect(commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            unitId,
+            subUnitId: sheetId,
+            selections: [{ range: { startRow: 0, endRow: 4, startColumn: 0, endColumn: 0 }, primary: null, style: null }],
+        })).toBe(true);
+        const status = get(IStatusBarService);
+        const getSum = () => status.getState()?.values.find(({ func }) => func === FUNCTION_NAMES_MATH.SUM)?.value;
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(92);
+
+        skeletons.setProjection(sheetId, {
+            isRowFiltered: (row) => row === 1,
+            getCell: (row, column) => {
+                if (column !== 0) {
+                    return undefined;
+                }
+                if (row === 2) {
+                    return null;
+                }
+                if (row === 0 || row === 3) {
+                    return { v: row === 0 ? 10 : 5, t: CellValueType.NUMBER };
+                }
+            },
+        });
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(24);
+        expect(status.getState()?.values.find(({ func }) => func === FUNCTION_NAMES_STATISTICAL.COUNTA)?.value).toBe(3);
+
+        skeletons.setProjection(sheetId, undefined);
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(92);
+
+        const companionId = 'companion';
+        const companion = renders.createRender(unitId, undefined, companionId);
+        companion.with(SheetSkeletonManagerService).setProjection(sheetId, {
+            isRowFiltered: (row) => row === 1,
+            getCell: (row, column) => row === 0 && column === 0 ? { v: 100, t: CellValueType.NUMBER } : undefined,
+        });
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(92);
+
+        renders.focusRender?.(companionId);
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(189);
+
+        renders.focusRender?.(unitId);
+        vi.advanceTimersByTime(150);
+        expect(getSum()).toBe(92);
     });
 });

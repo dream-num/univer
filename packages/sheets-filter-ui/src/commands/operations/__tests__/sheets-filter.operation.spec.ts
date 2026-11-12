@@ -37,6 +37,7 @@ import {
     CloseFilterPanelOperation,
     FILTER_PANEL_OPENED_KEY,
     OpenFilterPanelOperation,
+    RequestOpenFilterPanelOperation,
 } from '../sheets-filter.operation';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
@@ -103,6 +104,7 @@ function createFilterOperationTestBed() {
 
     [
         OpenFilterPanelOperation,
+        RequestOpenFilterPanelOperation,
         CloseFilterPanelOperation,
         ChangeFilterByOperation,
         SetCellEditVisibleOperation,
@@ -133,6 +135,36 @@ describe('test sheets filter ui operations', () => {
     });
 
     describe('test "OpenFilerPanelOperation"', () => {
+        it('allows a local panel to handle a request without invoking public filter permission checks', () => {
+            const publicOpen = vi.fn();
+            const listener = commandService.beforeCommandExecuted((command) => {
+                if (command.id === RequestOpenFilterPanelOperation.id) {
+                    (command.params as { handled?: boolean }).handled = true;
+                }
+                if (command.id === OpenFilterPanelOperation.id) {
+                    publicOpen();
+                    throw new Error('Public filter is read-only');
+                }
+            });
+
+            expect(commandService.syncExecuteCommand(RequestOpenFilterPanelOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 0,
+            })).toBe(true);
+            expect(publicOpen).not.toHaveBeenCalled();
+            expect(contextService.getContextValue(FILTER_PANEL_OPENED_KEY)).toBeFalsy();
+            listener.dispose();
+        });
+
+        it('falls back to the public operation and preserves its failure result', () => {
+            expect(commandService.syncExecuteCommand(RequestOpenFilterPanelOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 0,
+            })).toBe(false);
+        });
+
         it('should return false when the filter model is not found', () => {
             const spy = vi.spyOn(sheetsFilterPanelService, 'setupCol');
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {

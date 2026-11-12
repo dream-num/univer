@@ -19,9 +19,9 @@
 
 import type { IAccessor, ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { IOrderRule, SortType } from '../../services/interface';
 import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
+import type { IOrderRule, SortType } from '../../services/interface';
 import { SheetsSortService } from '../../services/sheets-sort.service';
 
 export interface ISortRangeCommandParams extends ISheetCommandSharedParams {
@@ -49,12 +49,16 @@ export const SortRangeCommand: ICommand = {
     id: 'sheet.command.sort-range',
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params: ISortRangeCommandParams) => {
-        const { range, orderRules, hasTitle, unitId, subUnitId } = params;
+    handler: (accessor: IAccessor, params: ISortRangeCommandParams, options) => {
+        const { range, orderRules, hasTitle } = params;
         const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { worksheet } = getSheetCommandTarget(univerInstanceService, params) || {};
-        if (!worksheet) {
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
+        if (!options?.fromFacade && !sortService.canSort({ unitId, subUnitId, range }, true)) {
             return false;
         }
 
@@ -95,7 +99,7 @@ export const SortRangeCommand: ICommand = {
 
         const order: { [key: number]: number } = {};
 
-        toReorder.forEach(({ index, value }, oldIndex) => {
+        toReorder.forEach(({ index }, oldIndex) => {
             order[oldOrder[oldIndex]] = index;
         });
 

@@ -28,8 +28,7 @@ import type {
     Viewport,
 } from '@univerjs/engine-render';
 import { UniverInstanceType, Workbook } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-
+import { getFocusedRenderForUnit, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 
 export interface ISheetObjectParam {
@@ -46,6 +45,10 @@ export interface ISheetObjectParam {
 
 function isRenderManagerService(renderManagerService: IRenderManagerService | IRenderContext): renderManagerService is IRenderManagerService {
     return typeof (renderManagerService as IRenderContext).isMainScene === 'undefined';
+}
+
+export function isFocusedSheetRender(context: IRenderContext, renders: IRenderManagerService): boolean {
+    return !renders.getFocusedRenderByUnitId || getFocusedRenderForUnit(renders, context.unitId)?.scene === context.scene;
 }
 
 /**

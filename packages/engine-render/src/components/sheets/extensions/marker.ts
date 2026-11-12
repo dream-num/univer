@@ -68,11 +68,11 @@ export class Marker extends SheetExtension {
             const { startRow, endRow, startColumn, endColumn } = range;
             for (let row = startRow; row <= endRow; row++) {
                 for (let col = startColumn; col <= endColumn; col++) {
-                    if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                    if (!skeleton.getRowVisible(row) || !worksheet.getColVisible(col)) {
                         continue;
                     }
 
-                    let cellData = skeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData ?? worksheet.getCell(row, col);
+                    let cellData = skeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData ?? skeleton.getCell(row, col);
                     if (!hasMerge && !cellData?.markers) {
                         continue;
                     }
@@ -94,7 +94,7 @@ export class Marker extends SheetExtension {
                             col: mergeInfo.startColumn,
                         };
 
-                        cellData = skeleton.stylesCache.fontMatrix.getValue(mainCell.row, mainCell.col)?.cellData ?? worksheet.getCell(mainCell.row, mainCell.col);
+                        cellData = skeleton.stylesCache.fontMatrix.getValue(mainCell.row, mainCell.col)?.cellData ?? skeleton.getCell(mainCell.row, mainCell.col);
                     }
 
                     if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

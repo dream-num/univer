@@ -31,6 +31,8 @@ export interface IExpandParams {
     down?: boolean;
 }
 
+type IRowVisibility = Pick<Worksheet, 'getRowVisible'>;
+
 // TODO@wzhudev: methods in this file should use `worksheet.getCell()` instead of using raw data
 
 export function findNextRange(
@@ -40,7 +42,8 @@ export function findNextRange(
     boundary?: IRange,
     isFindNext: boolean = true,
     nextStep: number = 1,
-    isGoBack: boolean = true
+    isGoBack: boolean = true,
+    rowVisibility: IRowVisibility = worksheet
 ): IRange {
     let destRange: IRange = { ...startRange };
 
@@ -61,7 +64,7 @@ export function findNextRange(
     switch (direction) {
         case Direction.UP:
             next = startRange.startRow - nextStep;
-            while (next > -1 && !worksheet.getRowVisible(next)) {
+            while (next > -1 && !rowVisibility.getRowVisible(next)) {
                 next -= 1;
             }
             if (next >= boundary.startRow) {
@@ -72,13 +75,13 @@ export function findNextRange(
                 destRange.endRow = boundary.endRow;
 
                 if (isFindNext) {
-                    destRange = findNextRange(destRange, Direction.LEFT, worksheet, boundary, false);
+                    destRange = findNextRange(destRange, Direction.LEFT, worksheet, boundary, false, 1, true, rowVisibility);
                 }
             }
             break;
         case Direction.DOWN:
             next = startRange.endRow + nextStep;
-            while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
+            while (next < worksheet.getRowCount() && !rowVisibility.getRowVisible(next)) {
                 next += 1;
             }
             if (next <= boundary.endRow) {
@@ -89,7 +92,7 @@ export function findNextRange(
                 destRange.endRow = boundary.startRow;
 
                 if (isFindNext) {
-                    destRange = findNextRange(destRange, Direction.RIGHT, worksheet, boundary, false);
+                    destRange = findNextRange(destRange, Direction.RIGHT, worksheet, boundary, false, 1, true, rowVisibility);
                 }
             }
             break;
@@ -106,7 +109,7 @@ export function findNextRange(
                 destRange.endColumn = boundary.endColumn;
 
                 if (isFindNext) {
-                    destRange = findNextRange(destRange, Direction.UP, worksheet, boundary, false);
+                    destRange = findNextRange(destRange, Direction.UP, worksheet, boundary, false, 1, true, rowVisibility);
                 }
             }
             break;
@@ -123,7 +126,7 @@ export function findNextRange(
                 destRange.endColumn = boundary.startColumn;
 
                 if (isFindNext) {
-                    destRange = findNextRange(destRange, Direction.DOWN, worksheet, boundary, false);
+                    destRange = findNextRange(destRange, Direction.DOWN, worksheet, boundary, false, 1, true, rowVisibility);
                 }
             }
             break;
@@ -134,7 +137,7 @@ export function findNextRange(
     return destRange;
 }
 
-export function findNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+export function findNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet, rowVisibility: IRowVisibility = worksheet): IRange {
     const destRange = { ...startRange };
     const { startRow, startColumn, endRow, endColumn } = getEdgeOfRange(startRange, direction, worksheet);
 
@@ -145,7 +148,7 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
     while (shouldContinue) {
         if (Direction.UP === direction) {
             let next = destRange.startRow - 1;
-            while (next > -1 && !worksheet.getRowVisible(next)) {
+            while (next > -1 && !rowVisibility.getRowVisible(next)) {
                 next -= 1;
             }
             if (next === -1) {
@@ -190,7 +193,7 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
 
         if (Direction.DOWN === direction) {
             let next = destRange.endRow + 1;
-            while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
+            while (next < worksheet.getRowCount() && !rowVisibility.getRowVisible(next)) {
                 next += 1;
             }
             if (next === worksheet.getRowCount()) {
@@ -325,17 +328,17 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
     return alignToMergedCellsBorders(destRange, worksheet, true);
 }
 
-export function findNextRangeExpand(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    return findNextRange(startRange, direction, worksheet, undefined, false, 1, false);
+export function findNextRangeExpand(startRange: IRange, direction: Direction, worksheet: Worksheet, rowVisibility: IRowVisibility = worksheet): IRange {
+    return findNextRange(startRange, direction, worksheet, undefined, false, 1, false, rowVisibility);
 }
 
-export function expandToNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextGapRange(startRange, direction, worksheet);
+export function expandToNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet, rowVisibility: IRowVisibility = worksheet): IRange {
+    const next = findNextGapRange(startRange, direction, worksheet, rowVisibility);
     return alignToMergedCellsBorders(Rectangle.union(next, startRange), worksheet, true);
 }
 
-export function expandToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextRangeExpand(startRange, direction, worksheet);
+export function expandToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet, rowVisibility: IRowVisibility = worksheet): IRange {
+    const next = findNextRangeExpand(startRange, direction, worksheet, rowVisibility);
     const destRange: IRange = {
         startRow: Math.min(startRange.startRow, next.startRow),
         startColumn: Math.min(startRange.startColumn, next.startColumn),
@@ -356,11 +359,12 @@ export function shrinkToNextGapRange(
     startRange: IRange,
     anchorRange: IRange,
     direction: Direction,
-    worksheet: Worksheet
+    worksheet: Worksheet,
+    rowVisibility: IRowVisibility = worksheet
 ): IRange {
     // use `moveToNextGapCell` reversely to get the next going to cell
     const reversedDirection = getReverseDirection(direction);
-    const nextGap = findNextGapRange(getEdgeOfRange(startRange, reversedDirection, worksheet), direction, worksheet);
+    const nextGap = findNextGapRange(getEdgeOfRange(startRange, reversedDirection, worksheet), direction, worksheet, rowVisibility);
 
     // if next exceed the startRange we should just expand anchorRange with
     if (direction === Direction.UP && nextGap.startRow <= startRange.startRow) {
@@ -400,12 +404,12 @@ export function shrinkToNextGapRange(
  * @param direction
  * @param worksheet
  */
-export function shrinkToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+export function shrinkToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet, rowVisibility: IRowVisibility = worksheet): IRange {
     // use `moveToNextCell` reversely to get the next going to range
     const reversedDirection = getReverseDirection(direction);
     const shrinkFromEdge = getEdgeOfRange(startRange, reversedDirection, worksheet);
     const otherEdge = getEdgeOfRange(startRange, direction, worksheet);
-    const next = findNextRangeExpand(shrinkFromEdge, direction, worksheet);
+    const next = findNextRangeExpand(shrinkFromEdge, direction, worksheet, rowVisibility);
     return alignToMergedCellsBorders(Rectangle.union(otherEdge, next), worksheet, false);
 }
 

@@ -16,16 +16,20 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
+    getSheetCommandTarget,
     RangeProtectionPermissionEditPoint,
+    SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetSortPermission,
 } from '@univerjs/sheets';
+import { SheetsSortService } from '@univerjs/sheets-sort';
 import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { combineLatest, map, startWith } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import {
     SortRangeAscCommand,
     SortRangeAscExtCommand,
@@ -42,6 +46,19 @@ import {
 export const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
 export const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
 
+function getSortRangeDisabled$(accessor: IAccessor, permissions: Parameters<typeof getCurrentRangeDisable$>[1]) {
+    const sorts = accessor.get(SheetsSortService);
+    const instances = accessor.get(IUniverInstanceService);
+    const selections = accessor.get(SheetsSelectionsService);
+    return combineLatest([getCurrentRangeDisable$(accessor, permissions), sorts.sortGuardsChanged$.pipe(startWith(0))]).pipe(
+        map(([disabled]) => {
+            const target = getSheetCommandTarget(instances);
+            const range = selections.getCurrentLastSelection()?.range;
+            return disabled || (!!target && !!range && !sorts.canSort({ ...target, range }));
+        })
+    );
+}
+
 export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: SHEETS_SORT_MENU_ID,
@@ -49,7 +66,7 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> 
         icon: 'AscendingIcon',
         tooltip: 'sheets-sort-ui.general.sort',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -110,7 +127,7 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem<LocaleKe
         type: MenuItemType.SUBITEMS,
         icon: 'AscendingIcon',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -124,7 +141,7 @@ export function sortRangeAscCtxMenuFactory(accessor: IAccessor): IMenuItem<Local
         title: 'sheets-sort-ui.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
         icon: 'AscendingIcon',
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -138,7 +155,7 @@ export function sortRangeAscExtCtxMenuFactory(accessor: IAccessor): IMenuItem<Lo
         title: 'sheets-sort-ui.general.sort-asc-ext',
         type: MenuItemType.BUTTON,
         icon: 'ExpandAscendingIcon',
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -152,7 +169,7 @@ export function sortRangeDescCtxMenuFactory(accessor: IAccessor): IMenuItem<Loca
         title: 'sheets-sort-ui.general.sort-desc-cur',
         type: MenuItemType.BUTTON,
         icon: 'DescendingIcon',
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -166,7 +183,7 @@ export function sortRangeDescExtCtxMenuFactory(accessor: IAccessor): IMenuItem<L
         title: 'sheets-sort-ui.general.sort-desc-ext',
         type: MenuItemType.BUTTON,
         icon: 'ExpandDescendingIcon',
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -180,7 +197,7 @@ export function sortRangeCustomCtxMenuFactory(accessor: IAccessor): IMenuItem<Lo
         title: 'sheets-sort-ui.general.sort-custom',
         type: MenuItemType.BUTTON,
         icon: 'CustomSortIcon',
-        disabled$: getCurrentRangeDisable$(accessor, {
+        disabled$: getSortRangeDisabled$(accessor, {
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],

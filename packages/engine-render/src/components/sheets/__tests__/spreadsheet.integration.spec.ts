@@ -15,7 +15,6 @@
  */
 
 import type { IDocumentData, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import {
     BooleanNumber,
     BorderStyleTypes,
@@ -38,6 +37,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { FontCache } from '../../../basics';
 import { Vector2 } from '../../../basics/vector2';
@@ -709,6 +709,21 @@ describe('spreadsheet integration', () => {
             endY: 0,
         });
         noSkeletonSpreadsheet.dispose();
+    });
+
+    it('suppresses worksheet drawing while its projection is a placeholder', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const viewportInfo = createViewportInfo(scene, cacheCanvas);
+        const font = new Font();
+        const draw = vi.spyOn(font, 'draw');
+        spreadsheet.register(font);
+        spreadsheet.draw(mainCanvas.getContext(), viewportInfo);
+        expect(draw).toHaveBeenCalled();
+        draw.mockClear();
+
+        skeleton.setProjection({ placeholder: true, isRowFiltered: () => true, getCell: () => null });
+        spreadsheet.draw(mainCanvas.getContext(), viewportInfo);
+        expect(draw).not.toHaveBeenCalled();
     });
 
     it('repaints text across the cleared incremental scroll bound', () => {

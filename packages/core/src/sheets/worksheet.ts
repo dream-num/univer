@@ -34,7 +34,6 @@ import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
 import { generateRandomId } from '../shared/random-id';
-import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
 import { BooleanNumber, CellValueType } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
@@ -595,6 +594,14 @@ export class Worksheet {
         return this._viewModel.getCell(row, col);
     }
 
+    /** Reads a display-only value through the cell interceptor pipeline. */
+    getCellForDisplay(row: number, col: number, value: Pick<ICellData, 'v' | 't'> | null): Nullable<ICellDataForSheetInterceptor> {
+        if (row < 0 || col < 0) {
+            return null;
+        }
+        return this._viewModel.getCellForDisplay(row, col, value);
+    }
+
     /**
      * Get cellData only use effect on value interceptor
      * @param {number} number row The row index of the cell.
@@ -674,7 +681,8 @@ export class Worksheet {
         col: number,
         endRow: number,
         endCol: number,
-        dataMode: CellModeEnum
+        dataMode: CellModeEnum,
+        includeRow?: (row: number) => boolean
     ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
 
     getMatrixWithMergedCells(
@@ -682,7 +690,8 @@ export class Worksheet {
         col: number,
         endRow: number,
         endCol: number,
-        dataMode: CellModeEnum = CellModeEnum.Raw
+        dataMode: CellModeEnum = CellModeEnum.Raw,
+        includeRow?: (row: number) => boolean
     ): ObjectMatrix<ICellDataWithSpanAndDisplay> {
         const matrix = this.getCellMatrix();
 
@@ -691,7 +700,7 @@ export class Worksheet {
 
         // iterate all cells in the range
         const returnCellMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
-        createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
+        const readCell = (row: number, col: number) => {
             let cellData: Nullable<ICellDataWithSpanAndDisplay>;
             if (dataMode === CellModeEnum.Raw) {
                 cellData = this.getCellRaw(row, col);
@@ -711,25 +720,36 @@ export class Worksheet {
             if (cellData) {
                 returnCellMatrix.setValue(row, col, cellData);
             }
-        });
+        };
+        for (let rowIndex = row; rowIndex <= endRow; rowIndex++) {
+            if (includeRow && !includeRow(rowIndex)) {
+                continue;
+            }
+            for (let column = col; column <= endCol; column++) {
+                readCell(rowIndex, column);
+            }
+        }
 
         // iterate over all merged cells in the range and remove non-top-left positions
         // from the matrix we just created
         mergedCellsInRange.forEach((mergedCell) => {
             const { startColumn, startRow, endColumn, endRow } = mergedCell;
-            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
-                if (row === startRow && col === startColumn) {
-                    returnCellMatrix.setValue(row, col, {
-                        ...matrix.getValue(row, col),
-                        rowSpan: endRow - startRow + 1,
-                        colSpan: endColumn - startColumn + 1,
-                    });
+            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+                if (includeRow && !includeRow(rowIndex)) {
+                    continue;
                 }
-
-                if (row !== startRow || col !== startColumn) {
-                    returnCellMatrix.realDeleteValue(row, col);
+                for (let column = startColumn; column <= endColumn; column++) {
+                    if (rowIndex === startRow && column === startColumn) {
+                        returnCellMatrix.setValue(rowIndex, column, {
+                            ...matrix.getValue(rowIndex, column),
+                            rowSpan: endRow - startRow + 1,
+                            colSpan: endColumn - startColumn + 1,
+                        });
+                    } else {
+                        returnCellMatrix.realDeleteValue(rowIndex, column);
+                    }
                 }
-            });
+            }
         });
 
         return returnCellMatrix;

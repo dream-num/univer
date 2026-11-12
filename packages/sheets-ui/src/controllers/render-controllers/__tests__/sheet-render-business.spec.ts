@@ -18,7 +18,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { CommandType, ICommandService, IConfigService, Injector, Univer, UniverInstanceType } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import { SHEET_EXTENSION_PREFIX, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { MoveRangeMutation, SetColDataMutation, SetRangeValuesMutation, SetRowDataMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
@@ -157,6 +157,7 @@ function createController() {
     };
     const sheetSkeletonManagerService = {
         currentSkeleton$,
+        projectionChanged$: new Subject<string>(),
         setCurrent: vi.fn(),
         makeDirty: vi.fn(),
         reCalculate: vi.fn(),
@@ -294,6 +295,23 @@ describe('SheetRenderController business flows', () => {
             },
         });
         expect(context.mainComponent.setDirtyArea).toHaveBeenCalledTimes(2);
+
+        const target = { unitId: 'unit-1', subUnitId: 'sheet-1' };
+        commandService.emit({
+            id: SetRowDataMutation.id,
+            type: CommandType.MUTATION,
+            params: { ...target, rowData: { 1: { h: 48 } } },
+        });
+        expect(sheetSkeletonManagerService.makeDirty).toHaveBeenLastCalledWith({
+            sheetId: 'sheet-1',
+            commandId: SetRowDataMutation.id,
+        }, true);
+        commandService.emit({
+            id: SetColDataMutation.id,
+            type: CommandType.MUTATION,
+            params: { ...target, columnData: { 1: { s: 'style-only' } } },
+        });
+        expect(sheetSkeletonManagerService.makeDirty).toHaveBeenCalledTimes(2);
 
         const dirtyCountBeforeCalculationNotification = scene.makeDirty.mock.calls.length;
         commandService.emit({

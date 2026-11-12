@@ -15,11 +15,11 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
 import { ICommandService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
-import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
+import type { IRequestOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
+import { RequestOpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
 import { filterPartial } from './icons';
 
 export const FILTER_ICON_SIZE = 16;
@@ -160,19 +160,19 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         }
 
         const { row, col, unitId, subUnitId, tableId } = this._filterParams!;
-        if (!this._commandService.hasCommand(OpenTableFilterPanelOperation.id)) {
+        if (!this._commandService.hasCommand(RequestOpenTableFilterPanelOperation.id)) {
             return;
         }
 
         setTimeout(() => {
-            const cmdParams: IOpenTableFilterPanelOperationParams = {
+            const cmdParams: IRequestOpenTableFilterPanelOperationParams = {
                 row,
                 col,
                 unitId,
                 subUnitId,
                 tableId,
             };
-            this._commandService.executeCommand(OpenTableFilterPanelOperation.id, cmdParams);
+            this._commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, cmdParams);
         }, 200);
     }
 

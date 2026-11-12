@@ -18,7 +18,12 @@ import type { ICellData, ICellDataForSheetInterceptor, ICellInterceptor, Nullabl
 import { createInterceptorKey } from '@univerjs/core';
 import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 
-const CELL_CONTENT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>('CELL_CONTENT') as ICellInterceptor<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>;
+export interface ICellContentLocation extends ISheetLocation {
+    rawData: Nullable<ICellData>;
+    displayValue?: Pick<ICellData, 'v' | 't'> | null;
+}
+
+const CELL_CONTENT = createInterceptorKey<ICellDataForSheetInterceptor, ICellContentLocation>('CELL_CONTENT') as ICellInterceptor<ICellDataForSheetInterceptor, ICellContentLocation>;
 const ROW_FILTERED = createInterceptorKey<boolean, ISheetRowLocation>('ROW_FILTERED');
 
 export const INTERCEPTOR_POINT = {
@@ -31,6 +36,7 @@ export enum InterceptCellContentPriority {
     NUMFMT = 10,
     CELL_IMAGE = 11,
     TABLE_STYLE = 12,
+    DISPLAY_VALUE = 99,
 }
 // used for define the range theme interceptor, it will also use to ignore the range theme interceptor
 export const RangeThemeInterceptorId = 'sheet.interceptor.range-theme-id';

@@ -156,6 +156,7 @@ export * from './layer';
 export { UniverRenderEnginePlugin } from './plugin';
 export {
     getCurrentTypeOfRenderer,
+    getFocusedRenderForUnit,
     IRenderManagerService,
     RenderManagerService,
     withCurrentTypeOfRenderer,

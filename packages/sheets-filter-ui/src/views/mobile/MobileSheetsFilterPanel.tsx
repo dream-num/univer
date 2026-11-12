@@ -26,9 +26,12 @@ import {
 } from '@univerjs/design';
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { FilterBy, SheetsFilterSyncController } from '@univerjs/sheets-filter';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import {
+    ComponentContainer,
     IMessageService,
     MobileDrawer,
+    useComponentsOfPart,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
@@ -126,6 +129,7 @@ export function MobileSheetsFilterPanel() {
 }
 
 function MobileSheetsFilterPanelContent() {
+    const filterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const panelService = useDependency(ISheetsFilterPanelService);
@@ -247,6 +251,18 @@ function MobileSheetsFilterPanelContent() {
                     )
                     : undefined}
             >
+                {!detailOpen && (
+                    <ComponentContainer
+                        components={filterPanelEmbedPointPart}
+                        sharedProps={{
+                            range: filterRange,
+                            colIndex: col,
+                            unitId: panelService.filterModel?.unitId,
+                            subUnitId: panelService.filterModel?.subUnitId,
+                            onClose: closePanel,
+                        }}
+                    />
+                )}
                 {detailOpen
                     ? (
                         <div className="univer-flex univer-min-h-full univer-flex-col">

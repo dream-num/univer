@@ -15,11 +15,11 @@
  */
 
 import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { BorderStyleTypes, Range } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { IBorderCache, IBorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { BorderStyleTypes, Range } from '@univerjs/core';
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import { SpreadsheetExtensionRegistry } from '../../extension';
@@ -105,7 +105,7 @@ export class Border extends SheetExtension {
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
         if (!isMerged) {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row);
             if (!visibleRow) return true;
 
             const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);

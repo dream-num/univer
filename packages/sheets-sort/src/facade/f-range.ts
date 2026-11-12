@@ -72,7 +72,7 @@ export class FRangeSheetsSortMixin extends FRange implements IFRangeSheetsSortMi
             hasTitle: false,
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-        });
+        }, { fromFacade: true });
         return this;
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
+import type { Scene } from '@univerjs/engine-render';
 import {
     CellValueType,
     ICommandService,
@@ -27,10 +27,13 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { IRenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -72,6 +75,52 @@ describe('Test clear selection content commands', () => {
     });
 
     describe('clear selection contents', () => {
+        it('clears projected visible rows and restores the same cells on undo', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const worksheet = workbook.getActiveSheet()!;
+            const unitId = workbook.getUnitId();
+            const subUnitId = worksheet.getSheetId();
+            const skeletons = get(SheetSkeletonService);
+            const skeleton = skeletons.createRenderSkeleton(worksheet, workbook.getStyles());
+            skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+            const display = new Spreadsheet('test', skeleton);
+            const scene = {} as Scene;
+            univer.__getInjector().add([IRenderManagerService, { useValue: {
+                getRenderUnitById: () => ({ mainComponent: display, scene }),
+            } as never }]);
+            try {
+                expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                    unitId,
+                    subUnitId,
+                    cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } } },
+                })).toBe(true);
+                const params = {
+                    unitId,
+                    subUnitId,
+                    ranges: [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 }],
+                };
+                const values = () => [0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v ?? null);
+                skeletons.setDisplayProjectionPending(scene, subUnitId, true);
+                expect(await commandService.executeCommand(ClearSelectionContentCommand.id, params)).toBe(false);
+                expect(values()).toEqual(['A', 'B', 'C']);
+                expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                    unitId,
+                    subUnitId,
+                    cellValue: { 3: { 0: { v: 'remote' } } },
+                }, { fromChangeset: true })).toBe(true);
+                expect(worksheet.getCellRaw(3, 0)?.v).toBe('remote');
+
+                skeletons.setDisplayProjectionPending(scene, subUnitId, false);
+                expect(await commandService.executeCommand(ClearSelectionContentCommand.id, params)).toBe(true);
+                expect(values()).toEqual([null, 'B', null]);
+                expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                expect(values()).toEqual(['A', 'B', 'C']);
+            } finally {
+                display.dispose();
+                skeleton.dispose();
+            }
+        });
+
         describe('correct situations', () => {
             it('will clear selection content when there is a selected range', async () => {
                 const selectionManager = get(SheetsSelectionsService);

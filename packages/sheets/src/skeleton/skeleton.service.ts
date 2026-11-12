@@ -17,7 +17,7 @@
 import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector, IUniverInstanceService, SheetTypes, UniverInstanceType } from '@univerjs/core';
-import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { getFocusedRenderForUnit, IRenderManagerService, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {
@@ -30,6 +30,7 @@ export interface ISheetSkeletonManagerParam {
 
 export class SheetSkeletonService extends Disposable {
     private _sceneMap: Map<string, Scene> = new Map();
+    private readonly _pendingProjections = new WeakMap<Scene, Set<string>>();
     private _sheetSkeletonParamStore: Map<string, Map<string, ISheetSkeletonManagerParam>> = new Map();
     private _buildSkeleton$ = new Subject<SpreadsheetSkeleton>();
     readonly buildSkeleton$ = this._buildSkeleton$.asObservable();
@@ -136,24 +137,22 @@ export class SheetSkeletonService extends Disposable {
     }
 
     private _buildSkeleton(worksheet: Worksheet, styles: Styles) {
-        // Chart Sheets have no cell geometry; direct creation retains its nonnullable contract.
+        const spreadsheetSkeleton = this.createRenderSkeleton(worksheet, styles, this._sceneMap.get(worksheet.getUnitId()));
+        this._buildSkeleton$.next(spreadsheetSkeleton);
+        return spreadsheetSkeleton;
+    }
+
+    /** Creates a display-owned skeleton outside the shared worksheet cache. */
+    createRenderSkeleton(worksheet: Worksheet, styles: Styles, scene?: Scene): SpreadsheetSkeleton {
+        // Chart sheets have no cell geometry.
         if (worksheet.getConfig().type === SheetTypes.CHART) {
             throw new Error('Cannot create a SpreadsheetSkeleton for SheetTypes.CHART');
         }
-        const spreadsheetSkeleton = this._injector.createInstance(
-            SpreadsheetSkeleton,
-            worksheet,
-            styles
-        );
-
-        const unitId = worksheet.getUnitId();
-        const scene = this._sceneMap.get(unitId);
+        const skeleton = this._injector.createInstance(SpreadsheetSkeleton, worksheet, styles);
         if (scene) {
-            spreadsheetSkeleton.setScene(scene);
+            skeleton.setScene(scene);
         }
-
-        this._buildSkeleton$.next(spreadsheetSkeleton);
-        return spreadsheetSkeleton;
+        return skeleton;
     }
 
     setScene(unitId: string, scene: Scene) {
@@ -179,6 +178,55 @@ export class SheetSkeletonService extends Disposable {
 
     getSkeleton(unitId: string, subUnitId: string): Nullable<SpreadsheetSkeleton> {
         return this.getSkeletonParam(unitId, subUnitId)?.skeleton;
+    }
+
+    /** Resolves the skeleton used by the current browser display for this sheet. */
+    getDisplaySkeleton(unitId: string, subUnitId: string, scene?: Scene): SpreadsheetSkeleton | undefined {
+        const component = this._getDisplayRender(unitId, scene)?.mainComponent;
+        const skeleton = component instanceof Spreadsheet ? component.getSkeleton() : undefined;
+        return skeleton?.worksheet.getSheetId() === subUnitId ? skeleton : undefined;
+    }
+
+    isDisplayProjectionPending(unitId: string, subUnitId: string): boolean {
+        const scene = this._getDisplayRender(unitId)?.scene;
+        return scene ? this.isSceneProjectionPending(scene, subUnitId) : false;
+    }
+
+    isSceneProjectionPending(scene: Scene, subUnitId: string): boolean {
+        return this._pendingProjections.get(scene)?.has(subUnitId) ?? false;
+    }
+
+    setDisplayProjectionPending(scene: Scene, subUnitId: string, pending: boolean): void {
+        const pendingSheets = this._pendingProjections.get(scene);
+        if (pending) {
+            if (pendingSheets) {
+                pendingSheets.add(subUnitId);
+            } else {
+                this._pendingProjections.set(scene, new Set([subUnitId]));
+            }
+        } else if (pendingSheets) {
+            pendingSheets.delete(subUnitId);
+            if (pendingSheets.size === 0) {
+                this._pendingProjections.delete(scene);
+            }
+        }
+    }
+
+    clearDisplayProjectionPending(scene: Scene): void {
+        this._pendingProjections.delete(scene);
+    }
+
+    private _getDisplayRender(unitId: string, scene?: Scene) {
+        if (!this._injector.has(IRenderManagerService)) {
+            return;
+        }
+        const renders = this._injector.get(IRenderManagerService);
+        const focused = getFocusedRenderForUnit(renders, unitId);
+        if (!scene || focused?.scene === scene || !renders.getFocusedRenderByUnitId) {
+            return focused;
+        }
+        return renders.getAllRenderersOfType(UniverInstanceType.UNIVER_SHEET)
+            .find((render) => render.unitId === unitId && render.scene === scene);
     }
 
     getSkeletonParam(unitId: string, subUnitId: string): Nullable<ISheetSkeletonManagerParam> {

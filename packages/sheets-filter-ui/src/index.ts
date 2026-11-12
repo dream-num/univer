@@ -16,9 +16,12 @@
 
 import './global.css';
 
-export { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from './commands/operations/sheets-filter.operation';
-export type { IOpenFilterPanelOperationParams } from './commands/operations/sheets-filter.operation';
+export { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation, RequestOpenFilterPanelOperation } from './commands/operations/sheets-filter.operation';
+export type { IOpenFilterPanelOperationParams, IRequestOpenFilterPanelOperationParams } from './commands/operations/sheets-filter.operation';
 export type { IUniverSheetsFilterUIConfig } from './config/config';
 export { menuSchema as SheetsFilterUIMenuSchema } from './menu/schema';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsFilterUIPlugin } from './plugin';
+export { ISheetsFilterPanelService, SheetsFilterPanelService } from './services/sheets-filter-panel.service';
+export { FilterPanel } from './views/components/SheetsFilterPanel';
+export { SheetsFilterRenderController } from './views/render-modules/sheets-filter.render-controller';

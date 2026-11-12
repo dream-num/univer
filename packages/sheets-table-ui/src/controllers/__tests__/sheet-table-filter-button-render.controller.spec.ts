@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import { INTERCEPTOR_POINT } from '@univerjs/sheets';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
+import { SheetsTableButtonStateEnum, TableColumnFilterTypeEnum, TableManager } from '@univerjs/sheets-table';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE } from '../../views/widgets/table-filter-button.shape';
+import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsTableFilterButtonShape } from '../../views/widgets/table-filter-button.shape';
 import { SheetsTableFilterButtonRenderController } from '../sheet-table-filter-button-render.controller';
 
 vi.hoisted(() => {
@@ -28,6 +33,71 @@ vi.hoisted(() => {
 });
 
 describe('SheetsTableFilterButtonRenderController', () => {
+    it('shows isolated table criteria, skips unchanged display state, and restores public indicators', () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([TableManager]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetRangeThemeModel]);
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'u1',
+            appVersion: '1',
+            name: '',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['s1'],
+            sheets: { s1: { id: 's1', rowCount: 20, columnCount: 10, cellData: {} } },
+        });
+        const tables = injector.get(TableManager);
+        for (const [id, startRow] of [['a', 0], ['b', 5]] as const) {
+            tables.addTable('u1', 's1', id, { startRow, endRow: startRow + 3, startColumn: 1, endColumn: 2 }, ['A', 'B'], id);
+            tables.getTable('u1', id)!.setTableFilterColumn(0, { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] });
+        }
+        const skeleton = { getCellWithCoordByIndex: () => ({ startX: 0, startY: 0, endX: 80, endY: 25 }) };
+        injector.add([SheetSkeletonManagerService, { useValue: {
+            currentSkeleton$: new Subject(),
+            getCurrentSkeleton: () => skeleton,
+        } as unknown as SheetSkeletonManagerService }]);
+        const scene = { addObjects: vi.fn(), makeDirty: vi.fn() };
+        const context = { unit: workbook, unitId: 'u1', scene } as unknown as IRenderContext<Workbook>;
+        injector.add([SheetsTableFilterButtonRenderController, {
+            useFactory: () => injector.createInstance(SheetsTableFilterButtonRenderController, context),
+        }]);
+        const controller = injector.get(SheetsTableFilterButtonRenderController);
+        const creation = vi.spyOn(injector, 'createInstance');
+        const states = () => creation.mock.calls
+            .filter((call) => call[0] === SheetsTableFilterButtonShape)
+            .map((call) => (call[2] as { filterParams: { buttonState: SheetsTableButtonStateEnum } }).filterParams.buttonState);
+        try {
+            controller.setDisplayFilterState(undefined);
+            expect(scene.addObjects).not.toHaveBeenCalled();
+            controller.setDisplayFilterState({ tableId: 'a', columns: new Set([1]) });
+            expect(states()).toEqual([
+                SheetsTableButtonStateEnum.FilterNoneSortNone,
+                SheetsTableButtonStateEnum.FilteredSortNone,
+                SheetsTableButtonStateEnum.FilteredSortNone,
+                SheetsTableButtonStateEnum.FilterNoneSortNone,
+            ]);
+            controller.setDisplayFilterState({ tableId: 'a', columns: new Set([1]) });
+            expect(scene.addObjects).toHaveBeenCalledTimes(1);
+            creation.mockClear();
+            controller.setDisplayFilterState(undefined);
+            expect(states()).toEqual([
+                SheetsTableButtonStateEnum.FilteredSortNone,
+                SheetsTableButtonStateEnum.FilterNoneSortNone,
+                SheetsTableButtonStateEnum.FilteredSortNone,
+                SheetsTableButtonStateEnum.FilterNoneSortNone,
+            ]);
+            const shapeDisposals = scene.addObjects.mock.lastCall![0].map((shape: SheetsTableFilterButtonShape) => vi.spyOn(shape, 'dispose'));
+            controller.dispose();
+            for (const dispose of shapeDisposals) {
+                expect(dispose).toHaveBeenCalledOnce();
+            }
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('should dispose rendered button shapes and interceptor resource', () => {
         const controller = new SheetsTableFilterButtonRenderController(
             {

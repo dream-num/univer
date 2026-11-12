@@ -34,7 +34,8 @@ export interface ICellContentInterceptor {
         col: number,
         effect: InterceptorEffectEnum,
         key?: string,
-        filter?: (interceptor: IInterceptor<any, any>) => boolean
+        filter?: (interceptor: IInterceptor<any, any>) => boolean,
+        displayValue?: Pick<ICellData, 'v' | 't'> | null
     ) => Nullable<ICellDataForSheetInterceptor>;
 }
 
@@ -87,6 +88,13 @@ export class SheetViewModel extends Disposable {
         }
 
         return this.getRawCell(row, col);
+    }
+
+    getCellForDisplay(row: number, col: number, displayValue: Pick<ICellData, 'v' | 't'> | null): Nullable<ICellDataForSheetInterceptor> {
+        if (this._cellContentInterceptor) {
+            return this._cellContentInterceptor.getCell(row, col, InterceptorEffectEnum.Value | InterceptorEffectEnum.Style, undefined, undefined, displayValue);
+        }
+        return { ...this.getRawCell(row, col), v: displayValue?.v, t: displayValue?.t };
     }
 
     getCellStyleOnly(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {

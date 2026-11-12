@@ -179,6 +179,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _calculationRowData: IUnitRowData = Object.create(null);
 
+    private readonly _filteredOutRows = new Map<string, Map<string, Set<number>>>();
+
     private _calculationGeneration = 0;
 
     private _forceCalculate: boolean = false;
@@ -226,6 +228,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._unitNameMap = Object.create(null);
         this._externalReferences = Object.create(null);
         this._calculationRowData = Object.create(null);
+        this._filteredOutRows.clear();
         this._clearDependencyTreeCache = Object.create(null);
         this._dirtyRanges = [];
         this._dirtyNameMap = Object.create(null);
@@ -390,10 +393,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number) {
         const filteredOutRows: number[] = [];
+        const override = this._filteredOutRows.get(unitId)?.get(sheetId);
 
         for (let r = startRow; r <= endRow; r++) {
-            if (this._calculationRowData[unitId]?.[sheetId]?.[r]?.filtered
-                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)) {
+            const filtered = override?.has(r) ?? (
+                this._calculationRowData[unitId]?.[sheetId]?.[r]?.filtered
+                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)
+            );
+            if (filtered) {
                 filteredOutRows.push(r);
             }
         }
@@ -413,6 +420,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _loadFormulaDataset(config: IFormulaDatasetConfig | Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot?: IFormulaDataSnapshot): void {
         this._calculationGeneration++;
         this._calculationRowData = Object.create(null);
+        this._filteredOutRows.clear();
+        for (const [unitId, sheets] of Object.entries(config.filteredOutRows ?? {})) {
+            const sheetRows = new Map<string, Set<number>>();
+            for (const [sheetId, rows] of Object.entries(sheets)) {
+                sheetRows.set(sheetId, new Set(rows));
+            }
+            this._filteredOutRows.set(unitId, sheetRows);
+        }
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
             this._unitData = copyUnitData(config.allUnitData);
             this._unitStylesData = config.unitStylesData;
@@ -470,6 +485,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     loadDataLite(rowData?: IUnitRowData) {
+        this._filteredOutRows.clear();
         const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 
         this._unitData = copyUnitData(allUnitData);

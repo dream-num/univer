@@ -15,10 +15,10 @@
  */
 
 import type { IScale } from '@univerjs/core';
+import { numberToABC } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { numberToABC } from '@univerjs/core';
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
@@ -53,6 +53,17 @@ const DEFAULT_PRINTING_COLUMN_STYLE = {
  * Column Header Bar, include a lot of columns header
  */
 export class ColumnHeaderLayout extends SheetExtension {
+    private readonly _displayStyles = new WeakMap<SpreadsheetSkeleton, Partial<IHeaderStyleCfg>>();
+
+    /** Applies transient editor colors without changing configured or printed headers. */
+    setDisplayStyle(skeleton: SpreadsheetSkeleton, style: Partial<IHeaderStyleCfg> | undefined): void {
+        if (style) {
+            this._displayStyles.set(skeleton, style);
+        } else {
+            this._displayStyles.delete(skeleton);
+        }
+    }
+
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
     // The workbook columns configuration and header style
@@ -84,10 +95,11 @@ export class ColumnHeaderLayout extends SheetExtension {
         return { ...this.columnsCfg, ...columnsCfg };
     }
 
-    getHeaderStyle(sheetId: string, isPrinting = false): IHeaderStyleCfg {
+    getHeaderStyle(sheetId: string, isPrinting = false, skeleton?: SpreadsheetSkeleton): IHeaderStyleCfg {
         const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
         const defaultStyle = isPrinting ? DEFAULT_PRINTING_COLUMN_STYLE : DEFAULT_COLUMN_STYLE;
-        return { ...defaultStyle, ...this.headerStyle, ...headerStyle };
+        const displayStyle = !isPrinting && skeleton ? this._displayStyles.get(skeleton) : undefined;
+        return { ...defaultStyle, ...this.headerStyle, ...headerStyle, ...displayStyle };
     }
 
     getCfgOfCurrentColumn(columnsCfg: Record<number, IAColumnCfg>, headerStyle: IHeaderStyleCfg, colIndex: number): [IAColumnCfgObj, boolean] {
@@ -136,7 +148,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         const columnsCfg = this.getColumnsCfg(worksheet.getSheetId());
-        const headerStyle = this.getHeaderStyle(worksheet.getSheetId(), ctx.__mode === 'printing');
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId(), ctx.__mode === 'printing', spreadsheetSkeleton);
 
         const scale = this._getScale(parentScale);
         this.setStyleToCtx(ctx, headerStyle);

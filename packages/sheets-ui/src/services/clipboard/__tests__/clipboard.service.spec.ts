@@ -18,6 +18,7 @@ import type { ICellData, IRange, IStyleData, Nullable, Univer, Workbook } from '
 import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
     BooleanNumber,
+    CellValueType,
     CommandType,
     CustomCommandExecutionError,
     extractPureTextFromCell,
@@ -37,6 +38,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
+import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -256,6 +258,76 @@ describe('Test clipboard', () => {
         expect(getValues(0, 0, 0, 0)).toEqual(originalSource);
         expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
     });
+
+    it.each(['focus switch', 'pending projection', 'changed projection', 'disposed pane'] as const)(
+        'keeps a delayed paste bound to its initiating pane after a %s',
+        async (change) => {
+            // Happy DOM has no canvas backend. Both renderers and their skeleton managers are real.
+            const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+                return {
+                    canvas: this,
+                    setTransform: vi.fn(),
+                    clearRect: vi.fn(),
+                    measureText: () => ({
+                        width: 10,
+                        fontBoundingBoxAscent: 10,
+                        fontBoundingBoxDescent: 2,
+                        actualBoundingBoxAscent: 10,
+                        actualBoundingBoxDescent: 2,
+                    }),
+                } as unknown as CanvasRenderingContext2D;
+            });
+            try {
+                univer.__getInjector().add([ICanvasColorService, { useClass: CanvasColorService }]);
+                const renders = get(IRenderManagerService);
+                renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+                const primary = renders.createRender('test');
+                const companion = renders.createRender('test', undefined, 'paste-companion');
+                primary.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+                const initiatingView = companion.with(SheetSkeletonManagerService);
+                initiatingView.setCurrent({ sheetId: 'sheet1' });
+                initiatingView.setProjection('sheet1', {
+                    isRowFiltered: (row) => row === 30 || row === 32,
+                    getCell: () => undefined,
+                });
+                renders.focusRender?.('paste-companion');
+                get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+                    range: { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 },
+                    primary: null,
+                    style: null,
+                }]);
+
+                let releaseRead = () => {};
+                const readGate = new Promise<void>((resolve) => {
+                    releaseRead = resolve;
+                });
+                const pending = sheetClipboardService.paste({
+                    presentationStyle: 'unspecified',
+                    types: ['text/html'],
+                    getType: async () => {
+                        await readGate;
+                        return new Blob(['<table><tr><td>A</td></tr><tr><td>B</td></tr></table>'], { type: 'text/html' });
+                    },
+                });
+                renders.focusRender?.('test');
+                if (change === 'pending projection') {
+                    initiatingView.setProjectionPending('sheet1', true);
+                } else if (change === 'changed projection') {
+                    initiatingView.setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+                } else if (change === 'disposed pane') {
+                    renders.removeRender('paste-companion');
+                }
+                releaseRead();
+
+                expect(await pending).toBe(change === 'focus switch');
+                expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual(
+                    change === 'focus switch' ? [undefined, 'A', undefined, 'B'] : [undefined, undefined, undefined, undefined]
+                );
+            } finally {
+                canvasContext.mockRestore();
+            }
+        }
+    );
 
     it('recalculates auto height when pasting into a row that already has a measured auto height', async () => {
         const row = 30;
@@ -959,6 +1031,143 @@ describe('Test clipboard', () => {
             );
             expect(getMergedCells(targetRange.startRow, targetRange.startColumn, targetRange.endRow, targetRange.endColumn, targetSubUnitId)).toEqual([targetRange]);
         });
+    });
+
+    it('copies displayed formula values to text, HTML and values-only paste without changing public values', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet2', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 30: { 0: { f: '=SUBTOTAL(109,A2:A4)', v: 180, t: CellValueType.NUMBER } } },
+        })).toBe(true);
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const before = Tools.deepClone(workbook.getSnapshot());
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: (row, column) => row === 30 && column === 0 ? { v: 150, t: CellValueType.NUMBER } : undefined,
+        });
+        const range = { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL };
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+        expect(content.plain).toBe('150');
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(document.querySelector('td')?.textContent).toBe('150');
+        expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ f: '=SUBTOTAL(109,A2:A4)', v: 150, t: CellValueType.NUMBER });
+        expect(workbook.getSnapshot()).toEqual(before);
+        get(SheetsSelectionsService).addSelections([{ range, primary: null, style: null }]);
+        expect(await sheetClipboardService.copy()).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE, target)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]).toMatchObject({ v: 150 });
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.f).toBeFalsy();
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.v).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0, 'sheet2')?.[0][0]?.v).toBe(150);
+        expect(workbook.getSheetBySheetId('sheet1')!.getCellRaw(30, 0)?.v).toBe(180);
+    });
+
+    it('copies new and cleared projected spill cells instead of public spill values', () => {
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 30: { 0: { v: 180 } } },
+        })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: (row, column) => {
+                if (column !== 0) {
+                    return undefined;
+                }
+                if (row === 30) {
+                    return null;
+                }
+                return row === 31 ? { v: 151, t: CellValueType.NUMBER } : undefined;
+            },
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 })!;
+        expect(content.matrixFragment.getValue(0, 0)?.v ?? null).toBeNull();
+        expect(content.matrixFragment.getValue(1, 0)?.v).toBe(151);
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(Array.from(document.querySelectorAll('td'), (cell) => cell.textContent)).toEqual(['', '151']);
+    });
+
+    it('copies only projected visible rows and compacts a merge across a hidden row', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 33, startColumn: 0, endColumn: 0 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Merged' } }, 33: { 0: { v: 'Next' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, {
+            ...target,
+            ranges: [{ ...range, endRow: 32 }],
+        })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => row === 31,
+            getCell: () => undefined,
+        });
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        const read = vi.spyOn(sheet, 'getCellRaw');
+        try {
+            const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+            expect(read.mock.calls.some(([row]) => row === 31)).toBe(false);
+            expect(content.discreteRange.rows).toEqual([30, 32, 33]);
+            expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ v: 'Merged', rowSpan: 2 });
+            expect(content.matrixFragment.getValue(2, 0)?.v).toBe('Next');
+            const document = new DOMParser().parseFromString(content.html, 'text/html');
+            expect(Array.from(document.querySelectorAll('td'), (cell) => cell.textContent)).toEqual(['Merged', 'Next']);
+            expect(document.querySelector('td')?.getAttribute('rowspan')).toBe('2');
+        } finally {
+            read.mockRestore();
+        }
+        get(SheetsSelectionsService).addSelections([{ range, primary: null, style: null }]);
+        expect(await sheetClipboardService.copy()).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet2',
+            range: { startRow: 35, endRow: 35, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(getMergedCells(35, 0, 37, 0, 'sheet2')).toEqual([
+            expect.objectContaining({ startRow: 35, endRow: 36, startColumn: 0, endColumn: 0 }),
+        ]);
+        expect(getValues(37, 0, 37, 0, 'sheet2')?.[0][0]?.v).toBe('Next');
+    });
+
+    it.each([
+        { copyType: COPY_TYPE.COPY, filteredRow: 31, expected: ['A', undefined, 'C'], remaining: ['A', 'B', 'C'] },
+        { copyType: COPY_TYPE.CUT, filteredRow: 31, expected: ['A', 'B', 'C'], remaining: [undefined, undefined, undefined] },
+        { copyType: COPY_TYPE.CUT, filteredRow: 30, expected: ['B', 'C', undefined], remaining: ['A', undefined, undefined] },
+    ])('uses projected coordinates for $copyType with filtered row $filteredRow', async ({ copyType, filteredRow, expected, remaining }) => {
+        const source = { unitId: 'test', subUnitId: 'sheet1' };
+        const target = { unitId: 'test', subUnitId: 'sheet2' };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...source,
+            cellValue: { 30: { 0: { v: 'A' } }, 31: { 0: { v: 'B' } }, 32: { 0: { v: 'C' } } },
+        })).toBe(true);
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        worksheet.__interceptViewModel((viewModel) => {
+            viewModel.registerRowFilteredInterceptor({ getRowFiltered: (row) => row === 32 });
+        });
+        expect(worksheet.getRowFiltered(32)).toBe(true);
+        const display = get(SheetSkeletonManagerService);
+        display.setProjection('sheet1', { isRowFiltered: (row) => row === filteredRow, getCell: () => undefined });
+        if (copyType === COPY_TYPE.COPY) {
+            display.setProjection('sheet2', { isRowFiltered: (row) => row === 36, getCell: () => undefined });
+        }
+        get(SheetsSelectionsService).addSelections([{
+            range: { startRow: 30, endRow: 32, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+            primary: null,
+            style: null,
+        }]);
+        expect(await (copyType === COPY_TYPE.COPY ? sheetClipboardService.copy() : sheetClipboardService.cut())).toBe(true);
+        const copyId = sheetClipboardService.copyContentCache().getLastCopyId()!;
+        expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+            ...target,
+            range: { startRow: 35, endRow: 35, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(getValues(35, 0, 37, 0, 'sheet2')?.map(([cell]) => cell?.v ?? undefined)).toEqual(expected);
+        expect(getValues(30, 0, 32, 0)?.map(([cell]) => cell?.v ?? undefined)).toEqual(remaining);
     });
 
     describe('Test cut command in single selection', () => {

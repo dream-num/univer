@@ -15,7 +15,7 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { IConfigService, Inject, Injector, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, IConfigService, Inject, Injector, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IAllRuntimeData } from '../runtime.service';
@@ -27,6 +27,9 @@ import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dep
 import { Interpreter } from '../../engine/interpreter/interpreter';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { AsyncCustomFunction } from '../../functions/custom-function';
+import { Subtotal } from '../../functions/math/subtotal';
+import { Sum } from '../../functions/math/sum';
+import { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService, ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
@@ -35,6 +38,7 @@ import { FormulaCacheService } from '../formula-cache.service';
 import { FormulaResultService } from '../formula-result.service';
 import { IFunctionService } from '../function.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from '../runtime.service';
+import { ISheetRowFilteredService } from '../sheet-row-filtered.service';
 
 function createService() {
     const configService = {
@@ -250,6 +254,91 @@ describe('CalculateFormulaService', () => {
         await service.execute({} as never);
         expect(mocks.formulaResultService.applyResult).not.toHaveBeenCalled();
         expect(mocks.formulaResultService.applyTreeResult).toHaveBeenCalledExactlyOnceWith(data);
+    });
+
+    it('replaces filter exclusions for only the requested sheet, including an empty override', async () => {
+        const testBed = createFunctionTestBed({
+            id: 'test',
+            appVersion: '',
+            name: 'Book',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['orders', 'summary'],
+            sheets: {
+                orders: {
+                    id: 'orders',
+                    name: 'Orders',
+                    rowCount: 10,
+                    columnCount: 5,
+                    rowData: { 4: { hd: BooleanNumber.TRUE } },
+                    cellData: {
+                        1: { 1: { v: 30 }, 4: { f: '=SUBTOTAL(109,B2:B5)' } },
+                        2: { 1: { v: 60 }, 4: { f: '=SUM(B2:B4)' } },
+                        3: { 1: { v: 90 } },
+                        4: { 1: { v: 5 } },
+                    },
+                },
+                summary: {
+                    id: 'summary',
+                    name: 'Summary',
+                    rowCount: 10,
+                    columnCount: 5,
+                    cellData: {
+                        0: { 0: { f: '=Orders!E2' }, 1: { f: '=SUBTOTAL(109,C2:C3)' } },
+                        1: { 2: { v: 10 } },
+                        2: { 2: { v: 20 } },
+                    },
+                },
+            },
+        }, [
+            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
+            [IDependencyManagerService, { useClass: DependencyManagerService }],
+        ]);
+        testBed.get(IFunctionService).registerExecutors(new Subtotal('SUBTOTAL'), new Sum('SUM'));
+        const filter = testBed.get(ISheetRowFilteredService).register(
+            (_unitId, sheetId, row) => sheetId === 'orders' && row === 2
+        );
+        const config: IFormulaDatasetConfig = {
+            formulaData: testBed.get(FormulaDataModel).getFormulaData(),
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: true,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+            rowData: { test: { orders: { 4: { hd: BooleanNumber.TRUE } }, summary: { 1: { filtered: true } } } },
+        };
+        const calculator = testBed.get(ICalculateFormulaService);
+        const values: unknown[][] = [];
+        const subscription = calculator.executionCompleteListener$.subscribe(({ unitData }) => {
+            const { orders, summary } = unitData.test ?? {};
+            values.push([
+                orders?.getValue(1, 4)?.v,
+                orders?.getValue(2, 4)?.v,
+                summary?.getValue(0, 0)?.v,
+                summary?.getValue(0, 1)?.v,
+            ]);
+        });
+        try {
+            const viewConfig = { ...config, filteredOutRows: { test: { orders: [1] } } };
+            await calculator.execute(config);
+            await calculator.execute(viewConfig);
+            await calculator.execute({ ...viewConfig, filteredOutRows: { test: { orders: [] } } });
+            await calculator.execute(config);
+
+            expect(values).toEqual([
+                [120, 180, 120, 20],
+                [150, 180, 150, 20],
+                [180, 180, 180, 20],
+                [120, 180, 120, 20],
+            ]);
+        } finally {
+            subscription.unsubscribe();
+            filter.dispose();
+            testBed.univer.dispose();
+        }
     });
 
     it('retains a queued scalar source when a preceding asynchronous dependency allows its cell to be cleared', async () => {

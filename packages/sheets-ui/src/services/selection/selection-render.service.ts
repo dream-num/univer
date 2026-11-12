@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { EventState, IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type {
     ISelectionWithCoord,
@@ -118,12 +118,21 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         // this._renderDisposable = null;
     }
 
+    private _shouldHandlePointerSelection(state: EventState): boolean {
+        const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
+        if (sheetId && this._sheetSkeletonManagerService.isProjectionPending(sheetId)) {
+            state.stopPropagation();
+            return false;
+        }
+        return this._getSheetType() !== SheetTypes.CHART && !this.isSelectionDisabled() && !this.inRefSelectionMode();
+    }
+
     private _initEventListeners(sheetObject: ISheetObjectParam): void {
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
 
         this.disposeWithMe(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (!this._shouldHandlePointerSelection(state)) {
                 return;
             }
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
@@ -134,7 +143,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
+                if (!this._shouldHandlePointerSelection(state)) {
                     return;
                 }
 
@@ -153,7 +162,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         );
 
         this.disposeWithMe(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (!this._shouldHandlePointerSelection(state)) {
                 return;
             }
 
@@ -175,7 +184,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
 
         this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            if (this._getSheetType() === SheetTypes.CHART || this.isSelectionDisabled() || this.inRefSelectionMode()) {
+            if (!this._shouldHandlePointerSelection(state)) {
                 return;
             }
 

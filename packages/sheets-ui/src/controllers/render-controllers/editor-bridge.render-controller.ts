@@ -28,7 +28,7 @@ import {
     SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
     SetWorksheetActiveOperation,
@@ -43,7 +43,7 @@ import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { getSheetObject } from '../utils/component-tools';
+import { getSheetObject, isFocusedSheetRender } from '../utils/component-tools';
 
 // TODO: wzhudev: this should be merged with Edit EditingRenderController.
 
@@ -57,6 +57,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Optional(ISheetEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: ISheetEmbedRuntimeFocusCoordinator
     ) {
         super();
@@ -87,13 +88,32 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         this._initSelectionChangeListener(d);
         this._commandExecutedListener(d);
         d.add(this._context.unit.activeSheet$.subscribe((worksheet) => {
-            if (worksheet?.getConfig().type === SheetTypes.CHART &&
+            if (this._isFocusedRender() && worksheet?.getConfig().type === SheetTypes.CHART &&
                 this._editorBridgeService.getEditLocation()?.unitId === this._context.unitId &&
                 !this._editorBridgeService.isVisible().visible) {
                 this._editorBridgeService.refreshEditCellState();
             }
         }));
+        d.add(this._sheetSkeletonManagerService.projectionChanged$.subscribe((sheetId) => {
+            const editLocation = this._editorBridgeService.getEditLocation();
+            if (this._isFocusedRender() && editLocation?.unitId === this._context.unitId &&
+                editLocation.sheetId === sheetId && !this._editorBridgeService.isVisible().visible) {
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
+        const focusChanges = this._renderManagerService.focusedRenderChanged$;
+        if (focusChanges) {
+            d.add(focusChanges.subscribe((unitId) => {
+                if (unitId === this._context.unitId) {
+                    this.refreshEditorPosition(true);
+                }
+            }));
+        }
         return d;
+    }
+
+    private _isFocusedRender(): boolean {
+        return isFocusedSheetRender(this._context, this._renderManagerService);
     }
 
     private _disposeCurrent(): void {
@@ -112,11 +132,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
     }
 
-    private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
-        if (this._getSheetType() === SheetTypes.CHART) {
+    private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>, force = false) {
+        if (this._getSheetType() === SheetTypes.CHART || !this._isFocusedRender() || this._editorBridgeService.isVisible().visible) {
             return;
         }
-        if (this._editorBridgeService.isVisible().visible) return;
 
         const primary = params?.[params.length - 1]?.primary;
         if (primary) {
@@ -141,7 +160,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                     isMergedMainCell: mergeInfo.isMergedMainCell,
                 }
                 : primary;
-            if (isSameEditCell(this._editorBridgeService.getEditLocation(), unitId, sheetId, newPrimary)) {
+            if (!force && isSameEditCell(this._editorBridgeService.getEditLocation(), unitId, sheetId, newPrimary)) {
                 return;
             }
             this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
@@ -154,12 +173,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }
     }
 
-    refreshEditorPosition() {
+    refreshEditorPosition(force = false) {
         const workbookSelections = this._selectionManagerService.getWorkbookSelections(this._context.unitId);
         if (workbookSelections) {
             const selections = workbookSelections.getCurrentSelections();
             if (selections) {
-                this._updateEditorPosition([...selections]);
+                this._updateEditorPosition([...selections], force);
             }
         }
     }
@@ -167,7 +186,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _commandExecutedListener(d: DisposableCollection) {
         const refreshCommandSet = new Set([ClearSelectionFormatCommand.id, SetZoomRatioCommand.id]);
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (refreshCommandSet.has(command.id)) {
+            if (this._isFocusedRender() && refreshCommandSet.has(command.id)) {
                 if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
             }
@@ -188,7 +207,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
         d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             if (options?.fromCollab) return;
-            if (command.id === SetWorksheetActiveOperation.id) {
+            if (this._isFocusedRender() && command.id === SetWorksheetActiveOperation.id) {
                 const params = command.params as ISetWorksheetActiveOperationParams;
                 const target = params.unitId === this._context.unitId
                     ? this._context.unit.getSheetBySheetId(params.subUnitId)

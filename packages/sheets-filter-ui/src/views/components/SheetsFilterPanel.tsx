@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import { ICommandService, ILogService, LocaleService } from '@univerjs/core';
 import { Button, Segmented } from '@univerjs/design';
-import { FilterBy, SheetsFilterService } from '@univerjs/sheets-filter';
+import { FilterBy } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentContainer, useComponentsOfPart, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback } from 'react';
 import { of } from 'rxjs';
-import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import type { LocaleKey } from '../../locale/types';
+import type { ByColorsModel, ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
+import { CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterByColor } from './SheetsFilterByColorsPanel';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
@@ -41,10 +41,16 @@ const FILTER_BY_OPTIONS: Array<{ label: LocaleKey; value: FilterBy }> = [
  *
  * @returns React element
  */
-export function FilterPanel() {
+export interface IFilterPanelProps {
+    onClose?: () => void;
+    showSyncSwitch?: boolean;
+}
+
+export function FilterPanel({ onClose, showSyncSwitch = true }: IFilterPanelProps = {}) {
     const sheetsFilterPanelService = useDependency(ISheetsFilterPanelService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
+    const logService = useDependency(ILogService);
 
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
@@ -55,25 +61,39 @@ export function FilterPanel() {
     const clearFilterDisabled = !useObservable(sheetsFilterPanelService.hasCriteria$);
 
     const onFilterByTypeChange = useCallback((value: FilterBy) => {
-        commandService.executeCommand(ChangeFilterByOperation.id, { filterBy: value });
-    }, [commandService]);
-
-    const onClearCriteria = useCallback(async () => {
-        await filterByModel?.clear();
-        commandService.executeCommand(CloseFilterPanelOperation.id);
-    }, [filterByModel, commandService]);
+        sheetsFilterPanelService.changeFilterBy(value);
+    }, [sheetsFilterPanelService]);
 
     const onCancel = useCallback(() => {
-        commandService.executeCommand(CloseFilterPanelOperation.id);
-    }, [commandService]);
+        if (onClose) {
+            onClose();
+            return;
+        }
+        return commandService.executeCommand(CloseFilterPanelOperation.id);
+    }, [commandService, onClose]);
+
+    const onClearCriteria = useCallback(async () => {
+        try {
+            if (await filterByModel?.clear() && sheetsFilterPanelService.filterByModel === filterByModel) {
+                await onCancel();
+            }
+        } catch (error) {
+            logService.error(error);
+        }
+    }, [filterByModel, sheetsFilterPanelService, onCancel, logService]);
 
     const onApply = useCallback(async () => {
-        await filterByModel?.apply();
-        commandService.executeCommand(CloseFilterPanelOperation.id);
-    }, [filterByModel, commandService]);
+        try {
+            if (await filterByModel?.apply() && sheetsFilterPanelService.filterByModel === filterByModel) {
+                await onCancel();
+            }
+        } catch (error) {
+            logService.error(error);
+        }
+    }, [filterByModel, sheetsFilterPanelService, onCancel, logService]);
 
-    const filterService = useDependency(SheetsFilterService);
-    const range = filterService.activeFilterModel?.getRange();
+    const filterModel = sheetsFilterPanelService.filterModel;
+    const range = filterModel?.getRange();
     const colIndex = sheetsFilterPanelService.col;
     const FilterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
 
@@ -88,7 +108,7 @@ export function FilterPanel() {
         >
             <ComponentContainer
                 components={FilterPanelEmbedPointPart}
-                sharedProps={{ range, colIndex, onClose: onCancel }}
+                sharedProps={{ range, colIndex, unitId: filterModel?.unitId, subUnitId: filterModel?.subUnitId, onClose: onCancel }}
             />
             <div className="univer-mb-1 univer-flex-shrink-0 univer-flex-grow-0">
                 <Segmented
@@ -113,7 +133,7 @@ export function FilterPanel() {
                 : (
                     <div className="univer-flex-1" />
                 )}
-            <FilterSyncSwitch />
+            {showSyncSwitch && <FilterSyncSwitch />}
             <div
                 data-u-comp="sheets-filter-panel-footer"
                 className={`

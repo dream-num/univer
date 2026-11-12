@@ -16,13 +16,6 @@
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMarkDirtyFilterChangeMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { FilterColumn } from '../../models/filter-model';
-import type { IAutoFilter, IFilterColumn } from '../../models/types';
-import type {
-    ISetSheetsFilterCriteriaMutationParams,
-    ISetSheetsFilterRangeMutationParams,
-} from '../mutations/sheets-filter.mutation';
 import {
     CommandType,
     ErrorService,
@@ -38,8 +31,16 @@ import {
     getSheetCommandTarget,
     isSingleCellSelection,
     MarkDirtyFilterChangeMutation,
+    SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { FilterColumn } from '../../models/filter-model';
+import type { IAutoFilter, IFilterColumn } from '../../models/types';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 import {
     ReCalcSheetsFilterMutation,
@@ -122,23 +123,41 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const autoFilter = filterModel.serialize();
-        const undoMutations = destructFilterModel(unitId, subUnitId, autoFilter);
+        const interceptor = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: RemoveSheetFilterCommand.id,
+            params: { unitId, subUnitId },
+        });
+        const undoMutations = [
+            ...(interceptor.preUndos ?? []),
+            ...destructFilterModel(unitId, subUnitId, autoFilter),
+            ...interceptor.undos,
+        ];
+        const redoMutations = [
+            ...(interceptor.preRedos ?? []),
+            { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } },
+            ...interceptor.redos,
+        ];
 
-        const result = commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, { unitId, subUnitId });
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations,
-                redoMutations: [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }],
-            });
-            commandService.executeCommand<IMarkDirtyFilterChangeMutationParams>(MarkDirtyFilterChangeMutation.id, {
-                unitId,
-                subUnitId,
-                filterRange,
-            });
+        const hasCompanionMutations = redoMutations.length > 1;
+        // Keep the intermediate states local until the filter and its companion mutations all succeed.
+        const { result, index } = sequenceExecute(redoMutations, commandService, hasCompanionMutations ? { onlyLocal: true } : undefined);
+        if (!result) {
+            if (hasCompanionMutations && index > 0) {
+                sequenceExecute(undoMutations, commandService, { onlyLocal: true });
+            }
+            return false;
         }
+        if (hasCompanionMutations) {
+            sequenceExecute(redoMutations, commandService, { syncOnly: true });
+        }
+        undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+        commandService.syncExecuteCommand<IMarkDirtyFilterChangeMutationParams>(MarkDirtyFilterChangeMutation.id, {
+            unitId,
+            subUnitId,
+            filterRange,
+        });
 
-        return result;
+        return true;
     },
 };
 

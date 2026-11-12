@@ -26,7 +26,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { MarkDirtyFilterChangeMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { MarkDirtyFilterChangeMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterService } from '../../../services/sheet-filter.service';
 import {
@@ -88,6 +88,7 @@ class SheetsFilterCommandTestPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.add([SheetsFilterService]);
+        this._injector.add([SheetInterceptorService]);
         this._injector.add([SheetsSelectionsService]);
     }
 }

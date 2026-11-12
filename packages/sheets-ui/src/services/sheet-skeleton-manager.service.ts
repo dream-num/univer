@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, Nullable, Workbook } from '@univerjs/core';
+import type { DependencyIdentifier, ISheetDisplayProjection, Nullable, Workbook } from '@univerjs/core';
 import type { IRender, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { Disposable, Inject, SheetTypes } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
     SetColumnHeaderHeightCommand,
     SetRowHeaderWidthCommand,
@@ -37,6 +37,10 @@ export interface ISheetSkeletonManagerSearch {
  */
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _sheetId: string = '';
+    private readonly _companionSkeletons = new Map<string, ISheetSkeletonManagerParam>();
+    private readonly _projectedSkeletons = new Map<string, ISheetSkeletonManagerParam>();
+    private readonly _projectionChanged$ = new Subject<string>();
+    readonly projectionChanged$ = this._projectionChanged$.asObservable();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
@@ -54,9 +58,17 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         super();
 
         const { unitId, scene } = this._context;
-        this._sheetSkeletonService.setScene(unitId, scene);
-
-        this._initSkeletonsRegisterGetCellHeight(unitId);
+        if (!this._isCompanionRender()) {
+            this._sheetSkeletonService.setScene(unitId, scene);
+            this._initSkeletonsRegisterGetCellHeight(unitId);
+        }
+        this.disposeWithMe(this._context.unit.sheetDisposed$?.subscribe((worksheet) => {
+            const sheetId = worksheet.getSheetId();
+            this.setProjection(sheetId, undefined);
+            this.setProjectionPending(sheetId, false);
+            this._companionSkeletons.get(sheetId)?.skeleton.dispose();
+            this._companionSkeletons.delete(sheetId);
+        }));
         this._initActiveSheetSync();
     }
 
@@ -94,10 +106,16 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     override dispose(): void {
+        this._sheetSkeletonService.clearDisplayProjectionPending(this._context.scene);
+        this._projectedSkeletons.forEach(({ skeleton }) => skeleton.dispose());
+        this._projectedSkeletons.clear();
+        this._companionSkeletons.forEach(({ skeleton }) => skeleton.dispose());
+        this._companionSkeletons.clear();
         super.dispose();
 
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
+        this._projectionChanged$.complete();
     }
 
     getCurrentSkeleton(): Nullable<SpreadsheetSkeleton> {
@@ -132,6 +150,51 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._setCurrent(searchParam.sheetId);
     }
 
+    /** Publishes or clears a display projection for this render context only. */
+    setProjection(sheetId: string, projection: ISheetDisplayProjection | undefined): void {
+        let param = this._projectedSkeletons.get(sheetId);
+        if (projection) {
+            if (!param) {
+                param = this._createRenderSkeletonParam(sheetId);
+                if (!param) {
+                    return;
+                }
+                this._projectedSkeletons.set(sheetId, param);
+            }
+            param.skeleton.setProjection(projection);
+            if (!param.dirty && !param.skeleton.dirty) {
+                param.skeleton.resetCache();
+                this._projectionChanged$.next(sheetId);
+                return;
+            }
+        } else {
+            if (!param) {
+                return;
+            }
+            this._projectedSkeletons.delete(sheetId);
+            param.skeleton.dispose();
+        }
+
+        if (this._sheetId === sheetId && this._context.unit.getSheetBySheetId(sheetId)) {
+            this._setCurrent(sheetId);
+        } else if (projection) {
+            this.reCalculate(param);
+        }
+        this._projectionChanged$.next(sheetId);
+    }
+
+    hasProjection(sheetId: string): boolean {
+        return this._projectedSkeletons.has(sheetId);
+    }
+
+    setProjectionPending(sheetId: string, pending: boolean): void {
+        this._sheetSkeletonService.setDisplayProjectionPending(this._context.scene, sheetId, pending);
+    }
+
+    isProjectionPending(sheetId: string): boolean {
+        return this._sheetSkeletonService.isSceneProjectionPending(this._context.scene, sheetId);
+    }
+
     private _setCurrent(sheetId: string) {
         this._sheetId = sheetId;
 
@@ -145,13 +208,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         let skeletonParam = this._getSkeletonParam(sheetId);
         if (!skeletonParam) {
-            const unitId = this._context.unitId;
-
-            if (!worksheet) {
+            skeletonParam = this._ensureBaseSkeletonParam(sheetId);
+            if (!skeletonParam) {
                 return;
             }
-
-            skeletonParam = this._sheetSkeletonService.newSkeletonParam(unitId, sheetId, worksheet, workbook.getStyles());
         } else {
             this.reCalculate(skeletonParam);
         }
@@ -190,15 +250,47 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     ensureSkeleton(sheetId: string): SpreadsheetSkeleton | undefined {
-        return this._sheetSkeletonService.ensureSkeleton(this._context.unitId, sheetId);
+        return (this._getSkeletonParam(sheetId) ?? this._ensureBaseSkeletonParam(sheetId))?.skeleton;
     }
 
     private _getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        return this._sheetSkeletonService.getSkeletonParam(this._context.unitId, sheetId);
+        return this._projectedSkeletons.get(sheetId) ?? (this._isCompanionRender()
+            ? this._companionSkeletons.get(sheetId)
+            : this._sheetSkeletonService.getSkeletonParam(this._context.unitId, sheetId));
+    }
+
+    private _isCompanionRender(): boolean {
+        const { renderId, unitId } = this._context;
+        return renderId !== undefined && renderId !== unitId;
+    }
+
+    private _createRenderSkeletonParam(sheetId: string): ISheetSkeletonManagerParam | undefined {
+        const { scene, unit, unitId } = this._context;
+        const worksheet = unit.getSheetBySheetId(sheetId);
+        if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
+        const skeleton = this._sheetSkeletonService.createRenderSkeleton(worksheet, unit.getStyles(), scene);
+        return { unitId, sheetId, skeleton, dirty: false };
+    }
+
+    private _ensureBaseSkeletonParam(sheetId: string): ISheetSkeletonManagerParam | undefined {
+        if (this._isCompanionRender()) {
+            const param = this._createRenderSkeletonParam(sheetId);
+            if (param) {
+                this._companionSkeletons.set(sheetId, param);
+            }
+            return param;
+        }
+        const { unit, unitId } = this._context;
+        const worksheet = unit.getSheetBySheetId(sheetId);
+        if (worksheet && worksheet.getConfig().type !== SheetTypes.CHART) {
+            return this._sheetSkeletonService.newSkeletonParam(unitId, sheetId, worksheet, unit.getStyles());
+        }
     }
 
     private _getSkeleton(sheetId: string): Nullable<SpreadsheetSkeleton> {
-        return this._sheetSkeletonService.getSkeleton(this._context.unitId, sheetId);
+        return this._getSkeletonParam(sheetId)?.skeleton;
     }
 
     setColumnHeaderSize(render: Nullable<IRender>, sheetId: string, size: number) {
@@ -225,7 +317,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         });
         this._resetSelectionsIfAvailable(render);
 
-        const sheetSkeletonManagerParam = this._sheetSkeletonService.getSkeletonParam(render.unitId, sheetId);
+        const sheetSkeletonManagerParam = this._getSkeletonParam(sheetId);
         if (sheetSkeletonManagerParam) {
             sheetSkeletonManagerParam.commandId = SetColumnHeaderHeightCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);
@@ -262,7 +354,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         });
         this._resetSelectionsIfAvailable(render);
 
-        const sheetSkeletonManagerParam = this._sheetSkeletonService.getSkeletonParam(render.unitId, sheetId);
+        const sheetSkeletonManagerParam = this._getSkeletonParam(sheetId);
         if (sheetSkeletonManagerParam) {
             sheetSkeletonManagerParam.commandId = SetRowHeaderWidthCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);

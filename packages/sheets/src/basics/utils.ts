@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
-import type { IDiscreteRange } from './interfaces';
 import { IUniverInstanceService, mergeIntervals, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { IDiscreteRange } from './interfaces';
 import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
@@ -152,7 +152,13 @@ export function discreteRangeToRange(discreteRange: IDiscreteRange): IRange {
     };
 }
 
-export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
+export function rangeToDiscreteRange(
+    range: IRange,
+    accessor: IAccessor,
+    unitId?: string,
+    subUnitId?: string,
+    isRowFiltered?: (row: number) => boolean
+): IDiscreteRange | null {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = unitId
         ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
@@ -166,7 +172,7 @@ export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?
     const rows = [];
     const cols = [];
     for (let r = startRow; r <= endRow; r++) {
-        if (!worksheet.getRowFiltered(r)) {
+        if (!(isRowFiltered?.(r) ?? worksheet.getRowFiltered(r))) {
             rows.push(r);
         }
     }
@@ -179,7 +185,13 @@ export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?
     };
 }
 
-export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?: string, subUnitId?: string): IRange[] {
+export function getVisibleRanges(
+    ranges: IRange[],
+    accessor: IAccessor,
+    unitId?: string,
+    subUnitId?: string,
+    isRowFiltered?: (row: number) => boolean
+): IRange[] {
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     if (!target) {
         return ranges;
@@ -199,7 +211,7 @@ export function getVisibleRanges(ranges: IRange[], accessor: IAccessor, unitId?:
         let intervalStartRow = startRow;
 
         for (let r = startRow; r <= endRow; r++) {
-            if (worksheet.getRowFiltered(r)) {
+            if (isRowFiltered?.(r) ?? worksheet.getRowFiltered(r)) {
                 if (intervalStartRow < r) {
                     rowIntervals.push([intervalStartRow, r - 1]);
                 }

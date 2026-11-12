@@ -302,9 +302,10 @@ export class TriggerCalculationController extends Disposable {
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
+        const initializeWhenEmpty = calculationMode === CalculationMode.WHEN_EMPTY;
 
         // loop all sheets cell data, and get the dirty data
-        const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
+        const dirtyRanges: IUnitRange[] = initializeWhenEmpty ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
         const dirtyDefinedNameMap: IDirtyUnitDefinedNameMap = {};
@@ -315,6 +316,7 @@ export class TriggerCalculationController extends Disposable {
 
         return {
             forceCalculation,
+            initializeWhenEmpty,
             dirtyRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,

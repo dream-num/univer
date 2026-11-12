@@ -266,6 +266,8 @@ export interface IFormulaDatasetConfig {
     arrayFormulaCellData: IArrayFormulaUnitCellType;
     arrayFormulaRange: IArrayFormulaRangeType;
     forceCalculate: boolean;
+    /** Fill missing formula caches on initial calculation. */
+    initializeWhenEmpty?: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitDefinedNameMap;

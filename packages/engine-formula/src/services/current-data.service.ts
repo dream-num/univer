@@ -63,6 +63,8 @@ export interface IFormulaDirtyData {
     dirtyReferenceUnits?: string[];
     dirtyIterationUnits?: string[];
     forceCalculation: boolean;
+    /** Fill missing formula caches on initial calculation. */
+    initializeWhenEmpty?: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitDefinedNameMap;

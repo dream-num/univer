@@ -93,12 +93,13 @@ export class FormulaController extends Disposable {
     }
 
     private _registerCommands(): void {
+        // The host schedules this trigger and forwards the resulting calculation start.
+        this._commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
         [
             SetFormulaDataMutation,
             SetArrayFormulaDataMutation,
             SetImageFormulaDataMutation,
             SetFormulaCalculationStartMutation,
-            SetTriggerFormulaCalculationStartMutation,
             SetFormulaStringBatchCalculationMutation,
             SetFormulaStringBatchCalculationResultMutation,
             SetQueryFormulaDependencyMutation,

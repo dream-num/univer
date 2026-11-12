@@ -249,6 +249,9 @@ function appendDirtyData(target: IFormulaDirtyData, source: Partial<IFormulaDirt
     mergeDirtyUnitNestedMap(target.dirtyUnitOtherFormulaMap, source.dirtyUnitOtherFormulaMap);
     mergeDirtyUnitStringMap(target.clearDependencyTreeCache, source.clearDependencyTreeCache);
     target.forceCalculation = target.forceCalculation || Boolean(source.forceCalculation);
+    if (source.initializeWhenEmpty) {
+        target.initializeWhenEmpty = true;
+    }
 }
 
 function mergeDirtyRanges(target: IUnitRange[], source: IUnitRange[], keys: Set<string>): void {

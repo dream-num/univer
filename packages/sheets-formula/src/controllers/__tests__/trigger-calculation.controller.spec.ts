@@ -171,6 +171,7 @@ describe('TriggerCalculationController', () => {
         expect(testBed.executedCommands.find((command) => command.id === SetFormulaCalculationStartMutation.id)).toMatchObject({
             id: SetFormulaCalculationStartMutation.id,
             params: expect.objectContaining({
+                initializeWhenEmpty: true,
                 isCalculateTreeModel: true,
                 calculationSettings: { test: { iterativeCalculation: true, maxIterations: 7, maxChange: 0.001 } },
                 rowData: testBed.formulaDataModel.getHiddenRowsFiltered(),

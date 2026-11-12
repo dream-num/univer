@@ -15,16 +15,15 @@
  */
 
 import type { ICollaborator } from '@univerjs/protocol';
-import type { LocaleKey } from '../../locale/types';
 import { IAuthzIoService, LocaleService } from '@univerjs/core';
 import { ActionRow, Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { UserEmptyBase64 } from './user-dialog/constant';
 
 export interface ISheetPermissionUserDialogProps {
     ActionRowComponent?: typeof ActionRow;
@@ -32,14 +31,16 @@ export interface ISheetPermissionUserDialogProps {
 
 export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: ISheetPermissionUserDialogProps = {}) => {
     const [inputValue, setInputValue] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
     const authzIoService = useDependency(IAuthzIoService);
 
     const userList = useObservable(sheetPermissionUserManagerService.userList$, sheetPermissionUserManagerService.userList);
+    const searchQuery = inputValue.trim().toLocaleLowerCase();
     const searchUserList = userList?.filter((item) => {
-        return item.subject?.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase()) && (item.role === UnitRole.Owner || item.role === UnitRole.Editor);
+        return item.subject?.name.toLocaleLowerCase().includes(searchQuery) && (item.role === UnitRole.Owner || item.role === UnitRole.Editor);
     }) ?? [];
     const [selectUserInfo, setSelectUserInfo] = useState<ICollaborator[]>(sheetPermissionUserManagerService.selectUserList);
 
@@ -60,6 +61,8 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
         <div>
             <div>
                 <Input
+                    ref={searchInputRef}
+                    aria-label={localeService.t<LocaleKey>('sheets-ui.permission.dialog.search')}
                     className="univer-w-full"
                     placeholder={localeService.t<LocaleKey>('sheets-ui.permission.dialog.search')}
                     value={inputValue}
@@ -110,16 +113,45 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
                         );
                     })
                     : (
-                        <div className="univer-flex univer-h-full univer-flex-col univer-items-center">
-                            <img
-                                className="univer-w-full"
-                                src={UserEmptyBase64}
-                                alt={localeService.t<LocaleKey>('sheets-ui.permission.dialog.emptyList')}
-                                draggable={false}
-                            />
-                            <p className="univer-text-sm univer-text-gray-400">
-                                {localeService.t<LocaleKey>('sheets-ui.permission.dialog.userEmpty')}
-                            </p>
+                        <div
+                            className={`
+                              univer-flex univer-h-full univer-flex-col univer-items-center univer-justify-center
+                              univer-gap-2 univer-px-6 univer-text-center
+                            `}
+                        >
+                            <div role="status" className="univer-flex univer-flex-col univer-gap-2">
+                                <p
+                                    className={`
+                                      univer-m-0 univer-text-sm univer-font-medium univer-text-gray-900
+                                      dark:!univer-text-gray-0
+                                    `}
+                                >
+                                    {localeService.t<LocaleKey>(searchQuery
+                                        ? 'sheets-ui.permission.dialog.searchEmpty'
+                                        : 'sheets-ui.permission.dialog.candidatesEmpty')}
+                                </p>
+                                {searchQuery && (
+                                    <p
+                                        className={`
+                                          univer-m-0 univer-text-sm univer-leading-relaxed univer-text-gray-500
+                                          dark:!univer-text-gray-200
+                                        `}
+                                    >
+                                        {localeService.t<LocaleKey>('sheets-ui.permission.dialog.searchEmptyDescription')}
+                                    </p>
+                                )}
+                            </div>
+                            {searchQuery && (
+                                <Button
+                                    variant="link"
+                                    onClick={() => {
+                                        setInputValue('');
+                                        searchInputRef.current?.focus();
+                                    }}
+                                >
+                                    {localeService.t<LocaleKey>('sheets-ui.permission.button.clearSearch')}
+                                </Button>
+                            )}
                         </div>
                     )}
             </div>

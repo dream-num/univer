@@ -44,5 +44,5 @@ export function cloneSectionBreakWithId(sectionBreak: ISectionBreak, existingIds
 }
 
 function isValidSectionId(value: unknown): value is string {
-    return typeof value === 'string' && value.startsWith(SECTION_ID_PREFIX) && value.length > SECTION_ID_PREFIX.length;
+    return typeof value === 'string' && value.length > 0;
 }

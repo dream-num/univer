@@ -73,6 +73,8 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     noNeedSetTextRange?: boolean;
     isCompositionEnd?: boolean;
     noHistory?: boolean;
+    /** Skip automatic undo history while retaining collaboration for a manually owned history item. */
+    skipHistory?: boolean;
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
     options?: { [key: string]: boolean };
@@ -292,6 +294,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             prevTextRanges,
             trigger,
             noHistory,
+            skipHistory,
             isCompositionEnd,
             debounce,
             isEditing = true,
@@ -370,6 +373,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             segmentId,
             trigger,
             noHistory,
+            skipHistory,
             debounce,
             redoState: {
                 ...(presentation ? { layoutState: params.layoutState } : {}),

@@ -15,8 +15,6 @@
  */
 
 import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
-import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
 import {
     createIdentifier,
     ICommandService,
@@ -31,6 +29,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, takeUntil } from 'rxjs';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
+import type { IDocStateChangeInfo, IDocStateChangeParams } from './doc-state-emit.service';
 import { DocStateEmitService } from './doc-state-emit.service';
 
 type ChangeStateCacheType = 'history' | 'collaboration';
@@ -155,8 +155,8 @@ export class DocStateChangeManagerService extends RxDisposable {
     }
 
     private _cacheChangeState(changeState: IDocStateChangeParams, type: ChangeStateCacheType = 'history') {
-        const { trigger, unitId, noHistory, debounce = false } = changeState;
-        if (noHistory || (type === 'history' && trigger == null)) {
+        const { trigger, unitId, noHistory, skipHistory, debounce = false } = changeState;
+        if (noHistory || (type === 'history' && (skipHistory || trigger == null))) {
             return;
         }
 

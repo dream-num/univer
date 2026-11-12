@@ -69,8 +69,10 @@ describe('Test weeknum function', () => {
             const isoWeek = NumberValueObject.create(21);
 
             // The last day of a week used to be counted into the next week when a time was present.
+            expect(testFunction.calculate(NumberValueObject.create(45654.5), sundayStart).getValue()).toBe(52);
             expect(testFunction.calculate(StringValueObject.create('2024-12-28 12:00'), sundayStart).getValue()).toBe(52);
             expect(testFunction.calculate(StringValueObject.create('2019-01-06 12:00'), mondayStart).getValue()).toBe(1);
+            expect(testFunction.calculate(NumberValueObject.create(43471.5), isoWeek).getValue()).toBe(1);
             expect(testFunction.calculate(StringValueObject.create('2024-12-29 12:00'), isoWeek).getValue()).toBe(52);
         });
 

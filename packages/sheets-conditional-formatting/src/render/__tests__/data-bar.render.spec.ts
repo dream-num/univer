@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
+import { Injector, Tools } from '@univerjs/core';
 import { UniverRenderingContext } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataBar } from '../data-bar.render';
@@ -49,6 +49,7 @@ describe('data bar local rasterization', () => {
     });
 
     afterEach(() => {
+        vi.unstubAllGlobals();
         injector.dispose();
         vi.restoreAllMocks();
     });
@@ -59,6 +60,41 @@ describe('data bar local rasterization', () => {
         }]);
         return injector.get(UniverRenderingContext);
     }
+
+    it.each(['printing', 'server'])('preserves native %s without browser globals', (mode) => {
+        const native = nativeContext(document.createElement('canvas'));
+        const context = createContext(native);
+        const bar = injector.get(DataBar);
+        const draw = vi.fn();
+        vi.stubGlobal('navigator', undefined);
+        if (mode === 'printing') {
+            context.__mode = 'printing';
+        } else {
+            vi.stubGlobal('document', undefined);
+        }
+
+        Reflect.get(bar, '_drawAtLocalOrigin').call(bar, context, 10, 20, 54, 25, draw);
+        expect(draw).toHaveBeenCalledExactlyOnceWith(context, 10, 20);
+        expect(native.drawImage).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        { browser: 'Safari', iPhone: false },
+        { browser: 'Chrome', iPhone: true },
+    ])('preserves native rounded-corner coverage on WebKit: %j', ({ browser, iPhone }) => {
+        vi.spyOn(Tools, 'getBrowserType').mockReturnValue(browser);
+        vi.spyOn(Tools, 'isIPhone').mockReturnValue(iPhone);
+        const native = nativeContext(document.createElement('canvas'));
+        const context = createContext(native);
+        const bar = injector.get(DataBar);
+        const draw = vi.fn();
+        const allocation = vi.spyOn(document, 'createElement');
+        Reflect.get(bar, '_drawAtLocalOrigin').call(bar, context, 10, 20, 54, 25, draw);
+
+        expect(draw).toHaveBeenCalledExactlyOnceWith(context, 10, 20);
+        expect(allocation).not.toHaveBeenCalled();
+        expect(native.drawImage).not.toHaveBeenCalled();
+    });
 
     it('keeps physical resolution and fractional geometry, then releases the owned bitmap', () => {
         const canvas = document.createElement('canvas');

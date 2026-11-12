@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { Range } from '@univerjs/core';
+import { Range, Tools } from '@univerjs/core';
 import {
     FIX_ONE_PIXEL_BLUR_OFFSET,
     SheetExtension,
@@ -160,6 +160,11 @@ export class DataBar extends SheetExtension {
         variant = '',
         strokeWidth = 0
     ): void {
+        // WebKit's offscreen rounded-corner coverage can differ from native destination drawing.
+        if (typeof navigator !== 'undefined' && (ctx.getBrowserType() === 'Safari' || Tools.isIPhone())) {
+            draw(ctx, x, y);
+            return;
+        }
         this._rasterCache.draw(ctx, x, y, width, height, variant, draw, strokeWidth);
     }
 

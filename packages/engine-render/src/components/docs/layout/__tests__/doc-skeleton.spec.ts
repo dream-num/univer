@@ -452,6 +452,8 @@ describe('doc skeleton', () => {
                 width: text.length * (small ? 4.645 : 6.64) * metricScale,
                 actualBoundingBoxAscent: small ? 6.278 : 9.221,
                 actualBoundingBoxDescent: small ? 0 : 0.182,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: (small ? 8 : 12) * metricScale,
                 fontBoundingBoxDescent: (small ? 2 : 3) * metricScale,
             };
@@ -534,6 +536,8 @@ describe('doc skeleton', () => {
                 width: 6.5 * metricScale,
                 actualBoundingBoxAscent: text.trim() ? 7 : 0,
                 actualBoundingBoxDescent: 0,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: 10 * metricScale,
                 fontBoundingBoxDescent: 2 * metricScale,
             };
@@ -607,6 +611,8 @@ describe('doc skeleton', () => {
                 width: (text.length * (text === '.' ? 3.308 : 11.95)) * metricScale,
                 actualBoundingBoxAscent: text === '.' ? 1.64 : 10.089,
                 actualBoundingBoxDescent: text === '.' ? 0.193 : 0.321,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: (12) * metricScale,
                 fontBoundingBoxDescent: (3) * metricScale,
             };
@@ -681,6 +687,8 @@ describe('doc skeleton', () => {
                 width: (space ? 3.32 : text.length * width) * metricScale,
                 actualBoundingBoxAscent: space ? 0 : ascent,
                 actualBoundingBoxDescent: space || small ? 0 : 2.84,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: (small ? 8 : 12) * metricScale,
                 fontBoundingBoxDescent: (small ? 2 : 3) * metricScale,
             };
@@ -755,6 +763,8 @@ describe('doc skeleton', () => {
                 width: (text === '√' ? 9.66717529296875 : 7.4174957275390625) * metricScale,
                 actualBoundingBoxAscent: text === '√' ? 13.555624961853027 : 6.871250152587891,
                 actualBoundingBoxDescent: text === '√' ? 0.6109380722045898 : 0.07187557220458984,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: (11) * metricScale,
                 fontBoundingBoxDescent: (3) * metricScale,
             };
@@ -918,6 +928,8 @@ describe('doc skeleton', () => {
                 width: (text.length * (text === ',' ? 3.2536 : 8)) * metricScale,
                 actualBoundingBoxAscent: text === ',' ? 1.296875 : 9,
                 actualBoundingBoxDescent: text === ',' ? 2.211172 : 0,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
                 fontBoundingBoxAscent: (12) * metricScale,
                 fontBoundingBoxDescent: (3) * metricScale,
             };
@@ -1083,6 +1095,8 @@ describe('doc skeleton', () => {
             fontBoundingBoxDescent: 4,
             actualBoundingBoxAscent: 15,
             actualBoundingBoxDescent: 4,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         const dataModel = new DocumentDataModel({
             id: 'drawingml-runtime-layout',

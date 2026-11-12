@@ -54,6 +54,8 @@ describe('DocsLayoutFontLoader', () => {
             fontBoundingBoxDescent: 2,
             actualBoundingBoxAscent: 7,
             actualBoundingBoxDescent: 1,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 7,
         });
         await loader.load([{ family: 'Document Face', source, descriptors: { weight: '700', style: 'italic' } }]);
         expect([...faces]).toMatchObject([{ family: 'Document Face', source, descriptors: { weight: '700', style: 'italic' } }]);

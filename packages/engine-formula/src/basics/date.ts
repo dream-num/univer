@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import {
     DateSystem,
     excelDateSerial,
@@ -24,6 +23,7 @@ import {
     isRealNum,
     numfmt,
 } from '@univerjs/core';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
@@ -314,6 +314,55 @@ export function getDateSerialNumberByObject(
 export function getWeekDayByDateSerialNumber(dateSerialNumber: number, dateSystem = DateSystem.Date1900): number {
     const offset = dateSystem === DateSystem.Date1904 ? 5 : 6;
     return ((Math.floor(dateSerialNumber) + offset) % 7 + 7) % 7;
+}
+
+/**
+ * Returns the serial number of the Monday that starts ISO 8601 week 1 of the given year.
+ *
+ * Week 1 is the week that contains the first Thursday of the year, so it starts on or before
+ * 1 January when the year starts on Monday to Thursday, and in the last days of December of the
+ * previous year when it starts on Friday to Sunday.
+ */
+function getIsoWeekStartSerialNumber(year: number, dateSystem: DateSystem): number {
+    const yearStartSerialNumber = excelDateSerial(new Date(Date.UTC(year, 0, 1)), dateSystem);
+    const yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, dateSystem);
+
+    if (yearStartWeekDay === 0) {
+        // 1 January is a Sunday, which still belongs to the last week of the previous year.
+        return yearStartSerialNumber + 1;
+    }
+
+    if (yearStartWeekDay <= 4) {
+        return yearStartSerialNumber - (yearStartWeekDay - 1);
+    }
+
+    return yearStartSerialNumber + (8 - yearStartWeekDay);
+}
+
+/**
+ * Returns the ISO 8601 week number of a date serial, the value of `ISOWEEKNUM` and
+ * `WEEKNUM(date, 21)`. The time fraction is ignored so a date-time keeps the week of its day.
+ */
+export function getIsoWeekNumber(dateSerialNumber: number, dateSystem = DateSystem.Date1900): number {
+    const serialNumber = Math.floor(dateSerialNumber);
+    const date = excelSerialToDate(serialNumber, dateSystem);
+    // Serial 0 is Excel's 1900-01-00, which is kept in the 1900 calendar year.
+    const currentYear = dateSystem === DateSystem.Date1900 && serialNumber === 0 ? 1900 : date.getUTCFullYear();
+
+    let weekStartSerialNumber = getIsoWeekStartSerialNumber(currentYear, dateSystem);
+
+    if (serialNumber < weekStartSerialNumber) {
+        weekStartSerialNumber = getIsoWeekStartSerialNumber(currentYear - 1, dateSystem);
+    } else if (date.getUTCMonth() === 11) {
+        // The last days of December belong to week 1 of the next year when it starts Monday to Thursday.
+        const nextYearWeekStartSerialNumber = getIsoWeekStartSerialNumber(currentYear + 1, dateSystem);
+
+        if (serialNumber >= nextYearWeekStartSerialNumber) {
+            return 1;
+        }
+    }
+
+    return Math.floor((serialNumber - weekStartSerialNumber) / 7) + 1;
 }
 
 interface ITwoDateDaysType {

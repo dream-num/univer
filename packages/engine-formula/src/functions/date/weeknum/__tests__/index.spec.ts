@@ -51,6 +51,31 @@ describe('Test weeknum function', () => {
             expect(result2.getValue()).toStrictEqual(52);
         });
 
+        it('return type 21 follows ISO 8601 at year boundaries', () => {
+            const returnType = NumberValueObject.create(21);
+
+            // The last days of December that belong to week 1 of the next year.
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30'), returnType).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2025-12-29'), returnType).getValue()).toBe(1);
+            // Week 1 starts in the last days of the previous year when 1 January is Friday or Saturday.
+            expect(testFunction.calculate(StringValueObject.create('2021-1-4'), returnType).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2021-2-1'), returnType).getValue()).toBe(5);
+            expect(testFunction.calculate(StringValueObject.create('2016-1-4'), returnType).getValue()).toBe(1);
+        });
+
+        it('ignores the time fraction of a date serial', () => {
+            const sundayStart = NumberValueObject.create(1);
+            const mondayStart = NumberValueObject.create(2);
+            const isoWeek = NumberValueObject.create(21);
+
+            // The last day of a week used to be counted into the next week when a time was present.
+            expect(testFunction.calculate(NumberValueObject.create(45654.5), sundayStart).getValue()).toBe(52);
+            expect(testFunction.calculate(StringValueObject.create('2024-12-28 12:00'), sundayStart).getValue()).toBe(52);
+            expect(testFunction.calculate(StringValueObject.create('2019-01-06 12:00'), mondayStart).getValue()).toBe(1);
+            expect(testFunction.calculate(NumberValueObject.create(43471.5), isoWeek).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2024-12-29 12:00'), isoWeek).getValue()).toBe(52);
+        });
+
         it('uses the 1904 epoch when serial is zero', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
             expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(1)).getValue()).toBe(0);

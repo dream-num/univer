@@ -59,6 +59,11 @@ export class RenderPrimitiveCache extends Disposable {
     private _fontRevision = -1;
     private _fonts?: FontFaceSet;
     private _textClipBound?: IBoundRectNoAngle;
+    private _textClipRepairCanvas?: HTMLCanvasElement;
+
+    constructor(private readonly _maxEntries = MAX_ENTRIES) {
+        super();
+    }
 
     draw(ctx: UniverRenderingContext, draw: () => void, textClipBound?: IBoundRectNoAngle): void {
         const original = ctx._context;
@@ -87,6 +92,11 @@ export class RenderPrimitiveCache extends Disposable {
         this._bitmaps.clear();
         this._contexts = new WeakMap();
         this._pixels = 0;
+        if (this._textClipRepairCanvas) {
+            this._textClipRepairCanvas.width = 0;
+            this._textClipRepairCanvas.height = 0;
+            this._textClipRepairCanvas = undefined;
+        }
     }
 
     override dispose(): void {
@@ -325,6 +335,53 @@ export class RenderPrimitiveCache extends Disposable {
             return;
         }
         const direction = native.direction === 'inherit' ? (native.canvas.dir as 'ltr' | 'rtl') : native.direction;
+        if (this._textClipBound) {
+            metrics ??= native.measureText(text);
+            const left = Math.max(0, Math.floor(px - metrics.actualBoundingBoxLeft * m.a) - 2);
+            const top = Math.max(0, Math.floor(py - metrics.actualBoundingBoxAscent * m.d) - 2);
+            const width = Math.min(native.canvas.width, Math.ceil(px + metrics.actualBoundingBoxRight * m.a) + 2) - left;
+            const height = Math.min(native.canvas.height, Math.ceil(py + metrics.actualBoundingBoxDescent * m.d) + 2) - top;
+            if (!Number.isFinite(width * height) || width <= 0 || height <= 0 || width * height > MAX_STROKE_PIXELS) {
+                fallback();
+                return;
+            }
+            // A local glyph origin changes native Float32 antialiasing. Reuse one viewport-sized repair surface.
+            const canvas = this._textClipRepairCanvas ??= createCanvasElement();
+            if (canvas.width !== native.canvas.width || canvas.height !== native.canvas.height) {
+                canvas.width = native.canvas.width;
+                canvas.height = native.canvas.height;
+            }
+            canvas.dir = direction;
+            canvas.lang = language;
+            const paint = canvas.getContext('2d');
+            if (!paint) {
+                canvas.width = 0;
+                canvas.height = 0;
+                this._textClipRepairCanvas = undefined;
+                fallback();
+                return;
+            }
+            paint.setTransform(1, 0, 0, 1, 0, 0);
+            paint.clearRect(left, top, width, height);
+            TEXT_PROPERTIES.forEach((property, index) => {
+                if (values[index] !== undefined) {
+                    Reflect.set(paint, property, values[index]);
+                }
+            });
+            paint.direction = direction;
+            paint.fillStyle = native.fillStyle;
+            paint.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+            paint.fillText(text, args[1] as number, args[2] as number);
+            native.save();
+            try {
+                native.setTransform(1, 0, 0, 1, 0, 0);
+                native.imageSmoothingEnabled = false;
+                native.drawImage(canvas, left, top, width, height, left, top, width, height);
+            } finally {
+                native.restore();
+            }
+            return;
+        }
         const key = JSON.stringify([
             'text',
             text,
@@ -382,7 +439,7 @@ export class RenderPrimitiveCache extends Disposable {
     }
 
     private _trim(incoming: number): void {
-        while (this._bitmaps.size >= MAX_ENTRIES || this._pixels + incoming > MAX_PIXELS) {
+        while (this._bitmaps.size >= this._maxEntries || this._pixels + incoming > MAX_PIXELS) {
             const key = this._bitmaps.keys().next().value;
             if (key === undefined) {
                 break;

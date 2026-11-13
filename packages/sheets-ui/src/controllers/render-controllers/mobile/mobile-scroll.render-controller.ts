@@ -17,6 +17,7 @@
 import type { IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
 import {
     Direction,
     Disposable,
@@ -30,6 +31,7 @@ import {
 import { DeviceType, DrawingGroupObject, IRenderManagerService, ObjectType, Scene, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { MobileZoomIndicator } from '@univerjs/ui';
+import { take } from 'rxjs';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
@@ -329,6 +331,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         transformer.resetProps({ moveOnlyWhenSelected: true });
         this.disposeWithMe(toDisposable(() => transformer.resetProps({ moveOnlyWhenSelected })));
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const engine = scene.getEngine();
         const lastTouchPos: IPoint = { x: 0, y: 0 };
         let _touchScrolling: boolean = false;
         let _drawingTransforming: boolean = false;
@@ -336,6 +339,16 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         // Velocity tracking for smooth inertia (iOS-like)
         const velocity = { x: 0, y: 0 };
         let scrollInertiaAnimationID: null | number = null;
+        let inertiaFrameSubscription: Subscription | null = null;
+        let inertiaMotion: {
+            startTime: number;
+            duration: number;
+            sheetId: string;
+            velocityX: number;
+            velocityY: number;
+            distanceX: number;
+            distanceY: number;
+        } | null = null;
 
         // Track velocity history for smoother calculation (like iOS)
         const VELOCITY_HISTORY_SIZE = 5;
@@ -350,6 +363,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const BASE_DECELERATION_RATE = 0.992; // Per millisecond deceleration (lower = stops faster)
         const BASE_MIN_VELOCITY_THRESHOLD = 0.22; // Minimum velocity to continue animation
         const BASE_MAX_VELOCITY = 12; // Cap maximum velocity for stability
+        // Keep the established 60Hz fling distance while integrating independently of frame intervals.
+        const INERTIA_DISTANCE_SCALE = BASE_DECELERATION_RATE ** (1000 / 60);
 
         // Flick detection thresholds
         const FLICK_TIME_THRESHOLD = 240; // ms - swipes faster than this are considered "flicks"
@@ -447,20 +462,27 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         /**
          * iOS-like inertia animation with time-based deceleration
          */
-        let lastFrameTime = 0;
         let _pinchZooming = false;
         let initialPinchDistance = 0;
         let initialZoomRatio = 1;
         let pinchCenter: IPoint = { x: 0, y: 0 };
         const cancelInertiaAnimation = () => {
+            inertiaFrameSubscription?.unsubscribe();
+            inertiaFrameSubscription = null;
+            inertiaMotion = null;
             if (scrollInertiaAnimationID !== null) {
                 cancelAnimationFrame(scrollInertiaAnimationID);
                 scrollInertiaAnimationID = null;
             }
-            lastFrameTime = 0;
             velocity.x = 0;
             velocity.y = 0;
         };
+
+        this.disposeWithMe(toDisposable(this._context.activated$.subscribe((active) => {
+            if (!active) {
+                cancelInertiaAnimation();
+            }
+        })));
 
         this.disposeWithMe(toDisposable(transformer.changeStart$.subscribe(() => {
             _drawingTransforming = true;
@@ -472,52 +494,67 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             _drawingTransforming = false;
         })));
 
-        const scrollInertia = (currentTime: number) => {
-            if (!viewportMain) return;
+        const scrollInertia = async (currentTime: number) => {
+            const motion = inertiaMotion;
+            if (!motion || !viewportMain) {
+                return;
+            }
 
-            // Stop inertia if pinch zooming has started
-            if (_pinchZooming) {
+            if (_pinchZooming || this._context.unit.getActiveSheet()?.getSheetId() !== motion.sheetId) {
                 cancelInertiaAnimation();
                 return;
             }
-
-            if (lastFrameTime === 0) {
-                lastFrameTime = currentTime;
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
-                return;
-            }
-
-            const deltaTime = currentTime - lastFrameTime;
-            lastFrameTime = currentTime;
-
-            const { decelerationRate, minVelocityThreshold } = getZoomAdjustedParams();
-
-            // Apply time-based exponential deceleration (iOS-like)
-            const decelerationFactor = decelerationRate ** deltaTime;
-            velocity.x *= decelerationFactor;
-            velocity.y *= decelerationFactor;
-
-            // Calculate displacement for this frame
-            // Using integral of velocity over time for smoother motion
+            const elapsed = Math.min(motion.duration, Math.max(0, currentTime - motion.startTime));
+            const { decelerationRate } = getZoomAdjustedParams();
             const dampingFactor = -Math.log(decelerationRate);
-            const offsetX = velocity.x * (1 - decelerationFactor) / dampingFactor;
-            const offsetY = velocity.y * (1 - decelerationFactor) / dampingFactor;
+            const distanceFactor = (1 - decelerationRate ** elapsed) / dampingFactor * INERTIA_DISTANCE_SCALE;
+            const distanceX = motion.velocityX * distanceFactor;
+            const distanceY = motion.velocityY * distanceFactor;
+            const offsetX = distanceX - motion.distanceX;
+            const offsetY = distanceY - motion.distanceY;
+            const previousX = viewportMain.viewportScrollX;
+            const previousY = viewportMain.viewportScrollY;
 
-            if (Math.abs(offsetX) > 0.01 || Math.abs(offsetY) > 0.01) {
-                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX }, { fromMobileInertia: true });
+            if (offsetX !== 0 || offsetY !== 0) {
+                try {
+                    await this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX }, { fromMobileInertia: true });
+                } catch (error) {
+                    if (inertiaMotion === motion) {
+                        cancelInertiaAnimation();
+                    }
+                    throw error;
+                }
+                if (inertiaMotion !== motion) {
+                    return;
+                }
+                if (viewportMain.viewportScrollX === previousX && viewportMain.viewportScrollY === previousY &&
+                    !viewportMain.isDirty && !viewportMain.isForceDirty) {
+                    cancelInertiaAnimation();
+                    return;
+                }
             }
-
-            // Continue animation if velocity is above threshold
-            const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-            if (speed > minVelocityThreshold) {
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
+            motion.distanceX = distanceX;
+            motion.distanceY = distanceY;
+            if (elapsed < motion.duration) {
+                queueInertiaFrame();
             } else {
-                scrollInertiaAnimationID = null;
-                lastFrameTime = 0;
+                cancelInertiaAnimation();
             }
         };
+        function queueInertiaFrame() {
+            if (engine?.beginFrame$) {
+                inertiaFrameSubscription = engine.beginFrame$.pipe(take(1)).subscribe(() => {
+                    inertiaFrameSubscription = null;
+                    return scrollInertia(performance.now());
+                });
+            } else {
+                scrollInertiaAnimationID = requestAnimationFrame((time) => {
+                    scrollInertiaAnimationID = null;
+                    return scrollInertia(time);
+                });
+            }
+        }
         // Get the canvas element for native touch events
-        const engine = scene.getEngine();
         const canvasElement = engine?.getCanvasElement();
         if (!canvasElement) return;
 
@@ -977,8 +1014,16 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // Only start inertia if velocity is significant
             const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
             if (speed > minVelocityThreshold * 2) {
-                lastFrameTime = 0;
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
+                inertiaMotion = {
+                    startTime: performance.now(),
+                    duration: Math.log(speed / minVelocityThreshold) / -Math.log(BASE_DECELERATION_RATE),
+                    sheetId: this._context.unit.getActiveSheet().getSheetId(),
+                    velocityX: velocity.x,
+                    velocityY: velocity.y,
+                    distanceX: 0,
+                    distanceY: 0,
+                };
+                queueInertiaFrame();
             }
 
             velocityHistory.length = 0;

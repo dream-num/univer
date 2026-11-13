@@ -140,7 +140,8 @@ function createController() {
         value: () => sceneOverlayOwnsTouch ? scene : null,
     });
 
-    const controller = injector.createInstance(MobileSheetsScrollRenderController, context as any);
+    injector.add([MobileSheetsScrollRenderController, { useFactory: () => injector.createInstance(MobileSheetsScrollRenderController, context as any) }]);
+    const controller = injector.get(MobileSheetsScrollRenderController);
     scrollControllers.push(controller);
 
     return {

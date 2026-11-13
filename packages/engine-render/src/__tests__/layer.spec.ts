@@ -274,7 +274,7 @@ describe('layer', () => {
 
         expect(layer.isAllowCache()).toBe(true);
         layer.render(ctx);
-        expect(ctx.drawImage).not.toHaveBeenCalled();
+        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
 
         scene.__resizeCache();
         layer.render(ctx);

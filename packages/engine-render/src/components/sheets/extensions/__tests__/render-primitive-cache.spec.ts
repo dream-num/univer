@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import { Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverRenderingContext } from '../../../../context';
 import { FontCache } from '../../../docs/layout/shaping-engine/font-cache';
+import { Border } from '../border';
 import { RenderPrimitiveCache } from '../render-primitive-cache';
 
 describe('render primitive raster cache', () => {
+    let injector: Injector;
     let cache: RenderPrimitiveCache;
     let native: CanvasRenderingContext2D;
     let ctx: UniverRenderingContext;
@@ -27,18 +30,30 @@ describe('render primitive raster cache', () => {
     let fontsDescriptor: PropertyDescriptor | undefined;
 
     beforeEach(() => {
-        cache = new RenderPrimitiveCache();
         native = document.createElement('canvas').getContext('2d')!;
-        ctx = new UniverRenderingContext(native);
+        injector = new Injector([
+            [RenderPrimitiveCache],
+            [Border],
+            [EventTarget],
+            [CanvasRenderingContext2D, { useValue: native }],
+            [UniverRenderingContext, {
+                useFactory: (container: Injector, context: CanvasRenderingContext2D) =>
+                    container.createInstance(UniverRenderingContext, context),
+                deps: [Injector, CanvasRenderingContext2D],
+            }],
+        ]);
+        cache = injector.get(RenderPrimitiveCache);
+        ctx = injector.get(UniverRenderingContext);
         ctx.strokeStyle = '#1d4ed8';
         native.canvas.dir = 'ltr';
-        fonts = Object.assign(new EventTarget(), { status: 'loaded' });
+        fonts = Object.assign(injector.get(EventTarget), { status: 'loaded' });
         fontsDescriptor = Object.getOwnPropertyDescriptor(document, 'fonts');
         Object.defineProperty(document, 'fonts', { configurable: true, value: fonts });
     });
 
     afterEach(() => {
         cache.dispose();
+        injector.dispose();
         vi.restoreAllMocks();
         if (fontsDescriptor) {
             Object.defineProperty(document, 'fonts', fontsDescriptor);
@@ -126,6 +141,106 @@ describe('render primitive raster cache', () => {
         expect(image).toHaveBeenCalledOnce();
         expect(text).not.toHaveBeenCalled();
         expect(native.getTransform()).toMatchObject({ a: 2, d: 2, e: 10, f: 14 });
+    });
+
+    it('preserves native glyph coordinates at a clipped antialiasing edge', () => {
+        native.canvas.width = 600;
+        native.canvas.height = 400;
+        ctx.setTransform(2, 0, 0, 2, 10, 14);
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), { left: 0, top: 56, right: 100, bottom: 100 });
+
+        const surface = image.mock.calls[0][0] as HTMLCanvasElement;
+        const paint = surface.getContext('2d')!;
+        expect([surface.width, surface.height]).toEqual([600, 400]);
+        expect(paint.fillText).toHaveBeenCalledWith('tail', 2.5, 20.5);
+        expect(paint.getTransform()).toMatchObject({ a: 2, d: 2, e: 10, f: 14 });
+        expect(native.getTransform()).toMatchObject({ a: 2, d: 2, e: 10, f: 14 });
+    });
+
+    it('reuses one clipped-text repair surface and releases it when the cache is cleared', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        const repair = () => cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), {
+            left: 0,
+            top: 21,
+            right: 100,
+            bottom: 40,
+        });
+        repair();
+        ctx.fillStyle = '#be123c';
+        repair();
+        const first = image.mock.calls[0][0] as HTMLCanvasElement;
+        expect(image.mock.calls[1][0]).toBe(first);
+        cache.clear();
+        expect([first.width, first.height]).toEqual([0, 0]);
+        repair();
+        const afterClear = image.mock.calls[2][0] as HTMLCanvasElement;
+        expect(afterClear).not.toBe(first);
+        cache.dispose();
+        expect([afterClear.width, afterClear.height]).toEqual([0, 0]);
+    });
+
+    it('resizes the clipped-text surface with its native viewport', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        for (const [width, height] of [[600, 400], [200, 100]]) {
+            native.canvas.width = width;
+            native.canvas.height = height;
+            cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), {
+                left: 0,
+                top: 21,
+                right: 100,
+                bottom: 40,
+            });
+            const surface = image.mock.calls[image.mock.calls.length - 1][0] as HTMLCanvasElement;
+            expect([surface.width, surface.height]).toEqual([width, height]);
+            expect(surface).toBe(image.mock.calls[0][0]);
+        }
+    });
+
+    it('restores native state if clipped-text repair submission fails', () => {
+        native.save();
+        ctx.setTransform(2, 0, 0, 2, 10, 14);
+        ctx.globalAlpha = 0.6;
+        ctx.imageSmoothingEnabled = true;
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 0.2,
+        } as TextMetrics);
+        vi.spyOn(native, 'drawImage').mockImplementation(() => {
+            throw new Error('Clipped text submission failed');
+        });
+        expect(() => cache.draw(ctx, () => ctx.fillText('tail', 2.5, 20.5), {
+            left: 0,
+            top: 56,
+            right: 100,
+            bottom: 100,
+        })).toThrow('Clipped text submission failed');
+        expect(ctx._context).toBe(native);
+        expect(native.getTransform()).toMatchObject({ a: 2, d: 2, e: 10, f: 14 });
+        expect(native.globalAlpha).toBe(0.6);
+        expect(native.imageSmoothingEnabled).toBe(true);
+        native.restore();
+        expect(native.getTransform()).toMatchObject({ a: 1, d: 1, e: 0, f: 0 });
     });
 
     it('keeps text decorations native and releases the damage bound after exceptions', () => {
@@ -238,6 +353,63 @@ describe('render primitive raster cache', () => {
         expect(bitmaps[bitmaps.length - 1].width).toBeGreaterThan(0);
         cache.dispose();
         expect(bitmaps.every((bitmap) => bitmap.width === 0 && bitmap.height === 0)).toBe(true);
+    });
+
+    it('retains a mixed-border working set beyond the default entry limit', () => {
+        cache.dispose();
+        cache = Reflect.get(injector.get(Border), '_strokeCache') as RenderPrimitiveCache;
+        const image = vi.spyOn(native, 'drawImage');
+        const paint = () => cache.draw(ctx, () => {
+            ctx.beginPath();
+            ctx.moveTo(0.5, 0.5);
+            ctx.lineTo(4.5, 0.5);
+            ctx.stroke();
+        });
+        for (let i = 0; i < 512; i++) {
+            ctx.strokeStyle = `#${i.toString(16).padStart(6, '0')}`;
+            paint();
+        }
+        const first = image.mock.calls[0][0] as HTMLCanvasElement;
+        ctx.strokeStyle = '#000000';
+        paint();
+        expect(image.mock.calls[512][0]).toBe(first);
+        expect(first.width).toBeGreaterThan(0);
+
+        ctx.strokeStyle = '#abcdef';
+        paint();
+        expect(first.width).toBe(0);
+        cache.dispose();
+        expect(image.mock.calls.every(([bitmap]) => (bitmap as HTMLCanvasElement).width === 0)).toBe(true);
+    });
+
+    it('keeps the original pixel budget and releases rasters with a larger entry allowance', () => {
+        cache.dispose();
+        cache = Reflect.get(injector.get(Border), '_strokeCache') as RenderPrimitiveCache;
+        const image = vi.spyOn(native, 'drawImage');
+        const paint = () => cache.draw(ctx, () => {
+            ctx.beginPath();
+            ctx.moveTo(0.5, 0.5);
+            ctx.lineTo(10_000.5, 0.5);
+            ctx.stroke();
+        });
+        for (let i = 0; i < 10; i++) {
+            ctx.strokeStyle = `#${i.toString(16).padStart(6, '0')}`;
+            paint();
+        }
+        const bitmaps = image.mock.calls.map(([bitmap]) => bitmap as HTMLCanvasElement);
+        expect(bitmaps[0].width).toBe(0);
+        expect(bitmaps[bitmaps.length - 1].width).toBeGreaterThan(0);
+        expect(bitmaps.reduce((pixels, bitmap) => pixels + bitmap.width * bitmap.height, 0)).toBeLessThanOrEqual(512 * 1024);
+        cache.clear();
+        expect(bitmaps.every((bitmap) => bitmap.width === 0 && bitmap.height === 0)).toBe(true);
+        paint();
+        const afterClear = image.mock.calls[image.mock.calls.length - 1][0] as HTMLCanvasElement;
+        expect(afterClear.width).toBeGreaterThan(0);
+        cache.dispose();
+        cache.dispose();
+        expect(afterClear.width).toBe(0);
+        expect(afterClear.height).toBe(0);
+        expect(ctx._context).toBe(native);
     });
 
     it('restores the original native context if drawing throws', () => {

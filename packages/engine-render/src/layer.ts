@@ -416,6 +416,7 @@ export class Layer extends Disposable {
         this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
         this._cacheValid = false;
         this._retainedCacheValid = false;
+        this._resizeCacheCanvas();
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>, retainedViewportKeys?: ReadonlySet<string>) {

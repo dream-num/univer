@@ -36,10 +36,10 @@ import { SheetScrollManagerService } from '../../../services/scroll-manager.serv
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
+import { getArrayFormulaSheetIds, getLeftTopPlaceholderSize, SheetRenderController } from '../sheet.render-controller';
 import { SheetSkeletonRenderController } from '../skeleton.render-controller';
 import { SheetsZoomRenderController } from '../zoom.render-controller';
 import { createChartRenderTestBed } from './chart-render-test-bed';
-import { getArrayFormulaSheetIds, getLeftTopPlaceholderSize, SheetRenderController } from '../sheet.render-controller';
 
 const EMPTY_ARRAY_RESULT: ISetArrayFormulaDataMutationParams = {
     arrayFormulaCellData: {},
@@ -212,7 +212,6 @@ describe('SheetRenderController', () => {
         expect(controller._rangeToBounds([range])).toEqual([]);
     });
 });
-
 
 describe('Chart host render lifecycle', () => {
     it('preserves plugin viewport visibility across Chart Sheet transitions', () => {

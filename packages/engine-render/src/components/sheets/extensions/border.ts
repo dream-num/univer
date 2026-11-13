@@ -29,6 +29,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 const BORDER_Z_INDEX = 50;
+const BORDER_PRIMITIVE_CACHE_ENTRIES = 512;
 
 interface IRenderBorderContext {
     ctx: UniverRenderingContext;
@@ -53,7 +54,7 @@ export class Border extends SheetExtension {
     preStyle: BorderStyleTypes;
     preColor: string;
 
-    private readonly _strokeCache = new RenderPrimitiveCache();
+    private readonly _strokeCache = new RenderPrimitiveCache(BORDER_PRIMITIVE_CACHE_ENTRIES);
     private readonly _rowCache = new BorderRowCache();
 
     override clearCache(): void {
@@ -115,35 +116,42 @@ export class Border extends SheetExtension {
             return resolved;
         };
 
-        this._strokeCache.draw(ctx, () => {
-            ctx.beginPath();
-            viewRanges.forEach((range) => {
-                for (let row = range.startRow; row <= range.endRow; row++) {
-                    const paintRow = (target: UniverRenderingContext) => {
-                        const context = target === ctx
-                            ? renderBorderContext
-                            : {
-                                ...renderBorderContext,
-                                ctx: target,
-                                lineStyle: undefined,
-                                lineWidth: undefined,
-                                lineColor: undefined,
-                            };
-                        for (let col = range.startColumn; col <= range.endColumn; col++) {
-                            const borderConfig = border.getValue(row, col);
-                            if (borderConfig) {
-                                this.renderBorderByCell(context, row, col, borderConfig);
+        const paint = () => {
+            this._strokeCache.draw(ctx, () => {
+                ctx.beginPath();
+                viewRanges.forEach((range) => {
+                    for (let row = range.startRow; row <= range.endRow; row++) {
+                        const paintRow = (target: UniverRenderingContext) => {
+                            const context = target === ctx
+                                ? renderBorderContext
+                                : {
+                                    ...renderBorderContext,
+                                    ctx: target,
+                                    lineStyle: undefined,
+                                    lineWidth: undefined,
+                                    lineColor: undefined,
+                                };
+                            for (let col = range.startColumn; col <= range.endColumn; col++) {
+                                const borderConfig = border.getValue(row, col);
+                                if (borderConfig) {
+                                    this.renderBorderByCell(context, row, col, borderConfig);
+                                }
                             }
+                        };
+                        if (!this.isRenderDiffRangesByRow(row, row, diffRanges)
+                            || !this._rowCache.draw(ctx, spreadsheetSkeleton, row, range, resolveColor, (target) => this._strokeCache.draw(target, () => paintRow(target)))) {
+                            paintRow(ctx);
                         }
-                    };
-                    if (!this.isRenderDiffRangesByRow(row, row, diffRanges)
-                        || !this._rowCache.draw(ctx, spreadsheetSkeleton, row, range, resolveColor, (target) => this._strokeCache.draw(target, () => paintRow(target)))) {
-                        paintRow(ctx);
                     }
-                }
+                });
+                ctx.closePath();
             });
-            ctx.closePath();
-        });
+        };
+        if (this.constructor === Border) {
+            ctx.withCachedScale(paint);
+        } else {
+            paint();
+        }
         ctx.restore();
     }
 

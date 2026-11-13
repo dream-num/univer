@@ -1401,6 +1401,9 @@ export class Viewport {
         const scrollX = afterLimitScrollXY.x;
         const scrollY = afterLimitScrollXY.y;
 
+        const needsScrollPaint = viewportScrollX !== this.viewportScrollX || viewportScrollY !== this.viewportScrollY ||
+            scrollX !== this.scrollX || scrollY !== this.scrollY || this.isDirty || this.isForceDirty;
+
         this._preScrollX = this.scrollX;
         this._preScrollY = this.scrollY;
         this._preViewportScrollX = this.viewportScrollX;
@@ -1422,7 +1425,10 @@ export class Viewport {
             limitY: this._scrollBar?.limitY,
         };
 
-        this._scrollBar?.makeDirty(true, true);
+        // Preserve scroll notifications at a clamped edge without repainting an unchanged clean viewport.
+        if (needsScrollPaint) {
+            this._scrollBar.makeDirty(true, true);
+        }
 
         // set valid scrollInfo
         this.onScrollAfter$.emitEvent(scrollSubParam);

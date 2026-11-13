@@ -20,6 +20,7 @@ import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@u
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IFakeEngine } from './render-test-bed';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand } from '../../../commands/commands/set-selection.command';
 import { SetScrollOperation } from '../../../commands/operations/scroll.operation';
@@ -53,7 +54,12 @@ function createScrollManagerServiceMock() {
 
 let pendingAnimationFrames: FrameRequestCallback[] = [];
 
-function flushWheelFrame() {
+function flushWheelFrame(scene: ReturnType<typeof createRenderTestBed>['scene']) {
+    const engine = scene.getEngine() as IFakeEngine;
+    if (engine.beginFrame$) {
+        engine.runRenderLoop(() => {});
+        return;
+    }
     const callback = pendingAnimationFrames.shift();
     expect(callback).toBeDefined();
     callback!(performance.now());
@@ -122,7 +128,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 7, deltaY: 10, preventDefault },
             { stopPropagation: () => { } }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
 
         expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 7, offsetY: 10 });
 
@@ -137,7 +143,11 @@ describe('SheetsScrollRenderController', () => {
             parentClassType: RENDER_CLASS_TYPE.ENGINE,
         });
         const { context, scene, contextService } = testBed;
-        vi.spyOn(testBed.get(ICommandService), 'executeCommand').mockResolvedValue(true);
+        vi.spyOn(testBed.get(ICommandService), 'executeCommand').mockImplementation(async (_id, params) => {
+            const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+            viewport.viewportScrollY += (params as { offsetY: number }).offsetY;
+            return true as never;
+        });
         const preserveCacheSpy = vi.spyOn(scene, 'makeDirtyForScrolling');
         const makeDirtySpy = vi.spyOn(scene, 'makeDirty');
         const mainLayer = {
@@ -151,7 +161,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
             { stopPropagation: vi.fn() }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
 
         expect(preserveCacheSpy).toHaveBeenCalledWith();
 
@@ -160,7 +170,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
             { stopPropagation: vi.fn() }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
         expect(makeDirtySpy).toHaveBeenCalledWith(true);
         expect(preserveCacheSpy).toHaveBeenCalledTimes(1);
 
@@ -170,7 +180,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
             { stopPropagation: vi.fn() }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
         expect(makeDirtySpy).toHaveBeenCalledTimes(2);
         void controller;
     });
@@ -195,6 +205,7 @@ describe('SheetsScrollRenderController', () => {
             type: CommandType.COMMAND,
             handler: () => {
                 pending = armReuse;
+                scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!.viewportScrollY += 10;
                 return true;
             },
         });
@@ -210,7 +221,7 @@ describe('SheetsScrollRenderController', () => {
                 { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
                 { stopPropagation: vi.fn() }
             );
-            flushWheelFrame();
+            flushWheelFrame(scene);
         };
 
         try {
@@ -258,7 +269,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: true, deltaX: 3, deltaY: 7, preventDefault },
             { stopPropagation }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
 
         expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 21, offsetY: 0 });
         expect(preventDefault).toHaveBeenCalled();
@@ -301,7 +312,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: -40, preventDefault },
             { stopPropagation: () => { } }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
 
         expect(viewMain.limitedScroll).toHaveBeenCalledWith(0, 2);
         expect(preventDefault).toHaveBeenCalled();
@@ -330,7 +341,7 @@ describe('SheetsScrollRenderController', () => {
             { ctrlKey: false, shiftKey: false, deltaX: 12, deltaY: 20, preventDefault },
             { stopPropagation: () => { } }
         );
-        flushWheelFrame();
+        flushWheelFrame(scene);
 
         expect(executeSpy).toHaveBeenCalledWith(SetScrollRelativeCommand.id, { offsetX: 6, offsetY: 10 });
         void controller;

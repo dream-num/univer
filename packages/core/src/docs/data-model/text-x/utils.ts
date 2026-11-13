@@ -792,9 +792,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns, paragraphs, customRanges, customBlocks, docxRawCustomBlocks, docxRawBlocks, docxExportExcludedRanges, customDecorations, tables, columnGroups, blockRanges } = body;
+    const { textRuns, paragraphs, sectionBreaks, customRanges, customBlocks, docxRawCustomBlocks, docxRawBlocks, docxExportExcludedRanges, customDecorations, tables, columnGroups, blockRanges } = body;
 
-    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && docxRawCustomBlocks == null && docxRawBlocks == null && docxExportExcludedRanges == null && customDecorations == null && tables == null && columnGroups == null && blockRanges == null) {
+    if (textRuns == null && paragraphs == null && sectionBreaks == null && customRanges == null && customBlocks == null && docxRawCustomBlocks == null && docxRawBlocks == null && docxExportExcludedRanges == null && customDecorations == null && tables == null && columnGroups == null && blockRanges == null) {
         return true;
     }
 

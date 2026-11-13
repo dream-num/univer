@@ -177,6 +177,65 @@ describe('ArrayFormulaCellInterceptorController', () => {
         });
         expect(getInterceptedCell(worksheet, workbook, 4, 4, interceptorService)).toBeUndefined();
     });
+
+    it('drops a spilled array result when the anchor formula no longer matches the captured source', async () => {
+        testBed = createControllerTestBed();
+        const commandService = testBed.injector.get(ICommandService);
+        const formulaDataModel = testBed.injector.get(FormulaDataModel);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        testBed.injector.get(ArrayFormulaCellInterceptorController);
+        formulaDataModel.setArrayFormulaRange({
+            test: { sheet1: { 6: { 2: { startRow: 6, startColumn: 2, endRow: 7, endColumn: 2 } } } },
+        });
+        formulaDataModel.setArrayFormulaCellData({
+            test: {
+                sheet1: {
+                    6: { 2: { v: 0.25, t: CellValueType.NUMBER } },
+                    7: { 2: { v: 50, t: CellValueType.NUMBER } },
+                },
+            },
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {},
+            sourceFormulaData: { test: { sheet1: { 6: { 2: { f: '=B5:B6' } } } } },
+        });
+
+        expect(formulaDataModel.getArrayFormulaRange().test?.sheet1?.[6]?.[2]).toBeUndefined();
+        expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1?.[6]?.[2]).toBeUndefined();
+        expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1?.[7]?.[2]).toBeUndefined();
+    });
+
+    it('keeps a spilled array result when the anchor formula still matches', async () => {
+        testBed = createControllerTestBed();
+        const commandService = testBed.injector.get(ICommandService);
+        const formulaDataModel = testBed.injector.get(FormulaDataModel);
+        const worksheet = (testBed.sheet as Workbook).getActiveSheet()!;
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        testBed.injector.get(ArrayFormulaCellInterceptorController);
+        worksheet.getCellMatrix().setValue(6, 2, { f: '=B5:B6' });
+        formulaDataModel.setArrayFormulaRange({
+            test: { sheet1: { 6: { 2: { startRow: 6, startColumn: 2, endRow: 7, endColumn: 2 } } } },
+        });
+        formulaDataModel.setArrayFormulaCellData({
+            test: {
+                sheet1: {
+                    6: { 2: { v: 0.25, t: CellValueType.NUMBER } },
+                    7: { 2: { v: 50, t: CellValueType.NUMBER } },
+                },
+            },
+        });
+
+        await commandService.executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitData: {},
+            unitOtherData: {},
+            sourceFormulaData: { test: { sheet1: { 6: { 2: { f: '=B5:B6' } } } } },
+        });
+
+        expect(formulaDataModel.getArrayFormulaRange().test?.sheet1?.[6]?.[2]?.endRow).toBe(7);
+        expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1?.[7]?.[2]?.v).toBe(50);
+    });
 });
 
 const unitId = 'test';

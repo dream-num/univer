@@ -56,6 +56,7 @@ export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } fro
 export { matchRefDrawToken } from './basics/match-token';
 export { isReferenceString } from './basics/regex';
 export { convertUnitDataToRuntime } from './basics/runtime';
+export { formulaSourceMatchesCell, omitMismatchedArrayFormulaResults } from './basics/stale-formula-result';
 export {
     compareToken,
     matchToken,

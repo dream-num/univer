@@ -154,9 +154,9 @@ export class Font extends SheetExtension {
         return parent?.getDocuments();
     }
 
-    getNativeTextClipRepairRanges(skeleton: SpreadsheetSkeleton): IRange[] {
+    getNativeTextClipRepairRanges(skeleton: SpreadsheetSkeleton, visibleRange: IRange): IRange[] {
         const ranges: IRange[] = [];
-        skeleton.nativeTextClipCache.forValue((row, column) => {
+        for (const { row, column } of skeleton.getNativeTextClipCandidates(visibleRange)) {
             const cell = skeleton.getCellWithCoordByIndex(row, column, false);
             const range = skeleton.overflowCache.getValue(row, column)
                 ?? (cell.isMerged || cell.isMergedMainCell
@@ -173,7 +173,7 @@ export class Font extends SheetExtension {
                 startColumn: range.startColumn,
                 endColumn: range.endColumn,
             });
-        });
+        }
         return ranges;
     }
 

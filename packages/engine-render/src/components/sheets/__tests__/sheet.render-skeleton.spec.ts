@@ -43,6 +43,138 @@ import { Font } from '../extensions/font';
 import { getCustomNumberDisplayText, getDocsSkeletonPageSize, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
 
 describe('Scroll cache history', () => {
+    it.each(['row', 'column'] as const)('bounds native text repair geometry to the same cache after a long %s history', (axis) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const cells: Record<number, Record<number, ICellData>> = {};
+        for (let index = 0; index < 10_000; index++) {
+            const row = axis === 'row' ? index : 0;
+            const column = axis === 'column' ? index : 0;
+            (cells[row] ??= {})[column] = { v: 'long text that must shrink to fit'.repeat(20), s: { stf: BooleanNumber.TRUE } };
+        }
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'styled-scroll-history',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: axis === 'row' ? 10_000 : 1,
+                columnCount: axis === 'column' ? 10_000 : 1,
+                defaultRowHeight: 20,
+                defaultColumnWidth: 40,
+                cellData: cells,
+            } },
+        });
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+        }]);
+        injector.add([Font]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        const font = injector.get(Font);
+        const visible = { startRow: 0, endRow: axis === 'row' ? 19 : 0, startColumn: 0, endColumn: axis === 'column' ? 19 : 0 };
+        const expected = Array.from({ length: 20 }, (_, index) => ({
+            startRow: axis === 'row' ? index : 0,
+            endRow: axis === 'row' ? index : 0,
+            startColumn: axis === 'column' ? index : 0,
+            endColumn: axis === 'column' ? index : 0,
+        }));
+        try {
+            skeleton.calculate();
+            const geometry = vi.spyOn(skeleton, 'getCellWithCoordByIndex');
+            for (let index = 0; index < 10_000; index += 20) {
+                const firstRow = axis === 'row' ? index : 0;
+                const firstColumn = axis === 'column' ? index : 0;
+                const bound = {
+                    left: skeleton.rowHeaderWidthAndMarginLeft + firstColumn * 40,
+                    right: skeleton.rowHeaderWidthAndMarginLeft + (firstColumn + (axis === 'column' ? 20 : 1)) * 40,
+                    top: skeleton.columnHeaderHeightAndMarginTop + firstRow * 20,
+                    bottom: skeleton.columnHeaderHeightAndMarginTop + (firstRow + (axis === 'row' ? 20 : 1)) * 20,
+                };
+                const info = {
+                    viewBound: bound,
+                    cacheBound: bound,
+                    viewportKey: 'viewMain',
+                    isDirty: 0,
+                    isForceDirty: false,
+                    shouldCacheUpdate: 1,
+                    diffX: axis === 'column' ? 800 : 0,
+                    diffY: axis === 'row' ? 400 : 0,
+                    diffBounds: [bound],
+                    diffCacheBounds: [bound],
+                } as IViewportInfo;
+                skeleton.setStylesCache(info, { scaleY: 1 });
+                if (index + 20 === 1000 || index + 20 === 10_000) {
+                    const top = {
+                        left: skeleton.rowHeaderWidthAndMarginLeft,
+                        right: skeleton.rowHeaderWidthAndMarginLeft + (axis === 'column' ? 20 : 1) * 40,
+                        top: skeleton.columnHeaderHeightAndMarginTop,
+                        bottom: skeleton.columnHeaderHeightAndMarginTop + (axis === 'row' ? 20 : 1) * 20,
+                    };
+                    skeleton.setStylesCache({ ...info, viewBound: top, cacheBound: top, diffBounds: [top], diffCacheBounds: [top] }, { scaleY: 1 });
+                    geometry.mockClear();
+                    expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual(expected);
+                    expect(geometry).toHaveBeenCalledTimes(20);
+                }
+            }
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
+    it('retains intersecting merge and overflow anchors outside the native text query', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const merge = { startRow: 0, endRow: 7, startColumn: 1, endColumn: 3 };
+        const cells: Record<number, Record<number, ICellData>> = {
+            0: { 1: { v: 'merged rotation', s: { tr: { a: 45 } } } },
+            8: { 0: { v: 'long text that must shrink to fit'.repeat(20), s: { stf: BooleanNumber.TRUE } } },
+            10: { 10: { v: 'outside', s: { tr: { a: 90 } } } },
+        };
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'native-text-query-anchors',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: { id: 'sheet', rowCount: 12, columnCount: 12, defaultRowHeight: 20, defaultColumnWidth: 40, cellData: cells, mergeData: [merge] } },
+        });
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+        }]);
+        injector.add([Font]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        const font = injector.get(Font);
+        const visible = { startRow: 5, endRow: 8, startColumn: 2, endColumn: 5 };
+        try {
+            skeleton.calculate();
+            for (const row of [0, 8, 10]) {
+                for (const column of Object.keys(cells[row]).map(Number)) {
+                    skeleton._setFontStylesCache(row, column, cells[row][column], skeleton.worksheet.getComposedCellStyle(row, column));
+                }
+            }
+            const overflow = skeleton.overflowCache.getValue(8, 0)!;
+            expect(overflow.startColumn).toBe(0);
+            expect(overflow.endColumn).toBeGreaterThanOrEqual(visible.startColumn);
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([merge, overflow]);
+            const replacement = skeleton.overflowCache.getSlice(0, 11, 0, 11);
+            replacement.realDeleteValue(8, 0);
+            skeleton.setOverflowCache(replacement);
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([merge]);
+            skeleton.appendToOverflowCache(8, 0, overflow.startColumn, overflow.endColumn);
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([merge, overflow]);
+            skeleton.appendToOverflowCache(8, 0, 0, 1);
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([merge]);
+            skeleton.resetRangeCache([merge]);
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([]);
+            skeleton.resetCache();
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([]);
+            skeleton.dispose();
+            expect(font.getNativeTextClipRepairRanges(skeleton, visible)).toEqual([]);
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
     it.each([false, true])('keeps unstyled empty cells sparse after a disjoint 10,000-row scan (stored empty cells: %s)', (stored) => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });
@@ -147,18 +279,18 @@ describe('Scroll cache history', () => {
                 }
             }
             const history = vi.spyOn(skeleton.stylesCache.fontMatrix, 'forValue');
-            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([
+            expect(font.getNativeTextClipRepairRanges(skeleton, skeleton.getRangeByViewBound())).toEqual([
                 merge,
                 { startRow: 5000, endRow: 5000, startColumn: 1, endColumn: 1 },
                 { startRow: 9999, endRow: 9999, startColumn: 1, endColumn: 2 },
             ]);
             expect(history).not.toHaveBeenCalled();
             skeleton.resetRangeCache([merge]);
-            expect(font.getNativeTextClipRepairRanges(skeleton)).toHaveLength(2);
+            expect(font.getNativeTextClipRepairRanges(skeleton, skeleton.getRangeByViewBound())).toHaveLength(2);
             skeleton.resetCache();
-            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([]);
+            expect(font.getNativeTextClipRepairRanges(skeleton, skeleton.getRangeByViewBound())).toEqual([]);
             skeleton.dispose();
-            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([]);
+            expect(font.getNativeTextClipRepairRanges(skeleton, skeleton.getRangeByViewBound())).toEqual([]);
         } finally {
             univer.dispose();
             environment.restore();

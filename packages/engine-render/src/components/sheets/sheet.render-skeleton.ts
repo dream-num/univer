@@ -15,6 +15,7 @@
  */
 
 import type {
+    BBox,
     BorderStyleTypes,
     IBorderStyleData,
     ICellDataForSheetInterceptor,
@@ -55,6 +56,7 @@ import {
     numfmt,
     ObjectMatrix,
     Range,
+    RBush,
     Rectangle,
     searchArray,
     SHEET_TEXT_LINE_GAP,
@@ -89,6 +91,11 @@ import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { SheetCellDocumentViewModel } from './sheet-cell-document-view-model';
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
+
+interface INativeTextClipCandidate extends BBox {
+    row: number;
+    column: number;
+}
 
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
@@ -332,7 +339,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
     private _emptyFontCache = new ObjectMatrix<boolean>();
-    private readonly _nativeTextClipCache = new ObjectMatrix<boolean>();
+    private readonly _nativeTextClipCache = new ObjectMatrix<INativeTextClipCandidate>();
+    private readonly _nativeTextClipIndex = new RBush<INativeTextClipCandidate>();
     private readonly _plainTextVerticalOverflowByRow = new Map<number, number>();
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
@@ -429,8 +437,37 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this._incrementalFontRenderRanges;
     }
 
-    get nativeTextClipCache(): ObjectMatrix<boolean> {
-        return this._nativeTextClipCache;
+    getNativeTextClipCandidates(range: IRange): ReadonlyArray<{ row: number; column: number }> {
+        return this._nativeTextClipIndex.search({
+            minX: range.startColumn,
+            minY: range.startRow,
+            maxX: range.endColumn,
+            maxY: range.endRow,
+        }).sort((a, b) => a.row - b.row || a.column - b.column);
+    }
+
+    private _cacheNativeTextClipCandidate(row: number, column: number): void {
+        this._deleteNativeTextClipCandidate(row, column);
+        const range = this._overflowCache.getValue(row, column)
+            ?? this.worksheet.getMergedCell(row, column)
+            ?? { startRow: row, endRow: row, startColumn: column, endColumn: column };
+        const candidate = {
+            row,
+            column,
+            minX: range.startColumn,
+            minY: range.startRow,
+            maxX: range.endColumn,
+            maxY: range.endRow,
+        };
+        this._nativeTextClipCache.setValue(row, column, candidate);
+        this._nativeTextClipIndex.insert(candidate);
+    }
+
+    private _deleteNativeTextClipCandidate(row: number, column: number): void {
+        const candidate = this._nativeTextClipCache.getValue(row, column);
+        if (!candidate) return;
+        this._nativeTextClipIndex.remove(candidate);
+        this._nativeTextClipCache.realDeleteValue(row, column);
     }
 
     /** Bound source-row checks by the current cache, without scanning retained font entries. */
@@ -480,6 +517,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._handleBorderMatrix.reset();
         this._emptyFontCache.reset();
         this._nativeTextClipCache.reset();
+        this._nativeTextClipIndex.clear();
         this._plainTextVerticalOverflowByRow.clear();
         this._preparedStyleRanges.clear();
         this._overflowCache.reset();
@@ -488,6 +526,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     setOverflowCache(value: ObjectMatrix<IRange>): void {
         this._overflowCache = value;
+        const candidates = this._nativeTextClipIndex.all();
+        this._nativeTextClipIndex.clear();
+        this._nativeTextClipCache.reset();
+        for (const { row, column } of candidates) {
+            this._cacheNativeTextClipCandidate(row, column);
+        }
     }
 
     private _refreshPlainTextVerticalOverflow(row: number): void {
@@ -559,7 +603,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     col > (visibleEndColumn + CACHE_COUNT)
                 ) {
                     this._stylesCache.fontMatrix.realDeleteValue(row, col);
-                    this._nativeTextClipCache.realDeleteValue(row, col);
+                    this._deleteNativeTextClipCandidate(row, col);
                     if (this._plainTextVerticalOverflowByRow.has(row)) overflowRows.add(row);
                 }
             });
@@ -1133,6 +1177,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             startColumn,
             endColumn,
         });
+        if (this._nativeTextClipCache.getValue(row, column)) {
+            this._cacheNativeTextClipCandidate(row, column);
+        }
     }
 
     getOverflowPosition(
@@ -1458,6 +1505,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._handleBorderMatrix?.reset();
         this._emptyFontCache?.reset();
         this._nativeTextClipCache.reset();
+        this._nativeTextClipIndex.clear();
         this._plainTextVerticalOverflowByRow.clear();
         this._overflowCache?.reset();
     }
@@ -1472,7 +1520,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             Range.foreach(range, (row, col) => {
                 if (this._plainTextVerticalOverflowByRow.has(row)) overflowRows?.add(row);
                 this._stylesCache.fontMatrix.realDeleteValue(row, col);
-                this._nativeTextClipCache.realDeleteValue(row, col);
+                this._deleteNativeTextClipCandidate(row, col);
                 this._stylesCache.border?.realDeleteValue(row, col);
                 this._stylesCache.backgroundPositions?.realDeleteValue(row, col);
                 this._handleBgMatrix.realDeleteValue(row, col);
@@ -1701,7 +1749,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);
         if (fontCacheItem.vertexAngle || fontCacheItem.centerAngle
             || (fontCacheItem.shrinkScale !== undefined && fontCacheItem.shrinkScale !== 1)) {
-            this._nativeTextClipCache.setValue(row, col, true);
+            this._cacheNativeTextClipCandidate(row, col);
         }
     }
 

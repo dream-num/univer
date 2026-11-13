@@ -25,6 +25,7 @@ export { objectPermissionMenuItemFactory } from './common/object-permission-menu
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
 export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { inheritUserInfoComponent } from './controllers/components.controller';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,
@@ -201,8 +202,10 @@ export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyb
 export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
 export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export type { INotificationOptions } from './views/notification/Notification';
-export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 
+export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 export { ProgressBar } from './views/progress-bar/ProgressBar';
+export { DefaultUserInfo, USER_INFO_COMPONENT, UserInfo } from './views/user-info/UserInfo';
+export type { IUserInfoContext, IUserInfoData, IUserInfoProps } from './views/user-info/UserInfo';

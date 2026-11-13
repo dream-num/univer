@@ -38,6 +38,7 @@ import { FontSize } from '../../views/font-size/FontSize';
 import { FONT_SIZE_COMPONENT } from '../../views/font-size/interface';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../../views/HeadingItem';
 import { SYMBOL_PICKER_COMPONENT, SymbolPicker } from '../../views/symbol-picker/SymbolPicker';
+import { DefaultUserInfo, USER_INFO_COMPONENT } from '../../views/user-info/UserInfo';
 
 export class MobileComponentsController extends Disposable {
     constructor(
@@ -66,6 +67,7 @@ export class MobileComponentsController extends Disposable {
     private _registerComponents(): void {
         ([
             [COMMON_LABEL_COMPONENT, CommonLabel],
+            [USER_INFO_COMPONENT, DefaultUserInfo],
             [HEADING_ITEM_COMPONENT, HeadingItem],
             [FONT_FAMILY_COMPONENT, FontFamily],
             [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],

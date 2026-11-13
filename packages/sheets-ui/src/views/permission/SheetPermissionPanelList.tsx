@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { ActionRow, Avatar, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
+import { ActionRow, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -40,7 +40,7 @@ import {
     WorkbookCreateProtectPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable, UserInfo } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged, from, merge, startWith, switchMap } from 'rxjs';
 import type { LocaleKey } from '../../locale/types';
@@ -334,9 +334,14 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                     <div>
                                         <div className="univer-flex univer-items-center">
 
-                                            <Tooltip title={item.creator?.name ?? ''}>
+                                            <Tooltip title={<UserInfo part="name" user={{ userId: item.creator?.userID, name: item.creator?.name }} context={{ scene: 'permission-creator', unitId, objectId: item.objectID }} />}>
                                                 <div>
-                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
+                                                    <UserInfo
+                                                        part="avatar"
+                                                        user={{ userId: item.creator?.userID, name: item.creator?.name, avatar: item.creator?.avatar }}
+                                                        context={{ scene: 'permission-creator', unitId, objectId: item.objectID }}
+                                                        className="univer-mr-1.5"
+                                                    />
                                                 </div>
                                             </Tooltip>
                                             <span

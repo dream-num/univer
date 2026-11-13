@@ -125,9 +125,18 @@ export function shouldAddFormulaReference(dataStream: string, index: number): bo
     const char = dataStream[index - 1];
     const nextChar = dataStream[index];
 
+    let checkChar = char;
+    if (checkChar && /\s/.test(checkChar)) {
+        let i = index - 1;
+        while (i >= 0 && /\s/.test(dataStream[i])) {
+            i--;
+        }
+        checkChar = i >= 0 ? dataStream[i] : '';
+    }
+
     return Boolean(
-        char &&
-        (matchRefDrawToken(char) || char === '!') &&
+        checkChar &&
+        (matchRefDrawToken(checkChar) || checkChar === '!') &&
         (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET))
     );
 }

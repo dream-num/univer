@@ -23,6 +23,8 @@ import {
     findFormulaStructuredReferences,
     getFormulaHighlightDataStream,
     getFormulaReplaceResult,
+    getFormulaSequenceNodeIndex,
+    isFormulaReferenceAddingTextContext,
     resolveFormulaReferenceEditingContext,
 } from '../formula-editor-helpers';
 
@@ -180,5 +182,27 @@ describe('engine-formula regression scenarios', () => {
             '#111111',
             '#ff0000',
         ]);
+    });
+
+    it('identifies reference insertion contexts after comma or open bracket followed by whitespace or newline (#7676)', () => {
+        // Space after comma
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, ', 8)).toBe(true);
+        // Newline after comma
+        expect(isFormulaReferenceAddingTextContext('SUM(A1,\n', 8)).toBe(true);
+        // Space and newline after comma
+        expect(isFormulaReferenceAddingTextContext('SUM(A1, \n', 9)).toBe(true);
+        // Multiple spaces after comma
+        expect(isFormulaReferenceAddingTextContext('SUM(A1,   ', 10)).toBe(true);
+        // Newline right after open bracket
+        expect(isFormulaReferenceAddingTextContext('IF(\n', 4)).toBe(true);
+        // Start of formula with spaces
+        expect(isFormulaReferenceAddingTextContext('   ', 3)).toBe(true);
+        // Reject whitespace after closing bracket or plain identifier
+        expect(isFormulaReferenceAddingTextContext('SUM(A1) ', 8)).toBe(false);
+        expect(isFormulaReferenceAddingTextContext('A1 ', 3)).toBe(false);
+
+        // getFormulaSequenceNodeIndex fallback when offset extends past trailing node due to whitespace
+        const sequenceNodes = ['SUM', '(', 'A1', ','];
+        expect(getFormulaSequenceNodeIndex(sequenceNodes, 8, false)).toBe(3);
     });
 });

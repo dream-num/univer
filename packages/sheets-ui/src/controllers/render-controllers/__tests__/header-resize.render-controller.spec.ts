@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { DeltaColumnWidthCommand, DeltaRowHeightCommand } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { BooleanNumber, ICommandService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
@@ -28,7 +25,7 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HeaderMenuResizeShape } from '../../../views/header-resize-shape';
 import type { ITestEvent } from './render-test-bed';
 import { SHEET_VIEW_KEY } from '../../../common/keys';

@@ -294,7 +294,7 @@ export class Engine extends Disposable {
                     timer = window.requestIdleCallback(() => {
                         this.resize();
                         timer = undefined;
-                    });
+                    }, { timeout: 100 });
                 }
             });
             this._resizeObserver.observe(this._container);

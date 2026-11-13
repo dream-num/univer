@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-ui` | `UniverSheetsUi` | Yes | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-ui` | `UniverSheetsUi` | Yes | Yes | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-ui
 npm install @univerjs/sheets-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/sheets-ui/lib/index.css';
@@ -38,6 +38,10 @@ Exported plugin classes:
 
 - `UniverSheetsUIPlugin`
 - `UniverSheetsMobileUIPlugin`
+
+## Integration Notes
+
+- Import `@univerjs/sheets-ui/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

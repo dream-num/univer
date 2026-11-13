@@ -441,4 +441,177 @@ describe('Conditional aggregate indexed equality semantics', () => {
         range.set(0, 0, StringValueObject.create('Beta'));
         expect(getPairedRangeAndCriteriaResult([range, criteria], params).map((row) => row[0].getValue())).toEqual([0, 2]);
     });
+
+    it.each(['COUNTIFS', 'SUMIFS', 'AVERAGEIFS', 'MINIFS', 'MAXIFS'])(
+        '%s aggregates indexed positions like a single criterion evaluation',
+        (formulaName) => {
+            const keys = ArrayValueObject.createByArray([['a'], ['b'], ['a'], ['c'], ['b'], ['a']]);
+            const amounts = ArrayValueObject.createByArray([[1], [2], [3], [4], [5], [6]]);
+            const criteria = ArrayValueObject.createByArray([['a'], ['b'], ['x'], [null]]);
+            const params = {
+                formulaName,
+                maxRowLength: 4,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange: amounts,
+            };
+            const result = getPairedRangeAndCriteriaResult([keys, criteria], params);
+            const expected = [StringValueObject.create('a'), StringValueObject.create('b'), StringValueObject.create('x'), NullValueObject.create()]
+                .map((criterion) => getPairedRangeAndCriteriaResult([keys, criterion], { ...params, maxRowLength: 1, maxColumnLength: 1 })[0][0].getValue());
+            expect(result.map((row) => row[0].getValue())).toEqual(expected);
+        }
+    );
+
+    it('keeps repeated criteria keys distinct when text contains the key separator', () => {
+        // Excel stores U+0000 in OOXML as `_x0000_`, so imported cells can contain it.
+        // These two criteria tuples must not share a cache key.
+        const nul = String.fromCharCode(0);
+        const firstKey = `A${nul}s:date1900:B`;
+        const secondKey = `B${nul}s:date1900:C`;
+        const keys = ArrayValueObject.createByArray([[firstKey], ['A']]);
+        const groups = ArrayValueObject.createByArray([['C'], [secondKey]]);
+        const amounts = ArrayValueObject.createByArray([[31], [37]]);
+
+        const result = getPairedRangeAndCriteriaResult([
+            keys,
+            ArrayValueObject.createByArray([[firstKey], ['A']]),
+            groups,
+            ArrayValueObject.createByArray([['C'], [secondKey]]),
+        ], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([31, 37]);
+    });
+
+    it('keeps date-formatted serials distinct from plain numbers in cached criteria', () => {
+        // Date comparisons round the serial, so `1` formatted as a date matches a
+        // date-formatted 1.000000001 while a plain `1` does not.
+        const range = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(1.000000001, 'yyyy-mm-dd')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(7)]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(1, 'yyyy-mm-dd')], [NumberValueObject.create(1)]],
+            rowCount: 2,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        const result = getPairedRangeAndCriteriaResult([range, criteria], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([7, 0]);
+    });
+
+    it('keeps date-formatted serials that round to different dates distinct', () => {
+        // Date comparison rounds the serial at 1e-8, so these two values land on
+        // different dates even though they scale to the same 12-digit number.
+        const lower = 45000.00000000499;
+        const upper = 45000.000000005006;
+        const range = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(lower, 'yyyy-mm-dd')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const amounts = ArrayValueObject.create({
+            calculateValueList: [[NumberValueObject.create(7)]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+        const criteria = ArrayValueObject.create({
+            calculateValueList: [
+                [NumberValueObject.create(lower, 'yyyy-mm-dd')],
+                [NumberValueObject.create(upper, 'yyyy-mm-dd')],
+            ],
+            rowCount: 2,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+
+        const result = getPairedRangeAndCriteriaResult([range, criteria], {
+            formulaName: 'SUMIFS',
+            maxRowLength: 2,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        });
+
+        expect(result.map((row) => row[0].getValue())).toEqual([7, 0]);
+    });
+
+    it('evaluates the repeated blank cells of a whole-column criteria range once', () => {
+        const size = 200;
+        const keyCount = 20;
+        const range = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [`k${i % keyCount}`]));
+        const amounts = ArrayValueObject.createByArray(Array.from({ length: size }, (_, i) => [i + 1]));
+        const criteria = ArrayValueObject.createByArray([
+            ...Array.from({ length: keyCount }, (_, i) => [`k${i}`]),
+            ...Array.from({ length: 80 }, () => [null]),
+        ]);
+        const params = {
+            formulaName: 'SUMIFS',
+            maxRowLength: 100,
+            maxColumnLength: 1,
+            isNumberSensitive: true,
+            targetRange: amounts,
+        };
+
+        const reads = vi.spyOn(range, 'get');
+        try {
+            const result = getPairedRangeAndCriteriaResult([range, criteria], params);
+            const expected = Array.from({ length: 100 }, (_, i) => {
+                if (i >= keyCount) {
+                    return 0;
+                }
+                let total = 0;
+                for (let row = i; row < size; row += keyCount) {
+                    total += row + 1;
+                }
+                return total;
+            });
+            expect(result.map((row) => row[0].getValue())).toEqual(expected);
+            // Blank criteria repeat, so they must reuse one evaluation instead of rescanning per cell.
+            expect(reads.mock.calls.length).toBeLessThan(size * 10);
+        } finally {
+            reads.mockRestore();
+        }
+    });
 });

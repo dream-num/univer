@@ -40,6 +40,8 @@ function drawTriangleMarker(ctx: UniverRenderingContext, color: string, x: numbe
 }
 
 export class Marker extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === Marker;
+
     protected override Z_INDEX: number = Z_INDEX;
 
     override uKey: string = UNIQUE_KEY;

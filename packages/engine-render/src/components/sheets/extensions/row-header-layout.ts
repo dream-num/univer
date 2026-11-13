@@ -49,6 +49,8 @@ const DEFAULT_PRINTING_ROW_STYLE = {
 } as const;
 
 export class RowHeaderLayout extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === RowHeaderLayout;
+
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
     // The workbook rows configuration and header style

@@ -78,11 +78,18 @@ export class FontCache {
 
     private static _globalFontMeasureCache: Map<string, Map<string, IMeasureTextCache>> = new Map();
 
+    private static _metricsRevision = 0;
+
+    static get metricsRevision(): number {
+        return this._metricsRevision;
+    }
+
     static get globalFontMeasureCache() {
         return this._globalFontMeasureCache;
     }
 
     static invalidateMetrics(matches: (fontStyle: string) => boolean): boolean {
+        this._metricsRevision++;
         let changed = false;
         const keys = new Set([
             ...this._globalFontMeasureCache.keys(),
@@ -124,6 +131,7 @@ export class FontCache {
         } else {
             return false;
         }
+        this._metricsRevision++;
         return true;
     }
 

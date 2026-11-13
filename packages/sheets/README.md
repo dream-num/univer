@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets` | `UniverSheets` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets` | `UniverSheets` | No | Yes | Yes | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets
 npm install @univerjs/sheets
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import EnUS from '@univerjs/sheets/locale/en-US';
@@ -33,7 +33,7 @@ univer.registerPlugin(UniverSheetsPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverSheetsPlugin` from `@univerjs/sheets`. Set `notExecuteFormula: true` to delegate calculation to the worker.
 
@@ -44,6 +44,10 @@ import { UniverSheetsPlugin } from '@univerjs/sheets/worker';
 
 univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });
 ```
+
+## Integration Notes
+
+- Import `@univerjs/sheets/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

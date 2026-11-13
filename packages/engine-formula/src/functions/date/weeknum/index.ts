@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import {
     getDateSerialNumberByObject,
+    getIsoWeekNumber,
     getWeekDayByDateSerialNumber,
 } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
@@ -97,55 +98,29 @@ export class Weeknum extends BaseFunction {
     }
 
     private _getResult(dateSerialNumber: number, returnTypeValue: number) {
-        const currentDate = excelSerialToDate(dateSerialNumber, this.getDateSystem());
-        const currentYear = this.getDateSystem() === DateSystem.Date1900 && dateSerialNumber === 0
-            ? 1900
-            : currentDate.getUTCFullYear();
-        let yearStart = new Date(Date.UTC(currentYear, 0, 1));
-        let yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
-        let yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
-
-        let yearWeekStartSerialNumber: number;
+        const serialNumber = Math.floor(dateSerialNumber);
 
         if (returnTypeValue === 21) {
             // System 2
-            // The week containing the first Thursday of the year is the first week of the year, and is numbered as week 1. This system is the methodology specified in ISO 8601, which is commonly known as the European week numbering system.
-            if (yearStartWeekDay < 1) {
-                yearWeekStartSerialNumber = yearStartSerialNumber + 1;
-            } else if (yearStartWeekDay <= 4) {
-                yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
-            } else {
-                yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
-            }
-
-            if (dateSerialNumber < yearWeekStartSerialNumber) {
-                yearStart = new Date(Date.UTC(currentYear - 1, 0, 1));
-                yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
-                yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
-
-                if (yearStartWeekDay < 1) {
-                    yearWeekStartSerialNumber = yearStartSerialNumber + 1;
-                } else if (yearStartWeekDay <= 4) {
-                    yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
-                } else {
-                    yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
-                }
-            }
-        } else {
-            // System 1
-            // The week containing January 1 is the first week of the year, and is numbered week 1.
-            const weekDay = this._returnTypeMap[returnTypeValue];
-
-            if (yearStartWeekDay < weekDay) {
-                yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay + 7 - weekDay);
-            } else {
-                yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - weekDay);
-            }
+            // The week containing the first Thursday of the year is week 1, the methodology specified in ISO 8601.
+            return NumberValueObject.create(getIsoWeekNumber(serialNumber, this.getDateSystem()));
         }
 
-        const result = Math.ceil((dateSerialNumber - yearWeekStartSerialNumber + 1) / 7);
+        // System 1
+        // The week containing January 1 is the first week of the year, and is numbered week 1.
+        const currentDate = excelSerialToDate(serialNumber, this.getDateSystem());
+        const currentYear = this.getDateSystem() === DateSystem.Date1900 && serialNumber === 0
+            ? 1900
+            : currentDate.getUTCFullYear();
+        const yearStartSerialNumber = excelDateSerial(new Date(Date.UTC(currentYear, 0, 1)), this.getDateSystem());
+        const yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
+        const weekDay = this._returnTypeMap[returnTypeValue];
 
-        return NumberValueObject.create(result);
+        const yearWeekStartSerialNumber = yearStartWeekDay < weekDay
+            ? yearStartSerialNumber - (yearStartWeekDay + 7 - weekDay)
+            : yearStartSerialNumber - (yearStartWeekDay - weekDay);
+
+        return NumberValueObject.create(Math.floor((serialNumber - yearWeekStartSerialNumber) / 7) + 1);
     }
 
     private _returnTypeMap: IReturnTypeMap = {

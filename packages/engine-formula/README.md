@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/engine-formula` | `UniverEngineFormula` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/engine-formula` | `UniverEngineFormula` | No | Yes | Yes | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/engine-formula
 npm install @univerjs/engine-formula
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -30,7 +30,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 univer.registerPlugin(UniverFormulaEnginePlugin);
 ```
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverFormulaEnginePlugin` from `@univerjs/engine-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
 
@@ -41,6 +41,12 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula/worker';
 
 univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
 ```
+
+## Integration Notes
+
+- Load the locale resources from `@univerjs/engine-formula/locale/<language>` for each language enabled by your application.
+- Import `@univerjs/engine-formula/facade` when using this package through Univer Facade APIs.
+- Custom calculation engines must await `FormulaResultService` before emitting completion. Subclasses of `CalculateFormulaService` must pass this service to the base constructor.
 
 ## Resources
 

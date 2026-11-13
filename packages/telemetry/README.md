@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/telemetry` | `UniverTelemetry` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/telemetry` | `UniverTelemetry` | No | No | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/telemetry
 # or
 npm install @univerjs/telemetry
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

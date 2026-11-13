@@ -48,7 +48,6 @@ import type { IPermissionPanelRule } from '../../services/permission/sheet-permi
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { useHighlightRange } from '../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { panelListEmptyBase64 } from './panel-list/constant';
 
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 
@@ -396,10 +395,30 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                 )
                 : (
                     <div
-                        className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
+                        role="status"
+                        className={`
+                          univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center
+                          univer-gap-2 univer-px-6 univer-text-center
+                        `}
                     >
-                        <img width={240} height={120} src={panelListEmptyBase64} alt="" draggable={false} />
-                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}</p>
+                        <p
+                            className={`
+                              univer-m-0 univer-text-sm univer-font-medium univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            `}
+                        >
+                            {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}
+                        </p>
+                        {hasSetProtectPermission && (
+                            <p
+                                className={`
+                                  univer-m-0 univer-max-w-60 univer-text-sm univer-leading-relaxed univer-text-gray-500
+                                  dark:!univer-text-gray-200
+                                `}
+                            >
+                                {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmptyDescription')}
+                            </p>
+                        )}
                     </div>
                 )}
 

@@ -79,6 +79,8 @@ class TestEditorRender extends Disposable {
         textSelectionInner$: new Subject(),
         movingSelection$: new Subject(),
         isFocusing: false,
+        getAllTextRanges: () => [],
+        getAllRectRanges: () => [],
     };
 
     readonly components = new Map();

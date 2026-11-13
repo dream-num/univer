@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-filter-ui` | `UniverSheetsFilterUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-filter-ui` | `UniverSheetsFilterUi` | Yes | Yes | No | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-filter-ui
 npm install @univerjs/sheets-filter-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/sheets-filter-ui/lib/index.css';
@@ -39,7 +39,7 @@ Main-thread plugin classes:
 - `UniverSheetsFilterUIPlugin`
 - `UniverSheetsFilterMobileUIPlugin`
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverSheetsFilterUIPlugin` from `@univerjs/sheets-filter-ui`.
 

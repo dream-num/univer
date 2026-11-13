@@ -118,6 +118,51 @@ describe('SheetSkeletonManagerService', () => {
         expect(current[current.length - 1]).toBeNull();
         expect(service.ensureSkeleton('chart')).toBeUndefined();
     });
+    it('follows the active worksheet once the tracked skeleton has been removed', () => {
+        const injector = new Injector([
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [LocaleService],
+            [ThemeService],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
+            [SheetSkeletonService],
+            [ICanvasColorService, { useClass: CanvasColorService }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
+        ]);
+        onTestFinished(() => injector.dispose());
+        const workbook = injector.createInstance(Workbook, {
+            id: 'delete-sheet',
+            sheetOrder: ['sheet-a', 'sheet-b'],
+            sheets: {
+                'sheet-a': { id: 'sheet-a', rowCount: 10, columnCount: 10 },
+                'sheet-b': { id: 'sheet-b', rowCount: 10, columnCount: 10 },
+            },
+        });
+        onTestFinished(() => workbook.dispose());
+        injector.get(SheetSkeletonService);
+        (injector.get(IUniverInstanceService) as UniverInstanceService).__addUnit(workbook);
+        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+            { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
+        );
+        onTestFinished(() => canvasContext.mockRestore());
+        const renderManager = injector.get(IRenderManagerService);
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+        const render = renderManager.createRender(workbook.getUnitId());
+        const service = render.with(SheetSkeletonManagerService);
+
+        service.setCurrent({ sheetId: 'sheet-a' });
+        expect(service.getCurrentParam()?.sheetId).toBe('sheet-a');
+
+        // Removing the tracked sheet drops its skeleton param before any skeleton-change command runs.
+        expect(workbook.removeSheet('sheet-a')).toBe(true);
+        expect(service.getCurrentParam()).toBeUndefined();
+
+        workbook.setActiveSheet(workbook.getSheetBySheetId('sheet-b')!);
+        expect(service.getCurrentParam()?.sheetId).toBe('sheet-b');
+        expect(service.getCurrentSkeleton()?.worksheet).toBe(workbook.getSheetBySheetId('sheet-b'));
+    });
+
     it('sets the current worksheet skeleton and marks it dirty for recalculation', () => {
         const injector = new Injector();
         injector.add([IConfigService, { useClass: ConfigService }]);
@@ -170,6 +215,7 @@ describe('SheetSkeletonManagerService', () => {
         const workbook = {
             getSheetBySheetId: () => ({ getSheetId: () => 'sheet-1' }),
             getStyles: () => ({}),
+            activeSheet$: new Subject(),
         };
         const service = injector.createInstance(SheetSkeletonManagerService, {
             unit: workbook,
@@ -231,7 +277,7 @@ describe('SheetSkeletonManagerService', () => {
         const injector = new Injector();
         injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
         const service = injector.createInstance(SheetSkeletonManagerService, {
-            unit: {},
+            unit: { activeSheet$: new Subject() },
             unitId: 'unit-1',
             type: UniverInstanceType.UNIVER_SHEET,
             scene: {},

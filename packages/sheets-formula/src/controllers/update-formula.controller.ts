@@ -403,6 +403,8 @@ export class UpdateFormulaController extends Disposable {
         const newFormulaData: IFormulaData = Object.create(null);
 
         const inCrossSheetCutRangeNewFormulas: ICrossSheetCutFormula[] = [];
+        const { type, unitId: affectedUnitId, sheetId: affectedSheetId } = formulaReferenceMoveParam;
+        const isRemovingSheet = type === FormulaReferenceMoveType.RemoveSheet;
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
@@ -418,6 +420,13 @@ export class UpdateFormulaController extends Disposable {
             }
 
             for (const sheetId of sheetDataKeys) {
+                // The removed sheet is deleted by the `remove-sheet` mutation that runs before these rewrites are
+                // applied, so a rewrite targeting it can never succeed. `RemoveSheetCommand` aborts its whole
+                // sequence on the first failure, leaving the remaining sheets and defined names untouched.
+                if (isRemovingSheet && unitId === affectedUnitId && sheetId === affectedSheetId) {
+                    continue;
+                }
+
                 const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const shouldModifySi: string[] = [];

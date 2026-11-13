@@ -113,6 +113,10 @@ export interface IEditorBridgeService {
      * Do not use it directly. Use the `SetCellEditVisibleOperation` command instead.
      */
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
+    /**
+     * Mark the open editor content as pending submission. Besides user edits, an external write that
+     * replaces the edited cell's content is marked too, so the draft still wins when editing ends.
+     */
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
     isVisible(): IEditorBridgeServiceVisibleParam;

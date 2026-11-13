@@ -14,349 +14,211 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest';
+import { UniverRenderingContext } from '../../../../context';
+import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { Background } from '../background';
 
+let univer: Univer;
+let injector: Injector;
+
 function createCtx() {
-    return {
-        save: vi.fn(),
-        restore: vi.fn(),
-        beginPath: vi.fn(),
-        closePath: vi.fn(),
-        fill: vi.fn(),
-        getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
-        fillStyle: '',
-    } as any;
+    const ctx = injector.get(UniverRenderingContext);
+    vi.spyOn(ctx, 'fill');
+    return ctx;
 }
 
-function createCellInfo(overrides?: Partial<any>) {
-    return {
-        row: 0,
-        column: 0,
-        startX: 0,
-        startY: 0,
-        endX: 10,
-        endY: 20,
-        isMerged: false,
-        isMergedMainCell: false,
-        mergeInfo: {
-            startX: 0,
-            startY: 0,
-            endX: 10,
-            endY: 20,
-            startRow: 0,
-            endRow: 0,
-            startColumn: 0,
-            endColumn: 0,
-        },
-        ...overrides,
-    };
+function createCellInfo(overrides?: Partial<ReturnType<SpreadsheetSkeleton['getCellWithCoordByIndex']>>) {
+    return { ...injector.get(SpreadsheetSkeleton).getCellWithCoordByIndex(0, 0), ...overrides };
 }
 
-function createBgMatrix(entries: Array<[number, number, string]>, size = entries.length) {
-    const valueMap = new Map(entries.map((item) => [`${item[0]}-${item[1]}`, item[2]]));
-    return {
-        getValue: vi.fn((row: number, col: number) => valueMap.get(`${row}-${col}`)),
-        forValue: vi.fn((cb: (row: number, col: number, value: string) => void) => {
-            entries.forEach(([row, col, value]) => cb(row, col, value));
-        }),
-        getSizeOf: vi.fn(() => size),
-    };
+function createBgMatrix(entries: Array<[number, number, string]>) {
+    const matrix = new ObjectMatrix<string>();
+    entries.forEach(([row, col, value]) => matrix.setValue(row, col, value));
+    vi.spyOn(matrix, 'forValue');
+    return matrix;
 }
 
 describe('background extension', () => {
-    it('draws by view ranges and by matrix iteration', () => {
-        const extension = new Background();
+    beforeEach(() => {
+        univer = new Univer();
+        injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'background-render',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 60,
+                    columnCount: 60,
+                    defaultRowHeight: 20,
+                    defaultColumnWidth: 40,
+                    rowHeader: { width: 46, hidden: BooleanNumber.TRUE },
+                    columnHeader: { height: 20, hidden: BooleanNumber.TRUE },
+                },
+            },
+        });
+        injector.add([Background]);
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles());
+            },
+        }]);
+        injector.add([UniverRenderingContext, {
+            useFactory: function createContext() {
+                return injector.createInstance(UniverRenderingContext, document.createElement('canvas').getContext('2d')!);
+            },
+        }]);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.restoreAllMocks();
+    });
+
+    it('draws populated cells inside visible ranges across background colors', () => {
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
         const ctx = createCtx();
-        const bgByRange = createBgMatrix([[0, 0, '1']], 99);
-        const bgByMatrix = createBgMatrix([[0, 0, '1']], 1);
-
-        const worksheet = {
-            getMergedCellRange: vi.fn(() => []),
-            getRowVisible: vi.fn(() => true),
-            getColVisible: vi.fn(() => true),
-            getSpanModel: vi.fn(() => ({
-                getMergeDataIndex: vi.fn(() => -1),
-            })),
-        } as any;
-
-        const skeletonBase = {
-            worksheet,
-            rowHeightAccumulation: [20],
-            columnWidthAccumulation: [40],
-            columnTotalWidth: 40,
-            rowTotalHeight: 20,
-            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
-        };
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            {
-                ...skeletonBase,
-                stylesCache: {
-                    background: { '#ff0000': bgByRange },
-                    backgroundPositions: new ObjectMatrix(),
-                },
-            } as any,
-            [],
-            {
+        const bgByRange = createBgMatrix([[0, 0, '1']]);
+        const bgByMatrix = createBgMatrix([[0, 0, '1'], [50, 50, '1']]);
+        const rendered = vi.spyOn(extension, 'renderBGByCell');
+        const backgroundPositions = skeleton.stylesCache.backgroundPositions;
+        assert.isDefined(backgroundPositions);
+        for (const [color, matrix] of [['#ff0000', bgByRange], ['#00ff00', bgByMatrix]] as const) {
+            skeleton.stylesCache.background = { [color]: matrix };
+            backgroundPositions.reset();
+            extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+                viewportKey: 'viewMain',
                 viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
                 checkOutOfViewBound: true,
-            } as any
-        );
+            });
+        }
         expect(bgByRange.forValue).not.toHaveBeenCalled();
+        expect(bgByMatrix.forValue).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            {
-                ...skeletonBase,
-                stylesCache: {
-                    background: { '#00ff00': bgByMatrix },
-                    backgroundPositions: new ObjectMatrix(),
-                },
-            } as any,
-            [],
-            {
-                viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
-                checkOutOfViewBound: true,
-            } as any
-        );
-        expect(bgByMatrix.forValue).toHaveBeenCalled();
+        expect(rendered).toHaveBeenCalledTimes(2);
+        expect(rendered.mock.calls.every(([, row, col]) => row === 0 && col === 0)).toBe(true);
     });
 
     it('reuses cached background cell positions when drawing backgrounds', () => {
-        const extension = new Background();
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
-        const backgroundPositions = new ObjectMatrix();
+        skeleton.stylesCache.background = { '#ff0000': createBgMatrix([[0, 0, '1']]) };
+        const backgroundPositions = skeleton.stylesCache.backgroundPositions;
+        assert.isDefined(backgroundPositions);
         backgroundPositions.setValue(0, 0, createCellInfo());
-
-        const skeleton = {
-            worksheet: {
-                getMergedCellRange: vi.fn(() => []),
-                getRowVisible: vi.fn(() => true),
-                getColVisible: vi.fn(() => true),
-                getSpanModel: vi.fn(() => ({
-                    getMergeDataIndex: vi.fn(() => -1),
-                })),
-            },
-            stylesCache: {
-                background: { '#ff0000': bgMatrix },
-                backgroundPositions,
-            },
-            rowHeightAccumulation: [20],
-            columnWidthAccumulation: [40],
-            columnTotalWidth: 40,
-            rowTotalHeight: 20,
-            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
-        } as any;
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            skeleton,
-            [],
-            {
-                viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-                checkOutOfViewBound: true,
-            } as any
-        );
-
-        expect(skeleton.getCellWithCoordByIndex).not.toHaveBeenCalled();
+        const coordinates = vi.spyOn(skeleton, 'getCellWithCoordByIndex');
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+            viewportKey: 'viewMain',
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+        });
+        expect(coordinates).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
     });
 
     it('skips merge lookups when drawing merge-free backgrounds', () => {
-        const extension = new Background();
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
+        const worksheet = skeleton.worksheet;
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 99);
-        const getMergeDataIndex = vi.fn(() => -1);
-        const worksheet = {
-            getMergedCellRange: vi.fn(() => []),
-            getRowVisible: vi.fn(() => true),
-            getColVisible: vi.fn(() => true),
-            getSpanModel: vi.fn(() => ({
-                getMergeDataIndex,
-            })),
-        };
-        const skeleton = {
-            worksheet,
-            stylesCache: {
-                background: { '#ff0000': bgMatrix },
-                backgroundPositions: new ObjectMatrix(),
-            },
-            rowHeightAccumulation: [20],
-            columnWidthAccumulation: [40],
-            columnTotalWidth: 40,
-            rowTotalHeight: 20,
-            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
-        } as any;
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            skeleton,
-            [],
-            {
-                viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-                checkOutOfViewBound: true,
-                hasMergeData: false,
-            } as any
-        );
-
-        expect(worksheet.getMergedCellRange).not.toHaveBeenCalled();
-        expect(worksheet.getSpanModel).not.toHaveBeenCalled();
-        expect(getMergeDataIndex).not.toHaveBeenCalled();
+        skeleton.stylesCache.background = { '#ff0000': createBgMatrix([[0, 0, '1']]) };
+        const mergeDataIndex = vi.spyOn(worksheet.getSpanModel(), 'getMergeDataIndex');
+        const spanModel = vi.spyOn(worksheet, 'getSpanModel');
+        const mergeRanges = vi.spyOn(worksheet, 'getMergedCellRange');
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+            viewportKey: 'viewMain',
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            hasMergeData: false,
+        });
+        expect(mergeRanges).not.toHaveBeenCalled();
+        expect(spanModel).not.toHaveBeenCalled();
+        expect(mergeDataIndex).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
     });
 
     it('uses diff ranges to choose background iteration during incremental drawing', () => {
-        const extension = new Background();
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[1, 1, '1']], 4);
-
-        const skeleton = {
-            worksheet: {
-                getMergedCellRange: vi.fn(() => []),
-                getRowVisible: vi.fn(() => true),
-                getColVisible: vi.fn(() => true),
-                getSpanModel: vi.fn(() => ({
-                    getMergeDataIndex: vi.fn(() => -1),
-                })),
-            },
-            stylesCache: {
-                background: { '#ff0000': bgMatrix },
-                backgroundPositions: new ObjectMatrix(),
-            },
-            rowHeightAccumulation: [20, 40],
-            columnWidthAccumulation: [40, 80],
-            columnTotalWidth: 80,
-            rowTotalHeight: 40,
-            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
-        } as any;
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            skeleton,
-            [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 }],
-            {
-                viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
-                checkOutOfViewBound: true,
-            } as any
-        );
-
+        const bgMatrix = createBgMatrix([[1, 1, '1']]);
+        skeleton.stylesCache.background = { '#ff0000': bgMatrix };
+        const coordinates = vi.spyOn(skeleton, 'getCellWithCoordByIndex');
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 }], {
+            viewportKey: 'viewMain',
+            viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
+            checkOutOfViewBound: true,
+        });
         expect(bgMatrix.forValue).not.toHaveBeenCalled();
-        expect(bgMatrix.getValue).toHaveBeenCalledWith(1, 1);
+        expect(coordinates).toHaveBeenCalledWith(1, 1, false);
     });
 
     it('draws merged cell backgrounds and handles early draw exits', () => {
-        const extension = new Background();
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
         const ctx = createCtx();
-        const bgMatrix = createBgMatrix([[0, 0, '1']], 2);
-        const mergedRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
-
-        const skeleton = {
-            worksheet: {
-                getMergedCellRange: vi.fn(() => [mergedRange]),
-                getRowVisible: vi.fn(() => true),
-                getColVisible: vi.fn(() => true),
-                getSpanModel: vi.fn(() => ({
-                    getMergeDataIndex: vi.fn(() => -1),
-                })),
-            },
-            stylesCache: {
-                background: { '#112233': bgMatrix },
-                backgroundPositions: new ObjectMatrix(),
-            },
-            rowHeightAccumulation: [20],
-            columnWidthAccumulation: [40],
-            columnTotalWidth: 40,
-            rowTotalHeight: 20,
-            getCellWithCoordByIndex: vi.fn(() => createCellInfo({ isMergedMainCell: true })),
-        } as any;
-
-        extension.draw(
-            ctx,
-            { scaleX: 1, scaleY: 1 } as any,
-            skeleton,
-            [],
-            {
-                viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
-                checkOutOfViewBound: true,
-            } as any
-        );
-
-        expect(skeleton.getCellWithCoordByIndex).toHaveBeenCalled();
+        skeleton.worksheet.getSpanModel().add({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
+        skeleton.stylesCache.background = { '#112233': createBgMatrix([[0, 0, '1']]) };
+        const coordinates = vi.spyOn(skeleton, 'getCellWithCoordByIndex');
+        extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+            viewportKey: 'viewMain',
+            viewRanges: [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }],
+            checkOutOfViewBound: true,
+            hasMergeData: true,
+        });
+        expect(coordinates).toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
     });
 
     it('covers renderBGByCell visibility and merge checks', () => {
-        const extension = new Background();
-        const rect = vi.fn();
-
-        const skeleton = {
-            worksheet: {
-                getRowVisible: vi.fn(() => true),
-                getColVisible: vi.fn(() => true),
-            },
-        } as any;
-
+        const extension = injector.get(Background);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
+        const worksheet = skeleton.worksheet;
+        const backgroundPaths = new Path2D();
+        const rect = vi.spyOn(backgroundPaths, 'rect');
+        const backgroundPositions = skeleton.stylesCache.backgroundPositions;
+        assert.isDefined(backgroundPositions);
         const bgContext = {
+            ctx: createCtx(),
             spreadsheetSkeleton: skeleton,
-            backgroundPaths: { rect },
+            backgroundPositions,
+            checkOutOfViewBound: true,
+            backgroundPaths,
             scaleX: 1,
             scaleY: 1,
             viewRanges: [{ startRow: 10, endRow: 10, startColumn: 10, endColumn: 10 }],
             diffRanges: [],
             cellInfo: createCellInfo(),
-        } as any;
-
-        const outOfView = extension.renderBGByCell(bgContext, 0, 0);
-        expect(outOfView).toBe(true);
+            skipRenderRangeCheck: false,
+        };
+        expect(extension.renderBGByCell(bgContext, 0, 0)).toBe(true);
         expect(rect).not.toHaveBeenCalled();
-
         bgContext.viewRanges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
-        skeleton.worksheet.getRowVisible = vi.fn(() => false);
-        const rowHidden = extension.renderBGByCell(bgContext, 0, 0);
-        expect(rowHidden).toBe(true);
-
-        skeleton.worksheet.getRowVisible = vi.fn(() => true);
+        worksheet.getRowManager().getRowData()[0] = { hd: BooleanNumber.TRUE };
+        expect(extension.renderBGByCell(bgContext, 0, 0)).toBe(true);
+        worksheet.getRowManager().getRowData()[0] = {};
         bgContext.viewRanges = [{ startRow: 10, endRow: 10, startColumn: 10, endColumn: 10 }];
         bgContext.skipRenderRangeCheck = true;
-        const skippedRangeCheck = extension.renderBGByCell(bgContext, 0, 0);
-        expect(skippedRangeCheck).toBeUndefined();
+        expect(extension.renderBGByCell(bgContext, 0, 0)).toBeUndefined();
         expect(rect).toHaveBeenCalled();
         bgContext.skipRenderRangeCheck = false;
-
-        bgContext.cellInfo = createCellInfo({
-            isMergedMainCell: true,
-            mergeInfo: {
-                startX: 0,
-                startY: 0,
-                endX: 10,
-                endY: 20,
-                startRow: 0,
-                endRow: 1,
-                startColumn: 0,
-                endColumn: 1,
-            },
-        });
-
-        skeleton.worksheet.getRowVisible = vi.fn(() => false);
-        const mergedRowHidden = extension.renderBGByCell(bgContext, 0, 0);
-        expect(mergedRowHidden).toBe(true);
-
-        skeleton.worksheet.getRowVisible = vi.fn(() => true);
-        skeleton.worksheet.getColVisible = vi.fn(() => false);
-        const mergedColHidden = extension.renderBGByCell(bgContext, 0, 0);
-        expect(mergedColHidden).toBe(true);
-
-        skeleton.worksheet.getColVisible = vi.fn(() => true);
+        worksheet.getSpanModel().add({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
+        bgContext.cellInfo = createCellInfo();
+        worksheet.getRowManager().getRowData()[0] = { hd: BooleanNumber.TRUE };
+        worksheet.getRowManager().getRowData()[1] = { hd: BooleanNumber.TRUE };
+        expect(extension.renderBGByCell(bgContext, 0, 0)).toBe(true);
+        worksheet.getRowManager().getRowData()[0] = {};
+        worksheet.getRowManager().getRowData()[1] = {};
+        worksheet.getColumnManager().getColumnData()[0] = { hd: BooleanNumber.TRUE };
+        worksheet.getColumnManager().getColumnData()[1] = { hd: BooleanNumber.TRUE };
+        expect(extension.renderBGByCell(bgContext, 0, 0)).toBe(true);
+        worksheet.getColumnManager().getColumnData()[0] = {};
+        worksheet.getColumnManager().getColumnData()[1] = {};
         extension.renderBGByCell(bgContext, 0, 0);
         expect(rect).toHaveBeenCalled();
     });

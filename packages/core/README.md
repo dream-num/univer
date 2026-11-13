@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/core` | `UniverCore` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/core` | `UniverCore` | No | No | Yes | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/core
 # or
 npm install @univerjs/core
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
@@ -31,6 +29,10 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
 });
 ```
+
+## Integration Notes
+
+- Import `@univerjs/core/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

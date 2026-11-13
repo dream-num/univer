@@ -16,7 +16,6 @@
 
 import type { IDataValidationRule, IRange, Nullable } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import type { IDataValidationError } from './f-workbook';
 import { DataValidationStatus } from '@univerjs/core';
 import {
     AddSheetDataValidationCommand,
@@ -26,6 +25,7 @@ import {
     SheetsDataValidationValidatorService,
 } from '@univerjs/sheets-data-validation';
 import { FRange } from '@univerjs/sheets/facade';
+import type { IDataValidationError } from './f-workbook';
 import { FDataValidation } from './f-data-validation';
 
 /**
@@ -34,6 +34,10 @@ import { FDataValidation } from './f-data-validation';
 export interface IFRangeSheetsDataValidationMixin {
     /**
      * Set a data validation rule to current range. if rule is null, clear data validation rule.
+     *
+     * To apply or clear the same rule for multiple cells, call this method once on the full target range
+     * instead of calling it on each cell separately.
+     *
      * @param {Nullable<FDataValidation>} rule data validation rule, built by `univerAPI.newDataValidation()`
      * @returns current range
      * @example

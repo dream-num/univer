@@ -14,32 +14,22 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, Injector, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
-    Plugin,
     RANGE_TYPE,
     touchDependencies,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import {
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    LexerTreeBuilder,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -89,38 +79,28 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             // Ensure undo/redo exists.
             this._injector.get(IUndoRedoService);
 
-            (dependencies ?? []).forEach((d) => this._injector.add(d));
+            (dependencies ?? []).forEach((d) => this._injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             // Minimal set of dependencies required by Sheets facade classes.
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);
-            this._injector.add([IFunctionService, { useClass: FunctionService }]);
             this._injector.add([ISocketService, { useClass: WebSocketService }]);
             this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            this._injector.add([FormulaDataModel]);
-            this._injector.add([LexerTreeBuilder]);
             this._injector.add([RefRangeService]);
             this._injector.add([WorksheetPermissionService]);
             this._injector.add([WorkbookPermissionService]);
             this._injector.add([WorksheetProtectionPointModel]);
             this._injector.add([RangeProtectionRuleModel]);
             this._injector.add([WorksheetProtectionRuleModel]);
-            this._injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             this._injector.add([SheetLazyExecuteScheduleService]);
 
             ([
@@ -135,9 +115,11 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
                 [SheetsNoteController],
             ]);
         }
+
+        override onReady(): void {}
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData ?? TEST_WORKBOOK_DATA);
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit(unitId);

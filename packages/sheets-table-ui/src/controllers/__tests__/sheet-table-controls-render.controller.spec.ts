@@ -47,17 +47,27 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { DeleteSheetTableCommand, DeleteSheetTableMutation, SheetTableService, TableManager } from '@univerjs/sheets-table';
+import {
+    DeleteSheetTableCommand,
+    DeleteSheetTableMutation,
+    SheetTableService,
+    TableManager,
+} from '@univerjs/sheets-table';
 import {
     ISheetSelectionRenderService,
     MoveSelectionCommand,
     SelectAllCommand,
+    SetScrollOperation,
+    SetScrollRelativeCommand,
+    SetZoomRatioOperation,
     SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import {
+    ContextMenuHostService,
     DesktopDialogService,
     DesktopSidebarService,
+    IContextMenuHostService,
     IDialogService,
     ISidebarService,
     IUIPartsService,
@@ -113,6 +123,7 @@ function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRe
     injector.add([SheetCanvasPopManagerService, { useValue: { attachPopupByPosition } as unknown as SheetCanvasPopManagerService }]);
     injector.add([ISheetSelectionRenderService, { useValue: { resetSelectionsByModelData: vi.fn() } as unknown as ISheetSelectionRenderService }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     const unit = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
@@ -150,6 +161,84 @@ function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRe
 }
 
 describe('SheetTableControlsRenderController', () => {
+    it('skips empty-table scroll refreshes while preserving zoom, mutation and table-add refreshes', () => {
+        const { injector, scene, addTable } = createTestBed();
+        injector.get(SheetTableControlsRenderController);
+        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
+        const sceneMakeDirty = vi.spyOn(scene, 'makeDirty');
+        const commands = injector.get(ICommandService);
+        for (const command of [SetScrollRelativeCommand, SetScrollOperation]) {
+            commands.registerCommand({ id: command.id, type: command.type, handler: () => true });
+            expect(commands.syncExecuteCommand(command.id)).toBe(true);
+        }
+        expect(shape.hasItems()).toBe(false);
+        expect(sceneMakeDirty).not.toHaveBeenCalled();
+
+        for (const command of [
+            { id: SetZoomRatioOperation.id, type: CommandType.OPERATION },
+            { id: 'sheet.mutation.unknown-table-notification', type: CommandType.MUTATION },
+        ]) {
+            commands.registerCommand({ ...command, handler: () => true });
+            sceneMakeDirty.mockClear();
+            expect(commands.syncExecuteCommand(command.id)).toBe(true);
+            expect(sceneMakeDirty).toHaveBeenCalledOnce();
+        }
+
+        sceneMakeDirty.mockClear();
+        addTable();
+        expect(shape.hasItems()).toBe(true);
+        expect(sceneMakeDirty).toHaveBeenCalledOnce();
+    });
+
+    it('refreshes existing tables on scroll even when their controls have no items yet', () => {
+        const { injector, scene, addTable } = createTestBed();
+        addTable();
+        injector.get(SheetTableControlsRenderController);
+        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
+        const sceneMakeDirty = vi.spyOn(scene, 'makeDirty');
+        const commands = injector.get(ICommandService);
+        for (const command of [SetScrollRelativeCommand, SetScrollOperation]) {
+            shape.setItems([]);
+            sceneMakeDirty.mockClear();
+            commands.registerCommand({ id: command.id, type: command.type, handler: () => true });
+            expect(commands.syncExecuteCommand(command.id)).toBe(true);
+            expect(shape.hasItems()).toBe(true);
+            expect(sceneMakeDirty).toHaveBeenCalledOnce();
+        }
+    });
+
+    it('restores a removed top table gap before returning to empty-table scroll reuse', () => {
+        const { injector, scene } = createTestBed();
+        const skeleton = injector.get(SheetSkeletonManagerService).getCurrentSkeleton()!;
+        skeleton.setGapConfig({ rowGaps: { 0: { size: 12 } } });
+        const tables = injector.get(TableManager);
+        tables.addTable('unit-1', 'sheet-1', 'Top table', {
+            startRow: 0,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 1,
+        }, ['Name', 'Amount'], 'top-table');
+        const commands = injector.get(ICommandService);
+        commands.registerCommand({ id: SetScrollOperation.id, type: CommandType.OPERATION, handler: () => true });
+        const removal = tables.tableDelete$.subscribe(() => {
+            // A scroll can arrive after the model removes a table but before the controls receive that notification.
+            shape.setItems([]);
+            expect(commands.syncExecuteCommand(SetScrollOperation.id)).toBe(true);
+            expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBe(12);
+        });
+        disposables.push({ dispose: () => removal.unsubscribe() });
+        injector.get(SheetTableControlsRenderController);
+        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
+        expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBeGreaterThan(12);
+
+        tables.deleteTable('unit-1', 'top-table');
+        expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBe(12);
+        const sceneMakeDirty = vi.spyOn(scene, 'makeDirty');
+        expect(commands.syncExecuteCommand(SetScrollOperation.id)).toBe(true);
+        expect(sceneMakeDirty).not.toHaveBeenCalled();
+        expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBe(12);
+    });
+
     it('keeps sheet caches for selection refreshes and invalidates them for table refreshes', () => {
         const { injector, scene, addTable } = createTestBed();
         injector.get(SheetTableControlsRenderController);

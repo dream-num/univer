@@ -15,8 +15,8 @@
  */
 
 import type { IShapeProps, SpreadsheetSkeleton, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import type { ITableControlHitRegion } from './table-controls-util';
 import { DEFAULT_FONTFACE_PLANE, Shape } from '@univerjs/engine-render';
+import type { ITableControlHitRegion } from './table-controls-util';
 import {
     buildCenteredPlusSegments,
     hitTestTableControl,
@@ -59,6 +59,10 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
             fill: 'rgba(0, 0, 0, 0)',
             zIndex: 5001,
         });
+    }
+
+    hasItems(): boolean {
+        return this._items.length > 0;
     }
 
     setItems(items: ITableControlRenderItem[]): void {

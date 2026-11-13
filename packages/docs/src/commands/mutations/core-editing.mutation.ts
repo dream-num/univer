@@ -27,7 +27,6 @@ import type {
     TPriority,
 } from '@univerjs/core';
 import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import {
     CommandType,
     CustomRangeType,
@@ -42,6 +41,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { getDocumentLayoutPresentation, IRenderManagerService } from '@univerjs/engine-render';
+import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
@@ -265,7 +265,8 @@ function scheduleDocumentSelectionUpdate(
     }
     const updatedSelection = selectionManager.getSelectionInfo(selectionTarget);
     queueMicrotask(() => {
-        if (selectionManager.getSelectionInfo(selectionTarget) !== updatedSelection) {
+        if (selectionManager.__getCurrentSelection()?.unitId !== unitId ||
+            selectionManager.getSelectionInfo(selectionTarget) !== updatedSelection) {
             return;
         }
         // Editing and history establish new input intent; geometry-only refreshes preserve it.

@@ -39,7 +39,7 @@ import {
     ThreadCommentModel,
 } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { ContextMenuHostService, DesktopSidebarService, IContextMenuHostService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsThreadCommentPopupService } from '../../../services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT_PANEL } from '../../../types/const';
@@ -127,6 +127,7 @@ describe('sheet thread comment operations', () => {
         injector.add([CellPopupManagerService, { useClass: TestCellPopupManagerService as never }]);
         injector.add([SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService as never }]);
         injector.add([SheetsThreadCommentPopupService]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ThreadCommentPanelService]);
 

@@ -361,7 +361,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
-        if (this._skeleton) {
+        // Removing a worksheet disposes its skeleton and clears the `worksheet` it was built from, while the
+        // render services keep the disposed instance until the skeleton manager publishes the next one.
+        if (this._skeleton?.worksheet) {
             const [unitId, sheetId] = this._skeleton.getLocation();
             return selectionControls.map((control) => {
                 const v = control.getValue();

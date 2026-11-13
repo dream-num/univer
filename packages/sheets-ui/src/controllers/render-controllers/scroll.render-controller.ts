@@ -27,6 +27,7 @@ import type {
     ISetSelectionsOperationParams,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
 import {
     Direction,
     Disposable,
@@ -42,6 +43,7 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
+import { take } from 'rxjs';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type {
@@ -66,6 +68,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     private _pendingWheelFrameId: number | null = null;
     private _scrollGeneration = 0;
     private readonly _selectionScrollTimers = new Set<ReturnType<typeof setTimeout>>();
+    private _pendingWheelFrameSubscription: Subscription | null = null;
+    private _pendingWheelSheetId: string | undefined;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -98,11 +102,21 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(toDisposable(() => {
             this._cancelPendingScroll();
         }));
+        this.disposeWithMe(toDisposable(this._context.activated$.subscribe((active) => {
+            if (!active) {
+                this._cancelPendingWheelScroll();
+            }
+        })));
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
                 }
+                const sheetId = this._context.unit.getActiveSheet(true)?.getSheetId();
+                if (this._pendingWheelSheetId !== sheetId) {
+                    this._cancelPendingWheelScroll();
+                }
+                this._pendingWheelSheetId = sheetId;
 
                 let offsetX = 0;
                 let offsetY = 0;
@@ -133,17 +147,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 // add offset on scroll position to check whether scrolling is reaching limit
                 this._pendingWheelOffsetX += offsetX;
                 this._pendingWheelOffsetY += offsetY;
-                if (this._pendingWheelFrameId == null) {
-                    const generation = this._scrollGeneration;
-                    const worksheet = this._context.unit.getActiveSheet();
-                    this._pendingWheelFrameId = requestAnimationFrame(() => {
-                        if (this._disposed || generation !== this._scrollGeneration || worksheet !== this._context.unit.getActiveSheet()) {
-                            return;
-                        }
-                        this._pendingWheelFrameId = null;
-                        this._flushPendingWheelScroll();
-                    });
-                }
+                this._queueWheelScroll();
                 const targetViewportScrollX = viewMain.viewportScrollX + this._pendingWheelOffsetX;
                 const targetViewportScrollY = viewMain.viewportScrollY + this._pendingWheelOffsetY;
                 const { x: targetScrollX, y: targetScrollY } = viewMain.transViewportScroll2ScrollValue(
@@ -169,6 +173,35 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         );
     }
 
+    private _queueWheelScroll() {
+        if (this._pendingWheelFrameId != null || this._pendingWheelFrameSubscription != null) {
+            return;
+        }
+        const engine = this._context.scene.getEngine();
+        const flush = () => {
+            this._pendingWheelFrameId = null;
+            this._pendingWheelFrameSubscription = null;
+            this._flushPendingWheelScroll();
+        };
+        if (engine?.beginFrame$) {
+            this._pendingWheelFrameSubscription = engine.beginFrame$.pipe(take(1)).subscribe(flush);
+        } else {
+            this._pendingWheelFrameId = requestAnimationFrame(flush);
+        }
+    }
+
+    private _cancelPendingWheelScroll() {
+        this._pendingWheelFrameSubscription?.unsubscribe();
+        this._pendingWheelFrameSubscription = null;
+        if (this._pendingWheelFrameId != null) {
+            cancelAnimationFrame(this._pendingWheelFrameId);
+            this._pendingWheelFrameId = null;
+        }
+        this._pendingWheelOffsetX = 0;
+        this._pendingWheelOffsetY = 0;
+        this._pendingWheelSheetId = undefined;
+    }
+
     private _flushPendingWheelScroll() {
         const offsetX = this._pendingWheelOffsetX;
         const offsetY = this._pendingWheelOffsetY;
@@ -178,14 +211,25 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         this._pendingWheelOffsetX = 0;
         this._pendingWheelOffsetY = 0;
+        const sheetId = this._pendingWheelSheetId;
+        this._pendingWheelSheetId = undefined;
+        if (sheetId !== this._context.unit.getActiveSheet(true)?.getSheetId() ||
+            !this._contextService.getContextValue(FOCUSING_SHEET)) {
+            return;
+        }
         if (this._getSheetType() === SheetTypes.CHART) {
             this._context.scene.getMainViewport().scrollByViewportDeltaVal({ viewportScrollX: offsetX, viewportScrollY: offsetY });
             this._context.scene.makeDirty();
             return;
         }
+        const viewMain = this._context.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const previousX = viewMain?.viewportScrollX;
+        const previousY = viewMain?.viewportScrollY;
         const canUseScrollFastPath = this._canUseScrollFastPath();
         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
-        this._markSceneDirtyForScrolling(canUseScrollFastPath);
+        if (!viewMain || viewMain.viewportScrollX !== previousX || viewMain.viewportScrollY !== previousY) {
+            this._markSceneDirtyForScrolling(canUseScrollFastPath);
+        }
     }
 
     private _canUseScrollFastPath() {
@@ -205,6 +249,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _markSceneDirtyForScrolling(canUseScrollFastPath: boolean) {
         const { scene } = this._context;
+        if (scene.isViewportCacheReusePending()) {
+            return;
+        }
         if (canUseScrollFastPath) {
             scene.makeDirtyForScrolling();
         } else {
@@ -347,12 +394,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _cancelPendingScroll() {
         this._scrollGeneration++;
-        if (this._pendingWheelFrameId != null) {
-            cancelAnimationFrame(this._pendingWheelFrameId);
-            this._pendingWheelFrameId = null;
-        }
-        this._pendingWheelOffsetX = 0;
-        this._pendingWheelOffsetY = 0;
+        this._cancelPendingWheelScroll();
         this._selectionScrollTimers.forEach((timer) => clearTimeout(timer));
         this._selectionScrollTimers.clear();
         const viewport = this._context.scene.getMainViewport();

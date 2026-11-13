@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-numfmt-ui` | `UniverSheetsNumfmtUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-numfmt-ui` | `UniverSheetsNumfmtUi` | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-numfmt-ui
 npm install @univerjs/sheets-numfmt-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/sheets-numfmt-ui/lib/index.css';

@@ -141,6 +141,35 @@ describe('lexer test', () => {
         }
     });
 
+    it('reuses calculation trees without sharing them with direct builder calls', () => {
+        const formula = '=SUM(1,2)';
+        const builder = get(LexerTreeBuilder);
+        const cached = lexer.treeBuilder(formula) as LexerNode;
+        expect(lexer.treeBuilder(formula)).toBe(cached);
+
+        const direct = builder.treeBuilder(formula) as LexerNode;
+        expect(direct).not.toBe(cached);
+        expect(direct.serialize()).toEqual(cached.serialize());
+        expect(builder.treeBuilder(formula)).not.toBe(direct);
+        expect(lexer.treeBuilder(formula)).toBe(cached);
+    });
+
+    it('keeps untransformed trees separate from cached suffix trees', () => {
+        const formula = '=1+2*3';
+        const cached = lexer.treeBuilder(formula) as LexerNode;
+        const direct = lexer.treeBuilder(formula, false) as LexerNode;
+        expect(direct.serialize()).not.toEqual(cached.serialize());
+        expect(lexer.treeBuilder(formula, false)).not.toBe(direct);
+        expect(lexer.treeBuilder(formula)).toBe(cached);
+    });
+
+    it.each(['=LET(x,1,x+1)', '=LAMBDA(x,x+1)(2)'])('does not reuse mutable bindings in %s', (formula) => {
+        const first = lexer.treeBuilder(formula) as LexerNode;
+        const second = lexer.treeBuilder(formula) as LexerNode;
+        expect(second).not.toBe(first);
+        expect(second.serialize()).toEqual(first.serialize());
+    });
+
     describe('lexer definedName', () => {
         it('simple', () => {
             definedNamesService.registerDefinedName('test', {

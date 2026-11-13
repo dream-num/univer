@@ -16,9 +16,15 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
+import { Range, Tools } from '@univerjs/core';
+import {
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    SheetExtension,
+    SpreadsheetExtensionRegistry,
+} from '@univerjs/engine-render';
 import type { IConditionalFormattingRenderRangeResolver, IDataBarCellData } from './type';
-import { Range } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
+import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 export const defaultDataBarPositiveColor = '#ffbe38';
@@ -34,8 +40,11 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class DataBar extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === DataBar;
+
     private _paddingRightAndLeft = 2;
     private _paddingTopAndBottom = 2;
+    private readonly _rasterCache = new ConditionalFormattingRasterCache();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = dataBarUKey;
 
@@ -59,15 +68,13 @@ export class DataBar extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
-        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
-            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
-            : sourceRanges;
+        const renderRanges = resolveRenderRanges(worksheet, sourceRanges, this._renderRangeResolver);
         if (!renderRanges.length) {
             return;
         }
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
-        // eslint-disable-next-line max-lines-per-function
+
         renderRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
@@ -106,55 +113,60 @@ export class DataBar extends SheetExtension {
                 const width = borderWidth - this._paddingRightAndLeft * 2;
                 const height = borderHeight - this._paddingTopAndBottom * 2;
 
-                if (value > 0) {
-                    // Width less than 1, almost invisible
-                    const dataBarWidth = Math.max(width * (1 - startPoint / 100) * value / 100, 1);
-                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width;
-                    const y0 = startY + this._paddingTopAndBottom;
+                const positive = value > 0;
+                const dataBarWidth = Math.max(positive
+                    ? width * (1 - startPoint / 100) * value / 100
+                    : width * startPoint / 100 * Math.abs(value) / 100, 1);
+                const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - (positive ? 0 : dataBarWidth);
+                const y0 = startY + this._paddingTopAndBottom;
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                const fillColor = ctx.fillStyle;
+                const strokeColor = ctx.strokeStyle;
+                // Destination setters resolve raw colors; bitmap contexts need the already-resolved colors.
+                this._drawAtLocalOrigin(ctx, x0, y0, dataBarWidth, height, (paint, x, y) => {
                     if (isGradient) {
-                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
-                        gradient.addColorStop(0, color);
-                        gradient.addColorStop(1, 'rgb(255 255 255)');
-                        ctx.fillStyle = gradient;
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
+                        const gradient = paint.createLinearGradient(x, y, x + dataBarWidth, y);
+                        gradient.addColorStop(0, positive ? color : 'rgb(255 255 255)');
+                        gradient.addColorStop(1, positive ? 'rgb(255 255 255)' : color);
+                        paint.fillStyle = gradient;
+                        paint.strokeStyle = paint === ctx ? color : strokeColor;
+                        paint.lineWidth = 1;
                     } else {
-                        ctx.fillStyle = color;
+                        paint.fillStyle = paint === ctx ? color : fillColor;
                     }
-
-                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
+                    this._drawRectWithRoundedCorner(paint, x, y, dataBarWidth, height, !positive, positive, positive, !positive);
                     if (isGradient) {
-                        ctx.stroke();
+                        paint.stroke();
                     }
-                } else {
-                    // Width less than 1, almost invisible
-                    const dataBarWidth = Math.max(width * startPoint / 100 * Math.abs(value) / 100, 1);
-                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
-                    const y0 = startY + this._paddingTopAndBottom;
-                    if (isGradient) {
-                        const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
-                        gradient.addColorStop(0, 'rgb(255 255 255)');
-                        gradient.addColorStop(1, color);
-                        ctx.fillStyle = gradient;
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
-                    } else {
-                        ctx.fillStyle = color;
-                    }
-
-                    this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, true, false, false, true);
-                    if (isGradient) {
-                        ctx.stroke();
-                    }
-                }
+                }, `${positive}:${isGradient}:${this._radius}:${color}`, isGradient ? 1 : 0);
             });
         });
         ctx.restore();
     }
 
     override dispose(): void {
+        this._rasterCache.dispose();
         this._renderRangeResolver = null;
         super.dispose();
+    }
+
+    private _drawAtLocalOrigin(
+        ctx: UniverRenderingContext,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        draw: (paint: UniverRenderingContext, x: number, y: number) => void,
+        variant = '',
+        strokeWidth = 0
+    ): void {
+        // WebKit's offscreen rounded-corner coverage can differ from native destination drawing.
+        if (typeof navigator !== 'undefined' && (ctx.getBrowserType() === 'Safari' || Tools.isIPhone())) {
+            draw(ctx, x, y);
+            return;
+        }
+        this._rasterCache.draw(ctx, x, y, width, height, variant, draw, strokeWidth);
     }
 
     private _drawRectWithRoundedCorner(ctx: UniverRenderingContext, x: number, y: number, width: number, height: number, topLeftRadius: boolean, topRightRadius: boolean, bottomRightRadius: boolean, bottomLeftRadius: boolean) {

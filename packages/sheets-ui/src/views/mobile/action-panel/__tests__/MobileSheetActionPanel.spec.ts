@@ -31,6 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     getPrimaryForRange,
     RangeProtectionRuleModel,
@@ -62,7 +63,6 @@ import { IEditorBridgeService } from '../../../../services/editor-bridge.service
 import {
     getMobileCellCenterOffset,
     getMobileCellRevealOffset,
-    getMobileEditingMenuBottomOffset,
     getMobileMenuCommand,
     MobileSheetActionPanel,
     normalizeMobileSelectionPrimary,
@@ -115,7 +115,7 @@ function createNumberFormatRibbon(): IMenuSchema[] {
     }];
 }
 
-function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
+async function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const contextService = injector.get(IContextService);
@@ -137,6 +137,7 @@ function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
     }]);
     injector.add([IEditorService, { useValue: { focus: vi.fn() } as unknown as IEditorService }]);
     injector.add([ILayoutService, { useValue: { focus: vi.fn() } as unknown as ILayoutService }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
     injector.add([IMenuManagerService, {
@@ -168,7 +169,7 @@ function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
-    act(() => {
+    await act(async () => {
         root.render(createElement(
             RediContext.Provider,
             { value: { injector } },
@@ -205,8 +206,8 @@ function disposeRenderedPanel(root: Root, container: HTMLElement, univer: Univer
 }
 
 describe('mobile sheet action panel visibility', () => {
-    it('disables both keyboard entrances when cell editing is forbidden', () => {
-        const { commandService, container, permissions, root, subUnitId, univer } = renderMobileSheetActionPanel();
+    it('disables both keyboard entrances when cell editing is forbidden', async () => {
+        const { commandService, container, permissions, root, subUnitId, univer } = await renderMobileSheetActionPanel();
         const startEditing = vi.fn(() => true);
         commandService.registerCommand({ ...SetCellEditVisibleOperation, handler: startEditing });
         const keyboard = () => container.querySelector<HTMLButtonElement>(
@@ -229,8 +230,22 @@ describe('mobile sheet action panel visibility', () => {
         }
     });
 
-    it('does not reopen the previous sheet drawer after drawing focus ends', () => {
-        const { container, contextService, root, univer } = renderMobileSheetActionPanel();
+    it('keeps an exit available while a drawing owns touch gestures', async () => {
+        const { container, contextService, root, univer } = await renderMobileSheetActionPanel();
+
+        try {
+            act(() => contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true));
+            expect(container.querySelector('[aria-label="Open sheet tools"]')).toBeNull();
+            clickButton(container, 'Back');
+            expect(contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)).toBe(false);
+            expect(container.querySelector('[aria-label="Open sheet tools"]')).not.toBeNull();
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
+    it('does not reopen the previous sheet drawer after drawing focus ends', async () => {
+        const { container, contextService, root, univer } = await renderMobileSheetActionPanel();
 
         try {
             clickButton(container, 'Open sheet tools');
@@ -246,7 +261,7 @@ describe('mobile sheet action panel visibility', () => {
         }
     });
 
-    it('closes the sheet drawer after executing a nested insert menu command', () => {
+    it('closes the sheet drawer after executing a nested insert menu command', async () => {
         const execute = vi.fn(() => true);
         const ribbon: IMenuSchema[] = [{
             key: RibbonPosition.INSERT,
@@ -274,7 +289,7 @@ describe('mobile sheet action panel visibility', () => {
                 }],
             }],
         }];
-        const { commandService, container, root, univer } = renderMobileSheetActionPanel(ribbon);
+        const { commandService, container, root, univer } = await renderMobileSheetActionPanel(ribbon);
         commandService.registerCommand({
             id: TEST_INSERT_COMMAND_ID,
             type: CommandType.COMMAND,
@@ -295,9 +310,9 @@ describe('mobile sheet action panel visibility', () => {
         }
     });
 
-    it('closes the sheet drawer after selecting a detailed number format', () => {
+    it('closes the sheet drawer after selecting a detailed number format', async () => {
         const execute = vi.fn(() => true);
-        const { commandService, container, root, univer } = renderMobileSheetActionPanel(createNumberFormatRibbon());
+        const { commandService, container, root, univer } = await renderMobileSheetActionPanel(createNumberFormatRibbon());
         commandService.registerCommand({
             id: TEST_NUMFMT_COMMAND_ID,
             type: CommandType.COMMAND,
@@ -317,9 +332,9 @@ describe('mobile sheet action panel visibility', () => {
         }
     });
 
-    it('closes the sheet drawer after confirming a custom number format', () => {
+    it('closes the sheet drawer after confirming a custom number format', async () => {
         const execute = vi.fn(() => true);
-        const { commandService, container, root, univer } = renderMobileSheetActionPanel(createNumberFormatRibbon());
+        const { commandService, container, root, univer } = await renderMobileSheetActionPanel(createNumberFormatRibbon());
         commandService.registerCommand({
             id: TEST_NUMFMT_COMMAND_ID,
             type: CommandType.COMMAND,
@@ -360,13 +375,6 @@ describe('mobile active-cell reveal offset', () => {
         expect(getMobileCellCenterOffset(100, 140, 80, 500)).toBe(-170);
         expect(getMobileCellCenterOffset(280, 320, 80, 520)).toBe(0);
         expect(getMobileCellCenterOffset(460, 500, 80, 520)).toBe(180);
-    });
-});
-
-describe('mobile editing menu placement', () => {
-    it('moves above the compact formula operator strip while it is visible', () => {
-        expect(getMobileEditingMenuBottomOffset(false)).toBe(72);
-        expect(getMobileEditingMenuBottomOffset(true)).toBe(108);
     });
 });
 

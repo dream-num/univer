@@ -157,6 +157,7 @@ export function Ribbon(props: IRibbonProps) {
                 className={clsx(`
                   univer-invisible univer-absolute -univer-left-[99999] -univer-top-[99999] univer-box-border
                   univer-flex univer-h-10 univer-min-w-min univer-items-center univer-px-3 univer-opacity-0
+                  rtl:univer-divide-x-reverse
                 `, {
                     'univer-hidden': !fakeToolbarVisible,
                 }, divideXClassName, borderBottomClassName)}
@@ -320,7 +321,10 @@ export function Ribbon(props: IRibbonProps) {
                     <div
                         data-u-comp="ribbon-toolbar"
                         ref={containerRef}
-                        className={clsx('univer-flex univer-overflow-hidden', divideXClassName, {
+                        className={clsx(`
+                          univer-flex univer-overflow-hidden
+                          rtl:univer-divide-x-reverse
+                        `, divideXClassName, {
                             'univer-justify-center': ribbonType === 'classic',
                         })}
                         role="toolbar"
@@ -353,7 +357,7 @@ export function Ribbon(props: IRibbonProps) {
                                 <div
                                     className={`
                                       univer-pl-2
-                                      rtl:univer-pr-2
+                                      rtl:univer-pl-0 rtl:univer-pr-2
                                     `}
                                 >
                                     <RibbonOverflow groups={activeGroup.hiddenGroups} />

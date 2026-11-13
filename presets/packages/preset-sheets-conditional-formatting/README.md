@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                          | CSS | Locales | Facade entry |
-| ------------------------------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-conditional-formatting` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-conditional-formatting` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/preset-sheets-conditional-formatting
 # or
 npm install @univerjs/preset-sheets-conditional-formatting
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

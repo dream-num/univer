@@ -70,7 +70,7 @@ describe('mobile GradientColorPicker', () => {
         const onChange = vi.fn();
         const view = render(<Editor onChange={onChange} />);
         expect(view.queryByText(enUS.design.GradientColorPicker.radial)).toBeNull();
-        fireEvent.click(view.getByRole('button', { name: enUS.design.Accessibility.increment }));
+        fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker.add }));
         expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ stops: [defaultValue.stops[0], defaultValue.stops[1], { ...defaultValue.stops[0], offset: 50 }] }));
         expect(view.getByRole('button', { name: `${enUS.design.GradientColorPicker.offset} 50%` })).toHaveAttribute('aria-pressed', 'true');
         fireEvent.change(view.getByLabelText(enUS.design.GradientColorPicker.angle), { target: { value: '180' } });

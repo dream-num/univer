@@ -29,7 +29,16 @@ import {
 } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { CanvasPopupService, DesktopDialogService, ICanvasPopupService, IDialogService, IUIPartsService, UIPartsService } from '@univerjs/ui';
+import {
+    CanvasPopupService,
+    ContextMenuHostService,
+    DesktopDialogService,
+    ICanvasPopupService,
+    IContextMenuHostService,
+    IDialogService,
+    IUIPartsService,
+    UIPartsService,
+} from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from '../doc-hyper-link-selection.controller';
@@ -62,6 +71,7 @@ describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link'
         injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
         injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.add([DocLayoutExecutorService]);
         injector.add([DocSelectionManagerService]);

@@ -15,6 +15,15 @@
  */
 
 import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type {
+    IArrayFormulaRangeType,
+    IRuntimeUnitDataType,
+    IUnitData,
+    IUnitSheetNameMap,
+    IUnitStylesData,
+} from '../../basics/common';
+import type { FormulaCalculationCache } from '../../services/formula-cache.service';
+import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import {
     CellValueType,
     DateSystem,
@@ -25,9 +34,6 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
-import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
-import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
@@ -46,10 +52,17 @@ export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject 
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 
-const FORMULA_CACHE_LRU_COUNT = 10000;
-
-export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {
+    private _calculationCache: FormulaCalculationCache | undefined;
+
+    setCalculationCache(cache: FormulaCalculationCache | undefined): void {
+        this._calculationCache = cache;
+    }
+
+    getCalculationCache(): FormulaCalculationCache | undefined {
+        return this._calculationCache;
+    }
+
     private _dateSystem = DateSystem.Date1900;
 
     private _forcedSheetId: Nullable<string> = '';
@@ -102,6 +115,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     override dispose(): void {
+        this._calculationCache = undefined;
         this._unitData = {};
 
         this._unitStylesData = {};
@@ -291,7 +305,13 @@ export class BaseReferenceObject extends ObjectClassType {
         if (!this._forcedSheetName) {
             return;
         }
-        this._forcedSheetId = sheetNameMap[this.getUnitId()]?.[this._forcedSheetName];
+        const names = sheetNameMap[this.getUnitId()];
+        this._forcedSheetId = names?.[this._forcedSheetName];
+        if (names && this._forcedSheetId == null) {
+            const name = this._forcedSheetName.toLocaleLowerCase();
+            const matchedName = Object.keys(names).find((candidate) => candidate.toLocaleLowerCase() === name);
+            this._forcedSheetId = matchedName == null ? undefined : names[matchedName];
+        }
     }
 
     setForcedSheetIdDirect(sheetId: string) {
@@ -685,7 +705,8 @@ export class BaseReferenceObject extends ObjectClassType {
         // A cached range can be reused only when its string and formatted-number interpretation matches.
         const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow}_${endRow}_${startColumn}_${endColumn}_${this._dateSystem}`;
 
-        const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
+        const cache = this._checkIfWorksheetMiss() ? undefined : this._calculationCache;
+        const array = cache && !cache.closed ? cache.references.get(key) : undefined;
 
         if (array && useCache) {
             return array;
@@ -724,9 +745,11 @@ export class BaseReferenceObject extends ObjectClassType {
             useInvertedIndexCache: true,
         };
 
-        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData, this._dateSystem);
+        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData, this._dateSystem).withCalculationCache(this._calculationCache);
 
-        useCache && FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
+        if (useCache && cache && !cache.closed) {
+            cache.references.set(key, arrayValueObject);
+        }
 
         return arrayValueObject;
     }
@@ -761,7 +784,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: 0,
         };
 
-        return ArrayValueObject.create(arrayValueObjectData, this._dateSystem);
+        return ArrayValueObject.create(arrayValueObjectData, this._dateSystem).withCalculationCache(this._calculationCache);
     }
 }
 

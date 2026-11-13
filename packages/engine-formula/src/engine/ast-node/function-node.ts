@@ -28,9 +28,9 @@ import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
-import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -431,6 +431,7 @@ export class FunctionNode extends BaseAstNode {
         referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
 
         referenceObject.setRuntimeData(this._runtimeService.getUnitData());
+        referenceObject.setCalculationCache(this._runtimeService.getCalculationCache?.());
 
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
 
@@ -553,18 +554,4 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
     private _isParentUnionNode(param: LexerNode) {
         return param.getParent()?.getParent()?.getToken() === matchToken.COLON;
     }
-}
-
-function normalizeFunctionToken(token: string): string {
-    if (token === 'REGEXTEST' || token === '_XLFN.REGEXTEST') {
-        return FUNCTION_NAMES_TEXT.REGEXMATCH;
-    }
-
-    for (const prefix of ['_XLFN.', '_XLWS.', '_XLETA.']) {
-        if (token.startsWith(prefix)) {
-            return token.slice(prefix.length);
-        }
-    }
-
-    return token;
 }

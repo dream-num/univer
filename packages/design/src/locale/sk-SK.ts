@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'OK',
         },
         GradientColorPicker: {
+            add: 'Pridať bod prechodu',
             linear: 'Lineárny',
             radial: 'Radiálny',
             angular: 'Uhlový',

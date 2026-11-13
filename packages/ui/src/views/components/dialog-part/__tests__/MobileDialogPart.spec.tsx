@@ -26,6 +26,10 @@ import type { IMobileDialogPartMethodOptions } from '../MobileDialogPart';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
@@ -40,6 +44,7 @@ Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: tr
 function renderWithDependencies(element: ReactElement, mobileService = false, keyboardVisible = false) {
     const injector = new Injector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: mobileService ? MobileDialogService : DesktopDialogService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([LocaleService]);

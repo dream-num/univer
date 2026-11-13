@@ -32,7 +32,7 @@ import {
     Workbook,
 } from '@univerjs/core';
 import { CanvasColorService, ICanvasColorService } from '@univerjs/engine-render';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IFloatDom, IFloatDomLayout } from '../../../../services/dom/canvas-dom-layer.service';
 import { ComponentManager } from '../../../../common/component-manager';
@@ -428,6 +428,74 @@ describe('FloatDomSingle', () => {
         expect(wrapper.style.touchAction).toBe('');
         expect(setPointerCapture).not.toHaveBeenCalled();
         expect(onPointerDown).not.toHaveBeenCalled();
+    });
+
+    it.each(['ctrlKey', 'metaKey'] as const)('cancels native %s wheel zoom while forwarding the gesture once', async (modifier) => {
+        const onWheel = vi.fn();
+        const layer = { ...createFloatDom(), preventBrowserZoom: true, onWheel };
+        const rendered = renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+        try {
+            const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+            const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -20, [modifier]: true });
+            fireEvent(inner, event);
+            expect(event.defaultPrevented).toBe(true);
+            expect(onWheel).toHaveBeenCalledExactlyOnceWith(event);
+
+            onWheel.mockClear();
+            const scroll = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 20 });
+            fireEvent(inner, scroll);
+            expect(scroll.defaultPrevented).toBe(false);
+            expect(onWheel).toHaveBeenCalledExactlyOnceWith(scroll);
+        } finally {
+            rendered.unmount();
+            rendered.injector.dispose();
+        }
+    });
+
+    it('releases zoom cancellation when a child owns events or the layer unmounts', async () => {
+        const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
+        const service = rendered.injector.get(CanvasFloatDomService);
+        try {
+            act(() => service.addFloatDom({ ...createFloatDom(), preventBrowserZoom: true }));
+            const inner = await waitFor(() => document.getElementById('float-1') as HTMLDivElement);
+            const gesture = () => {
+                const event = new Event('gesturechange', { bubbles: true, cancelable: true });
+                fireEvent(inner, event);
+                return event.defaultPrevented;
+            };
+            expect(gesture()).toBe(true);
+            act(() => service.updateFloatDom('float-1', { preventBrowserZoom: false }));
+            expect(gesture()).toBe(false);
+            act(() => service.updateFloatDom('float-1', { preventBrowserZoom: true }));
+            expect(gesture()).toBe(true);
+            act(() => service.updateFloatDom('float-1', { eventPassThrough: false }));
+            expect(gesture()).toBe(false);
+            act(() => service.updateFloatDom('float-1', { eventPassThrough: true }));
+            expect(gesture()).toBe(true);
+            rendered.unmount();
+            expect(gesture()).toBe(false);
+        } finally {
+            rendered.unmount();
+            rendered.injector.dispose();
+        }
+    });
+
+    it('binds zoom cancellation after a delayed first position mounts the layer', async () => {
+        const position$ = new Subject<IFloatDomLayout>();
+        const initial = createFloatDom();
+        const rendered = renderWithDependencies(<FloatDomSingle id="dom-1" layer={{ ...initial, position$, preventBrowserZoom: true }} />);
+        try {
+            expect(document.getElementById('dom-1')).toBeNull();
+            act(() => position$.next((initial.position$ as BehaviorSubject<IFloatDomLayout>).value));
+            const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+            const event = new Event('gesturestart', { bubbles: true, cancelable: true });
+            fireEvent(inner, event);
+            expect(event.defaultPrevented).toBe(true);
+        } finally {
+            rendered.unmount();
+            rendered.injector.dispose();
+            position$.complete();
+        }
     });
 
     it('updates clipped placement, full content size, and anchors through position$', async () => {

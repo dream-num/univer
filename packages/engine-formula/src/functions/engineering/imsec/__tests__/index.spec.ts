@@ -29,7 +29,7 @@ describe('Test imsec function', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe('0.00000348576140854289-0.0000117836687488848i');
+            expect(result.getValue()).toBe('3.48576140854289E-06-0.0000117836687488848i');
         });
 
         it('Value is large numbers', () => {

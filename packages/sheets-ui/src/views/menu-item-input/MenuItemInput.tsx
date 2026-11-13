@@ -67,14 +67,8 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
         }
     }, [value]);
 
-    function handlePressEnter() {
-        if (inputValue) {
-            onChange(inputValue);
-        }
-    }
-
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-        if (event.key === 'Escape' && !event.nativeEvent.isComposing && !composingRef.current) {
+        if ((event.key === 'Escape' || event.key === 'Enter') && !event.nativeEvent.isComposing && !composingRef.current) {
             return;
         }
         event.stopPropagation();
@@ -117,7 +111,6 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
                     min={min}
                     max={max}
                     disabled={disabled}
-                    onPressEnter={handlePressEnter}
                     onKeyDown={handleKeyDown}
                     onChange={handleChange}
                 />

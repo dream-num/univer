@@ -15,7 +15,15 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
+import {
+    AbsoluteRefType,
+    Disposable,
+    isValidRange,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    moveRangeByOffset,
+    Tools,
+} from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
@@ -81,8 +89,6 @@ enum NewExcelFunctionNodeType {
 
 const FORMULA_CACHE_LRU_COUNT = 2000;
 
-export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_LRU_COUNT);
-
 export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequenceNode>>(FORMULA_CACHE_LRU_COUNT);
 
 interface IInjectDefinedNameParam {
@@ -144,10 +150,6 @@ export class LexerTreeBuilder extends Disposable {
         this._resetTemp();
 
         this._currentLexerNode.dispose();
-
-        FormulaLexerNodeCache.clear();
-
-        FormulaSequenceNodeCache.clear();
     }
 
     getUpLevel() {
@@ -714,21 +716,6 @@ export class LexerTreeBuilder extends Disposable {
         transformSuffix = true,
         injectDefinedNameParam?: IInjectDefinedNameParam
     ) {
-        // Parsing LET/LAMBDA rewrites the lexer tree with runtime parameter bindings.
-        // Reusing that mutated tree would bind the next AST to the previous AST's nodes.
-        const isCacheable = !/\b(?:LET|LAMBDA)\s*\(/iu.test(formulaString);
-        const cacheKey = injectDefinedNameParam == null
-            ? formulaString
-            : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${injectDefinedNameParam.refOffsetX}\0${injectDefinedNameParam.refOffsetY}\0${formulaString}`;
-        if (transformSuffix === true && isCacheable) {
-            const lexerNode = FormulaLexerNodeCache.get(cacheKey);
-            const simpleCheckDefinedNameResult = injectDefinedNameParam
-                && this._simpleCheckDefinedName(formulaString, injectDefinedNameParam, lexerNode);
-            if (lexerNode && !simpleCheckDefinedNameResult) {
-                return lexerNode;
-            }
-        }
-
         this._resetCurrentLexerNode();
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
         const sequenceArray: ISequenceArray[] = [];
@@ -774,9 +761,6 @@ export class LexerTreeBuilder extends Disposable {
             const isValid = this._suffixExpressionHandler(this._currentLexerNode);
             if (!isValid) {
                 return ErrorType.VALUE;
-            }
-            if (isCacheable) {
-                FormulaLexerNodeCache.set(cacheKey, this._currentLexerNode);
             }
         }
 
@@ -943,27 +927,6 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         return this._handleDefinedName(sequenceArray, param);
-    }
-
-    private _simpleCheckDefinedName(
-        formulaString: string,
-        injectDefinedNameParam: IInjectDefinedNameParam,
-        lexerNode?: LexerNode
-    ) {
-        const { getDirtyDefinedNameMap, unitId } = injectDefinedNameParam;
-        const definedNameMap = getDirtyDefinedNameMap();
-        const executeUnitId = unitId;
-        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
-            const names = Object.keys(definedNameMap[executeUnitId]!);
-            for (let i = 0, len = names.length; i < len; i++) {
-                const name = names[i];
-                if (formulaString.indexOf(name) > -1 || lexerNode?.getDefinedNames().includes(name)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private _checkDefinedNameDirty(token: string, injectDefinedNameParam: IInjectDefinedNameParam) {

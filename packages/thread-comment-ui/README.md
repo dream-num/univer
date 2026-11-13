@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/thread-comment-ui` | `UniverThreadCommentUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/thread-comment-ui` | `UniverThreadCommentUi` | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/thread-comment-ui
 npm install @univerjs/thread-comment-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/thread-comment-ui/lib/index.css';

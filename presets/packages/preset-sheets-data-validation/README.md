@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                                   | CSS | Locales | Facade entry |
-| ----------------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-data-validation` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-data-validation` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/preset-sheets-data-validation
 # or
 npm install @univerjs/preset-sheets-data-validation
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

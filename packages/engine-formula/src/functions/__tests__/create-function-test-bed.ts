@@ -17,7 +17,6 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISheetData } from '../../basics/common';
 import {
     CellValueType,
     ILogService,
@@ -31,6 +30,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { ISheetData } from '../../basics/common';
 import { Lexer } from '../../engine/analysis/lexer';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
@@ -54,6 +54,8 @@ import {
     IFormulaExternalReferenceDataLoader,
     NoopFormulaExternalReferenceDataLoader,
 } from '../../services/external-reference-data-loader.service';
+import { FormulaCacheService } from '../../services/formula-cache.service';
+import { FormulaResultService } from '../../services/formula-result.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../../services/hyperlink-engine-formula.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
@@ -176,8 +178,10 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([FormulaResultService, { useValue: { applyResult: async () => {}, applyTreeResult: async () => {} } } as never]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([Lexer]);
+            injector.add([FormulaCacheService]);
             injector.add([LexerTreeBuilder]);
 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

@@ -32,7 +32,7 @@ import {
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { IValueOption } from '../../../../services/menu/menu';
+import type { ICustomComponentProps, IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema, MenuSchemaType } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
@@ -44,7 +44,6 @@ import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,
     CONTEXT_MENU_SUBMENU_PORTAL_ATTR,
     ContextMenuPanel,
-    getContextMenuQuickGroupColumns,
     getContextMenuSchemaRenderGroups,
     getNextMenuButtonByDirection,
     shouldShowContextMenuGroupSeparator,
@@ -160,6 +159,10 @@ async function nextFrame() {
     });
 }
 
+function TestMenuInput({ value, onChange }: ICustomComponentProps<string>) {
+    return <input aria-label="Size" value={value} onChange={(event) => onChange(event.target.value)} />;
+}
+
 describe('ContextMenuPanel', () => {
     afterEach(() => {
         cleanup();
@@ -246,7 +249,6 @@ describe('ContextMenuPanel', () => {
                 menuSchemas: [schemas[2]],
             },
         ]);
-        expect(getContextMenuQuickGroupColumns(schemas[0])).toBe(6);
     });
 
     it('renders paragraph quick menus with real tiny groups and submits the clicked command', () => {
@@ -416,13 +418,57 @@ describe('ContextMenuPanel', () => {
         expect(TestState.selectedOptions).toEqual([{
             id: 'callout',
             label: 'callout',
-            commandId: undefined,
+            commandId: 'callout',
             params: { block: 'callout' },
             value: undefined,
         }]);
 
         fireEvent.keyDown(panel, { key: 'Escape' });
         expect(TestState.cancels).toBe(1);
+    });
+
+    it.each(['Enter', 'label click'])('confirms the edited menu item with %s after selecting text across its input boundary', (confirmation) => {
+        renderWithDependencies(
+            <ContextMenuPanel
+                menuType="input-menu"
+                onOptionSelect={(option) => TestState.selectedOptions.push(option)}
+            />,
+            {
+                'input-menu': [
+                    createButtonItem('first-action', { title: 'First action' }),
+                    {
+                        key: 'set-size',
+                        order: 1,
+                        item: {
+                            id: 'set-size',
+                            type: MenuItemType.BUTTON,
+                            title: 'Apply size',
+                            label: 'test-menu-input',
+                            value$: new BehaviorSubject('100'),
+                        },
+                    },
+                ],
+            },
+            (injector) => injector.get(ComponentManager).register('test-menu-input', TestMenuInput)
+        );
+        const input = screen.getByRole('textbox', { name: 'Size' });
+        const label = screen.getByText('Apply size');
+        input.focus();
+        fireEvent.change(input, { target: { value: '240' } });
+        fireEvent.mouseDown(input);
+        fireEvent.mouseUp(label);
+        // A browser targets the common ancestor when a text-selection drag ends outside the input.
+        fireEvent.click(input.closest('button')!, { detail: 1 });
+        expect(TestState.selectedOptions).toEqual([]);
+
+        if (confirmation === 'Enter') {
+            fireEvent.keyDown(input, { key: 'Enter' });
+        } else {
+            fireEvent.mouseDown(label);
+            fireEvent.mouseUp(label);
+            fireEvent.click(label, { detail: 1 });
+        }
+        expect(TestState.selectedOptions).toEqual([expect.objectContaining({ id: 'set-size', value: 240 })]);
     });
 
     it.each(['ltr', 'rtl'] as const)('enters, navigates, and exits a submenu with arrow keys in %s', async (direction) => {
@@ -536,7 +582,7 @@ describe('ContextMenuPanel', () => {
         expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
-    it('selects an option from a selector submenu with the selector command id', () => {
+    it('keeps selector button and submenu option commands separate', () => {
         renderWithDependencies(
             <ContextMenuPanel
                 menuType="format-menu"
@@ -587,6 +633,15 @@ describe('ContextMenuPanel', () => {
             value: '#ff0000',
         }]);
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+
+        fireEvent.click(colorButton);
+        expect(TestState.selectedOptions[1]).toEqual({
+            id: 'text-color',
+            label: 'color',
+            commandId: 'text-color',
+            params: undefined,
+            value: undefined,
+        });
     });
 
     it('keeps a custom submenu component interactive without selecting its parent option', async () => {

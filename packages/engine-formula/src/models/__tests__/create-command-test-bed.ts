@@ -31,6 +31,8 @@ import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
+import { FormulaCacheService } from '../../services/formula-cache.service';
+import { FormulaResultService } from '../../services/formula-result.service';
 import {
     HyperlinkEngineFormulaService,
     IHyperlinkEngineFormulaService,
@@ -83,8 +85,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([FormulaResultService, { useValue: { applyResult: async () => {}, applyTreeResult: async () => {} } } as never]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
+            injector.add([FormulaCacheService]);
             injector.add([LexerTreeBuilder]);
             injector.add([Lexer]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);

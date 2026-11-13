@@ -69,7 +69,7 @@ import { AstTreeBuilder } from '../analysis/parser';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { BaseReferenceObject } from '../reference-object/base-reference-object';
-import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
+import { generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
 import { getDependencyGroups } from './dependency-groups';
 import {
     FormulaDependencyTree,
@@ -142,7 +142,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         this._updateRangeFlattenCache.clear();
         this._dependencyRTreeCacheForAddressFunction.clear();
-        FORMULA_AST_CACHE.clear();
     }
 
     private _initUnitDispose() {
@@ -154,11 +153,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     private _disposeByUnitId(unitId: string) {
-        FORMULA_AST_CACHE.forEach((_, key) => {
-            if (key.startsWith(unitId)) {
-                FORMULA_AST_CACHE.delete(key);
-            }
-        });
+        this._astTreeBuilder.cacheService.clearUnit(unitId);
     }
 
     async generate(isCalculateTreeModel = false) {

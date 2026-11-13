@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                          | CSS | Locales | Facade entry |
-| -------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-filter` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-filter` | — | Yes | Yes | No | Yes |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/preset-sheets-filter
 # or
 npm install @univerjs/preset-sheets-filter
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 
@@ -31,7 +29,7 @@ import { UniverSheetsFilterPreset } from '@univerjs/preset-sheets-filter';
 // createUniver({ presets: [UniverSheetsFilterPreset()] });
 ```
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverSheetsFilterPreset` from `@univerjs/preset-sheets-filter`. Configure `workerURL` on `UniverSheetsCorePreset`.
 

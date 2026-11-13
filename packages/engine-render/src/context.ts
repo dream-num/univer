@@ -28,6 +28,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
 
     private _transformCache: Nullable<DOMMatrix>;
+    private _cacheScale = false;
     private _bitmapMutationId = 0;
     private _bitmapMutationTrackingDepth = 0;
     readonly canvas: HTMLCanvasElement;
@@ -343,7 +344,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * DOMMatrix.a DOMMatrix.d would affect by ctx.rotate()
      */
     protected _getScale() {
-        const transform = this.getTransform();
+        const transform = this._cacheScale
+            ? (this._transformCache ??= this.getTransform())
+            : this.getTransform();
         const { a, b, c, d } = transform;
 
         const scaleX = Math.sqrt(a * a + b * b);
@@ -358,6 +361,19 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     getScale() {
         return this._getScale();
+    }
+
+    /** Reuse scale queries during drawing; transform methods still invalidate the cached matrix. */
+    withCachedScale(draw: () => void): void {
+        const previous = this._cacheScale;
+        this._cacheScale = true;
+        this._transformCache = null;
+        try {
+            draw();
+        } finally {
+            this._cacheScale = previous;
+            this._transformCache = null;
+        }
     }
 
     getContextAttributes(): CanvasRenderingContext2DSettings {
@@ -426,8 +442,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     getTransform() {
-        const m = this._transformCache || this._context.getTransform();
-        return m;
+        return this._context.getTransform();
     }
 
     resetTransform() {

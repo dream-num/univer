@@ -43,6 +43,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../common/component-manager';
 import { IconManager } from '../../../common/icon-manager';
 import enUS from '../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
@@ -314,6 +318,7 @@ describe('workbench object permission dialog', () => {
         injector.add([ComponentManager]);
         injector.add([IconManager]);
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.get(ComponentManager).register(OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog);
         const openDialog = () => {

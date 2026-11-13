@@ -150,11 +150,15 @@ describe('MenuItemInput', () => {
     });
 
     it.each([
-        ['column', '0'],
-        ['row', '0'],
-        ['column', ''],
-        ['row', ''],
-    ])('applies zero %s size from input %j through the real context menu and supports undo/redo', async (axis, text) => {
+        ['column', '0', 'click', 0],
+        ['row', '0', 'click', 0],
+        ['column', '', 'Enter', 0],
+        ['row', '', 'Enter', 0],
+        ['column', '240', 'Enter', 240],
+        ['row', '64', 'Enter', 64],
+        ['column', '2000', 'Enter', 1000],
+        ['column', '240', 'IME', 240],
+    ] as const)('applies %s size from input %j with %s through the real context menu and supports undo/redo', async (axis, text, confirmation, expectedSize) => {
         const testBed = createCommandTestBed(undefined, [[SheetSkeletonService]]);
         const injector = testBed.univer.__getInjector();
         const commands = injector.get(ICommandService);
@@ -224,40 +228,34 @@ describe('MenuItemInput', () => {
         act(() => input.focus());
         act(() => input.select());
         act(() => setInputText(input, text));
-        expect(input.value).toBe('0');
+        expect(input.value).toBe(String(expectedSize));
         const button = input.closest('button');
         if (!(button instanceof HTMLButtonElement)) {
             throw new TypeError('Dimension menu item not found');
         }
-        act(() => button.focus());
-        act(() => button.click());
+        if (confirmation === 'click') {
+            act(() => button.focus());
+            act(() => button.click());
+        } else {
+            if (confirmation === 'IME') {
+                act(() => {
+                    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, isComposing: true }));
+                    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                });
+                expect(executions).toEqual([]);
+                expect(getSize()).toBe(original);
+                await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+            }
+            act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })));
+        }
         expect(await Promise.all(executions)).toEqual([true]);
-        expect(getSize()).toBe(0);
+        expect(getSize()).toBe(expectedSize);
         await commands.executeCommand(UndoCommand.id);
         expect(getSize()).toBe(original);
         await commands.executeCommand(RedoCommand.id);
-        expect(getSize()).toBe(0);
-    });
-
-    it('reports zero immediately when the configured minimum allows collapsed dimensions', () => {
-        const { container, unmount } = renderWithDependencies(
-            <MenuItemInput
-                prefix="sheets-ui.rightClick.rowHeight"
-                suffix="px"
-                value="24"
-                min={0}
-                max={1000}
-                onChange={(value) => ChangeRecords.push(value)}
-            />
-        );
-        disposals.push(unmount);
-
-        act(() => {
-            setInputText(getInput(container), '0');
-        });
-
-        expect(getInput(container).value).toBe('0');
-        expect(ChangeRecords.values).toEqual(['0']);
+        expect(getSize()).toBe(expectedSize);
     });
 
     it('reports the positive minimum when the input is cleared', () => {
@@ -373,7 +371,7 @@ describe('MenuItemInput', () => {
         );
         disposals.push(unmount);
         const input = getInput(container);
-        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Backspace', 'Delete', 'Enter']) {
+        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Backspace', 'Delete']) {
             act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })));
         }
         for (const modifier of [{ ctrlKey: true }, { metaKey: true }]) {

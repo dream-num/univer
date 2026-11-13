@@ -78,9 +78,26 @@ export class Pv extends BaseFunction {
             let typeValue = +_typeObject.getValue();
             typeValue = typeValue ? 1 : 0;
 
+            let term: number;
+            if (Number.isInteger(nperValue) && Math.abs(nperValue) <= 0x7FFF_FFFF) {
+                // Integer multiplication preserves the compounding factor in loan balances.
+                term = 1;
+                let factor = 1 + rateValue;
+                for (let periods = Math.abs(nperValue); periods > 0; periods = Math.floor(periods / 2)) {
+                    if (periods % 2 === 1) {
+                        term *= factor;
+                    }
+                    factor *= factor;
+                }
+                if (nperValue < 0) {
+                    term = 1 / term;
+                }
+            } else {
+                term = (1 + rateValue) ** nperValue;
+            }
             const result = rateValue === 0
                 ? -pmtValue * nperValue - fvValue
-                : (((1 - (1 + rateValue) ** nperValue) / rateValue) * pmtValue * (1 + rateValue * typeValue) - fvValue) / (1 + rateValue) ** nperValue;
+                : (((1 - term) / rateValue) * pmtValue * (1 + rateValue * typeValue) - fvValue) / term;
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

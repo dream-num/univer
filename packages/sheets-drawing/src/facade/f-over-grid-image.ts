@@ -1009,6 +1009,10 @@ export class FOverGridImage extends FBase {
 
     /**
      * Remove the image from the sheet
+     *
+     * For multiple images on the same worksheet, prefer {@link FWorksheet.deleteImages} with the image
+     * handles instead of calling this method on each image.
+     *
      * @returns {boolean} true if the image is removed successfully, otherwise false
      * @example
      * ```ts

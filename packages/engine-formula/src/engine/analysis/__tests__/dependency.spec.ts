@@ -15,8 +15,6 @@
  */
 
 import type { ICellData, Injector } from '@univerjs/core';
-import { ObjectMatrix, Styles } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
     IDirtyUnitDefinedNameMap,
     IDirtyUnitSheetNameMap,
@@ -26,6 +24,8 @@ import type {
     IUnitSheetIdToNameMap,
 } from '../../../basics/common';
 import type { FormulaDependencyTreeVirtual } from '../../dependency/dependency-tree';
+import { ObjectMatrix, Styles } from '@univerjs/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
 import { Index } from '../../../functions/lookup/index';
@@ -42,13 +42,11 @@ import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
 import { IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
 import { Interpreter } from '../../interpreter/interpreter';
-import { FORMULA_AST_CACHE } from '../../utils/generate-ast-node';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('value-dependent reference ranges', () => {
     it.each(['InputData', 'inputdata'])('rebinds %s after named-range expansion and later source edits', async (name) => {
-        FORMULA_AST_CACHE.clear();
         const bed = createCommandTestBed();
         try {
             bed.get(IFunctionService).registerExecutors(new Sum('SUM'));
@@ -109,7 +107,6 @@ describe('value-dependent reference ranges', () => {
         ['horizontal', false],
         ['horizontal', true],
     ] as const)('updates %s INDEX endpoints after a selector edit (forced: %s)', async (direction, forceSelector) => {
-        FORMULA_AST_CACHE.clear();
         const bed = createCommandTestBed();
         try {
             bed.get(IFunctionService).registerExecutors(new Index('INDEX'), new Sum('SUM'));

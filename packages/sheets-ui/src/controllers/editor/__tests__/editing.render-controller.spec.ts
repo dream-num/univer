@@ -48,7 +48,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, IEditorService, InnerPasteCommand, MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import { FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
@@ -74,7 +74,7 @@ afterEach(() => {
 
 describe('imported formula metadata when editing', () => {
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('clears copied metadata on edits and keeps unchanged formulas (fd=%s)', (fd) => {
-        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        const testBed = createTestBed();
         try {
             const localeService = testBed.get(LocaleService);
             localeService.setLocale(LocaleType.EN_US);
@@ -116,7 +116,7 @@ describe('clearing cell editor content', () => {
     ];
 
     it.each(cases)('clears $name without removing cell formatting', ({ cell, body }) => {
-        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        const testBed = createTestBed();
         try {
             const worksheet = testBed.sheet.getSheetBySheetId('sheet1')!;
             const previous: ICellData = { s: { bl: 1, n: { pattern: '0.00' } }, ...cell };
@@ -150,7 +150,7 @@ describe('clearing cell editor content', () => {
     });
 
     it('restores a styled value on Undo and clears it again on Redo', async () => {
-        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        const testBed = createTestBed();
         try {
             const worksheet = testBed.sheet.getSheetBySheetId('sheet1')!;
             const previous: ICellData = { v: 2, t: CellValueType.NUMBER, s: { bl: 1 } };
@@ -194,7 +194,7 @@ describe('clearing cell editor content', () => {
         { name: 'explicit empty text', input: "'", expected: { v: '', t: CellValueType.FORCE_STRING } },
         { name: 'whitespace', input: ' ', expected: { v: ' ' } },
     ])('preserves $name', ({ input, expected }) => {
-        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        const testBed = createTestBed();
         try {
             const incoming = getCellDataByInput(
                 { v: 1, t: CellValueType.NUMBER },
@@ -212,7 +212,7 @@ describe('clearing cell editor content', () => {
     });
 
     it('preserves an in-cell image with no text', () => {
-        const testBed = createTestBed(undefined, [[LexerTreeBuilder], [IFunctionService, { useClass: FunctionService }]]);
+        const testBed = createTestBed();
         try {
             const snapshot: IDocumentData = { id: 'editor', body: { dataStream: '\r\n' }, documentStyle: {}, drawingsOrder: ['image'] };
             const incoming = getCellDataByInput(
@@ -697,6 +697,23 @@ describe('EditingRenderController business methods', () => {
         });
 
         expect(controller._editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(1);
+    });
+
+    it('commits the draft when a pointer click closes the editor', async () => {
+        const { controller } = createController();
+
+        await controller._handleEditorInvisible({
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            range: { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 },
+            value: expect.objectContaining({ v: 'new value' }),
+        }));
     });
 
     it('moves the cursor inside the editor and resets editor state on exit', () => {

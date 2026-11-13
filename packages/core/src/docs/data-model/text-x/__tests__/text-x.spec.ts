@@ -49,8 +49,14 @@ describe('test TextX methods and branches', () => {
             { t: TextXActionType.INSERT, len: result.dataStream.length, body: result, valueRangeId: range.rangeId },
             { t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range: { ...range, endIndex: result.dataStream.length + 1, properties: { ...range.properties, dirty: 0, cachedResult: result.dataStream } }, propertyPaths: [['dirty'], ['cachedResult']] }] },
         ];
-        const expected = TextX.apply(TextX.apply(Tools.deepClone(original), inserted), refreshed);
-        const composed = TextX.makeInvertible(TextX.compose(inserted, refreshed), Tools.deepClone(original));
+        const updated = TextX.apply(TextX.apply(Tools.deepClone(original), inserted), refreshed);
+        const followingSection = updated.sectionBreaks![0];
+        const sectionFormatting: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: followingSection.startIndex },
+            { t: TextXActionType.RETAIN, len: 1, coverType: UpdateDocsAttributeType.REPLACE, body: { dataStream: '', sectionBreaks: [{ ...followingSection, startIndex: 0, sectionType: 1 }] } },
+        ];
+        const expected = TextX.apply(Tools.deepClone(updated), sectionFormatting);
+        const composed = TextX.makeInvertible(TextX.compose(TextX.compose(inserted, refreshed), sectionFormatting), Tools.deepClone(original));
         const actual = TextX.apply(Tools.deepClone(original), JSON.parse(JSON.stringify(composed)));
         expect(validateDocumentStructure({ body: actual })).toEqual([]);
         expect(actual).toEqual(expected);

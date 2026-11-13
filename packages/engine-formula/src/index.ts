@@ -300,6 +300,7 @@ export {
     IFeatureCalculationManagerService,
 } from './services/feature-calculation-manager.service';
 export type { IFeatureCalculationManagerParam } from './services/feature-calculation-manager.service';
+export { DEFAULT_FORMULA_AST_CACHE_LIMIT, DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT, FormulaCacheService } from './services/formula-cache.service';
 export { FormulaCalculationTriggerService, mergeDirtyData } from './services/formula-calculation-trigger.service';
 export { IFormulaChangesetCalculationService } from './services/formula-changeset-calculation.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';

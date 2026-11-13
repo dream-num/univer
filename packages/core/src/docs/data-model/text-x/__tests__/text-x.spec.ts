@@ -25,10 +25,47 @@ import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
+import { validateDocumentStructure } from '../structure-validator';
 import { TextX } from '../text-x';
 import { composeBody, getBodySlice } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it.each([false, true])('preserves newly inserted field boundaries through a composed refresh (nested=%s)', (nested) => {
+        const original: IDocumentBody = {
+            dataStream: '\u001FOld\u001E\r\n',
+            customBlocks: [],
+            customRanges: [{ rangeId: 'existing', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, properties: { fieldType: 'REF', instruction: 'REF old' } }],
+            paragraphs: [{ startIndex: 5, paragraphId: 'para_original' }],
+            sectionBreaks: [{ startIndex: 6, sectionId: 'section_original' }],
+        };
+        const range = { rangeId: 'reference', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 1, properties: { fieldType: nested ? 'TOC' : 'REF', instruction: nested ? 'TOC \\o "1-3"' : 'REF target', dirty: 1 } };
+        const result: IDocumentBody = nested
+            ? { dataStream: '\u001F1\u001E\rnext', customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { fieldType: 'PAGEREF', instruction: 'PAGEREF target' } }], paragraphs: [{ startIndex: 3, paragraphId: 'para_result' }] }
+            : { dataStream: 'target' };
+        Reflect.set(result, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
+        const inserted: TextXAction[] = [{ t: TextXActionType.INSERT, len: 2, body: { dataStream: '\u001F\u001E', customRanges: [range] } }];
+        const refreshed: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 1 },
+            { t: TextXActionType.INSERT, len: result.dataStream.length, body: result, valueRangeId: range.rangeId },
+            { t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range: { ...range, endIndex: result.dataStream.length + 1, properties: { ...range.properties, dirty: 0, cachedResult: result.dataStream } }, propertyPaths: [['dirty'], ['cachedResult']] }] },
+        ];
+        const expected = TextX.apply(TextX.apply(Tools.deepClone(original), inserted), refreshed);
+        const composed = TextX.makeInvertible(TextX.compose(inserted, refreshed), Tools.deepClone(original));
+        const actual = TextX.apply(Tools.deepClone(original), JSON.parse(JSON.stringify(composed)));
+        expect(validateDocumentStructure({ body: actual })).toEqual([]);
+        expect(actual).toEqual(expected);
+        expect(actual.customRanges!.map((item) => item.rangeId).sort()).toEqual(nested ? ['existing', 'page', 'reference'] : ['existing', 'reference']);
+        expect(TextX.apply(Tools.deepClone(actual), TextX.invert(composed))).toEqual(original);
+        expect(TextX.apply(Tools.deepClone(original), composed)).toEqual(expected);
+        const peer: TextXAction[] = [{ t: TextXActionType.INSERT, len: 5, body: { dataStream: 'Peer ' } }];
+        for (const priority of ['left', 'right'] as const) {
+            const left = TextX.apply(TextX.apply(Tools.deepClone(original), composed), TextX.transform(peer, composed, priority));
+            const right = TextX.apply(TextX.apply(Tools.deepClone(original), peer), TextX.transform(composed, peer, priority === 'left' ? 'right' : 'left'));
+            expect(left).toEqual(right);
+            expect(validateDocumentStructure({ body: left })).toEqual([]);
+        }
+    });
+
     it.each(['left', 'right'] as const)('keeps paragraph-boundary identities after concurrent inline input (%s)', (priority) => {
         for (const prefix of ['', 'Earlier\r']) {
             const original: IDocumentBody = {

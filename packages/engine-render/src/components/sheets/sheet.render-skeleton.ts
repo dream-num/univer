@@ -55,6 +55,7 @@ import {
     numfmt,
     ObjectMatrix,
     Range,
+    Rectangle,
     searchArray,
     SHEET_TEXT_LINE_GAP,
     SheetSkeleton,
@@ -69,10 +70,11 @@ import type { ITransformChangeState } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
 import type { Scene } from '../../scene';
 import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
-import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, getFontStyleString } from '../../basics/tools';
+import { Text } from '../../shape/text';
 import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { FontCache } from '../docs/layout/shaping-engine/font-cache';
@@ -316,6 +318,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
 
     private _incrementalFontRenderRanges: IRange[] = [];
+    private _preparedStyleRanges = new Map<string, { range: IRange; scaleY: number }>();
+    private _preparedMergeStyleRanges = new ObjectMatrix<IRange>();
     private _stylesCache: IStylesCache = {
         background: {},
         backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -327,6 +331,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /** A matrix to store if a (row, column) position has render cache. */
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
+    private _emptyFontCache = new ObjectMatrix<boolean>();
+    private readonly _nativeTextClipCache = new ObjectMatrix<boolean>();
+    private readonly _plainTextVerticalOverflowByRow = new Map<number, number>();
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
     private _defaultGridlinesColor!: string;
@@ -346,6 +353,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this.textLineGap = _configService.getConfig<number>(SHEET_TEXT_LINE_GAP) ?? 0;
         const themeService = _injector.get(ThemeService);
         this.disposeWithMe(themeService.currentTheme$.subscribe(() => {
+            this._preparedMergeStyleRanges.reset();
             const gray200 = themeService.getColorFromTheme('gray.200');
             const gray900 = themeService.getColorFromTheme('gray.900');
             this._defaultGridlinesColor = ColorKit.mix(gray200, gray900, 0.07).toHexString();
@@ -421,6 +429,26 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return this._incrementalFontRenderRanges;
     }
 
+    get nativeTextClipCache(): ObjectMatrix<boolean> {
+        return this._nativeTextClipCache;
+    }
+
+    /** Bound source-row checks by the current cache, without scanning retained font entries. */
+    getPlainTextVerticalOverflow(bound?: IBoundRectNoAngle): number {
+        if (!this._plainTextVerticalOverflowByRow.size) return 0;
+        let overflow = 0;
+        if (bound) {
+            const { startRow, endRow } = this.getRangeByViewBound(bound);
+            for (let row = startRow; row <= endRow; row++) {
+                overflow = Math.max(overflow, this._plainTextVerticalOverflowByRow.get(row) ?? 0);
+            }
+        } else {
+            // Callers without a cache bound retain the conservative sparse-index fallback.
+            for (const value of this._plainTextVerticalOverflowByRow.values()) overflow = Math.max(overflow, value);
+        }
+        return overflow;
+    }
+
     get showGridlines(): BooleanNumber {
         return this._showGridlines;
     }
@@ -450,11 +478,25 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         };
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
+        this._emptyFontCache.reset();
+        this._nativeTextClipCache.reset();
+        this._plainTextVerticalOverflowByRow.clear();
+        this._preparedStyleRanges.clear();
         this._overflowCache.reset();
+        this._preparedMergeStyleRanges.reset();
     }
 
     setOverflowCache(value: ObjectMatrix<IRange>): void {
         this._overflowCache = value;
+    }
+
+    private _refreshPlainTextVerticalOverflow(row: number): void {
+        let overflow = 0;
+        for (const font of Object.values(this._stylesCache.fontMatrix.getRow(row) ?? {})) {
+            overflow = Math.max(overflow, font?.verticalInkOverflow ?? 0);
+        }
+        if (overflow) this._plainTextVerticalOverflowByRow.set(row, overflow);
+        else this._plainTextVerticalOverflowByRow.delete(row);
     }
 
     getFont(rowIndex: number, columnIndex: number): Nullable<IFontCacheItem> {
@@ -508,6 +550,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         this._clearTaskId = requestIdleCallback(() => {
+            const overflowRows = new Set<number>();
             this._stylesCache.fontMatrix.forValue((row, col) => {
                 if (
                     row < (visibleStartRow - CACHE_COUNT) ||
@@ -516,8 +559,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     col > (visibleEndColumn + CACHE_COUNT)
                 ) {
                     this._stylesCache.fontMatrix.realDeleteValue(row, col);
+                    this._nativeTextClipCache.realDeleteValue(row, col);
+                    if (this._plainTextVerticalOverflowByRow.has(row)) overflowRows.add(row);
                 }
             });
+            for (const row of overflowRows) this._refreshPlainTextVerticalOverflow(row);
 
             this._clearTaskId = null;
         });
@@ -542,18 +588,22 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             !!vpInfo.diffX ||
             !!vpInfo.diffY
         );
+        const scaleY = options?.scaleY ?? 1;
+        const prepared = vpInfo && this._preparedStyleRanges.get(vpInfo.viewportKey);
+        const shouldUseIncrementalStyleRange = isIncrementalScroll && prepared?.scaleY === scaleY;
+        this._incrementalFontRenderRanges = [];
+        if (shouldUseIncrementalStyleRange && !vpInfo.shouldCacheUpdate
+            && Rectangle.contains(prepared.range, this.getRangeByViewport(vpInfo))) {
+            return this;
+        }
         const hasMergeData = this.worksheet.getMergeData().length > 0;
-        const shouldRefreshCacheForScroll = isIncrementalScroll && !!vpInfo.shouldCacheUpdate && !!vpInfo.diffX;
-        const shouldUseIncrementalStyleRange = isIncrementalScroll && !shouldRefreshCacheForScroll;
         const styleRanges = shouldUseIncrementalStyleRange
-            ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
+            ? Rectangle.subtract(rowColumnSegment, prepared.range)
             : [rowColumnSegment];
         const visibleCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: true, border: true }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
         const shortRowVisibleCellOptions: ISetStylesCacheForOneCellOptions = { ...visibleCellOptions, skipFontCache: true };
         const overflowCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: false, border: false }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
-        const scaleY = options?.scaleY ?? 1;
         const hasRenderContext = options !== undefined;
-        this._incrementalFontRenderRanges = [];
 
         // clear cache out of visible range
         // this._clearCacheOutOfVisibleRange(visibleStartRow, visibleEndRow, visibleStartColumn, visibleEndColumn);
@@ -653,6 +703,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
+        if (vpInfo) {
+            this._preparedStyleRanges.set(vpInfo.viewportKey, { range: { ...rowColumnSegment }, scaleY });
+        }
         return this;
     }
 
@@ -1154,6 +1207,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
         const cell = this._cellData.getValue(row, column);
         const { t: cellValueType = CellValueType.STRING } = cell || {};
+        delete docsConfig.verticalInkOverflow;
         let horizontalAlignPos = horizontalAlign;
         /**
          * #univer-pro/issues/334
@@ -1224,6 +1278,25 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
             if (contentSize.width < currentColumnWidth) {
                 docsConfig.textFitsCurrentCell = true;
+                if (!documentSkeleton && !vertexAngle && !centerAngle) {
+                    const rowHeight = Math.max(0, this.rowHeightAccumulation[row] - (this.rowHeightAccumulation[row - 1] ?? 0)
+                        - (this.gapConfig?.rowGaps?.[row]?.size ?? 0));
+                    const padding = docsConfig.style?.pd ?? DEFAULT_PADDING_DATA;
+                    const top = padding.t ?? DEFAULT_PADDING_DATA.t;
+                    const bottom = padding.b ?? DEFAULT_PADDING_DATA.b;
+                    const ink = Text.getPlainTextVerticalBounds({
+                        text: docsConfig.displayText ?? getDisplayValueFromCell(docsConfig.cellData),
+                        fontStyle: docsConfig.fontString,
+                        height: rowHeight - top - bottom,
+                        top: top + FIX_ONE_PIXEL_BLUR_OFFSET,
+                        vAlign: docsConfig.verticalAlign,
+                    });
+                    const overflow = Math.max(0, -ink.top, ink.bottom - rowHeight);
+                    if (Number.isFinite(overflow) && overflow > 0) {
+                        docsConfig.verticalInkOverflow = overflow;
+                        this._plainTextVerticalOverflowByRow.set(row, Math.max(this._plainTextVerticalOverflowByRow.get(row) ?? 0, overflow));
+                    }
+                }
                 return true;
             }
 
@@ -1372,6 +1445,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * Any changes to sheet model would reset cache.
      */
     _resetCache(): void {
+        this._preparedStyleRanges.clear();
+        this._preparedMergeStyleRanges.reset();
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
@@ -1381,22 +1456,35 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         this._handleBgMatrix?.reset();
         this._handleBorderMatrix?.reset();
+        this._emptyFontCache?.reset();
+        this._nativeTextClipCache.reset();
+        this._plainTextVerticalOverflowByRow.clear();
         this._overflowCache?.reset();
     }
 
     override resetRangeCache(ranges: IRange[]): void {
+        const overflowRows = this._plainTextVerticalOverflowByRow.size ? new Set<number>() : null;
+        this._preparedStyleRanges.clear();
+        // An edited member can change any of a merged anchor's four prepared edges.
+        this._preparedMergeStyleRanges.reset();
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             Range.foreach(range, (row, col) => {
+                if (this._plainTextVerticalOverflowByRow.has(row)) overflowRows?.add(row);
                 this._stylesCache.fontMatrix.realDeleteValue(row, col);
+                this._nativeTextClipCache.realDeleteValue(row, col);
                 this._stylesCache.border?.realDeleteValue(row, col);
                 this._stylesCache.backgroundPositions?.realDeleteValue(row, col);
                 this._handleBgMatrix.realDeleteValue(row, col);
                 this._handleBorderMatrix.realDeleteValue(row, col);
+                this._emptyFontCache.realDeleteValue(row, col);
                 Object.values(this._stylesCache.background ?? {}).forEach((backgroundMatrix) => {
                     backgroundMatrix.realDeleteValue(row, col);
                 });
             });
+        }
+        if (overflowRows) {
+            for (const row of overflowRows) this._refreshPlainTextVerticalOverflow(row);
         }
         this.makeDirty(true);
     }
@@ -1527,7 +1615,11 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     }
 
     _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
-        if (isNullCell(cellData)) return;
+        if (isNullCell(cellData)) {
+            this._emptyFontCache.setValue(row, col, true);
+            return;
+        }
+        this._emptyFontCache.realDeleteValue(row, col);
 
         let config: Partial<IFontCacheItem> = {
             cellData,
@@ -1607,6 +1699,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._applyShrinkToFit(row, col, fontCacheItem, style);
         this._calculateOverflowCell(row, col, fontCacheItem, hasMergeData);
         this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);
+        if (fontCacheItem.vertexAngle || fontCacheItem.centerAngle
+            || (fontCacheItem.shrinkScale !== undefined && fontCacheItem.shrinkScale !== 1)) {
+            this._nativeTextClipCache.setValue(row, col, true);
+        }
     }
 
     /**
@@ -1633,11 +1729,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             options = { cacheItem: { bg: true, border: true } };
         }
 
-        const cacheItem = options.cacheItem;
-        if (options.reuseExisting && cacheItem && !options.mergeRange) {
+        const cacheItem = options.cacheItem ?? { bg: true, border: true };
+        const mergeRange = options.mergeRange;
+        const preparedMergeRange = mergeRange && this._preparedMergeStyleRanges.getValue(row, col);
+        if (options.reuseExisting && (!mergeRange || (preparedMergeRange && Rectangle.equals(preparedMergeRange, mergeRange)))) {
             const bgHandled = !cacheItem.bg || Tools.isDefine(this._handleBgMatrix.getValue(row, col));
             const borderHandled = !cacheItem.border || Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
-            if (bgHandled && borderHandled && (options.skipFontCache || this._stylesCache.fontMatrix.getValue(row, col))) {
+            if (bgHandled && borderHandled
+                && (options.skipFontCache || this._stylesCache.fontMatrix.getValue(row, col) || this._emptyFontCache.getValue(row, col))) {
                 return;
             }
         }
@@ -1667,12 +1766,18 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
-        if (!cell && Object.keys(style).length === 0) return;
+        // Empty merge anchors still own borders contributed by other members.
+        if (!mergeRange && isNullCell(cell) && Object.keys(style).length === 0) {
+            return;
+        }
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
         if (!options.skipFontCache) {
             this._setFontStylesCache(row, col, { ...cell, s: style }, style, options.hasMergeData ?? true);
+        }
+        if (mergeRange && cacheItem.bg && cacheItem.border && !options.skipFontCache) {
+            this._preparedMergeStyleRanges.setValue(row, col, { ...mergeRange });
         }
     }
 

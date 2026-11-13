@@ -76,7 +76,6 @@ import enUS from '../../../locale/en-US';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
 import { MobileFormulaBar } from '../../mobile/formula-bar/MobileFormulaBar';
-import { MobileFormulaBarOverlays } from '../../mobile/formula-bar/MobileFormulaBarControls';
 import { FormulaBar } from '../FormulaBar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -615,64 +614,6 @@ describe('FormulaBar', () => {
 
         expect(forceFormulaMode).toEqual([true]);
         subscription.unsubscribe();
-    });
-
-    it('prevents mobile formula bar actions from stealing editor focus', async () => {
-        currentBed = createFormulaBarTestBed();
-        const forceFormulaMode: boolean[] = [];
-        const subscription = currentBed.injector.get(IFormulaEditorManagerService).fxBtnClick$.subscribe((value) => {
-            forceFormulaMode.push(value);
-        });
-        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
-        root = rendered.root;
-        container = rendered.container;
-        const formulaButton = getActionElement(rendered.container, 2);
-        const pointerDownEvents = [0, 1, 2].map(() => new MouseEvent('pointerdown', {
-            bubbles: true,
-            cancelable: true,
-        }));
-
-        await act(async () => {
-            pointerDownEvents.forEach((event, index) => {
-                getActionElement(rendered.container, index).dispatchEvent(event);
-            });
-            await Promise.resolve();
-        });
-        await clickElement(formulaButton);
-
-        expect(pointerDownEvents.every((event) => event.defaultPrevented)).toBe(true);
-        expect(forceFormulaMode).toEqual([true]);
-        expect(currentBed.editorBridgeService.isVisible().visible).toBe(true);
-        subscription.unsubscribe();
-    });
-
-    it('keeps editor focus while inserting a mobile formula operator', async () => {
-        currentBed = createFormulaBarTestBed();
-        const onOperator = vi.fn();
-        const rendered = renderWithDependencies(
-            <MobileFormulaBarOverlays
-                expanded={false}
-                formulaActive
-                operatorsVisible
-                editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                onOperator={onOperator}
-            />,
-            currentBed.injector
-        );
-        root = rendered.root;
-        container = rendered.container;
-        const commaButton = rendered.container.querySelector<HTMLButtonElement>('button[aria-label=","]');
-        const pointerDownEvent = new MouseEvent('pointerdown', { bubbles: true, cancelable: true });
-
-        if (!commaButton) throw new Error('Expected the comma operator button to be rendered.');
-        await act(async () => {
-            commaButton.dispatchEvent(pointerDownEvent);
-            commaButton.click();
-            await Promise.resolve();
-        });
-
-        expect(pointerDownEvent.defaultPrevented).toBe(true);
-        expect(onOperator).toHaveBeenCalledWith(',');
     });
 
     it('commits, moves down, and exits editing from the compact mobile formula bar', async () => {

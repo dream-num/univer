@@ -16,10 +16,12 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { iconMap, IIconSetType } from '../models/icon-map';
+import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
+import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
@@ -32,11 +34,15 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class ConditionalFormattingIcon extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === ConditionalFormattingIcon;
+
     private _paddingRightAndLeft = DEFAULT_PADDING;
 
     private _width = DEFAULT_WIDTH;
 
     private _imageMap: Map<string, HTMLImageElement> = new Map();
+    private readonly _rasterCache = new ConditionalFormattingRasterCache();
+    private readonly _pendingImages = new Set<HTMLImageElement>();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
 
@@ -63,9 +69,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
-        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
-            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
-            : sourceRanges;
+        const renderRanges = resolveRenderRanges(worksheet, sourceRanges, this._renderRangeResolver);
         if (!renderRanges.length) {
             return;
         }
@@ -121,15 +125,31 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
                 // Highly centered processing
                 const y = (borderHeight - this._width) / 2 + startY;
-                ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
+                this._drawIcon(ctx, icon, startX + this._paddingRightAndLeft, y);
             });
         });
         ctx.restore();
     }
 
     override dispose(): void {
+        this._rasterCache.dispose();
+        for (const image of this._pendingImages) {
+            image.onload = null;
+        }
+        this._pendingImages.clear();
+        this._imageMap.clear();
         this._renderRangeResolver = null;
         super.dispose();
+    }
+
+    private _drawIcon(ctx: UniverRenderingContext, image: HTMLImageElement, x: number, y: number): void {
+        if (!ctx._context || ctx.__mode === 'printing' || ctx.getSystemType() !== 'Linux') {
+            ctx.drawImage(image, x, y, this._width, this._width);
+            return;
+        }
+        this._rasterCache.draw(ctx, x, y, this._width, this._width, image.src, (paint, left, top) => {
+            paint.drawImage(image, left, top, this._width, this._width);
+        });
     }
 
     private _init() {
@@ -139,8 +159,12 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 const key = this._createKey(type as IIconSetType, String(index));
                 const image = new Image();
                 image.onload = () => {
+                    image.onload = null;
+                    this._pendingImages.delete(image);
                     this._imageMap.set(key, image);
+                    this.parent?.makeDirty(true);
                 };
+                this._pendingImages.add(image);
                 image.src = base64;
             });
         }

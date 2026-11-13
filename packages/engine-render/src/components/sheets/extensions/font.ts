@@ -46,6 +46,7 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
 import { DEFAULT_PADDING_DATA, FULL_WIDTH_HORIZONTAL_ALIGNMENTS, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
+import { RenderPrimitiveCache } from './render-primitive-cache';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -122,18 +123,58 @@ interface IRenderFontContext {
 }
 
 export class Font extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === Font;
+
     override uKey = UNIQUE_KEY;
     override Z_INDEX = FONT_EXTENSION_Z_INDEX;
     private _imageFallback = new Image();
+    private readonly _primitiveCache = new RenderPrimitiveCache();
+
+    override clearCache(): void {
+        this._primitiveCache.clear();
+    }
+
+    override dispose(): void {
+        this._imageFallback.onload = null;
+        this._primitiveCache.dispose();
+        super.dispose();
+    }
 
     constructor() {
         super();
+        this._imageFallback.onload = () => {
+            this._imageFallback.onload = null;
+            this.parent?.makeDirty(true);
+        };
         this._imageFallback.src = IMAGE_FALLBACK_SRC;
     }
 
     getDocuments() {
         const parent = this.parent as SheetComponent;
         return parent?.getDocuments();
+    }
+
+    getNativeTextClipRepairRanges(skeleton: SpreadsheetSkeleton): IRange[] {
+        const ranges: IRange[] = [];
+        skeleton.nativeTextClipCache.forValue((row, column) => {
+            const cell = skeleton.getCellWithCoordByIndex(row, column, false);
+            const range = skeleton.overflowCache.getValue(row, column)
+                ?? (cell.isMerged || cell.isMergedMainCell
+                    ? cell.mergeInfo
+                    : {
+                        startRow: row,
+                        endRow: row,
+                        startColumn: column,
+                        endColumn: column,
+                    });
+            ranges.push({
+                startRow: range.startRow,
+                endRow: range.endRow,
+                startColumn: range.startColumn,
+                endColumn: range.endColumn,
+            });
+        });
+        return ranges;
     }
 
     /**
@@ -184,6 +225,28 @@ export class Font extends SheetExtension {
             endColumn: range.endColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW,
         }, lastRowIndex, lastColIndex));
         const rangesToScan = fontRenderRanges?.length ? fontRenderRanges : expandedViewRanges;
+        const verticalOverflow = ctx.__mode !== 'printing' && moreBoundsInfo.textClipBound
+            ? spreadsheetSkeleton.getPlainTextVerticalOverflow(moreBoundsInfo.viewBound)
+            : 0;
+        const sourceRange = verticalOverflow ? spreadsheetSkeleton.getRangeByViewBound(moreBoundsInfo.viewBound) : null;
+        const expandPlainTextRows = (range: IRange): IRange => {
+            if (!verticalOverflow || !sourceRange) return range;
+            const top = rowHeightAccumulation[range.startRow - 1] ?? 0;
+            const bottom = rowHeightAccumulation[range.endRow] ?? top;
+            const rows = spreadsheetSkeleton.getRangeByViewBound({
+                left: 0,
+                right: 0,
+                top: Math.floor(top - verticalOverflow) - 1 + spreadsheetSkeleton.columnHeaderHeightAndMarginTop,
+                bottom: Math.ceil(bottom + verticalOverflow) + 1 + spreadsheetSkeleton.columnHeaderHeightAndMarginTop,
+            });
+            return {
+                ...range,
+                startRow: Math.max(sourceRange.startRow, rows.startRow),
+                endRow: Math.min(sourceRange.endRow, rows.endRow),
+            };
+        };
+        const plainTextRanges = verticalOverflow ? (diffRanges.length ? diffRanges : rangesToScan).map(expandPlainTextRows) : [];
+        const extraPlainCells = verticalOverflow ? new Set<string>() : null;
         const renderFontContext = {
             ctx,
             scale,
@@ -193,10 +256,12 @@ export class Font extends SheetExtension {
             rowTotalHeight,
             viewRanges: fontRenderRanges?.length ? viewRanges : expandedViewRanges,
             checkOutOfViewBound: checkOutOfViewBound || true,
-            diffRanges,
+            diffRanges: verticalOverflow ? plainTextRanges : diffRanges,
             spreadsheetSkeleton,
         } as IRenderFontContext;
         ctx.save();
+        const deviceClip = ctx.__mode === 'printing' ? undefined : moreBoundsInfo.textClipBound;
+        const transform = deviceClip ? ctx.getTransform() : undefined;
 
         const mergeData = spreadsheetSkeleton.worksheet.getMergeData();
         const hasMerge = mergeData.length > 0;
@@ -225,7 +290,8 @@ export class Font extends SheetExtension {
             }
 
             const { startRow, endRow, startColumn, endColumn } = range;
-            for (let row = startRow; row <= endRow; row++) {
+            const scan = expandPlainTextRows(range);
+            for (let row = scan.startRow; row <= scan.endRow; row++) {
                 const rowStartPosition = rowHeightAccumulation[row - 1] ?? 0;
                 const rowEndPosition = rowHeightAccumulation[row] ?? rowStartPosition;
                 const rowGap = spreadsheetSkeleton.gapConfig?.rowGaps?.[row]?.size ?? 0;
@@ -239,9 +305,35 @@ export class Font extends SheetExtension {
                     if (!fontCache) {
                         continue;
                     }
+                    if (row < startRow || row > endRow) {
+                        // Only uncropped plain text can contribute ink from these source rows.
+                        if (inViewRanges(rangesToScan, row, col) || !inViewRanges(plainTextRanges, row, col)
+                            || !this._canRenderPlainTextWithoutClip(fontCache)) {
+                            continue;
+                        }
+                        const key = `${row}:${col}`;
+                        if (extraPlainCells?.has(key)) continue;
+                        extraPlainCells?.add(key);
+                    }
 
                     if (spanModel && spanModel.getMergeDataIndex(row, col) !== -1) {
                         continue;
+                    }
+                    if (deviceClip && transform && transform.a > 0 && transform.d > 0 && !transform.b && !transform.c
+                        && !fontCache.documentSkeleton && !fontCache.vertexAngle && !fontCache.centerAngle
+                        && fontCache.textFitsCurrentCell === false && !fontCache.cellData?.fontRenderExtension) {
+                        const overflow = spreadsheetSkeleton.overflowCache.getValue(row, col);
+                        if (overflow) {
+                            // Plain overflowing text is clipped to these cells. Keep a physical ink halo at the damage edge.
+                            const left = (columnWidthAccumulation[Math.min(col, overflow.startColumn) - 1] ?? 0) * transform.a + transform.e;
+                            const right = columnWidthAccumulation[Math.max(col, overflow.endColumn)] * transform.a + transform.e;
+                            const top = (rowHeightAccumulation[Math.min(row, overflow.startRow) - 1] ?? 0) * transform.d + transform.f;
+                            const bottom = rowHeightAccumulation[Math.max(row, overflow.endRow)] * transform.d + transform.f;
+                            if (right + 2 < deviceClip.left || left - 2 > deviceClip.right
+                                || bottom + 2 < deviceClip.top || top - 2 > deviceClip.bottom) {
+                                continue;
+                            }
+                        }
                     }
                     const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                     if (!cellInfo) {
@@ -249,7 +341,11 @@ export class Font extends SheetExtension {
                     }
 
                     renderFontContext.cellInfo = cellInfo;
-                    this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
+                    if (fontCache.documentSkeleton || moreBoundsInfo.textClipBound) {
+                        this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache), fontCache.documentSkeleton ? undefined : moreBoundsInfo.textClipBound);
+                    } else {
+                        this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
+                    }
                 }
             }
         });
@@ -262,7 +358,7 @@ export class Font extends SheetExtension {
 
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
-            this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
+            this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache));
         });
 
         ctx.restore();
@@ -410,7 +506,7 @@ export class Font extends SheetExtension {
         return false;
     };
 
-    private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
+    private _canRenderPlainTextWithoutClip(fontCache: IFontCacheItem): boolean {
         const { cellData, documentSkeleton, textFitsCurrentCell, vertexAngle = 0, centerAngle = 0, wrapStrategy } = fontCache;
         if (!textFitsCurrentCell) {
             return false;
@@ -434,6 +530,12 @@ export class Font extends SheetExtension {
             return false;
         }
 
+        return true;
+    }
+
+    private _renderPlainTextWithoutClip(ctx: UniverRenderingContext, renderFontCtx: IRenderFontContext, fontCache: IFontCacheItem) {
+        if (!this._canRenderPlainTextWithoutClip(fontCache)) return false;
+        const cellData = fontCache.cellData!;
         const padding = fontCache.style?.pd ?? DEFAULT_PADDING_DATA;
         const paddingLeft = padding.l ?? DEFAULT_PADDING_DATA.l;
         const paddingRight = padding.r ?? DEFAULT_PADDING_DATA.r;

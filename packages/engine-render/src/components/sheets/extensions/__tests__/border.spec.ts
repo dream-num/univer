@@ -14,36 +14,29 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes, ObjectMatrix } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BORDER_TYPE } from '../../../../basics/const';
+import { UniverRenderingContext } from '../../../../context';
+import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { Border } from '../border';
 
-const drawDiagonalLineByBorderTypeMock = vi.fn((..._args: any[]) => undefined);
-const drawLineByBorderTypeMock = vi.fn((..._args: any[]) => undefined);
-const getLineWidthMock = vi.fn((..._args: any[]) => 1);
-const setLineTypeMock = vi.fn((..._args: any[]) => undefined);
-
-vi.mock('../../../../basics/draw', () => ({
-    drawDiagonalLineByBorderType: (...args: any[]) => drawDiagonalLineByBorderTypeMock(...args),
-    drawLineByBorderType: (...args: any[]) => drawLineByBorderTypeMock(...args),
-    getLineWidth: (...args: any[]) => getLineWidthMock(...args),
-    setLineType: (...args: any[]) => setLineTypeMock(...args),
-}));
+let injector: Injector;
+let univer: Univer;
 
 function createCtx() {
-    return {
-        save: vi.fn(),
-        restore: vi.fn(),
-        beginPath: vi.fn(),
-        closePath: vi.fn(),
-        translateWithPrecisionRatio: vi.fn(),
-        setLineWidthByPrecision: vi.fn(),
-        getScale: vi.fn(() => ({ scaleX: 1, scaleY: 1 })),
-        strokeStyle: '',
-        lineCap: 'round',
-        globalCompositeOperation: 'source-over',
-    } as any;
+    const native = document.createElement('canvas').getContext('2d')!;
+    const ctx = injector.createChild([[UniverRenderingContext, {
+        useFactory: function createTestInstance() {
+            return injector.createInstance(UniverRenderingContext, native);
+        },
+    }]]).get(UniverRenderingContext);
+    for (const method of ['save', 'restore', 'beginPath', 'closePath', 'translateWithPrecisionRatio', 'setLineWidthByPrecision', 'setLineDash', 'stroke', 'moveToByPrecision', 'lineToByPrecision'] as const) {
+        vi.spyOn(ctx, method);
+    }
+    ctx.lineCap = 'round';
+    return ctx;
 }
 
 function createCellInfo(overrides?: Partial<any>) {
@@ -70,11 +63,76 @@ function createCellInfo(overrides?: Partial<any>) {
 
 describe('border extension', () => {
     beforeEach(() => {
+        univer = new Univer();
+        injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'border-render',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: 10,
+                columnCount: 10,
+                defaultRowHeight: 10,
+                defaultColumnWidth: 20,
+                rowHeader: { width: 46, hidden: BooleanNumber.TRUE },
+                columnHeader: { height: 20, hidden: BooleanNumber.TRUE },
+                cellData: { 0: { 0: { s: { bd: { t: { s: BorderStyleTypes.THIN, cl: { rgb: '#111111' } } } } } } },
+            } },
+        });
+        injector.add([Border]);
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles());
+            },
+        }]);
         vi.clearAllMocks();
     });
 
+    afterEach(() => univer.dispose());
+
+    it('reuses a consecutive brush without omitting edges and reapplies dash transitions', () => {
+        const extension = injector.get(Border);
+        const ctx = createCtx();
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
+        const context: Parameters<Border['renderBorderByCell']>[0] = {
+            ctx,
+            precisionScale: 1,
+            overflowCache: skeleton.overflowCache,
+            spreadsheetSkeleton: skeleton,
+            diffRanges: [],
+            viewRanges: [],
+        };
+        const solid = Object.fromEntries([BORDER_TYPE.TOP, BORDER_TYPE.RIGHT, BORDER_TYPE.BOTTOM, BORDER_TYPE.LEFT]
+            .map((type) => [type, { type, style: BorderStyleTypes.THIN, color: '#111' }]));
+        for (let col = 0; col < 4; col++) {
+            extension.renderBorderByCell(context, 0, col, solid);
+        }
+        expect(ctx.stroke).toHaveBeenCalledTimes(16);
+        expect(ctx.setLineDash).toHaveBeenCalledExactlyOnceWith([]);
+        expect(ctx.setLineWidthByPrecision).toHaveBeenCalledTimes(1);
+        extension.renderBorderByCell(context, 0, 4, {
+            [BORDER_TYPE.TOP]: { type: BORDER_TYPE.TOP, style: BorderStyleTypes.DASHED, color: '#222' },
+            [BORDER_TYPE.BOTTOM]: { type: BORDER_TYPE.BOTTOM, style: BorderStyleTypes.THIN, color: '#111' },
+        });
+        expect(vi.mocked(ctx.setLineDash).mock.calls.map(([dash]) => dash)).toEqual([[], [3], []]);
+        expect(ctx.stroke).toHaveBeenCalledTimes(18);
+        expect(ctx.strokeStyle).toBe('#111111');
+    });
+
+    it('checks only the border row for overflow exclusions', () => {
+        const extension = injector.get(Border) as any;
+        const overflow = new ObjectMatrix({
+            3: { 1: { startRow: 3, endRow: 3, startColumn: 1, endColumn: 4 } },
+            999: new Proxy({}, { ownKeys: () => { throw new Error('Unrelated overflow row enumerated'); } }),
+        });
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.LEFT, 3, 2)).toBe(true);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.RIGHT, 3, 4)).toBe(false);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.LEFT, 5, 2)).toBe(false);
+        expect(extension._getOverflowExclusion(overflow, BORDER_TYPE.TOP, 3, 2)).toBe(false);
+    });
+
     it('returns early on invalid draw preconditions and iterates valid range', () => {
-        const extension = new Border();
+        const extension = injector.get(Border);
         const ctx = createCtx();
 
         extension.draw(ctx, { scaleX: 1, scaleY: 1 } as any, { stylesCache: {} } as any, [], { viewRanges: [] } as any);
@@ -109,8 +167,36 @@ describe('border extension', () => {
         expect(ctx.translateWithPrecisionRatio).toHaveBeenCalled();
     });
 
+    it('keeps live native transforms for custom border renderers', () => {
+        const scales: { scaleX: number; scaleY: number }[] = [];
+        class CustomBorder extends Border {
+            override renderBorderByCell({ ctx }: Parameters<Border['renderBorderByCell']>[0]) {
+                ctx.getScale();
+                ctx._context.scale(2, 3);
+                scales.push(ctx.getScale());
+                return undefined;
+            }
+        }
+        const extension = injector.createChild([[CustomBorder, { useFactory: function createTestInstance() {
+            return injector.createInstance(CustomBorder);
+        } }]]).get(CustomBorder);
+        const native = document.createElement('canvas').getContext('2d')!;
+        native.scale(1.25, 1.5);
+        const ctx = injector.createChild([[UniverRenderingContext, { useFactory: function createTestInstance() {
+            return injector.createInstance(UniverRenderingContext, native);
+        } }]]).get(UniverRenderingContext);
+        const skeleton = injector.get(SpreadsheetSkeleton).calculate() as SpreadsheetSkeleton;
+        skeleton._setBorderStylesCache(0, 0, skeleton.worksheet.getComposedCellStyle(0, 0), undefined);
+        extension.draw(ctx, { scaleX: 1.25, scaleY: 1.5 }, skeleton, [], {
+            viewportKey: 'viewMain',
+            viewRanges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+        });
+        expect(scales).toEqual([{ scaleX: 2.5, scaleY: 4.5 }]);
+        expect(ctx.getScale()).toEqual({ scaleX: 1.25, scaleY: 1.5 });
+    });
+
     it('handles renderBorderByCell hidden/diff branches', () => {
-        const extension = new Border();
+        const extension = injector.get(Border);
         const ctx = createCtx();
         const overflowCache = new ObjectMatrix<any>();
 
@@ -146,7 +232,7 @@ describe('border extension', () => {
     });
 
     it.each([BORDER_TYPE.TL_BR, BORDER_TYPE.BL_TR])('keeps outer borders after skipping a merged child diagonal %s', (diagonalType) => {
-        const extension = new Border();
+        const extension = injector.get(Border);
         const ctx = createCtx();
         const renderBorderContext = {
             ctx,
@@ -173,12 +259,13 @@ describe('border extension', () => {
             [BORDER_TYPE.BOTTOM]: { type: BORDER_TYPE.BOTTOM, style: BorderStyleTypes.THIN, color: '#000000' },
         });
 
-        expect(drawLineByBorderTypeMock.mock.calls.map((call) => call[1])).toEqual([BORDER_TYPE.LEFT, BORDER_TYPE.BOTTOM]);
-        expect(drawDiagonalLineByBorderTypeMock.mock.calls.map((call) => call[2])).not.toContain(diagonalType);
+        expect(ctx.stroke).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(ctx.moveToByPrecision).mock.calls).toEqual([[0, -0.5], [0, 10]]);
+        expect(vi.mocked(ctx.lineToByPrecision).mock.calls).toEqual([[0, 10.5], [20, 10]]);
     });
 
     it('renders regular/diagonal/double borders and internal helpers', () => {
-        const extension = new Border() as any;
+        const extension = injector.get(Border) as any;
         const ctx = createCtx();
         const overflowCache = new ObjectMatrix<any>();
         const borderMatrix = new ObjectMatrix<any>();
@@ -207,13 +294,14 @@ describe('border extension', () => {
             viewRanges: [],
         } as any;
 
-        const doubleSpy = vi.spyOn(extension, '_renderDoubleBorder').mockImplementation(() => {});
+        const doubleSpy = vi.spyOn(extension, '_renderDoubleBorder');
         extension.renderBorderByCell(renderBorderContext, 0, 0, borderConfig);
 
-        expect(getLineWidthMock).toHaveBeenCalled();
-        expect(setLineTypeMock).toHaveBeenCalled();
-        expect(drawDiagonalLineByBorderTypeMock).toHaveBeenCalled();
-        expect(drawLineByBorderTypeMock).toHaveBeenCalled();
+        expect(ctx.setLineWidthByPrecision).toHaveBeenCalledWith(1);
+        expect(ctx.setLineDash).toHaveBeenCalledWith([]);
+        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(20, 10);
+        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(20, 0);
+        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(0, 10);
         expect(doubleSpy).toHaveBeenCalled();
 
         overflowCache.setValue(1, 3, {
@@ -238,7 +326,7 @@ describe('border extension', () => {
     });
 
     it('covers detailed double-border offset branches for vertical and horizontal lines', () => {
-        const extension = new Border() as any;
+        const extension = injector.get(Border) as any;
         const ctx = createCtx();
         const borderCache = new ObjectMatrix<any>();
 
@@ -313,7 +401,7 @@ describe('border extension', () => {
             endY: 0,
         });
 
-        expect(drawLineByBorderTypeMock).toHaveBeenCalled();
+        expect(ctx.stroke).toHaveBeenCalled();
         expect(ctx.save).toHaveBeenCalled();
         expect(ctx.restore).toHaveBeenCalled();
     });

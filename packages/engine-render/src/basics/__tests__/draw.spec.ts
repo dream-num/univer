@@ -152,3 +152,13 @@ describe('draw extra', () => {
         });
     });
 });
+
+describe('solid line transitions', () => {
+    it.each([BorderStyleTypes.THIN, BorderStyleTypes.MEDIUM, BorderStyleTypes.THICK, BorderStyleTypes.DOUBLE])('clears the preceding dash pattern for solid style %s', (style) => {
+        const ctx = createCtxMock();
+        setLineType(ctx, BorderStyleTypes.DASHED);
+        expect(ctx.setLineDash).toHaveBeenLastCalledWith([3]);
+        setLineType(ctx, style);
+        expect(ctx.setLineDash).toHaveBeenLastCalledWith([]);
+    });
+});

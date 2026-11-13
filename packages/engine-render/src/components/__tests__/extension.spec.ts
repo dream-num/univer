@@ -15,8 +15,11 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ComponentExtension } from '../extension';
+
+let injector: Injector;
 
 class TestExtension extends ComponentExtension<unknown, string, unknown> {
     constructor() {
@@ -31,15 +34,30 @@ class TestExtension extends ComponentExtension<unknown, string, unknown> {
 }
 
 describe('ComponentExtension', () => {
+    beforeEach(() => {
+        injector = new Injector([[TestExtension]]);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it('requires an explicit viewport cache opt-in', () => {
+        const extension = injector.get(TestExtension);
+        expect(extension.canReuseViewportCache()).toBe(false);
+        extension.viewportCacheReusable = true;
+        expect(extension.canReuseViewportCache()).toBe(true);
+        extension.viewportCacheReusable = false;
+        expect(extension.canReuseViewportCache()).toBe(false);
+    });
+
     it('uses the larger parent scale for extension rendering math', () => {
-        const extension = new TestExtension();
+        const extension = injector.get(TestExtension);
 
         expect(extension.getParentScale({ scaleX: 1.25, scaleY: 2 })).toBe(2);
         expect(extension.getParentScale({})).toBe(1);
     });
 
     it('clears transient render offsets and parent links on dispose', () => {
-        const extension = new TestExtension();
+        const extension = injector.get(TestExtension);
         extension.parent = {} as never;
         extension.extensionOffset = {
             renderConfig: {},

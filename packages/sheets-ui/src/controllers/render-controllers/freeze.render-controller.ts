@@ -268,6 +268,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 zIndex: 3,
             });
 
+            this._rowFreezeHeaderRect.viewportCacheReusable = true;
+            this._rowFreezeMainRect.viewportCacheReusable = true;
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             if (freezeColumn === -1 || freezeColumn === 0) {
@@ -299,6 +301,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 zIndex: 3,
             });
 
+            this._columnFreezeHeaderRect.viewportCacheReusable = true;
+            this._columnFreezeMainRect.viewportCacheReusable = true;
             scene.addObjects([this._columnFreezeHeaderRect, this._columnFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         }
 

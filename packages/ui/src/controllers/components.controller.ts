@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
 import { Disposable, Inject } from '@univerjs/core';
 import { ColorPicker } from '@univerjs/design';
 import {
@@ -51,6 +52,7 @@ import { HEADING_ITEM_COMPONENT, HeadingItem } from '../views/index';
 import { OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog } from '../views/object-permission/ObjectPermissionButton';
 import { OBJECT_PERMISSION_PANEL, ObjectPermissionPanel } from '../views/object-permission/ObjectPermissionPanel';
 import { SYMBOL_PICKER_COMPONENT, SymbolPicker } from '../views/symbol-picker/index';
+import { DefaultUserInfo, USER_INFO_COMPONENT } from '../views/user-info/UserInfo';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -84,6 +86,7 @@ export class ComponentsController extends Disposable {
     private _registerComponents(): void {
         ([
             [COMMON_LABEL_COMPONENT, CommonLabel],
+            [USER_INFO_COMPONENT, DefaultUserInfo],
             [OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog],
             [OBJECT_PERMISSION_PANEL, ObjectPermissionPanel],
             [HEADING_ITEM_COMPONENT, HeadingItem],
@@ -103,4 +106,9 @@ export class ComponentsController extends Disposable {
         // register the panel
         this.disposeWithMe(this._componentManager.register(ShortcutPanelComponentName, ShortcutPanel));
     }
+}
+
+/** Snapshot the host renderer into an independent viewer registry; disposal only affects the viewer. */
+export function inheritUserInfoComponent(source: ComponentManager, componentManager: ComponentManager): IDisposable {
+    return componentManager.register(USER_INFO_COMPONENT, source.get(USER_INFO_COMPONENT) ?? DefaultUserInfo, { override: true });
 }

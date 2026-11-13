@@ -16,20 +16,22 @@
 
 import type { ICollaborator } from '@univerjs/protocol';
 import { IAuthzIoService, LocaleService } from '@univerjs/core';
-import { ActionRow, Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
+import { ActionRow, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
-import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
+import { IDialogService, useDependency, useObservable, UserInfo } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
 
 export interface ISheetPermissionUserDialogProps {
+    unitId?: string;
+    objectId?: string;
     ActionRowComponent?: typeof ActionRow;
 }
 
-export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: ISheetPermissionUserDialogProps = {}) => {
+export const SheetPermissionUserDialog = ({ unitId, objectId, ActionRowComponent = ActionRow }: ISheetPermissionUserDialogProps = {}) => {
     const [inputValue, setInputValue] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
     const localeService = useDependency(LocaleService);
@@ -40,7 +42,7 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
     const userList = useObservable(sheetPermissionUserManagerService.userList$, sheetPermissionUserManagerService.userList);
     const searchQuery = inputValue.trim().toLocaleLowerCase();
     const searchUserList = userList?.filter((item) => {
-        return item.subject?.name.toLocaleLowerCase().includes(searchQuery) && (item.role === UnitRole.Owner || item.role === UnitRole.Editor);
+        return [item.subject?.name, item.subject?.userID, item.id].some((text) => text?.toLocaleLowerCase().includes(searchQuery)) && (item.role === UnitRole.Owner || item.role === UnitRole.Editor);
     }) ?? [];
     const [selectUserInfo, setSelectUserInfo] = useState<ICollaborator[]>(sheetPermissionUserManagerService.selectUserList);
 
@@ -72,6 +74,8 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
             <div className={clsx('univer-h-60 univer-min-w-72 univer-overflow-y-auto', scrollbarClassName)}>
                 {searchUserList?.length > 0
                     ? searchUserList?.map((item) => {
+                        const user = { userId: item.subject?.userID || item.id, name: item.subject?.name, avatar: item.subject?.avatar };
+                        const context = { scene: 'permission-member' as const, unitId, objectId };
                         if (cfgEnableObjInherit && item.role === UnitRole.Owner) {
                             return (
                                 <div
@@ -81,8 +85,8 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
                                       univer-rounded-md
                                     `}
                                 >
-                                    <Avatar src={item.subject?.avatar} size={24} />
-                                    <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
+                                    <UserInfo part="avatar" user={user} context={context} />
+                                    <div className="univer-mx-1.5 univer-flex-1"><UserInfo part="name" user={user} context={context} /></div>
                                     <div className="univer-text-xs univer-text-rose-600">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.ownerInherit')}</div>
                                 </div>
                             );
@@ -97,8 +101,8 @@ export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: IS
                                 `}
                                 onClick={() => handleChangeUser(item)}
                             >
-                                <Avatar src={item.subject?.avatar} size={24} />
-                                <div className="univer-mx-1.5 univer-flex-1">{item.subject?.name}</div>
+                                <UserInfo part="avatar" user={user} context={context} />
+                                <div className="univer-mx-1.5 univer-flex-1"><UserInfo part="name" user={user} context={context} /></div>
                                 {item.role === UnitRole.Owner && (
                                     <div className="univer-text-xs univer-text-rose-600">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.ownerWithoutInherit')}</div>
                                 )}

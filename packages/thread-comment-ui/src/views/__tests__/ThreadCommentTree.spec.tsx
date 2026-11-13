@@ -17,7 +17,7 @@
 import type { Dependency, ICommand, IDisposable, IDocumentData, Nullable } from '@univerjs/core';
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import type { IShortcutItem } from '@univerjs/ui';
+import type { IShortcutItem, IUserInfoProps } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
 import {
     CommandService,
@@ -60,7 +60,7 @@ import {
     UpdateCommentCommand,
     UpdateCommentMutation,
 } from '@univerjs/thread-comment';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IShortcutService, ISidebarService, RediContext, USER_INFO_COMPONENT } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -395,6 +395,7 @@ function createTreeTestBed(localeDependency: Dependency = [LocaleService, { useC
         [IConfigService, { useClass: ConfigService }],
         localeDependency,
         [RegionService],
+        [ComponentManager],
         [IEditorService, { useClass: TestEditorService as never }],
         [IRenderManagerService, { useClass: TestRenderManagerService as never }],
         [IShortcutService, { useClass: TestShortcutService as never }],
@@ -798,6 +799,17 @@ describe('ThreadCommentTree', () => {
         expect(container.textContent).toContain('Imported author');
     });
 
+    it('exposes an unresolved author ID to a host name and avatar renderer', () => {
+        const testBed = createTreeTestBed();
+        testBed.injector.get(ComponentManager).register(USER_INFO_COMPONENT, OpaqueAuthor, { override: true });
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'opaque-thread', personId: 'opaque-author' }));
+        const rendered = renderDefaultTree(testBed.injector, 'opaque-thread');
+        root = rendered.root;
+        container = rendered.container;
+        expect(container.querySelector('[data-part="name"]')?.textContent).toBe('opaque-author');
+        expect(container.querySelector('[data-part="avatar"]')?.textContent).toBe('opaque-author');
+    });
+
     it('adds a reply through the tree editor and stores it under the root thread', async () => {
         const testBed = createTreeTestBed();
         addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
@@ -918,3 +930,7 @@ describe('ThreadCommentTree', () => {
         expect(TestState.resolveStates).toEqual([true, false]);
     });
 });
+
+function OpaqueAuthor({ user, part }: IUserInfoProps) {
+    return <span data-part={part}>{user.userId}</span>;
+}

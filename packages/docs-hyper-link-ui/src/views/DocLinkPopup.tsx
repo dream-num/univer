@@ -23,11 +23,10 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, Button, clsx, MessageType, Tooltip } from '@univerjs/design';
+import { MessageType } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
-import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
-import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { HyperlinkPreview, IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
@@ -60,107 +59,24 @@ export const DocLinkPopup = () => {
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (
-        <div
-            className={clsx(`
-              univer-box-border univer-flex univer-max-w-80 univer-items-center univer-justify-between
-              univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-shadow
-              dark:!univer-bg-gray-900
-            `, borderClassName)}
-            onPointerEnter={() => {
-                hyperLinkService.setInfoPopupHovered(true);
-            }}
+        <HyperlinkPreview
+            title={target}
+            copyDisabled={!canCopy}
+            labels={{ copy: localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy'), edit: localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit'), remove: localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel') }}
+            onPointerEnter={() => hyperLinkService.setInfoPopupHovered(true)}
             onPointerLeave={() => {
                 hyperLinkService.setInfoPopupHovered(false);
                 hyperLinkService.scheduleHideInfoPopup();
             }}
-            onClick={() => {
-                hyperLinkService.hideInfoPopup();
+            onDismiss={() => hyperLinkService.hideInfoPopup()}
+            onOpen={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
+            onCopy={async () => {
+                await navigator.clipboard.writeText(target);
+                messageService.show({ content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'), type: MessageType.Info });
             }}
-        >
-            <div
-                className={`
-                  univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-items-center univer-truncate
-                  univer-text-sm univer-leading-5 univer-text-primary-500
-                `}
-                onClick={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
-            >
-                <div
-                    className={`
-                      univer-mr-2 univer-flex univer-size-5 univer-flex-[0_0_auto] univer-items-center
-                      univer-justify-center univer-text-base univer-text-gray-900
-                      dark:!univer-text-gray-0
-                    `}
-                >
-                    <LinkIcon />
-                </div>
-                <Tooltip showIfEllipsis title={target}>
-                    <span className="univer-flex-1 univer-truncate">{target}</span>
-                </Tooltip>
-            </div>
-            <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
-                <Button
-                    type="button"
-                    variant="text"
-                    size="small"
-                    aria-label={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}
-                    className="
-                      univer-ml-2 !univer-flex univer-size-6 !univer-rounded !univer-border-0 !univer-bg-transparent
-                      !univer-p-0 !univer-text-base !univer-font-normal
-                      hover:!univer-bg-transparent
-                      active:!univer-bg-transparent
-                      disabled:!univer-pointer-events-auto disabled:!univer-opacity-40
-                    "
-                    disabled={!canCopy}
-                    onClick={() => {
-                        navigator.clipboard.writeText(target);
-                        messageService.show({
-                            content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
-                            type: MessageType.Info,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
-                        <CopyIcon />
-                    </Tooltip>
-                </Button>
-                {canEdit && (
-                    <>
-                        <div
-                            className={`
-                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                              univer-justify-center univer-rounded univer-text-base
-                            `}
-                            onClick={() => {
-                                commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, {
-                                    link: currentPopup,
-                                });
-                            }}
-                        >
-                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit')}>
-                                <WriteIcon />
-                            </Tooltip>
-                        </div>
-                        <div
-                            className={`
-                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                              univer-justify-center univer-rounded univer-text-base
-                            `}
-                            onClick={() => {
-                                commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
-                                    unitId,
-                                    linkId: link.rangeId,
-                                    segmentId,
-                                });
-                            }}
-                        >
-                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel')}>
-                                <UnlinkIcon />
-                            </Tooltip>
-                        </div>
-                    </>
-                )}
-            </div>
-        </div>
+            onEdit={canEdit ? () => commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, { link: currentPopup }) : undefined}
+            onRemove={canEdit ? () => commandService.executeCommand(DeleteDocHyperLinkCommand.id, { unitId, linkId: link.rangeId, segmentId }) : undefined}
+        />
     );
 };
 

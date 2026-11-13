@@ -16,7 +16,7 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
-import { DrawingTypeEnum, LocaleType, Univer } from '@univerjs/core';
+import { DrawingTypeEnum, FOCUSING_PANEL_EDITOR, IContextService, LocaleType, Univer } from '@univerjs/core';
 import { DrawingManagerService, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RediContext } from '@univerjs/ui';
@@ -148,7 +148,7 @@ async function waitForDebouncedInput() {
 
 describe('DrawingTransform behavior', () => {
     let univer: Univer;
-    let drawingManagerService: IDrawingManagerService;
+    let drawingManagerService: DrawingManagerService;
     let renderManagerService: TestRenderManagerService;
     let root: Root | undefined;
     let container: HTMLElement | undefined;
@@ -159,7 +159,7 @@ describe('DrawingTransform behavior', () => {
         injector.add([IDrawingManagerService, { useClass: DrawingManagerService }]);
         injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
 
-        drawingManagerService = injector.get(IDrawingManagerService);
+        drawingManagerService = injector.get(IDrawingManagerService) as DrawingManagerService;
         renderManagerService = injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
     });
 
@@ -215,6 +215,18 @@ describe('DrawingTransform behavior', () => {
         });
 
         expect(renderManagerService.transformer.keepRatio).toBe(false);
+        expect(updates).toEqual([[
+            {
+                unitId,
+                subUnitId,
+                drawingId: 'image-1',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                locks: {
+                    noChangeAspect: false,
+                },
+            },
+        ]]);
+        updates.length = 0;
 
         setInputValue(getNumberInput(container, 0), '120');
         await waitForDebouncedInput();
@@ -232,6 +244,82 @@ describe('DrawingTransform behavior', () => {
         ]]);
         expect(renderManagerService.transformer.refreshCount).toBe(1);
         expect(renderManagerService.transformer.notificationCount).toBe(1);
+    });
+
+    it('restores the persisted aspect ratio lock and keeps Delete shortcuts out of panel editors', () => {
+        const drawing = {
+            ...createDrawing('image-1'),
+            locks: {
+                noChangeAspect: false,
+            },
+        };
+        const updates: IDrawingParam[][] = [];
+        drawingManagerService.featurePluginUpdate$.subscribe((update) => updates.push(update));
+
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(getLockRatioInput(container).checked).toBe(false);
+        expect(renderManagerService.transformer.keepRatio).toBe(false);
+
+        act(() => {
+            getNumberInput(container!, 0).focus();
+        });
+        expect(univer.__getInjector().get(IContextService).getContextValue(FOCUSING_PANEL_EDITOR)).toBe(true);
+
+        act(() => {
+            getLockRatioInput(container!).click();
+        });
+        expect(updates).toEqual([[
+            expect.objectContaining({
+                unitId,
+                subUnitId,
+                drawingId: 'image-1',
+                locks: {
+                    noChangeAspect: true,
+                },
+            }),
+        ]]);
+
+        act(() => {
+            getNumberInput(container!, 0).blur();
+        });
+        expect(univer.__getInjector().get(IContextService).getContextValue(FOCUSING_PANEL_EDITOR)).toBe(false);
+    });
+
+    it('applies collaborative aspect ratio lock updates to the active transformer', () => {
+        const drawing = {
+            ...createDrawing('image-1'),
+            locks: {
+                noChangeAspect: false,
+            },
+        };
+        drawingManagerService.registerDrawingData(unitId, {
+            [subUnitId]: {
+                data: {
+                    [drawing.drawingId]: drawing,
+                },
+                order: [drawing.drawingId],
+            },
+        });
+        const rendered = renderWithRediContext(univer.__getInjector(), drawing);
+        root = rendered.root;
+        container = rendered.container;
+
+        const update = drawingManagerService.getBatchUpdateOp([{
+            ...drawing,
+            locks: {
+                noChangeAspect: true,
+            },
+        }]);
+        act(() => {
+            drawingManagerService.applyJson1(unitId, subUnitId, update.redo);
+            drawingManagerService.updateNotification(update.objects);
+        });
+
+        expect(getLockRatioInput(container).checked).toBe(true);
+        expect(renderManagerService.transformer.keepRatio).toBe(true);
     });
 
     it('emits the requested rotation for the focused drawing', () => {

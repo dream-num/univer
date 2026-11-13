@@ -16,8 +16,8 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import type { ComponentProps } from 'react';
-import { debounce, DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
+import type { ComponentProps, FocusEvent } from 'react';
+import { debounce, DrawingTypeEnum, FOCUSING_PANEL_EDITOR, ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, clsx, InputNumber, MobileSelect } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -30,6 +30,7 @@ import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../com
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
+import { getDrawingKeepRatio, setDrawingTransformerKeepRatio } from './drawing-keep-ratio';
 import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotationDisabled } from './drawing-transform-rotation';
 
 const INPUT_DEBOUNCE_TIME = 300;
@@ -90,6 +91,7 @@ export function MobileDrawingTransform(props: IMobileDrawingTransformProps) {
 
 function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
     const localeService = useDependency(LocaleService);
+    const contextService = useDependency(IContextService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const { drawings, transformShow } = props;
@@ -111,7 +113,11 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
     const [xPosition, setXPosition] = useState(originX);
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
-    const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
+    const [lockRatio, setLockRatio] = useState(() => {
+        const keepRatio = getDrawingKeepRatio(drawingParam);
+        setDrawingTransformerKeepRatio(transformer, keepRatio);
+        return keepRatio;
+    });
     const rotateEnabled = resolveDrawingUIRotateEnabled(drawingParam, {
         getChildren: (drawing) => drawingManagerService.getDrawingsByGroup(drawing),
     });
@@ -177,6 +183,9 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
                 }
                 const drawing = drawingManagerService.getDrawingByParam(drawings[0]);
                 if (drawing != null) {
+                    const nextLockRatio = getDrawingKeepRatio(drawing);
+                    setLockRatio(nextLockRatio);
+                    setDrawingTransformerKeepRatio(transformer, nextLockRatio);
                     syncTransform(drawing);
                 }
             }),
@@ -184,6 +193,30 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
 
         return () => subscriptions.forEach((subscription) => subscription.unsubscribe());
     }, []);
+
+    useEffect(() => {
+        const subscription = drawingManagerService.update$.subscribe((drawings) => {
+            const updated = drawings.some((drawing) =>
+                drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId
+            );
+            if (!updated) {
+                return;
+            }
+
+            const drawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
+            if (drawing) {
+                const nextLockRatio = getDrawingKeepRatio(drawing);
+                setLockRatio(nextLockRatio);
+                setDrawingTransformerKeepRatio(transformer, nextLockRatio);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [drawingId, drawingManagerService, subUnitId, transformer, unitId]);
+
+    useEffect(() => () => {
+        contextService.setContextValue(FOCUSING_PANEL_EDITOR, false);
+    }, [contextService]);
 
     const notifyTransformChange = (updateParam: IDrawingParam) => {
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
@@ -265,7 +298,29 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
             return;
         }
         setLockRatio(value);
-        transformer.keepRatio = value;
+        setDrawingTransformerKeepRatio(transformer, value);
+        const currentDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) ?? drawingParam;
+        drawingManagerService.featurePluginUpdateNotification([{
+            unitId,
+            subUnitId,
+            drawingId,
+            drawingType,
+            locks: {
+                ...currentDrawing.locks,
+                noChangeAspect: value,
+            },
+        }]);
+    };
+
+    const handlePanelFocus = () => {
+        contextService.setContextValue(FOCUSING_PANEL_EDITOR, true);
+    };
+
+    const handlePanelBlur = (event: FocusEvent<HTMLDivElement>) => {
+        const nextTarget = event.relatedTarget;
+        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+            contextService.setContextValue(FOCUSING_PANEL_EDITOR, false);
+        }
     };
 
     return (
@@ -273,6 +328,8 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
             className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
                 'univer-hidden': !transformShow,
             })}
+            onFocusCapture={handlePanelFocus}
+            onBlurCapture={handlePanelBlur}
         >
             <header
                 className="

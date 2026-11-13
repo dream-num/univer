@@ -50,21 +50,19 @@ function withoutValueRangeMetadata(actions: TextXAction[], suppressed: Set<strin
     });
 }
 
-function restoreComposedValueRanges(inserted: TextXAction[], changes: TextXAction[], composed: TextXAction[]): TextXAction[] {
-    const values = getValueRangeIds(changes);
-    if (!values.size) {
-        return composed;
-    }
+function restoreComposedFieldRanges(inserted: TextXAction[], changes: TextXAction[], composed: TextXAction[]): TextXAction[] {
     const complete = new Map<string, number>();
-    for (const action of inserted) {
-        if (action.t !== TextXActionType.INSERT) {
-            continue;
-        }
-        for (const range of action.body.customRanges ?? []) {
-            if (values.has(range.rangeId) && range.rangeType === CustomRangeType.FIELD &&
-                action.body.dataStream[range.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                action.body.dataStream[range.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-                complete.set(range.rangeId, (complete.get(range.rangeId) ?? 0) + 1);
+    for (const actions of [inserted, changes]) {
+        for (const action of actions) {
+            if (action.t !== TextXActionType.INSERT) {
+                continue;
+            }
+            for (const range of action.body.customRanges ?? []) {
+                if (range.rangeType === CustomRangeType.FIELD &&
+                    action.body.dataStream[range.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    action.body.dataStream[range.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    complete.set(range.rangeId, (complete.get(range.rangeId) ?? 0) + 1);
+                }
             }
         }
     }
@@ -183,7 +181,7 @@ export class TextX {
             for (const update of otherUpdates) {
                 updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), update));
             }
-            return restoreComposedValueRanges(thisActions, otherActions, appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values())));
+            return restoreComposedFieldRanges(thisActions, otherActions, appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values())));
         }
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -240,7 +238,7 @@ export class TextX {
 
         textX.trimEndUselessRetainAction();
 
-        return restoreComposedValueRanges(thisActions, otherActions, textX.serialize());
+        return restoreComposedFieldRanges(thisActions, otherActions, textX.serialize());
     }
 
     /**

@@ -49,18 +49,21 @@ describe('test TextX methods and branches', () => {
             { t: TextXActionType.INSERT, len: result.dataStream.length, body: result, valueRangeId: range.rangeId },
             { t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range: { ...range, endIndex: result.dataStream.length + 1, properties: { ...range.properties, dirty: 0, cachedResult: result.dataStream } }, propertyPaths: [['dirty'], ['cachedResult']] }] },
         ];
-        const updated = TextX.apply(TextX.apply(Tools.deepClone(original), inserted), refreshed);
+        const bookmarkChanges: TextXAction[] = [{ t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: 'target', range: { rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, startIndex: 1, endIndex: 3, properties: { bookmarkId: 'target' } } }] }];
+        const updated = TextX.apply(TextX.apply(TextX.apply(Tools.deepClone(original), bookmarkChanges), inserted), refreshed);
         const followingSection = updated.sectionBreaks![0];
         const sectionFormatting: TextXAction[] = [
             { t: TextXActionType.RETAIN, len: followingSection.startIndex },
             { t: TextXActionType.RETAIN, len: 1, coverType: UpdateDocsAttributeType.REPLACE, body: { dataStream: '', sectionBreaks: [{ ...followingSection, startIndex: 0, sectionType: 1 }] } },
         ];
         const expected = TextX.apply(Tools.deepClone(updated), sectionFormatting);
-        const composed = TextX.makeInvertible(TextX.compose(TextX.compose(inserted, refreshed), sectionFormatting), Tools.deepClone(original));
+        const combined = TextX.compose(TextX.compose(bookmarkChanges, inserted), refreshed);
+        expect(TextX.apply(Tools.deepClone(original), combined)).toEqual(TextX.apply(Tools.deepClone(original), TextX.compose(bookmarkChanges, TextX.compose(inserted, refreshed))));
+        const composed = TextX.makeInvertible(TextX.compose(combined, sectionFormatting), Tools.deepClone(original));
         const actual = TextX.apply(Tools.deepClone(original), JSON.parse(JSON.stringify(composed)));
         expect(validateDocumentStructure({ body: actual })).toEqual([]);
         expect(actual).toEqual(expected);
-        expect(actual.customRanges!.map((item) => item.rangeId).sort()).toEqual(nested ? ['existing', 'page', 'reference'] : ['existing', 'reference']);
+        expect(actual.customRanges!.map((item) => item.rangeId).sort()).toEqual(nested ? ['existing', 'page', 'reference', 'target'] : ['existing', 'reference', 'target']);
         expect(TextX.apply(Tools.deepClone(actual), TextX.invert(composed))).toEqual(original);
         expect(TextX.apply(Tools.deepClone(original), composed)).toEqual(expected);
         const peer: TextXAction[] = [{ t: TextXActionType.INSERT, len: 5, body: { dataStream: 'Peer ' } }];

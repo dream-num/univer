@@ -20,15 +20,6 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import {
-    createIdentifier,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    ObjectMatrix,
-    RTree,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     IFeatureDirtyRangeType,
     IFormulaData,
@@ -54,6 +45,15 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from './dependency-tree';
+import {
+    createIdentifier,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RTree,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -1031,11 +1031,12 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             token === FUNCTION_NAMES_LOOKUP.ROW || token === FUNCTION_NAMES_LOOKUP.ROWS ||
             token === FUNCTION_NAMES_LOOKUP.COLUMN || token === FUNCTION_NAMES_LOOKUP.COLUMNS
         );
+        const isOffset = node.nodeType === NodeType.FUNCTION && token === FUNCTION_NAMES_LOOKUP.OFFSET;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
             // Static references only supply coordinates or dimensions to these functions.
             // Expressions and dynamic references can still read cell values while evaluating their arguments.
-            if (readsReferenceMetadata && this._isStaticReference(item)) {
+            if ((readsReferenceMetadata || (isOffset && i === 0)) && this._isStaticReference(item)) {
                 continue;
             }
             if (this._isPreCalculateNode(item)) {
@@ -1143,6 +1144,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         const refOffsetX = tree.refOffsetX;
         const refOffsetY = tree.refOffsetY;
 
+        // A recursively evaluated precedent may have moved the runtime cursor.
+        this._runtimeService.setCurrent(tree.row, tree.column, tree.rowCount, tree.columnCount, tree.subUnitId, tree.unitId);
         const addressFunctionRangeList = await this._getRangeListByFunctionRefNode(addressFunctionNodes, refOffsetX, refOffsetY);
 
         tree.addressFunctionNodes = [];
@@ -1243,6 +1246,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         while (preCalculateTreeList.length > 0) {
             const tree = preCalculateTreeList.pop()!;
 
+            await this._calculateAddressFunction(treeDependencyCache, tree);
+
             this._runtimeService.setCurrent(
                 tree.row,
                 tree.column,
@@ -1258,8 +1263,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 refOffsetX: tree.refOffsetX,
                 refOffsetY: tree.refOffsetY,
             };
-
-            await this._calculateAddressFunction(treeDependencyCache, tree);
 
             let value: FunctionVariantType;
             if (this._interpreter.checkAsyncNode(nodeData.node)) {

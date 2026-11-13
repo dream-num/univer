@@ -191,6 +191,40 @@ describe('Persisted calculation settings', () => {
         }
     });
 
+    it('updates the interior of an OFFSET range and follows a chain of resolved addresses', async () => {
+        const bed = createBed();
+        const formulas = {
+            0: { 3: { f: '=SUM(A1:OFFSET(A3,0,0))' } },
+            1: { 3: { f: '=SUM(OFFSET(D2,-1,0),A2)' } },
+            2: { 3: { f: '=SUM(OFFSET(D3,-1,0),A3)' }, 4: { f: '=D3*2' } },
+        };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData) => {
+            const values = result.unitData[unitId]?.[sheetId];
+            return [values?.getValue(0, 3)?.v, values?.getValue(1, 3)?.v, values?.getValue(2, 3)?.v, values?.getValue(2, 4)?.v];
+        };
+        const calculateEdit = () => calculate(bed, formulas, false, 100, 0.001, {
+            forceCalculate: false,
+            clearDependencyTreeCache: {},
+            dirtyRanges: [{ unitId, sheetId, range: { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 } }],
+        });
+        try {
+            cells.setValue(0, 0, { v: 1 });
+            cells.setValue(1, 0, { v: 2 });
+            cells.setValue(2, 0, { v: 3 });
+            const first = await calculate(bed, formulas, false);
+            expect(first.circularReferences).toEqual([]);
+            expect(read(first)).toEqual([6, 8, 11, 22]);
+            cells.setValue(1, 0, { v: 8 });
+            expect(read(await calculateEdit())).toEqual([12, 20, 23, 46]);
+            cells.setValue(1, 0, { v: 2 });
+            expect(read(await calculateEdit())).toEqual([6, 8, 11, 22]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('uses separate iteration budgets in a cross-workbook cycle', async () => {
         const bed = createBed();
         try {

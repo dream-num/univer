@@ -1158,6 +1158,77 @@ describe('UpdateFormulaController', () => {
 });
 
 describe('UpdateFormulaController spill cache integration', () => {
+    it('keeps an imported FILTER spill editable after shrinking and undoing', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const api = FUniver.newAPI(univer);
+        const book = api.createWorkbook({
+            id: 'imported-filter-spill',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 1 },
+                            3: { f: '=FILTER(A1:A3,B1:B3=1)', v: '1', t: CellValueType.NUMBER, ref: 'D1:D3' },
+                            5: { f: '=SUM(D1:D3)' },
+                        },
+                        1: { 0: { v: 2 }, 1: { v: 1 }, 3: { v: '2', t: CellValueType.NUMBER } },
+                        2: { 0: { v: 3 }, 1: { v: 1 }, 3: { v: '3', t: CellValueType.NUMBER } },
+                    },
+                },
+            },
+        });
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(book.getId());
+        const sheet = book.getActiveSheet();
+        const commands = injector.get(ICommandService);
+        const calculator = api.getFormula();
+        const calculate = async (action: () => unknown) => {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const done = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Imported spill calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await done;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        };
+        const values = () => sheet.getRange('D1:D3').getValues().map(([value]) => value ?? null);
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => sheet.getRange('A2').setValue(20));
+            expect(values()).toEqual([1, 20, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(24);
+            await calculate(() => sheet.getRange('B3').setValue(0));
+            expect(values()).toEqual([1, 20, null]);
+            expect(sheet.getRange('F1').getValue()).toBe(21);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 20, 3]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it.each([
         { formula: '=SEQUENCE($A$1)', horizontal: false, scale: 1 },
         { formula: '=SEQUENCE(1,$A$1)', horizontal: true, scale: 1 },

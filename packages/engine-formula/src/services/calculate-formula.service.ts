@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
+import type { ICellData, IUnitRange, IWorkbookCalculationSettings, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
@@ -106,8 +106,8 @@ interface ICycleFormula {
     formula: string;
     refOffsetX: number;
     refOffsetY: number;
-    formulaId?: string | null;
-    featureId?: string | null;
+    formulaId?: Nullable<string>;
+    featureId?: Nullable<string>;
     hasDynamicDeps?: boolean;
 }
 

@@ -903,7 +903,14 @@ export class Spreadsheet extends SheetComponent {
         for (const { bound, repairsMerge } of repaintBounds) {
             addBound(bound, repairsMerge);
         }
-        const nativeClipRanges = this._fontExtension.getNativeTextClipRepairRanges(skeleton)
+        // Cell lookup rounds coordinates; round outwards so fractional ink remains a candidate.
+        const nativeQueryRange = skeleton.getRangeByViewBound({
+            left: Math.floor(viewportInfo.cacheBound.left - SCROLL_REPAIR_INK_HALO / current.scaleX),
+            right: Math.ceil(viewportInfo.cacheBound.right + SCROLL_REPAIR_INK_HALO / current.scaleX),
+            top: Math.floor(viewportInfo.cacheBound.top - SCROLL_REPAIR_INK_HALO / current.scaleY),
+            bottom: Math.ceil(viewportInfo.cacheBound.bottom + SCROLL_REPAIR_INK_HALO / current.scaleY),
+        });
+        const nativeClipRanges = this._fontExtension.getNativeTextClipRepairRanges(skeleton, nativeQueryRange)
             .map((range) => ({ range, bound: getIntersectBound(getBound(range), viewportInfo.cacheBound) }));
         let expanded = true;
         while (expanded) {

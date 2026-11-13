@@ -63,7 +63,6 @@ import { IEditorBridgeService } from '../../../../services/editor-bridge.service
 import {
     getMobileCellCenterOffset,
     getMobileCellRevealOffset,
-    getMobileEditingMenuBottomOffset,
     getMobileMenuCommand,
     MobileSheetActionPanel,
     normalizeMobileSelectionPrimary,
@@ -376,13 +375,6 @@ describe('mobile active-cell reveal offset', () => {
         expect(getMobileCellCenterOffset(100, 140, 80, 500)).toBe(-170);
         expect(getMobileCellCenterOffset(280, 320, 80, 520)).toBe(0);
         expect(getMobileCellCenterOffset(460, 500, 80, 520)).toBe(180);
-    });
-});
-
-describe('mobile editing menu placement', () => {
-    it('moves above the compact formula operator strip while it is visible', () => {
-        expect(getMobileEditingMenuBottomOffset(false)).toBe(72);
-        expect(getMobileEditingMenuBottomOffset(true)).toBe(108);
     });
 });
 

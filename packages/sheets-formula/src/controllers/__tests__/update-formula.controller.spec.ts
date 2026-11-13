@@ -21,6 +21,7 @@ import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
+    IFormulaRuntimeService,
     RemoveDefinedNameMutation,
     SetArrayFormulaDataMutation,
     SetDefinedNameMutation,
@@ -1243,6 +1244,100 @@ describe('UpdateFormulaController spill cache integration', () => {
             expectValues(5);
             await calculate(() => expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true));
             expectValues(1, true);
+        } finally {
+            univer.dispose();
+        }
+    });
+});
+
+describe('conditional circular references', () => {
+    it.each([CalculationMode.NO_CALCULATION, CalculationMode.WHEN_EMPTY])('recalculates after edits and undo in mode %s', async (initialFormulaComputing) => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing });
+        const api = FUniver.newAPI(univer);
+        const calculator = api.getFormula();
+        const injector = univer.__getInjector();
+
+        async function calculate(action: () => void): Promise<void> {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Conditional cycle calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        }
+
+        const open = () => api.createWorkbook({
+            id: 'conditional-cycle',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 5 },
+                            2: { f: '=INDEX(B1:B2,MATCH(D1,A1:A2,0))' },
+                            3: { v: 1 },
+                            4: { f: '=IF(F1,SUM(E1:E3),G1)' },
+                            5: { v: 0, t: CellValueType.BOOLEAN },
+                            6: { v: 9 },
+                            7: { f: '=C1+E1' },
+                        },
+                        1: { 0: { v: 2 }, 1: { f: '=C1+1' } },
+                    },
+                },
+            },
+        });
+
+        try {
+            let book: ReturnType<typeof open> | undefined;
+            if (initialFormulaComputing === CalculationMode.WHEN_EMPTY) {
+                await calculate(() => {
+                    book = open();
+                });
+            } else {
+                book = open();
+                await calculate(() => calculator.executeCalculation());
+            }
+            const sheet = book!.getActiveSheet();
+            injector.get(IUniverInstanceService).focusUnit(book!.getId());
+            const commands = injector.get(ICommandService);
+            const runtime = injector.get(IFormulaRuntimeService);
+            const cycles = () => runtime.getRuntimeState().circularReferences?.map(({ row, column }) => [row, column]);
+            const values = () => ['C1', 'B2', 'E1', 'H1'].map((cell) => sheet.getRange(cell).getValue());
+            const undo = () => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+
+            expect(values()).toEqual([5, 6, 9, 14]);
+            expect(cycles()).toEqual([]);
+            await calculate(() => sheet.getRange('B1').setValue(8));
+            expect(values()).toEqual([8, 9, 9, 17]);
+
+            await calculate(() => sheet.getRange('D1').setValue(2));
+            expect(cycles()).toHaveLength(2);
+            expect(cycles()).toEqual(expect.arrayContaining([[0, 2], [1, 1]]));
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+
+            await calculate(() => sheet.getRange('F1').setValue(true));
+            expect(cycles()).toEqual([[0, 4]]);
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+            expect(values()).toEqual([8, 9, 9, 17]);
         } finally {
             univer.dispose();
         }

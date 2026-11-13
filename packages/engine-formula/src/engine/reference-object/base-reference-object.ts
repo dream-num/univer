@@ -566,6 +566,11 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellData(row: number, column: number) {
+        const readCycleCell = this._calculationCache?.readCycleCell;
+        const cycleCell = readCycleCell?.(this.getUnitId(), this.getSheetId(), row, column);
+        if (cycleCell != null) {
+            return cycleCell;
+        }
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();

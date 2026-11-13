@@ -2377,7 +2377,7 @@ describe('formula dirty ranges', () => {
                     1: { 0: { f: '=2', v: 2 }, 2: { si: 'shared' }, 3: { v: 5 } },
                     2: { 0: { f: '=3' }, 2: { si: 'shared', v: 0 } },
                     3: { 0: { f: '=4' }, 1: { f: '=A4', v: null }, 2: { si: 'shared' } },
-                    4: { 2: { si: 'orphan' } },
+                    4: { 0: { f: '=FALSE()', v: false }, 1: { f: '=""', v: '' }, 2: { si: 'orphan' } },
                     5: { 2: { si: 'late' } },
                     6: { 2: { f: '=B7', si: 'late' } },
                 },

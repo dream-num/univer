@@ -16,9 +16,9 @@
 
 import type { Attributes, ReactNode } from 'react';
 import { LocaleService } from '@univerjs/core';
-import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
+import { borderLeftBottomClassName, clsx, ResizeHandle, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -79,8 +79,6 @@ export function Sidebar() {
     const returnFocusElementRef = useRef<HTMLElement | null>(null);
     const previousSidebarIdRef = useRef<string | undefined>(undefined);
     const wasVisibleRef = useRef(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const dragWidthRef = useRef<number | null>(null);
 
     const options = useMemo(() => renderSidebarOptions(sidebarOptions), [sidebarOptions]);
 
@@ -124,47 +122,6 @@ export function Sidebar() {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [sidebarService]);
 
-    // Drag resize handlers
-    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-    }, []);
-
-    useEffect(() => {
-        if (!isDragging) {
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-            return;
-        }
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!sidebarRef.current) return;
-            const rect = sidebarRef.current.getBoundingClientRect();
-            const newWidth = rect.right - e.clientX;
-            const clampedWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(newWidth, MAX_SIDEBAR_WIDTH));
-            dragWidthRef.current = clampedWidth;
-            sidebarRef.current.style.width = `${clampedWidth}px`;
-        };
-
-        const handleMouseUp = () => {
-            setIsDragging(false);
-            if (dragWidthRef.current != null) {
-                sidebarService.setWidth(dragWidthRef.current);
-                dragWidthRef.current = null;
-            }
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [isDragging, sidebarService]);
-
     useEffect(() => {
         if (scrollRef.current) {
             sidebarService.setContainer(scrollRef.current);
@@ -189,9 +146,6 @@ export function Sidebar() {
     }, [sidebarService]);
 
     const width = useMemo(() => {
-        if (isDragging && dragWidthRef.current != null) {
-            return `${dragWidthRef.current}px`;
-        }
         if (!options?.visible) return 0;
 
         const savedWidth = sidebarService.width;
@@ -204,7 +158,7 @@ export function Sidebar() {
         }
 
         return options.width;
-    }, [isDragging, options, sidebarService]);
+    }, [options, sidebarService]);
 
     function handleClose() {
         sidebarService.close(sidebarOptions?.id);
@@ -225,38 +179,22 @@ export function Sidebar() {
                 'univer-w-96 univer-translate-x-0': options?.visible,
                 'univer-pointer-events-none univer-invisible univer-w-0 univer-translate-x-full': !options?.visible,
             })}
-            style={{ width: isDragging ? undefined : width }}
+            style={{ width }}
         >
             {/* Resize handle */}
             {options?.visible && (
-                <div
-                    className={`
-                      univer-absolute univer-left-0 univer-top-0 univer-z-20 univer-h-full univer-w-1
-                      univer-cursor-col-resize univer-transition-colors
-                      hover:univer-bg-primary-500
-                      active:univer-bg-primary-500
-                    `}
-                    onMouseDown={handleResizeMouseDown}
-                    role="separator"
-                    aria-orientation="vertical"
-                    aria-label={localeService.t<LocaleKey>('ui.sidebar.resize')}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (!sidebarRef.current) return;
-                        const currentWidth = sidebarRef.current.getBoundingClientRect().width;
-                        let newWidth = currentWidth;
-                        if (e.key === 'ArrowLeft') {
-                            e.preventDefault();
-                            newWidth = Math.max(MIN_SIDEBAR_WIDTH, currentWidth - 20);
-                        } else if (e.key === 'ArrowRight') {
-                            e.preventDefault();
-                            newWidth = Math.min(MAX_SIDEBAR_WIDTH, currentWidth + 20);
-                        }
-                        if (newWidth !== currentWidth) {
-                            sidebarRef.current.style.width = `${newWidth}px`;
-                            sidebarService.setWidth(newWidth);
-                        }
+                <ResizeHandle
+                    label={localeService.t<LocaleKey>('ui.sidebar.resize')}
+                    currentWidth={sidebarService.width || (typeof options.width === 'number' ? options.width : 384)}
+                    getCurrentWidth={() => sidebarRef.current?.getBoundingClientRect().width || sidebarService.width || 384}
+                    minimumWidth={MIN_SIDEBAR_WIDTH}
+                    maximumWidth={MAX_SIDEBAR_WIDTH}
+                    side="left"
+                    step={20}
+                    onResize={(nextWidth) => {
+                        if (sidebarRef.current) sidebarRef.current.style.width = `${nextWidth}px`;
                     }}
+                    onResizeEnd={(nextWidth) => sidebarService.setWidth(nextWidth)}
                 />
             )}
 

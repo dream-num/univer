@@ -124,6 +124,9 @@ const UPDATE_COMMANDS = [
     MoveRangeCommand.id,
 ];
 
+const ROW_RESIZE_COMMANDS = [DeltaRowHeightCommand.id, SetRowHeightCommand.id];
+const COLUMN_RESIZE_COMMANDS = [DeltaColumnWidthCommand.id, SetColWidthCommand.id];
+
 const REFRESH_MUTATIONS = [
     SetRowVisibleMutation.id,
     SetRowHiddenMutation.id,
@@ -216,20 +219,19 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         id === SetRowHiddenCommand.id ||
                         id === SetSpecificRowsVisibleCommand.id ||
                         id === SetColHiddenCommand.id ||
-                        id === SetSpecificColsVisibleCommand.id ||
-                        id === DeltaRowHeightCommand.id ||
-                        id === DeltaColumnWidthCommand.id ||
-                        id === SetRowHeightCommand.id ||
-                        id === SetColWidthCommand.id
+                        id === SetSpecificColsVisibleCommand.id
                     ) {
                         const { unitId, subUnitId, ranges } = params as
                             | ISetRowHiddenMutationParams
                             | ISetSpecificRowsVisibleCommandParams
                             | ISetColHiddenMutationParams
-                            | ISetSpecificColsVisibleCommandParams
+                            | ISetSpecificColsVisibleCommandParams;
+                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
+                    } else if (ROW_RESIZE_COMMANDS.includes(id) || COLUMN_RESIZE_COMMANDS.includes(id)) {
+                        const { unitId, subUnitId, ranges } = params as
                             | ISetWorksheetRowHeightMutationParams
                             | ISetWorksheetColWidthMutationParams;
-                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
+                        return this._getDrawingUndoForResize(unitId, subUnitId, ranges, ROW_RESIZE_COMMANDS.includes(id));
                     }
 
                     return { redos: [], undos: [] };
@@ -246,9 +248,37 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         mode: ISheetDrawingTransformPlan['mode'] = 'command',
         command: ICommandInfo = this._currentCommand
     ) {
+        const plan = this._createPlan(unitId, subUnitId, updates, deletes, mode, command);
+        if (!plan) {
+            return { redos: [], undos: [] };
+        }
+        const { originals } = plan;
+
+        const feature = this._transformPlanService.transform(plan);
+        if (mode === 'refresh') {
+            const changed = [...plan.updates.values()].filter((drawing) => JSON.stringify(originals.get(drawing.drawingId)) !== JSON.stringify(drawing));
+            if (changed.length) {
+                this._sheetDrawingService.refreshTransform(changed);
+                this._drawingManagerService.refreshTransform(changed);
+                this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
+            }
+            return { redos: [], undos: [] };
+        }
+
+        return this._createPlanMutations(plan, feature);
+    }
+
+    private _createPlan(
+        unitId: string,
+        subUnitId: string,
+        updates: Array<Partial<ISheetDrawing>>,
+        deletes: Array<Partial<ISheetDrawing>>,
+        mode: ISheetDrawingTransformPlan['mode'],
+        command: ICommandInfo
+    ): ISheetDrawingTransformPlan | undefined {
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!skeleton) {
-            return { redos: [], undos: [] };
+            return;
         }
 
         const data = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
@@ -277,18 +307,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             });
         });
 
-        const feature = this._transformPlanService.transform(plan);
-        if (mode === 'refresh') {
-            const changed = [...plan.updates.values()].filter((drawing) => JSON.stringify(originals.get(drawing.drawingId)) !== JSON.stringify(drawing));
-            if (changed.length) {
-                this._sheetDrawingService.refreshTransform(changed);
-                this._drawingManagerService.refreshTransform(changed);
-                this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
-            }
-            return { redos: [], undos: [] };
-        }
-
-        return this._createPlanMutations(plan, feature);
+        return plan;
     }
 
     private _getCalculatedSkeletonParam(unitId: string, subUnitId: string) {
@@ -470,6 +489,55 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         return this._createUndoAndRedoMutation(unitId, subUnitId, updateDrawings);
+    }
+
+    /**
+     * Resizing rows or columns keeps every drawing anchor, so the pixel placements are derived
+     * values that each replica refreshes after the size mutations (see `_sheetRefreshListener`).
+     * Writing them into the changeset would make collaborators who resize different rows replace
+     * the same paths and conflict. Mutations are only needed when an extension has to persist data
+     * of its own, such as a connector that is rerouted because a bound drawing changes shape. That
+     * can only happen for drawings that the resized rows or columns cross: drawings entirely after
+     * them move as a whole, and drawings entirely before them do not move.
+     */
+    private _getDrawingUndoForResize(unitId: string, subUnitId: string, ranges: IRange[], isRow: boolean) {
+        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
+        if (!sheetSkeletonParam) {
+            return { redos: [], undos: [] };
+        }
+
+        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId) ?? {};
+        const crossedDrawings: ISheetDrawing[] = [];
+        Object.keys(drawingData).forEach((drawingId) => {
+            const drawing = drawingData[drawingId] as ISheetDrawing;
+            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+                return;
+            }
+            const refreshed = this._tryRefreshDrawingPlacement(drawing, sheetSkeletonParam.skeleton, this._currentCommand.id, ({ from, to }) =>
+                ranges.some((range) => isRow
+                    ? from.row <= range.endRow && to.row >= range.startRow
+                    : from.column <= range.endColumn && to.column >= range.startColumn));
+            if (refreshed) {
+                crossedDrawings.push(refreshed);
+            }
+        });
+
+        if (crossedDrawings.length === 0) {
+            return { redos: [], undos: [] };
+        }
+
+        const plan = this._createPlan(unitId, subUnitId, crossedDrawings, [], 'command', this._currentCommand);
+        if (!plan) {
+            return { redos: [], undos: [] };
+        }
+        const feature = this._transformPlanService.transform(plan);
+        if (!Object.values(feature).some((mutations) => mutations.length > 0)) {
+            return { redos: [], undos: [] };
+        }
+
+        // The extension resolves bound drawings from the plan, so the persisted plan also has to
+        // include the drawings that only moved.
+        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
     }
 
     private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams) {

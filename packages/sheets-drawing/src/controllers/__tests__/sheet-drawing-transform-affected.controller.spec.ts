@@ -1140,6 +1140,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         const listener = testBed.commandService.onCommandExecuted(({ id }) => mutationIds.push(id));
 
         expect(await testBed.commandService.executeCommand(commandId, params)).toBe(true);
+        await Promise.resolve();
         listener.dispose();
 
         // Collaboration sends every executed mutation. Derived placements stay out of the
@@ -1178,6 +1179,66 @@ describe('sheet drawing transforms without UI plugins', () => {
             top: before.transform!.top! + 30,
             left: before.transform!.left! + 40,
         });
+    });
+
+    it.each([
+        ['row', SetRowHeightCommand.id, { startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }, { startRow: 0, endRow: 0, startColumn: 0, endColumn: 19 }],
+        ['column', SetColWidthCommand.id, { startRow: 0, endRow: 19, startColumn: 2, endColumn: 2 }, { startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 }],
+    ])('persists placements for a %s resize only when an extension has data to persist for a crossed drawing', async (_axis, commandId, crossing, before) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const original = structuredClone(getDrawing(service));
+        const commandPlans: string[][] = [];
+        // Stands in for a connector extension that persists rerouted data for affected drawings.
+        const extension = testBed.get(SheetDrawingTransformPlanService).register({
+            transform: (plan) => {
+                if (plan.mode !== 'command') return;
+                commandPlans.push([...plan.updates.keys()]);
+                return plan.updates.size
+                    ? { redos: [{ id: ClearSheetDrawingTransformerOperation.id, params: ['test'] }] }
+                    : undefined;
+            },
+        });
+        const mutationIds: string[] = [];
+        const listener = testBed.commandService.onCommandExecuted(({ id }) => mutationIds.push(id));
+        try {
+            // Rows or columns entirely before the drawing only move it: nothing to persist.
+            expect(await testBed.commandService.executeCommand(commandId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [before],
+                value: 90,
+            })).toBe(true);
+            await Promise.resolve();
+            expect(commandPlans).toEqual([]);
+            expect(mutationIds).not.toContain(SetDrawingApplyMutation.id);
+            const moved = structuredClone(getDrawing(service));
+            expect(moved.sheetTransform).toEqual(original.sheetTransform);
+            expect(moved.transform).not.toEqual(original.transform);
+
+            // Rows or columns crossing the drawing change its shape, and the extension persists.
+            expect(await testBed.commandService.executeCommand(commandId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [crossing],
+                value: 90,
+            })).toBe(true);
+            await Promise.resolve();
+            expect(commandPlans[0]).toEqual(['drawing-1']);
+            expect(mutationIds).toContain(SetDrawingApplyMutation.id);
+            const resized = structuredClone(getDrawing(service));
+            expect(resized.sheetTransform).toEqual(original.sheetTransform);
+            expect(resized.transform).not.toEqual(moved.transform);
+
+            expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+            await Promise.resolve();
+            expect(getDrawing(service)).toEqual(moved);
+            expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+            await Promise.resolve();
+            expect(getDrawing(service)).toEqual(resized);
+        } finally {
+            listener.dispose();
+            extension.dispose();
+        }
     });
 
     it('updates placement through a command and round-trips through undo and redo', async () => {

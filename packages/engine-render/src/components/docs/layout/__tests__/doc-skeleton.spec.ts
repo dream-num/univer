@@ -9195,6 +9195,66 @@ describe('doc skeleton', () => {
         }
     );
 
+    it.each([false, true].flatMap((sliced) => [undefined, 5].map((restart) => ({ sliced, restart }))))(
+        'inherits continuous-section counters on footnote-only continuations ($sliced/$restart)',
+        ({ sliced, restart }) => {
+            mockCanvasTextMetrics(11, 5);
+            const first = 'Cover\r\n';
+            const shared = restart == null ? '' : 'Shared section\r\n';
+            const dataStream = `${first}${shared}Section note\uFFFC\r\n`;
+            const referenceIndex = dataStream.indexOf('\uFFFC');
+            const noteStream = `${'Continuation note.\r'.repeat(50)}\n`;
+            const univer = new Univer();
+            const injector = univer.__getInjector();
+            const model = injector.createInstance(DocumentDataModel, {
+                id: 'continuous-section-footnote-counter',
+                body: {
+                    dataStream,
+                    paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `paragraph-${index}` })),
+                    sectionBreaks: [
+                        { startIndex: first.length - 1, sectionId: 'cover', pageNumberStart: 9 },
+                        ...(restart == null ? [] : [{ startIndex: first.length + shared.length - 1, sectionId: 'shared', sectionType: SectionType.CONTINUOUS, pageNumberStart: restart }]),
+                        { startIndex: dataStream.length - 1, sectionId: 'body', sectionType: SectionType.CONTINUOUS },
+                    ],
+                    customRanges: [{ startIndex: referenceIndex, endIndex: referenceIndex, rangeId: 'note', rangeType: CustomRangeType.FOOTNOTE, wholeEntity: true, properties: { noteId: 'note' } }],
+                },
+                notes: { note: { noteId: 'note', type: 'footnote', body: {
+                    dataStream: noteStream,
+                    paragraphs: Array.from(noteStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `note-${index}` })),
+                    sectionBreaks: [{ startIndex: noteStream.length - 1, sectionId: 'note' }],
+                } } },
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 320, height: 400 }, marginTop: 20, marginBottom: 20, marginLeft: 20, marginRight: 20 },
+            });
+            const snapshot = Tools.deepClone(model.getSnapshot());
+            const skeleton = DocumentSkeleton.create(injector.createInstance(DocumentViewModel, model), injector.get(LocaleService));
+            const assertPages = () => {
+                const pages = skeleton.getSkeletonData()!.pages;
+                expect(pages.length).toBeGreaterThan(1);
+                expect(pages[0]).toMatchObject({ sectionId: 'cover', pageNumber: 9 });
+                expect(pages.slice(1).map((page) => [page.sectionId, page.pageNumber])).toEqual(pages.slice(1).map((_, index) => ['body', (restart ?? 9) + index + 1]));
+                expect(pages.slice(1).every((page) => page.notes?.some((note) => note.continued))).toBe(true);
+                expect(pages.slice(1).flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))).toHaveLength(0);
+            };
+            try {
+                if (sliced) {
+                    completeIncrementalLayout(skeleton);
+                } else {
+                    skeleton.calculate();
+                }
+                assertPages();
+                for (const anchor of [first.length + 1, dataStream.length - 2]) {
+                    completeIncrementalLayout(skeleton, anchor);
+                    assertPages();
+                }
+                expect(model.getSnapshot()).toEqual(snapshot);
+            } finally {
+                skeleton.dispose();
+                model.dispose();
+                univer.dispose();
+            }
+        }
+    );
+
     it.each([false, true])('applies continuous-section page numbering to an empty explicit-break page (sliced=%s)', (sliced) => {
         const first = `Cover${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Question presented${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;

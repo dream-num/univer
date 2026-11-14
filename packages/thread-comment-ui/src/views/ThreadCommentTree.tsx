@@ -129,7 +129,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
-    const avatarFallback = uiConfig?.avatarFallback;
+    const avatar = user?.avatar || uiConfig?.avatarFallback;
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
     const direction = useObservable(localeService.direction$, localeService.getDirection());
     function formatCommentDateTime(value: string, region: LocaleType): string {
@@ -194,7 +194,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                   rtl:univer-left-auto rtl:univer-right-0
                 `}
                 style={{
-                    backgroundImage: `url(${user?.avatar || avatarFallback})`,
+                    backgroundImage: avatar ? `url(${avatar})` : undefined,
                 }}
             />
             {user || item.authorName

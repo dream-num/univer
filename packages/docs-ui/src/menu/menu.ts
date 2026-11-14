@@ -31,6 +31,7 @@ import {
     NAMED_STYLE_MAP,
     NamedStyleType,
     PresetListType,
+    resolveDocumentParagraphBullet,
     SectionType,
     ThemeService,
     Tools,
@@ -1441,10 +1442,11 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc?.getBody()?.paragraphs ?? [], doc?.getBody()?.dataStream ?? '');
                 let listType: string | undefined;
                 if (paragraphs.every((p) => {
+                    const bullet = resolveDocumentParagraphBullet(docDataModel.getSnapshot(), p);
                     if (!listType) {
-                        listType = p.bullet?.listType;
+                        listType = bullet?.listType;
                     }
-                    return p.bullet && p.bullet.listType === listType;
+                    return bullet && bullet.listType === listType;
                 })) {
                     subscriber.next(listType as PresetListType);
                     return;
@@ -1744,7 +1746,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;
         if (startOffset > prevIndex && startOffset <= startIndex) {
-            return paragraph;
+            return { ...paragraph, bullet: resolveDocumentParagraphBullet(docDataModel.getSnapshot(), paragraph) };
         }
 
         prevIndex = startIndex;

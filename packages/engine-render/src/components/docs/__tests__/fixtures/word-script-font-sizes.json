@@ -1,0 +1,3035 @@
+{
+    "glyphs": [
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Arial",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Times New Roman",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Calibri",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Cambria",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Segoe UI",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Consolas",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 12.479999542236328
+        },
+        {
+            "family": "SimSun",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 12.479999542236328
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Microsoft YaHei",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Aptos",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Arial Narrow",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Franklin Gothic Book",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Georgia",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Gungsuh",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "HGS明朝E",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Lucida Sans Unicode",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "MS Mincho",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Open Sans",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 12.479999542236328
+        },
+        {
+            "family": "PMingLiU",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 12.479999542236328
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Palatino Linotype",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Sylfaen",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Symbol",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Tahoma",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.0
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.480000019073486
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.960000038146973
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 9.479999542236328
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "Times",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 15.960000038146973
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 5,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 2.5199999809265137
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 8.039999961853027
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 8,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 3.9600000381469727
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 9.960000038146973
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 10,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.039999961853027
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 11.039999961853027
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 11,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 5.519999980926514
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 12.0
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 12,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 6.0
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 15.0
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 15,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 7.559999942779541
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 1,
+            "actualWordPdfSizePoints": 24.959999084472656
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 3,
+            "actualWordPdfSizePoints": 12.479999542236328
+        },
+        {
+            "family": "等线",
+            "nominalBodySizePoints": 25,
+            "baselineOffset": 2,
+            "actualWordPdfSizePoints": 12.479999542236328
+        }
+    ],
+    "actualWordProofSha256": {
+        "actual-word-script-font-proof.json": "a5867af1e1204d37c8e6ba0dc93b06d801dbe34e386eb9d5e1ce8594d94bfae1",
+        "actual-word-script-font-tie-proof.json": "6698318f5c3d67a22b1fdd6a5d968d3697672dace8536fe3ef6383148cb60ff3",
+        "actual-word-inventory-font-proof.json": "ddc4c9d7695b20e86335cf32ee9902c2eb8d337dbfdfaed970a4f856d6d50b4a",
+        "actual-word-font-program-metrics.json": "ba84231834a688e4f3fa8040c554ca3aa0d3a32da53c1a4c55bb631dd5de0563"
+    },
+    "scope": "Expected physical sizes come from504 distinct independently measured Word font/nominal-size/baseline contexts. Repeated observations are deduplicated and must agree. Public nominal font sizes remain unchanged. Substituted unavailable requested faces and unresolved Garamond controls are excluded from this implementation fixture and remain pending in the complete32-family physical proof; no full200 acceptance is claimed."
+}

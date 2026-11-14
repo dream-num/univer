@@ -15,14 +15,6 @@
  */
 
 import type { IParagraphStyle } from '@univerjs/core';
-import type {
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import {
     BooleanNumber,
     characterSpacingControlType,
@@ -32,15 +24,26 @@ import {
     SpacingRule,
     WrapStrategy,
 } from '@univerjs/core';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { cjk } from '../../../../../basics/cjk-regexp';
+import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
+    isWesternHangingPunctuation,
 } from '../../../../../basics/tools';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
 import {
+    adjustAdjacentPunctuationSpacing,
     createHyphenDashGlyph,
     getGlyphGroupFontBoundingBox,
     getGlyphGroupShrinkability,
@@ -179,7 +182,7 @@ function getGlyphGroupInkBounds(divide: IDocumentSkeletonDivide): { left: number
     return { left, right };
 }
 
-function getAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonDivide {
+function getAlignmentDivide(divide: IDocumentSkeletonDivide, afterLastTab = false): IDocumentSkeletonDivide {
     const { glyphGroup } = divide;
     let end = glyphGroup.length;
     let hasTrailingSpace = false;
@@ -195,6 +198,19 @@ function getAlignmentDivide(divide: IDocumentSkeletonDivide): IDocumentSkeletonD
 
     // Office hangs breakable spaces outside alignment, but retains tabs and
     // nonbreaking spaces. Share glyphs without removing editable source positions.
+    let start = 0;
+    if (afterLastTab) {
+        for (let index = 0; index < end; index++) {
+            if (glyphGroup[index].glyphType === GlyphType.TAB) {
+                start = index + 1;
+            }
+        }
+    }
+    if (start > 0) {
+        const tab = glyphGroup[start - 1];
+        // Justify the text after a fixed tab without moving the label or its stop.
+        return { ...divide, width: divide.width - tab.left - tab.width, glyphGroup: glyphGroup.slice(start, end) };
+    }
     return hasTrailingSpace ? { ...divide, glyphGroup: glyphGroup.slice(0, end) } : divide;
 }
 
@@ -206,13 +222,14 @@ function horizontalAlignHandler(
     excludeTrailingSpaces = false,
     preserveWordSpacing = false,
     isDrawingML = false,
-    compressAlignedOverflow = false
+    compressAlignedOverflow = false,
+    legacyWesternHanging = false,
+    justifiedWesternHanging = false
 ) {
     const { divides } = line;
 
     for (let i = 0; i < divides.length; i++) {
         const divide = divides[i];
-        const { width } = divide;
 
         if (divide.glyphGroup.length === 0) {
             divide.glyphGroupWidth = 0;
@@ -221,7 +238,10 @@ function horizontalAlignHandler(
         }
 
         removeGlyphAutoSpacing(divide.glyphGroup[divide.glyphGroup.length - 1], 1);
-        const alignmentDivide = isDrawingML || preserveWordSpacing ? getAlignmentDivide(divide) : divide;
+        const justifiedWords = preserveWordSpacing
+            && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH);
+        const alignmentDivide = isDrawingML || preserveWordSpacing ? getAlignmentDivide(divide, justifiedWords) : divide;
+        const { width } = alignmentDivide;
         let glyphGroupWidth = getGlyphGroupWidth(alignmentDivide);
 
         divide.glyphGroupWidth = getGlyphGroupWidth(divide);
@@ -230,28 +250,45 @@ function horizontalAlignHandler(
             continue;
         }
 
-        const justifiedWords = preserveWordSpacing
-            && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH);
         const compressedAlignedText = compressAlignedOverflow && alignmentDivide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content));
         if ((divide.isFull || ((justifiedWords || compressedAlignedText) && glyphGroupWidth > width)) && alignmentDivide.glyphGroup.length > 0) {
             let remaining = width - glyphGroupWidth;
+            const shrink = getGlyphGroupShrinkability(alignmentDivide.glyphGroup);
+            const terminalDivide = i === divides.length - 1 && isParagraphEnd(line);
+            let hangsJustifiedPunctuation = false;
 
             // Handle hanging punctuation to the right.
             // TODO: @jocs Handle hanging punctuation to the left if text dir is RTL.
             if (alignmentDivide.glyphGroup.length > 1) {
-                const lastGlyph = alignmentDivide.glyphGroup[alignmentDivide.glyphGroup.length - 1];
-                // A no-compression line can already contain a full CJK punctuation
-                // glyph outside its text extent. Do not compress it back inside.
-                const amount = hangingCjkPunctuation && glyphGroupWidth > width && isCjkLeftAlignedPunctuation(lastGlyph.content)
-                    ? lastGlyph.width
-                    : overhang(lastGlyph.content) * lastGlyph.width;
+                let lastGlyphIndex = alignmentDivide.glyphGroup.length - 1;
+                if (legacyWesternHanging || (preserveWordSpacing && justifiedWesternHanging)) {
+                    while (lastGlyphIndex > 0 && ['', '\r', '\n', '\u2028'].includes(alignmentDivide.glyphGroup[lastGlyphIndex].content)) {
+                        lastGlyphIndex--;
+                    }
+                }
+                const lastGlyph = alignmentDivide.glyphGroup[lastGlyphIndex];
+                // Word compresses word spaces before hanging punctuation on every justified line.
+                const wordShrink = justifiedWesternHanging
+                    ? alignmentDivide.glyphGroup.reduce((sum, glyph) =>
+                        sum + (glyph.content === DataStreamTreeTokenType.SPACE ? glyph.width / 4 : 0), 0)
+                    : 0;
+                hangsJustifiedPunctuation = preserveWordSpacing && justifiedWesternHanging
+                    && isWesternHangingPunctuation(lastGlyph.content)
+                    && glyphGroupWidth - width > wordShrink;
+                // Keep permitted hanging punctuation outside the extent before choosing word spacing.
+                let amount = overhang(lastGlyph.content) * lastGlyph.width;
+                if (hangsJustifiedPunctuation || (hangingCjkPunctuation && glyphGroupWidth > width && isCjkLeftAlignedPunctuation(lastGlyph.content))) {
+                    amount = lastGlyph.width;
+                } else if (preserveWordSpacing && justifiedWesternHanging && isWesternHangingPunctuation(lastGlyph.content)) {
+                    amount = 0;
+                }
 
-                remaining += preserveWordSpacing && !hangingCjkPunctuation ? 0 : amount;
+                const hangsWesternPunctuation = legacyWesternHanging && /^[.,]$/.test(lastGlyph.content);
+                remaining += preserveWordSpacing && !hangingCjkPunctuation && !hangsWesternPunctuation && !hangsJustifiedPunctuation ? 0 : amount;
             }
 
             let justificationRatio = 0;
             let extraJustification = 0;
-            const shrink = getGlyphGroupShrinkability(alignmentDivide.glyphGroup);
             const stretch = getGlyphGroupStretchability(alignmentDivide.glyphGroup);
 
             if (remaining < 0 && shrink > 0 && (!preserveWordSpacing
@@ -261,7 +298,7 @@ function horizontalAlignHandler(
                 remaining = Math.min(remaining + shrink, 0);
             } else if (
                 (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH) &&
-                !(i === divides.length - 1 && isParagraphEnd(line))
+                (!terminalDivide || hangsJustifiedPunctuation)
             ) {
                 // Attempt to increase the length of the line, using stretchability.
                 if (stretch > 0) {
@@ -314,6 +351,28 @@ function horizontalAlignHandler(
         if (!allowOverflowHorizontalOffset) {
             // To fix https://github.com/dream-num/univer-pro/issues/2930
             divide.paddingLeft = Math.max(divide.paddingLeft, 0);
+        }
+    }
+}
+
+function adjustLinePunctuationSpacing(line: IDocumentSkeletonLine): void {
+    for (const divide of line.divides) {
+        const tabEnds = new Map(divide.glyphGroup
+            .filter((glyph) => glyph.glyphType === GlyphType.TAB)
+            .map((glyph) => [glyph, glyph.left + glyph.width]));
+        if (!adjustAdjacentPunctuationSpacing(divide.glyphGroup, true)) {
+            continue;
+        }
+        let left = 0;
+        for (const glyph of divide.glyphGroup) {
+            const tabEnd = tabEnds.get(glyph);
+            if (tabEnd != null) {
+                // Keep the resolved tab anchor while compacting the text before it.
+                glyph.width = Math.max(0, tabEnd - left);
+                glyph.bBox.width = glyph.width;
+            }
+            glyph.left = left;
+            left += glyph.width;
         }
     }
 }
@@ -392,9 +451,13 @@ export function lineAdjustment(
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
     const { paragraphStyle = {} } = paragraph;
-    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
     const snapshot = viewModel.getSnapshot();
     const documentStyle = snapshot.documentStyle;
+    const resolvedParagraphStyle = resolveDocumentParagraphStyle(documentStyle, paragraphStyle, {
+        styles: snapshot.styles,
+        paragraphStyleId: paragraph.styleId,
+    });
+    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = resolvedParagraphStyle;
     const policy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(documentStyle.documentFlavor);
     const traditional = isTraditionalDocumentCompatibility(policy);
     const excludeTrailingSpaces = traditional && (horizontalAlign === HorizontalAlign.CENTER || horizontalAlign === HorizontalAlign.RIGHT);
@@ -402,12 +465,14 @@ export function lineAdjustment(
     // aligned paragraph. Apply that contraction before computing its offset.
     const compressAlignedOverflow = excludeTrailingSpaces
         && (sectionBreakConfig.characterSpacingControl ?? documentStyle.characterSpacingControl) !== characterSpacingControlType.doNotCompress;
-    const resolvedParagraphStyle = resolveDocumentParagraphStyle(documentStyle, paragraphStyle, {
-        styles: snapshot.styles,
-        paragraphStyleId: paragraph.styleId,
-    });
     const hangingCjkPunctuation = traditional && (sectionBreakConfig.characterSpacingControl ?? documentStyle.characterSpacingControl) === characterSpacingControlType.doNotCompress
         && resolvedParagraphStyle.hangingPunctuation === BooleanNumber.TRUE;
+    const wordCompatibilityMode = Number(documentStyle.compatibilitySettings?.compatibilityMode);
+    const legacyWesternHanging = traditional && wordCompatibilityMode >= 11 && wordCompatibilityMode < 15
+        && resolvedParagraphStyle.hangingPunctuation === BooleanNumber.TRUE;
+    const justifiedWesternHanging = traditional && !(wordCompatibilityMode >= 11 && wordCompatibilityMode < 15)
+        && resolvedParagraphStyle.hangingPunctuation === BooleanNumber.TRUE
+        && (horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH);
     for (const page of pages) {
         for (const section of page.sections) {
             for (const column of section.columns) {
@@ -437,13 +502,31 @@ export function lineAdjustment(
                         line.paddingTop = lineBoxHeight * 0.8 - boundingBoxAscent;
                         line.paddingBottom = lineBoxHeight - line.contentHeight - line.paddingTop;
                     }
+                    // Keep Word's original break positions; fixed pair spacing is
+                    // applied after fitting when additional compression is enabled.
+                    if (traditional
+                        && (sectionBreakConfig.characterSpacingControl ?? documentStyle.characterSpacingControl) !== characterSpacingControlType.doNotCompress
+                        && sectionBreakConfig.renderConfig?.preservePunctuationSpacing !== BooleanNumber.TRUE) {
+                        adjustLinePunctuationSpacing(line);
+                    }
                     shrinkStartAndEndCJKPunctuation(line, hangingCjkPunctuation);
                     addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
                     const preserveWordSpacing = traditional
                         && (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT
                             || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)
                         && !line.divides.some((divide) => divide.glyphGroup.some((glyph) => cjk.hasCJKText(glyph.content)));
-                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig), hangingCjkPunctuation, excludeTrailingSpaces, preserveWordSpacing, sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml', compressAlignedOverflow);
+                    horizontalAlignHandler(
+                        line,
+                        horizontalAlign,
+                        shouldAllowOverflowHorizontalOffset(sectionBreakConfig),
+                        hangingCjkPunctuation,
+                        excludeTrailingSpaces,
+                        preserveWordSpacing,
+                        sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml',
+                        compressAlignedOverflow,
+                        legacyWesternHanging,
+                        justifiedWesternHanging
+                    );
                 }
             }
         }

@@ -19,26 +19,13 @@ import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-do
 import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
-import {
-    normalizeInsertedParagraphIdsForDocument,
-    normalizeInsertedSectionIdsForDocument,
-    RESTORE_INSERTED_PARAGRAPH_IDS,
-} from './apply-utils/common';
-import {
-    appendRangeUpdates,
-    composeRangeUpdate,
-    dropRemovedRangeAnchors,
-    getChangedPropertyPaths,
-    getRangeUpdates,
-    moveRangeUpdates,
-    reconcileRangeUpdates,
-    transformRangeUpdate,
-    withoutRangeUpdates,
-} from './custom-range-update';
+import { normalizeInsertedParagraphIdsForDocument, normalizeInsertedSectionIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
+import { appendRangeUpdates, composeRangeUpdate, dropRemovedRangeAnchors, getChangedPropertyPaths, getRangeUpdates, moveRangeUpdates, reconcileRangeUpdates, transformRangeUpdate, withoutRangeUpdates } from './custom-range-update';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, getBodySliceForTextXAction, isUselessRetainAction } from './utils';
 
@@ -61,6 +48,74 @@ function withoutValueRangeMetadata(actions: TextXAction[], suppressed: Set<strin
         }
         return { ...action, body };
     });
+}
+
+function restoreComposedFieldRanges(inserted: TextXAction[], changes: TextXAction[], composed: TextXAction[]): TextXAction[] {
+    const complete = new Map<string, number>();
+    for (const actions of [inserted, changes]) {
+        for (const action of actions) {
+            if (action.t !== TextXActionType.INSERT) {
+                continue;
+            }
+            for (const range of action.body.customRanges ?? []) {
+                if (range.rangeType === CustomRangeType.FIELD &&
+                    action.body.dataStream[range.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    action.body.dataStream[range.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    complete.set(range.rangeId, (complete.get(range.rangeId) ?? 0) + 1);
+                }
+            }
+        }
+    }
+    if (!complete.size) {
+        return composed;
+    }
+    const fragments = new Map<string, { range: ICustomRange; count: number; startToken: string; endToken: string }>();
+    let offset = 0;
+    for (const action of composed) {
+        if (action.t === TextXActionType.INSERT) {
+            for (const range of action.body.customRanges ?? []) {
+                if (complete.get(range.rangeId) !== 1) {
+                    continue;
+                }
+                const startIndex = offset + range.startIndex;
+                const endIndex = offset + range.endIndex;
+                const previous = fragments.get(range.rangeId);
+                if (previous) {
+                    previous.range.endIndex = endIndex;
+                    previous.endToken = action.body.dataStream[range.endIndex];
+                    previous.count++;
+                } else {
+                    fragments.set(range.rangeId, { range: { ...Tools.deepClone(range), startIndex, endIndex }, count: 1, startToken: action.body.dataStream[range.startIndex], endToken: action.body.dataStream[range.endIndex] });
+                }
+            }
+        }
+        if (action.t !== TextXActionType.DELETE) {
+            offset += action.len;
+        }
+    }
+    const restored = [...fragments.values()].filter((item) => item.count > 1 &&
+        item.startToken === DataStreamTreeTokenType.CUSTOM_RANGE_START && item.endToken === DataStreamTreeTokenType.CUSTOM_RANGE_END);
+    if (!restored.length) {
+        return composed;
+    }
+    const updates = new Map(getRangeUpdates(composed).map((update) => [update.rangeId, update]));
+    const ids = new Set(restored.map(({ range }) => range.rangeId));
+    const pending = new Set(ids);
+    const actions = composed.map((action) => {
+        if (!action.body?.customRanges?.some((range) => ids.has(range.rangeId))) {
+            return action;
+        }
+        // Keep the first fragment's position in the metadata array, then restore its bounds.
+        const body = { ...action.body, customRanges: action.body.customRanges.filter((range) => !ids.has(range.rangeId) || pending.delete(range.rangeId)) };
+        if (!body.customRanges.length) {
+            Reflect.deleteProperty(body, 'customRanges');
+        }
+        return { ...action, body };
+    });
+    // A new field's delimiters can be split by its first result insertion.
+    return appendRangeUpdates(actions, restored.map(({ range }) => updates.has(range.rangeId)
+        ? composeRangeUpdate({ rangeId: range.rangeId, range }, updates.get(range.rangeId)!)
+        : { rangeId: range.rangeId, range }));
 }
 
 function insertedAnchorPriority(first: TextXAction, second: TextXAction, priority: TPriority): boolean {
@@ -89,12 +144,17 @@ function normalizeInsertActionParagraphIds(
     currentIndex: number,
     reservedParagraphIds: Set<string>
 ) {
-    normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
+    const splitsParagraph = normalizeInsertedParagraphIdsForDocument(doc.paragraphs, body.paragraphs, currentIndex, {
         freshenSplitParagraph: false,
         preserveExplicitParagraphIds: Boolean((body as IDocumentBody & Record<string, unknown>)[PRESERVE_INSERTED_PARAGRAPH_IDS]),
         reservedParagraphIds,
         dataStream: doc.dataStream,
     });
+    // Concurrent inline input can move a paragraph-boundary insertion inside the
+    // paragraph. Preserve its resolved identities instead of treating it as a split.
+    if (body.paragraphs?.length && !splitsParagraph) {
+        Reflect.set(body, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
+    }
 }
 
 export type TPriority = 'left' | 'right';
@@ -121,7 +181,7 @@ export class TextX {
             for (const update of otherUpdates) {
                 updates.set(update.rangeId, composeRangeUpdate(updates.get(update.rangeId), update));
             }
-            return appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values()));
+            return restoreComposedFieldRanges(thisActions, otherActions, appendRangeUpdates(TextX.compose(thisText, otherText), Array.from(updates.values())));
         }
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -178,7 +238,7 @@ export class TextX {
 
         textX.trimEndUselessRetainAction();
 
-        return textX.serialize();
+        return restoreComposedFieldRanges(thisActions, otherActions, textX.serialize());
     }
 
     /**

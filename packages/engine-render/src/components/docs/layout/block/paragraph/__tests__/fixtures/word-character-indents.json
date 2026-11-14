@@ -1,0 +1,557 @@
+{
+    "source": "Independent Microsoft Word COM first prints followed by effective indent observations",
+    "actualWordSessionSha256": "53d4ad941d5f908d804103cd6cad86d2dfcc6dcb1a89d12bda8ab8a32cae9570",
+    "actualObservationSha256": "42d4d363d4b7cf7eaca57617676928a008d99e71289ca94bf08881abd31ddc73",
+    "cases": [
+        {
+            "name": "Normal10-baseline-start",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal10-inherited-first-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal10-inherited-hang-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal10-direct-left-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal10-direct-first-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal10-direct-hang-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal10-direct-right-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentEnd": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 20.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal10-inherited-right-large-style",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentEnd": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 20.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal10-three-left-two-hang",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 3.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 50.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "Normal10-zero-left-physical-and-char-hang",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 0.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "Normal10-char-left-physical-hang",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 3.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 26.666666666666668
+                }
+            },
+            "wordLeft": 50.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "Normal10-first-large-run",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal10-hang-large-run",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal10-first-small-mark",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 20.0
+        },
+        {
+            "name": "Normal10-hang-small-mark",
+            "normalFontSize": 10,
+            "bodyFontSize": 10,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "Normal10-left-large-run",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal10-first-large-style-small-mark",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal10-hang-large-style-small-mark",
+            "normalFontSize": 10,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-baseline-start",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal20-inherited-first-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal20-inherited-hang-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-direct-left-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal20-direct-first-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal20-direct-hang-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-direct-right-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentEnd": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 40.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal20-inherited-right-large-style",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentEnd": {
+                    "v": 2,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 40.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal20-three-left-two-hang",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 3.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 100.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-zero-left-physical-and-char-hang",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 0.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-char-left-physical-hang",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 3.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 26.666666666666668
+                }
+            },
+            "wordLeft": 80.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "Normal20-first-large-run",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal20-hang-large-run",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-first-small-mark",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal20-hang-small-mark",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        },
+        {
+            "name": "Normal20-left-large-run",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "Normal20-first-large-style-small-mark",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 40.0
+        },
+        {
+            "name": "Normal20-hang-large-style-small-mark",
+            "normalFontSize": 20,
+            "bodyFontSize": 20,
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "paragraphMarkTextStyle": {
+                    "fs": 8
+                }
+            },
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -40.0
+        }
+    ]
+}

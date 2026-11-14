@@ -1,0 +1,72 @@
+{
+    "actualWordObservationSha256": "1695bb88f32518a8145626f748676b4161f4844b3699018010dc368ec773ef51",
+    "actualWordSessionSha256": "c963480be8b090212be31e54e7692f538dbd93fa983a612eddaaca8acf4b08ae",
+    "actualAuthoredWordControls": 10,
+    "actualPrefixWidth": 531.2011718750001,
+    "actualDivideWidth": 553.7333333333332,
+    "actualGlyphWidths": [
+        8.98046875,
+        8.407552083333332,
+        3.2799479166666665,
+        3.2154947916666665,
+        4.017578125
+    ],
+    "cases": [
+        {
+            "lang": "en-US",
+            "altLang": "zh-CN",
+            "punctuation": ".",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "2d33e6d75ce39a5a375c7434108ac1d18362ef743ee48be93e6b1c966fab3766",
+            "actualInputSha256": "e72ab4a2d3ff3f26d67ca662444133e76153bac53a12f4baafff5904dc934a32"
+        },
+        {
+            "lang": "en-US",
+            "altLang": "zh-CN",
+            "punctuation": ",",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "6fb3fada9eaf98eaa0b6d58e649b50ed41b741585ff142c6c06f8108ff0f1d33",
+            "actualInputSha256": "11bf4a7fdd45912022b5f7d922b399305fefde6232937ec250abed81e61b12a7"
+        },
+        {
+            "lang": "en-US",
+            "altLang": "ja-JP",
+            "punctuation": ".",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "d6f31ac035337b64f2a0c5edeb008518adec5751dc264999065d09c508d32050",
+            "actualInputSha256": "e7d725fcaf70f81896a8a259141ee5bfeb316bb9e338bbbf6d0c2f9a460f81bf"
+        },
+        {
+            "lang": "en-US",
+            "altLang": "ja-JP",
+            "punctuation": ",",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "cca2b963ec9e8a94b32babcc0131af4f4278a2fc7964c91133305bdca2eecfca",
+            "actualInputSha256": "5c97c48b2145753a10ee9145a05ed10153394d901bda8b4c9284db9a5ba3faab"
+        },
+        {
+            "lang": "en-US",
+            "altLang": "zh-TW",
+            "punctuation": ".",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "c795a17e2052ad0bef06d714ac9b9645038a61108e64acd25582a6763f197f79",
+            "actualInputSha256": "5770d0754fa9a9073642675f141649ec50b7911504e69c3ccc71d7351cc1c252"
+        },
+        {
+            "lang": "en-US",
+            "altLang": "zh-TW",
+            "punctuation": ",",
+            "actualVolOnFirstLine": false,
+            "actualWordFirstLine": "Hartwell, A. M. (2026, March 05). Reference Shape Study. In Collected Studies (2 ed.,",
+            "actualWordPdfSha256": "f924098ba48ce579b662e9b7aa51d4a24beed13cedce10433b26d6568abb0411",
+            "actualInputSha256": "b9242c094a756d2ed2892a9b9b38b3041f2f99e205c7bf740e4a9c5e30ca73d0"
+        }
+    ],
+    "actualTaiwanWordObservationSha256": "d51f64a695ef4cbb1493d518474d0b336abb22e90d475a599fb57cffce32cc07",
+    "actualTaiwanWordSessionSha256": "9c401b762a6dd37cdf054b07c3dedfbd541749d923ff21d3694b03ef610939ff"
+}

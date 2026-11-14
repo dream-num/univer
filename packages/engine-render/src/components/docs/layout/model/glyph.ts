@@ -14,35 +14,16 @@
  * limitations under the License.
  */
 
+import type { ITextStyle } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
-import type {
-    IAdjustability,
-    IDocumentSkeletonBoundingBox,
-    IDocumentSkeletonBullet,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonFontStyle,
-    IDocumentSkeletonGlyph,
-} from '../../../../basics/i-document-skeleton-cached';
+import type { IAdjustability, IDocumentSkeletonBoundingBox, IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonFontStyle, IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
-import {
-    getFirstGrapheme,
-    getFontStyleString,
-    getTextWithCaps,
-    hasArabic,
-    isCjkCenterAlignedPunctuation,
-    isCjkLeftAlignedPunctuation,
-    isCjkRightAlignedPunctuation,
-} from '../../../../basics/tools';
+import { getFirstGrapheme, getTextWithCaps, hasArabic, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, resolveTextStyleEastAsiaFont } from '../../../../basics/tools';
 import { getCheckboxShapeSize, isCheckboxGlyph } from '../../../../shape/checkbox';
-import {
-    applyFontMetricCompatibility,
-    getDocumentCompatibilityPolicy,
-    getSmallCapsFontStyle,
-    isTraditionalDocumentCompatibility,
-} from '../../document-compatibility';
+import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy, getDocumentFontStyle, getSmallCapsFontStyle, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
 
@@ -62,8 +43,11 @@ export function getGlyphGroupFontBoundingBox(
     let markDescent = 0;
     let normalLineHeight = 0;
     let markNormalLineHeight = 0;
+    let leadingAscent = 0;
+    let leadingDescent = 0;
     const traditional = isTraditionalDocumentCompatibility(policy);
     let hasInlineObject = false;
+    let hasListMarker = false;
     let hasOtherContent = false;
     for (const glyphs of glyphGroups) {
         for (const glyph of glyphs) {
@@ -80,7 +64,12 @@ export function getGlyphGroupFontBoundingBox(
             }
             boundingBoxAscent = Math.max(boundingBoxAscent, ba);
             boundingBoxDescent = Math.max(boundingBoxDescent, bd);
+            if (traditional && glyph.bBox.lineLeading) {
+                leadingAscent = Math.max(leadingAscent, ba + glyph.bBox.lineLeading / 2);
+                leadingDescent = Math.max(leadingDescent, bd + glyph.bBox.lineLeading / 2);
+            }
             normalLineHeight = Math.max(normalLineHeight, glyph.bBox.normalLineHeight ?? 0);
+            hasListMarker ||= glyph.glyphType === GlyphType.LIST;
             if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width > 0) {
                 hasInlineObject = true;
             } else if (glyph.width !== 0 || ba !== 0 || bd !== 0) {
@@ -97,6 +86,14 @@ export function getGlyphGroupFontBoundingBox(
         boundingBoxAscent = Math.max(boundingBoxAscent, markAscent);
         boundingBoxDescent = Math.max(boundingBoxDescent, markDescent);
         normalLineHeight = Math.max(normalLineHeight, markNormalLineHeight);
+    }
+    if (traditional && (hasInlineObject || hasListMarker)) {
+        boundingBoxAscent = Math.max(boundingBoxAscent, leadingAscent);
+        boundingBoxDescent = Math.max(boundingBoxDescent, leadingDescent);
+        if (!hasOtherContent) {
+            // An object-only line still uses its paragraph font for multiple-line leading.
+            normalLineHeight = Math.max(normalLineHeight, markNormalLineHeight);
+        }
     }
     return { boundingBoxAscent, boundingBoxDescent, normalLineHeight };
 }
@@ -147,6 +144,27 @@ export function baseAdjustability(content: string, width: number, emWidth = widt
             shrinkability: [0, 0],
         };
     }
+}
+
+export function adjustAdjacentPunctuationSpacing(glyphs: IDocumentSkeletonGlyph[], includeEastAsianQuotes = false): boolean {
+    let changed = false;
+    for (let index = 0; index < glyphs.length - 1; index++) {
+        const current = glyphs[index];
+        const next = glyphs[index + 1];
+        const delta = current.width / 2;
+        if (
+            (cjk.hasCJKPunctuation(current.content) || (includeEastAsianQuotes && /^[“”‘’]$/.test(current.content))) &&
+            (cjk.hasCJKPunctuation(next.content) || (includeEastAsianQuotes && /^[“”‘’]$/.test(next.content))) &&
+            current.ts?.textAdvance === undefined && next.ts?.textAdvance === undefined &&
+            delta > 0 && current.adjustability.shrinkability[1] + next.adjustability.shrinkability[0] >= delta
+        ) {
+            const right = Math.min(current.adjustability.shrinkability[1], delta);
+            glyphShrinkRight(current, right);
+            glyphShrinkLeft(next, delta - right);
+            changed = true;
+        }
+    }
+    return changed;
 }
 
 export function getGlyphGroupStretchability(glyphGroup: IDocumentSkeletonGlyph[]): number {
@@ -369,6 +387,11 @@ export function measureTextWithCharacterSpacing(
     return { content, width, inkWidth, segments };
 }
 
+export function isEastAsianFontCharacter(content: string, fontHint?: ITextStyle['fontHint']): boolean {
+    return cjk.hasCJK(content) || (fontHint === 'eastAsia'
+        && /^[\u00A1\u00A4\u00A7\u00A8\u00AA\u00AD\u00AF-\u00B4\u00B6-\u00BA\u00BC-\u00BF\u00D7\u00F7\u02B0-\u03CF\u0400-\u04FF\u2000-\u27BF\u2E80-\u2EFF\uE000-\uF8FF\uFB00-\uFB1C]+$/.test(content));
+}
+
 export function _createSkeletonWordOrLetter(
     glyphType: GlyphType,
     raw: string,
@@ -378,14 +401,21 @@ export function _createSkeletonWordOrLetter(
     const { textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const documentCompatibilityPolicy = config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const content = getTextWithCaps(raw, textStyle.caps || textStyle.smallCaps);
-    const eastAsiaFontFamily = textStyle.eastAsiaFontFamily?.trim();
+    const eastAsian = isEastAsianFontCharacter(content, textStyle.fontHint);
+    const fallback = eastAsian && config.eastAsiaFontScheme
+        ? resolveTextStyleEastAsiaFont({
+            ...textStyle,
+            eastAsiaFontTheme: textStyle.eastAsiaFontTheme ?? 'minor',
+        }, config.eastAsiaFontScheme, content).eastAsiaFontFamily
+        : undefined;
+    const eastAsiaFontFamily = [textStyle.eastAsiaFontFamily?.trim(), fallback !== textStyle.eastAsiaFontFamily ? fallback : undefined]
+        .filter(Boolean)
+        .join(', ');
     // A fallback font can paint CJK glyphs while Canvas still reports the Latin font's line metrics.
     // Word uses the East Asian font for ambiguous punctuation/symbols only when the run requests it.
     // Language/charset-dependent Latin extensions are not covered by the font-type hint alone.
-    const hintedEastAsian = textStyle.fontHint === 'eastAsia'
-        && /^[\u00A1\u00A4\u00A7\u00A8\u00AA\u00AD\u00AF-\u00B4\u00B6-\u00BA\u00BC-\u00BF\u00D7\u00F7\u02B0-\u03CF\u0400-\u04FF\u2000-\u27BF\u2E80-\u2EFF\uE000-\uF8FF\uFB00-\uFB1C]+$/.test(content);
-    const baseFontStyle = eastAsiaFontFamily && (cjk.hasCJK(content) || hintedEastAsian)
-        ? getFontStyleString({ ...textStyle, ff: `${eastAsiaFontFamily}, ${config.fontStyle.fontFamily}` })
+    const baseFontStyle = eastAsiaFontFamily && eastAsian
+        ? getDocumentFontStyle({ ...textStyle, ff: `${eastAsiaFontFamily}, ${config.fontStyle.fontFamily}` }, undefined, undefined, documentCompatibilityPolicy)
         : config.fontStyle;
 
     const fontStyle = getSmallCapsFontStyle(raw, textStyle, baseFontStyle, documentCompatibilityPolicy);
@@ -472,7 +502,7 @@ export function _createSkeletonWordOrLetter(
         (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy))) {
         bBox = { ...bBox, width: 0 };
     }
-    if (content === ' ' && (textStyle.fontHint === 'eastAsia' || config.balanceSpaceWidth)
+    if (content === ' ' && config.balanceSpaceWidth
         && config.balanceSingleByteDoubleByteWidth === BooleanNumber.TRUE
         && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
         // Word's compatibility option also expands leading/trailing and consecutive spaces in Latin text.
@@ -514,6 +544,7 @@ export function _createSkeletonWordOrLetter(
             ba: requestedLineAscent,
             bd: requestedLineDescent,
             normalLineHeight: requestedLineAscent + requestedLineDescent,
+            lineLeading: 0,
         };
     }
     const { width: contentWidth = 0 } = bBox;
@@ -604,8 +635,13 @@ export function createSkeletonBulletGlyph(
             s: BooleanNumber.FALSE,
         },
     };
-    const fontStyle = getFontStyleString(textStyle);
-    const metrics = FontCache.getTextSize(content, fontStyle, isTraditionalDocumentCompatibility(documentCompatibilityPolicy));
+    const fontStyle = getDocumentFontStyle(textStyle, undefined, undefined, documentCompatibilityPolicy);
+    const metrics = applyFontMetricCompatibility(
+        content,
+        fontStyle,
+        FontCache.getTextSize(content, fontStyle, isTraditionalDocumentCompatibility(documentCompatibilityPolicy)),
+        documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+    );
     const measuredBoundingBox = { ...metrics, width: metrics.width * getTextHorizontalScale(textStyle.sa) };
     const checkboxSize = isCheckboxGlyph(content) ? getCheckboxShapeSize(textStyle.fs) : null;
     const boundingBox = checkboxSize == null

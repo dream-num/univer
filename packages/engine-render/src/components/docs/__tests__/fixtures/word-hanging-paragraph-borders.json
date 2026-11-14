@@ -1,0 +1,47 @@
+{
+    "actualWordPdfSha256": "1cc92a0f8588996e6e94114915617d0fa65ea79a5c5e39414a946c6b8ecb7133",
+    "independentWordMeasurementSha256": "da2c4fbe6797bdd1d002a63c51d88e713d8660ec4bdfd84593c5a5e21ab00a8c",
+    "coordinateTolerancePixels": 0.02,
+    "cases": [
+        {
+            "name": "No indent",
+            "indentStart": 0.0,
+            "hanging": 0.0,
+            "indentFirstLine": 0.0,
+            "wrapped": false,
+            "actualWordLeftOffsetPixels": 0.0
+        },
+        {
+            "name": "Hanging48",
+            "indentStart": 48.0,
+            "hanging": 48.0,
+            "indentFirstLine": 0.0,
+            "wrapped": false,
+            "actualWordLeftOffsetPixels": 0.0
+        },
+        {
+            "name": "Hanging48 from96",
+            "indentStart": 96.0,
+            "hanging": 48.0,
+            "indentFirstLine": 0.0,
+            "wrapped": false,
+            "actualWordLeftOffsetPixels": 47.99466666666666
+        },
+        {
+            "name": "FirstLine48 from48",
+            "indentStart": 48.0,
+            "hanging": 0.0,
+            "indentFirstLine": 48.0,
+            "wrapped": false,
+            "actualWordLeftOffsetPixels": 47.99466666666666
+        },
+        {
+            "name": "Wrapped hanging48",
+            "indentStart": 48.0,
+            "hanging": 48.0,
+            "indentFirstLine": 0.0,
+            "wrapped": true,
+            "actualWordLeftOffsetPixels": 0.0
+        }
+    ]
+}

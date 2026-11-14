@@ -27,6 +27,7 @@ export {
 export type {
     IDeleteTableOfContentsCommandParams,
     IInsertTableOfContentsCommandParams,
+    ITableOfContentsHeading,
     IUpdateTableOfContentsCommandParams,
     TableOfContentsFormat,
     TableOfContentsTabLeader,

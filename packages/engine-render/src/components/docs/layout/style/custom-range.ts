@@ -15,11 +15,16 @@
  */
 
 import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, CustomRangeType } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType, SpecialCharacterKind } from '@univerjs/core';
 
 const CUSTOM_RANGE_COLOR_TOKEN = 'blue.600';
+const SPECIAL_CHARACTER_KINDS = new Set<string>(Object.values(SpecialCharacterKind));
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
+    if (customRange.rangeType === CustomRangeType.CUSTOM && customRange.wholeEntity &&
+        SPECIAL_CHARACTER_KINDS.has(customRange.properties?.kind)) {
+        return null;
+    }
     if (customRange.rangeType === CustomRangeType.HYPERLINK && customRange.properties?.textStyleMode === 'text') {
         return null;
     }

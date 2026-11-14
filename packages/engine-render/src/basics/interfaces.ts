@@ -19,6 +19,7 @@ import type {
     GridType,
     IDocStyleBase,
     IDocumentLayout,
+    IDocumentStyle,
     IOffset,
     IReferenceSource,
     IScale,
@@ -124,6 +125,8 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     cellHiddenEndMarkIndex?: number;
     cellPageHeights?: readonly number[];
     fontFamilyFallbacks?: Record<string, string>;
+    fontFamilyClasses?: IDocumentStyle['fontFamilyClasses'];
+    eastAsiaFontScheme?: IDocumentStyle['eastAsiaFontScheme'];
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;
@@ -174,6 +177,7 @@ export interface IFontCreateConfig {
     stackedText?: boolean;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
+    eastAsiaFontScheme?: IDocumentStyle['eastAsiaFontScheme'];
     charSpace: number;
     snapToGrid: BooleanNumber;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
@@ -213,6 +217,7 @@ export interface INodeSearch {
     page: number;
     segmentPage: number; // The index of the page where the header and footer reside.
     pageType: DocumentSkeletonPageType;
+    segmentId?: string;
     path: (string | number)[];
 }
 

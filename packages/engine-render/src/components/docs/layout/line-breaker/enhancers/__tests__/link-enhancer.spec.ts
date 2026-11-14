@@ -37,6 +37,35 @@ function collectBreaks(content: string, allowLinkBreaks = true) {
 
 describe('link enhancer', () => {
     it.each([
+        ['<', 'https://example.org/study', '>'],
+        ['(', 'https://example.org/study', ')'],
+        ['《', 'https://example.org/study', '》'],
+        ['[', 'www.example.org/study', ']'],
+    ])('keeps an enclosed URL intact when internal breaks are disabled: %s%s%s', (opening, url, closing) => {
+        const content = `Reference ${opening}${url}${closing} continues`;
+        const start = content.indexOf(opening);
+        const end = start + opening.length + url.length + closing.length;
+        const points = collectBreaks(content, false).map((point) => point.position);
+
+        expect(points.some((position) => position > start && position < end)).toBe(false);
+        expect(points[points.length - 1]).toBe(content.length);
+        expect(points.every((position, index) => index === 0 || position > points[index - 1])).toBe(true);
+    });
+
+    it('retains URL-relative break offsets after an opening delimiter', () => {
+        const content = 'Reference <https://foo123bar.example/path-now> continues';
+        const start = content.indexOf('https://');
+        const end = content.indexOf('>');
+        const points = collectBreaks(content);
+        const internal = points.filter((point) => point.type === BreakPointType.Link);
+
+        expect(internal.length).toBeGreaterThan(0);
+        expect(internal.every((point) => point.position > start && point.position < end)).toBe(true);
+        expect(points[points.length - 1].position).toBe(content.length);
+        expect(points.every((point, index) => index === 0 || point.position > points[index - 1].position)).toBe(true);
+    });
+
+    it.each([
         ['说明', 'http://www.swsresearch.com', '网站。'],
         ['😀 ', 'https://example.com/a?b=1', ' next'],
         ['', 'www.example.com', ''],

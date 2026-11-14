@@ -15,8 +15,9 @@
  */
 
 import type { ICustomRange } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType } from '@univerjs/core';
+import { formatNoteNumber } from './note-numbering';
 
 export function resolveHeaderFooterFieldGlyph(
     glyph: IDocumentSkeletonGlyph,
@@ -24,7 +25,8 @@ export function resolveHeaderFooterFieldGlyph(
     endIndex: number,
     customRanges: ICustomRange[],
     pageNumber: number,
-    pageCount: number | undefined
+    pageCount: number | undefined,
+    pageNumberFormat?: string
 ): IDocumentSkeletonGlyph {
     if (!glyph.content || glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START ||
         glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
@@ -37,7 +39,7 @@ export function resolveHeaderFooterFieldGlyph(
         typeof customRange.properties?.fieldType === 'string'
     );
     const fieldType = fieldRange?.properties?.fieldType?.toUpperCase();
-    if (!fieldRange || fieldRange.properties?.locked === BooleanNumber.TRUE || (fieldType !== 'PAGE' && fieldType !== 'NUMPAGES')) {
+    if (!fieldRange || (fieldType !== 'PAGE' && fieldType !== 'NUMPAGES')) {
         return glyph;
     }
     if (fieldType === 'NUMPAGES' && pageCount == null) {
@@ -47,7 +49,25 @@ export function resolveHeaderFooterFieldGlyph(
     // the cached digits were split into several differently formatted runs.
     let content = '';
     if (startIndex === fieldRange.startIndex + 1) {
-        content = String(fieldType === 'PAGE' ? pageNumber : pageCount);
+        const number = fieldType === 'PAGE' ? pageNumber : pageCount!;
+        content = formatNoteNumber(number, fieldType === 'PAGE' ? pageNumberFormat : undefined);
+        const instruction = String(fieldRange.properties?.instruction ?? '');
+        for (const match of instruction.matchAll(/\\\*\s*(?:"([^"]*)"|([^\s\\]+))/g)) {
+            const format = match[1] ?? match[2];
+            if (/^ARABIC$/i.test(format)) {
+                content = String(number);
+            } else if (/^ROMAN$/i.test(format)) {
+                content = formatNoteNumber(number, format === 'roman' ? 'lowerRoman' : 'upperRoman');
+            } else if (/^ALPHABETIC$/i.test(format)) {
+                content = formatNoteNumber(number, format === 'alphabetic' ? 'lowerLetter' : 'upperLetter');
+            } else if (/^Upper$/i.test(format)) {
+                content = content.toUpperCase();
+            } else if (/^Lower$/i.test(format)) {
+                content = content.toLowerCase();
+            } else if (!/^(MERGEFORMAT|CHARFORMAT)$/i.test(format)) {
+                return glyph;
+            }
+        }
     }
 
     return content === glyph.content ? glyph : { ...glyph, content };

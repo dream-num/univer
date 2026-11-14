@@ -44,6 +44,20 @@ function createDocument(dataStream: string): IDocumentData {
 }
 
 describe('measureDocumentNoWrapTextWidth', () => {
+    it('uses the document font classification for no-wrap hosts and text ranges', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({ width: 32 } as never);
+        try {
+            const document = createDocument('中文');
+            document.documentStyle.textStyle = { ff: 'Authored Roman', fs: 12 };
+            document.documentStyle.fontFamilyClasses = { 'Authored Roman': 'roman' };
+            expect(measureDocumentNoWrapTextWidth(document)).toBe(32);
+            expect(measureDocumentNoWrapTextRangeWidth(document, 0, 2)).toBe(32);
+            expect(measureSpy.mock.calls.every((call) => call[1].includes('"Authored Roman", serif'))).toBe(true);
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
     it.each([undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN, DocumentFlavor.DRAWINGML])(
         'honors the East Asian spacing switch across runs and ranges without changing its default (%s)',
         (documentFlavor) => {

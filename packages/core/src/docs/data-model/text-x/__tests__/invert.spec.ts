@@ -195,6 +195,8 @@ describe('test TextX static methods invert and makeInvertible', () => {
         }];
 
         expect(textX.serialize()).toEqual(expectedActions);
+        const changed = TextX.apply(Tools.deepClone(docBody), textX.serialize());
+        expect(changed.textRuns).toContainEqual({ st: 0, ed: 3, ts: { bl: BooleanNumber.TRUE, it: BooleanNumber.TRUE } });
         TextX.apply(docBody, textX.serialize());
         TextX.apply(docBody, TextX.invert(textX.serialize()));
         expect(docBody).toEqual(original);

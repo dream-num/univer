@@ -49,6 +49,8 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
         }
 
         if (target.length > 0) {
+            // The replacement utility exposes normalized decoration metadata even for plain text.
+            documentDataModel.getBody()!.customDecorations ??= [];
             const sliceBody = documentDataModel.sliceBody(index, index + queryLen);
             const replaceBody: IDocumentBody = {
                 dataStream: target,

@@ -16,7 +16,7 @@
 
 import type { IDocStyles, IDocumentBody, IDocumentData, JSONXActions } from '@univerjs/core';
 import type { IDocumentLayoutInvalidation } from '@univerjs/engine-render';
-import { CustomRangeType, JSON1, TextX } from '@univerjs/core';
+import { CustomRangeType, JSON1, resolveDocumentParagraphBullet, TextX } from '@univerjs/core';
 
 interface IDocumentLayoutRange {
     end: number;
@@ -119,7 +119,7 @@ class DocumentMutationLayoutIndex {
         this._styleRanges = new Map();
         for (const paragraph of this._body?.paragraphs ?? []) {
             const paragraphRange = { start: paragraph.startIndex, end: paragraph.startIndex + 1 };
-            const listId = paragraph.bullet?.listId;
+            const listId = resolveDocumentParagraphBullet({ styles: this._styles }, paragraph)?.listId;
             if (listId != null) {
                 this._listRanges.set(listId, mergeLayoutRange(this._listRanges.get(listId), paragraphRange)!);
             }

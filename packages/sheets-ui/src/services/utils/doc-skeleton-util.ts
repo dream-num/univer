@@ -26,6 +26,7 @@ import {
     HorizontalAlign,
     IUniverInstanceService,
     PresetListType,
+    resolveDocumentParagraphBullet,
     UniverInstanceType,
     VerticalAlign,
 } from '@univerjs/core';
@@ -151,7 +152,11 @@ const calcBulletPosition = (skeleton: DocumentSkeleton, paragraph: IParagraph, p
 export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, paddingLeft = 0, paddingTop = 0) => {
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
-    const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
+    const snapshot = docModel.getSnapshot();
+    const checkLists = (docModel.getBody()?.paragraphs ?? []).flatMap((paragraph) => {
+        const bullet = resolveDocumentParagraphBullet(snapshot, paragraph);
+        return bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0 ? [{ ...paragraph, bullet }] : [];
+    });
     const drawings = docSkeleton.getSkeletonData()?.pages[0].skeDrawings;
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),

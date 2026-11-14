@@ -14,74 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDocumentStyle, ISectionBreak } from '@univerjs/core';
-import {
-    AlignTypeH,
-    AlignTypeV,
-    BooleanNumber,
-    CustomRangeType,
-    DataStreamTreeTokenType,
-    DocumentDataModel,
-    DocumentFlavor,
-    GridType,
-    NumberUnitType,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    SectionType,
-    SpacingRule,
-} from '@univerjs/core';
+import type { IDocumentData, IDocumentStyle, IParagraphBorder, ISectionBreak } from '@univerjs/core';
+import { AlignTypeH, AlignTypeV, BaselineOffset, BooleanNumber, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocStyleType, DocumentDataModel, DocumentFlavor, GridType, LocaleType, NumberUnitType, ObjectRelativeFromH, ObjectRelativeFromV, SectionType, SpacingRule } from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
-import {
-    clearFontCreateConfigCache,
-    columnIterator,
-    compareDocumentSkeletonNestedPagePathOrder,
-    documentSkeletonLineIterator,
-    documentSkeletonTableIterator,
-    getCharSpaceApply,
-    getCharSpaceConfig,
-    getColumnByDivide,
-    getDocumentSkeletonColumnPagePathInfo,
-    getDocumentSkeletonNestedPageOffset,
-    getFontConfigFromLastGlyph,
-    getFontCreateConfig,
-    getGlyphGroupWidth,
-    getLastColumn,
-    getLastLine,
-    getLastLineByColumn,
-    getLastNotFullColumnInfo,
-    getLastNotFullDivideInfo,
-    getLastPage,
-    getLastRemainingDivide,
-    getLastSection,
-    getLastSpan,
-    getLineHeightConfig,
-    getNextDivide,
-    getNullSkeleton,
-    getNumberUnitValue,
-    getPageContentWidth,
-    getPageFromPath,
-    getPositionHorizon,
-    getPositionVertical,
-    getPreLine,
-    glyphIterator,
-    isBlankColumn,
-    isBlankPage,
-    isColumnFull,
-    lineIterator,
-    mergeByV,
-    prepareSectionBreakConfig,
-    resetContext,
-    setPageParent,
-    updateBlockIndex,
-    updateInlineDrawingCoordsAndBorder,
-    updateParagraphBorders,
-    validationGrid,
-} from '../tools';
+import { createSkeletonLetterGlyph } from '../model/glyph';
+import { clearFontCreateConfigCache, columnIterator, compareDocumentSkeletonNestedPagePathOrder, documentSkeletonLineIterator, documentSkeletonTableIterator, getCharSpaceApply, getCharSpaceConfig, getColumnByDivide, getDocumentSkeletonColumnPagePathInfo, getDocumentSkeletonNestedPageOffset, getFontConfigFromLastGlyph, getFontCreateConfig, getGlyphGroupWidth, getLastColumn, getLastLine, getLastLineByColumn, getLastNotFullColumnInfo, getLastNotFullDivideInfo, getLastPage, getLastRemainingDivide, getLastSection, getLastSpan, getLineHeightConfig, getNextDivide, getNullSkeleton, getNumberUnitValue, getPageContentWidth, getPageFromPath, getPositionHorizon, getPositionVertical, getPreLine, glyphIterator, hasSameParagraphBorderSet, isBlankColumn, isBlankPage, isColumnFull, lineIterator, mergeByV, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder, updateParagraphBorders, validationGrid } from '../tools';
+import wordDirectoryHyperlinks from './fixtures/word-directory-hyperlinks.json';
 
 function createSectionLayoutContext(documentStyle: IDocumentStyle, sections: Array<Omit<ISectionBreak, 'startIndex'>>) {
     const dataModel = new DocumentDataModel({
@@ -210,6 +153,10 @@ describe('docs layout tools extra', () => {
         expect(getNumberUnitValue({ v: Number.NaN } as any, 100)).toBe(0);
         expect(getNumberUnitValue({ v: 10, u: NumberUnitType.PIXEL } as any, 100)).toBe(10);
         expect(getNumberUnitValue({ v: 2, u: NumberUnitType.POINT } as any, 10)).toBe(2);
+        expect(getNumberUnitValue({ v: 2, u: NumberUnitType.CHARACTER, fallback: 12 }, 10)).toBe(20);
+        expect(getNumberUnitValue({ v: 0, u: NumberUnitType.CHARACTER, fallback: 12 }, 10)).toBe(12);
+        expect(getNumberUnitValue({ v: 0, u: NumberUnitType.LINE, fallback: 12 }, 16)).toBe(12);
+        expect(getNumberUnitValue({ v: 0, u: NumberUnitType.CHARACTER, fallback: Number.NaN }, 10)).toBe(0);
 
         expect(validationGrid(GridType.SNAP_TO_CHARS, BooleanNumber.TRUE)).toBe(true);
         expect(validationGrid(GridType.LINES, BooleanNumber.TRUE)).toBe(false);
@@ -720,7 +667,7 @@ describe('docs layout tools extra', () => {
             viewModel as any,
             paragraphNode as any,
             sectionBreakConfig as any,
-            { paragraphStyle: {}, bullet: { listType: 'bullet' } } as any
+            { paragraphStyle: {}, bullet: { listType: 'bullet', listId: 'counter', nestingLevel: 0 } } as any
         );
         expect(configWithBullet.textStyle.bl).toBe(1);
 
@@ -1347,6 +1294,460 @@ describe('docs layout tools extra', () => {
         expect(getDocumentSkeletonColumnPagePathInfo({
             path: ['pages', 2, 'skeTables', 'table-1', 'rows', 0, 'cells', 0],
         })).toBeUndefined();
+    });
+
+    it.each(['page', 'section', 'column'] as const)('keeps an empty %s from consuming editable source positions', (container) => {
+        const first = createPageSkeleton();
+        const blank = createPageSkeleton();
+        const last = createPageSkeleton();
+        for (const item of [first, blank, last]) {
+            item.page.skeTables.clear();
+            item.column.lines = [item.line1];
+        }
+        if (container === 'page') {
+            blank.page.sections = [];
+        } else if (container === 'section') {
+            blank.section.columns = [];
+        } else {
+            blank.column.lines = [];
+        }
+        const pages = [first.page, blank.page, last.page];
+
+        updateBlockIndex(pages);
+
+        expect([first.page.st, first.page.ed]).toEqual([0, 2]);
+        expect([blank.page.st, blank.page.ed]).toEqual([3, 2]);
+        expect([last.page.st, last.page.ed]).toEqual([3, 5]);
+        expect(pages.findIndex((page) => page.st <= 3 && page.ed >= 3)).toBe(2);
+    });
+
+    it('does not join adjacent paragraph borders with different compound styles', () => {
+        const border: IParagraphBorder = {
+            color: { rgb: '#000000' },
+            width: 4,
+            padding: 1,
+            dashStyle: DashStyleType.SOLID,
+            style: 'thinThickSmallGap',
+        };
+
+        expect(hasSameParagraphBorderSet(
+            { borderBottom: border },
+            { borderBottom: { ...border } }
+        )).toBe(true);
+        expect(hasSameParagraphBorderSet(
+            { borderBottom: border },
+            { borderBottom: { ...border, style: 'double' } }
+        )).toBe(false);
+    });
+
+    it.each([
+        DocumentFlavor.TRADITIONAL,
+        DocumentFlavor.MODERN,
+        DocumentFlavor.UNSPECIFIED,
+        DocumentFlavor.DRAWINGML,
+    ].flatMap((documentFlavor) => ['\t', ' ', '\u3000'].map((content) => ({ documentFlavor, content }))))(
+        'keeps the font baseline of a completed whitespace line (flavor: $documentFlavor, content: $content)',
+        ({ documentFlavor, content }) => {
+            const { page, line1, divide1 } = createPageSkeleton();
+            line1.lineHeight = 18;
+            line1.contentHeight = 12;
+            line1.divides = [{
+                ...divide1,
+                isFull: true,
+                glyphGroup: [7, 10].map((ascent) => ({
+                    ...divide1.glyphGroup[0],
+                    content,
+                    raw: content,
+                    bBox: { ba: ascent, bd: 2 },
+                })),
+            }];
+
+            updateBlockIndex([page], -1, getDocumentCompatibilityPolicy(documentFlavor));
+
+            expect(line1.asc).toBe(10);
+            expect(line1.dsc).toBe(2);
+            expect(line1.lineHeight).toBe(18);
+            expect(line1.contentHeight).toBe(12);
+        }
+    );
+
+    it.each(['\t', ' ', '\u3000'])('preserves an invisible zero-height whitespace line (%s)', (content) => {
+        const { page, line1, divide1 } = createPageSkeleton();
+        line1.lineHeight = 0;
+        line1.contentHeight = 0;
+        line1.divides = [{
+            ...divide1,
+            isFull: true,
+            glyphGroup: [{ ...divide1.glyphGroup[0], content, raw: content, bBox: { ba: 10, bd: 2 } }],
+        }];
+
+        updateBlockIndex([page], -1, getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL));
+
+        expect(line1.asc).toBe(0);
+        expect(line1.dsc).toBe(0);
+        expect(line1.lineHeight).toBe(0);
+    });
+
+    it.each(['\t', ' ', '\u3000'])('keeps oversized whitespace out of a visible line baseline (%s)', (content) => {
+        const { page, line1, divide1 } = createPageSkeleton();
+        line1.contentHeight = 4;
+        line1.divides = [{
+            ...divide1,
+            isFull: true,
+            glyphGroup: [
+                { ...divide1.glyphGroup[0], content, raw: content, bBox: { ba: 90, bd: 20 } },
+                { ...divide1.glyphGroup[0], content: 'T', raw: 'T', bBox: { ba: 3, bd: 1 } },
+            ],
+        }];
+
+        updateBlockIndex([page], -1, getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL));
+
+        expect(line1.asc).toBe(3);
+        expect(line1.dsc).toBe(1);
+        expect(line1.contentHeight).toBe(4);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [CustomRangeType.FOOTNOTE, CustomRangeType.ENDNOTE].flatMap((rangeType) =>
+            [undefined, BaselineOffset.NORMAL, BaselineOffset.SUBSCRIPT, BaselineOffset.SUPERSCRIPT].map((va) =>
+                ({ documentFlavor, rangeType, va })))))('preserves authored note marker alignment and its default ($documentFlavor/$rangeType/$va)', ({ documentFlavor, rangeType, va }) => {
+        const paragraph = { startIndex: 2, paragraphId: 'note-marker' };
+        const { viewModel, dataModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A\uFFFC', {
+            documentStyle: { documentFlavor },
+            body: {
+                paragraphs: [paragraph],
+                textRuns: [{ st: 1, ed: 2, ts: { fs: 16, cl: { rgb: '#123456' }, ...va == null ? {} : { va } } }],
+                customRanges: [{ rangeId: 'note-marker', rangeType, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { noteId: 'note' } }],
+            },
+            notes: { note: { noteId: 'note', type: rangeType === CustomRangeType.FOOTNOTE ? 'footnote' : 'endnote', body: { dataStream: 'Note\r\n', paragraphs: [{ startIndex: 4 }], sectionBreaks: [{ startIndex: 5 }] } } },
+        });
+        try {
+            const config = getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const expected = va ?? BaselineOffset.SUPERSCRIPT;
+            expect(config.textStyle).toMatchObject({ fs: 16, va: expected, cl: { rgb: '#123456' } });
+            expect(config.fontStyle.originFontSize).toBe(16);
+            if (expected === BaselineOffset.NORMAL) {
+                expect(config.fontStyle.fontSize).toBe(16);
+            } else {
+                expect(config.fontStyle.fontSize).toBeLessThan(16);
+            }
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [CustomRangeType.FOOTNOTE, CustomRangeType.ENDNOTE].flatMap((rangeType) =>
+            ['paragraph', 'character'].map((source) => ({ documentFlavor, rangeType, source }))))
+    )('resolves inherited note marker formatting before the range default ($documentFlavor/$rangeType/$source)', ({ documentFlavor, rangeType, source }) => {
+        const paragraph = { startIndex: 2, paragraphId: 'inherited-note-marker', styleId: 'NoteParagraph' };
+        const { viewModel, dataModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A\uFFFC', {
+            documentStyle: { documentFlavor },
+            styles: {
+                Base: { name: 'Base', type: source === 'paragraph' ? DocStyleType.paragraph : DocStyleType.character, textStyle: { va: BaselineOffset.NORMAL, fs: 15, cl: { rgb: '#654321' } } },
+                NoteParagraph: { name: 'Note Paragraph', type: DocStyleType.paragraph, ...source === 'paragraph' ? { basedOn: 'Base' } : {} },
+                NoteCharacter: { name: 'Note Character', type: DocStyleType.character, ...source === 'character' ? { basedOn: 'Base' } : {} },
+            },
+            body: {
+                paragraphs: [paragraph],
+                textRuns: [{ st: 1, ed: 2, sId: 'NoteCharacter' }],
+                customRanges: [{ rangeId: 'note-marker', rangeType, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { noteId: 'note' } }],
+            },
+            notes: { note: { noteId: 'note', type: rangeType === CustomRangeType.FOOTNOTE ? 'footnote' : 'endnote', body: { dataStream: 'Note\r\n', paragraphs: [{ startIndex: 4 }], sectionBreaks: [{ startIndex: 5 }] } } },
+        });
+        try {
+            const config = getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            expect(config.textStyle).toMatchObject({ va: BaselineOffset.NORMAL, fs: 15, cl: { rgb: '#654321' } });
+            expect(config.fontStyle.fontSize).toBe(15);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+        }
+    });
+
+    it.each([10, 18])('uses current named paragraph and character styles in the font path (%s)', (size) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 5, paragraphId: 'named-font', styleId: 'quote', paragraphStyle: {} };
+        const { viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello', {
+            styles: {
+                base: { name: 'Base', type: DocStyleType.paragraph, textStyle: { ff: 'Courier New', fs: size } },
+                quote: { name: 'Quote', type: DocStyleType.paragraph, basedOn: 'base', textStyle: { it: 1 } },
+                emphasisBase: { name: 'Emphasis Base', type: DocStyleType.character, textStyle: { cl: { rgb: '#123456' } } },
+                emphasis: { name: 'Emphasis', type: DocStyleType.character, basedOn: 'emphasisBase', textStyle: { bl: 1 } },
+            },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 5, sId: 'emphasis', ts: { bl: 0 } }] },
+        });
+        const result = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(result.textStyle).toMatchObject({ ff: 'Courier New', fs: size, it: 1, bl: 0, cl: { rgb: '#123456' } });
+    });
+
+    it.each(wordDirectoryHyperlinks.cases)('matches Word hyperlink typography in cached directories ($id/$mode)', (fixture) => {
+        clearFontCreateConfigCache();
+        const model = fixture.model as unknown as IDocumentData;
+        const { dataModel, viewModel, sectionBreakConfig } = createParagraphLayoutTestBed('', fixture.model);
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const paragraphs = viewModel.getChildren().flatMap((section) => section.children);
+        for (const { offset, expected } of fixture.samples) {
+            const node = paragraphs.find((node) => node.contentStartIndex <= offset && node.endIndex >= offset)!;
+            const paragraph = model.body!.paragraphs!.find((paragraph) => paragraph.startIndex >= offset)!;
+            const { textStyle } = getFontCreateConfig(offset - node.contentStartIndex, viewModel, node, sectionBreakConfig, paragraph);
+            expect(textStyle.cl?.rgb ?? '#000000').toBe(expected.rgb);
+            expect(textStyle.fs).toBe(expected.size);
+            expect(textStyle.bl ?? BooleanNumber.FALSE).toBe(expected.bold ? BooleanNumber.TRUE : BooleanNumber.FALSE);
+            expect(textStyle.ul?.s ?? BooleanNumber.FALSE).toBe(expected.underlined ? BooleanNumber.TRUE : BooleanNumber.FALSE);
+        }
+        expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('resolves imported default theme fonts without overriding authored fonts (%s)', (documentFlavor) => {
+        const paragraph = { startIndex: 2, paragraphId: 'default-theme-font' };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('AB', {
+            documentStyle: { documentFlavor, defaultFontTheme: 'minor' },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: {} }, { st: 1, ed: 2, ts: { ff: 'Arial' } }] },
+        });
+        sectionBreakConfig.localeService.setLocale(LocaleType.ZH_CN);
+        try {
+            const before = JSON.stringify(dataModel.getSnapshot());
+            expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph).fontStyle.fontFamily).toBe('等线');
+            expect(getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, paragraph).fontStyle.fontFamily).toBe('Arial');
+            clearFontCreateConfigCache();
+            dataModel.documentStyle.latinFontScheme = { minor: 'Georgia' };
+            expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph).fontStyle.fontFamily).toBe('Georgia');
+            dataModel.documentStyle.latinFontScheme = undefined;
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([
+        ['zh-CN', 'Hans'],
+        ['zh-TW', 'Hant'],
+        ['zh-HK', 'Hant'],
+        ['zh-Hans-TW', 'Hans'],
+        ['zh-Hant-CN', 'Hant'],
+        ['ja-JP', 'Jpan'],
+        ['ko-KR', 'Hang'],
+    ])('resolves inherited East Asian theme fonts for %s without replacing Latin fonts', (language, script) => {
+        for (const documentFlavor of [DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN]) {
+            clearFontCreateConfigCache();
+            const paragraph = { startIndex: 3, paragraphId: 'theme-font', styleId: 'heading' };
+            const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A中B', {
+                documentStyle: {
+                    documentFlavor,
+                    textStyle: { ff: 'Century', eastAsiaFontTheme: 'minor', altLang: language },
+                    eastAsiaFontScheme: {
+                        major: { scriptFonts: { Hans: 'Major Hans', Hant: 'Major Hant', Jpan: 'Major Jpan', Hang: 'Major Hang' } },
+                        minor: { fontFamily: 'Minor East Asian' },
+                    },
+                },
+                styles: { heading: { name: 'Heading', type: DocStyleType.paragraph, textStyle: { eastAsiaFontTheme: 'major' } } },
+                body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 3, ts: {} }] },
+            });
+            const before = JSON.stringify(dataModel.getSnapshot());
+            for (const index of [0, 1, 2]) {
+                expect(getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph).textStyle)
+                    .toMatchObject({ ff: 'Century', eastAsiaFontFamily: `Major ${script}`, eastAsiaFontTheme: 'major' });
+            }
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        }
+    });
+
+    it.each([
+        { language: 'zh-TW', altLang: 'zh-CN', binding: 'major', family: 'Cached', expected: 'Traditional' },
+        { language: undefined, altLang: 'en-US', binding: 'major', family: 'Cached', expected: 'Cached' },
+        { language: 'zh-CN', altLang: 'zh-CN', binding: null, family: 'Explicit', expected: 'Explicit' },
+        { language: 'zh-CN', altLang: 'zh-CN', binding: 'minor', family: 'Cached', expected: 'Explicit Theme EA' },
+    ] as const)('honors document theme language, explicit faces and unresolved mappings: %j', ({ language, altLang, binding, family, expected }) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 1, paragraphId: 'theme-override' };
+        const { viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('中', {
+            documentStyle: {
+                textStyle: { ff: 'Century', eastAsiaFontTheme: 'major' },
+                eastAsiaFontScheme: {
+                    language,
+                    major: { scriptFonts: { Hans: 'Simplified', Hant: 'Traditional' } },
+                    minor: { fontFamily: 'Explicit Theme EA', scriptFonts: { Hans: 'Unused' } },
+                },
+            },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: { eastAsiaFontTheme: binding, eastAsiaFontFamily: family, altLang } }] },
+        });
+        expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph).textStyle)
+            .toMatchObject({ ff: 'Century', eastAsiaFontFamily: expected });
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('provides a theme fallback without replacing declared East Asian fonts in %s mode', (documentFlavor) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 1, paragraphId: 'font-fallback' };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('中', {
+            documentStyle: {
+                documentFlavor,
+                textStyle: { ff: 'Times New Roman', eastAsiaFontFamily: 'DejaVu Sans', eastAsiaFontTheme: null, altLang: 'en-US', fs: 12 },
+                eastAsiaFontScheme: { major: {}, minor: { scriptFonts: { Hans: 'Word Minor Hans' } } },
+            },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: {} }] },
+        });
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const config = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(config.textStyle).toMatchObject({ ff: 'Times New Roman', eastAsiaFontFamily: 'DejaVu Sans', eastAsiaFontTheme: null, fs: 12 });
+        const glyph = createSkeletonLetterGlyph('中', config);
+        const families = glyph.fontStyle!.fontFamily;
+        expect(families).toContain('Word Minor Hans');
+        expect(families.indexOf('DejaVu Sans')).toBeLessThan(families.indexOf('Word Minor Hans'));
+        expect(families.indexOf('Word Minor Hans')).toBeLessThan(families.indexOf('Times New Roman'));
+        const continuation = getFontConfigFromLastGlyph(glyph, sectionBreakConfig, {});
+        expect(continuation.eastAsiaFontScheme).toBe(sectionBreakConfig.eastAsiaFontScheme);
+        expect(createSkeletonLetterGlyph('中', continuation).fontStyle?.fontFamily).toContain('Word Minor Hans');
+        expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+    });
+
+    it('does not invent a fallback without a matching theme script', () => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 1, paragraphId: 'font-fallback-missing' };
+        const { viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A', {
+            documentStyle: {
+                textStyle: { ff: 'Arial', eastAsiaFontFamily: 'Declared', eastAsiaFontTheme: null, altLang: 'en-US' },
+                eastAsiaFontScheme: { major: {}, minor: { scriptFonts: { Hans: 'Unused' } } },
+            },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: {} }] },
+        });
+        const config = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(createSkeletonLetterGlyph('A', config).fontStyle?.fontFamily).toBe(config.fontStyle.fontFamily);
+    });
+
+    it.each(['Body', ''])('resolves a named paragraph mark style for visible and empty paragraphs (%s)', (text) => {
+        const paragraph = {
+            startIndex: text.length,
+            paragraphId: 'named-paragraph-mark',
+            paragraphStyle: {
+                textStyle: { fs: 12 },
+                paragraphMarkStyleId: 'Mark',
+                paragraphMarkTextStyle: { it: BooleanNumber.FALSE },
+            },
+        };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(text, {
+            styles: {
+                Base: { name: 'Base', type: DocStyleType.character, textStyle: { fs: 10, it: BooleanNumber.TRUE } },
+                Mark: { name: 'Mark', type: DocStyleType.character, basedOn: 'Base', textStyle: { bl: BooleanNumber.TRUE } },
+            },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: text.length + 1, ts: { fs: 12 } }] },
+        });
+        try {
+            const before = JSON.stringify(dataModel.getSnapshot());
+            const mark = getFontCreateConfig(text.length, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            expect(mark.textStyle).toMatchObject({ fs: 10, bl: BooleanNumber.TRUE, it: BooleanNumber.FALSE });
+            if (text.length) {
+                const body = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+                expect(body.textStyle.fs).toBe(12);
+                expect(body.textStyle.bl).not.toBe(BooleanNumber.TRUE);
+            }
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it('shares resolved styled-run data without sharing glyph positions', () => {
+        clearFontCreateConfigCache();
+        const paragraph = {
+            startIndex: 6,
+            paragraphId: 'shared-run',
+            paragraphStyle: {
+                textStyle: { ff: 'Arial', fs: 10 },
+                paragraphMarkTextStyle: { fs: 18 },
+            },
+        };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Shared', {
+            styles: { Strong: { name: 'Strong', type: DocStyleType.character, textStyle: { bl: 1 } } },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 7, sId: 'Strong', ts: { it: 1 } }] },
+        });
+        try {
+            const before = JSON.stringify(dataModel.getSnapshot());
+            const config = (index: number) => getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const firstConfig = config(0);
+            const first = createSkeletonLetterGlyph('S', firstConfig);
+            const second = createSkeletonLetterGlyph('h', config(1));
+            expect(first.ts).toMatchObject({ ff: 'Arial', fs: 10, bl: 1, it: 1 });
+            expect(second.ts).toBe(first.ts);
+            expect(second.fontStyle).toBe(first.fontStyle);
+            first.left = 3;
+            second.left = 8;
+            expect(first.left).toBe(3);
+            expect(second.left).toBe(8);
+            expect(config(6).textStyle.fs).toBe(18);
+            expect(config(2)).toBe(firstConfig);
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([undefined, 'eastAsia'] as const)('honors a font-specific symbol without leaking its font through the styled-run cache (%s)', (fontHint) => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 3, paragraphId: 'symbol-run', paragraphStyle: {} };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A\uF0B0B', {
+            body: {
+                paragraphs: [paragraph],
+                textRuns: [{ st: 0, ed: 3, ts: {
+                    ff: 'Times New Roman',
+                    fs: 10,
+                    fontHint,
+                    eastAsiaFontFamily: 'SimSun',
+                    symbol: { font: 'Symbol', code: 0xF0B0 },
+                } }],
+            },
+        });
+        try {
+            const before = JSON.stringify(dataModel.getSnapshot());
+            const config = (index: number) => getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const first = createSkeletonLetterGlyph('A', config(0));
+            const symbol = createSkeletonLetterGlyph('\uF0B0', config(1));
+            const last = createSkeletonLetterGlyph('B', config(2));
+            expect(first.fontStyle?.fontFamily.split(',')[0]).toBe('"Times New Roman"');
+            expect(symbol.fontStyle?.fontFamily.split(',')[0]).toBe('Symbol');
+            expect(last.fontStyle?.fontFamily.split(',')[0]).toBe('"Times New Roman"');
+            expect(createSkeletonLetterGlyph('\uF0B0', config(1)).fontStyle?.fontFamily.split(',')[0]).toBe('Symbol');
+            expect(symbol.raw).toBe('\uF0B0');
+            expect(symbol.count).toBe(1);
+            expect(symbol.ts?.symbol).toEqual({ font: 'Symbol', code: 0xF0B0 });
+            expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it('keeps resolved run style cache within its paragraph and section context', () => {
+        clearFontCreateConfigCache();
+        const paragraph = { startIndex: 4, paragraphId: 'context', paragraphStyle: { textStyle: { fs: 10 } } };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Text', {
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 5, ts: { ff: 'Arial' } }] },
+        });
+        try {
+            const first = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+            const otherParagraph = { ...paragraph, paragraphStyle: { textStyle: { fs: 20 } } };
+            const other = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, otherParagraph);
+            expect(first.textStyle.fs).toBe(10);
+            expect(other.textStyle.fs).toBe(20);
+            expect(getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, otherParagraph)).toBe(other);
+            const otherSection = { ...sectionBreakConfig, charSpace: 3 };
+            expect(getFontCreateConfig(0, viewModel, paragraphNode, otherSection, otherParagraph).charSpace).toBe(3);
+            expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph).textStyle.fs).toBe(10);
+            clearFontCreateConfigCache();
+            expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph)).not.toBe(first);
+        } finally {
+            viewModel.dispose();
+            dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
     });
 });
 

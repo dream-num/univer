@@ -35,6 +35,7 @@ export interface IDocStateChangeParams {
     undoState: IDocChangeState;
     segmentId?: string;
     noHistory?: boolean;
+    skipHistory?: boolean;
     debounce?: boolean;
 }
 

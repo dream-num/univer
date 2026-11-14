@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { IAccessor, IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
 import type { ICommand, IMutationInfo } from '../command/command.service';
-import { BehaviorSubject } from 'rxjs';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { createIdentifier } from '../../common/di';
 import { UniverInstanceType } from '../../common/unit';
@@ -207,6 +207,20 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         this.disposeWithMe(toDisposable(() => this._undoRedoStatus$.complete()));
         this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._updateStatus())));
+        this.disposeWithMe(toDisposable(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+            const unitId = unit.getUnitId();
+            this._undoStacks.delete(unitId);
+            this._redoStacks.delete(unitId);
+            this._batchingStatus.delete(unitId);
+            this._activeGroups.delete(unitId);
+            this._updateStatus();
+        })));
+        this.disposeWithMe(toDisposable(() => {
+            this._undoStacks.clear();
+            this._redoStacks.clear();
+            this._batchingStatus.clear();
+            this._activeGroups.clear();
+        }));
     }
 
     getUndoRedoStatus(unitId: string): IUndoRedoStatus {

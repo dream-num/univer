@@ -25,11 +25,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import {
     ClickDocHyperLinkOperation,
+    findInternalLinkTarget,
     ShowDocHyperLinkEditPopupOperation,
     ToggleDocHyperLinkInfoPopupOperation,
 } from '../popup.operation';
 
 const unitId = 'hyper-link-popup-doc';
+
+describe('imported document link targets', () => {
+    it('resolves a paragraph target when an imported heading has no internal heading ID', () => {
+        const body = { dataStream: 'First\rImported\r\n', paragraphs: [{ startIndex: 5, paragraphId: 'first' }, { startIndex: 14, paragraphId: 'imported-heading' }] };
+        const before = JSON.stringify(body);
+        expect(findInternalLinkTarget(body, undefined, 'imported-heading')).toBe(6);
+        expect(findInternalLinkTarget(body, undefined, 'missing')).toBeUndefined();
+        expect(JSON.stringify(body)).toBe(before);
+    });
+});
 
 function createDocData(): IDocumentData {
     return {

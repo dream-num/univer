@@ -14,42 +14,21 @@
  * limitations under the License.
  */
 
-import {
-    BooleanNumber,
-    CellValueType,
-    CommandService,
-    ConfigService,
-    ContextService,
-    createInternalEditorID,
-    DesktopLogService,
-    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DocumentDataModel,
-    DocumentFlavor,
-    ICommandService,
-    IConfigService,
-    IContextService,
-    ILogService,
-    Injector,
-    IUniverInstanceService,
-    LocaleService,
-    SHEET_TEXT_LINE_GAP,
-    UniverInstanceService,
-    UniverInstanceType,
-} from '@univerjs/core';
-import { FontCache, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { BooleanNumber, CellValueType, CommandService, ConfigService, ContextService, createInternalEditorID, CustomRangeType, DesktopLogService, DOCS_COMMENT_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel, DocumentFlavor, ICommandService, IConfigService, IContextService, ILogService, Injector, IUniverInstanceService, LocaleService, SHEET_TEXT_LINE_GAP, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { FontCache, registerDocumentHeaderFooterReferenceResolver, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDocLayoutExecutor } from '../doc-layout-executor.service';
-import {
-    DocLayoutExecutorService,
-    DocLayoutExecutorType,
-    DocLayoutSessionStatus,
-} from '../doc-layout-executor.service';
+import { DocLayoutExecutorService, DocLayoutExecutorType, DocLayoutSessionStatus } from '../doc-layout-executor.service';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
+
 function createDocument(options?: { documentFlavor?: DocumentFlavor; id?: string }) {
-    return new DocumentDataModel({
+    return testInjector.createInstance(DocumentDataModel, {
         id: options?.id ?? 'doc-1',
         body: {
             dataStream: 'Hello\r\n',
@@ -96,7 +75,7 @@ function createExecutor(): IDocLayoutExecutor {
 }
 
 function createService(document: DocumentDataModel, registerExecutor = false, textLineGap = 0) {
-    const injector = new Injector();
+    const injector = testInjector.createChild();
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
@@ -111,11 +90,14 @@ function createService(document: DocumentDataModel, registerExecutor = false, te
         injector.get(DocLayoutExecutorService).register(createExecutor());
     }
 
-    return injector.createInstance(DocSkeletonManagerService, {
-        unit: document,
-        unitId: document.getUnitId(),
-        type: UniverInstanceType.UNIVER_DOC,
-    });
+    injector.add([DocSkeletonManagerService, {
+        useFactory: () => injector.createInstance(DocSkeletonManagerService, {
+            unit: document,
+            unitId: document.getUnitId(),
+            type: UniverInstanceType.UNIVER_DOC,
+        }),
+    }]);
+    return injector.get(DocSkeletonManagerService);
 }
 
 describe('DocSkeletonManagerService', () => {
@@ -164,10 +146,10 @@ describe('DocSkeletonManagerService', () => {
     });
 
     it.each([
-        ['internal editor', createDocument({ id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentFlavor: DocumentFlavor.UNSPECIFIED })],
-        ['unspecified document', createDocument({ id: 'unspecified-doc', documentFlavor: DocumentFlavor.UNSPECIFIED })],
-    ])('calculates %s synchronously before publishing', (_label, document) => {
-        const service = createService(document);
+        ['internal editor', { id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentFlavor: DocumentFlavor.UNSPECIFIED }],
+        ['unspecified document', { id: 'unspecified-doc', documentFlavor: DocumentFlavor.UNSPECIFIED }],
+    ] as const)('calculates %s synchronously before publishing', (_label, options) => {
+        const service = createService(createDocument(options));
 
         expect(service.getSkeleton().getSkeletonData()).not.toBeNull();
         expect(service.supportsIncrementalLayout()).toBe(false);
@@ -225,7 +207,7 @@ describe('DocSkeletonManagerService', () => {
         [DOCS_COMMENT_EDITOR_UNIT_ID_KEY, 0],
         ['ordinary-document', 0],
     ])('applies sheet line gaps only to the cell and formula editors: %s', (id, heightChange) => {
-        const injector = new Injector();
+        const injector = testInjector;
         const document = injector.createInstance(DocumentDataModel, {
             id,
             body: {
@@ -309,5 +291,33 @@ describe('DocSkeletonManagerService', () => {
             injector.dispose();
             measure.mockRestore();
         }
+    });
+
+    it.each(['STYLEREF', 'PAGE'])('keeps only host-resolved reference stories on their live model (%s)', (fieldType) => {
+        const data = createDocument().getSnapshot();
+        const document = testInjector.createInstance(DocumentDataModel, {
+            ...data,
+            documentStyle: { ...data.documentStyle, defaultHeaderId: 'header' },
+            headers: {
+                header: {
+                    headerId: 'header',
+                    body: {
+                        dataStream: '\u001Fcached\u001E\r\n',
+                        paragraphs: [{ paragraphId: 'header-paragraph', startIndex: 8 }],
+                        customRanges: [{ rangeId: 'field', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 7, properties: { fieldType, instruction: `${fieldType} Title`, cachedResult: 'cached' } }],
+                    },
+                },
+            },
+        });
+        const registration = registerDocumentHeaderFooterReferenceResolver(document, () => undefined);
+        const service = createService(document, true);
+        expect(service.supportsIncrementalLayout()).toBe(fieldType === 'PAGE');
+        if (fieldType === 'STYLEREF') {
+            expect(service.getSkeleton().getSkeletonData()).toBeTruthy();
+        }
+        registration.dispose();
+        expect(service.supportsIncrementalLayout()).toBe(true);
+        service.dispose();
+        document.dispose();
     });
 });

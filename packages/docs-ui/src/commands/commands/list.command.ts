@@ -29,6 +29,7 @@ import {
     MemoryCursor,
     PRESET_LIST_TYPE,
     PresetListType,
+    resolveDocumentParagraphBullet,
     sortRulesFactory,
     TextX,
     TextXActionType,
@@ -409,10 +410,13 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const prevParagraph = paragraphs[curIndex - 1];
         const nextParagraph = paragraphs[curIndex + 1];
 
-        if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
-            listId = prevParagraph.bullet.listId;
-        } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
-            listId = nextParagraph.bullet.listId;
+        const snapshot = docDataModel.getSnapshot();
+        const previousBullet = prevParagraph && resolveDocumentParagraphBullet(snapshot, prevParagraph);
+        const nextBullet = nextParagraph && resolveDocumentParagraphBullet(snapshot, nextParagraph);
+        if (previousBullet?.listType.indexOf(listType) === 0) {
+            listId = previousBullet.listId;
+        } else if (nextBullet?.listType.indexOf(listType) === 0) {
+            listId = nextBullet.listId;
         }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {

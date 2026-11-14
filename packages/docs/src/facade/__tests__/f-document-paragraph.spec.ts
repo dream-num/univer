@@ -15,9 +15,9 @@
  */
 
 import type { IDocumentData, Univer } from '@univerjs/core';
-import type { FDocument } from '../f-document';
-import { BooleanNumber, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUndoRedoService, PresetListType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DocStyleType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUndoRedoService, NumberUnitType, PresetListType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { FDocument } from '../f-document';
 import { UpdateDocumentParagraphStyleCommand } from '../../commands/commands/update-document-paragraph-style.command';
 import {
     createBulletDocument,
@@ -42,6 +42,102 @@ describe('FDocumentParagraph', () => {
     afterEach(() => {
         univer?.dispose();
         univer = null;
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('edits inherited character indents through save, undo and redo (%s)', (documentFlavor) => {
+        const data = createSimpleDocument();
+        data.documentStyle = { ...data.documentStyle, documentFlavor };
+        data.styles = {
+            base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: {
+                indentStart: { v: 2, u: NumberUnitType.CHARACTER, fallback: 12 },
+                hanging: { v: 2, u: NumberUnitType.CHARACTER, fallback: 12 },
+            } },
+        };
+        data.body!.paragraphs![0].styleId = 'base';
+        createDocumentFacade(data);
+        const paragraph = document.getParagraphs()[0];
+        const update = { indentStart: { v: 24 }, indentFirstLine: { v: 16 } };
+        expect(paragraph.setStyle(update)).toBe(true);
+        const expected = documentFlavor === DocumentFlavor.TRADITIONAL
+            ? {
+                indentStart: { v: 0, u: NumberUnitType.CHARACTER, fallback: 24 },
+                indentFirstLine: { v: 0, u: NumberUnitType.CHARACTER, fallback: 16 },
+            }
+            : update;
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(expected);
+        const saved = document.save();
+        expect(resolveDocumentParagraphStyle(saved.documentStyle, expected, {
+            styles: saved.styles,
+            paragraphStyleId: 'base',
+        }).hanging?.fallback).toBeUndefined();
+        expect(document.undo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toBeUndefined();
+        expect(document.redo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(expected);
+        createDocumentFacade(saved);
+        expect(document.getParagraphs()[0].getInfo().paragraph.paragraphStyle).toEqual(expected);
+        expect(update).toEqual({ indentStart: { v: 24 }, indentFirstLine: { v: 16 } });
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        ['named', 'direct', 'default'].map((owner) => ({ documentFlavor, owner }))))('edits line-unit paragraph spacing through save, undo and redo ($documentFlavor, $owner)', ({ documentFlavor, owner }) => {
+        for (const value of [0, 24]) {
+            const data = createSimpleDocument();
+            const original = {
+                spaceAbove: { v: 2, u: NumberUnitType.LINE, fallback: 12 },
+                spaceBelow: { v: 3, u: NumberUnitType.LINE, fallback: 12 },
+            };
+            data.documentStyle = { ...data.documentStyle, documentFlavor };
+            if (owner === 'named') {
+                data.styles = { base: { name: 'Base', type: DocStyleType.paragraph, paragraphStyle: original } };
+                data.body!.paragraphs![0].styleId = 'base';
+            } else if (owner === 'direct') {
+                data.body!.paragraphs![0].paragraphStyle = original;
+            } else {
+                data.documentStyle.defaultParagraphStyle = original;
+            }
+            createDocumentFacade(data);
+            const paragraph = document.getParagraphs()[0];
+            const before = paragraph.getInfo().paragraph.paragraphStyle;
+            const update = { spaceAbove: { v: value }, spaceBelow: { v: 16 } };
+            expect(paragraph.setStyle(update)).toBe(true);
+            const expected = documentFlavor === DocumentFlavor.TRADITIONAL
+                ? { spaceAbove: { v: 0, u: NumberUnitType.LINE, fallback: value }, spaceBelow: { v: 0, u: NumberUnitType.LINE, fallback: 16 } }
+                : update;
+            expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(expected);
+            const saved = document.save();
+            expect(document.undo()).toBe(true);
+            expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(before);
+            expect(document.redo()).toBe(true);
+            expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(expected);
+            createDocumentFacade(saved);
+            expect(document.getParagraphs()[0].getInfo().paragraph.paragraphStyle).toEqual(expected);
+            expect(update).toEqual({ spaceAbove: { v: value }, spaceBelow: { v: 16 } });
+            expect(original).toEqual({ spaceAbove: { v: 2, u: NumberUnitType.LINE, fallback: 12 }, spaceBelow: { v: 3, u: NumberUnitType.LINE, fallback: 12 } });
+        }
+    });
+
+    it.each(['indentFirstLine', 'hanging'] as const)('replaces a direct character indent when editing %s with an absolute value', (key) => {
+        const opposite = key === 'hanging' ? 'indentFirstLine' : 'hanging';
+        const data = createSimpleDocument();
+        data.documentStyle = { ...data.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
+        const original = { [opposite]: { v: 2, u: NumberUnitType.CHARACTER, fallback: 12 } };
+        data.body!.paragraphs![0].paragraphStyle = original;
+        createDocumentFacade(data);
+        const paragraph = document.getParagraphs()[0];
+        expect(paragraph.setStyle({ [key]: { v: 16 } })).toBe(true);
+        const saved = document.save();
+        const style = saved.body!.paragraphs![0].paragraphStyle!;
+        const resolved = resolveDocumentParagraphStyle(saved.documentStyle, style);
+        expect(resolved[key]).toEqual({ v: 0, u: NumberUnitType.CHARACTER, fallback: 16 });
+        expect(resolved[opposite]?.v ?? 0).toBe(0);
+        expect(resolved[opposite]?.fallback).toBeUndefined();
+        expect(document.undo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(original);
+        expect(document.redo()).toBe(true);
+        expect(paragraph.getInfo().paragraph.paragraphStyle).toEqual(style);
+        createDocumentFacade(saved);
+        expect(document.getParagraphs()[0].getInfo().paragraph.paragraphStyle).toEqual(style);
     });
 
     it('keeps paragraph handles stable when text is duplicated or inserted before them', () => {
@@ -85,6 +181,29 @@ describe('FDocumentParagraph', () => {
         expect(document.save().body?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST_CHECKED);
         expect(task.setTaskChecked(false)).toBe(true);
         expect(document.save().body?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.CHECK_LIST);
+    });
+
+    it('reads inherited checklists and keeps their parent counter live after checking', () => {
+        const data = createSimpleDocument();
+        data.styles = {
+            base: { name: 'Base', type: DocStyleType.paragraph, bullet: { listId: 'original', listType: PresetListType.CHECK_LIST } },
+            child: { name: 'Child', type: DocStyleType.paragraph, basedOn: 'base', bullet: { nestingLevel: 1 } },
+        };
+        data.body!.paragraphs![0].styleId = 'child';
+        data.body!.paragraphs![1].styleId = 'child';
+        data.body!.paragraphs![1].bullet = null;
+        createDocumentFacade(data);
+        const [task, disabled] = document.getParagraphs();
+        expect(task.isListItem()).toBe(true);
+        expect(task.isTask()).toBe(true);
+        expect(disabled.isListItem()).toBe(false);
+        expect(disabled.setTaskChecked(true)).toBe(false);
+        expect(task.setTaskChecked(true)).toBe(true);
+        const snapshot = document.getDocumentDataModel().getSnapshot();
+        expect(snapshot.body!.paragraphs![0].bullet).toEqual({ listType: PresetListType.CHECK_LIST_CHECKED });
+        snapshot.styles!.base.bullet!.listId = 'changed-parent';
+        expect(resolveDocumentParagraphBullet(snapshot, snapshot.body!.paragraphs![0])).toMatchObject({ listId: 'changed-parent', nestingLevel: 1, listType: PresetListType.CHECK_LIST_CHECKED });
+        expect(task.setTaskChecked(false)).toBe(true);
     });
 
     it('applies paragraph text style to the paragraph text range', () => {

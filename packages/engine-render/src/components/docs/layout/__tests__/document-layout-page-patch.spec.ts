@@ -19,6 +19,7 @@ import {
     BooleanNumber,
     createDocumentModelWithStyle,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentDataModel,
     DocumentFlavor,
     LocaleService,
@@ -53,7 +54,7 @@ function normalizeSkeleton(value: unknown): unknown {
 }
 
 describe('document layout page patch', () => {
-    it.each(['header', 'footer'] as const)('keeps precomputed body tables out of a %s at the same stream offset', (kind) => {
+    it.each((['header', 'footer'] as const).flatMap((kind) => [undefined, 0, 3].map((cellSpacing) => ({ kind, cellSpacing }))))('keeps precomputed body tables out of a $kind at the same stream offset (cell spacing: $cellSpacing)', ({ kind, cellSpacing }) => {
         const T = DataStreamTreeTokenType;
         const story = (text: string, rowCount: number, rowHeight: number): Required<Pick<IDocumentData, 'body' | 'tableSource'>> => {
             const row = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
@@ -61,6 +62,7 @@ describe('document layout page patch', () => {
             const dataStream = `${tableText}${T.PARAGRAPH}${T.SECTION_BREAK}`;
             const table: ITable = {
                 tableId: 'table-1',
+                ...(cellSpacing == null ? {} : { styleId: 'Spacing' }),
                 align: 0,
                 indent: { v: 0 },
                 textWrap: 0,
@@ -86,6 +88,12 @@ describe('document layout page patch', () => {
         };
         const snapshot: IDocumentData = {
             id: 'segment-local-tables',
+            ...(cellSpacing == null
+                ? {}
+                : { styles: {
+                    Base: { name: 'Base', type: DocStyleType.table, tableProperties: { cellSpacing: { v: 6 } }, rowProperties: { cellSpacing: { v: cellSpacing } } },
+                    Spacing: { name: 'Spacing', type: DocStyleType.table, basedOn: 'Base' },
+                } }),
             ...story('Body', 4, 100),
             documentStyle: {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -125,7 +133,7 @@ describe('document layout page patch', () => {
             expect(resourceNode.startIndex).toBe(bodyNode.startIndex);
             const resourceTable = createTableSkeleton(ctx, curPage, resourceViewModel, resourceNode, sectionBreakConfig)!;
             expect(resourceTable.rows).toHaveLength(1);
-            expect(resourceTable.height).toBe(18);
+            expect(resourceTable.height).toBe(18 + (cellSpacing ?? 0) * 4);
             expect(createTableSkeleton(ctx, curPage, viewModel, bodyNode, sectionBreakConfig)).toBe(bodyTable);
         } finally {
             viewModel.dispose();
@@ -145,9 +153,24 @@ describe('document layout page patch', () => {
             const page = [...resources.get('regular')!.values()][0];
             const table = [...page.skeTables.values()][0];
             expect(table.rows).toHaveLength(1);
-            expect(table.height).toBe(18);
-            const hydrated = hydrateDocumentSkeletonPage(structuredClone(serializeDocumentSkeletonPage(page, true)), undefined, snapshot);
-            expect([...hydrated.skeTables.values()][0].rows[0].rowSource).toBe(table.tableSource.tableRows[0]);
+            expect(table.height).toBe(18 + (cellSpacing ?? 0) * 4);
+            const publication = structuredClone(serializeDocumentSkeletonPage(page, true));
+            const resource = kind === 'header' ? snapshot.headers!.regular : snapshot.footers!.regular;
+            // A worker can resolve a DOCX grid whose authored widths were omitted.
+            resource.tableSource!['table-1'].tableColumns = [{}] as ITable['tableColumns'];
+            const hydrated = hydrateDocumentSkeletonPage(publication, undefined, snapshot);
+            expect([...hydrated.skeTables.values()][0].tableSource.tableColumns).toEqual(table.tableSource.tableColumns);
+            expect(resource.tableSource!['table-1'].tableColumns).toEqual([{}]);
+            const hydratedTable = [...hydrated.skeTables.values()][0];
+            if (cellSpacing == null) {
+                expect(hydratedTable.rows[0].rowSource).toBe(table.tableSource.tableRows[0]);
+            } else {
+                expect(hydratedTable.rows[0].rowSource).toEqual(table.tableSource.tableRows[0]);
+                expect(hydratedTable.tableSource.cellSpacing).toEqual({ v: 6 });
+                expect(hydratedTable.rows[0].rowSource.cellSpacing).toEqual({ v: cellSpacing });
+                expect(resource.tableSource!['table-1'].cellSpacing).toBeUndefined();
+                expect(resource.tableSource!['table-1'].tableRows[0].cellSpacing).toBeUndefined();
+            }
         } finally {
             skeleton.dispose();
             univer.dispose();

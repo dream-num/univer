@@ -17,8 +17,79 @@
 import { describe, expect, it } from 'vitest';
 import type { IDocumentBody, ISdtCustomRange } from '../../../../../types/interfaces';
 import { UpdateDocsAttributeType } from '../../../../../shared';
-import { CustomRangeType } from '../../../../../types/interfaces';
+import { CustomRangeType, DocStyleType } from '../../../../../types/interfaces';
+import { resolveDocumentParagraphBullet } from '../../../paragraph-style';
+import { TextXActionType } from '../../action-types';
+import { TextX } from '../../text-x';
 import { updateAttribute } from '../update-apply';
+
+describe('retained inherited numbering', () => {
+    it('preserves named styles without creating numbering during a paragraph format update', () => {
+        const body: IDocumentBody = { dataStream: 'A\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'stable', styleId: 'base' }] };
+        updateAttribute(body, { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'stable', paragraphStyle: { horizontalAlign: 1 } }] }, 1, 1, UpdateDocsAttributeType.COVER);
+        expect(body.paragraphs![0]).toMatchObject({ styleId: 'base', paragraphId: 'stable', paragraphStyle: { horizontalAlign: 1 } });
+        expect(Object.hasOwn(body.paragraphs![0], 'bullet')).toBe(false);
+    });
+
+    it.each([undefined, null])('keeps an existing %s numbering state while formatting', (bullet) => {
+        const body: IDocumentBody = { dataStream: 'A\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'stable', styleId: 'base', bullet }] };
+        updateAttribute(body, { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'stable', paragraphStyle: { keepNext: 1 } }] }, 1, 1, UpdateDocsAttributeType.COVER);
+        expect(body.paragraphs![0].styleId).toBe('base');
+        expect(body.paragraphs![0].bullet).toBe(bullet);
+    });
+
+    it('merges only authored numbering properties and retains live parent values', () => {
+        const body: IDocumentBody = { dataStream: 'A\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'stable', styleId: 'base', bullet: { nestingLevel: 1 } }] };
+        updateAttribute(body, { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'stable', bullet: { nestingLevel: 2 } }] }, 1, 1, UpdateDocsAttributeType.COVER);
+        expect(body.paragraphs![0].bullet).toEqual({ nestingLevel: 2 });
+        const document = { styles: { base: { name: 'Base', type: DocStyleType.paragraph, bullet: { listId: 'parent', listType: 'ordered' } } } };
+        expect(resolveDocumentParagraphBullet(document, body.paragraphs![0])).toEqual({ listId: 'parent', listType: 'ordered', nestingLevel: 2 });
+        document.styles.base.bullet.listId = 'changed-parent';
+        expect(resolveDocumentParagraphBullet(document, body.paragraphs![0])?.listId).toBe('changed-parent');
+    });
+
+    it('preserves explicit numbering suppression through cover updates, undo and redo', () => {
+        const body: IDocumentBody = { dataStream: 'A\r\n', paragraphs: [{ startIndex: 1, paragraphId: 'stable', styleId: 'base', bullet: { nestingLevel: 1 } }] };
+        const actions = TextX.makeInvertible([
+            { t: TextXActionType.RETAIN, len: 1 },
+            { t: TextXActionType.RETAIN, len: 1, coverType: UpdateDocsAttributeType.COVER, body: { dataStream: '', paragraphs: [{ startIndex: 0, paragraphId: 'stable', bullet: null }] } },
+        ], body);
+        TextX.apply(body, actions);
+        expect(body.paragraphs![0]).toMatchObject({ styleId: 'base', bullet: null });
+        TextX.apply(body, TextX.invert(actions));
+        expect(body.paragraphs![0]).toMatchObject({ styleId: 'base', bullet: { nestingLevel: 1 } });
+        TextX.apply(body, actions);
+        expect(body.paragraphs![0]).toMatchObject({ styleId: 'base', bullet: null });
+    });
+});
+
+describe('retained text formatting', () => {
+    it.each([UpdateDocsAttributeType.COVER, UpdateDocsAttributeType.REPLACE])('keeps absent decorations absent for unrelated formatting (%s)', (coverType) => {
+        const body: IDocumentBody = { dataStream: 'A\r\n' };
+        updateAttribute(body, { dataStream: '', textRuns: [{ st: 0, ed: 1, ts: { bl: 1 } }] }, 1, 0, coverType);
+        expect(body.customDecorations).toBeUndefined();
+        updateAttribute(body, { dataStream: '', customDecorations: [] }, 1, 0, coverType);
+        expect(body.customDecorations).toBeUndefined();
+    });
+
+    it.each([
+        UpdateDocsAttributeType.COVER,
+        UpdateDocsAttributeType.REPLACE,
+    ])('keeps absent text runs absent when replaying an empty formatting update (%s)', (coverType) => {
+        const body: IDocumentBody = { dataStream: 'A\r\n' };
+        updateAttribute(body, { dataStream: '', textRuns: [] }, 1, 0, coverType);
+        updateAttribute(body, { dataStream: '', textRuns: [{ st: 0, ed: 1, ts: {} }] }, 1, 0, coverType);
+        expect(body.textRuns).toBeUndefined();
+        expect(body.dataStream).toBe('A\r\n');
+    });
+
+    it('adds formatting to a plain body with no existing text-run array', () => {
+        const body: IDocumentBody = { dataStream: 'A1B\r\n' };
+        updateAttribute(body, { dataStream: '', textRuns: [{ st: 0, ed: 1, ts: { bl: 1 } }] }, 1, 1, UpdateDocsAttributeType.COVER);
+        expect(body.textRuns).toEqual([{ st: 1, ed: 2, ts: { bl: 1 } }]);
+        expect(body.dataStream).toBe('A1B\r\n');
+    });
+});
 
 describe('retained SDT metadata boundaries', () => {
     it('restores child-before-parent order when a retained parent shrinks onto its child', () => {

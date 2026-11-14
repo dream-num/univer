@@ -16,23 +16,103 @@
 
 import { describe, expect, it } from 'vitest';
 import type { IDocumentBody, IDocumentData } from '../../../../types/interfaces/i-document-data';
-import type { IInsertAction, IRetainAction } from '../action-types';
+import type { IInsertAction, IRetainAction, TextXAction } from '../action-types';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
-import {
-    CustomDecorationType,
-    CustomRangeType,
-    DocumentBlockRangeType,
-} from '../../../../types/interfaces/i-document-data';
+import { CustomDecorationType, CustomRangeType, DocumentBlockRangeType, SpecialCharacterKind } from '../../../../types/interfaces/i-document-data';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
-import { TextXActionType } from '../action-types';
+import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
+import { validateDocumentStructure } from '../structure-validator';
 import { TextX } from '../text-x';
-import { composeBody } from '../utils';
+import { composeBody, getBodySlice } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it.each([false, true])('preserves newly inserted field boundaries through a composed refresh (nested=%s)', (nested) => {
+        const original: IDocumentBody = {
+            dataStream: '\u001FOld\u001E\r\n',
+            customBlocks: [],
+            customRanges: [{ rangeId: 'existing', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 4, properties: { fieldType: 'REF', instruction: 'REF old' } }],
+            paragraphs: [{ startIndex: 5, paragraphId: 'para_original' }],
+            sectionBreaks: [{ startIndex: 6, sectionId: 'section_original' }],
+        };
+        const range = { rangeId: 'reference', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 1, properties: { fieldType: nested ? 'TOC' : 'REF', instruction: nested ? 'TOC \\o "1-3"' : 'REF target', dirty: 1 } };
+        const result: IDocumentBody = nested
+            ? { dataStream: '\u001F1\u001E\rnext', customRanges: [{ rangeId: 'page', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { fieldType: 'PAGEREF', instruction: 'PAGEREF target' } }], paragraphs: [{ startIndex: 3, paragraphId: 'para_result' }] }
+            : { dataStream: 'target' };
+        Reflect.set(result, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
+        const inserted: TextXAction[] = [{ t: TextXActionType.INSERT, len: 2, body: { dataStream: '\u001F\u001E', customRanges: [range] } }];
+        const refreshed: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 1 },
+            { t: TextXActionType.INSERT, len: result.dataStream.length, body: result, valueRangeId: range.rangeId },
+            { t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range: { ...range, endIndex: result.dataStream.length + 1, properties: { ...range.properties, dirty: 0, cachedResult: result.dataStream } }, propertyPaths: [['dirty'], ['cachedResult']] }] },
+        ];
+        const bookmarkChanges: TextXAction[] = [{ t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: 'target', range: { rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, startIndex: 1, endIndex: 3, properties: { bookmarkId: 'target' } } }] }];
+        const updated = TextX.apply(TextX.apply(TextX.apply(Tools.deepClone(original), bookmarkChanges), inserted), refreshed);
+        const followingSection = updated.sectionBreaks![0];
+        const sectionFormatting: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: followingSection.startIndex },
+            { t: TextXActionType.RETAIN, len: 1, coverType: UpdateDocsAttributeType.REPLACE, body: { dataStream: '', sectionBreaks: [{ ...followingSection, startIndex: 0, sectionType: 1 }] } },
+        ];
+        const expected = TextX.apply(Tools.deepClone(updated), sectionFormatting);
+        const combined = TextX.compose(TextX.compose(bookmarkChanges, inserted), refreshed);
+        expect(TextX.apply(Tools.deepClone(original), combined)).toEqual(TextX.apply(Tools.deepClone(original), TextX.compose(bookmarkChanges, TextX.compose(inserted, refreshed))));
+        const composed = TextX.makeInvertible(TextX.compose(combined, sectionFormatting), Tools.deepClone(original));
+        const actual = TextX.apply(Tools.deepClone(original), JSON.parse(JSON.stringify(composed)));
+        expect(validateDocumentStructure({ body: actual })).toEqual([]);
+        expect(actual).toEqual(expected);
+        expect(actual.customRanges!.map((item) => item.rangeId).sort()).toEqual(nested ? ['existing', 'page', 'reference', 'target'] : ['existing', 'reference', 'target']);
+        expect(TextX.apply(Tools.deepClone(actual), TextX.invert(composed))).toEqual(original);
+        expect(TextX.apply(Tools.deepClone(original), composed)).toEqual(expected);
+        const peer: TextXAction[] = [{ t: TextXActionType.INSERT, len: 5, body: { dataStream: 'Peer ' } }];
+        for (const priority of ['left', 'right'] as const) {
+            const left = TextX.apply(TextX.apply(Tools.deepClone(original), composed), TextX.transform(peer, composed, priority));
+            const right = TextX.apply(TextX.apply(Tools.deepClone(original), peer), TextX.transform(composed, peer, priority === 'left' ? 'right' : 'left'));
+            expect(left).toEqual(right);
+            expect(validateDocumentStructure({ body: left })).toEqual([]);
+        }
+    });
+
+    it.each(['left', 'right'] as const)('keeps paragraph-boundary identities after concurrent inline input (%s)', (priority) => {
+        for (const prefix of ['', 'Earlier\r']) {
+            const original: IDocumentBody = {
+                dataStream: `${prefix}Intro\r\n`,
+                paragraphs: [
+                    ...(prefix ? [{ startIndex: prefix.length - 1, paragraphId: 'earlier' }] : []),
+                    { startIndex: prefix.length + 5, paragraphId: 'original' },
+                ],
+            };
+            const offset: TextXAction[] = prefix ? [{ t: TextXActionType.RETAIN, len: prefix.length }] : [];
+            const inline = TextX.makeInvertible([...offset, {
+                t: TextXActionType.INSERT,
+                len: 6,
+                body: { dataStream: 'Alice ' },
+            }], original);
+            const paragraph = TextX.makeInvertible([...offset, {
+                t: TextXActionType.INSERT,
+                len: 4,
+                body: { dataStream: 'Bob\r', paragraphs: [{ startIndex: 3, paragraphId: 'para_inserted' }] },
+            }], original);
+            const apply = (first: TextXAction[], second: TextXAction[]) => {
+                const body = Tools.deepClone(original);
+                TextX.apply(body, JSON.parse(JSON.stringify(first)));
+                TextX.apply(body, JSON.parse(JSON.stringify(second)));
+                return body;
+            };
+            const left = apply(inline, TextX.transform(paragraph, inline, priority));
+            const right = apply(paragraph, TextX.transform(inline, paragraph, priority === 'left' ? 'right' : 'left'));
+            expect(left).toEqual(right);
+            expect(left.paragraphs!.map((item) => item.paragraphId)).toEqual([
+                ...(prefix ? ['earlier'] : []),
+                'para_inserted',
+                'original',
+            ]);
+            expect(left).not.toHaveProperty(PRESERVE_INSERTED_PARAGRAPH_IDS);
+        }
+    });
+
     it('keeps peer formatting and nested fields when undoing heading metadata without text edits', () => {
         const body: IDocumentBody = {
             dataStream: 'Heading\rTail\r\n',
@@ -175,6 +255,7 @@ describe('test TextX methods and branches', () => {
             expect(body).toEqual(original);
         }
     });
+
     it.each(['', 'Value'])('roundtrips identity removal and history through JSONX for %j', (value) => {
         const original = {
             id: 'doc',
@@ -742,5 +823,71 @@ describe('test TextX methods and branches', () => {
         it('textX name should to be text-x', () => {
             expect(TextX.name).toBe('text-x');
         });
+    });
+
+    it.each([
+        { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011' },
+        { kind: SpecialCharacterKind.OPTIONAL_HYPHEN, character: '\u00AD' },
+        { kind: 'emSpace', character: '\u2003' },
+        { kind: 'enSpace', character: '\u2002' },
+    ])('moves, copies, deletes and restores a semantic character without changing adjacent literal text (%j)', ({ kind, character }) => {
+        const source: IDocumentBody = { dataStream: `AB${character}CD\r\n`, customRanges: [{ rangeId: 'hyphen', rangeType: CustomRangeType.CUSTOM, wholeEntity: true, startIndex: 2, endIndex: 2, properties: { kind } }] };
+        const insert = new TextX().retain(1).insert(1, { dataStream: 'X' }).serialize();
+        TextX.makeInvertible(insert, source);
+        const shifted = TextX.apply(Tools.deepClone(source), insert);
+        expect(shifted.dataStream).toBe(`AXB${character}CD\r\n`);
+        expect(shifted.customRanges![0]).toEqual({ ...source.customRanges![0], startIndex: 3, endIndex: 3 });
+        const restoredInsert = TextX.apply(Tools.deepClone(shifted), TextX.invert(insert));
+        expect(restoredInsert.dataStream).toBe(source.dataStream);
+        expect(restoredInsert.customRanges).toEqual(source.customRanges);
+        const copied = getBodySlice(source, 2, 3);
+        const pasted = TextX.apply({ dataStream: 'Z\r\n' }, new TextX().insert(1, copied).serialize());
+        expect(pasted.dataStream).toBe(`${character}Z\r\n`);
+        expect(pasted.customRanges).toEqual([{ ...source.customRanges![0], startIndex: 0, endIndex: 0 }]);
+        const remove = new TextX().retain(3).delete(1).serialize();
+        TextX.makeInvertible(remove, shifted);
+        const deleted = TextX.apply(Tools.deepClone(shifted), remove);
+        expect(deleted.dataStream).toBe('AXBCD\r\n');
+        expect(deleted.customRanges).toEqual([]);
+        const restoredDelete = TextX.apply(deleted, TextX.invert(remove));
+        expect(restoredDelete.dataStream).toBe(shifted.dataStream);
+        expect(restoredDelete.customRanges).toEqual(shifted.customRanges);
+    });
+
+    it.each([CustomRangeType.FIELD, CustomRangeType.SDT, CustomRangeType.BOOKMARK])('does not duplicate an enclosing range when undoing text-only formatting (%s)', (rangeType) => {
+        const source: IDocumentBody = {
+            dataStream: '\u001FValue\u001E\r\n',
+            textRuns: [{ st: 1, ed: 6, ts: { fs: 11 } }],
+            customRanges: [{ rangeId: 'enclosing', rangeType, wholeEntity: false, startIndex: 0, endIndex: 6, properties: { instruction: 'REF target' } }],
+        };
+        const actions = new TextX()
+            .retain(1)
+            .retain(5, { dataStream: '', textRuns: [{ st: 0, ed: 5, ts: { it: BooleanNumber.TRUE } }] }, UpdateDocsAttributeType.REPLACE)
+            .updateCustomRanges([{ rangeId: 'enclosing', range: { ...source.customRanges![0], properties: { dirty: BooleanNumber.FALSE } }, propertyPaths: [['dirty']] }])
+            .serialize();
+        TextX.makeInvertible(actions, source);
+        const changed = TextX.apply(Tools.deepClone(source), actions);
+        const restored = TextX.apply(changed, TextX.invert(actions));
+
+        expect(restored.customRanges).toEqual(source.customRanges);
+        expect(restored.dataStream).toBe(source.dataStream);
+        expect(restored.textRuns).toEqual(source.textRuns);
+    });
+
+    it('keeps an absent run array absent when inserting an unformatted undo placeholder', () => {
+        const body: IDocumentBody = { dataStream: 'AB\r\n' };
+        const actions = new TextX().retain(1).insert(1, { dataStream: 'X', textRuns: [{ st: 0, ed: 1, ts: {} }] }).serialize();
+        const result = TextX.apply(Tools.deepClone(body), actions);
+        expect(result.dataStream).toBe('AXB\r\n');
+        expect(result.textRuns).toBeUndefined();
+    });
+
+    it.each([undefined, []])('keeps inserted character formatting when the destination has no runs (%j)', (textRuns) => {
+        const body: IDocumentBody = { dataStream: 'AB\r\n', textRuns };
+        const actions = new TextX().retain(1).insert(1, { dataStream: 'X', textRuns: [{ st: 0, ed: 1, ts: { it: BooleanNumber.TRUE } }] }).serialize();
+        const result = TextX.apply(Tools.deepClone(body), actions);
+        expect(result.dataStream).toBe('AXB\r\n');
+        expect(result.textRuns).toEqual([{ st: 1, ed: 2, ts: { it: BooleanNumber.TRUE } }]);
+        expect(body).toEqual({ dataStream: 'AB\r\n', textRuns });
     });
 });

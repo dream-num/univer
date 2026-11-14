@@ -944,6 +944,9 @@ export class DocLayoutExecutorService extends Disposable {
         for (const [segmentId, footerModel] of dataModel.footerModelMap) {
             collectSegment(segmentId, footerModel.getBody());
         }
+        for (const [segmentId, noteModel] of dataModel.noteModelMap) {
+            collectSegment(segmentId, noteModel.getBody());
+        }
 
         return presentations;
     }

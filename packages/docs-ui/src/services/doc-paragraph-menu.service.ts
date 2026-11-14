@@ -37,6 +37,7 @@ import {
     IPermissionService,
     isInternalEditorID,
     PresetListType,
+    resolveDocumentParagraphBullet,
 } from '@univerjs/core';
 import {
     canEditDocumentTargets,
@@ -911,7 +912,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
         const paragraphDataStream = dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd);
         const paragraphModel = body?.paragraphs?.find((item) => item.startIndex === paragraph.startIndex);
-        const listIcon = getListIcon(paragraphModel?.bullet?.listType);
+        const listIcon = getListIcon(paragraphModel && resolveDocumentParagraphBullet(this._context.unit.getSnapshot(), paragraphModel)?.listType);
         const isHorizontalRuleParagraph = isHorizontalLineParagraph(paragraphDataStream, paragraphModel);
         const customBlock = body?.customBlocks?.find((item) => item.startIndex >= paragraph.paragraphStart && item.startIndex <= paragraph.paragraphEnd);
         const isCustomBlockOnly = customBlock?.blockType === BlockType.CUSTOM && paragraphDataStream.replace(/[\b\r\n]/g, '') === '';

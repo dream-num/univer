@@ -54,6 +54,7 @@ import {
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     toDisposable,
+    Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { collectDocDrawings } from '@univerjs/docs-drawing';
@@ -64,6 +65,7 @@ import {
     DocumentSkeletonPageType,
     getDocsTableRenderViewport,
     getTableIdAndSliceIndex,
+    hasDocumentReferenceLayout,
     Liquid,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
 } from '@univerjs/engine-render';
@@ -328,7 +330,7 @@ export function getDocsDrawingClipPage(config: {
 }
 
 export function getDocsPageRelativeDrawingLeft(config: {
-    hostPage: Pick<IDocumentSkeletonPage, 'pageWidth'>;
+    hostPage: Pick<IDocumentSkeletonPage, 'pageWidth'> & Partial<Pick<IDocumentSkeletonPage, 'marginLeft' | 'marginRight'>>;
     positionH: {
         align?: AlignTypeH;
         posOffset?: number;
@@ -338,24 +340,29 @@ export function getDocsPageRelativeDrawingLeft(config: {
     width: number;
 }): number | undefined {
     const { hostPage, positionH, width } = config;
-    if (positionH.relativeFrom !== ObjectRelativeFromH.PAGE) {
+    if (positionH.relativeFrom !== ObjectRelativeFromH.PAGE && positionH.relativeFrom !== ObjectRelativeFromH.MARGIN) {
         return;
     }
 
+    const left = positionH.relativeFrom === ObjectRelativeFromH.MARGIN ? hostPage.marginLeft ?? 0 : 0;
+    const availableWidth = positionH.relativeFrom === ObjectRelativeFromH.MARGIN
+        ? hostPage.pageWidth - left - (hostPage.marginRight ?? 0)
+        : hostPage.pageWidth;
+
     if (positionH.align === AlignTypeH.RIGHT) {
-        return hostPage.pageWidth - width;
+        return left + availableWidth - width;
     }
     if (positionH.align === AlignTypeH.CENTER) {
-        return hostPage.pageWidth / 2 - width / 2;
+        return left + availableWidth / 2 - width / 2;
     }
     if (positionH.align != null) {
-        return 0;
+        return left;
     }
     if (positionH.posOffset != null) {
-        return positionH.posOffset;
+        return left + positionH.posOffset;
     }
 
-    return positionH.percent ? positionH.percent * hostPage.pageWidth : 0;
+    return left + (positionH.percent ? positionH.percent * availableWidth : 0);
 }
 
 export function getDocsPageRelativeDrawingTop(config: {
@@ -369,7 +376,8 @@ export function getDocsPageRelativeDrawingTop(config: {
     height: number;
 }): number | undefined {
     const { hostPage, positionV, height } = config;
-    if (positionV.relativeFrom !== ObjectRelativeFromV.PAGE) {
+    // A continuous page has no physical top to replace the measured flow position.
+    if (positionV.relativeFrom !== ObjectRelativeFromV.PAGE || !Number.isFinite(hostPage.pageHeight)) {
         return;
     }
 
@@ -547,6 +555,7 @@ function hasNewPublishedPageDrawings(
 }
 
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
+    private _referenceDrawings?: Map<string, { original?: IDrawingParam; projected: IDocDrawingBase }>;
     private _liquid = new Liquid();
     private _changesetDrawingRefreshScheduled = false;
     private _pendingMultiDrawingSelection = new Set<string>();
@@ -569,6 +578,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         this._commandExecutedListener();
         this.disposeWithMe(toDisposable(() => this._clearPendingMultiDrawingSelection()));
+        this.disposeWithMe(toDisposable(() => {
+            this._synchronizeReferenceDrawings();
+        }));
     }
 
     private _initialize() {
@@ -723,6 +735,77 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         );
     }
 
+    private _synchronizeReferenceDrawings(skeleton?: DocumentSkeleton): ReadonlySet<string> {
+        const changed = new Set<string>();
+        const { unit, unitId } = this._context;
+        const snapshot = skeleton && hasDocumentReferenceLayout(unit) ? skeleton.getLayoutSnapshot() : undefined;
+        if (!snapshot && !this._referenceDrawings?.size) {
+            return changed;
+        }
+        const current = this._drawingManagerService.getDrawingDataForUnit(unitId)?.[unitId];
+        if (!current) {
+            this._referenceDrawings = undefined;
+            return changed;
+        }
+        const original = unit.getSnapshot();
+        const source = collectDocDrawings(original).drawings;
+        const projected = snapshot && collectDocDrawings(snapshot).drawings;
+        const changes = new Map(Object.entries(projected ?? {}).filter(([id, drawing]) =>
+            drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE && !Tools.diffValue(source[id], drawing)));
+        if (!changes.size && !this._referenceDrawings?.size && (!snapshot || snapshot === original)) {
+            return changed;
+        }
+
+        // Refresh assigns runtime transforms and visibility; source drawing objects may be shared.
+        const data = Object.fromEntries(Object.entries(current.data).map(([id, drawing]) => [id, { ...drawing }]));
+        const remove = new Set<string>();
+        const drop = new Set<string>();
+        for (const [id, previous] of this._referenceDrawings ?? []) {
+            if (changes.has(id)) {
+                continue;
+            }
+            remove.add(id);
+            changed.add(id);
+            const restored = source[id] ?? previous.original;
+            if (restored) {
+                data[id] = { ...previous.original, ...restored, unitId, subUnitId: unitId };
+            } else {
+                delete data[id];
+                drop.add(id);
+            }
+        }
+        const registrations = new Map<string, { original?: IDrawingParam; projected: IDocDrawingBase }>();
+        for (const [id, drawing] of changes) {
+            const previous = this._referenceDrawings?.get(id);
+            if (!previous || !Tools.diffValue(previous.projected, drawing)) {
+                changed.add(id);
+                if (current.data[id]) {
+                    remove.add(id);
+                }
+            }
+            registrations.set(id, { original: previous ? previous.original : current.data[id], projected: drawing });
+            const reference = {
+                ...data[id],
+                ...drawing,
+                unitId,
+                subUnitId: unitId,
+                allowTransform: false,
+                selectable: false,
+                hidden: data[id]?.hidden ?? true,
+            };
+            data[id] = reference;
+        }
+        this._drawingManagerService.setDrawingData(unitId, unitId, data);
+        this._drawingManagerService.setDrawingOrder(unitId, unitId, [
+            ...new Set([...current.order.filter((id) => !drop.has(id)), ...changes.keys()]),
+        ]);
+        this._referenceDrawings = registrations.size ? registrations : undefined;
+        if (remove.size) {
+            this._drawingManagerService.removeNotification([...remove].map((drawingId) => ({ unitId, subUnitId: unitId, drawingId })));
+        }
+        return changed;
+    }
+
     private _refreshDrawing(
         skeleton: DocumentSkeleton,
         drawingIds?: ReadonlySet<string>,
@@ -741,6 +824,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             return;
         }
 
+        const referenceChanges = this._synchronizeReferenceDrawings(skeleton);
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const updateDrawingMap: Record<string, IDrawingParamsWithBehindText> = {}; // IFloatingObjectManagerParam
 
@@ -767,14 +851,18 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             .filter((drawing) => affectedDrawingIds == null || affectedDrawingIds.has(drawing.drawingId));
 
         for (const drawing of updateDrawings) {
-            drawing.hidden = false;
+            const reference = this._referenceDrawings?.get(drawing.drawingId);
+            drawing.hidden = reference?.projected.hidden === true;
+            if (reference) {
+                drawing.selectable = false;
+            }
         }
 
         const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap, affectedDrawingIds);
         const nonMultiDrawings = updateDrawings
             .filter((drawing) => !drawing.isMultiTransform)
             .concat(staleNonMultiDrawings)
-            .filter((drawing) => shouldRefreshDocDrawingTransform(
+            .filter((drawing) => referenceChanges.has(drawing.drawingId) || shouldRefreshDocDrawingTransform(
                 this._drawingManagerService.getDrawingByParam({
                     unitId,
                     subUnitId: unitId,
@@ -1191,10 +1279,22 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 positionV: runtimeDrawing.docTransform.positionV,
                 height,
             });
+        const measuredPositionV = drawingOrigin.docTransform.positionV;
+        const currentPositionV = runtimeDrawing.docTransform.positionV;
+        let drawingTop = aTop;
+        if (!Number.isFinite(context.page.pageHeight) &&
+            measuredPositionV.relativeFrom === ObjectRelativeFromV.PAGE &&
+            currentPositionV.relativeFrom === ObjectRelativeFromV.PAGE &&
+            measuredPositionV.align == null && currentPositionV.align == null &&
+            measuredPositionV.percent == null && currentPositionV.percent == null) {
+            // Keep the measured continuous flow origin while overlay offsets change.
+            drawingTop += (currentPositionV.posOffset ?? context.page.marginTop) -
+                (measuredPositionV.posOffset ?? context.page.marginTop);
+        }
         const transform: IDrawingTransformStateWithClipBounds = {
             left: (pageRelativeLeft ?? aLeft) + context.docsLeft +
                 (pageRelativeLeft == null ? this._liquid.x : context.pageOffsetLeft),
-            top: (pageRelativeTop ?? aTop) + context.docsTop +
+            top: (pageRelativeTop ?? drawingTop) + context.docsTop +
                 (pageRelativeTop == null ? this._liquid.y : context.pageOffsetTop),
             width,
             height,

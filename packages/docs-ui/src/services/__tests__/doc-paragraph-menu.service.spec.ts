@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, IParagraph } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import {
     BlockType,
@@ -951,6 +951,8 @@ describe('DocParagraphMenuService', () => {
                 startIndex: 4,
                 bullet: {
                     listType: PresetListType.ORDER_LIST,
+                    listId: 'menu-order',
+                    nestingLevel: 0,
                 },
             }],
         });
@@ -1297,7 +1299,7 @@ describe('DocParagraphMenuService', () => {
             keydown$,
             paragraphBounds: new Map([[9, paragraph]]),
             paragraphs: [{
-                bullet: { listType: PresetListType.BULLET_LIST },
+                bullet: { listType: PresetListType.BULLET_LIST, listId: 'menu-bullet', nestingLevel: 0 },
                 startIndex: 9,
             }],
         });
@@ -1689,7 +1691,7 @@ function createService(options: {
     docRanges?: Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     getDocRanges?: () => Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     getPermissionValue?: (permissionId: string) => boolean;
-    paragraphs?: Array<{ bullet?: { listType?: PresetListType }; paragraphId?: string; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
+    paragraphs?: Array<{ bullet?: IParagraph['bullet']; paragraphId?: string; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     hoverParagraphLeft$?: BehaviorSubject<IMutiPageParagraphBound | null>;
     hoverParagraphRealTime$?: BehaviorSubject<IMutiPageParagraphBound | null>;

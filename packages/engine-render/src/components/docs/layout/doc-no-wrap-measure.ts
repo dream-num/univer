@@ -18,8 +18,8 @@ import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
 import { BooleanNumber, resolveDocumentParagraphStyle } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
-import { getFirstGrapheme, getFontStyleString, getTextWithCaps } from '../../../basics/tools';
-import { getDocumentCompatibilityPolicy, getSmallCapsFontStyle } from '../document-compatibility';
+import { getFirstGrapheme, getTextWithCaps } from '../../../basics/tools';
+import { getDocumentCompatibilityPolicy, getDocumentFontStyle, getSmallCapsFontStyle } from '../document-compatibility';
 import { BreakPointType } from './line-breaker/break';
 import { createDocumentLineBreaker } from './line-breaker/document-line-breaker';
 import { getPairKerningAdjustment, measureTextWithCharacterSpacing } from './model/glyph';
@@ -66,14 +66,14 @@ function measureDocumentNoWrapTextByStyle(text: string, textStyle: ITextStyle | 
 
 function measureDocumentNoWrapCJKLatinSpacing(
     segment: string,
-    textStyle: ITextStyle | undefined,
+    font: IDocumentSkeletonFontStyle,
     previous: { char: string; cjkWidth: number }
 ): number {
     let spacing = 0;
 
     for (const char of Array.from(segment)) {
         const isCJK = isDocumentNoWrapMeasureCJKText(char);
-        const cjkWidth = isCJK ? FontCache.getMeasureText(char, getFontStyleString(textStyle).fontCache).width : 0;
+        const cjkWidth = isCJK ? FontCache.getMeasureText(char, font.fontCache).width : 0;
 
         if (isCJK && isDocumentNoWrapMeasureLatinText(previous.char)) {
             spacing += cjkWidth / 4;
@@ -95,14 +95,15 @@ function measureDocumentNoWrapRunsWidth(
     textRuns: ITextRun[],
     fallbackTextStyle: ITextStyle | undefined,
     policy: IDocumentCompatibilityPolicy,
-    spaceWidthEastAsian: boolean
+    spaceWidthEastAsian: boolean,
+    fontPolicy?: IDocumentData['documentStyle']
 ): number {
     let currentLineWidth = 0;
     let maxLineWidth = 0;
     let pendingTrailingWhitespaceWidth = 0;
     const previous = { char: '', cjkWidth: 0 };
     let previousText = '';
-    let previousFont: ReturnType<typeof getFontStyleString> | undefined;
+    let previousFont: ReturnType<typeof getDocumentFontStyle> | undefined;
 
     const measureSegment = (segment: string, textStyle: ITextStyle | undefined, font: IDocumentSkeletonFontStyle) => {
         const content = getTextWithCaps(segment, textStyle?.caps || textStyle?.smallCaps);
@@ -128,14 +129,14 @@ function measureDocumentNoWrapRunsWidth(
             pendingTrailingWhitespaceWidth = 0;
             currentLineWidth += measureSegment(visibleSegment, textStyle, font);
             if (spaceWidthEastAsian) {
-                currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, textStyle, previous);
+                currentLineWidth += measureDocumentNoWrapCJKLatinSpacing(visibleSegment, font, previous);
             }
         }
 
         if (trailingWhitespace) {
             pendingTrailingWhitespaceWidth += measureSegment(trailingWhitespace, textStyle, font);
             if (spaceWidthEastAsian) {
-                measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, textStyle, previous);
+                measureDocumentNoWrapCJKLatinSpacing(trailingWhitespace, font, previous);
             }
         }
     };
@@ -152,7 +153,7 @@ function measureDocumentNoWrapRunsWidth(
 
     const appendRange = (text: string, textStyle: ITextStyle | undefined) => {
         const segments = splitDocumentNoWrapMeasureLines(text);
-        const font = getFontStyleString(textStyle);
+        const font = getDocumentFontStyle(textStyle, fontPolicy?.fontFamilyFallbacks, fontPolicy?.fontFamilyClasses, policy);
 
         segments.forEach((segment, index) => {
             if (index > 0) {
@@ -228,7 +229,8 @@ export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData,
         textRuns,
         documentData.documentStyle?.textStyle,
         getDocumentCompatibilityPolicy(documentData.documentStyle?.documentFlavor),
-        documentData.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
+        documentData.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE,
+        documentData.documentStyle
     );
 }
 
@@ -253,7 +255,8 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
         textRuns ?? [],
         documentData?.documentStyle?.textStyle,
         getDocumentCompatibilityPolicy(documentData?.documentStyle?.documentFlavor),
-        documentData?.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE
+        documentData?.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE,
+        documentData?.documentStyle
     );
 }
 

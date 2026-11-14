@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ISdtCustomRange } from '../../../../../types/interfaces/i-document-data';
 import { describe, expect, it } from 'vitest';
+import type { IDocumentBody, ISdtCustomRange } from '../../../../../types/interfaces/i-document-data';
 import { CustomRangeType } from '../../../../../types/interfaces/i-document-data';
-import { deleteCustomRanges, insertCustomRanges, mergeContinuousRanges } from '../common';
+import { deleteCustomRanges, insertCustomDecorations, insertCustomRanges, mergeContinuousRanges } from '../common';
+
+describe('sparse decoration metadata', () => {
+    it('keeps absent decorations absent when inserting undecorated text or replaying an empty payload', () => {
+        const body: IDocumentBody = { dataStream: 'A\r\n' };
+        insertCustomDecorations(body, { dataStream: 'B' }, 1, 0);
+        expect(body.customDecorations).toBeUndefined();
+        insertCustomDecorations(body, { dataStream: 'B', customDecorations: [] }, 1, 0);
+        expect(body.customDecorations).toBeUndefined();
+    });
+});
 
 describe('overlapping bookmark identity', () => {
     it('merges each bookmark independently of interleaved overlapping ranges', () => {
@@ -44,6 +54,17 @@ describe('overlapping bookmark identity', () => {
         expect(body.customRanges).toEqual([{ ...bookmark, endIndex: 9 }]);
         deleteCustomRanges(body, 2, 4);
         expect(body.customRanges).toEqual([bookmark]);
+    });
+});
+
+describe('DOCX permission ranges', () => {
+    it('keeps one permission range when editing its interior', () => {
+        const range = { rangeId: 'permission', startIndex: 0, endIndex: 7, rangeType: CustomRangeType.CUSTOM, properties: { kind: 'docx-permission', startAttributes: { id: '42', edGrp: 'everyone' }, endAttributes: { id: '42' }, collapsed: false } };
+        const body: IDocumentBody = { dataStream: 'abcdefgh', customRanges: [range] };
+        insertCustomRanges(body, { dataStream: 'XY' }, 2, 4);
+        expect(body.customRanges).toEqual([{ ...range, endIndex: 9 }]);
+        deleteCustomRanges(body, 2, 4);
+        expect(body.customRanges).toEqual([{ ...range, endIndex: 7 }]);
     });
 });
 

@@ -144,4 +144,17 @@ describe('Test searchb function', () => {
             expect(getObjectValue(result3)).toStrictEqual(7);
         });
     });
+
+    describe('Wildcards', () => {
+        const searchb = (find: string, within: string) => getObjectValue(
+            testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within))
+        );
+
+        it('matches ?, * and ~ and returns the position in bytes', () => {
+            expect(searchb('b*', 'abc')).toStrictEqual(2);
+            expect(searchb('?c', 'abc')).toStrictEqual(2);
+            expect(searchb('~*', 'a*b')).toStrictEqual(2);
+            expect(searchb('文?', '中文ab')).toStrictEqual(3);
+        });
+    });
 });

@@ -21,6 +21,7 @@ import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { charLenByte } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { searchWithWildcard } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -97,7 +98,7 @@ export class Searchb extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        const index = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        const index = searchWithWildcard(withinTextValue, findTextValue, startNumValue - 1);
 
         if (index === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

@@ -20,6 +20,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { searchWithWildcard } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -96,7 +97,7 @@ export class Search extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        const result = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        const result = searchWithWildcard(withinTextValue, findTextValue, startNumValue - 1);
 
         if (result === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

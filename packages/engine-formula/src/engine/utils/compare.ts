@@ -95,6 +95,39 @@ export function replaceWildcard(value: string) {
     });
 }
 
+/**
+ * Returns the index of the first match of `pattern` in `text` at or after `fromIndex`, or -1, reading the pattern as
+ * Excel's SEARCH does: `?` matches any single character, `*` matches any sequence of characters (including none),
+ * and `~` makes the `?`, `*` or `~` that follows it literal.
+ */
+export function searchWithWildcard(text: string, pattern: string, fromIndex = 0): number {
+    if (!/[*?~]/.test(pattern)) {
+        return text.indexOf(pattern, fromIndex);
+    }
+
+    let source = '';
+    for (let i = 0; i < pattern.length; i++) {
+        const char = pattern[i];
+        const next = pattern[i + 1];
+
+        if (char === '~' && (next === '*' || next === '?' || next === '~')) {
+            source += `\\${next}`;
+            i++;
+        } else if (char === '*') {
+            source += '[\\s\\S]*';
+        } else if (char === '?') {
+            source += '[\\s\\S]';
+        } else {
+            source += char.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+        }
+    }
+
+    const regex = new RegExp(source, 'g');
+    regex.lastIndex = fromIndex;
+    const match = regex.exec(text);
+    return match ? match.index : -1;
+}
+
 export function compareWithWildcard(currentValue: string, value: string, operator: compareToken, isCaseSensitive = true) {
     let currentText = currentValue;
     let pattern = value;

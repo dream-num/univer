@@ -27,17 +27,38 @@ import {
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SheetCanvasPopManagerService } from '../canvas-pop-manager.service';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const testInjectors: Injector[] = [];
+const testResizeObservers: TestResizeObserver[] = [];
+
+class TestResizeObserver {
+    constructor(private readonly _callback: ResizeObserverCallback) {
+        testResizeObservers.push(this);
+    }
+
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+
+    emit() {
+        this._callback([], this as never);
+    }
+}
+
+beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', TestResizeObserver);
+});
 
 afterEach(() => {
     testInjectors.forEach((injector) => injector.dispose());
     testInjectors.length = 0;
+    testResizeObservers.length = 0;
+    vi.unstubAllGlobals();
 });
 
 function createEventSubject<T>() {
@@ -166,7 +187,7 @@ function createWorkbook(worksheet: any) {
     };
 }
 
-function createSheetHarness() {
+function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
     const injector = new Injector();
     testInjectors.push(injector);
     injector.add([ICanvasPopupService, { useClass: TestCanvasPopupService as never }]);
@@ -193,7 +214,9 @@ function createSheetHarness() {
     } as DOMRect);
 
     const transformChange$ = createEventSubject<unknown>();
+    const sceneTransformChange$ = createEventSubject<unknown>();
     const viewMainScrollAfter$ = createEventSubject<unknown>();
+    const viewMainResized$ = new Subject<void>();
     const clientRect$ = new BehaviorSubject({});
     const worksheet = {
         getSheetId: () => 'sheet-1',
@@ -231,13 +254,20 @@ function createSheetHarness() {
         top: 0,
         viewportScrollX: 0,
         viewportScrollY: 0,
+        absoluteScale: 1,
         onScrollAfter$: viewMainScrollAfter$,
+        onResized$: viewMainResized$,
+        getAbsoluteVector: ({ x, y }: { x: number; y: number }) => ({
+            x: (x - viewport.viewportScrollX) * viewport.absoluteScale,
+            y: (y - viewport.viewportScrollY) * viewport.absoluteScale,
+        }),
     };
     const render = {
         getInjector: vi.fn(() => injector),
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
             getViewport: () => viewport,
+            onTransformChange$: sceneTransformChange$,
         },
         engine: {
             clientRect$,
@@ -247,7 +277,7 @@ function createSheetHarness() {
         with(token: unknown) {
             if (token === SheetSkeletonManagerService) {
                 return {
-                    ensureSkeleton: () => skeleton,
+                    ensureSkeleton: () => options?.withoutSkeleton ? undefined : skeleton,
                     getOrCreateSkeleton: () => skeleton,
                     getSkeletonParam: () => ({ skeleton }),
                 };
@@ -280,7 +310,10 @@ function createSheetHarness() {
         canvas,
         clientRect$,
         transformChange$,
+        sceneTransformChange$,
         viewMainScrollAfter$,
+        viewMainResized$,
+        getLastResizeObserver: () => testResizeObservers[testResizeObservers.length - 1],
         sheetSelectionRenderService,
         viewport,
     };
@@ -358,6 +391,103 @@ describe('SheetCanvasPopManagerService', () => {
         disposable.dispose();
         expect(popupService.removedIds).toEqual(['popup-1']);
         expect(popupService.popups.size).toBe(0);
+    });
+
+    it('anchors a drawing popup through the viewport when the active sheet has no grid skeleton', () => {
+        const { injector, popupService, viewport, viewMainScrollAfter$ } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, {
+            componentKey: 'drawing-toolbar',
+            constrainToCanvas: true,
+        });
+
+        expect(popupService.lastPopup()).toMatchObject({
+            componentKey: 'drawing-toolbar',
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            anchorRect: { left: 50, right: 130, top: 40, bottom: 100 },
+            boundaryInsets: { left: 0, top: 0 },
+        });
+
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        viewMainScrollAfter$.emit({});
+        expect(positions[positions.length - 1]).toEqual({ left: 40, right: 120, top: 32, bottom: 92 });
+    });
+
+    it('updates a drawing popup after canvas and viewport layout changes finish', async () => {
+        const {
+            injector,
+            popupService,
+            canvas,
+            transformChange$,
+            sceneTransformChange$,
+            viewMainResized$,
+            getLastResizeObserver,
+            viewport,
+        } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
+            top: 20,
+            left: 30,
+            width: 100,
+            height: 120,
+            right: 130,
+            bottom: 140,
+            x: 30,
+            y: 20,
+            toJSON: () => ({}),
+        } as DOMRect);
+        getLastResizeObserver().emit();
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
+        });
+
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        transformChange$.emit({});
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
+        });
+
+        viewport.absoluteScale = 0.8;
+        sceneTransformChange$.emit({});
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 42, right: 74, top: 24.8, bottom: 48.8 });
+        });
+
+        viewMainResized$.subscribe(() => {
+            viewport.viewportScrollX = 10;
+            viewport.viewportScrollY = 5;
+        });
+        viewMainResized$.next();
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 38, right: 70, top: 24, bottom: 48 });
+        });
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {

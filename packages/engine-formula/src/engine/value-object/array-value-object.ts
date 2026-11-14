@@ -1535,10 +1535,23 @@ export class ArrayValueObject extends BaseValueObject {
             );
         }
 
+        // A comparison read from the inverted index records only the rows it finds (for `=`, the matching rows):
+        // every other row is FALSE. Fill them in, so that functions reading the array directly (SORTBY, TAKE,
+        // TRANSPOSE, INDEX, UNIQUE...) get a full array rather than holes.
+        const falseValue = BooleanValueObject.create(false);
+        for (let r = 0; r < rowCount; r++) {
+            const row = result[r] ?? (result[r] = []);
+            for (let c = 0; c < columnCount; c++) {
+                if (row[c] == null) {
+                    row[c] = falseValue;
+                }
+            }
+        }
+
         const newArray = this._createNewArray(result, rowCount, columnCount);
 
         // Mark empty values in the array as false
-        newArray.setDefaultValue(BooleanValueObject.create(false));
+        newArray.setDefaultValue(falseValue);
         return newArray;
     }
 

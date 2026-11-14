@@ -35,6 +35,10 @@ const locale: typeof enUS = {
 
         shortcut: {
             'quick-sum': 'Somme rapide',
+            'toggle-show-formulas': 'Afficher les formules',
+        },
+        showFormulas: {
+            tooltip: 'Afficher les formules',
         },
 
         insert: {

@@ -166,7 +166,7 @@ function createWorkbook(worksheet: any) {
     };
 }
 
-function createSheetHarness() {
+function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
     const injector = new Injector();
     testInjectors.push(injector);
     injector.add([ICanvasPopupService, { useClass: TestCanvasPopupService as never }]);
@@ -232,6 +232,10 @@ function createSheetHarness() {
         viewportScrollX: 0,
         viewportScrollY: 0,
         onScrollAfter$: viewMainScrollAfter$,
+        getAbsoluteVector: ({ x, y }: { x: number; y: number }) => ({
+            x: x - viewport.viewportScrollX,
+            y: y - viewport.viewportScrollY,
+        }),
     };
     const render = {
         getInjector: vi.fn(() => injector),
@@ -247,7 +251,7 @@ function createSheetHarness() {
         with(token: unknown) {
             if (token === SheetSkeletonManagerService) {
                 return {
-                    ensureSkeleton: () => skeleton,
+                    ensureSkeleton: () => options?.withoutSkeleton ? undefined : skeleton,
                     getOrCreateSkeleton: () => skeleton,
                     getSkeletonParam: () => ({ skeleton }),
                 };
@@ -358,6 +362,39 @@ describe('SheetCanvasPopManagerService', () => {
         disposable.dispose();
         expect(popupService.removedIds).toEqual(['popup-1']);
         expect(popupService.popups.size).toBe(0);
+    });
+
+    it('anchors a drawing popup through the viewport when the active sheet has no grid skeleton', () => {
+        const { injector, popupService, viewport, viewMainScrollAfter$ } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, {
+            componentKey: 'drawing-toolbar',
+            constrainToCanvas: true,
+        });
+
+        expect(popupService.lastPopup()).toMatchObject({
+            componentKey: 'drawing-toolbar',
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            anchorRect: { left: 50, right: 130, top: 40, bottom: 100 },
+            boundaryInsets: { left: 0, top: 0 },
+        });
+
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        viewMainScrollAfter$.emit({});
+        expect(positions[positions.length - 1]).toEqual({ left: 40, right: 120, top: 32, bottom: 92 });
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {

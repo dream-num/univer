@@ -47,7 +47,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     IRefSelectionsService,
@@ -272,12 +272,16 @@ export class SheetCanvasPopManagerService extends Disposable {
     private _createPositionObserver(
         bound: IBoundRectNoAngle,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
+        skeleton: Nullable<SpreadsheetSkeleton>,
         worksheet: Worksheet
     ) {
         const calc = () => {
             const { scene } = currentRender;
-            const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
+            const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            // Non-grid sheets have no SpreadsheetSkeleton, but their drawing coordinates still use the main viewport.
+            const offsetBound = skeleton
+                ? transformBound2OffsetBound(bound, scene, skeleton, worksheet)
+                : transformBoundByViewport(bound, viewMain!);
             const canvasElement = currentRender.engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
 
@@ -339,7 +343,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
 
         const currentRender = this._renderManagerService.getRenderUnitById(unitId);
-        if (!currentRender || !skeleton) {
+        if (!currentRender || (!skeleton && !currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN))) {
             return {
                 dispose: () => {
                     // empty
@@ -384,8 +388,8 @@ export class SheetCanvasPopManagerService extends Disposable {
             canvasElement,
             boundaryInsets: popup.constrainToCanvas
                 ? {
-                    left: (viewMain?.left ?? skeleton.rowHeaderWidth * scaleX) * scaleAdjust,
-                    top: (viewMain?.top ?? skeleton.columnHeaderHeight * scaleY) * scaleAdjust,
+                    left: (viewMain?.left ?? (skeleton ? skeleton.rowHeaderWidth * scaleX : 0)) * scaleAdjust,
+                    top: (viewMain?.top ?? (skeleton ? skeleton.columnHeaderHeight * scaleY : 0)) * scaleAdjust,
                 }
                 : popup.boundaryInsets,
         });
@@ -947,6 +951,18 @@ export class SheetCanvasPopManagerService extends Disposable {
             disposable,
         };
     }
+}
+
+function transformBoundByViewport(originBound: IBoundRectNoAngle, viewport: Viewport): IBoundRectNoAngle {
+    const topLeft = viewport.getAbsoluteVector(Vector2.FromArray([originBound.left, originBound.top]));
+    const bottomRight = viewport.getAbsoluteVector(Vector2.FromArray([originBound.right, originBound.bottom]));
+
+    return {
+        left: topLeft.x,
+        top: topLeft.y,
+        right: bottomRight.x,
+        bottom: bottomRight.y,
+    };
 }
 
 function pxToNum(width: string): number {

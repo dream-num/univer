@@ -82,6 +82,25 @@ describe('Test math kit', () => {
         expect(divide(0.00000000000000002, -0)).toBe(-Infinity);
     });
 
+    it('Rounding beyond 15 significant digits or above the first digit', () => {
+        // more decimals than the number holds: unchanged, without floating-point noise
+        expect(ceil(1.23, 16)).toBe(1.23);
+        expect(round(1.5, 20)).toBe(1.5);
+        expect(floor(1.5, 309)).toBe(1.5);
+
+        // a place far above the first digit: nothing left to round
+        expect(round(2.5, -400)).toBe(0);
+        expect(floor(1.5, -400)).toBe(0);
+        expect(ceil(1.5, -1)).toBe(10);
+        expect(floor(-0.001, 0)).toBe(-1);
+        expect(ceil(0.001, 0)).toBe(1);
+
+        // ordinary cases are unchanged
+        expect(round(1234.5, -2)).toBe(1200);
+        expect(ceil(1234.5, -2)).toBe(1300);
+        expect(round(123456789012345.6, 0)).toBe(123456789012346);
+    });
+
     // test round
     it('Function round', () => {
         expect(round(1.23456789, 2)).toBe(1.23);

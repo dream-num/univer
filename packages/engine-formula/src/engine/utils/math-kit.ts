@@ -36,12 +36,52 @@ export function divide(a: number, b: number): number {
     return a / b;
 }
 /**
+ * Excel keeps 15 significant digits. Rounding to decimals past the last of them leaves the number unchanged, and
+ * rounding to a place well above its first digit leaves nothing to round. Returns the result in those two cases, where scaling by
+ * 10 ** precision would add floating-point noise or overflow, and undefined when the rounding has to be computed.
+ */
+function roundOutsidePrecision(base: number, precision: number, mode: 'round' | 'floor' | 'ceil'): number | undefined {
+    if (base === 0 || !Number.isFinite(base)) {
+        return undefined;
+    }
+
+    const magnitude = Math.floor(Math.log10(Math.abs(base)));
+
+    // Scaling to more decimals than the number holds only adds noise (ROUNDUP(1.23, 16) gave 1.2299999999999998)
+    if (precision > 0 && (precision + magnitude >= 15 || !Number.isFinite(10 ** precision))) {
+        return base;
+    }
+
+    // |base| * 10 ** precision < 0.1: the place rounded to is above the number's first digit
+    if (precision + magnitude < -1) {
+        const unit = 10 ** -precision;
+
+        if (mode === 'round') {
+            return 0;
+        }
+
+        if (mode === 'floor') {
+            return base > 0 ? 0 : -unit;
+        }
+
+        return base > 0 ? unit : 0;
+    }
+
+    return undefined;
+}
+
+/**
  * Rounds a number to a specified number of decimal places.
  * @param base The number to round.
  * @param precision The number of decimal places to round to.
  * @returns The rounded number.
  */
 export function round(base: number, precision: number): number {
+    const outside = roundOutsidePrecision(base, Math.trunc(precision), 'round');
+    if (outside !== undefined) {
+        return outside;
+    }
+
     const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.round(multiply(base, factor) + epsilon) / factor;
@@ -54,6 +94,11 @@ export function round(base: number, precision: number): number {
  * @returns The floored number.
  */
 export function floor(base: number, precision: number): number {
+    const outside = roundOutsidePrecision(base, Math.trunc(precision), 'floor');
+    if (outside !== undefined) {
+        return outside;
+    }
+
     const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.floor(multiply(base, factor) + epsilon) / factor;
@@ -66,6 +111,11 @@ export function floor(base: number, precision: number): number {
  * @returns The ceiled number.
  */
 export function ceil(base: number, precision: number): number {
+    const outside = roundOutsidePrecision(base, Math.trunc(precision), 'ceil');
+    if (outside !== undefined) {
+        return outside;
+    }
+
     const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.ceil(multiply(base, factor) - epsilon) / factor;

@@ -378,6 +378,12 @@ async function waitForCompleteLayout(skeleton: DocumentSkeleton): Promise<boolea
 }
 
 async function waitForNextCompleteLayout(skeleton: DocumentSkeleton, generation: number): Promise<boolean> {
+    const progress = skeleton.getLayoutProgress();
+    // The synchronous renderer does not publish incremental layout progress.
+    // A synchronous completion may also have happened before this subscription.
+    if (progress == null || (progress.complete && progress.generation > generation)) {
+        return true;
+    }
     try {
         await firstValueFrom(skeleton.layoutProgress$.pipe(
             filter((next) => next.generation > generation && next.complete),

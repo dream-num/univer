@@ -5189,7 +5189,10 @@ export class DocumentSkeleton extends Skeleton {
         removeDupPages(ctx);
         mergeContinuousDuplicatePages(skeleton.pages, state.mode === 'continuous');
         if (ctx.footnoteLayout) {
-            ctx.footnoteLayout.finish(skeleton.pages, prepareSectionBreakConfig(ctx, ctx.viewModel.getChildren().length - 1));
+            const sections = ctx.viewModel.getChildren();
+            const config = ctx.sectionBreakConfigCache.get(sections[sections.length - 1]?.endIndex ?? -1)
+                ?? prepareSectionBreakConfig(ctx, sections.length - 1);
+            ctx.footnoteLayout.finish(skeleton.pages, config);
             updateBlockIndex(skeleton.pages, -1, ctx.docsConfig.documentCompatibilityPolicy);
         }
         if (state.mode === 'continuous') {
@@ -5455,7 +5458,12 @@ export class DocumentSkeleton extends Skeleton {
         const { skeleton, viewModel } = ctx;
         // Calculate page and section position information
         removeDupPages(ctx);
-        ctx.footnoteLayout?.finish(skeleton.pages, prepareSectionBreakConfig(ctx, viewModel.getChildren().length - 1));
+        if (ctx.footnoteLayout) {
+            const sections = viewModel.getChildren();
+            const config = ctx.sectionBreakConfigCache.get(sections[sections.length - 1]?.endIndex ?? -1)
+                ?? prepareSectionBreakConfig(ctx, sections.length - 1);
+            ctx.footnoteLayout.finish(skeleton.pages, config);
+        }
         updateBlockIndex(skeleton.pages, -1, ctx.docsConfig.documentCompatibilityPolicy);
         mergeContinuousDuplicatePages(
             skeleton.pages,

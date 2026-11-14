@@ -58,7 +58,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, map, throttleTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, merge, Subject, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -302,24 +302,37 @@ export class SheetCanvasPopManagerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposable = new DisposableCollection();
         const updatePosition = () => position$.next(calc());
+        const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const layoutChange$ = new Subject<void>();
 
-        disposable.add(currentRender.engine.clientRect$.subscribe({
+        // Chart Sheet presentation updates viewport padding after the resize notification.
+        // Recalculate after the current layout event completes so the popup sees the final transform.
+        disposable.add(merge(
+            currentRender.engine.clientRect$,
+            fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)),
+            fromEventSubject(currentRender.scene.onTransformChange$).pipe(throttleTime(16)),
+            layoutChange$
+        ).pipe(debounceTime(0)).subscribe({
             next: updatePosition,
             error: () => {},
         }));
-        disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(updatePosition));
-        disposable.add(fromEventSubject(currentRender.scene.onTransformChange$).pipe(throttleTime(16)).subscribe(updatePosition));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (shouldUpdatePosition(commandInfo.id)) {
-                updatePosition();
+                layoutChange$.next();
             }
         }));
 
-        const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const canvasResizeObserver = new ResizeObserver(() => layoutChange$.next());
+        canvasResizeObserver.observe(currentRender.engine.getCanvasElement());
+        disposable.add(toDisposable(() => {
+            canvasResizeObserver.disconnect();
+            layoutChange$.complete();
+        }));
+
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
-            disposable.add(viewMain.onResized$.subscribe(updatePosition));
+            disposable.add(viewMain.onResized$.subscribe(() => layoutChange$.next()));
         }
 
         return {

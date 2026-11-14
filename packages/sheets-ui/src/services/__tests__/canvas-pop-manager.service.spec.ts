@@ -27,17 +27,38 @@ import {
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SheetCanvasPopManagerService } from '../canvas-pop-manager.service';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const testInjectors: Injector[] = [];
+const testResizeObservers: TestResizeObserver[] = [];
+
+class TestResizeObserver {
+    constructor(private readonly _callback: ResizeObserverCallback) {
+        testResizeObservers.push(this);
+    }
+
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+
+    emit() {
+        this._callback([], this as never);
+    }
+}
+
+beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', TestResizeObserver);
+});
 
 afterEach(() => {
     testInjectors.forEach((injector) => injector.dispose());
     testInjectors.length = 0;
+    testResizeObservers.length = 0;
+    vi.unstubAllGlobals();
 });
 
 function createEventSubject<T>() {
@@ -292,6 +313,7 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         sceneTransformChange$,
         viewMainScrollAfter$,
         viewMainResized$,
+        getLastResizeObserver: () => testResizeObservers[testResizeObservers.length - 1],
         sheetSelectionRenderService,
         viewport,
     };
@@ -404,15 +426,15 @@ describe('SheetCanvasPopManagerService', () => {
         expect(positions[positions.length - 1]).toEqual({ left: 40, right: 120, top: 32, bottom: 92 });
     });
 
-    it('updates a drawing popup when the canvas layout or render transform changes', () => {
+    it('updates a drawing popup after canvas and viewport layout changes finish', async () => {
         const {
             injector,
             popupService,
             canvas,
-            clientRect$,
             transformChange$,
             sceneTransformChange$,
             viewMainResized$,
+            getLastResizeObserver,
             viewport,
         } = createSheetHarness({ withoutSkeleton: true });
         const service = injector.get(SheetCanvasPopManagerService);
@@ -440,22 +462,32 @@ describe('SheetCanvasPopManagerService', () => {
             y: 20,
             toJSON: () => ({}),
         } as DOMRect);
-        clientRect$.next({ width: 100 });
-        expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
+        getLastResizeObserver().emit();
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
+        });
 
         viewport.viewportScrollX = 5;
         viewport.viewportScrollY = 4;
         transformChange$.emit({});
-        expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
+        });
 
         viewport.absoluteScale = 0.8;
         sceneTransformChange$.emit({});
-        expect(positions[positions.length - 1]).toEqual({ left: 42, right: 74, top: 24.8, bottom: 48.8 });
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 42, right: 74, top: 24.8, bottom: 48.8 });
+        });
 
-        viewport.viewportScrollX = 10;
-        viewport.viewportScrollY = 5;
+        viewMainResized$.subscribe(() => {
+            viewport.viewportScrollX = 10;
+            viewport.viewportScrollY = 5;
+        });
         viewMainResized$.next();
-        expect(positions[positions.length - 1]).toEqual({ left: 38, right: 70, top: 24, bottom: 48 });
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 38, right: 70, top: 24, bottom: 48 });
+        });
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {

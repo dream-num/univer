@@ -116,8 +116,15 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 
         const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
             const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
-            const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
+            // A piece grows over the ranges it meets, so the piece before a
+            // paragraph can already cover a range that runs past it. Start the
+            // next piece at the cursor rather than back at that range's start,
+            // which would emit a negative retain, and drop it if nothing is left.
+            const rangeStartIndex = Math.max(cursor, Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex));
             const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
+            if (rangeEndIndex < rangeStartIndex) {
+                return;
+            }
 
             const customRange = {
                 rangeId: index ? `${rangeId}$${index}` : rangeId,

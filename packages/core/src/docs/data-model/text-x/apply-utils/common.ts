@@ -696,7 +696,8 @@ const ID_SPLIT_SYMBOL = '$';
 const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
 
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
-    if (ranges.length <= 1) {
+    // A single range still takes its root id, as it would among others.
+    if (ranges.length === 0) {
         return ranges;
     }
     ranges.sort((a, b) => a.startIndex - b.startIndex);

@@ -55,6 +55,14 @@ function getHeaderFooterMaxHeight(pageHeight: number) {
 
 // New data structure framework
 // Determine odd and even page numbers
+export function getNextSkeletonPageNumber(page: IDocumentSkeletonPage, section: ISectionBreakConfig): number {
+    // A continuous section can start on the preceding section's physical page.
+    // Keep that page's label, then advance the new section's own counter.
+    return page.type === DocumentSkeletonPageType.BODY && page.sectionId !== section.sectionId
+        ? (section.pageNumberStart ?? page.pageNumber) + 1
+        : page.pageNumber + 1;
+}
+
 export function createSkeletonPage(
     ctx: ILayoutContext,
     sectionBreakConfig: ISectionBreakConfig,

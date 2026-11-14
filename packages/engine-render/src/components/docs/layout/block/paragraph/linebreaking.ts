@@ -29,7 +29,7 @@ import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } fr
 import { getDocumentBorderWidth } from '../../../page-borders';
 import { parseDataStreamToTree } from '../../../view-model/document-view-model';
 import { BreakPointType } from '../../line-breaker/break';
-import { createSkeletonPage } from '../../model/page';
+import { createSkeletonPage, getNextSkeletonPageNumber } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { getFontCreateConfig, getLastNotFullColumnInfo, getLastSection, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
 import { dealWithBullet, generateOrderedListSymbol } from './bullet';
@@ -609,10 +609,6 @@ function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase): IDocumentSke
         blockAnchorTop: 0,
         isPageBreak: false,
     };
-}
-
-function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
-    return lastPage.pageNumber + 1;
 }
 
 interface IParagraphLineRef {
@@ -1345,7 +1341,7 @@ function _layoutShapedTexts({
         const textStartIndex = paragraphNode.contentStartIndex + shapedTextOffset;
         const lastPage = allPages[allPages.length - 1];
         if (referencePageBreaks?.has(shapedTextOffset) && _hasPageContent(lastPage)) {
-            allPages.push(createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage)));
+            allPages.push(createSkeletonPage(ctx, sectionBreakConfig, skeletonResourceReference, getNextSkeletonPageNumber(lastPage, sectionBreakConfig)));
         }
         const textGlyphCount = _glyphCount(glyphs);
         const textEndIndex = textStartIndex + textGlyphCount;
@@ -1472,7 +1468,7 @@ function _layoutShapedTexts({
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    _getNextPageNumber(currentPage),
+                    getNextSkeletonPageNumber(currentPage, sectionBreakConfig),
                     BreakType.PAGE,
                     currentPage
                 );
@@ -1512,7 +1508,7 @@ function _layoutShapedTexts({
                             ctx,
                             sectionBreakConfig,
                             skeletonResourceReference,
-                            _getNextPageNumber(lastPage),
+                            getNextSkeletonPageNumber(lastPage, sectionBreakConfig),
                             BreakType.COLUMN,
                             lastPage
                         )
@@ -1524,7 +1520,7 @@ function _layoutShapedTexts({
                         ctx,
                         sectionBreakConfig,
                         skeletonResourceReference,
-                        _getNextPageNumber(lastPage),
+                        getNextSkeletonPageNumber(lastPage, sectionBreakConfig),
                         BreakType.COLUMN,
                         lastPage
                     )
@@ -1689,7 +1685,7 @@ export function lineBreaking(
             ctx,
             sectionBreakConfig,
             ctx.skeletonResourceReference,
-            _getNextPageNumber(curPage),
+            getNextSkeletonPageNumber(curPage, sectionBreakConfig),
             BreakType.PAGE,
             curPage
         );

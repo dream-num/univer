@@ -27,7 +27,7 @@ import { getDocumentCompatibilityPolicy, getNominalFontLineHeight, isTraditional
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, applyGlyphKerning, createSkeletonBulletGlyph, getGlyphGroupFontBoundingBox, getGlyphGroupShrinkability, getGlyphGroupStretchability, getGlyphPairKerningAdjustment, getTextHorizontalScale, preserveLineStartPunctuationSpace } from '../../model/glyph';
 import { calculateLineTopByDrawings, collisionDetection, createAndUpdateBlockAnchor, createSkeletonLine, setLineMarginBottom, TRADITIONAL_TABLE_WRAP_MIN_WIDTH, updateDivideInfo } from '../../model/line';
-import { createSkeletonPage } from '../../model/page';
+import { createSkeletonPage, getNextSkeletonPageNumber } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { FontCache } from '../../shaping-engine/font-cache';
 import { FloatObjectType, getCharSpaceApply, getCharSpaceConfig, getDrawingMLLineBaseline, getLastLineByColumn, getLastNotFullColumnInfo, getLastNotFullDivideInfo, getLastPage, getLastSection, getLineHeightConfig, getNumberUnitValue, getPositionHorizon, getPositionVertical, isBlankColumn, isColumnFull, lineIterator, reachesNextDocumentGridLine, resolveParagraphCharacterIndents } from '../../tools';
@@ -3001,7 +3001,7 @@ function _pageOperator(
         ctx,
         sectionBreakConfig,
         { skeHeaders, skeFooters },
-        curSkeletonPage.pageNumber + 1,
+        getNextSkeletonPageNumber(curSkeletonPage, sectionBreakConfig),
         undefined,
         curSkeletonPage
     );

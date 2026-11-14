@@ -17,6 +17,7 @@
 import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IParagraph, ISpecialCharacterCustomRange, ITextRange, ITextRun } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
+    binSearchFirstGreaterThanTarget,
     BooleanNumber,
     BuildTextUtils,
     cloneParagraphWithId,
@@ -491,6 +492,7 @@ export function buildTableOfContentsBody(
     const hasLeadingParagraph = isExistingToc && body.dataStream[toc.startIndex + 1] === '\r';
     const oldLeadingParagraph = hasLeadingParagraph ? oldParagraphs.find((paragraph) => paragraph.startIndex === toc.startIndex + 1) : undefined;
     const oldEntryParagraphs = oldParagraphs.filter((paragraph) => paragraph !== oldTitleParagraph && paragraph !== oldLeadingParagraph);
+    const oldParagraphsByTarget = getTocParagraphsByTarget(body, toc, oldEntryParagraphs);
     const usedParagraphIds = new Set<string>();
     let cachedResult = '';
 
@@ -603,6 +605,7 @@ export function buildTableOfContentsBody(
                 refreshPageTab: rightAlignPageNumbers,
                 resetEntryParagraphFormatting: options?.resetEntryParagraphFormatting,
                 styleName: options?.entryStyleName,
+                sourceParagraph: oldParagraphsByTarget.get(heading.bookmarkId ?? heading.headingId) ?? oldParagraphsByTarget.get(heading.paragraph.paragraphId),
             }
         ));
     }
@@ -739,6 +742,41 @@ function getOutlineLevel(paragraph: IParagraph, styles?: IDocStyles): number | u
     }
 }
 
+function getTocParagraphsByTarget(body: IDocumentBody, toc: ICustomRange, entries: IParagraph[]): Map<string, IParagraph> {
+    const result = new Map<string, IParagraph>();
+    if (!entries.length) {
+        return result;
+    }
+    const paragraphs = body.paragraphs ?? [];
+    const ends = paragraphs.map((paragraph) => paragraph.startIndex);
+    const byEnd = new Map(entries.map((paragraph) => [paragraph.startIndex, paragraph]));
+    const bookmarks = new Map((body.customRanges ?? [])
+        .filter((range) => range.rangeType === CustomRangeType.BOOKMARK && range.properties?.bookmarkId)
+        .map((range) => [String(range.properties!.bookmarkId).toLowerCase(), range.startIndex]));
+    for (const range of body.customRanges ?? []) {
+        if (range.rangeType !== CustomRangeType.HYPERLINK || range.startIndex <= toc.startIndex || range.endIndex >= toc.endIndex) {
+            continue;
+        }
+        const source = byEnd.get(paragraphs[binSearchFirstGreaterThanTarget(ends, range.startIndex - 1)]?.startIndex);
+        const targetId = range.properties?.bookmarkId ?? range.properties?.headingId;
+        if (!source || !targetId) {
+            continue;
+        }
+        result.set(targetId, source);
+        const offset = bookmarks.get(targetId.toLowerCase());
+        if (offset != null) {
+            const target = paragraphs[binSearchFirstGreaterThanTarget(ends, offset - 1)];
+            if (target) {
+                result.set(target.paragraphId, source);
+                if (target.paragraphStyle?.headingId) {
+                    result.set(target.paragraphStyle.headingId, source);
+                }
+            }
+        }
+    }
+    return result;
+}
+
 interface ITableOfContentsParagraphFormat {
     tabStopOffset?: number;
     tabLeader?: TableOfContentsTabLeader;
@@ -747,6 +785,7 @@ interface ITableOfContentsParagraphFormat {
     refreshPageTab?: boolean;
     resetEntryParagraphFormatting?: boolean;
     styleName?: string;
+    sourceParagraph?: IParagraph;
 }
 
 function copyTocParagraph(
@@ -764,7 +803,8 @@ function copyTocParagraph(
     const byStyleLevel = byIndex && getTocStyleName(byIndex, styles) === styleName
         ? byIndex
         : oldParagraphs.find((paragraph) => getTocStyleName(paragraph, styles) === styleName);
-    const source = byStyleLevel ?? oldParagraphs[Math.min(index, oldParagraphs.length - 1)];
+    const byTarget = options.sourceParagraph && getTocStyleName(options.sourceParagraph, styles) === styleName ? options.sourceParagraph : undefined;
+    const source = byTarget ?? byStyleLevel ?? oldParagraphs[Math.min(index, oldParagraphs.length - 1)];
     const defaultStyleId = styleName === 'tableoffigures' ? 'TableOfFigures' : `TOC${level}`;
     const canonicalStyle = styles?.[defaultStyleId];
     const styleId = canonicalStyle?.type === DocStyleType.paragraph &&

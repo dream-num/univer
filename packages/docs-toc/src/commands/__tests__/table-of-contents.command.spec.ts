@@ -237,6 +237,48 @@ describe('table of contents body builder', () => {
         expect(body).toEqual(before);
     });
 
+    it('keeps numbered entry tabs with their targets when a directory removes and reorders rows', () => {
+        const cached = '\u001FIntroduction\t1\rChapter 1 : One\t2\rChapter 2 : Two\t3\r\u001E';
+        const dataStream = `${cached}One\rTwo\r\n`;
+        const toc: ICustomRange = { rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: cached.length - 1, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1"' } };
+        const pageTab = { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT };
+        const entryEnds = [...cached.matchAll(/\r/g)].map((match) => match.index);
+        const headings = ['One', 'Two'].map((text, index) => ({
+            text: `Chapter ${index + 1} :\t${text}`,
+            level: 1,
+            headingId: `heading-${index}`,
+            startOffset: cached.length + index * 4,
+            paragraph: { paragraphId: `heading-${index}`, startIndex: cached.length + index * 4 + 3 },
+        }));
+        const body: IDocumentBody = {
+            dataStream,
+            paragraphs: [
+                ...entryEnds.map((startIndex, index) => ({ startIndex, paragraphId: `entry-${index}`, styleId: 'TOC1', paragraphStyle: { tabStops: index ? [{ offset: index * 40, alignment: TabStopAlignment.START }, pageTab] : [pageTab] } })),
+                ...headings.map((heading) => heading.paragraph),
+            ],
+            customRanges: [toc, ...headings.flatMap((heading, index): ICustomRange[] => [
+                { rangeId: `link-${index}`, rangeType: CustomRangeType.HYPERLINK, startIndex: entryEnds[index] + 1, endIndex: entryEnds[index + 1] - 1, properties: { bookmarkId: `_Toc${index}` } },
+                { rangeId: `bookmark-${index}`, rangeType: CustomRangeType.BOOKMARK, startIndex: heading.startOffset + 1, endIndex: heading.paragraph.startIndex - 1, properties: { bookmarkId: `_Toc${index}` } },
+            ])],
+        };
+        const before = structuredClone(body);
+        const build = (source: IDocumentBody): IDocumentBody => {
+            let identity = 0;
+            return buildTableOfContentsBody(source, source.customRanges!.find((range) => range.rangeId === 'toc')!, () => 4, () => `range-${identity++}`, {
+                entries: [...headings].reverse(),
+                resetEntryParagraphFormatting: true,
+                styles: { TOC1: { name: 'toc 1', type: DocStyleType.paragraph, paragraphStyle: { tabStops: [pageTab] } } },
+            })!;
+        };
+        const first = build(body);
+        expect(first.paragraphs!.map((paragraph) => paragraph.paragraphStyle?.tabStops)).toEqual([
+            [{ offset: 80, alignment: TabStopAlignment.START }, pageTab],
+            [{ offset: 40, alignment: TabStopAlignment.START }, pageTab],
+        ]);
+        expect(build(first)).toEqual(first);
+        expect(body).toEqual(before);
+    });
+
     it.each([
         { namedLeader: TabStopLeader.HYPHEN, override: undefined, expected: TabStopLeader.HYPHEN },
         { namedLeader: TabStopLeader.UNDERSCORE, override: undefined, expected: TabStopLeader.UNDERSCORE },

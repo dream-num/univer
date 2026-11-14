@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import type { ISetArrayFormulaDataMutationParams, ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, isRealNum } from '@univerjs/core';
-import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
+import { FormulaDataModel, omitMismatchedArrayFormulaResults, SetArrayFormulaDataMutation, SetFormulaCalculationResultMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
 export class ArrayFormulaCellInterceptorController extends Disposable {
@@ -51,6 +51,20 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     const { arrayFormulaRange, arrayFormulaCellData } = params;
                     this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
                     this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
+                } else if (command.id === SetFormulaCalculationResultMutation.id) {
+                    const params = command.params as ISetFormulaCalculationResultMutation | undefined;
+                    if (params == null) {
+                        return;
+                    }
+
+                    // Array spills are applied before this result. Drop anchors whose formula changed while calculating.
+                    omitMismatchedArrayFormulaResults(
+                        this._formulaDataModel.getArrayFormulaRange(),
+                        this._formulaDataModel.getArrayFormulaCellData(),
+                        undefined,
+                        params.sourceFormulaData,
+                        (unitId, sheetId, row, column, source) => this._formulaDataModel.matchesFormulaSource(unitId, sheetId, row, column, source)
+                    );
                 }
             })
         );

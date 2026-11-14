@@ -195,6 +195,41 @@ describe('FormulaRuntimeService', () => {
         }
     });
 
+    it('keeps the single-cell reference source from before the formula is cleared', () => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            unitDataMatrix.setValue(3, 2, { f: '=$B$4' });
+            runtime.setCurrent(3, 2, 20, 20, 'sheet', 'unit');
+            unitDataMatrix.setValue(3, 2, null);
+            runtime.setRuntimeData(createNewArray([[NumberValueObject.create(50)]], 1, 1));
+
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 2)?.v).toBe(50);
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[3]?.[2]).toEqual({ f: '=$B$4' });
+        } finally {
+            injector.dispose();
+        }
+    });
+
+    it('keeps the array anchor source from before the formula is cleared', () => {
+        const { injector, runtime, unitDataMatrix } = createRuntimeService();
+        try {
+            unitDataMatrix.setValue(6, 2, { f: '=B5:B6' });
+            runtime.setCurrent(6, 2, 20, 20, 'sheet', 'unit');
+            unitDataMatrix.setValue(6, 2, null);
+            runtime.setRuntimeData(createNewArray(
+                [[NumberValueObject.create(0.25)], [NumberValueObject.create(50)]],
+                2,
+                1
+            ));
+
+            expect(runtime.getUnitData().unit?.sheet?.getValue(6, 2)?.v).toBe(0.25);
+            expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(7, 2)?.v).toBe(50);
+            expect(runtime.getAllRuntimeData().sourceFormulaData?.unit?.sheet?.[6]?.[2]).toEqual({ f: '=B5:B6' });
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it.each([
         { source: { f: '=SUM(A1:B2)', si: 'shared' }, expected: { f: '=SUM(A1:B2)', si: 'shared' } },
         { source: { f: '=SUM(A1:B2)', si: 'shared', x: 1, y: 0 }, expected: { f: '', si: 'shared' } },

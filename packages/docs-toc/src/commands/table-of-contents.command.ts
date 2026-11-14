@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IParagraph, ISpecialCharacterCustomRange, ITextRange, ITextRun } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IDocumentStyle, ILists, IParagraph, ISpecialCharacterCustomRange, ITables, ITextRange, ITextRun } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
     binSearchFirstGreaterThanTarget,
@@ -25,6 +25,7 @@ import {
     createParagraphId,
     CustomRangeType,
     DocStyleType,
+    DocumentFlavor,
     generateRandomId,
     getBodySlice,
     getPlainText,
@@ -35,6 +36,8 @@ import {
     JSONX,
     NamedStyleType,
     NumberUnitType,
+    PRESET_LIST_TYPE,
+    resolveDocumentParagraphBullet,
     resolveDocumentParagraphStyle,
     SliceBodyType,
     SpecialCharacterKind,
@@ -45,7 +48,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { getFontStyleString, getNumberUnitValue, IRenderManagerService, measureDocumentNoWrapTextWidth, resolveDocumentParagraphNumbering } from '@univerjs/engine-render';
 import { filter, firstValueFrom, take, timeout } from 'rxjs';
 
 const FIELD_START = '\u001F';
@@ -116,10 +119,26 @@ export interface ITableOfContentsHeading {
     /** Printed label supplied by an embedded story whose anchor is in the main body. */
     pageNumber?: number | string;
     text: string;
+    /** Generated label before a tab separator; used to retain the number's tab spacing. */
+    numberingText?: string;
     textRuns?: ITextRun[];
     customBlocks?: ICustomBlock[];
     specialCharacters?: ISpecialCharacterCustomRange[];
     showPageNumber?: boolean;
+}
+
+interface ITableOfContentsBuildOptions {
+    tabStopOffset?: number;
+    availableWidth?: number;
+    entries?: ITableOfContentsHeading[];
+    showPageNumbers?: boolean;
+    styles?: IDocStyles;
+    documentStyle?: IDocumentStyle;
+    lists?: ILists;
+    tableSource?: ITables;
+    preserveLeadingParagraph?: boolean;
+    resetEntryParagraphFormatting?: boolean;
+    entryStyleName?: string;
 }
 
 export const UpdateTableOfContentsCommand: ICommand<IUpdateTableOfContentsCommandParams> = {
@@ -169,7 +188,13 @@ async function updateTableOfContents(
         };
         const replacement = params?.mode === 'pageNumbersOnly'
             ? buildPageNumberOnlyTableOfContentsBody(currentBody, currentToc, resolvePageNumber)
-            : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber, undefined, { styles: doc.getSnapshot().styles });
+            : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber, undefined, {
+                documentStyle: doc.getDocumentStyle(),
+                styles: doc.getSnapshot().styles,
+                lists: doc.getSnapshot().lists,
+                tableSource: doc.getSnapshot().tableSource,
+                availableWidth: getDocumentTextWidth(currentBody, currentToc.startIndex, doc.getDocumentStyle()),
+            });
         if (!replacement) {
             return false;
         }
@@ -271,11 +296,18 @@ export const InsertTableOfContentsCommand: ICommand<IInsertTableOfContentsComman
                 title: params?.title,
             },
         };
-        const { pageSize, marginLeft = 0, marginRight = 0 } = doc.getDocumentStyle();
+        const availableWidth = getDocumentTextWidth(body, selection.startOffset, doc.getDocumentStyle());
         const replacement = buildTableOfContentsBody(body, toc, (offset) => {
             const pageIndex = skeleton.findBodyPageIndexByCharIndex(offset);
             return skeleton.getSkeletonData()?.pages[pageIndex]?.pageNumber;
-        }, generateRandomId, { tabStopOffset: Math.max(72, (pageSize?.width ?? 594.3) - marginLeft - marginRight), styles: doc.getSnapshot().styles });
+        }, generateRandomId, {
+            tabStopOffset: Math.max(72, availableWidth ?? 594.3),
+            availableWidth,
+            documentStyle: doc.getDocumentStyle(),
+            styles: doc.getSnapshot().styles,
+            lists: doc.getSnapshot().lists,
+            tableSource: doc.getSnapshot().tableSource,
+        });
         if (!replacement) {
             return false;
         }
@@ -451,22 +483,29 @@ function shiftRuns(runs: ITextRun[] | undefined, start: number, end: number, del
     });
 }
 
+function getDocumentTextWidth(body: IDocumentBody, offset: number, documentStyle?: IDocumentStyle): number | undefined {
+    const section = body.sectionBreaks?.find((entry) => offset <= entry.startIndex);
+    const pageWidth = section?.pageSize?.width ?? documentStyle?.pageSize?.width;
+    return section?.columnProperties?.[0]?.width ?? (pageWidth == null ? undefined : pageWidth - (section?.marginLeft ?? documentStyle?.marginLeft ?? 0) - (section?.marginRight ?? documentStyle?.marginRight ?? 0));
+}
+
 export function buildTableOfContentsBody(
     body: IDocumentBody,
     toc: ICustomRange,
     resolvePageNumber: (offset: number) => number | string | undefined,
     idFactory: () => string = generateRandomId,
-    options?: { tabStopOffset?: number; entries?: ITableOfContentsHeading[]; showPageNumbers?: boolean; styles?: IDocStyles; preserveLeadingParagraph?: boolean; resetEntryParagraphFormatting?: boolean; entryStyleName?: string }
+    options?: ITableOfContentsBuildOptions
 ): IDocumentBody | null {
     if (toc.properties?.locked === BooleanNumber.TRUE) {
         return null;
     }
+    options = { ...options, availableWidth: options?.availableWidth ?? getDocumentTextWidth(body, toc.startIndex, options?.documentStyle) };
     const instruction = String(toc.properties?.instruction ?? '');
     if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
     const [minLevel, maxLevel] = parseOutlineLevelRange(instruction);
-    const headings = options?.entries ?? collectHeadings(body, toc, minLevel, maxLevel, options?.styles);
+    const headings = options?.entries ?? collectHeadings(body, toc, minLevel, maxLevel, options?.styles, options ?? {});
     if (headings.length === 0) {
         return null;
     }
@@ -591,7 +630,7 @@ export function buildTableOfContentsBody(
         }
         result.dataStream += '\r';
         cachedResult += `${visibleEntry}\r`;
-        result.paragraphs!.push(copyTocParagraph(
+        const paragraph = copyTocParagraph(
             oldEntryParagraphs,
             index,
             heading.level,
@@ -607,7 +646,9 @@ export function buildTableOfContentsBody(
                 styleName: options?.entryStyleName,
                 sourceParagraph: oldParagraphsByTarget.get(heading.bookmarkId ?? heading.headingId) ?? oldParagraphsByTarget.get(heading.paragraph.paragraphId),
             }
-        ));
+        );
+        formatNumberedEntry(paragraph, heading, toc.rangeId, options);
+        result.paragraphs!.push(paragraph);
     }
 
     result.dataStream += FIELD_END;
@@ -674,7 +715,43 @@ function parseOutlineLevelRange(instruction: string): [number, number] {
     return [min, max];
 }
 
-function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, minLevel: number, maxLevel: number, styles?: IDocStyles): ITableOfContentsHeading[] {
+function formatNumberedEntry(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {
+    if (!heading.numberingText || options?.documentStyle?.documentFlavor === DocumentFlavor.MODERN) {
+        return;
+    }
+    const style = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles: options?.styles, paragraphStyleId: paragraph.styleId });
+    const numberStyle = heading.textRuns?.find((run) => run.st === 0 && run.ed >= heading.numberingText!.length)?.ts;
+    const textStyle = { ...style.textStyle, ...numberStyle };
+    const font = getFontStyleString(textStyle, options?.documentStyle?.fontFamilyFallbacks, options?.documentStyle?.fontFamilyClasses);
+    const width = measureDocumentNoWrapTextWidth({
+        id: rangeId,
+        documentStyle: { ...options?.documentStyle, textStyle },
+        body: { dataStream: heading.numberingText },
+    });
+    const characterWidth = font.originFontSize * 4 / 3;
+    const first = getNumberUnitValue(style.indentFirstLine, characterWidth);
+    const start = getNumberUnitValue(style.indentStart, characterWidth) + (first > 0 ? first : -getNumberUnitValue(style.hanging, characterWidth));
+    const tabs = style.tabStops ?? [];
+    const nextTab = tabs.filter((tab) => !tab.clear && tab.offset > start + width).sort((left, right) => left.offset - right.offset)[0];
+    if (nextTab && (nextTab.alignment === TabStopAlignment.START || nextTab.alignment === TabStopAlignment.TAB_STOP_ALIGNMENT_UNSPECIFIED) && (options?.availableWidth == null || nextTab.offset < options.availableWidth)) {
+        if (paragraph.paragraphStyle?.tabStops) {
+            paragraph.paragraphStyle = { ...paragraph.paragraphStyle, tabStops: [...paragraph.paragraphStyle.tabStops].sort((left, right) => left.offset - right.offset) };
+        }
+        return;
+    }
+    // Word leaves an extra 11-point grid interval after the numbered label.
+    const interval = 11 * 4 / 3;
+    const offset = (Math.floor((start + width) / interval + 1e-6) + 2) * 11 * 4 / 3;
+    paragraph.paragraphStyle = {
+        ...paragraph.paragraphStyle,
+        tabStops: [...tabs, { offset, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE }].sort((left, right) => left.offset - right.offset),
+    };
+}
+
+function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, minLevel: number, maxLevel: number, styles?: IDocStyles, options?: ITableOfContentsBuildOptions): ITableOfContentsHeading[] {
+    // Counting headings does not need list resolution or text measurement.
+    const snapshot = options && { body, styles, documentStyle: options.documentStyle, lists: { ...PRESET_LIST_TYPE, ...options.lists }, tableSource: options.tableSource };
+    const numbering = snapshot && resolveDocumentParagraphNumbering(snapshot);
     const paragraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
     let paragraphStart = 0;
     return paragraphs.flatMap((paragraph) => {
@@ -704,7 +781,7 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
             }
         }
         const leading = content.length - content.trimStart().length;
-        const text = content.trim();
+        let text = content.trim();
         if (!text) {
             return [];
         }
@@ -714,17 +791,31 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
             range.endIndex >= startOffset &&
             range.properties?.bookmarkId
         );
+        const label = numbering?.get(paragraph.startIndex)?.label;
+        const bullet = snapshot && resolveDocumentParagraphBullet(snapshot, paragraph);
+        const definition = bullet && snapshot?.lists[bullet.listType];
+        const followNumberWith = bullet && definition?.nestingLevel[bullet.nestingLevel]?.followNumberWith;
+        const preset = bullet && options?.lists?.[bullet.listType] == null && PRESET_LIST_TYPE[bullet.listType];
+        const separator = followNumberWith === 0 || (followNumberWith == null && preset) ? '\t' : ' ';
+        const prefix = label ? label.replace(/[ \t]+$/, '') + separator : '';
+        if (label && !/\\w(?:\s|$)/i.test(String(toc?.properties?.instruction ?? ''))) {
+            text = text.replace(/\t/g, ' ');
+        }
+        const numberFont = Object.fromEntries(Object.entries(paragraph.paragraphStyle?.paragraphMarkTextStyle ?? {}).filter(([key]) => ['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'complexScriptFontFamily', 'fontHint'].includes(key)));
         return [{
             bookmarkId: bookmark?.properties?.bookmarkId,
             headingId,
             level,
             paragraph,
             startOffset,
-            text,
+            text: `${prefix}${text}`,
+            numberingText: prefix && separator === '\t' ? prefix.slice(0, -1) : undefined,
+            // The local numbering font survives; size and separator follow the directory style.
+            textRuns: prefix && Object.keys(numberFont).length ? [{ st: 0, ed: prefix.length - separator.length, ts: numberFont }] : undefined,
             specialCharacters: characters.filter((range) => range.properties.kind === SpecialCharacterKind.NON_BREAKING_HYPHEN).map((range) => ({
                 ...range,
-                startIndex: offsets[range.startIndex - startOffset] - leading,
-                endIndex: offsets[range.endIndex - startOffset] - leading,
+                startIndex: prefix.length + offsets[range.startIndex - startOffset] - leading,
+                endIndex: prefix.length + offsets[range.endIndex - startOffset] - leading,
             })),
         }];
     });

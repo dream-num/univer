@@ -193,7 +193,9 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
     } as DOMRect);
 
     const transformChange$ = createEventSubject<unknown>();
+    const sceneTransformChange$ = createEventSubject<unknown>();
     const viewMainScrollAfter$ = createEventSubject<unknown>();
+    const viewMainResized$ = new Subject<void>();
     const clientRect$ = new BehaviorSubject({});
     const worksheet = {
         getSheetId: () => 'sheet-1',
@@ -231,10 +233,12 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         top: 0,
         viewportScrollX: 0,
         viewportScrollY: 0,
+        absoluteScale: 1,
         onScrollAfter$: viewMainScrollAfter$,
+        onResized$: viewMainResized$,
         getAbsoluteVector: ({ x, y }: { x: number; y: number }) => ({
-            x: x - viewport.viewportScrollX,
-            y: y - viewport.viewportScrollY,
+            x: (x - viewport.viewportScrollX) * viewport.absoluteScale,
+            y: (y - viewport.viewportScrollY) * viewport.absoluteScale,
         }),
     };
     const render = {
@@ -242,6 +246,7 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
             getViewport: () => viewport,
+            onTransformChange$: sceneTransformChange$,
         },
         engine: {
             clientRect$,
@@ -284,7 +289,9 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         canvas,
         clientRect$,
         transformChange$,
+        sceneTransformChange$,
         viewMainScrollAfter$,
+        viewMainResized$,
         sheetSelectionRenderService,
         viewport,
     };
@@ -404,6 +411,8 @@ describe('SheetCanvasPopManagerService', () => {
             canvas,
             clientRect$,
             transformChange$,
+            sceneTransformChange$,
+            viewMainResized$,
             viewport,
         } = createSheetHarness({ withoutSkeleton: true });
         const service = injector.get(SheetCanvasPopManagerService);
@@ -438,6 +447,15 @@ describe('SheetCanvasPopManagerService', () => {
         viewport.viewportScrollY = 4;
         transformChange$.emit({});
         expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
+
+        viewport.absoluteScale = 0.8;
+        sceneTransformChange$.emit({});
+        expect(positions[positions.length - 1]).toEqual({ left: 42, right: 74, top: 24.8, bottom: 48.8 });
+
+        viewport.viewportScrollX = 10;
+        viewport.viewportScrollY = 5;
+        viewMainResized$.next();
+        expect(positions[positions.length - 1]).toEqual({ left: 38, right: 70, top: 24, bottom: 48 });
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {

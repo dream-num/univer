@@ -172,6 +172,10 @@ describe('use-sheet-selection-change regression scenarios', () => {
         expect(isFormulaReferenceAddingContext(nodes, 4)).toBe(true);
         expect(isFormulaReferenceAddingTextContext('M28,', 4)).toBe(true);
         expect(insertFormulaReferenceText('M28,', 'M27', 4)).toBe('M28,M27');
+        expect(isFormulaReferenceAddingTextContext('M28, ', 5)).toBe(true);
+        expect(insertFormulaReferenceText('M28, ', 'M27', 5)).toBe('M28, M27');
+        expect(isFormulaReferenceAddingTextContext('M28,\n', 5)).toBe(true);
+        expect(insertFormulaReferenceText('M28,\n', 'M27', 5)).toBe('M28,\nM27');
     });
 
     it('skips stale non-add formula selection updates when no rendered reference exists', () => {

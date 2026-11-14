@@ -308,14 +308,14 @@ export const useSheetSelectionChange = (
             isFormulaReferenceAddingTextContext(formulaText, offset);
         if (isAddingReference) {
             if (offset !== 0) {
-                if (nodeIndex === -1 && sequenceNodes.length) {
+                if (nodeIndex === -1 && sequenceNodes.length && !isFormulaReferenceAddingTextContext(formulaText, offset)) {
                     return;
                 }
                 const range = getLastFormulaSelection(selections);
                 if (!range) {
                     return;
                 }
-                const lastNodes = sequenceNodes.splice(nodeIndex + 1);
+                const lastNodes = nodeIndex === -1 ? [] : sequenceNodes.splice(nodeIndex + 1);
                 const rangeSheetId = range.sheetId ?? subUnitId;
                 const unitRangeName = {
                     range,

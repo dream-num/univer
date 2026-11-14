@@ -195,9 +195,15 @@ describe('use-formula-selection regression scenarios', () => {
         expect(shouldAddFormulaReference('=', 1)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(', 5)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(A1,', 8)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1, ', 9)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1,\n', 9)).toBe(true);
+        expect(shouldAddFormulaReference('=SUM(A1, \n', 10)).toBe(true);
+        expect(shouldAddFormulaReference('=IF(\n', 5)).toBe(true);
         expect(shouldAddFormulaReference('=A1+', 4)).toBe(true);
         expect(shouldAddFormulaReference('=Sheet1!', 8)).toBe(true);
         expect(shouldAddFormulaReference('=SUM', 4)).toBe(false);
         expect(shouldAddFormulaReference('=A1', 3)).toBe(false);
+        expect(shouldAddFormulaReference('=A1 ', 4)).toBe(false);
+        expect(shouldAddFormulaReference('=A1\n', 4)).toBe(false);
     });
 });

@@ -397,6 +397,49 @@ describe('SheetCanvasPopManagerService', () => {
         expect(positions[positions.length - 1]).toEqual({ left: 40, right: 120, top: 32, bottom: 92 });
     });
 
+    it('updates a drawing popup when the canvas layout or render transform changes', () => {
+        const {
+            injector,
+            popupService,
+            canvas,
+            clientRect$,
+            transformChange$,
+            viewport,
+        } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
+            top: 20,
+            left: 30,
+            width: 100,
+            height: 120,
+            right: 130,
+            bottom: 140,
+            x: 30,
+            y: 20,
+            toJSON: () => ({}),
+        } as DOMRect);
+        clientRect$.next({ width: 100 });
+        expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
+
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        transformChange$.emit({});
+        expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
+    });
+
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {
         const { injector, popupService, viewport } = createSheetHarness();
         const service = injector.get(SheetCanvasPopManagerService);

@@ -301,16 +301,23 @@ export class SheetCanvasPopManagerService extends Disposable {
         const position = calc();
         const position$ = new BehaviorSubject(position);
         const disposable = new DisposableCollection();
+        const updatePosition = () => position$.next(calc());
+
+        disposable.add(currentRender.engine.clientRect$.subscribe({
+            next: updatePosition,
+            error: () => {},
+        }));
+        disposable.add(fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)).subscribe(updatePosition));
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (shouldUpdatePosition(commandInfo.id)) {
-                position$.next(calc());
+                updatePosition();
             }
         }));
 
         const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
-            disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => position$.next(calc())));
+            disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
         }
 
         return {

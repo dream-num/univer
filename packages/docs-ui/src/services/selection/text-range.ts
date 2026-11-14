@@ -136,6 +136,7 @@ export class TextRange implements IDocRange {
     private _cursorList: ITextRange[] = [];
 
     private _anchorBlinkTimer: Nullable<ReturnType<typeof setInterval>> = null;
+    private _anchorBlinkTimeout: Nullable<ReturnType<typeof setTimeout>> = null;
     private _anchorActiveStroke = DEFAULT_CARET_COLOR;
 
     constructor(
@@ -155,7 +156,8 @@ export class TextRange implements IDocRange {
     }
 
     private _anchorBlink() {
-        setTimeout(() => {
+        this._anchorBlinkTimeout = setTimeout(() => {
+            this._anchorBlinkTimeout = null;
             if (this._anchorShape) {
                 if (this._anchorShape.visible) {
                     this.deactivateStatic();
@@ -168,7 +170,14 @@ export class TextRange implements IDocRange {
                 if (this._anchorShape.visible) {
                     this.activeStatic();
 
-                    setTimeout(() => {
+                    if (this._anchorBlinkTimer == null) {
+                        return;
+                    }
+                    if (this._anchorBlinkTimeout != null) {
+                        clearTimeout(this._anchorBlinkTimeout);
+                    }
+                    this._anchorBlinkTimeout = setTimeout(() => {
+                        this._anchorBlinkTimeout = null;
                         this.deactivateStatic();
                     }, BLINK_ON);
                 }
@@ -367,9 +376,13 @@ export class TextRange implements IDocRange {
         this._anchorShape?.dispose();
         this._anchorShape = null;
 
-        if (this._anchorBlinkTimer) {
+        if (this._anchorBlinkTimer != null) {
             clearInterval(this._anchorBlinkTimer);
             this._anchorBlinkTimer = null;
+        }
+        if (this._anchorBlinkTimeout != null) {
+            clearTimeout(this._anchorBlinkTimeout);
+            this._anchorBlinkTimeout = null;
         }
     }
 

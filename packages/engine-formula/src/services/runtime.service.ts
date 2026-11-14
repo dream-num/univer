@@ -37,12 +37,15 @@ import {
     createIdentifier,
     Disposable,
     Inject,
+    isFormulaId,
+    isFormulaString,
     isNullCell,
     isRealNum,
     IUniverInstanceService,
     ObjectMatrix,
     UniverInstanceType,
 } from '@univerjs/core';
+import { CLEAR_IMPORTED_SPILL_CELL } from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
@@ -756,6 +759,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
              * then it is not treated as an array range and is directly assigned.
              */
             if (startRow === endRow && startColumn === endColumn) {
+                this._clearImportedSpillFollowers(unitId, sheetId, row, column, sheetData);
                 const firstCellRaw = objectValueRefOrArray.getFirstCell();
                 const firstCell = firstCellRaw.isNull()
                     ? NumberValueObject.create(0)
@@ -856,6 +860,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     }
                 });
             } else {
+                // Imported spill followers can have a cached value in the worksheet matrix.
+                // Clear that copy when the spill takes ownership so it cannot block a later update.
+                this._clearImportedSpillFollowers(unitId, sheetId, row, column, sheetData);
                 const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                     // Formula calculation results are saved to cache
@@ -889,6 +896,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 });
             }
         } else {
+            this._clearImportedSpillFollowers(unitId, sheetId, row, column, sheetData);
             const valueObject = this._getValueObjectOfRuntimeData(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
             if (this._currentSourceFormula != null) {
@@ -1050,6 +1058,32 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     clearArrayObjectCache() {
         this._calculationCache?.references.clear();
+    }
+
+    private _clearImportedSpillFollowers(
+        unitId: string,
+        sheetId: string,
+        row: number,
+        column: number,
+        runtimeCells: ObjectMatrix<Nullable<ICellData>>
+    ): void {
+        const range = this._currentConfigService.getArrayFormulaRange()[unitId]?.[sheetId]?.[row]?.[column];
+        if (range == null) return;
+        const rawCells = this._currentConfigService.getUnitData()[unitId]?.[sheetId]?.cellData;
+        const spillCells = this._currentConfigService.getArrayFormulaCellData()[unitId]?.[sheetId];
+        if (rawCells == null || spillCells == null) return;
+
+        for (let r = range.startRow; r <= range.endRow; r++) {
+            for (let c = range.startColumn; c <= range.endColumn; c++) {
+                if (r === row && c === column) continue;
+                const raw = rawCells.getValue(r, c);
+                const cached = spillCells.getValue(r, c);
+                if (raw != null && !isNullCell(raw) && !isFormulaString(raw.f) && !isFormulaId(raw.si) &&
+                    this._isSameCellValue(raw, cached) && runtimeCells.getValue(r, c) == null) {
+                    runtimeCells.setValue(r, c, CLEAR_IMPORTED_SPILL_CELL);
+                }
+            }
+        }
     }
 
     private _checkIfArrayFormulaRangeHasData(

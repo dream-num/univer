@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
+import type { ICellData, IUnitRange, IWorkbookCalculationSettings, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import {
-    AsyncLock,
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    IConfigService,
-    Inject,
-    isFormulaId,
-    isFormulaString,
-    normalizeWorkbookCalculationSettings,
-    ObjectMatrix,
-    Rectangle,
-    requestImmediateMacroTask,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -54,6 +39,21 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
+import {
+    AsyncLock,
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    IConfigService,
+    Inject,
+    isFormulaId,
+    isFormulaString,
+    normalizeWorkbookCalculationSettings,
+    ObjectMatrix,
+    Rectangle,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { Lexer } from '../engine/analysis/lexer';
@@ -61,6 +61,8 @@ import { AstTreeBuilder } from '../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { generateAstNode } from '../engine/utils/generate-ast-node';
+import { objectValueToCellValue } from '../engine/utils/value-object';
+import { NumberValueObject } from '../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaResultService } from './formula-result.service';
@@ -93,6 +95,21 @@ export interface ICalculateFormulaService {
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
+
+interface ICycleFormula {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    column: number;
+    rowCount: number;
+    columnCount: number;
+    formula: string;
+    refOffsetX: number;
+    refOffsetY: number;
+    formulaId?: Nullable<string>;
+    featureId?: Nullable<string>;
+    hasDynamicDeps?: boolean;
+}
 
 export class CalculateFormulaService extends Disposable implements ICalculateFormulaService {
     protected readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
@@ -129,10 +146,121 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return cell.v == null ? { v: 0, t: CellValueType.NUMBER } : cell;
     }
 
-    protected async* _iterateCalculationGroup<T extends { unitId: string; subUnitId: string; row: number; column: number; formula?: string }>(
+    private _evaluateCycleFormula(tree: ICycleFormula): ICellData | undefined {
+        const { unitId, subUnitId, row, column, rowCount, columnCount, formula, refOffsetX, refOffsetY } = tree;
+        this._runtimeService.setCurrent(row, column, rowCount, columnCount, subUnitId, unitId);
+        const node = generateAstNode(unitId, formula, this._lexer, this._astTreeBuilder, this._currentConfigService, subUnitId, column, row);
+        const restoreRefInfo = this._runtimeService.setFunctionRefInfoOverride(1, 1);
+        try {
+            if (this._interpreter.checkAsyncNode(node)) return;
+            const value = this._interpreter.execute({ node, refOffsetX, refOffsetY });
+            let scalar = value as BaseValueObject;
+            if (value.isReferenceObject() || scalar.isArray()) {
+                const range = value as BaseReferenceObject | ArrayValueObject;
+                const { startRow, endRow, startColumn, endColumn } = range.getRangePosition();
+                if (startRow !== endRow || startColumn !== endColumn) return;
+                scalar = range.getFirstCell();
+                if (scalar.isNull()) scalar = NumberValueObject.create(0);
+            }
+            if (!scalar.isCube() && !scalar.isHyperlink() && !scalar.isImage()) {
+                return objectValueToCellValue(scalar);
+            }
+        } finally {
+            restoreRefInfo();
+            node.resetCalculationState();
+        }
+    }
+
+    private _resolveConditionalCycle<T extends ICycleFormula>(group: T[]): T[] | undefined {
+        if (!group.some(({ formula }) => /\b(?:IF|IFERROR|INDEX)\s*\(/i.test(formula))) {
+            return;
+        }
+
+        const arrayRanges = this._currentConfigService.getArrayFormulaRange();
+        if (group.some((tree) => tree.formulaId != null || tree.featureId != null || tree.hasDynamicDeps ||
+            arrayRanges[tree.unitId]?.[tree.subUnitId]?.[tree.row]?.[tree.column] != null ||
+            /\b(?:INDIRECT|OFFSET|RAND|RANDBETWEEN|RANDARRAY|NOW|TODAY)\s*\(/i.test(tree.formula))) {
+            return;
+        }
+
+        const cache = this._runtimeService.getCalculationCache?.();
+        if (cache == null) return;
+
+        const members = new Map<string, Map<string, ObjectMatrix<T>>>();
+        for (const tree of group) {
+            let sheets = members.get(tree.unitId);
+            if (sheets == null) members.set(tree.unitId, sheets = new Map());
+            let cells = sheets.get(tree.subUnitId);
+            if (cells == null) sheets.set(tree.subUnitId, cells = new ObjectMatrix());
+            cells.setValue(tree.row, tree.column, tree);
+        }
+        const resolved = new Map<T, ICellData>();
+        const resolving = new Set<T>();
+        const stack: T[] = [];
+        const order: T[] = [];
+        const read: { pending?: T } = {};
+        cache.readCycleCell = (unitId, sheetId, row, column) => {
+            const tree = members.get(unitId)?.get(sheetId)?.getValue(row, column);
+            if (tree == null) return;
+            const cell = resolved.get(tree);
+            if (cell == null) read.pending ??= tree;
+            return cell;
+        };
+
+        this._runtimeService.setFormulaCycleIndex(0);
+        try {
+            for (const start of group) {
+                if (resolved.has(start)) continue;
+                stack.push(start);
+                resolving.add(start);
+                while (stack.length > 0) {
+                    if (this._runtimeService.isStopExecution()) return;
+                    const tree = stack[stack.length - 1];
+                    cache.references.clear();
+                    cache.invertedIndex.clear();
+                    read.pending = undefined;
+                    const cell = this._evaluateCycleFormula(tree);
+
+                    // Retry once the first unfinished read has a value. Later reads
+                    // may change when that value selects a different branch.
+                    const precedent = read.pending;
+                    if (precedent != null) {
+                        if (resolving.has(precedent)) return;
+                        resolving.add(precedent);
+                        stack.push(precedent);
+                    } else {
+                        if (cell == null) return;
+                        resolved.set(tree, cell);
+                        order.push(tree);
+                        stack.pop();
+                        resolving.delete(tree);
+                    }
+                }
+            }
+            return order;
+        } finally {
+            cache.readCycleCell = undefined;
+            cache.references.clear();
+            cache.invertedIndex.clear();
+        }
+    }
+
+    protected async* _iterateCalculationGroup<T extends ICycleFormula>(
         group: T[],
         groupId: string
     ) {
+        const order = this._resolveConditionalCycle(group);
+        if (order != null) {
+            const cache = this._runtimeService.getCalculationCache?.();
+            for (const tree of order) {
+                cache?.references.clear();
+                cache?.invertedIndex.clear();
+                yield { tree, preserve: false, iteration: 0 };
+            }
+            cache?.references.clear();
+            cache?.invertedIndex.clear();
+            return;
+        }
         const settings = group.map((item) => this._getCalculationSettings(item.unitId));
         if (group.every((item, i) => {
             const cell = this._currentConfigService.getUnitData()[item.unitId]?.[item.subUnitId]?.cellData.getValue(item.row, item.column);
@@ -206,7 +334,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         })));
     }
 
-    protected async* _getCalculationSteps<T extends { cycleGroup?: string; unitId: string; subUnitId: string; row: number; column: number }>(trees: T[]) {
+    protected async* _getCalculationSteps<T extends ICycleFormula & { cycleGroup?: string }>(trees: T[]) {
         while (trees.length) {
             const tree = trees.pop()!;
             if (tree.cycleGroup == null) {

@@ -263,8 +263,8 @@ export class Interpreter extends Disposable {
         }
 
         await this._executeAsync(children[0], dateSystem, refOffsetX, refOffsetY);
-        const condition = children[0].getValue();
-        if (condition == null || condition.isReferenceObject() || condition.isArray()) {
+        const condition = this._getLazyIfCondition(children[0].getValue());
+        if (condition == null) {
             return false;
         }
         if (condition.isError()) {
@@ -272,7 +272,7 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        const selected = (condition as BaseValueObject).getValue() ? children[1] : children[2];
+        const selected = condition.getValue() ? children[1] : children[2];
         if (selected == null) {
             node.setValue(BooleanValueObject.create(false));
             return true;
@@ -295,8 +295,8 @@ export class Interpreter extends Disposable {
         }
 
         this._execute(children[0], dateSystem, refOffsetX, refOffsetY);
-        const condition = children[0].getValue();
-        if (condition == null || condition.isReferenceObject() || condition.isArray()) {
+        const condition = this._getLazyIfCondition(children[0].getValue());
+        if (condition == null) {
             return false;
         }
         if (condition.isError()) {
@@ -304,7 +304,7 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        const selected = (condition as BaseValueObject).getValue() ? children[1] : children[2];
+        const selected = condition.getValue() ? children[1] : children[2];
         if (selected == null) {
             node.setValue(BooleanValueObject.create(false));
             return true;
@@ -313,6 +313,24 @@ export class Interpreter extends Disposable {
         this._execute(selected, dateSystem, refOffsetX, refOffsetY);
         node.setValue(this._toLazyIfSelectedValue(selected.getValue(), node));
         return true;
+    }
+
+    private _getLazyIfCondition(value: Nullable<FunctionVariantType>): BaseValueObject | undefined {
+        if (value == null || value.isArray()) return;
+        let condition = value as BaseValueObject;
+        if (value.isReferenceObject()) {
+            const reference = value as BaseReferenceObject;
+            if (reference.getRowCount() !== 1 || reference.getColumnCount() !== 1) return;
+            condition = reference.getCellByPosition();
+        }
+        if (condition.isString()) {
+            switch (String(condition.getValue()).trim().toUpperCase()) {
+                case 'TRUE': return BooleanValueObject.create(true);
+                case 'FALSE': return BooleanValueObject.create(false);
+                default: return ErrorValueObject.create(ErrorType.VALUE);
+            }
+        }
+        return condition;
     }
 
     private async _executeLazyIfErrorAsync(

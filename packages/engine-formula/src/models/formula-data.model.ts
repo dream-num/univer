@@ -921,8 +921,48 @@ export class FormulaDataModel extends Disposable {
      * @returns
      */
     getFormulaDirtyRanges(): IUnitRange[] {
-        const formulaData = this.getFormulaData();
+        // Customized models keep their formula DTO authoritative.
+        if (!supportsCompactFormulaSnapshot(this)) {
+            return this._getFormulaDirtyRangesFromData(this.getFormulaData());
+        }
 
+        const dirtyRanges: IUnitRange[] = [];
+        const workbooks = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        for (let i = 0; i < workbooks.length; i++) {
+            const workbook = workbooks[i];
+            const unitId = workbook.getUnitId();
+            const worksheets = workbook.getSheets();
+            for (let j = 0; j < worksheets.length; j++) {
+                const worksheet = worksheets[j];
+                const sheetId = worksheet.getSheetId();
+                const cellMatrix = worksheet.getCellMatrix();
+
+                const formulaIdMap: Record<string, IFormulaIdMap> = Object.create(null);
+                // Resolve followers against all anchors, including anchors after their followers.
+                this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix, formulaIdMap);
+                const columnRanges: IColumnRowRanges = Object.create(null);
+                cellMatrix.forValue((row, column, cell) => {
+                    const formulaString = cell?.f || '';
+                    const formulaId = cell?.si || '';
+                    const checkFormulaString = isFormulaString(formulaString);
+                    const hasSharedAnchor = isFormulaId(formulaId) && formulaIdMap[formulaId] !== undefined;
+                    if (!(checkFormulaString || hasSharedAnchor) || (cell?.v !== undefined && cell?.v !== null)) {
+                        return;
+                    }
+                    pushContinuousRow(columnRanges, row, column);
+                });
+                if (!this._formulaIdMapData[unitId]) {
+                    this._formulaIdMapData[unitId] = Object.create(null);
+                }
+                this._formulaIdMapData[unitId]![sheetId] = formulaIdMap;
+                pushColumnDirtyRanges(dirtyRanges, unitId, sheetId, columnRanges);
+            }
+        }
+
+        return dirtyRanges;
+    }
+
+    private _getFormulaDirtyRangesFromData(formulaData: IFormulaData): IUnitRange[] {
         const dirtyRanges: IUnitRange[] = [];
 
         for (const unitId in formulaData) {
@@ -944,7 +984,7 @@ export class FormulaDataModel extends Disposable {
                 if (!sheetInstance) continue;
 
                 // Object to store continuous cell ranges by column
-                const columnRanges: { [column: number]: { startRow: number; endRow: number }[] } = Object.create(null);
+                const columnRanges: IColumnRowRanges = Object.create(null);
 
                 for (const rowStr of Object.keys(sheet)) {
                     const row = Number(rowStr);
@@ -960,53 +1000,34 @@ export class FormulaDataModel extends Disposable {
 
                         if (!(isFormula && noValue)) continue;
 
-                        if (!columnRanges[column]) columnRanges[column] = [];
-
-                        const lastRange = columnRanges[column].slice(-1)[0];
-
-                        // If the current row is continuous with the last range, extend endRow
-                        if (lastRange && lastRange.endRow === row - 1) {
-                            lastRange.endRow = row;
-                        } else {
-                            // Otherwise, start a new range
-                            columnRanges[column].push({ startRow: row, endRow: row });
-                        }
+                        pushContinuousRow(columnRanges, row, column);
                     }
                 }
 
-                // Convert collected column ranges to IUnitRange format
-                for (const column in columnRanges) {
-                    const currentColumnRanges = columnRanges[column];
-                    for (let i = 0; i < currentColumnRanges.length; i++) {
-                        const range = currentColumnRanges[i];
-                        dirtyRanges.push({
-                            unitId,
-                            sheetId,
-                            range: {
-                                rangeType: RANGE_TYPE.NORMAL,
-                                startRow: range.startRow,
-                                endRow: range.endRow, // Use endRow as the inclusive end row
-                                startColumn: Number(column),
-                                endColumn: Number(column),
-                            },
-                        });
-                    }
-                }
+                pushColumnDirtyRanges(dirtyRanges, unitId, sheetId, columnRanges);
             }
         }
 
         return dirtyRanges;
     }
 
-    private _initSheetArrayFormulaData(unitId: string, sheetId: string, cellMatrix: ObjectMatrix<Nullable<ICellData>>) {
+    private _initSheetArrayFormulaData(
+        unitId: string,
+        sheetId: string,
+        cellMatrix: ObjectMatrix<Nullable<ICellData>>,
+        formulaIdMap?: Record<string, IFormulaIdMap>
+    ) {
         let arrayFormulaRangeMatrix: Nullable<ObjectMatrix<IRange>>;
         let arrayFormulaCellDataMatrix: Nullable<ObjectMatrix<Nullable<ICellData>>>;
         const formulaIds = new Set<string>();
 
-        cellMatrix.forValue((_, __, cell) => {
+        cellMatrix.forValue((row, column, cell) => {
             const formulaId = cell?.si;
-            if (isFormulaString(cell?.f) && isFormulaId(formulaId)) {
-                formulaIds.add(String(formulaId));
+            const formula = cell?.f;
+            if (isFormulaString(formula) && isFormulaId(formulaId)) {
+                const id = String(formulaId);
+                formulaIds.add(id);
+                if (formulaIdMap) formulaIdMap[id] = { f: formula!, r: row, c: column };
             }
         });
 
@@ -1076,6 +1097,46 @@ export class FormulaDataModel extends Disposable {
 const SNAPSHOT_MODEL_METHODS = ['getFormulaData', 'initSheetFormulaData', '_initSheetArrayFormulaData'].map((name) =>
     [name, Object.getOwnPropertyDescriptor(FormulaDataModel.prototype, name)?.value] as const
 );
+
+interface IColumnRowRanges {
+    [column: number]: { startRow: number; endRow: number }[];
+}
+
+function pushContinuousRow(columnRanges: IColumnRowRanges, row: number, column: number): void {
+    if (!columnRanges[column]) {
+        columnRanges[column] = [];
+    }
+
+    const ranges = columnRanges[column];
+    const lastRange = ranges[ranges.length - 1];
+
+    // Extend the previous range when this row continues it; otherwise start a new range.
+    if (lastRange && lastRange.endRow === row - 1) {
+        lastRange.endRow = row;
+    } else {
+        ranges.push({ startRow: row, endRow: row });
+    }
+}
+
+function pushColumnDirtyRanges(dirtyRanges: IUnitRange[], unitId: string, sheetId: string, columnRanges: IColumnRowRanges): void {
+    for (const column in columnRanges) {
+        const ranges = columnRanges[column];
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            dirtyRanges.push({
+                unitId,
+                sheetId,
+                range: {
+                    rangeType: RANGE_TYPE.NORMAL,
+                    startRow: range.startRow,
+                    endRow: range.endRow, // Use endRow as the inclusive end row
+                    startColumn: Number(column),
+                    endColumn: Number(column),
+                },
+            });
+        }
+    }
+}
 
 function buildSheetFormulaData(
     formulaData: IFormulaData,

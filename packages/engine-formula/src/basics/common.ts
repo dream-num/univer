@@ -39,6 +39,9 @@ export const REFERENCE_OBJECT_CLASS_TYPE = 'referenceObject';
 
 export const VALUE_OBJECT_CLASS_TYPE = 'valueObject';
 
+// Remove a worksheet cache value while keeping any newly calculated spill value visible.
+export const CLEAR_IMPORTED_SPILL_CELL: ICellData = { v: null, t: null };
+
 export enum BooleanValue {
     FALSE = 'FALSE',
     TRUE = 'TRUE',

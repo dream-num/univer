@@ -34,6 +34,7 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
+import { CLEAR_IMPORTED_SPILL_CELL } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
@@ -566,6 +567,11 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellData(row: number, column: number) {
+        const readCycleCell = this._calculationCache?.readCycleCell;
+        const cycleCell = readCycleCell?.(this.getUnitId(), this.getSheetId(), row, column);
+        if (cycleCell != null) {
+            return cycleCell;
+        }
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
@@ -578,12 +584,18 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentRuntimeActiveArrayFormulaRange());
 
-        let cellData: Nullable<ICellData> = activeRuntimeData?.getValue(row, column) ||
+        const runtimeCell = activeRuntimeData?.getValue(row, column);
+        const clearsImportedSpill = runtimeCell === CLEAR_IMPORTED_SPILL_CELL;
+        let cellData: Nullable<ICellData> = (clearsImportedSpill ? null : runtimeCell) ||
             activeRuntimeArrayFormulaCellData?.getValue(row, column) ||
             this.getRuntimeFeatureCellValue(row, column);
 
         if (cellData) {
             return cellData;
+        }
+
+        if (clearsImportedSpill) {
+            return null;
         }
 
         cellData = activeArrayFormulaCellData?.getValue(row, column);

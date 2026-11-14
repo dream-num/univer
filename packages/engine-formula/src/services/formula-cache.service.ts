@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, LRUMap } from '@univerjs/core';
+import type { ICellData } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { AstRootNode } from '../engine/ast-node/ast-root-node';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import { Disposable, LRUMap } from '@univerjs/core';
 import { FormulaAstLRU } from '../basics/cache-lru';
 import { normalizeFunctionToken } from '../basics/function';
 import { InvertedIndexCache } from '../basics/inverted-index-cache';
@@ -36,6 +37,7 @@ function usesFunction(node: BaseAstNode | LexerNode, names: Set<string>): boolea
 export class FormulaCalculationCache extends Disposable {
     readonly references = new FormulaAstLRU<ArrayValueObject>(10000);
     readonly invertedIndex = new InvertedIndexCache();
+    readCycleCell?: (unitId: string, sheetId: string, row: number, column: number) => ICellData | undefined;
 
     get closed(): boolean {
         return this._disposed;

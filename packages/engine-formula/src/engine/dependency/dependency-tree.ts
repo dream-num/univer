@@ -24,7 +24,8 @@ import type {
 } from '../../basics/common';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { AstRootNode, FunctionNode } from '../ast-node';
+import type { AstRootNode } from '../ast-node';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { moveRangeByOffset } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -106,7 +107,7 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     isCache: boolean = false;
     isDirty: boolean = false;
 
-    addressFunctionNodes: FunctionNode[] = [];
+    addressFunctionNodes: BaseAstNode[] = [];
 
     get isVirtual() {
         return true;
@@ -318,7 +319,7 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     node: Nullable<AstRootNode>;
 
-    addressFunctionNodes: FunctionNode[] = [];
+    addressFunctionNodes: BaseAstNode[] = [];
 
     constructor(treeId: number) {
         super();

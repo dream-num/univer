@@ -21,6 +21,7 @@ import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
     IDefinedNamesService,
+    IFormulaRuntimeService,
     RemoveDefinedNameMutation,
     SetArrayFormulaDataMutation,
     SetDefinedNameMutation,
@@ -101,6 +102,32 @@ function createControllerTestBed(initialFormulaComputing?: CalculationMode) {
         testBed.injector.get(IConfigService).setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing });
     }
     return testBed;
+}
+
+function setTwoByTwoArrayFormula(formulaDataModel: FormulaDataModel): void {
+    formulaDataModel.setArrayFormulaRange({
+        test: {
+            sheet1: {
+                5: {
+                    5: { startRow: 5, startColumn: 5, endRow: 6, endColumn: 6 },
+                },
+            },
+        },
+    });
+    formulaDataModel.setArrayFormulaCellData({
+        test: {
+            sheet1: {
+                5: {
+                    5: { v: 1 },
+                    6: { v: 2 },
+                },
+                6: {
+                    5: { v: 3 },
+                    6: { v: 4 },
+                },
+            },
+        },
+    });
 }
 
 describe('UpdateFormulaController', () => {
@@ -994,6 +1021,50 @@ describe('UpdateFormulaController', () => {
         expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(true);
     });
 
+    it('should not sync array formula data when a formula edit leaves array formulas unchanged', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        const arrayFormulaRange = formulaDataModel.getArrayFormulaRange();
+        const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData();
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                8: {
+                    0: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getFormulaData().test?.sheet1?.[8]?.[0]).toMatchObject({ f: '=A1' });
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetFormulaDataMutation.id)).toBe(true);
+        expect(executeCommandSpy.mock.calls.some(([id]) => id === SetArrayFormulaDataMutation.id)).toBe(false);
+        expect(formulaDataModel.getArrayFormulaRange()).toBe(arrayFormulaRange);
+        expect(formulaDataModel.getArrayFormulaCellData()).toBe(arrayFormulaCellData);
+    });
+
+    it('should sync array formula data when a formula edit replaces an array formula anchor', async () => {
+        setTwoByTwoArrayFormula(formulaDataModel);
+        // Replacing a multi-cell array anchor also marks its former range dirty.
+        commandService.registerCommand(SetTriggerFormulaCalculationStartMutation);
+        const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
+
+        await commandService.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                5: {
+                    5: { f: '=A1' },
+                },
+            },
+        });
+
+        expect(formulaDataModel.getArrayFormulaRange().test?.sheet1?.[5]?.[5]).toBeUndefined();
+        const notification = executeCommandSpy.mock.calls.find(([id]) => id === SetArrayFormulaDataMutation.id);
+        expect(notification?.[2]).toMatchObject({ onlyLocal: true, remove: true });
+    });
+
     it('should initialize formula data for added sheets and workbooks, then clear removed sheets', async () => {
         const configService = testBed.injector.get(IConfigService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand');
@@ -1087,6 +1158,77 @@ describe('UpdateFormulaController', () => {
 });
 
 describe('UpdateFormulaController spill cache integration', () => {
+    it('keeps an imported FILTER spill editable after shrinking and undoing', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const api = FUniver.newAPI(univer);
+        const book = api.createWorkbook({
+            id: 'imported-filter-spill',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 1 },
+                            3: { f: '=FILTER(A1:A3,B1:B3=1)', v: '1', t: CellValueType.NUMBER, ref: 'D1:D3' },
+                            5: { f: '=SUM(D1:D3)' },
+                        },
+                        1: { 0: { v: 2 }, 1: { v: 1 }, 3: { v: '2', t: CellValueType.NUMBER } },
+                        2: { 0: { v: 3 }, 1: { v: 1 }, 3: { v: '3', t: CellValueType.NUMBER } },
+                    },
+                },
+            },
+        });
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(book.getId());
+        const sheet = book.getActiveSheet();
+        const commands = injector.get(ICommandService);
+        const calculator = api.getFormula();
+        const calculate = async (action: () => unknown) => {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const done = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Imported spill calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await done;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        };
+        const values = () => sheet.getRange('D1:D3').getValues().map(([value]) => value ?? null);
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => sheet.getRange('A2').setValue(20));
+            expect(values()).toEqual([1, 20, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(24);
+            await calculate(() => sheet.getRange('B3').setValue(0));
+            expect(values()).toEqual([1, 20, null]);
+            expect(sheet.getRange('F1').getValue()).toBe(21);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 20, 3]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(values()).toEqual([1, 2, 3]);
+            expect(sheet.getRange('F1').getValue()).toBe(6);
+            await calculate(() => calculator.executeCalculation());
+            expect(values()).toEqual([1, 2, 3]);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it.each([
         { formula: '=SEQUENCE($A$1)', horizontal: false, scale: 1 },
         { formula: '=SEQUENCE(1,$A$1)', horizontal: true, scale: 1 },
@@ -1173,6 +1315,100 @@ describe('UpdateFormulaController spill cache integration', () => {
             expectValues(5);
             await calculate(() => expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true));
             expectValues(1, true);
+        } finally {
+            univer.dispose();
+        }
+    });
+});
+
+describe('conditional circular references', () => {
+    it.each([CalculationMode.NO_CALCULATION, CalculationMode.WHEN_EMPTY])('recalculates after edits and undo in mode %s', async (initialFormulaComputing) => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing });
+        const api = FUniver.newAPI(univer);
+        const calculator = api.getFormula();
+        const injector = univer.__getInjector();
+
+        async function calculate(action: () => void): Promise<void> {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Conditional cycle calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        }
+
+        const open = () => api.createWorkbook({
+            id: 'conditional-cycle',
+            sheetOrder: ['data'],
+            sheets: {
+                data: {
+                    id: 'data',
+                    name: 'Data',
+                    rowCount: 10,
+                    columnCount: 10,
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                            1: { v: 5 },
+                            2: { f: '=INDEX(B1:B2,MATCH(D1,A1:A2,0))' },
+                            3: { v: 1 },
+                            4: { f: '=IF(F1,SUM(E1:E3),G1)' },
+                            5: { v: 0, t: CellValueType.BOOLEAN },
+                            6: { v: 9 },
+                            7: { f: '=C1+E1' },
+                        },
+                        1: { 0: { v: 2 }, 1: { f: '=C1+1' } },
+                    },
+                },
+            },
+        });
+
+        try {
+            let book: ReturnType<typeof open> | undefined;
+            if (initialFormulaComputing === CalculationMode.WHEN_EMPTY) {
+                await calculate(() => {
+                    book = open();
+                });
+            } else {
+                book = open();
+                await calculate(() => calculator.executeCalculation());
+            }
+            const sheet = book!.getActiveSheet();
+            injector.get(IUniverInstanceService).focusUnit(book!.getId());
+            const commands = injector.get(ICommandService);
+            const runtime = injector.get(IFormulaRuntimeService);
+            const cycles = () => runtime.getRuntimeState().circularReferences?.map(({ row, column }) => [row, column]);
+            const values = () => ['C1', 'B2', 'E1', 'H1'].map((cell) => sheet.getRange(cell).getValue());
+            const undo = () => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true);
+
+            expect(values()).toEqual([5, 6, 9, 14]);
+            expect(cycles()).toEqual([]);
+            await calculate(() => sheet.getRange('B1').setValue(8));
+            expect(values()).toEqual([8, 9, 9, 17]);
+
+            await calculate(() => sheet.getRange('D1').setValue(2));
+            expect(cycles()).toHaveLength(2);
+            expect(cycles()).toEqual(expect.arrayContaining([[0, 2], [1, 1]]));
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+
+            await calculate(() => sheet.getRange('F1').setValue(true));
+            expect(cycles()).toEqual([[0, 4]]);
+            expect(values()).toEqual([8, 9, 9, 17]);
+            await calculate(undo);
+            expect(cycles()).toEqual([]);
+            expect(values()).toEqual([8, 9, 9, 17]);
         } finally {
             univer.dispose();
         }

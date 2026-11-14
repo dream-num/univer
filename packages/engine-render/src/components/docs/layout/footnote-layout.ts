@@ -35,6 +35,7 @@ import {
     createSkeletonPage,
     expandCellPageHeightForFlowTables,
     expandCellPageHeightForInlineDrawings,
+    getNextSkeletonPageNumber,
 } from './model/page';
 import { formatNoteNumber } from './note-numbering';
 import {
@@ -372,7 +373,7 @@ export class DocumentFootnoteLayout {
                     if (requiresNewPage || offset + row.height > limit + 0.01) {
                         do {
                             this._pages.set(target, previousPlan);
-                            target = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, target.pageNumber + 1);
+                            target = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(target, config));
                             targetPages.push(target);
                             offset = 0;
                             preceding = [];
@@ -430,7 +431,7 @@ export class DocumentFootnoteLayout {
                     } else {
                         heights[index] = available;
                     }
-                    measurePage = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, measurePage.pageNumber + 1);
+                    measurePage = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(measurePage, config));
                     measurePages.push(measurePage);
                 }
                 return changed ? heights : undefined;
@@ -452,7 +453,7 @@ export class DocumentFootnoteLayout {
             },
             hasContinuation: () => this._getInherited(current, pages, config).fragments.length > 0,
             nextPage: () => {
-                current = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, current.pageNumber + 1);
+                current = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(current, config));
                 pages.push(current);
                 top = 0;
             },
@@ -522,7 +523,7 @@ export class DocumentFootnoteLayout {
             return;
         }
         while (this._pages.get(previous)?.following.length) {
-            const page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, previous.pageNumber + 1);
+            const page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(previous, config));
             pages.push(page);
             const inherited = this._getInherited(page, pages, config);
             this._pages.set(page, inherited);

@@ -45,7 +45,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
-import { createSkeletonPage } from './model/page';
+import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
 import { layoutPagelessDocumentNotes } from './pageless-note-layout';
@@ -59,6 +59,28 @@ function getEffectiveSectionType(sectionType: SectionType | undefined): SectionT
     return sectionType == null || sectionType === SectionType.SECTION_TYPE_UNSPECIFIED
         ? SectionType.NEXT_PAGE
         : sectionType;
+}
+
+function getSectionPageNumberStart(ctx: ILayoutContext, sectionIndex: number, page: IDocumentSkeletonPage | undefined, config: ISectionBreakConfig): number {
+    if (page == null) {
+        return config.pageNumberStart ?? 1;
+    }
+    if (page.sectionId === config.sectionId) {
+        return page.pageNumberStart;
+    }
+    // Several continuous sections can share a physical page. Inherit the last
+    // restart on that page, including when reflow starts after that section.
+    const sections = ctx.viewModel.getChildren();
+    for (let index = sectionIndex; index >= 0; index--) {
+        const section = ctx.viewModel.getSectionBreak(sections[index].endIndex);
+        if (section?.sectionId === page.sectionId) {
+            break;
+        }
+        if (section?.pageNumberStart != null) {
+            return section.pageNumberStart;
+        }
+    }
+    return page.pageNumber;
 }
 
 function hasCompatiblePageGeometry(page: IDocumentSkeletonPage, config: ReturnType<typeof prepareSectionBreakConfig>): boolean {
@@ -4535,7 +4557,7 @@ export class DocumentSkeleton extends Skeleton {
                 state.ctx,
                 state.sectionBreakConfig,
                 state.ctx.skeletonResourceReference,
-                candidate.previousPage.pageNumber + 1
+                getNextSkeletonPageNumber(candidate.previousPage, state.sectionBreakConfig)
             );
             const previousNextPage = candidate.previousSkeleton.pages[state.priorityPageIndex + 1];
             if (previousNextPage != null) {
@@ -4972,9 +4994,7 @@ export class DocumentSkeleton extends Skeleton {
         let curSkeletonPage = getLastPage(allSkeletonPages);
         let reuseNextColumn = false;
 
-        sectionBreakConfig.pageNumberStart = curSkeletonPage?.sectionId === sectionBreakConfig.sectionId
-            ? curSkeletonPage.pageNumberStart
-            : curSkeletonPage?.pageNumber ?? pageNumberStart;
+        sectionBreakConfig.pageNumberStart = getSectionPageNumberStart(ctx, state.sectionIndex, curSkeletonPage, sectionBreakConfig);
 
         ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
@@ -5028,7 +5048,7 @@ export class DocumentSkeleton extends Skeleton {
                 ? explicitPageNumberStart ?? curSkeletonPage.pageNumber
                 : curSkeletonPage == null
                     ? pageNumberStart
-                    : explicitPageNumberStart ?? curSkeletonPage.pageNumber + 1;
+                    : explicitPageNumberStart ?? getNextSkeletonPageNumber(curSkeletonPage, sectionBreakConfig);
             if (reuseBoundaryPage) {
                 allSkeletonPages.pop();
             }
@@ -5497,9 +5517,7 @@ export class DocumentSkeleton extends Skeleton {
             let reuseCurrentPage = false;
             let reuseNextColumn = false;
 
-            sectionBreakConfig.pageNumberStart = curSkeletonPage?.sectionId === sectionBreakConfig.sectionId
-                ? curSkeletonPage.pageNumberStart
-                : curSkeletonPage?.pageNumber ?? pageNumberStart;
+            sectionBreakConfig.pageNumberStart = getSectionPageNumberStart(ctx, i, curSkeletonPage, sectionBreakConfig);
 
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
@@ -5556,7 +5574,7 @@ export class DocumentSkeleton extends Skeleton {
                     ? explicitPageNumberStart ?? curSkeletonPage.pageNumber
                     : curSkeletonPage == null
                         ? pageNumberStart
-                        : explicitPageNumberStart ?? curSkeletonPage.pageNumber + 1;
+                        : explicitPageNumberStart ?? getNextSkeletonPageNumber(curSkeletonPage, sectionBreakConfig);
                 if (reuseBoundaryPage) {
                     allSkeletonPages.pop();
                 }

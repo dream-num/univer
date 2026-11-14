@@ -20,7 +20,7 @@ import type { ISectionBreakConfig } from '../../../basics/interfaces';
 import type { ILayoutContext } from './tools';
 import { DocumentViewModel } from '../view-model/document-view-model';
 import { defaultSeparatorBody, layoutNoteBody, layoutNoteSegment } from './footnote-layout';
-import { createSkeletonPage } from './model/page';
+import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { getNoteSections } from './note-numbering';
 
 /** Endnotes occupy document flow after a section or the final body section. */
@@ -76,7 +76,7 @@ export class DocumentEndnoteLayout {
                     break;
                 }
                 // A note's first line can overflow its constrained story; retry on an empty body page.
-                page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, page.pageNumber + 1);
+                page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(page, config));
                 pages.push(page);
                 top = 0;
                 needsSeparator = true;
@@ -87,7 +87,7 @@ export class DocumentEndnoteLayout {
             for (let index = 0; index < notePages.length; index++) {
                 const fragment = notePages[index];
                 if (index > 0) {
-                    page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, page.pageNumber + 1);
+                    page = createSkeletonPage(this._ctx, config, this._ctx.skeletonResourceReference, getNextSkeletonPageNumber(page, config));
                     pages.push(page);
                     top = 0;
                     needsSeparator = true;

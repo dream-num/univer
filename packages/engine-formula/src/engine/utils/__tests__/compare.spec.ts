@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { compareToken } from '../../../basics/token';
-import { compareWithWildcard, isMatchWildcard, isWildcard, replaceWildcard } from '../compare';
+import { compareWithWildcard, isMatchWildcard, isWildcard, replaceWildcard, searchWithWildcard } from '../compare';
 
 describe('Test compare', () => {
     it('Function isWildcard', () => {
@@ -49,6 +49,18 @@ describe('Test compare', () => {
         expect(replaceWildcard('test~~*')).toBe('test~*');
 
         expect(replaceWildcard('[test*]')).toBe('[test ]');
+    });
+
+    it('Function searchWithWildcard', () => {
+        expect(searchWithWildcard('ABC', 'B')).toBe(1);
+        expect(searchWithWildcard('ABC', 'B*')).toBe(1);
+        expect(searchWithWildcard('ABC', '?C')).toBe(1);
+        expect(searchWithWildcard('XABC', 'A*C')).toBe(1);
+        expect(searchWithWildcard('A*B', '~*')).toBe(1);
+        expect(searchWithWildcard('A~B', '~~')).toBe(1);
+        expect(searchWithWildcard('ABC', '~*')).toBe(-1);
+        expect(searchWithWildcard('ABCBD', 'B?', 2)).toBe(3);
+        expect(searchWithWildcard('X(.)', '(.)')).toBe(1);
     });
 
     it('Function compareWithWildcard', () => {

@@ -139,4 +139,42 @@ describe('Test search function', () => {
             ]);
         });
     });
+
+    describe('Wildcards', () => {
+        const search = (find: string, within: string, start?: number) => getObjectValue(
+            testFunction.calculate(
+                StringValueObject.create(find),
+                StringValueObject.create(within),
+                start === undefined ? undefined : NumberValueObject.create(start)
+            )
+        );
+
+        it('? matches any single character', () => {
+            expect(search('?c', 'abc')).toStrictEqual(2);
+            expect(search('a?', 'xyz')).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('* matches any sequence of characters', () => {
+            expect(search('b*', 'abc')).toStrictEqual(2);
+            expect(search('a*c', 'xabc')).toStrictEqual(2);
+            expect(search('*', 'abc')).toStrictEqual(1);
+            expect(search('*', 'abc', 2)).toStrictEqual(2);
+        });
+
+        it('~ makes the next ?, * or ~ literal', () => {
+            expect(search('~*', 'a*b')).toStrictEqual(2);
+            expect(search('~?', 'a?b')).toStrictEqual(2);
+            expect(search('~~', 'a~b')).toStrictEqual(2);
+            expect(search('~*', 'abc')).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('other regular expression characters stay literal', () => {
+            expect(search('(.)', 'x(.)')).toStrictEqual(2);
+            expect(search('[a]*', 'x[a]')).toStrictEqual(2);
+        });
+
+        it('respects start_num', () => {
+            expect(search('b?', 'abcbd', 3)).toStrictEqual(4);
+        });
+    });
 });

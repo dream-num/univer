@@ -225,6 +225,55 @@ describe('Persisted calculation settings', () => {
         }
     });
 
+    it('keeps XLOOKUP references and updates composed ranges after their endpoints move', async () => {
+        const bed = createBed();
+        const formulas = {
+            0: {
+                6: { f: '=SUM(XLOOKUP(E1,A1:A4,B1:B4):XLOOKUP(F1,A1:A4,D1:D4))' },
+                7: { f: '=G1*2' },
+                8: { f: '=ISREF(XLOOKUP(1,A1:A4,B1:D4))' },
+                9: { f: '=ISREF(XLOOKUP(99,A1:A4,B1:B4,D1))' },
+                10: { f: '=ISREF(XLOOKUP(1,A1:A4,{1;2;3;4}))' },
+                11: { f: '=COUNT(XLOOKUP(1,A1:A4,J2:J5))' },
+                12: { f: '=XLOOKUP(1,A1:A4,N1:N4)' },
+            },
+        };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData, columns: number[]) => columns.map((column) =>
+            result.unitData[unitId]?.[sheetId]?.getValue(0, column)?.v
+        );
+        const edit = async (row: number, column: number, value: number, expected: number) => {
+            cells.setValue(row, column, { v: value });
+            const result = await calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId, sheetId, range: { startRow: row, endRow: row, startColumn: column, endColumn: column } }],
+            });
+            expect(read(result, [6, 7])).toEqual([expected, expected * 2]);
+        };
+        try {
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+                for (let column = 1; column < 4; column++) {
+                    cells.setValue(row, column, { v: row * 3 + column });
+                }
+            }
+            cells.setValue(0, 4, { v: 1 });
+            cells.setValue(0, 5, { v: 2 });
+            const initial = await calculate(bed, formulas, false);
+            expect(read(initial, [6, 7, 8, 9, 10, 11, 12])).toEqual([21, 42, 1, 1, 0, 0, 0]);
+            await edit(1, 2, 50, 66);
+            await edit(1, 2, 5, 21);
+            await edit(0, 5, 4, 78);
+            await edit(3, 2, 100, 167);
+            await edit(3, 2, 11, 78);
+            await edit(0, 5, 2, 21);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('uses separate iteration budgets in a cross-workbook cycle', async () => {
         const bed = createBed();
         try {

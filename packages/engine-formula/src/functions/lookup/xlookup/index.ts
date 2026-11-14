@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -30,7 +31,8 @@ export class Xlookup extends BaseFunction {
 
     override maxParams = 6;
 
-    // eslint-disable-next-line
+    override needsReferenceObject = true;
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: BaseValueObject,
@@ -38,7 +40,42 @@ export class Xlookup extends BaseFunction {
         ifNotFound?: BaseValueObject,
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
-    ): BaseValueObject {
+    ): BaseValueObject;
+    override calculate(
+        lookupValue: FunctionVariantType,
+        lookupArray: FunctionVariantType,
+        returnArray: FunctionVariantType,
+        ifNotFound?: FunctionVariantType,
+        matchMode?: FunctionVariantType,
+        searchMode?: FunctionVariantType
+    ): FunctionVariantType;
+    // eslint-disable-next-line
+    override calculate(
+        lookupValueArg: FunctionVariantType,
+        lookupArrayArg: FunctionVariantType,
+        returnArrayArg: FunctionVariantType,
+        ifNotFoundArg?: FunctionVariantType,
+        matchModeArg?: FunctionVariantType,
+        searchModeArg?: FunctionVariantType
+    ): FunctionVariantType {
+        const lookupValue = this._toValue(lookupValueArg);
+        const lookupArray = this._toValue(lookupArrayArg);
+        const ifNotFound = ifNotFoundArg == null ? undefined : this._toValue(ifNotFoundArg);
+        const matchMode = matchModeArg == null ? undefined : this._toValue(matchModeArg);
+        const searchMode = searchModeArg == null ? undefined : this._toValue(searchModeArg);
+        let returnArray: ArrayValueObject | BaseReferenceObject;
+        let returnRange: IRange | undefined;
+        if (returnArrayArg.isReferenceObject()) {
+            const reference = returnArrayArg as BaseReferenceObject;
+            if (!reference.isMultiArea() && (!reference.getForcedSheetName() || reference.getForcedSheetId())) {
+                returnRange = reference.getRangePosition();
+                returnArray = reference;
+            } else {
+                returnArray = reference.toArrayValueObject();
+            }
+        } else {
+            returnArray = baseValueObjectToArrayValueObject(returnArrayArg as BaseValueObject);
+        }
         let _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
         if (ifNotFound?.isNull()) {
             _ifNotFound = ErrorValueObject.create(ErrorType.NA);
@@ -64,8 +101,8 @@ export class Xlookup extends BaseFunction {
 
         const rowCountLookup = lookupArray.isArray() ? (lookupArray as ArrayValueObject).getRowCount() : 1;
         const columnCountLookup = lookupArray.isArray() ? (lookupArray as ArrayValueObject).getColumnCount() : 1;
-        const rowCountReturn = returnArray.isArray() ? (returnArray as ArrayValueObject).getRowCount() : 1;
-        const columnCountReturn = returnArray.isArray() ? (returnArray as ArrayValueObject).getColumnCount() : 1;
+        const rowCountReturn = returnRange == null ? returnArray.getRowCount() : returnRange.endRow - returnRange.startRow + 1;
+        const columnCountReturn = returnRange == null ? returnArray.getColumnCount() : returnRange.endColumn - returnRange.startColumn + 1;
 
         if (
             (rowCountLookup !== 1 && columnCountLookup !== 1) ||
@@ -98,40 +135,43 @@ export class Xlookup extends BaseFunction {
         return this._getResult(
             _lookupValue,
             baseValueObjectToArrayValueObject(lookupArray),
-            baseValueObjectToArrayValueObject(returnArray),
+            returnArray,
             _ifNotFound,
             matchModeValue,
             searchModeValue,
             rowCountLookup,
             columnCountLookup,
             rowCountReturn,
-            columnCountReturn
+            columnCountReturn,
+            ifNotFoundArg?.isReferenceObject() ? ifNotFoundArg as BaseReferenceObject : undefined,
+            returnRange
         );
+    }
+
+    private _toValue(value: FunctionVariantType): BaseValueObject {
+        return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject;
     }
 
     private _getResult(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
-        returnArray: ArrayValueObject,
+        returnArray: ArrayValueObject | BaseReferenceObject,
         ifNotFound: BaseValueObject,
         matchModeValue: number,
         searchModeValue: number,
         rowCountLookup: number,
         columnCountLookup: number,
         rowCountReturn: number,
-        columnCountReturn: number
+        columnCountReturn: number,
+        fallbackReference?: BaseReferenceObject,
+        returnRange?: IRange
     ) {
         const lookupValueRowCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getRowCount() : 1;
         const lookupValueColumnCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getColumnCount() : 1;
 
         if (lookupValueRowCount > 1 || lookupValueColumnCount > 1) {
-            let resultArray: Nullable<ArrayValueObject>;
-
-            if (rowCountLookup === 1) {
-                resultArray = (returnArray as ArrayValueObject).slice([0, 1]);
-            } else {
-                resultArray = (returnArray as ArrayValueObject).slice(undefined, [0, 1]);
-            }
+            const array = baseValueObjectToArrayValueObject(this._toValue(returnArray));
+            const resultArray = rowCountLookup === 1 ? array.slice([0, 1]) : array.slice(undefined, [0, 1]);
 
             if (resultArray == null) {
                 return ErrorValueObject.create(ErrorType.NA);
@@ -144,20 +184,9 @@ export class Xlookup extends BaseFunction {
 
         const _lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).get(0, 0) as BaseValueObject : lookupValue;
 
-        if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
-            return this._getLookupResult(_lookupValue, lookupArray, returnArray, ifNotFound, matchModeValue, searchModeValue);
-        }
-
-        let axis = 0;
-        /**
-         * 0 for rows
-         * 1 for columns
-         */
-        if (columnCountLookup === columnCountReturn) {
-            axis = 1;
-        }
-
-        return this._getLookupResult(_lookupValue, lookupArray, returnArray, ifNotFound, matchModeValue, searchModeValue, axis);
+        const sameShape = columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn;
+        const axis = sameShape ? undefined : Number(columnCountLookup === columnCountReturn);
+        return this._getLookupResult(_lookupValue, lookupArray, returnArray, fallbackReference ?? ifNotFound, matchModeValue, searchModeValue, axis, returnRange);
     }
 
     private _legacyImplicitLookupValue(lookupValue: BaseValueObject): BaseValueObject {
@@ -212,7 +241,27 @@ export class Xlookup extends BaseFunction {
         matchModeValue: number,
         searchModeValue: number,
         axis?: number
-    ) {
+    ): BaseValueObject;
+    private _getLookupResult(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject | BaseReferenceObject,
+        ifNotFound: FunctionVariantType,
+        matchModeValue: number,
+        searchModeValue: number,
+        axis: number | undefined,
+        returnRange: IRange | undefined
+    ): FunctionVariantType;
+    private _getLookupResult(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject | BaseReferenceObject,
+        ifNotFound: FunctionVariantType,
+        matchModeValue: number,
+        searchModeValue: number,
+        axis?: number,
+        returnRange?: IRange
+    ): FunctionVariantType {
         if (value.isError()) {
             return value;
         }
@@ -227,14 +276,27 @@ export class Xlookup extends BaseFunction {
             return ifNotFound;
         }
 
-        if (axis === 0) {
-            return resultArray.slice([position.row, position.row + 1]) ?? ErrorValueObject.create(ErrorType.NA);
-        }
-        if (axis === 1) {
-            return resultArray.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        if (returnRange != null) {
+            const { startRow, endRow, startColumn, endColumn } = returnRange;
+            const row = startRow + position.row;
+            const column = startColumn + position.column;
+            return this.createReferenceObject(resultArray as BaseReferenceObject, {
+                startRow: row,
+                endRow: axis === 1 ? endRow : row,
+                startColumn: column,
+                endColumn: axis === 0 ? endColumn : column,
+            });
         }
 
-        const result = resultArray.get(position.row, position.column) ?? NullValueObject.create();
+        const array = resultArray as ArrayValueObject;
+        if (axis === 0) {
+            return array.slice([position.row, position.row + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        }
+        if (axis === 1) {
+            return array.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+        }
+
+        const result = array.get(position.row, position.column) ?? NullValueObject.create();
         return this._blankResultAsZero(result);
     }
 

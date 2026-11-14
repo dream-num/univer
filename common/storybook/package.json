@@ -30,7 +30,7 @@
         "@univerjs/ui": "workspace:*",
         "css-loader": "^7.1.5",
         "postcss-loader": "^8.2.1",
-        "storybook": "^10.6.6",
+        "storybook": "^10.6.7",
         "style-loader": "^4.0.0",
         "tsconfig-paths-webpack-plugin": "^4.2.0",
         "typescript": "^6.0.3"

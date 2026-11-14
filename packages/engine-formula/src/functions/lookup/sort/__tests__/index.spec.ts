@@ -261,4 +261,38 @@ describe('Test sort function', () => {
             ]);
         });
     });
+
+    describe('Ties', () => {
+        it('keeps rows with equal TRUE/FALSE values in their original order', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([['a', false], ['b', true], ['c', false], ['d', false]]),
+                rowCount: 4,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const descending = testFunction.calculate(array, NumberValueObject.create(2), NumberValueObject.create(-1));
+            expect(getObjectValue(descending)).toStrictEqual([['b', true], ['a', false], ['c', false], ['d', false]]);
+            const ascending = testFunction.calculate(array, NumberValueObject.create(2), NumberValueObject.create(1));
+            expect(getObjectValue(ascending)).toStrictEqual([['a', false], ['c', false], ['d', false], ['b', true]]);
+        });
+
+        it('keeps rows with blank values in their original order, after the other rows', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([['a', null], ['b', 1], ['c', null], ['d', null], ['e', 2]]),
+                rowCount: 5,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const descending = testFunction.calculate(array, NumberValueObject.create(2), NumberValueObject.create(-1));
+            expect(getObjectValue(descending)).toStrictEqual([['e', 2], ['b', 1], ['a', 0], ['c', 0], ['d', 0]]);
+            const ascending = testFunction.calculate(array, NumberValueObject.create(2), NumberValueObject.create(1));
+            expect(getObjectValue(ascending)).toStrictEqual([['b', 1], ['e', 2], ['a', 0], ['c', 0], ['d', 0]]);
+        });
+    });
 });

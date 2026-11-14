@@ -33,6 +33,7 @@ import {
     IUniverInstanceService,
     JSONX,
     NamedStyleType,
+    NumberUnitType,
     resolveDocumentParagraphStyle,
     SliceBodyType,
     SpecialCharacterKind,
@@ -791,13 +792,15 @@ function copyTocParagraph(
     const tabStops = refreshPageTab && pageTabs.length
         ? [...oldTabs.filter((tab) => tab.alignment !== TabStopAlignment.END), ...pageTabs]
         : undefined;
+    const missingWordStyle = resetEntryParagraphFormatting && format === 'fromTemplate' && styleId == null && /^toc[1-9]$/.test(styleName);
+    const fallbackIndent = missingWordStyle ? { indentStart: { v: Math.max(0, level - 1) * 2, u: NumberUnitType.CHARACTER } } : {};
     // A same-level paragraph is a formatting template, not the identity of every
     // entry. Keep distinct existing row IDs and allocate only for additional rows.
     if (source) {
         let paragraphStyle = source.paragraphStyle;
         if (resetEntryParagraphFormatting) {
             const entryTabs = tabStops ?? oldTabs.filter((tab) => tab.alignment !== TabStopAlignment.END);
-            paragraphStyle = entryTabs.length ? { tabStops: entryTabs } : {};
+            paragraphStyle = { ...fallbackIndent, ...(entryTabs.length ? { tabStops: entryTabs } : {}) };
         } else if (tabStops) {
             paragraphStyle = { ...paragraphStyle, tabStops };
         }
@@ -821,7 +824,7 @@ function copyTocParagraph(
         paragraphStyle.tabStops = [{ offset: tabStopOffset, alignment: TabStopAlignment.END, leader: getTabStopLeader(tabLeader ?? 'dots') }];
     }
     if (resetEntryParagraphFormatting) {
-        paragraphStyle = tabStops?.length ? { tabStops } : {};
+        paragraphStyle = { ...fallbackIndent, ...(tabStops?.length ? { tabStops } : {}) };
     }
     return {
         startIndex,

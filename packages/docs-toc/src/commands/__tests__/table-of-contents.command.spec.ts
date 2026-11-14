@@ -22,6 +22,8 @@ import {
     getBodySlice,
     ICommandService,
     NamedStyleType,
+    NumberUnitType,
+    resolveDocumentParagraphStyle,
     SliceBodyType,
     SpecialCharacterKind,
     TabStopAlignment,
@@ -92,6 +94,14 @@ function createBody(): { body: IDocumentBody; toc: ICustomRange } {
 }
 
 describe('canonical directory style selection', () => {
+    it.each([false, true])('keeps nested Word entry indents when its named style is missing (authored=%s)', (authored) => {
+        const { body, toc } = createBody();
+        const styles = authored ? { TOC2: { name: 'toc 2', type: DocStyleType.paragraph, paragraphStyle: { indentStart: { v: 19 } } } } : undefined;
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'generated', { styles, resetEntryParagraphFormatting: true })!;
+        const paragraph = result.paragraphs!.find((entry) => entry.styleId === 'TOC2')!;
+        expect(resolveDocumentParagraphStyle(undefined, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId }).indentStart).toEqual(authored ? { v: 19 } : { v: 2, u: NumberUnitType.CHARACTER });
+    });
+
     it.each([
         { name: 'toc 1', canonical: 'TOC1', entryStyleName: undefined },
         { name: 'Table of Figures', canonical: 'TableOfFigures', entryStyleName: 'tableoffigures' },

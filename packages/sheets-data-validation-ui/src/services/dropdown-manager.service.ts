@@ -18,7 +18,6 @@ import type { CellValue, DateKit, IDisposable, IExcelDateTimeParts, Nullable, Wo
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
 import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dateKit, DateSystem, Disposable, DisposableCollection, excelDateTimePartsToSerial, excelSerialToDateTimeParts, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -28,6 +27,7 @@ import { getPatternType } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService, ISheetCellDropdownManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
+import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { DROP_DOWN_DEFAULT_COLOR } from '../const';
@@ -157,7 +157,15 @@ export class DataValidationDropdownManagerService extends Disposable {
             return;
         }
 
-        const rule = this._dataValidationModel.getRuleByLocation(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+        // A merged cell keeps its validation rule on the merge main cell, while a selection that
+        // lands on a covered cell reports that covered cell as the primary one.
+        const mergeCell = worksheet.getMergedCell(row, col);
+        const rule = this._dataValidationModel.getRuleByLocation(
+            workbook.getUnitId(),
+            worksheet.getSheetId(),
+            mergeCell?.startRow ?? row,
+            mergeCell?.startColumn ?? col
+        );
         if (!rule) {
             return;
         }

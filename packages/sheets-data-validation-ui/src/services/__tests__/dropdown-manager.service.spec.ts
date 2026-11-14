@@ -597,6 +597,38 @@ describe('DataValidationDropdownManagerService', () => {
         expect(getDropdown(testBed).props).not.toHaveProperty('defaultValue');
     });
 
+    it('keeps the active dropdown when a merged selection reports a covered cell as primary', () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-merged-list',
+            type: 'list',
+        }, {
+            dropdownType: DataValidatorDropdownType.LIST,
+            getListWithColor: () => [{ label: 'Open' }],
+        });
+
+        const worksheet = testBed.workbook.getActiveSheet()!;
+        worksheet.setMergeData([{ startRow: 1, endRow: 2, startColumn: 2, endColumn: 3 }]);
+
+        let hideCount = 0;
+        testBed.get(DataValidationDropdownManagerService).showDataValidationDropdown('book-1', 'sheet-1', 1, 2, () => {
+            hideCount++;
+        });
+
+        // Selecting a merged cell puts the primary on the clicked covered cell, not the merge main cell.
+        (testBed.get(SheetsSelectionsService) as unknown as TestSheetsSelectionsService).moveEnd([{
+            primary: {
+                unitId: 'book-1',
+                sheetId: 'sheet-1',
+                actualRow: 2,
+                actualColumn: 3,
+            },
+        } as never]);
+
+        expect(testBed.get(DataValidationDropdownManagerService).activeDropdown).not.toBeNull();
+        expect(hideCount).toBe(0);
+    });
+
     it('hides the active dropdown when selection leaves validation cells', () => {
         testBed = createTestBed();
         setRule(testBed, {

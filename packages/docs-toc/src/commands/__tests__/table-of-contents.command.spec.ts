@@ -19,10 +19,13 @@ import {
     BooleanNumber,
     CustomRangeType,
     DocStyleType,
+    DocumentFlavor,
     getBodySlice,
     ICommandService,
     NamedStyleType,
     NumberUnitType,
+    PRESET_LIST_TYPE,
+    PresetListType,
     resolveDocumentParagraphStyle,
     SliceBodyType,
     SpecialCharacterKind,
@@ -118,6 +121,80 @@ describe('canonical directory style selection', () => {
 });
 
 describe('table of contents body builder', () => {
+    it('formats numbered headings on initial insertion without decorating the trailing paragraph', () => {
+        const { toc } = createBody();
+        const body: IDocumentBody = { dataStream: 'Heading\r\n', paragraphs: [{ startIndex: 7, paragraphId: 'heading', paragraphStyle: { outlineLevel: 0 }, bullet: { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 } }] };
+        const before = structuredClone(body);
+        const result = buildTableOfContentsBody(body, { ...toc, startIndex: 0, endIndex: 0 }, () => 1, () => 'entry')!;
+        const field = result.customRanges!.find((range) => range.rangeId === toc.rangeId)!;
+        expect(field.properties!.cachedResult).toBe('1.\tHeading\t1\r');
+        expect(result.paragraphs![0].paragraphStyle?.tabStops?.some((tab) => tab.alignment === TabStopAlignment.START)).toBe(true);
+        const trailing = result.paragraphs![result.paragraphs!.length - 1];
+        expect(trailing.startIndex).toBeGreaterThan(field.endIndex);
+        expect(trailing.paragraphStyle?.tabStops?.some((tab) => tab.alignment === TabStopAlignment.START) ?? false).toBe(false);
+        expect(body).toEqual(before);
+    });
+
+    it('shifts marked characters with a generated numbered heading prefix', () => {
+        const { body, toc } = createBody();
+        body.dataStream = body.dataStream.replace('Heading One', 'Heading\u2011One');
+        body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        const offset = body.dataStream.indexOf('\u2011');
+        body.customRanges!.push({ rangeId: 'hyphen', rangeType: CustomRangeType.CUSTOM, startIndex: offset, endIndex: offset, wholeEntity: true, properties: { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN } });
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry')!;
+        const character = result.customRanges!.find((range) => range.rangeType === CustomRangeType.CUSTOM)!;
+        expect(result.dataStream).toContain('1.\tHeading\u2011One');
+        expect(character.startIndex).toBe(11);
+        expect(result.dataStream[character.startIndex]).toBe('\u2011');
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('retains explicit numbered entries in %s without adding their number a second time', (documentFlavor) => {
+        const { body, toc } = createBody();
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry', {
+            documentStyle: { documentFlavor },
+            entries: [{ headingId: 'heading-1', paragraph: body.paragraphs![1], startOffset: toc.endIndex + 1, level: 1, text: '1.\tHeading', numberingText: '1.' }],
+        })!;
+        expect(result.customRanges!.find((range) => range.rangeId === toc.rangeId)!.properties!.cachedResult).toBe('1.\tHeading\t1\r');
+        expect(result.paragraphs![0].paragraphStyle?.tabStops?.some((tab) => tab.alignment === TabStopAlignment.START) ?? false).toBe(documentFlavor === DocumentFlavor.TRADITIONAL);
+    });
+
+    it('keeps a custom list definition in preference to the built-in numbering preset', () => {
+        const { body, toc } = createBody();
+        body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        const definition = structuredClone(PRESET_LIST_TYPE[PresetListType.ORDER_LIST]);
+        definition.nestingLevel[0] = { ...definition.nestingLevel[0], glyphFormat: 'Article %1.', startNumber: 4, followNumberWith: 1 };
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry', { lists: { [PresetListType.ORDER_LIST]: definition } })!;
+        expect(result.customRanges!.find((range) => range.rangeId === toc.rangeId)!.properties!.cachedResult).toContain('Article 5. Heading One');
+    });
+
+    it('retains the numbering font family while taking its size from the directory style', () => {
+        const { body, toc } = createBody();
+        body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        body.paragraphs![1].paragraphStyle!.paragraphMarkTextStyle = { ff: 'Courier New', fs: 24 };
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry')!;
+        expect(result.textRuns?.find((run) => run.st === 1 && run.ed === 3)?.ts).toEqual({ ff: 'Courier New' });
+    });
+
+    it.each([false, true])('copies tabs inside a numbered heading only with the Word preserve-tabs switch (%s)', (preserveTabs) => {
+        const { body, toc } = createBody();
+        body.dataStream = body.dataStream.replace('Heading One', 'Heading\tOne');
+        body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        if (preserveTabs) {
+            toc.properties!.instruction += ' \\w';
+        }
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry')!;
+        expect(result.customRanges!.find((range) => range.rangeId === toc.rangeId)!.properties!.cachedResult).toContain(preserveTabs ? '1.\tHeading\tOne\t1' : '1.\tHeading One\t1');
+    });
+
+    it('places the numbering tab inside the directory section column', () => {
+        const { body, toc } = createBody();
+        body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
+        body.paragraphs![0].paragraphStyle = { tabStops: [{ offset: 400, alignment: TabStopAlignment.START }, { offset: 600, alignment: TabStopAlignment.END }] };
+        body.sectionBreaks = [{ sectionId: 'columns', startIndex: body.dataStream.length - 1, columnProperties: [{ width: 250, paddingEnd: 20 }, { width: 250, paddingEnd: 0 }] }];
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry', { documentStyle: { pageSize: { width: 600, height: 800 } } })!;
+        expect(result.paragraphs![0].paragraphStyle?.tabStops?.some((tab) => tab.alignment === TabStopAlignment.START && tab.offset < 250)).toBe(true);
+    });
+
     it.each([
         { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011', marked: true },
         { kind: SpecialCharacterKind.NON_BREAKING_HYPHEN, character: '\u2011', marked: false },

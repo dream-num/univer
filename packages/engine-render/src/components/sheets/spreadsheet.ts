@@ -700,8 +700,9 @@ export class Spreadsheet extends SheetComponent {
         const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty, shouldCacheUpdate } = viewportInfo as Required<IViewportInfo>;
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
-        const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
-        const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
+        const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+        const bufferEdgeSizeX = bufferEdgeX * scaleX / dpr;
+        const bufferEdgeSizeY = bufferEdgeY * scaleY / dpr;
 
         let renderCacheCanvas = cacheCanvas;
         let cacheCtx = renderCacheCanvas.getContext();
@@ -755,8 +756,8 @@ export class Spreadsheet extends SheetComponent {
             cacheCtx.save();
         }
         // support for browser native zoom (only windows has this problem)
-        const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
-        const sourceTop = bufferEdgeSizeY * Math.min(1, window.devicePixelRatio);
+        const sourceLeft = bufferEdgeSizeX * Math.min(1, dpr);
+        const sourceTop = bufferEdgeSizeY * Math.min(1, dpr);
         const { left, top, right, bottom } = viewPortPosition;
         const dw = right - left + rowHeaderWidthAndMarginLeft;
         const dh = bottom - top + columnHeaderHeightAndMarginTop;

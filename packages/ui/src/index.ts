@@ -22,6 +22,10 @@ export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { objectPermissionMenuItemFactory } from './common/object-permission-menu';
+export { HyperlinkEditor } from './components/hyperlink/HyperlinkEditor';
+export type { IHyperlinkEditorProps } from './components/hyperlink/HyperlinkEditor';
+export { HyperlinkPreview } from './components/hyperlink/HyperlinkPreview';
+export type { IHyperlinkPreviewProps } from './components/hyperlink/HyperlinkPreview';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
 export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
@@ -198,11 +202,12 @@ export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zo
 export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyboard-inset-context';
+
 export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
 export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export type { INotificationOptions } from './views/notification/Notification';
-export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 
+export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

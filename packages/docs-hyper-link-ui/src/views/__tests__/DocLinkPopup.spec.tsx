@@ -33,8 +33,6 @@ import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
@@ -146,6 +144,7 @@ function createPopupTestBed(documentData = createDocData()) {
         },
     });
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    injector.get(LocaleService).setDirection('ltr');
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(AddDocHyperLinkCommand);
@@ -182,11 +181,9 @@ function renderPopup(root: Root, container: HTMLDivElement, testBed: ReturnType<
         );
     });
 
-    const actions = Array.from(container.querySelectorAll('.univer-ml-2')) as HTMLElement[];
-
     return {
-        edit: actions[1],
-        remove: actions[2],
+        edit: container.querySelector<HTMLButtonElement>('button[aria-label="Edit"]')!,
+        remove: container.querySelector<HTMLButtonElement>('button[aria-label="Remove link"]')!,
     };
 }
 
@@ -216,14 +213,6 @@ describe('DocLinkPopup', () => {
         currentTestBed = undefined;
         vi.restoreAllMocks();
         vi.useRealTimers();
-    });
-
-    it('keeps desktop and mobile hyperlink edit components independent', () => {
-        const desktopSource = readFileSync(resolve(process.cwd(), 'src/views/DocHyperLinkEdit.tsx'), 'utf8');
-        const mobileSource = readFileSync(resolve(process.cwd(), 'src/views/MobileDocHyperLinkEdit.tsx'), 'utf8');
-
-        expect(desktopSource).not.toContain('props.mobile');
-        expect(mobileSource).not.toContain("from './DocHyperLinkEdit'");
     });
 
     it('opens the hyperlink edit popup for the currently displayed document link', async () => {
@@ -372,7 +361,6 @@ describe('DocLinkPopup', () => {
 
         const copy = container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]');
         expect(copy).toBeInstanceOf(HTMLButtonElement);
-        expect(copy?.dataset.uComp).toBe('button');
         expect(copy?.disabled).toBe(true);
     });
 

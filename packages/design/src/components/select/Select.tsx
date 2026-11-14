@@ -194,6 +194,7 @@ export function Select(props: ISelectProps) {
                     {displayValue}
                 </span>
                 <MoreDownIcon
+                    preserveStrokeWidth
                     className={`
                       univer-flex-shrink-0
                       dark:!univer-text-gray-0

@@ -111,7 +111,7 @@ export function FontFamilyDropdown(props: IFontFamilyDropdownProps) {
                     disabled={disabled}
                     onChange={handleChange}
                 />
-                <MoreDownIcon className="univer-flex-shrink-0 univer-text-xs univer-text-gray-500" />
+                <MoreDownIcon className="univer-size-3 univer-flex-shrink-0 univer-text-gray-500" preserveStrokeWidth />
             </div>
         </Dropdown>
     );

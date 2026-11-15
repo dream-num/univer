@@ -115,8 +115,10 @@ export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
             };
 
             const ensuredString = ensureString(value);
-            if (ensuredString && isWildCardString(compare)) return !regexp.createFromWildcard(compare as string).test(ensuredString);
-            return ensuredString !== compare;
+            if (ensuredString === null) return true;
+
+            // The complement of "equals" (textMatch): case-insensitive, with wildcards.
+            return !regexp.createFromWildcard(compare).test(ensuredString);
         }
 
         // As numeric match.
@@ -181,12 +183,4 @@ function ensureString(value: Nullable<CellValue>): string | null {
     }
 
     return typeof value === 'string' ? value : value.toString();
-}
-
-function isWildCardString(str: string | number): boolean {
-    if (typeof str === 'number') {
-        return false;
-    }
-
-    return str.indexOf('*') !== -1 || str.indexOf('?') !== -1;
 }

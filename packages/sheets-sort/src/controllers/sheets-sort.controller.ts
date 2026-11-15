@@ -16,7 +16,7 @@
 
 import type { ICellData, Nullable } from '@univerjs/core';
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-import { CellValueType, Disposable, ICommandService, Inject } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, isRealNum } from '@univerjs/core';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
 import { compareNull, compareNumber, compareString, isNullValue } from './utils';
@@ -85,7 +85,9 @@ export class SheetsSortController extends Disposable {
             return `${a.v}`;
         }
         if (a?.t === CellValueType.FORCE_STRING) {
-            return Number.parseFloat(`${a.v}`);
+            // Forced text such as a typed 'abc is not a number: parseFloat would make it NaN,
+            // which compares equal to every number and leaves the numbers unsorted.
+            return isRealNum(a.v) ? Number.parseFloat(`${a.v}`) : `${a.v}`;
         }
         return `${a?.v}`;
     }

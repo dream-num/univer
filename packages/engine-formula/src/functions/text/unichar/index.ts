@@ -75,7 +75,13 @@ export class Unichar extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let result = String.fromCharCode(numberValue);
+        // A code point in the surrogate block is half of a UTF-16 pair, not a character.
+        if (numberValue >= 0xD800 && numberValue <= 0xDFFF) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        // fromCharCode would keep only the low 16 bits of a code point above U+FFFF.
+        let result = String.fromCodePoint(numberValue);
 
         // special case for some characters causing doc stream issues
         if (filterCodeArray.some((value) => value === result)) {

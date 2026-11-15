@@ -48,6 +48,16 @@ describe('Test unichar function', () => {
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
         });
 
+        it('Number is a code point above U+FFFF', () => {
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(128512)))).toStrictEqual('\u{1F600}');
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(65601)))).toStrictEqual('\u{10041}');
+        });
+
+        it('Number is a surrogate code point', () => {
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(55296)))).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(57343)))).toStrictEqual(ErrorType.NA);
+        });
+
         it('Value is array', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

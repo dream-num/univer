@@ -32,6 +32,18 @@ describe('Test unicode function', () => {
             expect(getObjectValue(result)).toStrictEqual(65);
         });
 
+        it('Value starts with a character above U+FFFF', () => {
+            const text = StringValueObject.create('\u{1F600}a');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(128512);
+        });
+
+        it('Value is empty', () => {
+            const text = StringValueObject.create('');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
         it('Value is array', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

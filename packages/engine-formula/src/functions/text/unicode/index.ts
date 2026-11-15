@@ -55,7 +55,12 @@ export class Unicode extends BaseFunction {
             textValue = textValue.toLocaleUpperCase();
         }
 
-        const result = textValue.charCodeAt(0);
+        // codePointAt reads a character above U+FFFF whole, not its first UTF-16 half.
+        const result = textValue.codePointAt(0);
+
+        if (result === undefined) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         return NumberValueObject.create(result);
     }

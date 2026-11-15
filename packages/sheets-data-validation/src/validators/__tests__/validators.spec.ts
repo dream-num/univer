@@ -148,6 +148,21 @@ describe('validators', () => {
         expect(lexerTreeBuilder.moveFormulaRefOffset).toHaveBeenCalled();
     });
 
+    it('reads only decimal numeric text as a number', async () => {
+        const { localeService, injector } = createContext();
+        const decimal = new DecimalValidator(localeService, injector);
+        const whole = new WholeValidator(localeService, injector);
+
+        for (const [text, number] of [[' 12 ', 12], ['.5', 0.5], ['-3', -3], ['+4', 4], ['1e3', 1000], ['12.', 12]] as const) {
+            expect(getCellValueNumber(text)).toBe(number);
+        }
+        for (const value of [' ', '0x10', '0b101', '0o17', 'Infinity', '1,234', true, false]) {
+            expect(getCellValueNumber(value)).toBeNaN();
+        }
+        expect(await decimal.validator({ value: ' ', unitId: 'u', subUnitId: 's', row: 0, column: 0 } as never, { uid: 'rule-1', type: DataValidationType.DECIMAL, operator: DataValidationOperator.BETWEEN, formula1: '0', formula2: '100', allowBlank: false } as never)).toBe(false);
+        expect(await whole.validator({ value: '0x10', unitId: 'u', subUnitId: 's', row: 0, column: 0 } as never, { uid: 'rule-2', type: DataValidationType.WHOLE, operator: DataValidationOperator.BETWEEN, formula1: '0', formula2: '100', allowBlank: false } as never)).toBe(false);
+    });
+
     it('covers date validation parsing, normalization, and messages', async () => {
         const { localeService, injector, customFormulaService, lexerTreeBuilder, univerInstanceService } = createContext();
         const date = new DateValidator(localeService, injector);

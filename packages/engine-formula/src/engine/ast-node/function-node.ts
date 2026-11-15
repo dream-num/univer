@@ -154,6 +154,16 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
 
+        if (object.isReferenceObject() && this._functionExecutor.rejectsMultiCellReference) {
+            const reference = object as BaseReferenceObject;
+            if (reference.getRowCount() > 1 || reference.getColumnCount() > 1) {
+                if (reference.getForcedSheetName().length > 0 && !reference.getForcedSheetId()) {
+                    return ErrorValueObject.create(ErrorType.REF);
+                }
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+        }
+
         if (object.isReferenceObject() && this._functionExecutor.needsFilteredOutRows) {
             this._setFilteredOutRows(object as BaseReferenceObject);
         }
@@ -402,7 +412,8 @@ export class FunctionNode extends BaseAstNode {
     private _setRefInfo() {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount } = this._runtimeService;
 
-        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount);
+        const arrayFormulaRange = this._currentConfigService.getArrayFormulaRange()[currentUnitId]?.[currentSubUnitId]?.[currentRow]?.[currentColumn];
+        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount, arrayFormulaRange != null);
         this._functionExecutor.setDateSystem(this._currentConfigService.getDateSystem(currentUnitId));
 
         if (this._functionExecutor.needsSheetsInfo) {

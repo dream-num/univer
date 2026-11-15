@@ -1949,13 +1949,12 @@ export class ArrayValueObject extends BaseValueObject {
             return rawValue.calculateValueList;
         }
         rawValue = rawValue.slice(1, -1) as string;
-        const rowArray = rawValue.split(';');
+        const rowArray = splitArrayConstant(rawValue);
         const rowArrayCount = rowArray.length;
         const result: BaseValueObject[][] = [];
         let maxColumnCount = 0;
         for (let r = 0; r < rowArrayCount; r++) {
-            const columnRaw = rowArray[r];
-            const columnArray = columnRaw.split(',');
+            const columnArray = rowArray[r];
             const columnArrayCount = columnArray.length;
 
             if (maxColumnCount < columnArrayCount) {
@@ -2076,6 +2075,30 @@ export class ValueObjectFactory {
 
         return createNumberValueObjectByRawValue(Number(tokenTrim)).withDateSystem(dateSystem);
     }
+}
+
+function splitArrayConstant(value: string): string[][] {
+    const rows: string[][] = [[]];
+    let start = 0;
+    let inQuotes = false;
+    for (let index = 0; index <= value.length; index++) {
+        const character = value[index];
+        if (character === '"') {
+            if (inQuotes && value[index + 1] === '"') {
+                index++;
+                continue;
+            }
+            inQuotes = !inQuotes;
+        }
+        if (index === value.length || (!inQuotes && (character === ',' || character === ';'))) {
+            rows[rows.length - 1].push(value.slice(start, index));
+            start = index + 1;
+            if (character === ';') {
+                rows.push([]);
+            }
+        }
+    }
+    return rows;
 }
 
 function isStringWrappedByDoubleQuotes(input: string) {

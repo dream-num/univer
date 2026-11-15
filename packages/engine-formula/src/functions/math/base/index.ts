@@ -119,7 +119,7 @@ export class Base extends BaseFunction {
         }
 
         // The minimum length of the returned string. Must be an integer greater than or equal to 0.
-        if (minLengthValue < 0) {
+        if (minLengthValue < 0 || minLengthValue > 255) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

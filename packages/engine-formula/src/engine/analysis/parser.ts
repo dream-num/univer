@@ -15,9 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Disposable, Inject, Injector, sortRules } from '@univerjs/core';
 import type { LambdaNode } from '../ast-node/lambda-node';
-import { Disposable, Inject, sortRules } from '@univerjs/core';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { normalizeFunctionToken } from '../../basics/function';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_LET_FUNCTION_NAME,
@@ -26,7 +29,10 @@ import {
     DEFAULT_TOKEN_TYPE_ROOT,
     FORCED_RECALCULATION_FUNCTION_NAME,
 } from '../../basics/token-type';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IDefinedNamesService } from '../../services/defined-names.service';
 import { FormulaCacheService } from '../../services/formula-cache.service';
+import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
 import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
@@ -41,13 +47,47 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import { getAstNodeTopParent } from '../utils/ast-node-tool';
+import { Interpreter } from '../interpreter/interpreter';
+import { AsyncObject } from '../reference-object/base-reference-object';
+import { generateExecuteAstNodeData, getAstNodeTopParent } from '../utils/ast-node-tool';
 import { isChildRunTimeParameter, isFirstChildParameter } from '../utils/function-definition';
 import { updateLambdaStatement } from '../utils/update-lambda-statement';
+import { ErrorValueObject } from '../value-object/base-value-object';
+import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
+import { Lexer } from './lexer';
 import { LexerNode } from './lexer-node';
+
+// Bound deferred calls before the JavaScript stack overflows; this is not Excel's recursion limit.
+const MAX_NAMED_LAMBDA_CALL_DEPTH = 64;
+
+class NamedLambdaCallNode extends BaseAstNode {
+    constructor(token: string, private readonly _evaluate: (args: FunctionVariantType[]) => FunctionVariantType | AsyncObject) {
+        super(token);
+    }
+
+    override get nodeType() {
+        return NodeType.FUNCTION;
+    }
+
+    override execute() {
+        this.setValue(this._evaluate(this._arguments()) as FunctionVariantType);
+    }
+
+    override async executeAsync(): Promise<AstNodePromiseType> {
+        const value = this._evaluate(this._arguments());
+        this.setValue(value instanceof AsyncObject ? await value.getValue() : value);
+        return AstNodePromiseType.SUCCESS;
+    }
+
+    private _arguments(): FunctionVariantType[] {
+        return this.getChildren().map((node) => node.getValue() ?? ErrorValueObject.create(ErrorType.VALUE));
+    }
+}
 
 export class AstTreeBuilder extends Disposable {
     private _astNodeFactoryList: AstRootNodeFactory[] = [];
+    private _namedLambdaCallDepth = 0;
+    private _namedLambdaCalls: NamedLambdaCallNode[] = [];
 
     constructor(
         @Inject(FormulaCacheService) readonly cacheService: FormulaCacheService,
@@ -61,7 +101,8 @@ export class AstTreeBuilder extends Disposable {
         @Inject(ReferenceNodeFactory) private readonly _referenceNodeFactory: ReferenceNodeFactory,
         @Inject(SuffixNodeFactory) private readonly _suffixNodeFactory: SuffixNodeFactory,
         @Inject(UnionNodeFactory) private readonly _unionNodeFactory: UnionNodeFactory,
-        @Inject(ValueNodeFactory) private readonly _valueNodeFactory: ValueNodeFactory
+        @Inject(ValueNodeFactory) private readonly _valueNodeFactory: ValueNodeFactory,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -77,6 +118,7 @@ export class AstTreeBuilder extends Disposable {
     }
 
     parse(lexerNode: LexerNode) {
+        this._namedLambdaCalls = [];
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
         const node = this._parse(lexerNode, astNode);
 
@@ -87,7 +129,74 @@ export class AstTreeBuilder extends Disposable {
         if (lexerNode.hasDefinedNames()) {
             node?.setDefinedNames(lexerNode.getDefinedNames());
         }
+        if (node && this._namedLambdaCalls.length > 0 && this._injector.get(Interpreter).checkAsyncNode(node)) {
+            this._namedLambdaCalls.forEach((call) => call.setAsync());
+        }
+        this._namedLambdaCalls = [];
         return node;
+    }
+
+    private _createNamedLambdaCall(item: LexerNode): NamedLambdaCallNode | undefined {
+        if (item.getChildren().some((child) => !(child instanceof LexerNode) || child.getToken() !== DEFAULT_TOKEN_TYPE_PARAMETER)) {
+            return;
+        }
+        const token = item.getToken().trim();
+        if (this._injector.get(IFunctionService).hasExecutor(token.toUpperCase())) {
+            return;
+        }
+        const config = this._injector.get(IFormulaCurrentConfigService);
+        const unitId = config.getExecuteUnitId();
+        if (!unitId) {
+            return;
+        }
+        const sheetId = config.getExecuteSubUnitId();
+        const definedName = this._injector.get(IDefinedNamesService).getValueByName(unitId, token, sheetId);
+        if (!definedName) {
+            return;
+        }
+        const node = new NamedLambdaCallNode(token, (args) => this._executeNamedLambda(token, unitId, sheetId, args));
+        this._namedLambdaCalls.push(node);
+        return node;
+    }
+
+    private _executeNamedLambda(token: string, unitId: string, sheetId: Nullable<string>, args: FunctionVariantType[]): FunctionVariantType | AsyncObject {
+        if (this._namedLambdaCallDepth >= MAX_NAMED_LAMBDA_CALL_DEPTH) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+        const config = this._injector.get(IFormulaCurrentConfigService);
+        const lexer = this._injector.get(Lexer);
+        const interpreter = this._injector.get(Interpreter);
+        this._namedLambdaCallDepth++;
+        let asynchronous = false;
+        try {
+            config.setExecuteUnitId(unitId);
+            if (sheetId != null) {
+                config.setExecuteSubUnitId(sheetId);
+            }
+            // Every invocation needs fresh parameter bindings, including repeated calls in one formula.
+            const lexerNode = lexer.treeBuilder(`=${token}`, true, unitId);
+            if (!(lexerNode instanceof LexerNode)) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+            const body = this.parse(lexerNode);
+            if (!body) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+            const lambda = interpreter.execute(generateExecuteAstNodeData(body));
+            if (!(lambda instanceof LambdaValueObjectObject)) {
+                return lambda.isError() ? lambda : ErrorValueObject.create(ErrorType.VALUE);
+            }
+            const result = lambda.execute(...args);
+            if (result instanceof AsyncObject) {
+                asynchronous = true;
+                return new AsyncObject(result.getValue().finally(() => this._namedLambdaCallDepth--));
+            }
+            return result;
+        } finally {
+            if (!asynchronous) {
+                this._namedLambdaCallDepth--;
+            }
+        }
     }
 
     private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
@@ -192,7 +301,10 @@ export class AstTreeBuilder extends Disposable {
         const calculateStack: BaseAstNode[] = [];
         let currentAstNode: Nullable<BaseAstNode> = null;
         // console.log('lexerNode', lexerNode, children);
-        const token = lexerNode.getToken().trim().toUpperCase();
+        const token = normalizeFunctionToken(lexerNode.getToken().trim().toUpperCase());
+        if (token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME || token === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
+            lexerNode.setToken(token);
+        }
         if (token === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
             /**
              * Since the let function performs the same as lambda expressions,
@@ -376,6 +488,12 @@ export class AstTreeBuilder extends Disposable {
     // }
 
     private _checkAstNode(item: LexerNode | string) {
+        if (item instanceof LexerNode) {
+            const namedCall = this._createNamedLambdaCall(item);
+            if (namedCall) {
+                return namedCall;
+            }
+        }
         let astNode: Nullable<BaseAstNode> = null;
         const astNodeFactoryListCount = this._astNodeFactoryList.length;
         for (let x = 0; x < astNodeFactoryListCount; x++) {

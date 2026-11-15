@@ -183,6 +183,6 @@ export class If extends BaseFunction {
     }
 
     private _isCurrentArrayFormula(): boolean {
-        return this.currentFormulaRowCount > 1 || this.currentFormulaColumnCount > 1;
+        return this.currentArrayFormula || this.currentFormulaRowCount > 1 || this.currentFormulaColumnCount > 1;
     }
 }

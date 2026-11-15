@@ -24,6 +24,10 @@ export enum ORDER {
     ZERO = 0,
 }
 
+// Compare text by the runtime locale's collation, as the SORT function does, so an
+// accented letter sorts beside its base letter instead of after "z".
+const textCollator = new Intl.Collator(undefined, { numeric: false });
+
 const removeStringSymbol = (str: string) => {
     return str.replace(/-/gi, '').replace(/'/gi, '');
 };
@@ -89,12 +93,11 @@ export const compareString = (a1: ICommonComparableCellValue, a2: ICommonCompara
     }
 
     if (isA1Str && isA2Str) {
-        const a1AsString = a1 as string;
-        const a2AsString = a2 as string;
-        if (a1AsString < a2AsString) {
+        const order = textCollator.compare(a1 as string, a2 as string);
+        if (order < 0) {
             return type === SortType.ASC ? ORDER.NEGATIVE : ORDER.POSITIVE;
         }
-        if (a1AsString > a2AsString) {
+        if (order > 0) {
             return type === SortType.ASC ? ORDER.POSITIVE : ORDER.NEGATIVE;
         }
         return ORDER.ZERO;

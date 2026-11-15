@@ -29,11 +29,9 @@ interface IStorageDriver {
 }
 
 class IndexedDBDriver implements IStorageDriver {
-    private _db: Promise<IDBDatabase>;
-
-    constructor() {
-        this._db = this._init();
-    }
+    // Opened on first use: where IndexedDB is denied (a sandboxed iframe), an eager
+    // open rejects before anyone awaits it, as an unhandled rejection.
+    private _db: Promise<IDBDatabase> | null = null;
 
     private _init(): Promise<IDBDatabase> {
         return new Promise((resolve, reject) => {
@@ -47,6 +45,7 @@ class IndexedDBDriver implements IStorageDriver {
     }
 
     private _store(mode: IDBTransactionMode): Promise<IDBObjectStore> {
+        this._db ??= this._init();
         return this._db.then((db) => {
             const tx = db.transaction(STORE_NAME, mode);
             return tx.objectStore(STORE_NAME);

@@ -38,6 +38,22 @@ describe('Test char function', () => {
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
 
+        it('Number is above 255', () => {
+            // Excel takes 1-255; codes above 255 are UNICHAR's job. String.fromCharCode
+            // keeps only the low 16 bits, so CHAR(65601) used to return 'A'.
+            for (const code of [256, 8364, 65536, 65601]) {
+                const number = NumberValueObject.create(code);
+                const result = testFunction.calculate(number);
+                expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            }
+        });
+
+        it('Value is within 1 and 255', () => {
+            const number = NumberValueObject.create(65);
+            const result = testFunction.calculate(number);
+            expect(getObjectValue(result)).toStrictEqual('A');
+        });
+
         it('Value is array', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -69,7 +85,7 @@ describe('Test char function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(number2);
-            expect(getObjectValue(result2)).toStrictEqual('˒');
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
 
             const number3 = NumberValueObject.create(28);
             const result3 = testFunction.calculate(number3);

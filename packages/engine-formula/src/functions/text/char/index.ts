@@ -66,7 +66,9 @@ export class Char extends BaseFunction {
 
         const numberValue = Math.floor(+numberObject.getValue());
 
-        if (numberValue <= 0) {
+        // Excel takes 1-255; codes above 255 are UNICHAR's job. String.fromCharCode
+        // keeps only the low 16 bits, so CHAR(65601) used to return 'A'.
+        if (numberValue <= 0 || numberValue > 255) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

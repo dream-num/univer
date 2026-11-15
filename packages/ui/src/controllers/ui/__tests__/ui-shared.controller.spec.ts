@@ -41,9 +41,10 @@ class TestSingleUnitUIController extends SingleUnitUIController {
         lifecycleService: any,
         renderManagerService: any,
         private readonly _contentElement: HTMLElement,
-        private readonly _containerElement: HTMLElement
+        private readonly _containerElement: HTMLElement,
+        renderDelay?: number
     ) {
-        super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
+        super(injector, instanceService, layoutService, lifecycleService, renderManagerService, renderDelay);
     }
 
     runBootstrap() {
@@ -353,5 +354,48 @@ describe('SingleUnitUIController', () => {
 
         controller.runBootstrap();
         await expect(controller.callbackPromise).rejects.toThrow('unexpected');
+    });
+
+    it('should respect custom renderDelay configuration (e.g. 0ms)', async () => {
+        vi.useFakeTimers();
+
+        const renderer = createRenderer('render-custom');
+        const rendererMap = new Map<string, any>([['render-custom', renderer]]);
+        const lifecycleService = {
+            onStage: vi.fn().mockResolvedValue(undefined),
+            stage: LifecycleStages.Starting,
+        };
+
+        const controller = new TestSingleUnitUIController(
+            new Injector(),
+            {
+                focused$: new Subject<string>(),
+                getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'render-custom' })),
+                getUnitCreateOptions: vi.fn(() => null),
+            },
+            {
+                registerRootContainerElement: vi.fn(() => ({ dispose: vi.fn() })),
+                registerContentElement: vi.fn(() => ({ dispose: vi.fn() })),
+            },
+            lifecycleService,
+            {
+                getRenderAll: vi.fn(() => rendererMap),
+                getRenderUnitById: vi.fn((id: string) => rendererMap.get(id)),
+                created$: new Subject<any>(),
+                disposed$: new Subject<string>(),
+            },
+            document.createElement('div'),
+            document.createElement('div'),
+            0
+        );
+
+        controller.runBootstrap();
+        await controller.callbackPromise;
+
+        // With renderDelay: 0, advancing timers by 0ms triggers Rendered immediately without waiting 300ms
+        expect(lifecycleService.stage).toBe(LifecycleStages.Starting);
+        vi.advanceTimersByTime(0);
+        expect(lifecycleService.stage).toBe(LifecycleStages.Rendered);
+        expect(renderer.engine.mount).toHaveBeenCalledTimes(1);
     });
 });

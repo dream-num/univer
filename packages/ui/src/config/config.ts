@@ -36,6 +36,12 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
      * The fallback avatar for user.
      */
     avatarFallback?: string;
+
+    /**
+     * Delay in milliseconds before the first render starts after LifecycleStages.Ready.
+     * Defaults to 300ms. Can be set to 0 to eliminate initial render delay.
+     */
+    renderDelay?: number;
 }
 
 export const defaultPluginConfig: IUniverUIConfig = {};

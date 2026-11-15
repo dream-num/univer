@@ -42,7 +42,7 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
         @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService
     ) {
-        super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
+        super(injector, instanceService, layoutService, lifecycleService, renderManagerService, _config?.renderDelay);
 
         menuManagerService.mergeMenu(mobileMenuSchema);
         this._initBuiltinComponents(uiPartsService);

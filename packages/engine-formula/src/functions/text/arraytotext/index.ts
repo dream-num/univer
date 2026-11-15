@@ -63,6 +63,9 @@ export class Arraytotext extends BaseFunction {
         const [formatObject] = variants as BaseValueObject[];
 
         const formatValue = +formatObject.getValue();
+        if (formatValue !== 0 && formatValue !== 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;

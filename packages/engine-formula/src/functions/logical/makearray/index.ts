@@ -30,13 +30,13 @@ export class Makearray extends BaseFunction {
     override maxParams = 3;
 
     override calculate(...variants: BaseValueObject[]) {
-        const row = this.getIndexNumValue(variants[0]);
+        const row = this._getDimension(variants[0]);
 
         if (typeof row !== 'number') {
             return row;
         }
 
-        const column = this.getIndexNumValue(variants[1]);
+        const column = this._getDimension(variants[1]);
 
         if (typeof column !== 'number') {
             return column;
@@ -70,5 +70,17 @@ export class Makearray extends BaseFunction {
 
     override isAsync(): boolean {
         return true;
+    }
+
+    private _getDimension(value: BaseValueObject): number | BaseValueObject {
+        const scalar = value.isArray() ? (value as ArrayValueObject).getFirstCell() : value;
+        if (scalar.isError()) {
+            return scalar;
+        }
+        const dimension = this.getIndexNumValue(scalar);
+        if (typeof dimension !== 'number' || !Number.isFinite(dimension) || dimension < 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        return Math.floor(dimension);
     }
 }

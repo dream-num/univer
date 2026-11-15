@@ -49,7 +49,7 @@ export class Linest extends BaseFunction {
             return knownXsValues;
         }
 
-        let _constb = constb ?? BooleanValueObject.create(true);
+        let _constb = constb == null || constb.isNull() ? BooleanValueObject.create(true) : constb;
 
         if (_constb.isArray()) {
             _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;

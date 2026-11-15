@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Injector, IWorkbookData } from '@univerjs/core';
-import { CellValueType, ILogService, LocaleType, LogLevel, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, FormulaType, ILogService, LocaleType, LogLevel, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../../basics/common';
 import type { IDefinedNameMapItem } from '../../../services/defined-names.service';
@@ -55,6 +55,7 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/funct
 import { StdevP } from '../../../functions/statistical/stdev-p';
 import { FUNCTION_NAMES_TEXT } from '../../../functions/text/function-names';
 import { Regexmatch } from '../../../functions/text/regexmatch';
+import { FormulaDataModel } from '../../../models/formula-data.model';
 import { UniverFormulaEnginePlugin } from '../../../plugin';
 import { ICalculateFormulaService } from '../../../services/calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
@@ -959,7 +960,7 @@ describe('Test indirect', () => {
     });
 });
 
-function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem) {
+function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem, singleCellArray = false) {
     const data: IWorkbookData = {
         id: 'named-lambda',
         name: 'Named lambdas',
@@ -969,6 +970,9 @@ function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem) {
         sheetOrder: ['sheet'],
         sheets: { sheet: { id: 'sheet', name: 'Sheet1', rowCount: 100, columnCount: 10, cellData: {} } },
     };
+    if (singleCellArray) {
+        data.sheets.sheet.cellData = { 0: { 0: { f: '=SUM(IF(B1:B4,1,8))', ref: 'A1', ft: FormulaType.ARRAY } } };
+    }
     const univer = new Univer();
     univer.registerPlugin(UniverFormulaEnginePlugin);
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
@@ -985,6 +989,7 @@ function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem) {
             dirtyDefinedNameMap?: IFormulaDatasetConfig['dirtyDefinedNameMap'];
             forceCalculate?: boolean;
             input?: number;
+            arrayFormula?: boolean;
         } = {}) {
             let complete!: (result: IAllRuntimeData) => void;
             const completed = new Promise<IAllRuntimeData>((resolve) => {
@@ -995,7 +1000,11 @@ function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem) {
                 await service.execute({
                     formulaData: { [data.id]: { sheet: { 0: { 0: { f: formula } } } } },
                     arrayFormulaCellData: {},
-                    arrayFormulaRange: {},
+                    arrayFormulaRange: options.arrayFormula
+                        ? {
+                            [data.id]: { sheet: { 0: { 0: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } } } },
+                        }
+                        : {},
                     forceCalculate: options.forceCalculate ?? true,
                     dirtyRanges: [{ unitId: data.id, sheetId: 'sheet', range: { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 } }],
                     dirtyNameMap: {},
@@ -1201,6 +1210,83 @@ describe('Quoted array constants in formulas', () => {
         ['=ARRAYTOTEXT(TEXTSPLIT("a,b;c",{",",";"}),1)', '{"a","b","c"}'],
     ])('keeps quoted separators as data in %s', async (formula, expected) => {
         const bed = createNamedLambdaTestBed({ ...RECURSIVE_DEFINED_NAMES });
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Supported formula Excel compatibility', () => {
+    it.each([true, false])('preserves one-cell array formula context: %s', async (arrayFormula) => {
+        const bed = createNamedLambdaTestBed({}, arrayFormula);
+        try {
+            const model = bed.injector.get(FormulaDataModel);
+            model.getFormulaData();
+            expect(model.getArrayFormulaRange()['named-lambda']?.sheet?.[0]?.[0] != null).toBe(arrayFormula);
+            await bed.calculate('=1', { arrayFormula });
+            const runtime = bed.injector.get(IFormulaRuntimeService);
+            runtime.setCurrent(0, 0, 1, 1, 'sheet', 'named-lambda');
+            const lexer = bed.injector.get(Lexer);
+            const ast = bed.injector.get(AstTreeBuilder).parse(lexer.treeBuilder('=SUM(IF(B1:B4,1,8))', true, 'named-lambda') as LexerNode);
+            const result = bed.injector.get(Interpreter).execute(generateExecuteAstNodeData(ast as BaseAstNode));
+            expect((result as BaseValueObject).getValue()).toBe(arrayFormula ? 25 : 1);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        ['=BASE(1,2,255)', `${'0'.repeat(254)}1`],
+        ['=SUM(FACTDOUBLE({4,5,6}))', 71],
+        ['=SUM(FACTDOUBLE(B1:B4))', ErrorType.VALUE],
+        ['=SUM(FACTDOUBLE(B1:B4+4))', 39],
+        ['=SUM(MROUND(B1:B4,5))', ErrorType.VALUE],
+        ['=SUM(MROUND(B1:B4+7,5))', 25],
+        ['=SUM(QUOTIENT(B1:B4,2))', ErrorType.VALUE],
+        ['=SUM(QUOTIENT(B1:B4+7,2))', 13],
+        ['=SUM(SQRTPI(B1:B4))', ErrorType.VALUE],
+        ['=ROUND(SUM(SQRTPI(B1:B4+0)),6)', 1.772454],
+        ['=SUM(MROUND({7,8,13},5))', 30],
+        ['=ARRAYTOTEXT(MROUND({7,8,13},{5;10}),1)', '{5,10,15;10,10,10}'],
+        ['=SUM(QUOTIENT({5,7,9},2))', 9],
+        ['=ARRAYTOTEXT(QUOTIENT({5,7,9},{2;0}),1)', '{2,3,4;#DIV/0!,#DIV/0!,#DIV/0!}'],
+        ['=ROUND(SUM(SQRTPI({1,2,3})),6)', 7.349062],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{1,3}),1)', '{1,3;4,6}'],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{1;3}),1)', '{1,3;4,6}'],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{-1,1},2),1)', '{3,1,2;6,4,5}'],
+        ['=CHOOSECOLS({1,2,3;4,5,6},{1,0})', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{1,3}),1)', '{1,2;5,6}'],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{1;3}),1)', '{1,2;5,6}'],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{-1,1},2),1)', '{5,6;1,2;3,4}'],
+        ['=CHOOSEROWS({1,2;3,4;5,6},{1,0})', ErrorType.VALUE],
+        ['=BASE(1,2,256)', ErrorType.NUM],
+        ['=BASE(1,2,255.9)', `${'0'.repeat(254)}1`],
+        ['=BASE(1,2,256.1)', ErrorType.NUM],
+        ['=MAKEARRAY(0,2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(2,0,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(-1,2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY("a",2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(NA(),2,LAMBDA(r,c,1))', ErrorType.NA],
+        ['=SUM(MAKEARRAY(2.9,2,LAMBDA(r,c,r*c)))', 9],
+        ['=CEILING.MATH(-5.5,,1)', -6],
+        ['=FLOOR.MATH(-5.5,,1)', -5],
+        ['=CEILING.MATH(-5.5,0,1)', 0],
+        ['=CEILING.MATH(-5.5,B10,1)', 0],
+        ['=CEILING.MATH(-5.5,CHOOSE(1,,99),1)', -6],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},),6))', '2|1'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},FALSE),6))', '2.428571|0'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},CHOOSE(1,,99)),6))', '2|1'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LOGEST({3;6;12},{1;2;3},),6))', '2|1.5'],
+        ['=ARRAYTOTEXT(UNIQUE({1;"1";1}),1)', '{1;"1"}'],
+        ['=ARRAYTOTEXT({1,2},2)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT({1,2},-1)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT({1,2},0.5)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(UNIQUE({"a";"A";"b"}),1)', '{"a";"b"}'],
+        ['=ARRAYTOTEXT(UNIQUE({1,"1",TRUE,"TRUE"},TRUE),1)', '{1,"1",TRUE,"TRUE"}'],
+    ])('calculates %s through the real formula service', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
         try {
             expect((await bed.calculate(formula as string))?.v).toBe(expected);
         } finally {

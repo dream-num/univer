@@ -18,6 +18,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Choosecols extends BaseFunction {
@@ -35,19 +36,9 @@ export class Choosecols extends BaseFunction {
 
         const result: BaseValueObject[][] = [];
 
-        for (let i = 0; i < variants.length; i++) {
-            let variantObject = variants[i];
-
-            if (variantObject.isArray()) {
-                const variantRowCount = (variantObject as ArrayValueObject).getRowCount();
-                const variantColumnCount = (variantObject as ArrayValueObject).getColumnCount();
-
-                if (variantRowCount > 1 || variantColumnCount > 1) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                variantObject = (variantObject as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
+        const indexes = variants.flatMap((variant) => variant.isArray() ? (variant as ArrayValueObject).getArrayValue().flat() : [variant]);
+        for (let i = 0; i < indexes.length; i++) {
+            let variantObject = indexes[i] ?? NullValueObject.create();
 
             if (variantObject.isString()) {
                 variantObject = variantObject.convertToNumberObjectValue();

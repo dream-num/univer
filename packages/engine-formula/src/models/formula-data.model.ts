@@ -15,7 +15,7 @@
  */
 
 import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, FormulaType, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -1031,6 +1031,7 @@ export class FormulaDataModel extends Disposable {
                 range.endRow === row &&
                 range.startColumn === column &&
                 range.endColumn === column &&
+                cell?.ft !== FormulaType.ARRAY &&
                 !isArrayConstantFormula(formula)
             ) {
                 return true;

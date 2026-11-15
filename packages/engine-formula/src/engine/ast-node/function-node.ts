@@ -157,6 +157,9 @@ export class FunctionNode extends BaseAstNode {
         if (object.isReferenceObject() && this._functionExecutor.rejectsMultiCellReference) {
             const reference = object as BaseReferenceObject;
             if (reference.getRowCount() > 1 || reference.getColumnCount() > 1) {
+                if (reference.getForcedSheetName().length > 0 && !reference.getForcedSheetId()) {
+                    return ErrorValueObject.create(ErrorType.REF);
+                }
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
         }

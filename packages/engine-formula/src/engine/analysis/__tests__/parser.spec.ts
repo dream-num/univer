@@ -988,7 +988,7 @@ function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem, singleCellA
         async calculate(formula: string, options: {
             dirtyDefinedNameMap?: IFormulaDatasetConfig['dirtyDefinedNameMap'];
             forceCalculate?: boolean;
-            input?: number;
+            input?: number | string;
             arrayFormula?: boolean;
         } = {}) {
             let complete!: (result: IAllRuntimeData) => void;
@@ -1219,6 +1219,34 @@ describe('Quoted array constants in formulas', () => {
 });
 
 describe('Supported formula Excel compatibility', () => {
+    it.each([
+        '=FACTDOUBLE(INDIRECT("Missing!B1:B4"))',
+        '=MROUND(INDIRECT("Missing!B1:B4"),5)',
+        '=QUOTIENT(INDIRECT("Missing!B1:B4"),2)',
+        '=SQRTPI(INDIRECT("Missing!B1:B4"))',
+    ])('preserves missing-sheet errors in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula))?.v).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        '=FACTDOUBLE(B1:B4)',
+        '=MROUND(B1:B4,5)',
+        '=QUOTIENT(B1:B4,2)',
+        '=SQRTPI(B1:B4)',
+    ])('rejects valid multi-cell references with first-cell errors in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula, { input: ErrorType.NA }))?.v).toBe(ErrorType.VALUE);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it.each([true, false])('preserves one-cell array formula context: %s', async (arrayFormula) => {
         const bed = createNamedLambdaTestBed({}, arrayFormula);
         try {

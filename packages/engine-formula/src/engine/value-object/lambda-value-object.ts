@@ -94,9 +94,10 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         this._lambdaNode.setNotEmpty(false);
 
-        let value: AsyncObject | BaseValueObject;
+        let value: BaseValueObject;
         if (this._interpreter.checkAsyncNode(this._lambdaNode)) {
-            value = new AsyncObject(this._interpreter.executeAsync(generateExecuteAstNodeData(this._lambdaNode)) as Promise<BaseValueObject>);
+            const result = this._interpreter.executeAsync(generateExecuteAstNodeData(this._lambdaNode)) as Promise<BaseValueObject>;
+            return new AsyncObject(result.finally(() => this._lambdaNode?.setNotEmpty(true)));
         } else {
             const o = this._interpreter.execute(generateExecuteAstNodeData(this._lambdaNode));
             if (o.isReferenceObject()) {

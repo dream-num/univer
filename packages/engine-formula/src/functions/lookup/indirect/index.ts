@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
 import { operatorToken } from '../../../basics/token';
@@ -116,7 +116,13 @@ export class Indirect extends BaseFunction {
         }
 
         if (regexTestSingeRange(refTextV)) {
-            return this._setDefault(new CellReferenceObject(refTextV));
+            const reference = new CellReferenceObject(refTextV);
+            const range = reference.getRangeData();
+            // A malformed qualified reference can match the lexer regex but deserialize as a huge range.
+            if (range.startRow !== range.endRow || range.startColumn !== range.endColumn || range.endRow >= MAX_ROW_COUNT || range.endColumn >= MAX_COLUMN_COUNT) {
+                return ErrorValueObject.create(ErrorType.REF);
+            }
+            return this._setDefault(reference);
         }
         if (regexTestRow(refTextV)) {
             return this._setDefault(new RowReferenceObject(refTextV));

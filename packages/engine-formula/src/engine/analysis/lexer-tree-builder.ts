@@ -771,7 +771,7 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    private _handleDefinedName(sequenceArray: ISequenceArray[], param: IInjectDefinedNameParam): {
+    private _handleDefinedName(sequenceArray: ISequenceArray[], param: IInjectDefinedNameParam, resolvingNames = new Set<string>()): {
         sequenceString: string;
         hasDefinedName: boolean;
         definedNames: string[];
@@ -815,17 +815,17 @@ export class LexerTreeBuilder extends Disposable {
                 const definedContent = getValueByName(unitId, definedNameToken, sheetId);
                 if (definedContent) {
                     definedNames.push(definedContent.name);
-                    const refOffsetX = definedContent.localSheetId === 'AllDefaultWorkbook'
-                        ? param.refOffsetX - 1
-                        : param.refOffsetX;
-                    const refString = definedContent.formulaOrRefString.startsWith('=')
-                        ? definedContent.formulaOrRefString
-                        : this._moveDefinedNameRefOffset(definedContent.formulaOrRefString, refOffsetX, param.refOffsetY);
-                    const nestedDefinedNameParam = this._handleNestedDefinedName(refString, param);
+                    if (resolvingNames.has(definedContent.id)) {
+                        // Recursive calls must be evaluated with arguments, not expanded while parsing.
+                        sequenceString += nodeType === sequenceNodeType.FUNCTION ? token : ErrorType.NAME;
+                        hasDefinedName = true;
+                        continue;
+                    }
+                    const nestedDefinedNameParam = this._handleNestedDefinedName(definedContent, param, resolvingNames);
                     if (nestedDefinedNameParam == null || typeof nestedDefinedNameParam !== 'object') {
                         sequenceString += nestedDefinedNameParam || ErrorType.NAME;
                         hasDefinedName = true;
-                    } else if (typeof nestedDefinedNameParam === 'object') {
+                    } else {
                         const { sequenceString: nestedSequenceString, definedNames: nestedDefinedNames } = nestedDefinedNameParam;
                         sequenceString += nestedSequenceString;
                         nestedDefinedNames.forEach((name) => {
@@ -917,7 +917,13 @@ export class LexerTreeBuilder extends Disposable {
         return tokenRaw;
     }
 
-    private _handleNestedDefinedName(refString: string, param: IInjectDefinedNameParam) {
+    private _handleNestedDefinedName(definedContent: IDefinedNamesServiceParam, param: IInjectDefinedNameParam, resolvingNames: Set<string>) {
+        const refOffsetX = definedContent.localSheetId === 'AllDefaultWorkbook'
+            ? param.refOffsetX - 1
+            : param.refOffsetX;
+        const refString = definedContent.formulaOrRefString.startsWith('=')
+            ? definedContent.formulaOrRefString
+            : this._moveDefinedNameRefOffset(definedContent.formulaOrRefString, refOffsetX, param.refOffsetY);
         const sequenceArray: ISequenceArray[] = [];
 
         const state = this._nodeMaker(refString, sequenceArray);
@@ -926,7 +932,12 @@ export class LexerTreeBuilder extends Disposable {
             return state as string;
         }
 
-        return this._handleDefinedName(sequenceArray, param);
+        resolvingNames.add(definedContent.id);
+        try {
+            return this._handleDefinedName(sequenceArray, param, resolvingNames);
+        } finally {
+            resolvingNames.delete(definedContent.id);
+        }
     }
 
     private _checkDefinedNameDirty(token: string, injectDefinedNameParam: IInjectDefinedNameParam) {
@@ -1716,6 +1727,10 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     const nextCurrentString = formulaChars[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.DOUBLE_QUOTATION) {
+                        if (!this.isBracesClose()) {
+                            this._pushSegment(currentString);
+                            this._addSequenceArray(sequenceArray, currentString, cur);
+                        }
                         cur++;
                     } else {
                         this._closeDoubleQuotation();

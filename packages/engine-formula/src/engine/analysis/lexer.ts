@@ -60,10 +60,26 @@ export class Lexer extends Disposable {
         }
 
         const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, injectDefinedNameParam);
-        if (isCacheable && lexerNode instanceof LexerNode) {
+        if (isCacheable && lexerNode instanceof LexerNode && !this._containsLambda(lexerNode)) {
             this._cacheService.setLexerTree(cacheKey, lexerNode, injectDefinedNameParam?.unitId ?? undefined);
         }
         return lexerNode;
+    }
+
+    private _containsLambda(node: LexerNode): boolean {
+        const pending = [node];
+        while (pending.length > 0) {
+            const current = pending.pop()!;
+            if (/^(?:_xlfn\.)?(?:LET|LAMBDA)$/iu.test(current.getToken().trim())) {
+                return true;
+            }
+            for (const child of current.getChildren()) {
+                if (child instanceof LexerNode) {
+                    pending.push(child);
+                }
+            }
+        }
+        return false;
     }
 
     private _isDefinedNameDirty(formulaString: string, unitId: Nullable<string>, lexerNode: LexerNode): boolean {

@@ -59,7 +59,17 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { animationFrameScheduler, BehaviorSubject, combineLatest, map, startWith, throttleTime } from 'rxjs';
+import {
+    animationFrameScheduler,
+    BehaviorSubject,
+    combineLatest,
+    defer,
+    map,
+    ReplaySubject,
+    startWith,
+    takeUntil,
+    throttleTime,
+} from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -277,15 +287,10 @@ export class SheetCanvasPopManagerService extends Disposable {
     private _createPositionObserver(
         bound: IBoundRectNoAngle,
         currentRender: IRender,
-        skeleton: Nullable<SpreadsheetSkeleton>,
-        worksheet: Worksheet,
-        renderedPosition$?: IRenderedPositionObservable
+        skeleton: SpreadsheetSkeleton,
+        worksheet: Worksheet
     ) {
         const calc = () => {
-            if (!skeleton) {
-                return transformRenderedPositionToClientRect(renderedPosition$!.getValue(), currentRender);
-            }
-
             const { scene } = currentRender;
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
             const canvasElement = currentRender.engine.getCanvasElement();
@@ -310,38 +315,62 @@ export class SheetCanvasPopManagerService extends Disposable {
         const updatePosition = () => position$.next(calc());
         const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
-        if (skeleton) {
-            disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-                if (shouldUpdatePosition(commandInfo.id)) {
-                    updatePosition();
-                }
-            }));
-
-            if (viewMain) {
-                disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (shouldUpdatePosition(commandInfo.id)) {
+                updatePosition();
             }
-
-            return {
-                position,
-                position$,
-                disposable,
-            };
-        }
-
-        disposable.add(combineLatest([
-            renderedPosition$!,
-            currentRender.engine.clientRect$.pipe(startWith(undefined)),
-        ]).pipe(
-            // Coalesce layout signals into one latest-position update on the next browser frame.
-            throttleTime(0, animationFrameScheduler, { leading: false, trailing: true })
-        ).subscribe(([renderedPosition]) => {
-            position$.next(transformRenderedPositionToClientRect(renderedPosition, currentRender));
         }));
 
+        if (viewMain) {
+            disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
+        }
+
+        return { position, position$, disposable };
+    }
+
+    private _createRenderedPositionObserver(currentRender: IRender, renderedPosition$: IRenderedPositionObservable) {
+        const disposed$ = new ReplaySubject<void>(1);
+        const getPosition = () => transformRenderedPositionToClientRect(renderedPosition$.getValue(), currentRender);
+        const changes$ = combineLatest([
+            renderedPosition$,
+            currentRender.engine.clientRect$.pipe(startWith(undefined)),
+        ]).pipe(
+            throttleTime(0, animationFrameScheduler, { leading: false, trailing: true }),
+            map(([position]) => transformRenderedPositionToClientRect(position, currentRender))
+        );
+        // Let the popup schedule the end of its initial throttle window before scheduling layout updates.
+        const position$ = defer(() => changes$.pipe(startWith(getPosition()))).pipe(takeUntil(disposed$));
+
         return {
-            position,
+            position: getPosition(),
             position$,
-            disposable,
+            disposable: toDisposable(() => {
+                disposed$.next();
+                disposed$.complete();
+            }),
+        };
+    }
+
+    private _getObjectPopupBound(targetObject: BaseObject): IBoundRectNoAngle {
+        const { left, top, width, height } = targetObject;
+
+        let offsetX = 0;
+        let offsetY = 0;
+        let drawingType;
+        if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
+            drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
+        }
+        if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
+            const offset = this._popupMenuOffsetMap.get(drawingType)!;
+            offsetX = offset.offsetX;
+            offsetY = offset.offsetY;
+        }
+
+        return {
+            left,
+            right: left + width + offsetX,
+            top: top + offsetY,
+            bottom: top + height,
         };
     }
 
@@ -367,36 +396,22 @@ export class SheetCanvasPopManagerService extends Disposable {
         const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const viewMain = currentRender?.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!currentRender || (!skeleton && !renderedPosition$)) {
+        if (!currentRender) {
             return createNoopCheckDisposable();
         }
-        const { left, top, width, height } = targetObject;
-
-        let offsetX = 0;
-        let offsetY = 0;
-        let drawingType;
-        if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
-            drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
-        }
-        if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
-            const offset = this._popupMenuOffsetMap.get(drawingType)!;
-            offsetX = offset.offsetX;
-            offsetY = offset.offsetY;
-        }
-
-        const bound: IBoundRectNoAngle = {
-            left,
-            right: left + width + offsetX,
-            top: top + offsetY,
-            bottom: top + height,
-        };
-        const { position, position$, disposable } = this._createPositionObserver(
-            bound,
+        const gridObserver = skeleton && this._createPositionObserver(
+            this._getObjectPopupBound(targetObject),
             currentRender,
             skeleton,
-            worksheet,
-            renderedPosition$
+            worksheet
         );
+        const observer = gridObserver ?? (
+            renderedPosition$ && this._createRenderedPositionObserver(currentRender, renderedPosition$)
+        );
+        if (!observer) {
+            return createNoopCheckDisposable();
+        }
+        const { position, position$, disposable } = observer;
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const canvasElement = currentRender.engine.getCanvasElement();
         const scaleAdjust = canvasElement.getBoundingClientRect().width / pxToNum(canvasElement.style.width);
@@ -420,7 +435,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         disposableCollection.add(disposable);
         disposableCollection.add(toDisposable(() => {
             this._globalPopupManagerService.removePopup(id);
-            position$.complete();
+            gridObserver?.position$.complete();
         }));
         const trackedDisposable = this._trackPopupDisposable(disposableCollection);
 

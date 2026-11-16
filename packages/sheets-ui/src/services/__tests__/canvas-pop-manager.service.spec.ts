@@ -26,7 +26,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { animationFrameScheduler, BehaviorSubject, Subject, throttleTime } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SheetCanvasPopManagerService } from '../canvas-pop-manager.service';
@@ -38,6 +38,7 @@ const testInjectors: Injector[] = [];
 afterEach(() => {
     testInjectors.forEach((injector) => injector.dispose());
     testInjectors.length = 0;
+    vi.useRealTimers();
 });
 
 function createEventSubject<T>() {
@@ -376,7 +377,8 @@ describe('SheetCanvasPopManagerService', () => {
         expect(popupService.popups.size).toBe(0);
     });
 
-    it('uses the latest rendered position in the next frame for a chart sheet floating DOM popup', async () => {
+    it('keeps a chart sheet popup at the latest bounds when layout changes around its first subscription', () => {
+        vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame'] });
         const {
             canvas,
             clientRect$,
@@ -394,13 +396,13 @@ describe('SheetCanvasPopManagerService', () => {
             getPropByKey: () => 'chart',
         };
 
-        service.attachPopupToObject(
+        const disposable = service.attachPopupToObject(
             targetObject as never,
             { componentKey: 'drawing-toolbar' },
             renderedPosition$
         );
-        const positions: unknown[] = [];
-        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+        const popup = popupService.lastPopup()!;
+        expect(popup.anchorRect).toEqual({ left: 50, right: 130, top: 40, bottom: 100 });
 
         vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
             top: 40,
@@ -413,15 +415,28 @@ describe('SheetCanvasPopManagerService', () => {
             y: 40,
             toJSON: () => ({}),
         } as DOMRect);
-        renderedPosition$.next({ startX: 100, startY: 50, endX: 300, endY: 200 });
+        renderedPosition$.next({ startX: 70, startY: 30, endX: 200, endY: 120 });
         clientRect$.next({});
 
-        await vi.waitFor(() => {
-            expect(positions).toEqual([
-                { left: 50, right: 130, top: 40, bottom: 100 },
-                { left: 130, right: 330, top: 90, bottom: 240 },
-            ]);
-        });
+        const positions: unknown[] = [];
+        // SingleCanvasPopup consumes anchors with a leading-only frame throttle.
+        const subscription = popup.anchorRect$.pipe(throttleTime(0, animationFrameScheduler))
+            .subscribe((position) => positions.push(position));
+        const positionAtSubscription = { left: 100, right: 230, top: 70, bottom: 160 };
+        expect(positions).toEqual([positionAtSubscription]);
+
+        renderedPosition$.next({ startX: 90, startY: 40, endX: 280, endY: 175 });
+        renderedPosition$.next({ startX: 100, startY: 50, endX: 300, endY: 200 });
+        clientRect$.next({});
+        expect(positions).toEqual([positionAtSubscription]);
+
+        vi.advanceTimersToNextFrame();
+        expect(positions).toEqual([
+            positionAtSubscription,
+            { left: 130, right: 330, top: 90, bottom: 240 },
+        ]);
+        disposable.dispose();
+        expect(subscription.closed).toBe(true);
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {

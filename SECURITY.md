@@ -18,7 +18,7 @@ We encourage responsible disclosure of security vulnerabilities. If you discover
 
 1. How to Report:
     - Email us at: developer@univer.ai
-    - Alternatively, submit a private Security Advisory via GitHub (if applicable).
+    - Alternativeeeely, submit a private Security Advisory via GitHub (if applicable).
 2. What to Include:
     - Description: A detailed explanation of the vulnerability and its potential impact.
     - Steps to Reproduce: Clear instructions to replicate the issue.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import {
     AsyncLock,
@@ -45,6 +45,7 @@ import type {
 import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type {
+    IFormulaDependencyTree,
     IFormulaDependencyTreeFullJson,
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
@@ -53,6 +54,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
+import type { IFormulaDemandStep, IFormulaDemandTree } from './formula-demand-scheduler';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { ErrorType } from '../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
@@ -60,15 +62,24 @@ import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
+import { getFormulaValueDemand } from '../engine/utils/formula-value-demand';
 import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
+import { FormulaDemandScheduler } from './formula-demand-scheduler';
 import { FormulaResultService } from './formula-result.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
 export const DEFAULT_INTERVAL_COUNT = 500;
 
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
+
+interface IFormulaDemandExecutionContext<T extends IFormulaDemandTree> {
+    owners: T[];
+    features: T[];
+    initiallyReady: T[];
+    resolve: (unitId: string, sheetId: string, row: number, column: number) => T | undefined;
+}
 
 export interface ICalculateFormulaService {
     /** Internal engine opt-in; engines without this capability and RPC proxies keep the complete formula DTO input. */
@@ -131,7 +142,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     protected async* _iterateCalculationGroup<T extends { unitId: string; subUnitId: string; row: number; column: number; formula?: string }>(
         group: T[],
-        groupId: string
+        groupId: string,
+        iterationBudgets = new Map<T, number>()
     ) {
         const settings = group.map((item) => this._getCalculationSettings(item.unitId));
         if (group.every((item, i) => {
@@ -163,6 +175,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         const beforeValues: ICellData['v'][] = [];
         const beforeTypes: ICellData['t'][] = [];
         for (let iteration = 0; iteration < limit; iteration++) {
+            const executed = new Set<T>();
             for (let i = 0; i < group.length; i++) {
                 if (settings[i].iterativeCalculation) {
                     const before = this._getIterationCell(group[i]);
@@ -171,16 +184,22 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 }
             }
             for (let i = 0; i < group.length; i++) {
-                if (iteration < (settings[i].iterativeCalculation ? settings[i].maxIterations : 1)) {
+                const used = iterationBudgets.get(group[i]) ?? 0;
+                if (used < (settings[i].iterativeCalculation ? settings[i].maxIterations : 1)) {
                     // Each member can change a range read by the next member in this round.
                     this._runtimeService.getCalculationCache?.()?.references.clear();
-                    yield { tree: group[i], preserve: !settings[i].iterativeCalculation, iteration };
+                    yield { tree: group[i], preserve: !settings[i].iterativeCalculation, iteration: used };
+                    iterationBudgets.set(group[i], used + 1);
+                    executed.add(group[i]);
                 }
             }
             iterations = iteration + 1;
             converged = group.every((item, i) => {
                 if (!settings[i].iterativeCalculation) {
                     return true;
+                }
+                if (!executed.has(item)) {
+                    return false;
                 }
                 const after = this._getIterationCell(item);
                 const previousValue = beforeValues[i];
@@ -201,7 +220,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             row: item.row,
             column: item.column,
             groupId,
-            iterations: settings[i].iterativeCalculation ? Math.min(iterations, settings[i].maxIterations) : 0,
+            iterations: settings[i].iterativeCalculation ? Math.min(iterationBudgets.get(item) ?? iterations, settings[i].maxIterations) : 0,
             converged: settings[i].iterativeCalculation ? converged : undefined,
         })));
     }
@@ -219,6 +238,256 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             }
             yield* this._iterateCalculationGroup(group, tree.cycleGroup);
         }
+    }
+
+    protected _materializeDemandResult(value: FunctionVariantType): FunctionVariantType {
+        const isReferenceObject = value != null &&
+            typeof (value as unknown as { isReferenceObject?: unknown }).isReferenceObject === 'function' &&
+            value.isReferenceObject();
+        return isReferenceObject ? (value as BaseReferenceObject).toArrayValueObject() : value;
+    }
+
+    protected _requiresDemandCalculation(tree: IFormulaDemandTree): boolean {
+        const dynamicNames = [FUNCTION_NAMES_LOOKUP.INDIRECT, FUNCTION_NAMES_LOOKUP.OFFSET];
+        return tree.cycleGroup != null || tree.hasDynamicDeps === true ||
+            (tree.addressFunctionNodes?.length ?? 0) > 0 || dynamicNames.some((name) =>
+            (tree.formula ?? '').toUpperCase().replace(/\s+/g, '').includes(`${name}(`));
+    }
+
+    /** Static dependencies choose candidates; only unfinished value reads prove a cycle. */
+    protected async _forEachDemandCalculationTree<T extends IFormulaDemandTree>(
+        trees: T[],
+        visitor: (tree: T, step: IFormulaDemandStep) => Promise<boolean | void>,
+        options: {
+            availableTrees?: readonly T[] | (() => readonly T[]);
+            isDirty?: (tree: T) => boolean;
+            initiallyReady?: readonly T[];
+            demandContext?: IFormulaDemandExecutionContext<T>;
+            ready?: Set<T>;
+        } = {}
+    ): Promise<boolean> {
+        const needsDemand = trees.some((tree) => this._requiresDemandCalculation(tree));
+        if (!needsDemand) {
+            for await (const step of this._getCalculationSteps(trees)) {
+                if (this._runtimeService.isStopExecution() || await visitor(step.tree, { ...step, probe: false }) === false) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        const demandTrees = trees.filter((tree) => this._requiresDemandCalculation(tree));
+        if (demandTrees.length < trees.length && !trees.some((tree) => tree.cycleGroup != null)) {
+            return this._forEachHybridDemandCalculationTree(trees, demandTrees, visitor, options);
+        }
+        if (!this._runtimeService.getAllRuntimeData().circularReferences?.length) {
+            this._runtimeService.disableCycleDependency();
+        }
+        const context = options.demandContext ?? this._createDemandExecutionContext(trees, options);
+        const { owners, features, resolve } = context;
+        const initiallyReady = options.ready
+            ? []
+            : [...context.initiallyReady, ...(options.initiallyReady ?? [])];
+        const cellKey = (unit: string, sheet: string, row: number, column: number) => JSON.stringify([unit, sheet, row, column]);
+        const scheduler = new FormulaDemandScheduler(
+            trees.slice(),
+            this._runtimeService.getUnitData(),
+            resolve,
+            async (tree, step) => {
+                if (tree.featureId != null) {
+                    // Feature callbacks are opaque; their declared input ranges
+                    // are the value requirements of the registered producer.
+                    const scope = getFormulaValueDemand(this._runtimeService.getUnitData());
+                    for (const dependency of tree.rangeList ?? []) {
+                        for (const candidate of owners) {
+                            if (candidate.unitId === dependency.unitId && candidate.subUnitId === dependency.sheetId &&
+                                candidate.row >= dependency.range.startRow && candidate.row <= dependency.range.endRow &&
+                                candidate.column >= dependency.range.startColumn && candidate.column <= dependency.range.endColumn) {
+                                scope?.readCell(candidate.unitId, candidate.subUnitId, candidate.row, candidate.column);
+                            }
+                        }
+                        for (const feature of features) {
+                            for (const output of feature.featureDirtyRanges ?? []) {
+                                const row = Math.max(output.range.startRow, dependency.range.startRow);
+                                const column = Math.max(output.range.startColumn, dependency.range.startColumn);
+                                if (output.unitId === dependency.unitId && output.sheetId === dependency.sheetId &&
+                                    row <= Math.min(output.range.endRow, dependency.range.endRow) &&
+                                    column <= Math.min(output.range.endColumn, dependency.range.endColumn)) {
+                                    scope?.readCell(output.unitId, output.sheetId, row, column);
+                                }
+                            }
+                        }
+                    }
+                }
+                return await visitor(tree, step);
+            },
+            (group, budgets) => {
+                this._runtimeService.enableCycleDependency();
+                return this._iterateCalculationGroup(group, cellKey(group[0].unitId, group[0].subUnitId, group[0].row, group[0].column), budgets);
+            },
+            () => this._runtimeService.isStopExecution(),
+            initiallyReady,
+            options.ready
+        );
+        return await scheduler.run();
+    }
+
+    private _createDemandExecutionContext<T extends IFormulaDemandTree>(
+        roots: readonly T[],
+        options: {
+            availableTrees?: readonly T[] | (() => readonly T[]);
+            isDirty?: (tree: T) => boolean;
+        }
+    ): IFormulaDemandExecutionContext<T> {
+        const owners: T[] = [];
+        const ownersBySheet = new Map<string, Map<string, ObjectMatrix<number>>>();
+        const rangeMatrices = new WeakMap<IObjectMatrixPrimitiveType<IRange>, ObjectMatrix<IRange>>();
+        const features: T[] = [];
+        const rootSet = new Set(roots);
+        const initiallyReady: T[] = [];
+        const available = typeof options.availableTrees === 'function' ? options.availableTrees() : options.availableTrees ?? roots;
+        for (const tree of available) {
+            if (tree.featureId != null) {
+                features.push(tree);
+                if (!rootSet.has(tree) && !options.isDirty?.(tree)) {
+                    initiallyReady.push(tree);
+                }
+                continue;
+            }
+            if (tree.formulaId != null) {
+                continue;
+            }
+            let unitOwners = ownersBySheet.get(tree.unitId);
+            if (!unitOwners) {
+                unitOwners = new Map();
+                ownersBySheet.set(tree.unitId, unitOwners);
+            }
+            let sheetOwners = unitOwners.get(tree.subUnitId);
+            if (!sheetOwners) {
+                sheetOwners = new ObjectMatrix<number>();
+                unitOwners.set(tree.subUnitId, sheetOwners);
+            }
+            const position = sheetOwners.getValue(tree.row, tree.column);
+            if (position == null) {
+                sheetOwners.setValue(tree.row, tree.column, owners.length);
+                owners.push(tree);
+            } else {
+                owners[position] = tree;
+            }
+            const sheet = this._currentConfigService.getUnitData()[tree.unitId]?.[tree.subUnitId];
+            const cached = sheet?.cellData.getValue(tree.row, tree.column)?.v;
+            if (!rootSet.has(tree) && !options.isDirty?.(tree) && cached != null) {
+                initiallyReady.push(tree);
+            }
+        }
+        const resolve = (unit: string, sheet: string, row: number, column: number) => {
+            const sheetOwners = ownersBySheet.get(unit)?.get(sheet);
+            const direct = sheetOwners?.getValue(row, column);
+            if (direct != null) {
+                return owners[direct];
+            }
+            for (const feature of features) {
+                if (feature.featureDirtyRanges?.some((output) => output.unitId === unit && output.sheetId === sheet &&
+                    row >= output.range.startRow && row <= output.range.endRow &&
+                    column >= output.range.startColumn && column <= output.range.endColumn)) {
+                    return feature;
+                }
+            }
+            let owner: T | undefined;
+            const ranges = this._runtimeService.getUnitArrayFormula()[unit]?.[sheet] ??
+                this._currentConfigService.getArrayFormulaRange()[unit]?.[sheet];
+            if (!ranges) {
+                return;
+            }
+            let rangeMatrix = rangeMatrices.get(ranges);
+            if (!rangeMatrix) {
+                rangeMatrix = new ObjectMatrix<IRange>(ranges);
+                rangeMatrices.set(ranges, rangeMatrix);
+            }
+            rangeMatrix.forValue((anchorRow, anchorColumn, range) => {
+                if (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn) {
+                    const position = sheetOwners?.getValue(anchorRow, anchorColumn);
+                    owner = position == null ? undefined : owners[position];
+                    return false;
+                }
+            });
+            return owner;
+        };
+        return { owners, features, initiallyReady, resolve };
+    }
+
+    private async _forEachHybridDemandCalculationTree<T extends IFormulaDemandTree>(
+        trees: T[],
+        demandTrees: T[],
+        visitor: (tree: T, step: IFormulaDemandStep) => Promise<boolean | void>,
+        options: {
+            availableTrees?: readonly T[] | (() => readonly T[]);
+            isDirty?: (tree: T) => boolean;
+            initiallyReady?: readonly T[];
+            demandContext?: IFormulaDemandExecutionContext<T>;
+            ready?: Set<T>;
+        }
+    ): Promise<boolean> {
+        const demandTreeSet = new Set(demandTrees);
+        const executionOrder = trees.slice().reverse();
+        const available = typeof options.availableTrees === 'function' ? options.availableTrees() : options.availableTrees ?? trees;
+        const demandContext = options.demandContext ?? this._createDemandExecutionContext(trees, {
+            availableTrees: available,
+            isDirty: options.isDirty,
+        });
+        const executed = new Set<T>([
+            ...demandContext.initiallyReady,
+            ...(options.initiallyReady ?? []),
+        ]);
+        let ordinarySegment: T[] = [];
+        const visitAndMarkReady = async (tree: T, step: IFormulaDemandStep) => {
+            const result = await visitor(tree, step);
+            if (result !== false && !step.probe) {
+                executed.add(tree);
+            }
+            return result;
+        };
+
+        const runOrdinarySegment = async () => {
+            for (const tree of ordinarySegment) {
+                if (executed.has(tree)) {
+                    continue;
+                }
+                if (await visitAndMarkReady(tree, { preserve: false, iteration: 0, probe: false }) === false) {
+                    return false;
+                }
+            }
+            ordinarySegment = [];
+            return true;
+        };
+
+        for (const tree of executionOrder) {
+            if (!demandTreeSet.has(tree)) {
+                ordinarySegment.push(tree);
+                continue;
+            }
+            if (!await runOrdinarySegment()) {
+                return false;
+            }
+            this._runtimeService.getCalculationCache?.()?.references.clear();
+            const completed = await this._forEachDemandCalculationTree([tree], visitAndMarkReady, {
+                availableTrees: available,
+                demandContext,
+                ready: executed,
+                isDirty: (candidate) => {
+                    if (executed.has(candidate)) {
+                        return false;
+                    }
+                    return options.isDirty?.(candidate) ?? trees.includes(candidate);
+                },
+            });
+            this._runtimeService.getCalculationCache?.()?.references.clear();
+            if (!completed) {
+                return false;
+            }
+            executed.add(tree);
+        }
+
+        return runOrdinarySegment();
     }
 
     constructor(
@@ -463,7 +732,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
         let i = 0;
         const treeCount = treeList.length;
-        for await (const { tree, preserve, iteration } of this._getCalculationSteps(treeList)) {
+        const demandNodes = new WeakMap<IFormulaDependencyTree, ReturnType<typeof generateAstNode>>();
+        const completed = await this._forEachDemandCalculationTree(treeList, async (tree, { preserve, iteration, probe }) => {
             this._runtimeService.setFormulaCycleIndex(iteration);
 
             this._runtimeService.setCurrent(
@@ -511,10 +781,13 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             if (preserve) {
                 this._runtimeService.preserveCurrentCellData();
                 i++;
-                continue;
+                return;
             }
 
             if (getDirtyData != null && tree.featureId != null) {
+                if (probe) {
+                    return;
+                }
                 /**
                  * Execute the dependencies registered by the feature,
                  * and return the dirty area marked by the feature,
@@ -526,48 +799,69 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
                 this._runtimeService.setRuntimeFeatureRange(tree.featureId, dirtyRanges);
             } else {
-                const node = generateAstNode(
-                    tree.unitId,
-                    tree.formula,
-                    this._lexer,
-                    this._astTreeBuilder,
-                    this._currentConfigService,
-                    tree.subUnitId,
-                    tree.column,
-                    tree.row
-                );
+                const demand = getFormulaValueDemand(this._runtimeService.getUnitData());
+                let node = demand ? demandNodes.get(tree) : undefined;
+                if (!node) {
+                    node = generateAstNode(
+                        tree.unitId,
+                        tree.formula,
+                        this._lexer,
+                        this._astTreeBuilder,
+                        this._currentConfigService,
+                        tree.subUnitId,
+                        tree.column,
+                        tree.row
+                    );
+                    if (demand) {
+                        // Dirty registry metadata invalidates the first AST as
+                        // usual. Resuming that same logical evaluation must keep
+                        // its call-site identities and completed samples.
+                        demandNodes.set(tree, node);
+                    }
+                }
                 const nodeData = {
                     node,
                     refOffsetX: tree.refOffsetX,
                     refOffsetY: tree.refOffsetY,
                 };
-                let value: FunctionVariantType;
-
-                if (interpreter.checkAsyncNode(nodeData.node)) {
-                    value = await interpreter.executeAsync(nodeData);
-                } else {
-                    value = interpreter.execute(nodeData);
-                }
-
-                if (this._disposed) {
+                try {
+                    let value: FunctionVariantType;
+                    if (interpreter.checkAsyncNode(nodeData.node)) {
+                        value = await interpreter.executeAsync(nodeData);
+                    } else {
+                        value = interpreter.execute(nodeData);
+                    }
+                    value = this._materializeDemandResult(value);
+                    if (this._runtimeService.isStopExecution()) {
+                        return;
+                    }
+                    if (!probe && tree.formulaId != null) {
+                        this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
+                    } else if (!probe) {
+                        this._runtimeService.setRuntimeData(value);
+                    }
+                } finally {
                     node.resetCalculationState();
-                    return;
                 }
-
-                if (tree.formulaId != null) {
-                    this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
-                } else {
-                    this._runtimeService.setRuntimeData(value);
-                }
-                node.resetCalculationState();
             }
 
-            i++;
-        }
+            if (!probe) {
+                i++;
+            }
+        }, {
+            availableTrees: () => this._formulaDependencyGenerator.getAvailableFormulaTrees?.() ?? treeList,
+            isDirty: (tree) => tree.isDirty,
+        });
 
         // clear all pending tasks
         pendingTasks.forEach((cancel) => cancel());
         pendingTasks = [];
+
+        if (!completed || this._runtimeService.isStopExecution()) {
+            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+            this._runtimeService.markedAsStopFunctionsExecuted();
+            return;
+        }
 
         if (treeCount > 0) {
             this._runtimeService.markedAsSuccessfullyExecuted();

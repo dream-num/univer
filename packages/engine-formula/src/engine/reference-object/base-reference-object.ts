@@ -15,15 +15,6 @@
  */
 
 import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type {
-    IArrayFormulaRangeType,
-    IRuntimeUnitDataType,
-    IUnitData,
-    IUnitSheetNameMap,
-    IUnitStylesData,
-} from '../../basics/common';
-import type { FormulaCalculationCache } from '../../services/formula-cache.service';
-import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import {
     CellValueType,
     DateSystem,
@@ -34,9 +25,19 @@ import {
     moveRangeByOffset,
     ObjectMatrix,
 } from '@univerjs/core';
+import type {
+    IArrayFormulaRangeType,
+    IRuntimeUnitDataType,
+    IUnitData,
+    IUnitSheetNameMap,
+    IUnitStylesData,
+} from '../../basics/common';
+import type { FormulaCalculationCache } from '../../services/formula-cache.service';
+import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
+import { getFormulaValueDemand } from '../utils/formula-value-demand';
 import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -566,6 +567,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellData(row: number, column: number) {
+        getFormulaValueDemand(this._runtimeData)?.readCell(this.getUnitId(), this.getSheetId(), row, column);
         const activeSheetData = this.getCurrentActiveSheetData();
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
@@ -702,11 +704,27 @@ export class BaseReferenceObject extends ObjectClassType {
     toArrayValueObject(useCache: boolean = true): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
+        const requestedCache = useCache;
+        const demand = getFormulaValueDemand(this._runtimeData);
+        // Demand reads must observe dirty producers instead of returning a
+        // range snapshot from an earlier attempt. The demand scope has its
+        // own attempt/frame cache for ranges that were rebuilt in this pass.
+        if (demand) {
+            useCache = false;
+        }
+
         // A cached range can be reused only when its string and formatted-number interpretation matches.
         const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow}_${endRow}_${startColumn}_${endColumn}_${this._dateSystem}`;
 
         const cache = this._checkIfWorksheetMiss() ? undefined : this._calculationCache;
         const array = cache && !cache.closed ? cache.references.get(key) : undefined;
+
+        if (demand && requestedCache) {
+            const demandArray = demand.arrayCache?.get(key);
+            if (demandArray) {
+                return demandArray;
+            }
+        }
 
         if (array && useCache) {
             return array;
@@ -747,7 +765,9 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const arrayValueObject = ArrayValueObject.create(arrayValueObjectData, this._dateSystem).withCalculationCache(this._calculationCache);
 
-        if (useCache && cache && !cache.closed) {
+        if (demand && requestedCache) {
+            demand.arrayCache?.set(key, arrayValueObject);
+        } else if (useCache && cache && !cache.closed) {
             cache.references.set(key, arrayValueObject);
         }
 

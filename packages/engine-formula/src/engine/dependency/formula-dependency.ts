@@ -85,6 +85,7 @@ export function generateRandomDependencyTreeId(dependencyManagerService: IDepend
 }
 
 export interface IFormulaDependencyGenerator {
+    getAvailableFormulaTrees?(): readonly IFormulaDependencyTree[];
     /** Keep structural dirty information available when a calculation is interrupted. */
     finishReferenceContext?(completed: boolean): void;
     generate(isCalculateTreeModel?: boolean): Promise<IFormulaDependencyTree[]>;
@@ -102,6 +103,12 @@ function isEmptyRecord(record: Record<string, unknown> | null | undefined) {
 }
 
 export class FormulaDependencyGenerator extends Disposable implements IFormulaDependencyGenerator {
+    private _availableFormulaTrees = new Map<number, IFormulaDependencyTree>();
+
+    getAvailableFormulaTrees(): readonly IFormulaDependencyTree[] {
+        return Array.from(this._availableFormulaTrees.values());
+    }
+
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     protected _dependencyRTreeCacheForAddressFunction: RTree = new RTree();
@@ -138,6 +145,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
     override dispose(): void {
         super.dispose();
+        this._availableFormulaTrees.clear();
         this._dependencyTreeCache.clear();
 
         this._updateRangeFlattenCache.clear();
@@ -153,10 +161,16 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     private _disposeByUnitId(unitId: string) {
+        for (const [id, tree] of this._availableFormulaTrees) {
+            if (tree.unitId === unitId) {
+                this._availableFormulaTrees.delete(id);
+            }
+        }
         this._astTreeBuilder.cacheService.clearUnit(unitId);
     }
 
     async generate(isCalculateTreeModel = false) {
+        this._availableFormulaTrees.clear();
         this._updateRangeFlatten();
         // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
@@ -232,7 +246,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             );
         }
 
-        this._dependencyTreeCache.clear();
+        this._availableFormulaTrees = this._dependencyTreeCache;
+        this._dependencyTreeCache = new Map();
 
         this._dependencyRTreeCacheForAddressFunction.clear();
 
@@ -645,6 +660,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
     protected _endFormulaDependencyTreeModel() {
         this._formulaDependencyTreeModel.clear();
+        this._availableFormulaTrees.clear();
         this._dependencyTreeCache.clear();
         this._dependencyManagerService.closeKdTree();
     }

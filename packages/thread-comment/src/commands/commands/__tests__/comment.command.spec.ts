@@ -15,8 +15,6 @@
  */
 
 import type { IDocumentBody, Injector, IWorkbookData } from '@univerjs/core';
-import type { CommentUpdate } from '../../../models/thread-comment.model';
-import type { IThreadComment } from '../../../types/interfaces/i-thread-comment';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -27,6 +25,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IUniverThreadCommentConfig } from '../../../config/config';
+import type { CommentUpdate } from '../../../models/thread-comment.model';
+import type { IThreadComment } from '../../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../../models/thread-comment.model';
 import { UniverThreadCommentPlugin } from '../../../plugin';
 import { IThreadCommentDataSourceService } from '../../../services/tc-datasource.service';
@@ -99,9 +100,9 @@ describe('Thread comment commands', () => {
     let commandService: ICommandService;
     let threadCommentModel: ThreadCommentModel;
 
-    beforeEach(() => {
+    function setup(config?: Partial<IUniverThreadCommentConfig>) {
         univer = new Univer();
-        univer.registerPlugin(UniverThreadCommentPlugin);
+        univer.registerPlugin(UniverThreadCommentPlugin, config);
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
 
         const injector = univer.__getInjector();
@@ -111,6 +112,10 @@ describe('Thread comment commands', () => {
 
         commandService = get(ICommandService);
         threadCommentModel = get(ThreadCommentModel);
+    }
+
+    beforeEach(() => {
+        setup();
     });
 
     afterEach(() => {
@@ -748,5 +753,245 @@ describe('Thread comment commands', () => {
             commentId: remoteRoot.id,
         }, { fromChangeset: true });
         expect(threadCommentModel.getThread(remoteRoot.unitId, remoteRoot.subUnitId, remoteRoot.threadId)).toBeUndefined();
+    });
+
+    describe('when edit, delete and resolve are locked', () => {
+        beforeEach(() => {
+            univer.dispose();
+            setup({
+                permissions: {
+                    edit: false,
+                    delete: false,
+                    resolve: false,
+                },
+            });
+        });
+
+        it('refuses update, delete, resolve and tree delete without mutating comments', async () => {
+            const root = createComment({ id: 'locked-root' });
+            const reply = createComment({
+                id: 'locked-reply',
+                parentId: root.id,
+                threadId: root.id,
+                ref: '',
+            });
+            await commandService.executeCommand(AddCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                comment: root,
+            });
+            await commandService.executeCommand(AddCommentCommand.id, {
+                unitId: reply.unitId,
+                subUnitId: reply.subUnitId,
+                comment: reply,
+            });
+            const dataSource = get(IThreadCommentDataSourceService);
+            const updateComment = vi.spyOn(dataSource, 'updateComment');
+            const resolveComment = vi.spyOn(dataSource, 'resolveComment');
+            const deleteComment = vi.spyOn(dataSource, 'deleteComment');
+
+            await expect(commandService.executeCommand(UpdateCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                payload: { commentId: root.id, text: createBody('blocked edit') },
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(ResolveCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                commentId: root.id,
+                resolved: true,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(DeleteCommentCommand.id, {
+                unitId: reply.unitId,
+                subUnitId: reply.subUnitId,
+                commentId: reply.id,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(DeleteCommentTreeCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                commentId: root.id,
+            })).resolves.toBe(false);
+
+            expect(updateComment).not.toHaveBeenCalled();
+            expect(resolveComment).not.toHaveBeenCalled();
+            expect(deleteComment).not.toHaveBeenCalled();
+            expect(threadCommentModel.getComment(root.unitId, root.subUnitId, root.id)).toMatchObject({
+                text: createBody(root.id),
+                resolved: undefined,
+            });
+            expect(threadCommentModel.getComment(reply.unitId, reply.subUnitId, reply.id)?.id).toBe(reply.id);
+        });
+
+        it('still allows replies when only edit and delete are locked', async () => {
+            univer.dispose();
+            setup({
+                permissions: {
+                    edit: false,
+                    delete: false,
+                },
+            });
+            const root = createComment({ id: 'reply-allowed-root' });
+            const reply = createComment({
+                id: 'reply-allowed-child',
+                parentId: root.id,
+                threadId: root.id,
+                ref: '',
+            });
+            await commandService.executeCommand(AddCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                comment: root,
+            });
+
+            await expect(commandService.executeCommand(AddCommentCommand.id, {
+                unitId: reply.unitId,
+                subUnitId: reply.subUnitId,
+                comment: reply,
+            })).resolves.toBe(true);
+            await expect(commandService.executeCommand(UpdateCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                payload: { commentId: root.id, text: createBody('blocked') },
+            })).resolves.toBe(false);
+
+            expect(threadCommentModel.getComment(reply.unitId, reply.subUnitId, reply.id)?.id).toBe(reply.id);
+            expect(threadCommentModel.getComment(root.unitId, root.subUnitId, root.id)?.text).toEqual(createBody(root.id));
+        });
+
+        it('keeps collaboration mutations working while commands stay locked', async () => {
+            const root = createComment({ id: 'collab-root', text: createBody('original') });
+            await commandService.executeCommand(AddCommentCommand.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                comment: root,
+            });
+
+            await expect(commandService.executeCommand(UpdateCommentMutation.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                payload: { commentId: root.id, text: createBody('remote edit') },
+            }, { fromChangeset: true })).resolves.toBe(true);
+            await expect(commandService.executeCommand(ResolveCommentMutation.id, {
+                unitId: root.unitId,
+                subUnitId: root.subUnitId,
+                commentId: root.id,
+                resolved: true,
+            }, { fromChangeset: true })).resolves.toBe(true);
+
+            expect(threadCommentModel.getComment(root.unitId, root.subUnitId, root.id)).toMatchObject({
+                text: createBody('remote edit'),
+                resolved: true,
+            });
+        });
+
+        it('returns false from facade update, delete and resolve while keeping the comment', async () => {
+            const facade = get(ThreadCommentFacadeService);
+            const location = { unitId: 'unit-1', subUnitId: 'sheet-1' };
+            await facade.createCommentAsync({
+                ...location,
+                id: 'facade-locked-root',
+                personId: 'owner',
+                anchor: { kind: ThreadCommentAnchorKind.SLIDE_POSITION, pageId: 'sheet-1', x: 0.25, y: 0.5 },
+                content: 'created',
+            });
+
+            await expect(facade.updateCommentAsync({
+                ...location,
+                commentId: 'facade-locked-root',
+                content: 'updated',
+            })).resolves.toBe(false);
+            await expect(facade.resolveCommentAsync({
+                ...location,
+                commentId: 'facade-locked-root',
+            })).resolves.toBe(false);
+            await expect(facade.deleteCommentAsync({
+                ...location,
+                commentId: 'facade-locked-root',
+                deleteThread: true,
+            })).resolves.toBe(false);
+
+            const [thread] = facade.getComments();
+            expect(thread.root.id).toBe('facade-locked-root');
+            expect(thread.root.text.dataStream).toBe('created\r\n');
+            expect(thread.root.resolved).toBeUndefined();
+        });
+    });
+
+    describe('when permissions are functions', () => {
+        beforeEach(() => {
+            univer.dispose();
+            setup({
+                permissions: {
+                    edit: (comment) => comment.id !== 'locked-edit',
+                    delete: (comment) => comment.id !== 'locked-delete',
+                    resolve: (comment) => comment.id !== 'locked-resolve',
+                    reply: (comment) => comment.parentId !== 'no-reply-root',
+                },
+            });
+        });
+
+        it('refuses only the comments rejected by each callback', async () => {
+            const editable = createComment({ id: 'editable-root' });
+            const lockedEdit = createComment({ id: 'locked-edit' });
+            const lockedDelete = createComment({ id: 'locked-delete' });
+            const lockedResolve = createComment({ id: 'locked-resolve' });
+            const noReplyRoot = createComment({ id: 'no-reply-root' });
+            for (const root of [editable, lockedEdit, lockedDelete, lockedResolve, noReplyRoot]) {
+                await commandService.executeCommand(AddCommentCommand.id, {
+                    unitId: root.unitId,
+                    subUnitId: root.subUnitId,
+                    comment: root,
+                });
+            }
+
+            await expect(commandService.executeCommand(UpdateCommentCommand.id, {
+                unitId: editable.unitId,
+                subUnitId: editable.subUnitId,
+                payload: { commentId: editable.id, text: createBody('ok') },
+            })).resolves.toBe(true);
+            await expect(commandService.executeCommand(UpdateCommentCommand.id, {
+                unitId: lockedEdit.unitId,
+                subUnitId: lockedEdit.subUnitId,
+                payload: { commentId: lockedEdit.id, text: createBody('blocked') },
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(DeleteCommentTreeCommand.id, {
+                unitId: lockedDelete.unitId,
+                subUnitId: lockedDelete.subUnitId,
+                commentId: lockedDelete.id,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(ResolveCommentCommand.id, {
+                unitId: lockedResolve.unitId,
+                subUnitId: lockedResolve.subUnitId,
+                commentId: lockedResolve.id,
+                resolved: true,
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(AddCommentCommand.id, {
+                unitId: noReplyRoot.unitId,
+                subUnitId: noReplyRoot.subUnitId,
+                comment: createComment({
+                    id: 'blocked-reply',
+                    parentId: noReplyRoot.id,
+                    threadId: noReplyRoot.id,
+                    ref: '',
+                }),
+            })).resolves.toBe(false);
+            await expect(commandService.executeCommand(AddCommentCommand.id, {
+                unitId: editable.unitId,
+                subUnitId: editable.subUnitId,
+                comment: createComment({
+                    id: 'allowed-reply',
+                    parentId: editable.id,
+                    threadId: editable.id,
+                    ref: '',
+                }),
+            })).resolves.toBe(true);
+
+            expect(threadCommentModel.getComment(editable.unitId, editable.subUnitId, editable.id)?.text).toEqual(createBody('ok'));
+            expect(threadCommentModel.getComment(lockedEdit.unitId, lockedEdit.subUnitId, lockedEdit.id)?.text).toEqual(createBody(lockedEdit.id));
+            expect(threadCommentModel.getComment(lockedDelete.unitId, lockedDelete.subUnitId, lockedDelete.id)?.id).toBe(lockedDelete.id);
+            expect(threadCommentModel.getComment(lockedResolve.unitId, lockedResolve.subUnitId, lockedResolve.id)?.resolved).toBeUndefined();
+            expect(threadCommentModel.getComment(noReplyRoot.unitId, noReplyRoot.subUnitId, 'blocked-reply')).toBeUndefined();
+            expect(threadCommentModel.getComment(editable.unitId, editable.subUnitId, 'allowed-reply')?.id).toBe('allowed-reply');
+        });
     });
 });

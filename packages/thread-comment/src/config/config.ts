@@ -15,6 +15,9 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
+import type { IThreadCommentPermissions } from '../common/comment-permission';
+
+export type { IThreadCommentPermissions, ThreadCommentPermission } from '../common/comment-permission';
 
 export const THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'thread-comment.config';
 
@@ -22,6 +25,12 @@ export const configSymbol = Symbol(THREAD_COMMENT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverThreadCommentConfig {
     overrides?: DependencyOverride;
+    /**
+     * Controls whether comments can be edited, deleted, resolved, or replied to.
+     * Omitted keys default to `true`, matching the previous unrestricted command behavior.
+     * Commands refuse the matching write when a boolean is `false` or a callback returns `false`.
+     */
+    permissions?: IThreadCommentPermissions;
 }
 
 export const defaultPluginConfig: IUniverThreadCommentConfig = {};

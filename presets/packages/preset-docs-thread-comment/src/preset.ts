@@ -15,10 +15,12 @@
  */
 
 import type { IPreset } from '@univerjs/presets';
+import type { IUniverThreadCommentConfig } from '@univerjs/thread-comment';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 
-export interface IUniverDocsThreadCommentPresetConfig {
+export interface IUniverDocsThreadCommentPresetConfig extends IUniverThreadCommentConfig {
 }
 
 /**
@@ -26,8 +28,10 @@ export interface IUniverDocsThreadCommentPresetConfig {
  *
  * @param {Partial<IUniverDocsThreadCommentPresetConfig>} config - The configuration object.
  */
-export function UniverDocsThreadCommentPreset(_config: Partial<IUniverDocsThreadCommentPresetConfig> = {}): IPreset {
+export function UniverDocsThreadCommentPreset(config: Partial<IUniverDocsThreadCommentPresetConfig> = {}): IPreset {
+    const { permissions, overrides } = config;
     const plugins: IPreset['plugins'] = [
+        [UniverThreadCommentPlugin, { permissions, overrides }],
         UniverThreadCommentUIPlugin,
         UniverDocsThreadCommentUIPlugin,
     ];

@@ -15,7 +15,7 @@
  */
 
 import type { IUser, LocaleType, UniverInstanceType } from '@univerjs/core';
-import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { IAddCommentCommandParams, IThreadComment, IUniverThreadCommentConfig, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     dateKit,
@@ -34,7 +34,9 @@ import {
     DeleteCommentCommand,
     DeleteCommentTreeCommand,
     getDT,
+    isThreadCommentPermissionAllowed,
     ResolveCommentCommand,
+    THREAD_COMMENT_PLUGIN_CONFIG_KEY,
     ThreadCommentModel,
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
@@ -130,6 +132,11 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
+    const threadCommentConfig = useConfigValue<IUniverThreadCommentConfig>(THREAD_COMMENT_PLUGIN_CONFIG_KEY);
+    const canEdit = isThreadCommentPermissionAllowed(threadCommentConfig?.permissions?.edit, item);
+    const canDelete = isThreadCommentPermissionAllowed(threadCommentConfig?.permissions?.delete, item);
+    const canReply = threadCommentConfig?.permissions?.reply !== false;
+    const showMoreActions = isCommentBySelf && !isMock && !resolved && (canEdit || canDelete);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
@@ -205,7 +212,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                             <UserInfo user={userInfo} context={userContext} part="name" />
                         </div>
                         <div>
-                            {(isMock || resolved)
+                            {(isMock || resolved || !canReply)
                                 ? null
                                 : (
                                     showReply && user
@@ -229,7 +236,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         )
                                         : null
                                 )}
-                            {isCommentBySelf && !isMock && !resolved
+                            {showMoreActions
                                 ? (
                                     <DropdownComponent
                                         overlay={(
@@ -248,30 +255,38 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                       rtl:[&_button]:univer-text-right
                                                     `}
                                                 >
-                                                    <li>
-                                                        <button
-                                                            type="button"
-                                                            className={`
-                                                              hover:univer-bg-gray-100
-                                                              dark:hover:!univer-bg-gray-600
-                                                            `}
-                                                            onClick={() => onEditingChange?.(true)}
-                                                        >
-                                                            {localeService.t<LocaleKey>('thread-comment-ui.item.edit')}
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button
-                                                            type="button"
-                                                            className={`
-                                                              hover:univer-bg-gray-100
-                                                              dark:hover:!univer-bg-gray-600
-                                                            `}
-                                                            onClick={handleDeleteItem}
-                                                        >
-                                                            {localeService.t<LocaleKey>('thread-comment-ui.item.delete')}
-                                                        </button>
-                                                    </li>
+                                                    {canEdit
+                                                        ? (
+                                                            <li>
+                                                                <button
+                                                                    type="button"
+                                                                    className={`
+                                                                      hover:univer-bg-gray-100
+                                                                      dark:hover:!univer-bg-gray-600
+                                                                    `}
+                                                                    onClick={() => onEditingChange?.(true)}
+                                                                >
+                                                                    {localeService.t<LocaleKey>('thread-comment-ui.item.edit')}
+                                                                </button>
+                                                            </li>
+                                                        )
+                                                        : null}
+                                                    {canDelete
+                                                        ? (
+                                                            <li>
+                                                                <button
+                                                                    type="button"
+                                                                    className={`
+                                                                      hover:univer-bg-gray-100
+                                                                      dark:hover:!univer-bg-gray-600
+                                                                    `}
+                                                                    onClick={handleDeleteItem}
+                                                                >
+                                                                    {localeService.t<LocaleKey>('thread-comment-ui.item.delete')}
+                                                                </button>
+                                                            </li>
+                                                        )
+                                                        : null}
                                                 </ul>
                                             </div>
                                         )}
@@ -445,6 +460,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const userManagerService = useDependency(UserManagerService);
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
+    const threadCommentConfig = useConfigValue<IUniverThreadCommentConfig>(THREAD_COMMENT_PLUGIN_CONFIG_KEY);
+    const canResolve = comments
+        ? isThreadCommentPermissionAllowed(threadCommentConfig?.permissions?.resolve, comments.root)
+        : false;
+    const canDeleteRoot = comments
+        ? isThreadCommentPermissionAllowed(threadCommentConfig?.permissions?.delete, comments.root)
+        : false;
+    const canReply = threadCommentConfig?.permissions?.reply !== false;
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
     const fallbackEditorId = useMemo(() => generateRandomId(6), []);
     const renderComments: IThreadComment[] = [
@@ -524,7 +547,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     }, [handleMouseLeave]);
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
-    const editorVisible = showEdit && !editingId && !resolved;
+    const editorVisible = showEdit && !editingId && !resolved && (!comments || canReply);
     const title = `${displayRef ?? refStr ?? comments?.root.ref ?? ''}${subUnitName ? ' · ' : ''}${subUnitName}`;
     const resolveLabel = localeService.t<LocaleKey>(resolved
         ? 'thread-comment-ui.item.markUnresolved'
@@ -597,28 +620,32 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         </span>
                     </Tooltip>
                 </div>
-                {!!comments && (
+                {!!comments && (canResolve || (currentUser?.userID === comments.root.personId && canDeleteRoot)) && (
                     <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
-                        <Tooltip title={resolveLabel}>
-                            <button
-                                type="button"
-                                aria-label={resolveLabel}
-                                className={clsx(`
-                                  univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
-                                  univer-justify-center univer-rounded-[3px] univer-border-0 univer-bg-transparent
-                                  univer-p-0 univer-text-base univer-text-inherit
-                                  hover:univer-bg-gray-50
-                                  rtl:univer-ml-0 rtl:univer-mr-1
-                                  dark:hover:!univer-bg-gray-800
-                                `, {
-                                    'univer-text-green-500': resolved,
-                                })}
-                                onClick={handleResolve}
-                            >
-                                {resolved ? <SuccessIcon /> : <SuccessOutlineIcon />}
-                            </button>
-                        </Tooltip>
-                        {currentUser?.userID === comments.root.personId
+                        {canResolve
+                            ? (
+                                <Tooltip title={resolveLabel}>
+                                    <button
+                                        type="button"
+                                        aria-label={resolveLabel}
+                                        className={clsx(`
+                                          univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
+                                          univer-items-center univer-justify-center univer-rounded-[3px] univer-border-0
+                                          univer-bg-transparent univer-p-0 univer-text-base univer-text-inherit
+                                          hover:univer-bg-gray-50
+                                          rtl:univer-ml-0 rtl:univer-mr-1
+                                          dark:hover:!univer-bg-gray-800
+                                        `, {
+                                            'univer-text-green-500': resolved,
+                                        })}
+                                        onClick={handleResolve}
+                                    >
+                                        {resolved ? <SuccessIcon /> : <SuccessOutlineIcon />}
+                                    </button>
+                                </Tooltip>
+                            )
+                            : null}
+                        {currentUser?.userID === comments.root.personId && canDeleteRoot
                             ? (
                                 <Tooltip title={deleteLabel}>
                                     <button

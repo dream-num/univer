@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IConfigService } from '@univerjs/core';
+import type { IThreadCommentPermissions } from '../../common/comment-permission';
+import type { IUniverThreadCommentConfig } from '../../config/config';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload } from '../mutations/comment.mutation';
-import { CommandType, ICommandService } from '@univerjs/core';
+import { isThreadCommentPermissionAllowed } from '../../common/comment-permission';
+import { THREAD_COMMENT_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
 import {
@@ -26,6 +30,15 @@ import {
     ResolveCommentMutation,
     UpdateCommentMutation,
 } from '../mutations/comment.mutation';
+
+function isCommentActionAllowed(
+    accessor: IAccessor,
+    action: keyof IThreadCommentPermissions,
+    comment: IThreadComment
+): boolean {
+    const config = accessor.get(IConfigService).getConfig<IUniverThreadCommentConfig>(THREAD_COMMENT_PLUGIN_CONFIG_KEY);
+    return isThreadCommentPermissionAllowed(config?.permissions?.[action], comment);
+}
 
 type CommentWriteKind = 'resolve' | 'update';
 const latestWriteVersions = new WeakMap<IThreadComment, Record<CommentWriteKind, number>>();
@@ -61,6 +74,9 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         const { comment: originComment } = params;
         const isRoot = !originComment.parentId;
         if (!isRoot && threadCommentModel.getRootComment(params.unitId, params.subUnitId, originComment.threadId)?.id !== originComment.parentId) {
+            return false;
+        }
+        if (!isRoot && !isCommentActionAllowed(accessor, 'reply', originComment)) {
             return false;
         }
         const savedComment = await dataSourceService.addComment(originComment);
@@ -130,6 +146,10 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
             return false;
         }
 
+        if (!isCommentActionAllowed(accessor, 'edit', current)) {
+            return false;
+        }
+
         const { children, ...currentComment } = current;
         const writeVersion = startCommentWrite(current, 'update');
         const success = await dataSourceService.updateComment({
@@ -174,6 +194,10 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         const currentComment = threadCommentModel.getComment(unitId, subUnitId, commentId);
         const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         if (!currentComment) {
+            return false;
+        }
+
+        if (!isCommentActionAllowed(accessor, 'resolve', currentComment)) {
             return false;
         }
 
@@ -228,6 +252,10 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
+        if (!isCommentActionAllowed(accessor, 'delete', comment)) {
+            return false;
+        }
+
         if (!(await dataSourceService.deleteComment(unitId, subUnitId, comment.threadId, commentId))) {
             return false;
         }
@@ -261,6 +289,10 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
 
         const commentWithChildren = threadCommentModel.getCommentWithChildren(unitId, subUnitId, commentId);
         if (!commentWithChildren) {
+            return false;
+        }
+
+        if (!isCommentActionAllowed(accessor, 'delete', commentWithChildren.root)) {
             return false;
         }
 

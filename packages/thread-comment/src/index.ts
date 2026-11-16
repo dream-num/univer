@@ -43,10 +43,13 @@ export type {
     IUpdateCommentPayload,
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
+export { isThreadCommentPermissionAllowed } from './common/comment-permission';
+export type { IThreadCommentPermissions, ThreadCommentPermission } from './common/comment-permission';
 export {
     createThreadCommentResourceHook,
 } from './common/tc-resource';
 export { getDT } from './common/utils';
+export { THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverThreadCommentConfig } from './config/config';
 export { ThreadCommentModel } from './models/thread-comment.model';
 export type { CommentUpdate, IThreadCommentQuery, IThreadInfo } from './models/thread-comment.model';

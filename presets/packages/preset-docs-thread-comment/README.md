@@ -25,9 +25,20 @@ npm install @univerjs/preset-docs-thread-comment
 ```ts
 import { UniverDocsThreadCommentPreset } from '@univerjs/preset-docs-thread-comment';
 
-// Use with createUniver:
-// createUniver({ presets: [UniverDocsThreadCommentPreset()] });
+createUniver({
+  presets: [
+    UniverDocsThreadCommentPreset({
+      permissions: {
+        edit: false,
+        delete: false,
+        resolve: false,
+      },
+    }),
+  ],
+});
 ```
+
+Omit `permissions` to keep editing, deleting, resolving, and replying allowed.
 
 ## Resources
 

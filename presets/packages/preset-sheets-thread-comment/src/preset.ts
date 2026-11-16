@@ -15,15 +15,16 @@
  */
 
 import type { IPreset } from '@univerjs/presets';
+import type { IUniverThreadCommentConfig } from '@univerjs/thread-comment';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-
 import '@univerjs/sheets-thread-comment/facade';
 
 export type * from '@univerjs/sheets-thread-comment/facade';
 
-export interface IUniverSheetsThreadCommentPresetConfig {
+export interface IUniverSheetsThreadCommentPresetConfig extends IUniverThreadCommentConfig {
 }
 
 /**
@@ -31,8 +32,10 @@ export interface IUniverSheetsThreadCommentPresetConfig {
  *
  * @param {Partial<IUniverSheetsThreadCommentPresetConfig>} config - The configuration object.
  */
-export function UniverSheetsThreadCommentPreset(_config: Partial<IUniverSheetsThreadCommentPresetConfig> = {}): IPreset {
+export function UniverSheetsThreadCommentPreset(config: Partial<IUniverSheetsThreadCommentPresetConfig> = {}): IPreset {
+    const { permissions, overrides } = config;
     const plugins: IPreset['plugins'] = [
+        [UniverThreadCommentPlugin, { permissions, overrides }],
         UniverThreadCommentUIPlugin,
         UniverSheetsThreadCommentPlugin,
         UniverSheetsThreadCommentUIPlugin,

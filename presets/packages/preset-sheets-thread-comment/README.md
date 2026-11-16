@@ -25,9 +25,20 @@ npm install @univerjs/preset-sheets-thread-comment
 ```ts
 import { UniverSheetsThreadCommentPreset } from '@univerjs/preset-sheets-thread-comment';
 
-// Use with createUniver:
-// createUniver({ presets: [UniverSheetsThreadCommentPreset()] });
+createUniver({
+  presets: [
+    UniverSheetsThreadCommentPreset({
+      permissions: {
+        edit: false,
+        delete: false,
+        resolve: false,
+      },
+    }),
+  ],
+});
 ```
+
+Omit `permissions` to keep editing, deleting, resolving, and replying allowed. Commands and Facade methods return `false` when a locked action is attempted.
 
 ## Resources
 

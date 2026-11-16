@@ -74,6 +74,24 @@ if (thread) {
 
 `personId` defaults to the current identity in `UserManagerService`. Agent and human identities intentionally share that user-management boundary.
 
+## Locking comment edits
+
+Register `UniverThreadCommentPlugin` before the comment UI plugin so its config is applied. Omitted keys stay allowed, matching the previous command behavior. Boolean `false` locks every comment; a callback can lock selected comments. Commands and Facade methods return `false` and do not emit mutations when an action is locked. The comment panel stays readable and still accepts replies unless `reply` is also locked.
+
+```ts
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+
+univer.registerPlugin(UniverThreadCommentPlugin, {
+  permissions: {
+    edit: false,
+    delete: false,
+    resolve: false,
+  },
+});
+```
+
+With presets, pass the same options to `UniverSheetsThreadCommentPreset` or `UniverDocsThreadCommentPreset`. `updateCommentAsync`, `deleteCommentAsync`, and `resolveCommentAsync` return `false` when the matching permission is locked.
+
 ## Integration Notes
 
 Product-specific packages such as `@univerjs/sheets-thread-comment` and `@univerjs/docs-thread-comment-ui` build on this shared layer.

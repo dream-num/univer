@@ -16,7 +16,7 @@
 
 import type { Dependency, ICommand, IDisposable, IDocumentData, Nullable } from '@univerjs/core';
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
-import type { IThreadComment } from '@univerjs/thread-comment';
+import type { IThreadComment, IThreadCommentPermissions } from '@univerjs/thread-comment';
 import type { IShortcutItem, IUserInfoProps } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
 import {
@@ -55,6 +55,7 @@ import {
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    THREAD_COMMENT_PLUGIN_CONFIG_KEY,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
     UpdateCommentCommand,
@@ -386,7 +387,10 @@ function createComment(overrides: Partial<IThreadComment>): IThreadComment {
     };
 }
 
-function createTreeTestBed(localeDependency: Dependency = [LocaleService, { useClass: TestLocaleService as never }]) {
+function createTreeTestBed(
+    localeDependency: Dependency = [LocaleService, { useClass: TestLocaleService as never }],
+    permissions?: IThreadCommentPermissions
+) {
     const injector = new Injector();
     const dependencies: Dependency[] = [
         [ICommandService, { useClass: CommandService }],
@@ -412,6 +416,9 @@ function createTreeTestBed(localeDependency: Dependency = [LocaleService, { useC
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
     injector.get(LifecycleService).stage = LifecycleStages.Rendered;
     injector.get(UserManagerService).setCurrentUser({ userID: 'owner', name: 'Owner', avatar: 'owner.png' });
+    if (permissions) {
+        injector.get(IConfigService).setConfig(THREAD_COMMENT_PLUGIN_CONFIG_KEY, { permissions });
+    }
 
     const commandService = injector.get(ICommandService);
     [
@@ -928,6 +935,73 @@ describe('ThreadCommentTree', () => {
             commentId: 'root-thread',
         });
         expect(TestState.resolveStates).toEqual([true, false]);
+    });
+
+    it('hides edit, delete and resolve controls when those permissions are locked', async () => {
+        const testBed = createTreeTestBed(undefined, {
+            edit: false,
+            delete: false,
+            resolve: false,
+        });
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.more"]')).toBeNull();
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.markResolved"]')).toBeNull();
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.delete"]')).toBeNull();
+        expect(container.textContent).toContain('root-thread');
+
+        await act(async () => {
+            getRootCommentItem(container!, 'root-thread').dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+            await waitForFrame();
+        });
+
+        expect(getReplyAction(container!, 'root-thread')).toBeDefined();
+    });
+
+    it('keeps the reply editor when only edit and delete are locked', () => {
+        const testBed = createTreeTestBed(undefined, {
+            edit: false,
+            delete: false,
+        });
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.more"]')).toBeNull();
+        expect(getResolveAction(container!, 'root-thread')).toBeDefined();
+        expect(getOnlyEditor(testBed).getEditorId()).toBeTruthy();
+    });
+
+    it('hides only the controls rejected by per-comment permission functions', () => {
+        const testBed = createTreeTestBed(undefined, {
+            edit: (comment) => comment.id !== 'root-thread',
+            delete: (comment) => comment.id !== 'reply-thread',
+            resolve: () => false,
+        });
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
+        testBed.threadCommentModel.addComment(UNIT_ID, SHEET_ID, createComment({
+            id: 'reply-thread',
+            parentId: 'root-thread',
+            threadId: 'root-thread',
+            ref: '',
+        }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.markResolved"]')).toBeNull();
+
+        act(() => getMoreAction(container!, 'root-thread').click());
+        const rootMenu = document.body.querySelector('[data-slot="popover-content"] ul');
+        expect(rootMenu?.textContent).not.toContain('thread-comment-ui.item.edit');
+        expect(rootMenu?.textContent).toContain('thread-comment-ui.item.delete');
     });
 });
 

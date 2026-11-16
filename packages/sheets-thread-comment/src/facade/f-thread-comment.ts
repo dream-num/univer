@@ -442,7 +442,7 @@ export class FThreadComment {
 
     /**
      * Delete the comment and it's replies
-     * @returns {Promise<boolean>} Whether the comment is deleted successfully
+     * @returns {Promise<boolean>} Whether the comment is deleted successfully. Returns `false` when `permissions.delete` on `IUniverThreadCommentConfig` disallows the delete.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -469,7 +469,7 @@ export class FThreadComment {
     /**
      * Update the comment content
      * @param {IDocumentBody | RichTextValue} content The new content of the comment
-     * @returns {Promise<boolean>} Whether the comment is updated successfully
+     * @returns {Promise<boolean>} Whether the comment is updated successfully. Returns `false` when `permissions.edit` on `IUniverThreadCommentConfig` disallows the update.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -516,7 +516,7 @@ export class FThreadComment {
     /**
      * Resolve the comment
      * @param {boolean} [resolved] Whether the comment is resolved
-     * @returns {Promise<boolean>} Set the comment to resolved or not operation result
+     * @returns {Promise<boolean>} Set the comment to resolved or not operation result. Returns `false` when `permissions.resolve` on `IUniverThreadCommentConfig` disallows the change.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -554,7 +554,7 @@ export class FThreadComment {
     /**
      * Reply to the comment
      * @param {FTheadCommentBuilder} comment The comment to reply to
-     * @returns {Promise<boolean>} Whether the comment is replied successfully
+     * @returns {Promise<boolean>} Whether the comment is replied successfully. Returns `false` when `permissions.reply` on `IUniverThreadCommentConfig` disallows the reply.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

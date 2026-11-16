@@ -118,6 +118,29 @@ describe('Test xlookup', () => {
             expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
         });
 
+        it('reads ? and * as ordinary characters in exact match mode', () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const returnArray = ArrayValueObject.create('{1;2;3;4}');
+            const cases: [string, number, number | string][] = [
+                ['a?', 0, 2],
+                ['A?', 0, 2],
+                ['b*', 0, 4],
+                ['c*', 0, 'missing'],
+                ['a?', 2, 1],
+                ['b*', 2, 3],
+            ];
+            for (const [lookup, matchMode, expected] of cases) {
+                const result = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookupArray,
+                    returnArray,
+                    StringValueObject.create('missing'),
+                    NumberValueObject.create(matchMode)
+                );
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
         it('preserves errors returned by a wildcard match', () => {
             const lookupArray = ArrayValueObject.create('{"alpha";"beta"}');
             const returnArray = ArrayValueObject.create('{#DIV/0!;#N/A}');

@@ -20,10 +20,10 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue, isLiteralTextMatch, isWildcard } from '../../../engine/utils/compare';
 import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Xmatch extends BaseFunction {
@@ -160,7 +160,7 @@ export class Xmatch extends BaseFunction {
 
             rowOrColumn = _lookupArray.getRowCount() === 1 ? position.column : position.row;
         } else {
-            const matchObject = _lookupArray.isEqual(lookupValue) as ArrayValueObject;
+            const matchObject = this._exactMatches(_lookupArray, lookupValue);
 
             let position: Nullable<{ row: number; column: number }>;
 
@@ -182,5 +182,16 @@ export class Xmatch extends BaseFunction {
         }
 
         return NumberValueObject.create(rowOrColumn + 1);
+    }
+
+    // Match mode 0 is an exact match: ? and * are ordinary characters. Only match mode 2 reads them as wildcards.
+    private _exactMatches(lookupArray: ArrayValueObject, lookupValue: BaseValueObject): ArrayValueObject {
+        if (!lookupValue.isString() || !isWildcard(String(lookupValue.getValue()))) {
+            return lookupArray.isEqual(lookupValue) as ArrayValueObject;
+        }
+
+        const text = String(lookupValue.getValue());
+
+        return lookupArray.mapValue((item) => BooleanValueObject.create(item.isString() && isLiteralTextMatch(String(item.getValue()), text)));
     }
 }

@@ -40,6 +40,7 @@ export enum FUNCTION_NAMES_LOOKUP {
     ROW = 'ROW',
     ROWS = 'ROWS',
     RTD = 'RTD',
+    SINGLE = 'SINGLE',
     SORT = 'SORT',
     SORTBY = 'SORTBY',
     TAKE = 'TAKE',

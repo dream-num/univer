@@ -235,6 +235,20 @@ export class BaseReferenceObject extends ObjectClassType {
         }
     }
 
+    getImplicitIntersectionValue(row: number, column: number): BaseValueObject {
+        const { startRow, startColumn, endRow, endColumn } = this.getRangePosition();
+        if (startRow === endRow && startColumn === endColumn) {
+            return this.getCellByPosition();
+        }
+        if (startRow === endRow && column >= startColumn && column <= endColumn) {
+            return this.getCellByColumn(column);
+        }
+        if (startColumn === endColumn && row >= startRow && row <= endRow) {
+            return this.getCellByRow(row);
+        }
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     getFirstCell() {
         if (this._checkIfWorksheetMiss()) {
             return ErrorValueObject.create(ErrorType.REF);

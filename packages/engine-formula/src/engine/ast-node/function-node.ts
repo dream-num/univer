@@ -23,6 +23,7 @@ import type {
     FunctionVariantType,
     NodeValueType,
 } from '../reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { DateSystem, Inject, Injector } from '@univerjs/core';
@@ -442,10 +443,20 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
         const referenceObject = variant as BaseReferenceObject;
+        const unitData = this._currentConfigService.getUnitData();
+        if (referenceObject.isMultiArea()) {
+            for (const row of (referenceObject as MultiAreaReferenceObject).getAreas()) {
+                for (const area of row) {
+                    if (area.isReferenceObject() && (area as BaseReferenceObject).getUnitData() !== unitData) {
+                        this._setRefData(area);
+                    }
+                }
+            }
+        }
 
         referenceObject.setForcedSheetId(this._currentConfigService.getSheetNameMap());
 
-        referenceObject.setUnitData(this._currentConfigService.getUnitData());
+        referenceObject.setUnitData(unitData);
 
         referenceObject.setArrayFormulaCellData(this._currentConfigService.getArrayFormulaCellData());
 

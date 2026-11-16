@@ -422,7 +422,7 @@ export class Interpreter extends Disposable {
             if (preserveArray) {
                 return reference.toArrayValueObject();
             }
-            value = this._implicitLazyIfReferenceValue(reference);
+            value = reference.getImplicitIntersectionValue(this._runtimeService.currentRow || 0, this._runtimeService.currentColumn || 0);
         }
 
         if (value.isArray() && !preserveArray) {
@@ -435,27 +435,6 @@ export class Interpreter extends Disposable {
         }
 
         return value;
-    }
-
-    private _implicitLazyIfReferenceValue(reference: BaseReferenceObject): BaseValueObject {
-        const range = reference.getRangePosition();
-        const currentRow = this._runtimeService.currentRow || 0;
-        const currentColumn = this._runtimeService.currentColumn || 0;
-        const { startRow, startColumn, endRow, endColumn } = range;
-
-        if (startRow === endRow && startColumn === endColumn) {
-            return reference.getCellByPosition();
-        }
-
-        if (endRow === startRow && currentColumn >= startColumn && currentColumn <= endColumn) {
-            return reference.getCellByColumn(currentColumn);
-        }
-
-        if (startColumn === endColumn && currentRow >= startRow && currentRow <= endRow) {
-            return reference.getCellByRow(currentRow);
-        }
-
-        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     private _preserveLazyIfSelectedReferenceArray(node: BaseAstNode): boolean {

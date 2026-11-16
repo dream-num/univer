@@ -40,6 +40,7 @@ import { Offset } from './offset';
 import { Row } from './row';
 import { Rows } from './rows';
 // import { Rtd } from './rtd';
+import { Single } from './single';
 import { Sort } from './sort';
 import { Sortby } from './sortby';
 import { Take } from './take';
@@ -81,6 +82,7 @@ export const functionLookup = [
     // [Rtd, FUNCTION_NAMES_LOOKUP.RTD],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
+    [Single, FUNCTION_NAMES_LOOKUP.SINGLE],
     [Sort, FUNCTION_NAMES_LOOKUP.SORT],
     [Sortby, FUNCTION_NAMES_LOOKUP.SORTBY],
     [Take, FUNCTION_NAMES_LOOKUP.TAKE],

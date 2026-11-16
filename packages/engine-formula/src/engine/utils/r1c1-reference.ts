@@ -18,29 +18,21 @@ import type { IRange, IUnitRangeName } from '@univerjs/core';
 import { AbsoluteRefType } from '@univerjs/core';
 import { handleRefStringInfo } from './reference';
 
-const $relativeRegex = /[\[\]]/g;
-
 function handleR1C1(rowOrColumnString: string, current: number) {
-    if ($relativeRegex.test(rowOrColumnString)) {
-        const index = Number(rowOrColumnString.replace($relativeRegex, ''));
-        return current + index;
+    if (rowOrColumnString === '') {
+        return current;
+    }
+    if (rowOrColumnString.startsWith('[')) {
+        return current + Number(rowOrColumnString.slice(1, -1));
     }
 
     return Number(rowOrColumnString) - 1;
 }
 
 function singleReference(refBody: string, currentRow = 0, currentColumn = 0) {
-    refBody = refBody.toLocaleUpperCase();
-
-    const refBodyArray = refBody.split(/[RC]/);
-
-    const rowString = refBodyArray[1];
-
-    const columnString = refBodyArray[2];
-
-    const row = handleR1C1(rowString, currentRow);
-
-    const column = handleR1C1(columnString, currentColumn);
+    const match = /^R(\d*|\[[+-]?\d+\])C(\d*|\[[+-]?\d+\])$/i.exec(refBody);
+    const row = match ? handleR1C1(match[1], currentRow) : Number.NaN;
+    const column = match ? handleR1C1(match[2], currentColumn) : Number.NaN;
 
     return {
         row,

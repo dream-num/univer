@@ -1084,7 +1084,7 @@ export class FormulaDataModel extends Disposable {
                     }
 
                     const rangeCell = cellMatrix.getValue(r, c);
-                    if (rangeCell != null) {
+                    if (rangeCell != null && rangeCell.v !== undefined) {
                         arrayFormulaCellDataMatrix.setValue(r, c, { ...rangeCell });
                     }
                 }

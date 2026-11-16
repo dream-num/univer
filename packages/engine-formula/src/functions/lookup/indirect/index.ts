@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
 import { operatorToken } from '../../../basics/token';
 import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
 import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
@@ -62,7 +64,7 @@ export class Indirect extends BaseFunction {
             return a1;
         }
 
-        let a1Value = this.getZeroOrOneByOneDefault(a1);
+        let a1Value = a1?.isNull() ? 0 : this.getZeroOrOneByOneDefault(a1);
 
         if (a1Value == null) {
             a1Value = 1;
@@ -75,10 +77,13 @@ export class Indirect extends BaseFunction {
             const columnCount = (refText as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
-                // TODO
-                return refText.map(() => {
-                    return ErrorValueObject.create(ErrorType.VALUE);
+                const areas: MultiAreaValue[][] = [];
+                (refText as ArrayValueObject).iterator((cell, row, column) => {
+                    (areas[row] ??= [])[column] = cell
+                        ? this._handleSingleObject(cell, a1Value)
+                        : ErrorValueObject.create(ErrorType.REF);
                 });
+                return new MultiAreaReferenceObject('', areas);
             }
 
             _refText = (refText as ArrayValueObject).getFirstCell();
@@ -88,6 +93,12 @@ export class Indirect extends BaseFunction {
     }
 
     private _handleSingleObject(refTextObject: BaseValueObject, a1Value: number) {
+        if (refTextObject.isError()) {
+            return refTextObject as ErrorValueObject;
+        }
+        if (!refTextObject.isString()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
         const refTextValue = `${refTextObject.getValue()}`;
 
         if (refTextValue.trim() === '') {
@@ -102,9 +113,13 @@ export class Indirect extends BaseFunction {
         const refTextV = this._convertToDefinedName(refTextValue);
 
         if (a1Value === 0) {
-            const gridRange = deserializeRangeForR1C1(refTextV);
+            const gridRange = deserializeRangeForR1C1(refTextV, this.row, this.column);
 
             const { range, sheetName, unitId } = gridRange;
+            if ([range.startRow, range.endRow].some((row) => !Number.isInteger(row) || row < 0 || row >= MAX_ROW_COUNT) ||
+                [range.startColumn, range.endColumn].some((column) => !Number.isInteger(column) || column < 0 || column >= MAX_COLUMN_COUNT)) {
+                return ErrorValueObject.create(ErrorType.REF);
+            }
 
             const rangeReferenceObject = new RangeReferenceObject(range);
 

@@ -96,6 +96,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         return true;
     }
 
+    isArrayOfReferences(): boolean {
+        return this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID;
+    }
+
     override isRange(): boolean {
         // A multi-area reference is not a single rectangle.
         return false;

@@ -33,7 +33,7 @@ import { OleUIService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
@@ -58,16 +58,7 @@ function createControllerHarness(
         dispose: vi.fn(),
         canDispose: () => true,
     };
-    const renderedPosition$ = new BehaviorSubject({
-        startX: 10,
-        startY: 20,
-        endX: 110,
-        endY: 120,
-        width: 100,
-        height: 100,
-        rotate: 0,
-        absolute: { left: false, top: false },
-    });
+    const renderedPosition$ = new Subject<never>();
     let drawingType = initialDrawingType;
     let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
     const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
@@ -173,8 +164,17 @@ describe('DrawingPopupMenuController', () => {
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM', icon: undefined },
         { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart', icon: 'CustomChartIcon' },
         { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart without an icon', icon: undefined },
-    ])('passes the $label popup icon and constrains its placement in RTL', ({ drawingType, icon }) => {
-        const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, getFeatureMenuIcon, injector } = createControllerHarness(drawingType, icon);
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart sheet chart', icon: undefined, sheetType: SheetTypes.CHART },
+    ])('passes the $label popup icon and constrains its placement in RTL', ({ drawingType, icon, sheetType }) => {
+        const {
+            attachPopupToObject,
+            createControl$,
+            drawingObject,
+            getAttachedPopup,
+            getFeatureMenuIcon,
+            injector,
+            renderedPosition$,
+        } = createControllerHarness(drawingType, icon, sheetType);
         const locale = injector.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
@@ -190,7 +190,7 @@ describe('DrawingPopupMenuController', () => {
                 direction: 'left',
                 extraProps: expect.objectContaining({ icon }),
             }),
-            undefined
+            sheetType === SheetTypes.CHART ? renderedPosition$ : undefined
         );
         expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([
             expect.objectContaining({
@@ -198,28 +198,6 @@ describe('DrawingPopupMenuController', () => {
                 label: 'sheets-thread-comment-ui.menu.addComment',
             }),
         ]));
-
-        controller.dispose();
-        injector.dispose();
-    });
-
-    it('uses the drawing rendered position for a chart sheet popup', () => {
-        const {
-            attachPopupToObject,
-            createControl$,
-            drawingObject,
-            injector,
-            renderedPosition$,
-        } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, undefined, SheetTypes.CHART);
-        const controller = injector.get(DrawingPopupMenuController);
-
-        createControl$.next();
-
-        expect(attachPopupToObject).toHaveBeenCalledWith(
-            drawingObject,
-            expect.objectContaining({ constrainToCanvas: true }),
-            renderedPosition$
-        );
 
         controller.dispose();
         injector.dispose();

@@ -48,7 +48,12 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin, WorkbookEditablePermission, WorkbookRenameSheetPermission } from '@univerjs/sheets';
 import { RemoveSheetDrawingCommand, SetSheetDrawingCommand, UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { SheetCanvasPopManagerService, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { FloatingObjectToolbarPosition, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
+import {
+    FloatingObjectToolbarPosition,
+    IMenuManagerService,
+    IMessageService,
+    MenuItemType,
+} from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';

@@ -1312,11 +1312,8 @@ export class ArrayValueObject extends BaseValueObject {
         if (divisor === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
-        // Normalize each term before summing the population variance.
-        const variance = ddof === 0
-            ? squaredDifferences.reduce((sum, difference) => sum + difference / divisor, 0)
-            : squaredDifferences.reduce((sum, difference) => sum + difference, 0) / divisor;
-        return NumberValueObject.create(variance);
+        const sum = squaredDifferences.reduce((total, difference) => total + difference, 0);
+        return NumberValueObject.create(ddof === 0 ? sum * (1 / divisor) : sum / divisor);
     }
 
     /**

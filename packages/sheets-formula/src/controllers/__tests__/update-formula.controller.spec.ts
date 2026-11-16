@@ -1604,6 +1604,7 @@ describe('Grouped dynamic array formulas', () => {
                                 13: { f: '=TYPE(INDEX({1;2},1)+0)' },
                                 14: { f: '=ARRAYTOTEXT(STDEV.P(4,14,16,27,31),1)' },
                                 15: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,TAKE(x,1))),1)' },
+                                16: { f: '=ARRAYTOTEXT(VAR.P(1000000000004,1000000000014,1000000000016,1000000000027,1000000000031),1)' },
                             },
                         },
                     },
@@ -1647,7 +1648,7 @@ describe('Grouped dynamic array formulas', () => {
             await calculate(() => formula.executeCalculation());
             check(9);
             expect(sheet.getRange('F11:G13').getValues()).toEqual([['West', 10], [0, 2], ['Total', 12]]);
-            expect(sheet.getRange('I11:P11').getValues()).toEqual([[
+            expect(sheet.getRange('I11:Q11').getValues()).toEqual([[
                 '{"West",10;,2;"Total",#VALUE!}',
                 64,
                 64,
@@ -1656,6 +1657,7 @@ describe('Grouped dynamic array formulas', () => {
                 64,
                 '{9.64572444143}',
                 '{"West",#VALUE!;,#VALUE!;"Total",#VALUE!}',
+                '{93.0400000005961}',
             ]]);
             await calculate(() => sheet.getRange('C2').setValue(19));
             check(19);

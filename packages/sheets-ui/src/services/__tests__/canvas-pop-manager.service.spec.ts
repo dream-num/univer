@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IRange } from '@univerjs/core';
 import type { IPopup } from '@univerjs/ui';
-import { ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, SheetTypes } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
@@ -27,38 +27,17 @@ import {
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SheetCanvasPopManagerService } from '../canvas-pop-manager.service';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const testInjectors: Injector[] = [];
-const testResizeObservers: TestResizeObserver[] = [];
-
-class TestResizeObserver {
-    constructor(private readonly _callback: ResizeObserverCallback) {
-        testResizeObservers.push(this);
-    }
-
-    observe = vi.fn();
-    unobserve = vi.fn();
-    disconnect = vi.fn();
-
-    emit() {
-        this._callback([], this as never);
-    }
-}
-
-beforeEach(() => {
-    vi.stubGlobal('ResizeObserver', TestResizeObserver);
-});
 
 afterEach(() => {
     testInjectors.forEach((injector) => injector.dispose());
     testInjectors.length = 0;
-    testResizeObservers.length = 0;
-    vi.unstubAllGlobals();
 });
 
 function createEventSubject<T>() {
@@ -214,12 +193,12 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
     } as DOMRect);
 
     const transformChange$ = createEventSubject<unknown>();
-    const sceneTransformChange$ = createEventSubject<unknown>();
     const viewMainScrollAfter$ = createEventSubject<unknown>();
     const viewMainResized$ = new Subject<void>();
     const clientRect$ = new BehaviorSubject({});
     const worksheet = {
         getSheetId: () => 'sheet-1',
+        getConfig: () => ({ type: options?.withoutSkeleton ? SheetTypes.CHART : SheetTypes.GRID }),
         getFreeze: () => ({ startRow: 1, startColumn: 1, xSplit: 0, ySplit: 0 }),
     };
     const workbook = createWorkbook(worksheet);
@@ -267,7 +246,6 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
             getViewport: () => viewport,
-            onTransformChange$: sceneTransformChange$,
         },
         engine: {
             clientRect$,
@@ -310,10 +288,8 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         canvas,
         clientRect$,
         transformChange$,
-        sceneTransformChange$,
         viewMainScrollAfter$,
         viewMainResized$,
-        getLastResizeObserver: () => testResizeObservers[testResizeObservers.length - 1],
         sheetSelectionRenderService,
         viewport,
     };
@@ -393,7 +369,39 @@ describe('SheetCanvasPopManagerService', () => {
         expect(popupService.popups.size).toBe(0);
     });
 
-    it('anchors a drawing popup through the viewport when the active sheet has no grid skeleton', () => {
+    it('keeps grid drawing popup command updates synchronous', () => {
+        const { injector, popupService, commandService, canvas } = createSheetHarness();
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
+            top: 20,
+            left: 30,
+            width: 100,
+            height: 120,
+            right: 130,
+            bottom: 140,
+            x: 30,
+            y: 20,
+            toJSON: () => ({}),
+        } as DOMRect);
+        commandService.emit(SetScrollOperation.id);
+
+        expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
+    });
+
+    it('anchors a chart sheet drawing popup through its viewport without a grid skeleton', () => {
         const { injector, popupService, viewport, viewMainScrollAfter$ } = createSheetHarness({ withoutSkeleton: true });
         const service = injector.get(SheetCanvasPopManagerService);
         const targetObject = {
@@ -426,15 +434,12 @@ describe('SheetCanvasPopManagerService', () => {
         expect(positions[positions.length - 1]).toEqual({ left: 40, right: 120, top: 32, bottom: 92 });
     });
 
-    it('updates a drawing popup after canvas and viewport layout changes finish', async () => {
+    it('updates a chart sheet drawing popup after viewport layout changes finish', async () => {
         const {
             injector,
             popupService,
             canvas,
-            transformChange$,
-            sceneTransformChange$,
             viewMainResized$,
-            getLastResizeObserver,
             viewport,
         } = createSheetHarness({ withoutSkeleton: true });
         const service = injector.get(SheetCanvasPopManagerService);
@@ -462,24 +467,9 @@ describe('SheetCanvasPopManagerService', () => {
             y: 20,
             toJSON: () => ({}),
         } as DOMRect);
-        getLastResizeObserver().emit();
-        await vi.waitFor(() => {
-            expect(positions[positions.length - 1]).toEqual({ left: 50, right: 90, top: 30, bottom: 60 });
-        });
-
         viewport.viewportScrollX = 5;
         viewport.viewportScrollY = 4;
-        transformChange$.emit({});
-        await vi.waitFor(() => {
-            expect(positions[positions.length - 1]).toEqual({ left: 45, right: 85, top: 26, bottom: 56 });
-        });
-
         viewport.absoluteScale = 0.8;
-        sceneTransformChange$.emit({});
-        await vi.waitFor(() => {
-            expect(positions[positions.length - 1]).toEqual({ left: 42, right: 74, top: 24.8, bottom: 48.8 });
-        });
-
         viewMainResized$.subscribe(() => {
             viewport.viewportScrollX = 10;
             viewport.viewportScrollY = 5;

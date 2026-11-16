@@ -44,6 +44,7 @@ import {
     ICommandService,
     Inject,
     IUniverInstanceService,
+    SheetTypes,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -58,7 +59,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, debounceTime, map, merge, Subject, throttleTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -303,43 +304,46 @@ export class SheetCanvasPopManagerService extends Disposable {
         const disposable = new DisposableCollection();
         const updatePosition = () => position$.next(calc());
         const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        const layoutChange$ = new Subject<void>();
 
-        // Chart Sheet presentation updates viewport padding after the resize notification.
-        // Recalculate after the current layout event completes so the popup sees the final transform.
-        disposable.add(merge(
-            currentRender.engine.clientRect$,
-            fromEventSubject(currentRender.engine.onTransformChange$).pipe(throttleTime(16)),
-            fromEventSubject(currentRender.scene.onTransformChange$).pipe(throttleTime(16)),
-            layoutChange$
-        ).pipe(debounceTime(0)).subscribe({
-            next: updatePosition,
-            error: () => {},
-        }));
+        if (skeleton) {
+            disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
+                if (shouldUpdatePosition(commandInfo.id)) {
+                    updatePosition();
+                }
+            }));
 
-        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (shouldUpdatePosition(commandInfo.id)) {
-                layoutChange$.next();
+            if (viewMain) {
+                disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
             }
-        }));
 
-        const canvasResizeObserver = new ResizeObserver(() => layoutChange$.next());
-        canvasResizeObserver.observe(currentRender.engine.getCanvasElement());
-        disposable.add(toDisposable(() => {
-            canvasResizeObserver.disconnect();
-            layoutChange$.complete();
-        }));
-
-        if (viewMain) {
-            disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
-            disposable.add(viewMain.onResized$.subscribe(() => layoutChange$.next()));
+            return {
+                position,
+                position$,
+                disposable,
+            };
         }
+
+        disposable.add(this._observeChartSheetPositionChanges(currentRender, updatePosition));
 
         return {
             position,
             position$,
             disposable,
         };
+    }
+
+    private _observeChartSheetPositionChanges(currentRender: IRender, updatePosition: () => void) {
+        const disposable = new DisposableCollection();
+        const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+        if (viewMain) {
+            disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
+            // Engine and scene transforms both resize the viewport. Chart Sheet presentation then updates its
+            // padding through the same signal, so recalculate once after the complete resize chain settles.
+            disposable.add(viewMain.onResized$.pipe(debounceTime(0)).subscribe(updatePosition));
+        }
+
+        return disposable;
     }
 
     /**
@@ -363,9 +367,9 @@ export class SheetCanvasPopManagerService extends Disposable {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderUnitById(unitId)?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
-
         const currentRender = this._renderManagerService.getRenderUnitById(unitId);
-        if (!currentRender || (!skeleton && !currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN))) {
+        if (!currentRender || (!skeleton && (worksheet.getConfig().type !== SheetTypes.CHART ||
+            !currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)))) {
             return {
                 dispose: () => {
                     // empty

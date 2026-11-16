@@ -18,6 +18,17 @@ import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { DocumentDataModel } from '@univerjs/core';
 import { convertBodyToHtml } from '@univerjs/docs-ui';
 import { describe, expect, it } from 'vitest';
+import {
+    excelLocaleChHtml,
+    excelLocaleFrHtml,
+    excelLocaleFrNbspHtml,
+    excelLocaleTextHtml,
+    excelLocaleUsHtml,
+    excelLocaleUsPlainHtml,
+    excelLocaleViDeHtml,
+    excelLocaleViGeneralHtml,
+    excelLocaleXNumHtml,
+} from '../../__tests__/excel-locale-separator-html';
 import { HtmlToUSMService } from '../converter';
 import { LarkPastePlugin } from '../paste-plugins/plugin-lark';
 import { UniverPastePlugin } from '../paste-plugins/plugin-univer';
@@ -227,5 +238,116 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(0, 0)).toMatchObject({ v: 'Merged', colSpan: 2, rowSpan: 2 });
         expect(cellMatrix.getValue(0, 2)?.v).toBe('Next');
         expect(cellMatrix.getValue(1, 2)?.v).toBe('Below');
+    });
+
+    it('parses numbers pasted from Excel with non-US separators declared via mso-displayed-*-separator', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(excelLocaleViDeHtml);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(516382306730);
+        expect(cellMatrix.getValue(1, 0)?.v).toBe(12.5);
+        expect(cellMatrix.getValue(2, 0)?.v).toBe(1000.5);
+
+        const { cellMatrix: secondMatrix } = converter.convert(excelLocaleUsPlainHtml);
+        expect(secondMatrix.getValue(0, 0)?.v).toBe(1234);
+    });
+
+    it('keeps US number parsing unchanged when Excel declares US separators', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(excelLocaleUsHtml);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(1234.56);
+    });
+
+    it('parses French space and non-breaking-space thousands, Swiss apostrophes, General format, x:num, and text format', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+
+        expect(converter.convert(excelLocaleFrHtml).cellMatrix.getValue(0, 0)?.v).toBe(1000.5);
+        expect(converter.convert(excelLocaleFrNbspHtml).cellMatrix.getValue(0, 0)?.v).toBe(1000.5);
+        expect(converter.convert(excelLocaleChHtml).cellMatrix.getValue(0, 0)?.v).toBe(1234.56);
+        expect(converter.convert(excelLocaleViGeneralHtml).cellMatrix.getValue(0, 0)?.v).toBe(516382306730);
+        expect(converter.convert(excelLocaleXNumHtml).cellMatrix.getValue(0, 0)?.v).toBe(516382306730);
+        expect(converter.convert(excelLocaleTextHtml).cellMatrix.getValue(0, 0)?.v).toBe('516.382.306.730');
+    });
+
+    it('falls back to US parsing when Excel declares the same character for both separators', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html><head><style>
+                table { mso-displayed-decimal-separator:"\\,"; mso-displayed-thousand-separator:"\\,"; }
+                .xl65 { mso-number-format:"\\#\\,\\#\\#0"; }
+            </style></head>
+            <body><table><tr><td class="xl65">1,234</td></tr></table></body></html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(1234);
+    });
+
+    it('ignores an invalid x:num value and parses the displayed locale number', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html><head><style>
+                table { mso-displayed-decimal-separator:"\\,"; mso-displayed-thousand-separator:"\\."; }
+                .xl65 { mso-number-format:"\\#\\,\\#\\#0"; }
+            </style></head>
+            <body><table><tr><td class="xl65" x:num="not-a-number">516.382.306.730</td></tr></table></body></html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(516382306730);
+    });
+
+    it('does not convert a General-format cell that is not entirely a locale number', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html><head><style>
+                table { mso-displayed-decimal-separator:"\\,"; mso-displayed-thousand-separator:"\\."; }
+            </style></head>
+            <body><table>
+                <tr><td></td></tr>
+                <tr><td>id 516.382.306.730</td></tr>
+            </table></body></html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe('');
+        expect(cellMatrix.getValue(1, 0)?.v).toBe('id 516.382.306.730');
+    });
+
+    it('parses locale percent values and parenthesized negatives', () => {
+        const converter = new HtmlToUSMService({
+            getCurrentSkeleton: () => null,
+            getNumfmtParseOptions: () => ({ locale: 'en-US' }),
+        });
+        const { cellMatrix } = converter.convert(`
+            <html><head><style>
+                table { mso-displayed-decimal-separator:"\\,"; mso-displayed-thousand-separator:"\\."; }
+                .xl65 { mso-number-format:"0\\.0%"; }
+                .xl66 { mso-number-format:"\\#\\,\\#\\#0"; }
+            </style></head>
+            <body><table>
+                <tr><td class="xl65">12,5%</td></tr>
+                <tr><td class="xl66">(1.000)</td></tr>
+            </table></body></html>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)?.v).toBe(0.125);
+        expect(cellMatrix.getValue(1, 0)?.v).toBe(-1000);
     });
 });

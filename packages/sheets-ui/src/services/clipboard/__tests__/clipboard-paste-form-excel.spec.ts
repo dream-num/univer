@@ -49,6 +49,16 @@ import {
     excelSample6,
     excelSample7,
 } from './constant';
+import {
+    excelLocaleChHtml,
+    excelLocaleFrHtml,
+    excelLocaleFrNbspHtml,
+    excelLocaleTextHtml,
+    excelLocaleUsHtml,
+    excelLocaleViDeHtml,
+    excelLocaleViGeneralHtml,
+    excelLocaleXNumHtml,
+} from './excel-locale-separator-html';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -492,6 +502,163 @@ describe('Test clipboard', () => {
             expect(cellValues?.[3]?.[0]?.v).toBe(42037);
             expect(cellValues?.[4]?.[0]?.v).toBe(30);
             expect(cellValues?.[5]?.[0]?.v).toBe(1234.57);
+        });
+
+        it('parses Vietnamese/German Excel numbers that use comma decimals and dot thousands', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const res = await sheetClipboardService.legacyPaste(excelLocaleViDeHtml);
+            expect(res).toBeTruthy();
+
+            const cellValues = getValues(0, 0, 2, 0);
+            expect(cellValues?.[0]?.[0]?.v).toBe(516382306730);
+            expect(cellValues?.[0]?.[0]?.t).toBe(CellValueType.NUMBER);
+            expect(cellValues?.[1]?.[0]?.v).toBe(12.5);
+            expect(cellValues?.[1]?.[0]?.t).toBe(CellValueType.NUMBER);
+            expect(cellValues?.[2]?.[0]?.v).toBe(1000.5);
+            expect(cellValues?.[2]?.[0]?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('parses French Excel numbers that use space thousands', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleFrHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(1000.5);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.t).toBe(CellValueType.NUMBER);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleFrNbspHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(1000.5);
+        });
+
+        it('parses Swiss Excel numbers that use apostrophe thousands', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleChHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(1234.56);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('keeps US Excel number parsing unchanged', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleUsHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(1234.56);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('keeps Excel text-formatted cells as text', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleTextHtml)).resolves.toBe(true);
+            const cellValue = getValues(0, 0, 0, 0)?.[0]?.[0];
+            expect(cellValue?.v).toBe('516.382.306.730');
+            expect(cellValue?.t).not.toBe(CellValueType.NUMBER);
+        });
+
+        it('prefers a valid Excel x:num attribute over the displayed locale number', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleXNumHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(516382306730);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.t).toBe(CellValueType.NUMBER);
+        });
+
+        it('parses a General-format Vietnamese Excel number as a numeric cell', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 0,
+                        endColumn: 0,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            await expect(sheetClipboardService.legacyPaste(excelLocaleViGeneralHtml)).resolves.toBe(true);
+            expect(getValues(0, 0, 0, 0)?.[0]?.[0]?.v).toBe(516382306730);
         });
     });
 });

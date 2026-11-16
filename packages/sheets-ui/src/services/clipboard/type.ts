@@ -46,6 +46,7 @@ export interface IParsedCellValueByClipboard {
         v?: string;
     };
     numfmtPattern?: string;
+    parsedNumber?: boolean;
 }
 
 export interface IUniverSheetCopyDataModel {

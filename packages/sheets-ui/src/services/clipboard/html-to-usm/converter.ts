@@ -28,6 +28,7 @@ import {
     getNumfmtParseValueFilter,
     isDefaultFormat,
     isSafeUrl,
+    isTextFormat,
     numfmt,
     ObjectMatrix,
     skipParseTagNames,
@@ -132,6 +133,12 @@ export class HtmlToUSMService {
     // mso-number-format is a css property used in html copied from excel to indicate the cell format, we need to parse it and apply the corresponding format in univer sheet.
     private _msoNumfmtMap = new Map<string, string>();
 
+    // Excel clipboard HTML declares these on the table rule. Defaults are US separators.
+    private _msoDecimalSeparator = '.';
+    private _msoThousandSeparator = ',';
+    private _formatDecimalSeparator = '.';
+    private _formatThousandSeparator = ',';
+
     private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
     private _getNumfmtParseOptions?: () => Parameters<typeof getNumfmtParseValueFilter>[1];
     private _numfmtParseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1];
@@ -145,6 +152,8 @@ export class HtmlToUSMService {
     convert(html: string): IUniverSheetCopyDataModel {
         // This service outlives the active workbook, so resolve locale and date system for every paste operation.
         this._numfmtParseOptions = this._getNumfmtParseOptions?.();
+        this._resetMsoDisplayedSeparators();
+        this._refreshFormatSeparators();
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
@@ -158,6 +167,7 @@ export class HtmlToUSMService {
             // Must read textContent BEFORE shadow DOM moves the element, because browsers discard mso-* properties during CSS parsing.
             const rawStyleText = style.textContent ?? '';
             this._parseMsoNumfmtFromCssText(rawStyleText);
+            this._parseMsoDisplayedSeparators(rawStyleText);
 
             // Excel emits the deprecated `windowtext` system color, which CSSOM may discard with its border declaration.
             // Normalize it before reading cssRules so imported borders retain a stable workbook color.
@@ -318,6 +328,139 @@ export class HtmlToUSMService {
     }
 
     /**
+     * Parse mso-displayed-decimal-separator / mso-displayed-thousand-separator from raw CSS text.
+     * Excel declares these on the `table` rule to describe how displayed numbers were rendered.
+     * Must be called with style.textContent BEFORE the style element is moved into a shadow DOM.
+     */
+    private _parseMsoDisplayedSeparators(rawCssText: string): void {
+        const decimalMatch = rawCssText.match(/mso-displayed-decimal-separator\s*:\s*("(?:[^"\\]|\\.)*"|[^;}]+)/i);
+        const thousandMatch = rawCssText.match(/mso-displayed-thousand-separator\s*:\s*("(?:[^"\\]|\\.)*"|[^;}]+)/i);
+        const decimal = decimalMatch ? normalizeMsoSeparatorValue(decimalMatch[1]) : null;
+        const thousand = thousandMatch ? normalizeMsoSeparatorValue(thousandMatch[1]) : null;
+
+        if (decimal) {
+            this._msoDecimalSeparator = decimal;
+        }
+        if (thousand) {
+            this._msoThousandSeparator = thousand;
+        }
+        if (this._msoDecimalSeparator === this._msoThousandSeparator) {
+            this._resetMsoDisplayedSeparators();
+        }
+    }
+
+    private _resetMsoDisplayedSeparators(): void {
+        this._msoDecimalSeparator = '.';
+        this._msoThousandSeparator = ',';
+    }
+
+    private _hasNonUsDisplayedSeparators(): boolean {
+        return this._msoDecimalSeparator !== '.' || this._msoThousandSeparator !== ',';
+    }
+
+    private _refreshFormatSeparators(): void {
+        this._formatDecimalSeparator = '.';
+        this._formatThousandSeparator = ',';
+        const formatted = numfmt.format('#,##0.0', 1234.5, this._numfmtParseOptions);
+        const match = formatted.match(/^1(.?)234(.?)5$/);
+        if (match?.[1] && match[2]) {
+            this._formatThousandSeparator = match[1];
+            this._formatDecimalSeparator = match[2];
+        }
+    }
+
+    /**
+     * Check that a number extracted from pasted text is consistent with the cell's number format.
+     * When Excel's displayed separators differ from the workbook locale, compare after
+     * normalizing grouping and decimal characters instead of requiring a byte-for-byte match.
+     */
+    private _isNumberTextConsistent(pattern: string, value: number, cellText: string): boolean {
+        const formatted = numfmt.format(pattern, value, this._numfmtParseOptions);
+        if (formatted === cellText) {
+            return true;
+        }
+        if (!this._hasNonUsDisplayedSeparators()) {
+            return false;
+        }
+        return canonicalizeDisplayedNumber(formatted, this._formatDecimalSeparator, this._formatThousandSeparator)
+            === canonicalizeDisplayedNumber(cellText, this._msoDecimalSeparator, this._msoThousandSeparator);
+    }
+
+    private _parseDisplayedNumericCell(cellText: string, pattern: string): { value: number; pattern: string } | null {
+        if (this._hasNonUsDisplayedSeparators()) {
+            const extractedNumber = extractNumber(cellText, this._msoDecimalSeparator, this._msoThousandSeparator);
+            if (
+                extractedNumber !== null
+                && !Number.isNaN(extractedNumber)
+                && this._isNumberTextConsistent(pattern, extractedNumber, cellText)
+            ) {
+                return { value: extractedNumber, pattern };
+            }
+        }
+
+        const parseData = getNumfmtParseValueFilter(cellText, this._numfmtParseOptions);
+
+        if (
+            typeof parseData?.v === 'number'
+            && (
+                parseData.z === pattern
+                || numfmt.format(pattern, parseData.v, this._numfmtParseOptions) === cellText
+            )
+        ) {
+            return { value: parseData.v, pattern };
+        }
+        if (parseData && parseData.z) {
+            return { value: Number(parseData.v), pattern: parseData.z };
+        }
+        if (!parseData) {
+            const extractedNumber = extractNumber(cellText, this._msoDecimalSeparator, this._msoThousandSeparator);
+            if (
+                extractedNumber !== null
+                && !Number.isNaN(extractedNumber)
+                && this._isNumberTextConsistent(pattern, extractedNumber, cellText)
+            ) {
+                return { value: extractedNumber, pattern };
+            }
+        }
+        return null;
+    }
+
+    private _parseExcelNumericCell(
+        cell: HTMLElement,
+        pattern: string | undefined
+    ): { cellText: string; numfmtPattern?: string } | null {
+        if (isTextFormat(pattern)) {
+            return null;
+        }
+
+        const rawNumber = readExcelXNumAttribute(cell);
+        if (rawNumber !== null) {
+            return {
+                cellText: rawNumber.toString(),
+                numfmtPattern: isDefaultFormat(pattern) ? undefined : pattern,
+            };
+        }
+
+        if (isDefaultFormat(pattern)) {
+            return null;
+        }
+
+        let cellText = cell.childElementCount === 0 ? normalizePlainCellText(cell.textContent ?? '') : cell.innerHTML;
+        if (cellText.includes('mso-spacerun:yes')) {
+            cellText = cleanMsoSpaceRun(cellText);
+        }
+
+        const parsed = this._parseDisplayedNumericCell(cellText, pattern);
+        if (!parsed) {
+            return null;
+        }
+        return {
+            cellText: parsed.value.toString(),
+            numfmtPattern: parsed.pattern,
+        };
+    }
+
+    /**
      * Get the mso-number-format value for a given DOM node,
      * following the same priority as _getStyle: class > id > tag.
      */
@@ -468,6 +611,8 @@ export class HtmlToUSMService {
                         },
                     };
                     cellValue.v = Number(cellValue.v);
+                } else if (value.parsedNumber) {
+                    cellValue.v = Number(cellValue.v);
                 }
 
                 valueMatrix.setValue(row, col, cellValue);
@@ -532,43 +677,33 @@ export class HtmlToUSMService {
                 let cellText = '';
                 let cellRichStyle;
                 let numfmtPattern: string | undefined;
+                let parsedNumber = false;
 
                 const pattern = this._getMsoNumfmtForNode(cell as HTMLElement);
-                if (!isDefaultFormat(pattern)) {
-                    cellText = cell.childElementCount === 0 ? normalizePlainCellText(cell.textContent ?? '') : cell.innerHTML;
-                    if (cellText.includes('mso-spacerun:yes')) {
-                        cellText = cleanMsoSpaceRun(cellText);
-                    }
-
-                    const parseData = getNumfmtParseValueFilter(cellText, this._numfmtParseOptions);
-
-                    if (
-                        typeof parseData?.v === 'number' &&
-                        (
-                            parseData.z === pattern ||
-                            numfmt.format(pattern, parseData.v, this._numfmtParseOptions) === cellText
-                        )
-                    ) {
-                        cellText = parseData.v.toString();
-                        numfmtPattern = pattern;
-                    } else if (parseData && parseData.z) {
-                        cellText = parseData.v.toString();
-                        numfmtPattern = parseData.z;
-                    } else if (!parseData) {
-                        const extractedNumber = extractNumber(cellText);
-
-                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && numfmt.format(pattern, extractedNumber, this._numfmtParseOptions) === cellText) {
-                            cellText = extractedNumber.toString();
-                            numfmtPattern = pattern;
-                        }
-                    }
+                const parsedExcelNumber = this._parseExcelNumericCell(cell as HTMLElement, pattern);
+                if (parsedExcelNumber) {
+                    cellText = parsedExcelNumber.cellText;
+                    numfmtPattern = parsedExcelNumber.numfmtPattern;
+                    parsedNumber = true;
                 }
 
-                if (!numfmtPattern) {
+                if (!parsedExcelNumber) {
                     // Determine whether it is rich text based on whether there are html tags
                     const cellTextAndRichText = this._getCellTextAndRichText(cell, cellStyle, skeleton);
                     cellText = cellTextAndRichText.cellText;
                     cellRichStyle = cellTextAndRichText.cellRichStyle;
+
+                    if (!isTextFormat(pattern) && this._hasNonUsDisplayedSeparators() && !cellRichStyle) {
+                        const extractedNumber = extractEntireDisplayedNumber(
+                            cellText,
+                            this._msoDecimalSeparator,
+                            this._msoThousandSeparator
+                        );
+                        if (extractedNumber !== null) {
+                            cellText = extractedNumber.toString();
+                            parsedNumber = true;
+                        }
+                    }
                 }
 
                 const cellValue = {
@@ -582,6 +717,7 @@ export class HtmlToUSMService {
                         v: cellText,
                     },
                     numfmtPattern,
+                    parsedNumber,
                 };
 
                 if (cellMatrix.getValue(rowIndex, colSetValueIndex)) {
@@ -863,6 +999,7 @@ export class HtmlToUSMService {
         this._computedStyleStringCache.clear();
         this._cellStyleDataCache.clear();
         this._msoNumfmtMap.clear();
+        this._resetMsoDisplayedSeparators();
     }
 }
 
@@ -1096,25 +1233,142 @@ function cleanMsoSpaceRun(value: string): string {
         .replace(/\u00A0|&nbsp;/gi, '');
 }
 
-function extractNumber(value: string): number | null {
-    const match = value.match(/\(?-?\d[\d,]*(\.\d+)?%?\)?/);
-    if (!match) return null;
+const SPACE_LIKE_SEPARATORS = new Set([' ', '\u00A0', '\u202F', '\u2009']);
+const SPACE_LIKE_SEPARATOR_RE = /[\u0020\u00A0\u202F\u2009]/g;
 
-    let numStr = match[0];
+/**
+ * Normalize a raw mso-displayed-*-separator CSS value to a single character.
+ * Returns null when the value does not decode to exactly one character.
+ */
+function normalizeMsoSeparatorValue(value: string): string | null {
+    let result = value.trim();
+    if (result.startsWith('"') && result.endsWith('"') && result.length >= 2) {
+        result = result.slice(1, -1);
+    }
+    const decoded = decodeMsoNumberFormat(result);
+    return decoded.length === 1 ? decoded : null;
+}
 
+function escapeRegExpChar(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeSpaceLikeThousands(value: string, thousandSeparator: string): string {
+    if (!SPACE_LIKE_SEPARATORS.has(thousandSeparator)) {
+        return value;
+    }
+    return value.replace(SPACE_LIKE_SEPARATOR_RE, thousandSeparator);
+}
+
+function buildDisplayedNumberPattern(decimalSeparator: string, thousandSeparator: string): RegExp {
+    const decimalPattern = escapeRegExpChar(decimalSeparator);
+    const thousandPattern = escapeRegExpChar(thousandSeparator);
+    return new RegExp(`\\(?-?\\d[\\d${thousandPattern}]*(${decimalPattern}\\d+)?%?\\)?`);
+}
+
+function parseDisplayedNumberMatch(
+    matched: string,
+    decimalSeparator: string,
+    thousandSeparator: string
+): number | null {
+    let numStr = normalizeSpaceLikeThousands(matched, thousandSeparator);
     const isPercent = numStr.includes('%');
 
-    numStr = numStr.replace(/[,%]/g, '');
+    numStr = numStr.split(thousandSeparator).join('').replace(/%/g, '');
+    if (decimalSeparator) {
+        const decimalIndex = numStr.lastIndexOf(decimalSeparator);
+        if (decimalIndex !== -1) {
+            numStr = `${numStr.slice(0, decimalIndex)}.${numStr.slice(decimalIndex + decimalSeparator.length)}`;
+        }
+    }
 
     if (/^\(.*\)$/.test(numStr)) {
         numStr = `-${numStr.slice(1, -1)}`;
     }
 
     let num = Number(numStr);
-
+    if (!Number.isFinite(num)) {
+        return null;
+    }
     if (isPercent) {
         num = num / 100;
     }
-
     return num;
+}
+
+/**
+ * Extract a number from a string that may contain thousand separators, a decimal
+ * separator and a percent sign. Separators default to US conventions and can be
+ * overridden with the values Excel declares via mso-displayed-*-separator.
+ */
+function extractNumber(value: string, decimalSeparator = '.', thousandSeparator = ','): number | null {
+    const text = normalizeSpaceLikeThousands(value, thousandSeparator);
+    const match = text.match(buildDisplayedNumberPattern(decimalSeparator, thousandSeparator));
+    if (!match) {
+        return null;
+    }
+    return parseDisplayedNumberMatch(match[0], decimalSeparator, thousandSeparator);
+}
+
+function extractEntireDisplayedNumber(
+    value: string,
+    decimalSeparator: string,
+    thousandSeparator: string
+): number | null {
+    const trimmed = normalizeSpaceLikeThousands(value.trim(), thousandSeparator);
+    if (!trimmed) {
+        return null;
+    }
+    const match = trimmed.match(buildDisplayedNumberPattern(decimalSeparator, thousandSeparator));
+    if (!match || match[0] !== trimmed) {
+        return null;
+    }
+    return parseDisplayedNumberMatch(match[0], decimalSeparator, thousandSeparator);
+}
+
+function canonicalizeDisplayedNumber(
+    text: string,
+    decimalSeparator: string,
+    thousandSeparator: string
+): string {
+    let result = normalizeSpaceLikeThousands(text.trim(), thousandSeparator);
+    const wrappedNegative = result.startsWith('(') && result.endsWith(')');
+    if (wrappedNegative) {
+        result = result.slice(1, -1);
+    }
+    if (thousandSeparator) {
+        result = result.split(thousandSeparator).join('');
+    }
+    result = result.replace(SPACE_LIKE_SEPARATOR_RE, '');
+    if (decimalSeparator) {
+        const decimalIndex = result.lastIndexOf(decimalSeparator);
+        if (decimalIndex !== -1) {
+            result = `${result.slice(0, decimalIndex)}.${result.slice(decimalIndex + decimalSeparator.length)}`;
+        }
+    }
+    result = result.replace(/ /g, '');
+    return wrappedNegative ? `-${result}` : result;
+}
+
+function readExcelXNumAttribute(cell: Element): number | null {
+    const candidates: Array<string | null> = [
+        cell.getAttribute('x:num'),
+        cell.getAttribute('num'),
+        cell.getAttributeNS?.('urn:schemas-microsoft-com:office:excel', 'num') ?? null,
+    ];
+    for (const attr of cell.getAttributeNames()) {
+        if (attr === 'x:num' || attr.endsWith(':num')) {
+            candidates.push(cell.getAttribute(attr));
+        }
+    }
+    for (const raw of candidates) {
+        if (raw === null || raw === undefined || raw === '') {
+            continue;
+        }
+        const num = Number(raw);
+        if (Number.isFinite(num)) {
+            return num;
+        }
+    }
+    return null;
 }

@@ -69,8 +69,12 @@ export function normalizeTextForComparison(value: string): string {
         : lower;
 }
 
-export function isMatchWildcard(currentValue: string, value: string) {
-    const pattern = escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
+/**
+ * Regular-expression source for a wildcard pattern: `*` matches any text, `?` one
+ * character, and `~` makes the following `*` or `?` literal.
+ */
+export function wildcardPatternSource(value: string): string {
+    return escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
         if (match.startsWith('~')) {
             return `\\${match.substring(1)}`;
         }
@@ -82,7 +86,10 @@ export function isMatchWildcard(currentValue: string, value: string) {
         }
         return match;
     });
-    const regex = new RegExp(`^${pattern}$`, 's');
+}
+
+export function isMatchWildcard(currentValue: string, value: string) {
+    const regex = new RegExp(`^${wildcardPatternSource(value)}$`, 's');
     return regex.test(currentValue);
 }
 

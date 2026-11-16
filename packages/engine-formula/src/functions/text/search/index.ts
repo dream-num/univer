@@ -20,6 +20,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { isWildcard, wildcardPatternSource } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -94,6 +95,12 @@ export class Search extends BaseFunction {
 
         if (findText.isNull() || findTextValue.length === 0) {
             return NumberValueObject.create(startNumValue);
+        }
+
+        if (isWildcard(findTextValue)) {
+            // SEARCH reads ? and * as wildcards and ~ as their escape; FIND does not.
+            const match = new RegExp(wildcardPatternSource(findTextValue), 's').exec(withinTextValue.slice(startNumValue - 1));
+            return match ? NumberValueObject.create(startNumValue + match.index) : ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const result = withinTextValue.indexOf(findTextValue, startNumValue - 1);

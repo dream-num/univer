@@ -138,5 +138,21 @@ describe('Test search function', () => {
                 [1, 4, 6, 8],
             ]);
         });
+
+        it('Matches ? and * as wildcards and ~ as their escape', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['a?c', 'xabc', 1, 2],
+                ['b*d', 'abcde', 1, 2],
+                ['*', 'abc', 2, 2],
+                ['B?D', 'abcbxd', 3, 4],
+                ['~?', 'a?b', 1, 2],
+                ['~*', 'a*b', 1, 2],
+                ['x?z', 'abc', 1, ErrorType.VALUE],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
     });
 });

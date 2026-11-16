@@ -31,7 +31,7 @@ import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
-import { getDocHyperLinkTarget } from '../utils/hyper-link-target';
+import { getDocHyperLinkTarget, getDocHyperLinkTargetLabel } from '../utils/hyper-link-target';
 
 export const DocLinkPopup = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
@@ -57,11 +57,12 @@ export const DocLinkPopup = () => {
     }
 
     const target = getDocHyperLinkTarget(link.properties);
+    const targetLabel = getDocHyperLinkTargetLabel(link.properties, body);
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (
         <HyperlinkPreview
-            title={target}
+            title={targetLabel}
             copyDisabled={!canCopy}
             labels={{ copy: localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy'), edit: localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit'), remove: localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel') }}
             onPointerEnter={() => hyperLinkService.setInfoPopupHovered(true)}

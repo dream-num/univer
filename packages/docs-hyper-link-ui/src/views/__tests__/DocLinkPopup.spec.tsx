@@ -482,7 +482,7 @@ describe('DocLinkPopup', () => {
         root = createRoot(container);
         act(() => root!.render(<RediContext.Provider value={{ injector: currentTestBed!.injector }}><MobileDocLinkPopup /></RediContext.Provider>));
         const open = vi.spyOn(window, 'open').mockReturnValue(null);
-        const target = container.querySelector<HTMLButtonElement>('button[aria-label="#_TocExample"]');
+        const target = container.querySelector<HTMLButtonElement>('button[aria-label="Hello"]');
         const destinations: number[] = [];
         const navigation = selection.refreshSelection$.subscribe((event) => {
             if (event) {

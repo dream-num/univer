@@ -21,6 +21,18 @@ export function getDocHyperLinkTarget(properties?: IHyperlink): string {
     return properties?.url ?? (properties?.bookmarkId ? `#${properties.bookmarkId}` : properties?.headingId ? `#${properties.headingId}` : '');
 }
 
+export function getDocHyperLinkTargetLabel(properties: IHyperlink | undefined, body: IDocumentBody | undefined): string {
+    const target = getDocHyperLinkTarget(properties);
+    if (!target.startsWith('#') || !body) return target;
+    const id = target.slice(1);
+    const bookmark = body.customRanges?.find((range) => range.rangeType === CustomRangeType.BOOKMARK && (range.rangeId === id || range.properties?.bookmarkId === id));
+    const paragraphIndex = body.paragraphs?.findIndex((paragraph) => paragraph.paragraphId === id || paragraph.paragraphStyle?.headingId === id) ?? -1;
+    const start = bookmark?.startIndex ?? (paragraphIndex < 0 ? undefined : paragraphIndex === 0 ? 0 : body.paragraphs![paragraphIndex - 1].startIndex + 1);
+    if (start == null) return target;
+    const end = bookmark && !bookmark.properties?.collapsed ? bookmark.endIndex + 1 : body.paragraphs?.find((paragraph) => paragraph.startIndex >= start)?.startIndex ?? start;
+    return body.dataStream.slice(start, Math.min(end, start + 512)).replace(/[\u0000-\u001F\uFFFC]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) || target;
+}
+
 export function getDocHyperLinkTargetProperties(target: string, body?: IDocumentBody, previous?: IHyperlink): IHyperlink {
     if (!target.startsWith('#')) {
         return { url: target };

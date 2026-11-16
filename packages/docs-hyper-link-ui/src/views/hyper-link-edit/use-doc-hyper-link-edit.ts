@@ -83,7 +83,7 @@ export function useDocHyperLinkEdit() {
                 // eslint-disable-next-line react/set-state-in-effect
                 setLink(getDocHyperLinkTarget(matchedRange.properties));
                 // eslint-disable-next-line react/set-state-in-effect
-                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream));
+                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream).replace(/[\u001F\u001E]/g, ''));
             }
             return;
         }

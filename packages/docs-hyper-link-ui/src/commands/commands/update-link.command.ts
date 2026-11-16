@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
-import { CommandType, CustomRangeType, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, CustomRangeType, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 import { DocHyperLinkCommandId } from '@univerjs/docs-hyper-link';
 import { getDocHyperLinkTargetProperties } from '../../utils/hyper-link-target';
@@ -52,27 +52,28 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
 
         const oldLink = oldBody.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK);
 
-        const textRun = getBodySlice(oldBody, currentSelection.startOffset!, currentSelection.endOffset!).textRuns?.[0];
-        if (textRun) {
+        const original = getBodySlice(oldBody, currentSelection.startOffset!, currentSelection.endOffset!);
+        const unchangedLabel = params.label === BuildTextUtils.transform.getPlainText(original.dataStream).replace(/[\u001F\u001E]/g, '');
+        const textRun = original.textRuns?.[0];
+        if (textRun && !unchangedLabel) {
             textRun.ed = params.label.length + 1;
         }
 
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
-                dataStream: `${params.label}`,
-                customRanges: [{
+                ...(unchangedLabel ? original : { dataStream: params.label, textRuns: textRun ? [textRun] : undefined }),
+                customRanges: [...(unchangedLabel ? original.customRanges?.filter((range) => range.rangeId !== linkId) ?? [] : []), {
                     rangeId: linkId,
                     rangeType: CustomRangeType.HYPERLINK,
                     startIndex: 0,
-                    endIndex: params.label.length + 1,
+                    endIndex: (unchangedLabel ? original.dataStream.length : params.label.length) - 1,
                     properties: {
                         ...getDocHyperLinkTargetProperties(payload, doc.getBody(), oldLink?.properties),
                         ...(oldLink?.properties?.textStyleMode ? { textStyleMode: oldLink.properties.textStyleMode } : null),
                         ...(oldLink?.properties?.textColorMode ? { textColorMode: oldLink.properties.textColorMode } : null),
                     },
                 }],
-                textRuns: textRun ? [textRun] : undefined,
             },
             selection: {
                 startOffset: currentSelection.startOffset!,

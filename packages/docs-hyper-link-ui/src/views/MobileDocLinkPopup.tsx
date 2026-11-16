@@ -31,7 +31,7 @@ import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
-import { getDocHyperLinkTarget } from '../utils/hyper-link-target';
+import { getDocHyperLinkTarget, getDocHyperLinkTargetLabel } from '../utils/hyper-link-target';
 
 export function MobileDocLinkPopup() {
     const commandService = useDependency(ICommandService);
@@ -59,14 +59,15 @@ export function MobileDocLinkPopup() {
     }
 
     const url = getDocHyperLinkTarget(link.properties);
+    const label = getDocHyperLinkTargetLabel(link.properties, body);
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
 
     return (
         <div className="univer-flex univer-flex-col univer-gap-2 univer-py-2">
             <MobileActionRow
-                title={<span className="univer-truncate univer-text-primary-600">{url}</span>}
-                aria-label={url}
+                title={<span className="univer-truncate univer-text-primary-600">{label}</span>}
+                aria-label={label}
                 variant="subtle"
                 onClick={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
             />

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { IWildcardSearchPattern } from '../../../engine/utils/wildcard-search';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { isWildcard, wildcardPatternSource } from '../../../engine/utils/compare';
+import { parseWildcardSearchPattern, searchWildcard } from '../../../engine/utils/wildcard-search';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -49,6 +50,9 @@ export class Search extends BaseFunction {
         const withinTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, withinText, ErrorValueObject.create(ErrorType.NA));
         const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _startNum, ErrorValueObject.create(ErrorType.NA));
 
+        // Each distinct find_text is parsed once per calculation, however many cells use it.
+        const patterns = new Map<string, IWildcardSearchPattern>();
+
         const resultArray = findTextArray.mapValue((findTextObject, rowIndex, columnIndex) => {
             const withinTextObject = withinTextArray.get(rowIndex, columnIndex) as BaseValueObject;
             const startNumObject = startNumArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -65,7 +69,7 @@ export class Search extends BaseFunction {
                 return startNumObject;
             }
 
-            return this._handleSingleObject(findTextObject, withinTextObject, startNumObject);
+            return this._handleSingleObject(findTextObject, withinTextObject, startNumObject, patterns);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -75,9 +79,14 @@ export class Search extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSingleObject(findText: BaseValueObject, withinText: BaseValueObject, startNum: BaseValueObject): BaseValueObject {
-        const findTextValue = getTextValueOfNumberFormat(findText).toLocaleUpperCase();
-        const withinTextValue = getTextValueOfNumberFormat(withinText).toLocaleUpperCase();
+    private _handleSingleObject(
+        findText: BaseValueObject,
+        withinText: BaseValueObject,
+        startNum: BaseValueObject,
+        patterns: Map<string, IWildcardSearchPattern>
+    ): BaseValueObject {
+        const findTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(findText));
+        const withinTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(withinText));
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum);
 
@@ -97,13 +106,15 @@ export class Search extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        if (isWildcard(findTextValue)) {
-            // SEARCH reads ? and * as wildcards and ~ as their escape; FIND does not.
-            const match = new RegExp(wildcardPatternSource(findTextValue), 's').exec(withinTextValue.slice(startNumValue - 1));
-            return match ? NumberValueObject.create(startNumValue + match.index) : ErrorValueObject.create(ErrorType.VALUE);
+        // SEARCH reads ? and * as wildcards and ~ as their escape; FIND does not.
+        let pattern = patterns.get(findTextValue);
+
+        if (!pattern) {
+            pattern = parseWildcardSearchPattern(findTextValue);
+            patterns.set(findTextValue, pattern);
         }
 
-        const result = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        const result = searchWildcard(withinTextValue, pattern, startNumValue - 1);
 
         if (result === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -111,4 +122,26 @@ export class Search extends BaseFunction {
 
         return NumberValueObject.create(result + 1);
     }
+}
+
+/**
+ * Upper-cases text for a case-insensitive search without changing its length, so a match
+ * index is also the position in the original text. A character whose upper case is longer
+ * (ß becomes SS) is kept as it is.
+ */
+function upperCaseKeepingPositions(text: string): string {
+    const upper = text.toLocaleUpperCase();
+
+    if (upper.length === text.length) {
+        return upper;
+    }
+
+    let result = '';
+
+    for (const char of text) {
+        const upperChar = char.toLocaleUpperCase();
+        result += upperChar.length === char.length ? upperChar : char;
+    }
+
+    return result;
 }

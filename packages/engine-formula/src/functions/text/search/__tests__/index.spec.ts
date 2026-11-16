@@ -154,5 +154,27 @@ describe('Test search function', () => {
                 expect(getObjectValue(result)).toStrictEqual(expected);
             }
         });
+
+        it('Returns the earliest match, counted in the original text', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['b*', 'abcb', 1, 2],
+                ['*c', 'abc', 1, 1],
+                ['?B', 'ßB', 1, 1],
+                ['B', 'ßB', 1, 2],
+                ['c', 'ßßc', 3, 3],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
+
+        it('Fails fast on a pattern with several * that does not match', () => {
+            // A backtracking regex takes seconds here; the segment matcher is linear per segment.
+            const started = performance.now();
+            const result = testFunction.calculate(StringValueObject.create('a*a*a*a*b'), StringValueObject.create('a'.repeat(200)), NumberValueObject.create(1));
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            expect(performance.now() - started).toBeLessThan(1000);
+        });
     });
 });

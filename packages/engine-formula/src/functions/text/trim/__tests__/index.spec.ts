@@ -79,5 +79,18 @@ describe('Test trim function', () => {
             const result3 = testFunction.calculate(text3);
             expect(getObjectValue(result3)).toStrictEqual('t est te st');
         });
+
+        it('Removes only the space character (32), as Excel does', () => {
+            // Tabs, line feeds and non-breaking spaces (160) are kept; CLEAN or SUBSTITUTE remove them.
+            const cases: [string, string][] = [
+                ['a\tb', 'a\tb'],
+                ['a\n b', 'a\n b'],
+                ['\u00A0a\u00A0', '\u00A0a\u00A0'],
+                ['  a \t  b  ', 'a \t b'],
+            ];
+            for (const [text, expected] of cases) {
+                expect(getObjectValue(testFunction.calculate(StringValueObject.create(text)))).toStrictEqual(expected);
+            }
+        });
     });
 });

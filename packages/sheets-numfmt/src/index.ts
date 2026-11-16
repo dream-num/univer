@@ -16,9 +16,7 @@
 
 export {
     getCurrencyFormat,
-    getCurrencySymbolByLocale,
     getCurrencySymbolIconByLocale,
-    localeCurrencySymbolMap,
 } from './base/const/currency-symbols';
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';

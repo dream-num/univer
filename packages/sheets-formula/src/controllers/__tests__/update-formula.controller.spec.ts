@@ -1592,7 +1592,7 @@ describe('Grouped dynamic array formulas', () => {
                             2: { 0: { v: 'East' }, 1: { v: 2024 }, 2: { v: 3 } },
                             3: { 0: { v: 'West' }, 1: { v: 2024 }, 2: { v: 10 } },
                             4: { 0: { v: 'East' }, 1: { v: 2025 }, 2: { v: 4 } },
-                            7: { 5: { v: 10 }, 6: { v: 'West' } },
+                            7: { 5: { v: 10 }, 6: { v: 'West' }, 7: { v: 'F8' } },
                             8: { 5: { v: 2 } },
                             10: {
                                 5: { f: '=GROUPBY(G8:G9,F8:F9,SUM)' },
@@ -1605,6 +1605,16 @@ describe('Grouped dynamic array formulas', () => {
                                 14: { f: '=ARRAYTOTEXT(STDEV.P(4,14,16,27,31),1)' },
                                 15: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,TAKE(x,1))),1)' },
                                 16: { f: '=ARRAYTOTEXT(VAR.P(1000000000004,1000000000014,1000000000016,1000000000027,1000000000031),1)' },
+                                17: { f: '=ISREF(DROP(F8:F9,1))' },
+                                18: { f: '=ISREF(INDIRECT({"F8"}))' },
+                                19: { f: '=ISREF(INDIRECT(ADDRESS(8,6)))' },
+                                20: { f: '=TYPE(DROP({1;2},1))' },
+                                21: { f: '=TRUNC(-3.59,2)' },
+                            },
+                            14: {
+                                5: { f: '=SUM(DROP(F8:F9,1))' },
+                                6: { f: '=ISREF(INDIRECT(H8))' },
+                                7: { f: '=ADDRESS(2,3,H9,TRUE)' },
                             },
                         },
                     },
@@ -1673,6 +1683,16 @@ describe('Grouped dynamic array formulas', () => {
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             check(9);
             expect(sheet.getRange('L1:L4').getValues()).toEqual([[null], [null], [null], [null]]);
+            expect(sheet.getRange('R11:V11').getValues()).toEqual([[1, 0, 1, 64, -3.59]]);
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('H15').getValue()).toBe('#VALUE!');
+            await calculate(() => sheet.getRange('F9').setValue(7));
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[7, 1]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            await calculate(() => sheet.getRange('H8').setValue('invalid'));
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 0]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
         } finally {
             univer.dispose();
         }

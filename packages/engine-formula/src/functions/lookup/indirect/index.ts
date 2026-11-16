@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -51,11 +51,16 @@ export class Indirect extends BaseFunction {
 
     override needsUnitReferenceResolver = true;
 
+    override needsReferenceObject = true;
+
     override isAddress() {
         return true;
     }
 
-    override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
+    override calculate(refTextInput: FunctionVariantType, a1Input?: FunctionVariantType) {
+        const isReference = refTextInput.isReferenceObject();
+        const refText = isReference ? (refTextInput as BaseReferenceObject).toArrayValueObject() : refTextInput as BaseValueObject;
+        const a1 = a1Input?.isReferenceObject() ? (a1Input as BaseReferenceObject).toArrayValueObject() : a1Input as BaseValueObject | undefined;
         if (refText.isError()) {
             return refText;
         }
@@ -76,7 +81,11 @@ export class Indirect extends BaseFunction {
             const rowCount = (refText as ArrayValueObject).getRowCount();
             const columnCount = (refText as ArrayValueObject).getColumnCount();
 
-            if (rowCount > 1 || columnCount > 1) {
+            const first = (refText as ArrayValueObject).getFirstCell();
+            if (rowCount === 1 && columnCount === 1 && first.isError()) {
+                return first;
+            }
+            if (!isReference || rowCount > 1 || columnCount > 1) {
                 const areas: MultiAreaValue[][] = [];
                 (refText as ArrayValueObject).iterator((cell, row, column) => {
                     (areas[row] ??= [])[column] = cell
@@ -86,7 +95,7 @@ export class Indirect extends BaseFunction {
                 return new MultiAreaReferenceObject('', areas);
             }
 
-            _refText = (refText as ArrayValueObject).getFirstCell();
+            _refText = first;
         }
 
         return this._handleSingleObject(_refText, a1Value);

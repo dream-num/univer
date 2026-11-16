@@ -92,7 +92,7 @@ export class RankEq extends BaseFunction {
             const numberValue = +numberObject.getValue();
             const orderValue = +orderObject.getValue();
 
-            if (Number.isNaN(numberValue) || Number.isNaN(orderValue)) {
+            if (orderObject.isString() || Number.isNaN(numberValue) || Number.isNaN(orderValue)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 

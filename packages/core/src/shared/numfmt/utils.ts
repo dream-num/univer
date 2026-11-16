@@ -240,7 +240,10 @@ export const getNumfmtParseValueFilter = (value: string, options: ParseOptions =
         if (z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
-            const normalized = value.replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim();
+            // Parenthesised negatives put the currency symbol after '(',
+            // e.g. "($1,000)", so strip the parens before validating the
+            // grouping, otherwise the check rejects a well-formed value.
+            const normalized = value.replace(/[()]/g, '').replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim();
 
             if (normalized.includes(',')) {
                 const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);

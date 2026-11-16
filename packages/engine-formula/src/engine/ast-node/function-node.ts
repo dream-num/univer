@@ -25,7 +25,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { DateSystem, Inject, Injector } from '@univerjs/core';
+import { BooleanNumber, DateSystem, FormulaType, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
@@ -225,7 +225,11 @@ export class FunctionNode extends BaseAstNode {
         }
 
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
-        if (getFixedArrayResultRange(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)) {
+        const anchor = this._currentConfigService.getUnitData()[currentUnitId]?.[currentSubUnitId]?.cellData.getValue(currentRow, currentColumn);
+        if (
+            (anchor?.ft === FormulaType.ARRAY && anchor.fd === BooleanNumber.TRUE) ||
+            getFixedArrayResultRange(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)
+        ) {
             return result;
         }
 

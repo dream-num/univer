@@ -1189,7 +1189,18 @@ describe('UpdateFormulaController spill cache integration', () => {
                             25: { f: '=ANCHORARRAY(Y1)' },
                         },
                         1: { 18: { f: '=ANCHORARRAY(B2)' }, 24: { v: 7, t: CellValueType.NUMBER } },
-                        8: { 1: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'B9:D10', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE } },
+                        8: {
+                            1: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'B9:D10', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            5: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'F9:G9', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            10: { f: '=LINEST({2;4;6}*A1,{1;2;3})' },
+                        },
+                        12: {
+                            0: { v: 5, t: CellValueType.NUMBER },
+                            1: { f: '=A1' },
+                            3: { f: "=SUM(Sheet1!$A$13:$A$14:'Sheet1'!$C$15)" },
+                            4: { f: '=ISREF((Sheet1!$A$13:$A$14 Sheet1!$C$13:$C$14))' },
+                        },
+                        14: { 2: { v: 2, t: CellValueType.NUMBER } },
                     },
                 },
             },
@@ -1227,6 +1238,10 @@ describe('UpdateFormulaController spill cache integration', () => {
             expect(sheet.getRange('M1:N3').getValues()).toEqual([[input, 2 * input], [input, 2 * input], [input, 2 * input]]);
             expect(sheet.getRange('P1:Q3').getValues()).toEqual([[input, input], [2 * input, 2 * input], ['#N/A', '#N/A']]);
             expect(sheet.getRange('B9:D10').getValues()).toEqual([[2 * input, 0, '#N/A'], [2 * input, 0, '#N/A']]);
+            expect(sheet.getRange('F9:G9').getValues()).toEqual([[2 * input, 0]]);
+            expect(sheet.getRange('K9:L9').getValues()).toEqual([[2 * input, null]]);
+            expect(sheet.getRange('D13').getValue()).toBe(input + 7);
+            expect(sheet.getRange('E13').getValue()).toBe(0);
             expect(sheet.getRange('S1:S2').getValues()).toEqual([['#REF!'], ['#REF!']]);
             const sum = input * (input + 1) / 2;
             expect(sheet.getRange('U1').getValue()).toBe(sum);

@@ -15,14 +15,15 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
 import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { CellValueType } from '@univerjs/core';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
+import { RangeReferenceObject } from '../reference-object/range-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -36,6 +37,7 @@ import {
     findCompareToken,
     valueObjectCompare,
 } from './object-compare';
+import { copyReferenceContext } from './three-dimensional-reference';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -878,6 +880,8 @@ export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, 
     let referenceObject: FunctionVariantType;
     if (variant1.isCell() && variant2.isCell()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+    } else if ((variant1.isCell() || variant1.isRange()) && (variant2.isCell() || variant2.isRange())) {
+        referenceObject = mergeRectangularReferences(variant1, variant2);
     } else if (variant1.isRow() && variant2.isRow()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
     } else if (variant1.isColumn() && variant2.isColumn()) {
@@ -886,4 +890,31 @@ export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, 
         referenceObject = ErrorValueObject.create(ErrorType.NAME);
     }
     return referenceObject;
+}
+
+function mergeRectangularReferences(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
+    const first = variant1.getRangePosition();
+    const last = variant2.getRangePosition();
+    const firstUnit = variant1.getForcedUnitId();
+    const lastUnit = variant2.getForcedUnitId();
+    const firstSheet = variant1.getForcedSheetId();
+    const lastSheet = variant2.getForcedSheetId();
+    if ((variant1.getForcedSheetName() && !firstSheet) || (variant2.getForcedSheetName() && !lastSheet)) {
+        return ErrorValueObject.create(ErrorType.NAME);
+    }
+    if ((firstUnit && lastUnit && firstUnit !== lastUnit) || (firstSheet && lastSheet && firstSheet !== lastSheet)) {
+        return ErrorValueObject.create(ErrorType.REF);
+    }
+
+    const source = variant1.getForcedSheetName() ? variant1 : variant2;
+    const range = new RangeReferenceObject({
+        startRow: Math.min(first.startRow, last.startRow),
+        endRow: Math.max(first.endRow, last.endRow),
+        startColumn: Math.min(first.startColumn, last.startColumn),
+        endColumn: Math.max(first.endColumn, last.endColumn),
+    }, firstSheet || lastSheet, firstUnit || lastUnit);
+    copyReferenceContext(source, range);
+    range.setForcedSheetName(source.getForcedSheetName());
+    range.setRefOffset(0, 0);
+    return range;
 }

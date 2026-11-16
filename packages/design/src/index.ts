@@ -114,6 +114,8 @@ export { RadioGroup } from './components/radio-group/RadioGroup';
 export type { IRadioGroupProps } from './components/radio-group/RadioGroup';
 export { Radio } from './components/radio/Radio';
 export type { IRadioProps } from './components/radio/Radio';
+export { ResizeHandle } from './components/resize-handle/ResizeHandle';
+export type { IResizeHandleProps } from './components/resize-handle/ResizeHandle';
 export { Segmented } from './components/segmented/Segmented';
 export { SelectList } from './components/select-list/SelectList';
 export type { ISelectListProps } from './components/select-list/SelectList';
@@ -155,11 +157,12 @@ export {
 export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
+
 export {
     resolveMobileKeyboardViewportLayout,
     revealFocusedElementInMobileViewport,
     useMobileKeyboardViewportLayout,
 } from './hooks/use-mobile-keyboard-viewport';
-export type { IMobileKeyboardViewportLayout } from './hooks/use-mobile-keyboard-viewport';
 
+export type { IMobileKeyboardViewportLayout } from './hooks/use-mobile-keyboard-viewport';
 export { cva } from 'class-variance-authority';

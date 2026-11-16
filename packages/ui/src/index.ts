@@ -28,6 +28,7 @@ export type { ITableSize, ITableSizePickerProps } from './components/table-size-
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
 export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { inheritUserInfoComponent } from './controllers/components.controller';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,
@@ -205,8 +206,10 @@ export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport 
 
 export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export type { INotificationOptions } from './views/notification/Notification';
-export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 
+export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 export { ProgressBar } from './views/progress-bar/ProgressBar';
+export { DefaultUserInfo, USER_INFO_COMPONENT, UserInfo } from './views/user-info/UserInfo';
+export type { IUserInfoContext, IUserInfoData, IUserInfoProps } from './views/user-info/UserInfo';

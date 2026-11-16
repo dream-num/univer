@@ -56,7 +56,7 @@ import {
     UpdateCommentCommand,
     UpdateCommentMutation,
 } from '@univerjs/thread-comment';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -373,6 +373,7 @@ function createPanelTestBed() {
         [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
         [LifecycleService],
         [UserManagerService],
+        [ComponentManager],
         [ThreadCommentModel],
         [ThreadCommentPanelService],
     ];

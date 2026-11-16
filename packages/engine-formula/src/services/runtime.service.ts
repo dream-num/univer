@@ -48,6 +48,7 @@ import {
 import { CLEAR_IMPORTED_SPILL_CELL } from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
+import { expandArrayValueObject, getFixedArrayResultRange } from '../engine/utils/array-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
@@ -672,7 +673,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     // eslint-disable-next-line max-lines-per-function
-    setRuntimeData(functionVariant: FunctionVariantType) {
+    setRuntimeData(formulaResult: FunctionVariantType) {
         if (this._disposed) {
             return;
         }
@@ -693,6 +694,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const columnCount = this.currentColumnCount;
         const sheetId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
+
+        const functionVariant = this._fitFixedArrayResult(formulaResult, rowCount, columnCount);
 
         // Get current sheet data
         if (this._runtimeData[unitId] == null) {
@@ -932,6 +935,18 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             clearArrayUnitData.setValue(row, column, valueObject);
         }
+    }
+
+    private _fitFixedArrayResult(result: FunctionVariantType, rowCount: number, columnCount: number): FunctionVariantType {
+        const row = this._currentRow;
+        const column = this._currentColumn;
+        const declared = getFixedArrayResultRange(this._currentConfigService, this._currentUnitId, this._currentSubUnitId, row, column);
+        if (!declared || this._checkIfArrayFormulaExceeded(rowCount, columnCount, declared)) {
+            return result;
+        }
+
+        const value = result.isReferenceObject() ? (result as BaseReferenceObject).toArrayValueObject() : result as BaseValueObject;
+        return expandArrayValueObject(declared.endRow - row + 1, declared.endColumn - column + 1, value, ErrorValueObject.create(ErrorType.NA));
     }
 
     private _getValueObjectOfRuntimeData(variant: Nullable<BaseValueObject>): Nullable<ICellData> {

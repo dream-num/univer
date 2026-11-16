@@ -16,7 +16,7 @@
 
 import type { Dependency, ICellData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CellValueType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, FormulaType, ICommandService, IConfigService, IUniverInstanceService, LocaleType, LogLevel, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import {
     FormulaDataModel,
@@ -1158,6 +1158,95 @@ describe('UpdateFormulaController', () => {
 });
 
 describe('UpdateFormulaController spill cache integration', () => {
+    it('recalculates imported spill references and fixed arrays without cached values', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const facade = FUniver.newAPI(univer);
+        const workbook = facade.createWorkbook({
+            id: 'imported-array-results',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sheet1',
+                    rowCount: 20,
+                    columnCount: 26,
+                    cellData: {
+                        0: {
+                            0: { v: 3, t: CellValueType.NUMBER },
+                            1: { f: '=SEQUENCE(A1)', ref: 'B1:B3', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            3: { f: '=ANCHORARRAY(B1)', ref: 'D1:D3', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            5: { f: '=SUM(A1,1)', ref: 'F1:G2', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            8: { f: '={1,2;3,4}*A1', ref: 'I1:K3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            12: { f: '={1,2}*A1', ref: 'M1:N3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            15: { f: '={1;2}*A1', ref: 'P1:Q3', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE },
+                            18: { f: '=ANCHORARRAY(A1)' },
+                            20: { f: '=SUM(ANCHORARRAY(B1))' },
+                            22: { f: '=ANCHORARRAY(U1)' },
+                            24: { f: '=SEQUENCE(2)' },
+                            25: { f: '=ANCHORARRAY(Y1)' },
+                        },
+                        1: { 18: { f: '=ANCHORARRAY(B2)' }, 24: { v: 7, t: CellValueType.NUMBER } },
+                        8: { 1: { f: '=LINEST({2;4;6}*A1,{1;2;3})', ref: 'B9:D10', ft: FormulaType.ARRAY, fd: BooleanNumber.FALSE } },
+                    },
+                },
+            },
+        });
+        const calculator = facade.getFormula();
+        const sheet = workbook.getActiveSheet();
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(workbook.getId());
+        const commands = injector.get(ICommandService);
+        const calculate = async (action: () => unknown) => {
+            let subscription: { dispose(): void } | undefined;
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const completed = new Promise<void>((resolve, reject) => {
+                subscription = calculator.calculationEnd(() => resolve());
+                timer = setTimeout(() => reject(new Error('Imported array calculation timed out')), 5000);
+            });
+            try {
+                action();
+                await completed;
+            } finally {
+                clearTimeout(timer);
+                subscription?.dispose();
+            }
+        };
+        function expectExcelValues(input: number) {
+            const spill = [[1], [input >= 2 ? 2 : null], [input === 3 ? 3 : null]];
+            expect(sheet.getRange('B1:B3').getValues()).toEqual(spill);
+            expect(sheet.getRange('D1:D3').getValues()).toEqual(spill);
+            expect(sheet.getRange('F1:G2').getValues()).toEqual([[input + 1, input + 1], [input + 1, input + 1]]);
+            expect(sheet.getRange('I1:K3').getValues()).toEqual([
+                [input, 2 * input, '#N/A'],
+                [3 * input, 4 * input, '#N/A'],
+                ['#N/A', '#N/A', '#N/A'],
+            ]);
+            expect(sheet.getRange('M1:N3').getValues()).toEqual([[input, 2 * input], [input, 2 * input], [input, 2 * input]]);
+            expect(sheet.getRange('P1:Q3').getValues()).toEqual([[input, input], [2 * input, 2 * input], ['#N/A', '#N/A']]);
+            expect(sheet.getRange('B9:D10').getValues()).toEqual([[2 * input, 0, '#N/A'], [2 * input, 0, '#N/A']]);
+            expect(sheet.getRange('S1:S2').getValues()).toEqual([['#REF!'], ['#REF!']]);
+            const sum = input * (input + 1) / 2;
+            expect(sheet.getRange('U1').getValue()).toBe(sum);
+            expect(sheet.getRange('W1').getValue()).toBe(sum);
+            expect(sheet.getRange('Y1:Z1').getValues()).toEqual([['#SPILL!', '#SPILL!']]);
+        }
+        try {
+            await calculate(() => calculator.executeCalculation());
+            expectExcelValues(3);
+            await calculate(() => sheet.getRange('A1').setValue(2));
+            expectExcelValues(2);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expectExcelValues(3);
+            await calculate(() => sheet.getRange('A1').setValue(1));
+            expectExcelValues(1);
+        } finally {
+            univer.dispose();
+        }
+    });
+
     it('keeps an imported FILTER spill editable after shrinking and undoing', async () => {
         const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
         univer.registerPlugin(UniverSheetsPlugin);

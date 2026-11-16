@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { DateSystem, Inject, Injector } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
@@ -26,6 +25,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
@@ -37,6 +37,7 @@ import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
+import { getFixedArrayResultRange } from '../utils/array-object';
 import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -220,6 +221,11 @@ export class FunctionNode extends BaseAstNode {
             this._runtimeService.hasFunctionRefInfoOverride() &&
             (this._runtimeService.currentRowCount > 1 || this._runtimeService.currentColumnCount > 1)
         ) {
+            return result;
+        }
+
+        const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
+        if (getFixedArrayResultRange(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)) {
             return result;
         }
 

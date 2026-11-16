@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { isFormulaId, isFormulaString } from '@univerjs/core';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Anchorarray extends BaseFunction {
@@ -25,6 +28,34 @@ export class Anchorarray extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(reference: FunctionVariantType) {
-        return reference;
+        if (reference.isError()) {
+            return reference;
+        }
+        if (!reference.isReferenceObject()) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const anchor = reference as BaseReferenceObject;
+        const { startRow, startColumn, endRow, endColumn } = anchor.getRangePosition();
+        if (startRow !== endRow || startColumn !== endColumn || (anchor.getForcedSheetName() && !anchor.getForcedSheetId())) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const range = this._getSpillRange(anchor, startRow, startColumn);
+        if (range != null && anchor.getCellData(startRow, startColumn)?.v !== ErrorType.SPILL) {
+            return this.createReferenceObject(anchor, range);
+        }
+
+        const source = anchor.getCurrentActiveSheetData()?.cellData.getValue(startRow, startColumn);
+        return isFormulaString(source?.f) || isFormulaId(source?.si) ? anchor : ErrorValueObject.create(ErrorType.REF);
+    }
+
+    private _getSpillRange(anchor: BaseReferenceObject, row: number, column: number) {
+        const current = anchor.getCurrentRuntimeActiveArrayFormulaRange()?.[row]?.[column];
+        // An anchor already recalculated as a scalar must not reuse its old spill extent.
+        if (current || anchor.getCurrentRuntimeSheetData()?.getValue(row, column) != null) {
+            return current;
+        }
+        return anchor.getCurrentActiveArrayFormulaRange()?.[row]?.[column];
     }
 }

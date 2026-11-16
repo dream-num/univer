@@ -48,7 +48,7 @@ import {
 import { CLEAR_IMPORTED_SPILL_CELL } from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { expandArrayValueObject, getFixedArrayResultRange } from '../engine/utils/array-object';
+import { expandArrayValueObject, getFixedArrayResultRange, isExplicitDynamicArrayFormula } from '../engine/utils/array-object';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
@@ -785,7 +785,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 return;
             }
 
-            if (this._isCurrentSingleCellArrayFormulaRange(unitId, sheetId, row, column)) {
+            if (this._isCurrentSingleCellArrayFormulaRange(unitId, sheetId, row, column, functionVariant.isReferenceObject())) {
                 const errorObject = this._getValueObjectOfRuntimeData(ErrorValueObject.create(ErrorType.VALUE));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
@@ -1208,12 +1208,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return isCellOverlapping;
     }
 
-    private _isCurrentSingleCellArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number) {
+    private _isCurrentSingleCellArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number, isReferenceResult: boolean) {
         const range = this._currentConfigService.getArrayFormulaRange()[unitId]?.[sheetId]?.[row]?.[column];
 
         return range != null &&
             range.startRow === range.endRow &&
-            range.startColumn === range.endColumn;
+            range.startColumn === range.endColumn &&
+            !(isReferenceResult && isExplicitDynamicArrayFormula(this._currentConfigService, unitId, sheetId, row, column));
     }
 
     private _isInArrayFormulaRange(range: Nullable<IRange>, r: number, c: number) {

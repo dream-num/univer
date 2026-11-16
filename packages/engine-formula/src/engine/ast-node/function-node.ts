@@ -25,7 +25,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { BooleanNumber, DateSystem, FormulaType, Inject, Injector } from '@univerjs/core';
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
@@ -37,7 +37,7 @@ import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
-import { getFixedArrayResultRange } from '../utils/array-object';
+import { getFixedArrayResultRange, isExplicitDynamicArrayFormula } from '../utils/array-object';
 import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -225,9 +225,8 @@ export class FunctionNode extends BaseAstNode {
         }
 
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
-        const anchor = this._currentConfigService.getUnitData()[currentUnitId]?.[currentSubUnitId]?.cellData.getValue(currentRow, currentColumn);
         if (
-            (anchor?.ft === FormulaType.ARRAY && anchor.fd === BooleanNumber.TRUE) ||
+            isExplicitDynamicArrayFormula(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn) ||
             getFixedArrayResultRange(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)
         ) {
             return result;

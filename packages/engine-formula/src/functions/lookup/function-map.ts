@@ -46,6 +46,7 @@ import { Take } from './take';
 import { Tocol } from './tocol';
 import { Torow } from './torow';
 import { Transpose } from './transpose';
+import { Trimrange } from './trimrange';
 import { Unique } from './unique';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
@@ -86,6 +87,7 @@ export const functionLookup = [
     [Tocol, FUNCTION_NAMES_LOOKUP.TOCOL],
     [Torow, FUNCTION_NAMES_LOOKUP.TOROW],
     [Transpose, FUNCTION_NAMES_LOOKUP.TRANSPOSE],
+    [Trimrange, FUNCTION_NAMES_LOOKUP.TRIMRANGE],
     [Unique, FUNCTION_NAMES_LOOKUP.UNIQUE],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],

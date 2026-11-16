@@ -1171,8 +1171,8 @@ describe('UpdateFormulaController spill cache integration', () => {
                 sheet: {
                     id: 'sheet',
                     name: 'Sheet1',
-                    rowCount: 20,
-                    columnCount: 26,
+                    rowCount: 5000,
+                    columnCount: 27,
                     cellData: {
                         0: {
                             0: { v: 3, t: CellValueType.NUMBER },
@@ -1199,8 +1199,18 @@ describe('UpdateFormulaController spill cache integration', () => {
                             1: { f: '=A1' },
                             3: { f: "=SUM(Sheet1!$A$13:$A$14:'Sheet1'!$C$15)" },
                             4: { f: '=ISREF((Sheet1!$A$13:$A$14 Sheet1!$C$13:$C$14))' },
+                            6: { f: '=_xlfn.TRIMRANGE(A12:C16)', ref: 'G13', ft: FormulaType.ARRAY, fd: BooleanNumber.TRUE },
+                            10: { f: '=ISREF(TRIMRANGE(A12:C16))' },
+                            11: { f: '=TRIMRANGE(A12:C16,4)' },
+                            12: { f: '=TRIMRANGE(F12:F16)' },
+                            13: { f: '=ROWS(TRIMRANGE(A12:C16,1))' },
+                            14: { f: '=ISO.CEILING(-A1-0.3,-2)' },
+                            15: { f: '=ISO.CEILING(A1+0.3,)' },
+                            16: { f: '=ISO.CEILING(A1+0.3,F12)' },
+                            17: { f: '=ROWS(TRIMRANGE(A12:C16,F12))' },
+                            19: { f: '=ROWS(TRIMRANGE(AA1:AA5000))' },
                         },
-                        14: { 2: { v: 2, t: CellValueType.NUMBER } },
+                        14: { 2: { v: 2, t: CellValueType.NUMBER }, 26: { v: 99, t: CellValueType.NUMBER } },
                     },
                 },
             },
@@ -1242,6 +1252,9 @@ describe('UpdateFormulaController spill cache integration', () => {
             expect(sheet.getRange('K9:L9').getValues()).toEqual([[2 * input, null]]);
             expect(sheet.getRange('D13').getValue()).toBe(input + 7);
             expect(sheet.getRange('E13').getValue()).toBe(0);
+            expect(sheet.getRange('G13:I15').getValues()).toEqual([[5, input, 0], [0, 0, 0], [0, 0, 2]]);
+            expect(sheet.getRange('K13:R13').getValues()).toEqual([[1, '#VALUE!', '#REF!', 4, Math.ceil((-input - 0.3) / 2) * 2 + 0, input + 1, 0, 5]]);
+            expect(sheet.getRange('T13').getValue()).toBe(1);
             expect(sheet.getRange('S1:S2').getValues()).toEqual([['#REF!'], ['#REF!']]);
             const sum = input * (input + 1) / 2;
             expect(sheet.getRange('U1').getValue()).toBe(sum);
@@ -1256,6 +1269,10 @@ describe('UpdateFormulaController spill cache integration', () => {
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expectExcelValues(3);
             await calculate(() => sheet.getRange('A1').setValue(1));
+            expectExcelValues(1);
+            await calculate(() => sheet.getRange('C15').setValue({ v: null }));
+            expect(sheet.getRange('G13:I15').getValues()).toEqual([[5, 1, null], [null, null, null], [null, null, null]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expectExcelValues(1);
         } finally {
             univer.dispose();

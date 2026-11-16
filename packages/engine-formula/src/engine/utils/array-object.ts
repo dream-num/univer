@@ -20,6 +20,11 @@ import { BooleanNumber, FormulaType } from '@univerjs/core';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 
+export function isExplicitDynamicArrayFormula(config: IFormulaCurrentConfigService, unitId: string, sheetId: string, row: number, column: number): boolean {
+    const anchor = config.getUnitData()[unitId]?.[sheetId]?.cellData.getValue(row, column);
+    return anchor?.ft === FormulaType.ARRAY && anchor.fd === BooleanNumber.TRUE;
+}
+
 export function getFixedArrayResultRange(config: IFormulaCurrentConfigService, unitId: string, sheetId: string, row: number, column: number) {
     const range = config.getArrayFormulaRange()[unitId]?.[sheetId]?.[row]?.[column];
     if (!range || (range.endRow <= row && range.endColumn <= column)) {

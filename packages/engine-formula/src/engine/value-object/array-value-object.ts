@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DateSystem, isRealNum } from '@univerjs/core';
 import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
+import { DateSystem, isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { regexTestArrayValue } from '../../basics/regex';
@@ -1293,8 +1293,7 @@ export class ArrayValueObject extends BaseValueObject {
     override var(ddof: number = 0): BaseValueObject {
         const mean = this.mean();
 
-        // let isError = null;
-        const squaredDifferences: BaseValueObject[][] = [[]];
+        const squaredDifferences: number[] = [];
         this.iterator((valueObject: Nullable<BaseValueObject>) => {
             if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
                 return;
@@ -1306,22 +1305,18 @@ export class ArrayValueObject extends BaseValueObject {
                 return;
             }
 
-            squaredDifferences[0].push(baseValueObject);
+            squaredDifferences.push(Number(baseValueObject.getValue()));
         });
 
-        const { _unitId, _sheetId, _currentRow, _currentColumn } = this;
-
-        const squaredDifferencesArrayObject = ArrayValueObject.create({
-            calculateValueList: squaredDifferences,
-            rowCount: 1,
-            columnCount: squaredDifferences[0].length,
-            unitId: _unitId,
-            sheetId: _sheetId,
-            row: _currentRow,
-            column: _currentColumn,
-        });
-
-        return squaredDifferencesArrayObject.mean(ddof);
+        const divisor = squaredDifferences.length - ddof;
+        if (divisor === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+        // Normalize each term before summing the population variance.
+        const variance = ddof === 0
+            ? squaredDifferences.reduce((sum, difference) => sum + difference / divisor, 0)
+            : squaredDifferences.reduce((sum, difference) => sum + difference, 0) / divisor;
+        return NumberValueObject.create(variance);
     }
 
     /**

@@ -1597,6 +1597,13 @@ describe('Grouped dynamic array formulas', () => {
                             10: {
                                 5: { f: '=GROUPBY(G8:G9,F8:F9,SUM)' },
                                 8: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,INDEX(x,1))),1)' },
+                                9: { f: '=TYPE(TAKE({10;2},1))' },
+                                10: { f: '=TYPE(FILTER(42,TRUE))' },
+                                11: { f: '=ISREF(TAKE(F8:F9,1))' },
+                                12: { f: '=ISREF({1,2})' },
+                                13: { f: '=TYPE(INDEX({1;2},1)+0)' },
+                                14: { f: '=ARRAYTOTEXT(STDEV.P(4,14,16,27,31),1)' },
+                                15: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,TAKE(x,1))),1)' },
                             },
                         },
                     },
@@ -1640,7 +1647,16 @@ describe('Grouped dynamic array formulas', () => {
             await calculate(() => formula.executeCalculation());
             check(9);
             expect(sheet.getRange('F11:G13').getValues()).toEqual([['West', 10], [0, 2], ['Total', 12]]);
-            expect(sheet.getRange('I11').getValue()).toBe('{"West",10;,2;"Total",#VALUE!}');
+            expect(sheet.getRange('I11:P11').getValues()).toEqual([[
+                '{"West",10;,2;"Total",#VALUE!}',
+                64,
+                64,
+                1,
+                0,
+                64,
+                '{9.64572444143}',
+                '{"West",#VALUE!;,#VALUE!;"Total",#VALUE!}',
+            ]]);
             await calculate(() => sheet.getRange('C2').setValue(19));
             check(19);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));

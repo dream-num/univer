@@ -91,7 +91,7 @@ describe('Test filter function', () => {
         });
 
         it('supports scalar array and string-number include values', async () => {
-            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('1')))).toBe(42);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('1')))).toEqual([[42]]);
             expect(getObjectValue(testFunction.calculate(NumberValueObject.create(42), StringValueObject.create('0'), StringValueObject.create('empty')))).toBe('empty');
         });
 

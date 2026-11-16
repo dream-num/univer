@@ -16,6 +16,7 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -74,12 +75,7 @@ export class Filter extends BaseFunction {
     }
 
     private _getResultArrayByR1C1(array: BaseValueObject, include: BaseValueObject, ifEmpty: BaseValueObject): BaseValueObject {
-        let _array = array;
         let _include = include;
-
-        if (_array.isArray()) {
-            _array = (_array as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
 
         if (_include.isArray()) {
             _include = (_include as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -96,7 +92,7 @@ export class Filter extends BaseFunction {
         const includeValue = +_include.getValue();
 
         if (includeValue) {
-            return _array;
+            return expandArrayValueObject(1, 1, array);
         }
 
         return ifEmpty;

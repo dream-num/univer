@@ -15,22 +15,36 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, RegionService } from '@univerjs/core';
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-import { CellValueType, Disposable, ICommandService, Inject } from '@univerjs/core';
+import type { TextComparer } from './utils';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
-import { compareNull, compareNumber, compareString, isNullValue } from './utils';
+import { compareNull, compareNumber, compareString, createRegionTextComparer, isNullValue } from './utils';
 
 export type ICommonComparableCellValue = number | string | null;
 
 export class SheetsSortController extends Disposable {
+    private _compareText: TextComparer;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetsSortService) private readonly _sortService: SheetsSortService
+        @Inject(SheetsSortService) private readonly _sortService: SheetsSortService,
+        @Inject(RegionService) private readonly _regionService: RegionService
     ) {
         super();
+        this._compareText = createRegionTextComparer(this._regionService.getCurrentRegion());
         this._initCommands();
+        this._initTextComparer();
         this._registerCompareFns();
+    }
+
+    // Text is collated for Univer's configured region, not the host's default locale, so the
+    // same data sorts the same way on every machine.
+    private _initTextComparer(): void {
+        this.disposeWithMe(this._regionService.currentRegion$.subscribe((region) => {
+            this._compareText = createRegionTextComparer(region);
+        }));
     }
 
     private _initCommands(): void {
@@ -46,7 +60,7 @@ export class SheetsSortController extends Disposable {
 
             const compareTypeFns = [
                 compareNull,
-                compareString,
+                (x: ICommonComparableCellValue, y: ICommonComparableCellValue, sortType: typeof type) => compareString(x, y, sortType, this._compareText),
                 compareNumber,
             ];
 

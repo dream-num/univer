@@ -24,9 +24,85 @@ export enum ORDER {
     ZERO = 0,
 }
 
-// Compare text by the runtime locale's collation, as the SORT function does, so an
-// accented letter sorts beside its base letter instead of after "z".
-const textCollator = new Intl.Collator(undefined, { numeric: false });
+export type TextComparer = (a: string, b: string) => number;
+
+// Excel sorts text left to right: digits, then spaces and punctuation in this order, then letters.
+const EXCEL_SYMBOL_ORDER = ' !"#$%&()*,./:;?@[\\]^_`{|}~+<=>';
+
+enum UnitClass {
+    DIGIT = 0,
+    SYMBOL = 1,
+    LETTER = 2,
+}
+
+const DIGIT_START = /^\p{Nd}/u;
+const LETTER_START = /^[\p{L}\p{M}]/u;
+const TEXT_UNITS = /[\p{L}\p{M}]+|[^\p{L}\p{M}]/gu;
+
+const unitClass = (unit: string): UnitClass => {
+    if (DIGIT_START.test(unit)) return UnitClass.DIGIT;
+    if (LETTER_START.test(unit)) return UnitClass.LETTER;
+    return UnitClass.SYMBOL;
+};
+
+const symbolRank = (symbol: string) => {
+    const rank = EXCEL_SYMBOL_ORDER.indexOf(symbol);
+    return rank === -1 ? EXCEL_SYMBOL_ORDER.length : rank;
+};
+
+const compareUnit = (a: string, b: string, collator: Intl.Collator) => {
+    const classA = unitClass(a);
+    const classB = unitClass(b);
+
+    if (classA !== classB) return classA - classB;
+
+    if (classA === UnitClass.SYMBOL) {
+        return symbolRank(a) - symbolRank(b) || (a < b ? -1 : a > b ? 1 : 0);
+    }
+
+    return collator.compare(a, b);
+};
+
+const compareUnits = (a: string[], b: string[], collator: Intl.Collator) => {
+    const length = Math.min(a.length, b.length);
+
+    for (let i = 0; i < length; i++) {
+        const order = compareUnit(a[i], b[i], collator);
+        if (order !== 0) return order;
+    }
+
+    return a.length - b.length;
+};
+
+/**
+ * Compares text in Excel's order: runs of letters by the locale's collation, so an accented
+ * letter sorts beside its base letter, and digits before spaces and punctuation before letters.
+ * Accents only break ties between texts that are otherwise equal.
+ */
+export const createTextComparer = (locale?: string): TextComparer => {
+    const baseCollator = new Intl.Collator(locale, { sensitivity: 'base' });
+    const accentCollator = new Intl.Collator(locale, { sensitivity: 'accent' });
+
+    return (a, b) => {
+        if (a === b) return 0;
+
+        const unitsA = a.match(TEXT_UNITS) ?? [];
+        const unitsB = b.match(TEXT_UNITS) ?? [];
+
+        return compareUnits(unitsA, unitsB, baseCollator) || compareUnits(unitsA, unitsB, accentCollator);
+    };
+};
+
+/** Univer locales are written `enUS`; Intl expects `en-US`. */
+export const createRegionTextComparer = (region: string): TextComparer => {
+    try {
+        return createTextComparer(region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2'));
+    } catch {
+        return createTextComparer();
+    }
+};
+
+const defaultTextComparer = createTextComparer();
 
 const removeStringSymbol = (str: string) => {
     return str.replace(/-/gi, '').replace(/'/gi, '');
@@ -77,7 +153,12 @@ export const compareNumber = (
     return null;
 };
 
-export const compareString = (a1: ICommonComparableCellValue, a2: ICommonComparableCellValue, type: SortType) => {
+export const compareString = (
+    a1: ICommonComparableCellValue,
+    a2: ICommonComparableCellValue,
+    type: SortType,
+    compareText: TextComparer = defaultTextComparer
+) => {
     const isA1Str = typeof a1 === 'string';
     const isA2Str = typeof a2 === 'string';
 
@@ -93,7 +174,7 @@ export const compareString = (a1: ICommonComparableCellValue, a2: ICommonCompara
     }
 
     if (isA1Str && isA2Str) {
-        const order = textCollator.compare(a1 as string, a2 as string);
+        const order = compareText(a1 as string, a2 as string);
         if (order < 0) {
             return type === SortType.ASC ? ORDER.NEGATIVE : ORDER.POSITIVE;
         }

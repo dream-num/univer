@@ -193,6 +193,7 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
     } as DOMRect);
 
     const transformChange$ = createEventSubject<unknown>();
+    const sceneTransformChange$ = createEventSubject<unknown>();
     const viewMainScrollAfter$ = createEventSubject<unknown>();
     const viewMainResized$ = new Subject<void>();
     const clientRect$ = new BehaviorSubject({});
@@ -246,6 +247,7 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
             getViewport: () => viewport,
+            onTransformChange$: sceneTransformChange$,
         },
         engine: {
             clientRect$,
@@ -288,6 +290,7 @@ function createSheetHarness(options?: { withoutSkeleton?: boolean }) {
         canvas,
         clientRect$,
         transformChange$,
+        sceneTransformChange$,
         viewMainScrollAfter$,
         viewMainResized$,
         sheetSelectionRenderService,
@@ -477,6 +480,79 @@ describe('SheetCanvasPopManagerService', () => {
         viewMainResized$.next();
         await vi.waitFor(() => {
             expect(positions[positions.length - 1]).toEqual({ left: 38, right: 70, top: 24, bottom: 48 });
+        });
+    });
+
+    it('updates a chart sheet drawing popup when the canvas client rect changes', async () => {
+        const {
+            injector,
+            popupService,
+            canvas,
+            clientRect$,
+        } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
+            top: 20,
+            left: 30,
+            width: 100,
+            height: 120,
+            right: 130,
+            bottom: 140,
+            x: 30,
+            y: 20,
+            toJSON: () => ({}),
+        } as DOMRect);
+        targetObject.left = 30;
+        targetObject.width = 20;
+        clientRect$.next({});
+
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 60, right: 80, top: 30, bottom: 60 });
+        });
+    });
+
+    it('updates a chart sheet drawing popup after zoom-to-fit changes the scene transform', async () => {
+        const {
+            injector,
+            popupService,
+            sceneTransformChange$,
+            viewport,
+        } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+        };
+
+        service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        viewport.absoluteScale = 0.8;
+        sceneTransformChange$.emit({});
+        // Chart Sheet presentation applies its final viewport origin after the scene scale notification.
+        viewport.viewportScrollX = 10;
+        viewport.viewportScrollY = 5;
+
+        await vi.waitFor(() => {
+            expect(positions[positions.length - 1]).toEqual({ left: 26, right: 90, top: 28, bottom: 76 });
         });
     });
 

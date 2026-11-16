@@ -59,7 +59,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, debounceTime, map, throttleTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, merge, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -274,15 +274,17 @@ export class SheetCanvasPopManagerService extends Disposable {
         bound: IBoundRectNoAngle,
         currentRender: IRender,
         skeleton: Nullable<SpreadsheetSkeleton>,
-        worksheet: Worksheet
+        worksheet: Worksheet,
+        getCurrentBound?: () => IBoundRectNoAngle
     ) {
         const calc = () => {
             const { scene } = currentRender;
             const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const currentBound = getCurrentBound?.() ?? bound;
             // Non-grid sheets have no SpreadsheetSkeleton, but their drawing coordinates still use the main viewport.
             const offsetBound = skeleton
-                ? transformBound2OffsetBound(bound, scene, skeleton, worksheet)
-                : transformBoundByViewport(bound, viewMain!);
+                ? transformBound2OffsetBound(currentBound, scene, skeleton, worksheet)
+                : transformBoundByViewport(currentBound, viewMain!);
             const canvasElement = currentRender.engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
 
@@ -338,9 +340,13 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
-            // Engine and scene transforms both resize the viewport. Chart Sheet presentation then updates its
-            // padding through the same signal, so recalculate once after the complete resize chain settles.
-            disposable.add(viewMain.onResized$.pipe(debounceTime(0)).subscribe(updatePosition));
+            // Chart Sheet fits its primary chart after the canvas or viewport resizes, which can apply a later
+            // scene-scale transform. Coalesce these signals so the popup reads the final layout and current bound.
+            disposable.add(merge(
+                currentRender.engine.clientRect$,
+                viewMain.onResized$,
+                fromEventSubject(currentRender.scene.onTransformChange$)
+            ).pipe(debounceTime(0)).subscribe(updatePosition));
         }
 
         return disposable;
@@ -377,8 +383,6 @@ export class SheetCanvasPopManagerService extends Disposable {
                 canDispose: () => true,
             };
         }
-        const { left, top, width, height } = targetObject;
-
         let offsetX = 0;
         let offsetY = 0;
         let drawingType;
@@ -391,14 +395,16 @@ export class SheetCanvasPopManagerService extends Disposable {
             offsetY = offset.offsetY;
         }
 
-        const bound: IBoundRectNoAngle = {
-            left,
-            right: left + width + offsetX,
-            top: top + offsetY,
-            bottom: top + height,
-        };
+        const getTargetBound = () => getObjectPopupBound(targetObject, offsetX, offsetY);
+        const bound = getTargetBound();
 
-        const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
+        const { position, position$, disposable } = this._createPositionObserver(
+            bound,
+            currentRender,
+            skeleton,
+            worksheet,
+            skeleton ? undefined : getTargetBound
+        );
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const canvasElement = currentRender.engine.getCanvasElement();
         const scaleAdjust = canvasElement.getBoundingClientRect().width / pxToNum(canvasElement.style.width);
@@ -977,6 +983,15 @@ export class SheetCanvasPopManagerService extends Disposable {
             disposable,
         };
     }
+}
+
+function getObjectPopupBound(targetObject: BaseObject, offsetX: number, offsetY: number): IBoundRectNoAngle {
+    return {
+        left: targetObject.left,
+        right: targetObject.left + targetObject.width + offsetX,
+        top: targetObject.top + offsetY,
+        bottom: targetObject.top + targetObject.height,
+    };
 }
 
 function transformBoundByViewport(originBound: IBoundRectNoAngle, viewport: Viewport): IBoundRectNoAngle {

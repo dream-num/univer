@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
@@ -66,6 +67,26 @@ describe('Test xmatch', () => {
                 arrayValueObject1.slice(undefined, [1, 2])!
             );
             expect(resultObject.getValue()).toBe(2);
+        });
+
+        it('reads ? and * as ordinary characters in exact match mode', async () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const cases: [string, number | undefined, number | string][] = [
+                ['a?', undefined, 2],
+                ['A?', 0, 2],
+                ['b*', 0, 4],
+                ['c*', 0, ErrorType.NA],
+                ['a?', 2, 1],
+                ['b*', 2, 3],
+            ];
+            for (const [lookup, matchMode, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookupArray,
+                    matchMode === undefined ? undefined : NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
         });
 
         it('Search single string horizon', async () => {

@@ -846,7 +846,7 @@ function _appendFittingGlyphs(
         return;
     }
 
-    const reflowMetrics = currentLine
+    const reflowMetrics = currentLine && !defaultSpanMetrics
         ? _getExpandedLineMetrics(currentLine, lineGlyphs, glyphGroup, sectionBreakConfig, paragraphConfig)
         : undefined;
     if (currentLine && reflowMetrics) {

@@ -60,6 +60,14 @@ describe('SheetsSortController compare function', () => {
         expect(sort([{ v: '#N/A', t: CellValueType.STRING }, { v: '#N/A', t: CellValueType.FORCE_STRING }, { v: 'apple', t: CellValueType.STRING }], SortType.ASC)).toEqual(['#N/A', 'apple', '#N/A']);
     });
 
+    it('treats distinct error tokens as equal within the error group', () => {
+        const compare = registeredCompareFn();
+        const divisionError = { v: '#DIV/0!', t: CellValueType.STRING };
+        const unavailableError = { v: '#N/A', t: CellValueType.STRING };
+        expect(compare(SortType.ASC, divisionError, unavailableError)).toBe(0);
+        expect(compare(SortType.DESC, divisionError, unavailableError)).toBe(0);
+    });
+
     it('preserves numeric forced text and compares both logical encodings', () => {
         expect(sort([{ v: true, t: CellValueType.BOOLEAN }, { v: 'false', t: CellValueType.BOOLEAN }, { v: '002', t: CellValueType.FORCE_STRING }, { v: 1, t: CellValueType.NUMBER }], SortType.ASC)).toEqual([1, '002', 'false', true]);
     });

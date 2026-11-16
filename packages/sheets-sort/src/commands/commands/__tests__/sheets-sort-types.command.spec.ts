@@ -69,6 +69,16 @@ describe('SortRangeCommand mixed cell types', () => {
         expect(await sortRows(SortType.DESC)).toEqual([3, 1, 2, 0, 5, 7, 4, 6]);
     });
 
+    it('uses the secondary key rather than error-token spelling for distinct errors', async () => {
+        const errorValues = [
+            { v: 10, t: CellValueType.NUMBER },
+            { v: '#DIV/0!', t: CellValueType.STRING },
+            { v: '#N/A', t: CellValueType.STRING },
+            null,
+        ];
+        expect(await sortRows(SortType.ASC, true, errorValues)).toEqual([0, 2, 1, 3]);
+    });
+
     it('uses a secondary key and preserves row order on equal ties', async () => {
         const tiedValues = [...values, { v: 0, t: CellValueType.BOOLEAN }, { v: 0, t: CellValueType.BOOLEAN }];
         expect(await sortRows(SortType.ASC, true, tiedValues)).toEqual([4, 7, 5, 0, 8, 9, 2, 1, 3, 6]);

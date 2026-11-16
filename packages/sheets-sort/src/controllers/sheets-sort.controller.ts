@@ -57,8 +57,10 @@ export class SheetsSortController extends Disposable {
                         if (cell?.t === CellValueType.STRING && typeof cell.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) return 3;
                         return typeof value === 'number' ? 0 : 1;
                     };
-                    const difference = category(a, left) - category(b, right);
+                    const leftCategory = category(a, left);
+                    const difference = leftCategory - category(b, right);
                     if (difference !== 0) return (type === SortType.ASC ? 1 : -1) * difference;
+                    if (leftCategory === 3) return 0;
                     if (a?.t === CellValueType.BOOLEAN && b?.t === CellValueType.BOOLEAN && !a.p?.body?.dataStream && !b.p?.body?.dataStream) {
                         const logicalValue = (cell: Nullable<ICellData>) => cell?.v === true || cell?.v === 1 || cell?.v === 'true' || cell?.v === '1' ? 1 : 0;
                         const logicalDifference = logicalValue(a) - logicalValue(b);

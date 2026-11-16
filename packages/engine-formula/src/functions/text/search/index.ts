@@ -21,7 +21,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { parseWildcardSearchPattern, searchWildcard } from '../../../engine/utils/wildcard-search';
+import { parseWildcardSearchPattern, searchWildcard, upperCaseKeepingPositions } from '../../../engine/utils/wildcard-search';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -122,26 +122,4 @@ export class Search extends BaseFunction {
 
         return NumberValueObject.create(result + 1);
     }
-}
-
-/**
- * Upper-cases text for a case-insensitive search without changing its length, so a match
- * index is also the position in the original text. A character whose upper case is longer
- * (ß becomes SS) is kept as it is.
- */
-function upperCaseKeepingPositions(text: string): string {
-    const upper = text.toLocaleUpperCase();
-
-    if (upper.length === text.length) {
-        return upper;
-    }
-
-    let result = '';
-
-    for (const char of text) {
-        const upperChar = char.toLocaleUpperCase();
-        result += upperChar.length === char.length ? upperChar : char;
-    }
-
-    return result;
 }

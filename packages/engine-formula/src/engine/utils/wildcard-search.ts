@@ -98,3 +98,25 @@ function findSegment(text: string, segment: ReadonlyArray<string | null>, fromIn
 
     return -1;
 }
+
+/**
+ * Upper-cases text for a case-insensitive search without changing its length, so a match
+ * index is also the position in the original text. A character whose upper case is longer
+ * (ß becomes SS) is kept as it is.
+ */
+export function upperCaseKeepingPositions(text: string): string {
+    const upper = text.toLocaleUpperCase();
+
+    if (upper.length === text.length) {
+        return upper;
+    }
+
+    let result = '';
+
+    for (const char of text) {
+        const upperChar = char.toLocaleUpperCase();
+        result += upperChar.length === char.length ? upperChar : char;
+    }
+
+    return result;
+}

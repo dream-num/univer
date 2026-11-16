@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IWildcardSearchPattern } from '../../../engine/utils/wildcard-search';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -21,6 +22,7 @@ import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { charLenByte } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { parseWildcardSearchPattern, searchWildcard, upperCaseKeepingPositions } from '../../../engine/utils/wildcard-search';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -49,6 +51,9 @@ export class Searchb extends BaseFunction {
         const withinTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, withinText, ErrorValueObject.create(ErrorType.NA));
         const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _startNum, ErrorValueObject.create(ErrorType.NA));
 
+        // Each distinct find_text is parsed once per calculation, however many cells use it.
+        const patterns = new Map<string, IWildcardSearchPattern>();
+
         const resultArray = findTextArray.mapValue((findTextObject, rowIndex, columnIndex) => {
             const withinTextObject = withinTextArray.get(rowIndex, columnIndex) as BaseValueObject;
             const startNumObject = startNumArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -65,7 +70,7 @@ export class Searchb extends BaseFunction {
                 return startNumObject;
             }
 
-            return this._handleSingleObject(findTextObject, withinTextObject, startNumObject);
+            return this._handleSingleObject(findTextObject, withinTextObject, startNumObject, patterns);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -75,9 +80,14 @@ export class Searchb extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSingleObject(findText: BaseValueObject, withinText: BaseValueObject, startNum: BaseValueObject): BaseValueObject {
-        const findTextValue = getTextValueOfNumberFormat(findText).toLocaleUpperCase();
-        const withinTextValue = getTextValueOfNumberFormat(withinText).toLocaleUpperCase();
+    private _handleSingleObject(
+        findText: BaseValueObject,
+        withinText: BaseValueObject,
+        startNum: BaseValueObject,
+        patterns: Map<string, IWildcardSearchPattern>
+    ): BaseValueObject {
+        const findTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(findText));
+        const withinTextValue = upperCaseKeepingPositions(getTextValueOfNumberFormat(withinText));
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum);
 
@@ -97,7 +107,15 @@ export class Searchb extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        const index = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        // SEARCHB reads ? and * as wildcards and ~ as their escape, as SEARCH does.
+        let pattern = patterns.get(findTextValue);
+
+        if (!pattern) {
+            pattern = parseWildcardSearchPattern(findTextValue);
+            patterns.set(findTextValue, pattern);
+        }
+
+        const index = searchWildcard(withinTextValue, pattern, startNumValue - 1);
 
         if (index === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

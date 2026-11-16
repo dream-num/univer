@@ -362,8 +362,6 @@ export interface ICellMarks {
 }
 
 export interface IFontRenderExtension {
-    /** Overrides visible text while preserving the cell value. An empty string hides the text. */
-    displayText?: string;
     leftOffset?: number;
     rightOffset?: number;
     topOffset?: number;

@@ -237,11 +237,6 @@ function setRenderTextCache(cacheItem: IFontCacheItem, cellData: Nullable<ICellD
     );
 }
 
-function getCellDataForTextLayout(cell: ICellDataForSheetInterceptor): ICellDataForSheetInterceptor {
-    const displayText = cell.fontRenderExtension?.displayText;
-    return displayText === undefined ? cell : { ...cell, p: undefined, v: displayText, t: CellValueType.STRING };
-}
-
 function updateDocumentPageWidth(documentModel: DocumentDataModel, cellInfo: ICellWithCoord): void {
     const startX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.startX : cellInfo.startX;
     const endX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.endX : cellInfo.endX;
@@ -808,8 +803,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         // TODO@weird94: in future, we should use `getCellRaw` instead of `getCell` to improve performance.
-        const sourceCell = this.worksheet.getCell(row, col);
-        const cell = sourceCell && getCellDataForTextLayout(sourceCell);
+        const cell = this.worksheet.getCell(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
 
         if (cell?.interceptorAutoHeight) {
@@ -1069,7 +1063,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
         const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
-        const modelObject = this.worksheet.getCellDocumentModel(getCellDataForTextLayout(cell), style, { isDeepClone: true });
+        const modelObject = this.worksheet.getCellDocumentModel(cell, style, { isDeepClone: true });
         if (modelObject == null) {
             return measuredWidth;
         }
@@ -1620,9 +1614,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, sourceCell: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
-        const cellData = sourceCell && getCellDataForTextLayout(sourceCell);
-        if (isNullCell(cellData) && cellData?.fontRenderExtension?.displayText === undefined) {
+    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
+        if (isNullCell(cellData)) {
             this._emptyFontCache.setValue(row, col, true);
             return;
         }
@@ -1771,10 +1764,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
 
-        const cell: Nullable<ICellDataForSheetInterceptor> = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this.worksheet.getComposedCellStyleByCellData(row, col, cell);
         // Empty merge anchors still own borders contributed by other members.
-        if (!mergeRange && isNullCell(cell) && !cell?.fontRenderExtension?.displayText && Object.keys(style).length === 0) {
+        if (!mergeRange && isNullCell(cell) && Object.keys(style).length === 0) {
             return;
         }
 

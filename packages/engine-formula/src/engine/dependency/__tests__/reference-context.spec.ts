@@ -113,7 +113,9 @@ it('executes opaque features without parsing an empty formula or recalculating u
             dependencyRanges: [],
             getDirtyData: (dirty) => ({
                 runtimeCellData: { test: { s: new ObjectMatrix({ 0: { 1: { v: featureValue } } }) } },
-                dirtyRanges: dirty.forceCalculation ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } } : {},
+                dirtyRanges: dirty.forceCalculation || dirty.dirtyUnitFeatureMap.test?.s?.feature
+                    ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } }
+                    : {},
             }),
         });
         const config = { formulaData: { test: { s: { 0: { 0: { f: '=B1' }, 2: { f: '=5' } } } } }, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: true, dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {} };
@@ -121,7 +123,9 @@ it('executes opaque features without parsing an empty formula or recalculating u
         featureValue = 42;
         bed.get(IUniverInstanceService).getUnit<Workbook>(bed.unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(bed.sheetId)!.setRowCount(11);
         await service.execute({ ...config, forceCalculate: false, dirtyReferenceUnits: ['test'] });
-        expect(observed).toEqual([[41, 5], [42, undefined]]);
+        featureValue = 43;
+        await service.execute({ ...config, forceCalculate: false, dirtyUnitFeatureMap: { test: { s: { feature: true } } } });
+        expect(observed).toEqual([[41, 5], [42, undefined], [43, undefined]]);
         expect(bed.get(IFormulaCurrentConfigService).isForceCalculate()).toBe(false);
     } finally {
         subscription.unsubscribe();

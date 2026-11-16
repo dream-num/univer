@@ -275,10 +275,12 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue);
                     const v = isNullable(value) ? '' : String(value);
-                    const condition = subRuleConfig.value || '';
+                    // Excel builds text rules from SEARCH and "=", which ignore case.
+                    const text = v.toLowerCase();
+                    const condition = (subRuleConfig.value || '').toLowerCase();
                     switch (subRuleConfig.operator) {
                         case CFTextOperator.beginsWith: {
-                            return v.startsWith(condition);
+                            return text.startsWith(condition);
                         }
                         case CFTextOperator.containsBlanks: {
                             return /^\s*$/.test(v);
@@ -293,19 +295,19 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             return !(ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.containsText: {
-                            return v.indexOf(condition) > -1;
+                            return text.includes(condition);
                         }
                         case CFTextOperator.notContainsText: {
-                            return v.indexOf(condition) === -1;
+                            return !text.includes(condition);
                         }
                         case CFTextOperator.endsWith: {
-                            return v.endsWith(condition);
+                            return text.endsWith(condition);
                         }
                         case CFTextOperator.equal: {
-                            return v === condition;
+                            return text === condition;
                         }
                         case CFTextOperator.notEqual: {
-                            return v !== condition;
+                            return text !== condition;
                         }
                         default: {
                             return false;

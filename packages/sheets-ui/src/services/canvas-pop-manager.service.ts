@@ -60,7 +60,16 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, combineLatest, debounceTime, map, merge, startWith, throttleTime } from 'rxjs';
+import {
+    animationFrameScheduler,
+    BehaviorSubject,
+    combineLatest,
+    debounceTime,
+    map,
+    merge,
+    startWith,
+    throttleTime,
+} from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -82,9 +91,6 @@ interface IPopupMenuItem {
     disable: boolean;
 }
 type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
-
-// Chart Sheet layout can publish several rendered positions while a side panel is opening or closing.
-const CHART_SHEET_POPUP_POSITION_DEBOUNCE_MS = 50;
 
 export class SheetCanvasPopManagerService extends Disposable {
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
@@ -335,7 +341,10 @@ export class SheetCanvasPopManagerService extends Disposable {
             disposable.add(combineLatest([
                 renderedPosition$,
                 currentRender.engine.clientRect$.pipe(startWith(undefined)),
-            ]).pipe(debounceTime(CHART_SHEET_POPUP_POSITION_DEBOUNCE_MS)).subscribe(([renderedPosition]) => {
+            ]).pipe(
+                // Coalesce layout signals into one latest-position update on the next browser frame.
+                throttleTime(0, animationFrameScheduler, { leading: false, trailing: true })
+            ).subscribe(([renderedPosition]) => {
                 position$.next(transformRenderedPositionToClientRect(renderedPosition, currentRender));
             }));
         } else {

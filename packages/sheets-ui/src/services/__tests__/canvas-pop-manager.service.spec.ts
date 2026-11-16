@@ -518,7 +518,7 @@ describe('SheetCanvasPopManagerService', () => {
         });
     });
 
-    it('uses the settled rendered position for a chart sheet floating DOM popup', async () => {
+    it('uses the latest rendered position in the next frame for a chart sheet floating DOM popup', async () => {
         const {
             canvas,
             clientRect$,

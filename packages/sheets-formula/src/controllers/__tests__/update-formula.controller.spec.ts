@@ -1574,7 +1574,7 @@ describe('Grouped dynamic array formulas', () => {
         try {
             const workbook = facade.createWorkbook({
                 id: 'grouped-formula-com',
-                sheetOrder: ['sheet'],
+                sheetOrder: ['sheet', 'source'],
                 sheets: {
                     sheet: {
                         id: 'sheet',
@@ -1616,7 +1616,24 @@ describe('Grouped dynamic array formulas', () => {
                                 6: { f: '=ISREF(INDIRECT(H8))' },
                                 7: { f: '=ADDRESS(2,3,H9,TRUE)' },
                             },
+                            16: {
+                                5: { f: '=TYPE(MATCH(F9,F8:F9,0))' },
+                                6: { f: '=TYPE(MATCH(F9:F9,F8:F9,0))' },
+                                7: { f: '=TYPE(MATCH({10},F8:F9,0))' },
+                                8: { f: '=ISREF(INDIRECT("F"&(MATCH(F9,F8:F9,0)+7)))' },
+                                9: { f: '=ISREF(INDIRECT("F"&(MATCH({10},F8:F9,0)+7)))' },
+                                10: { f: '=SUM(OFFSET(INDIRECT("F"&(MATCH(F9,F8:F9,0)+7)),0,0))' },
+                                11: { f: '=SUM(OFFSET(INDIRECT({"Source!A1:A2"}),0,1))' },
+                                12: { f: '=ISREF(OFFSET(INDIRECT({"Source!A1"}),0,1))' },
+                            },
                         },
+                    },
+                    source: {
+                        id: 'source',
+                        name: 'Source',
+                        rowCount: 20,
+                        columnCount: 22,
+                        cellData: { 0: { 1: { v: 19 } }, 1: { 1: { v: 23 } } },
                     },
                 },
             });
@@ -1686,9 +1703,12 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('R11:V11').getValues()).toEqual([[1, 0, 1, 64, -3.59]]);
             expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
             expect(sheet.getRange('H15').getValue()).toBe('#VALUE!');
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
             await calculate(() => sheet.getRange('F9').setValue(7));
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 7, 19, 0]]);
             expect(sheet.getRange('F15:G15').getValues()).toEqual([[7, 1]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('F17:M17').getValues()).toEqual([[1, 1, 64, 1, 0, 2, 19, 0]]);
             await calculate(() => sheet.getRange('H8').setValue('invalid'));
             expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 0]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));

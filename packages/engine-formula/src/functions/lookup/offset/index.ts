@@ -44,7 +44,7 @@ export class Offset extends BaseFunction {
         columns: FunctionVariantType,
         height?: FunctionVariantType,
         width?: FunctionVariantType
-    ) {
+    ): MultiAreaValue {
         if (reference.isError()) {
             return reference;
         }
@@ -67,6 +67,12 @@ export class Offset extends BaseFunction {
 
         if (!reference.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (reference instanceof MultiAreaReferenceObject && reference.isArrayOfReferences() &&
+            reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
+            const result = this.calculate(reference.getAreas()[0][0], rows, columns, height, width);
+            return result instanceof MultiAreaReferenceObject ? result : new MultiAreaReferenceObject('', [[result]]);
         }
 
         const rowCount = (reference as BaseReferenceObject).getRowCount();

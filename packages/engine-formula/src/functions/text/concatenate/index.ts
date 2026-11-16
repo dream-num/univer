@@ -28,6 +28,19 @@ export class Concatenate extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...textValues: BaseValueObject[]) {
+        if (textValues.length > 0 && textValues.every((value) => !value.isArray())) {
+            let text = '';
+            for (const value of textValues) {
+                if (value.isError()) {
+                    return value;
+                }
+                if (!value.isNull()) {
+                    text += formatValueForFormulaText(value.getValue());
+                }
+            }
+            return StringValueObject.create(text);
+        }
+
         let maxRowLength = 0;
         let maxColumnLength = 0;
 

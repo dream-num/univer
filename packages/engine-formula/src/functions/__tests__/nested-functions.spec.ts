@@ -839,7 +839,7 @@ describe('Test nested functions', () => {
                 formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toStrictEqual([['>=']]);
+            expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toBe('>=');
             expect(calculate('=COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
             expect(calculate('=COUNTIF(D2:D4,">="&X21)-COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
         });

@@ -19,7 +19,7 @@ import { IAuthzIoService, Injector, LocaleService, LocaleType } from '@univerjs/
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
 import { UnitRole } from '@univerjs/protocol';
-import { IDialogService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IDialogService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -39,6 +39,7 @@ function createTestBed() {
     const injector = new Injector();
     const close = vi.fn<IDialogService['close']>();
     injector.add([LocaleService]);
+    injector.add([ComponentManager]);
     injector.add([SheetPermissionUserManagerService]);
     injector.add([IAuthzIoService, { useValue: { getCfgEnableObjInherit: () => false } as IAuthzIoService }]);
     injector.add([IDialogService, { useValue: { close } as unknown as IDialogService }]);

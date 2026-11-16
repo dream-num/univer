@@ -43,6 +43,8 @@ export type { IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ColorPickerPanel } from './components/color-picker/ColorPickerPanel';
 export type { IColorPickerPanelProps } from './components/color-picker/ColorPickerPanel';
 export { ColorPresets } from './components/color-picker/ColorPresets';
+export { ColorSelect } from './components/color-picker/ColorSelect';
+export type { IColorSelectProps } from './components/color-picker/ColorSelect';
 export { MobileColorPicker } from './components/color-picker/MobileColorPicker';
 export type { IMobileColorPickerProps } from './components/color-picker/MobileColorPicker';
 export { MobileColorPresets } from './components/color-picker/MobileColorPresets';

@@ -677,6 +677,64 @@ describe('Custom number display', () => {
     });
 });
 
+describe('Cell display text overrides', () => {
+    it('renders empty cell captions, suppresses labels, and keeps values untouched', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'display-text',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 5,
+                    columnCount: 5,
+                    defaultColumnWidth: 30,
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet()!;
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: function createTestInstance() {
+                return injector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+            },
+        }]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        const cells = [
+            { fontRenderExtension: { displayText: 'Missing' } },
+            { v: 'Header', fontRenderExtension: { displayText: '' } },
+            { v: 148706409, fontRenderExtension: { displayText: 'Long caption' } },
+            { s: { tr: { a: 45 } }, fontRenderExtension: { displayText: 'Rotated' } },
+        ];
+        worksheet.__interceptViewModel((viewModel) => {
+            viewModel.registerCellContentInterceptor({ getCell: (row, col) => col === 0 ? cells[row] : undefined });
+        });
+        try {
+            skeleton.calculate();
+            const bound = {
+                left: skeleton.rowHeaderWidthAndMarginLeft,
+                top: skeleton.columnHeaderHeightAndMarginTop,
+                right: skeleton.rowHeaderWidthAndMarginLeft + 150,
+                bottom: skeleton.columnHeaderHeightAndMarginTop + 120,
+            };
+            skeleton.setStylesCache({
+                viewBound: bound,
+                cacheBound: bound,
+                viewportKey: 'viewMain',
+            } as IViewportInfo);
+            expect(skeleton.getFont(0, 0)?.displayText).toBe('Missing');
+            expect(skeleton.getFont(1, 0)?.displayText).toBe('');
+            expect(skeleton.getFont(2, 0)?.displayText).toBe('Long caption');
+            expect(skeleton.getFont(3, 0)?.documentSkeleton?.getViewModel().getDataModel().getSnapshot().body?.dataStream).toContain('Rotated');
+            expect(cells.map((_, row) => worksheet.getCellValueOnly(row, 0)?.v)).toEqual([undefined, 'Header', 148706409, undefined]);
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+});
+
 describe('Configured cell text line gap', () => {
     it.each([false, true])('keeps saved cells intact and includes inter-line gaps in auto height (rich: %s)', (rich) => {
         const environment = setupRenderTestEnv();

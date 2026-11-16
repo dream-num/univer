@@ -1414,6 +1414,11 @@ export function getDisplayValueFromCell(cell: Nullable<ICellDataForSheetIntercep
         return '';
     }
 
+    const override = cell.fontRenderExtension?.displayText;
+    if (override !== undefined) {
+        return override;
+    }
+
     const richTextValue = cell.p?.body?.dataStream;
     if (richTextValue) {
         return BuildTextUtils.transform.getPlainText(richTextValue);

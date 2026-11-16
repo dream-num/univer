@@ -137,7 +137,7 @@ export function isEmptyCell(cell: Nullable<ICellData>) {
 }
 
 export function isCellCoverable(cell: Nullable<ICellDataForSheetInterceptor>) {
-    return isEmptyCell(cell) && cell?.coverable !== false;
+    return isEmptyCell(cell) && cell?.coverable !== false && !cell?.fontRenderExtension?.displayText;
 }
 
 export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {

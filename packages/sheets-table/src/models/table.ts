@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange } from '../types/type';
 import { generateRandomId } from '@univerjs/core';
+import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange, TableMetaType } from '../types/type';
 import { tableThemeConfig } from '../controllers/table-theme.factory';
 import { TableColumn } from './table-column';
+import { isImportedTableWithoutTheme } from './table-dxf';
 import { TableFilters } from './table-filter';
 
 export class Table {
@@ -29,10 +30,11 @@ export class Table {
     private _tableStyleId?: string;
     private _showHeader: boolean;
     private _showFooter: boolean;
+    private _showAutoFilter: boolean;
     private _range: ITableRange;
     private _columns: Map<string, TableColumn> = new Map();
     private _columnOrder: string[] = [];
-    tableMeta: Record<string, any>;
+    tableMeta: TableMetaType;
     private _tableFilters: TableFilters;
 
     private _subUnitId: string;
@@ -48,7 +50,8 @@ export class Table {
     _init(header: string[], options: ITableOptions) {
         this._tableStyleId = options?.tableStyleId;
         this._showHeader = options?.showHeader ?? true;
-        this._showFooter = options.showFooter ?? false;
+        this._showFooter = options?.showFooter ?? false;
+        this._showAutoFilter = options?.showAutoFilter ?? true;
         // init table columns
         const range = this.getRange();
         const startColumn = range.startColumn;
@@ -139,7 +142,7 @@ export class Table {
         this._columnOrder.splice(index, 1);
     }
 
-    setTableMeta(meta: Record<string, any>) {
+    setTableMeta(meta: TableMetaType) {
         this.tableMeta = meta;
     }
 
@@ -196,6 +199,9 @@ export class Table {
     }
 
     getTableStyleId() {
+        if (!this._tableStyleId && isImportedTableWithoutTheme(this)) {
+            return '';
+        }
         return this._tableStyleId ?? tableThemeConfig[0].name;
     }
 
@@ -215,6 +221,14 @@ export class Table {
         return this._showFooter ?? false;
     }
 
+    isShowAutoFilter() {
+        return this._showAutoFilter ?? true;
+    }
+
+    setShowAutoFilter(showAutoFilter: boolean) {
+        this._showAutoFilter = showAutoFilter;
+    }
+
     getTableInfo(): ITableInfo {
         return {
             id: this._id,
@@ -223,6 +237,7 @@ export class Table {
             range: this.getRangeInfo(),
             meta: this.tableMeta,
             showHeader: this._showHeader,
+            showAutoFilter: this._showAutoFilter,
             columns: this._columnOrder.map((columnId) => this._columns.get(columnId)!.toJSON()),
         };
     }
@@ -234,6 +249,7 @@ export class Table {
             options: {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
+                showAutoFilter: this._showAutoFilter,
             },
             tableStyleId: this._tableStyleId,
         };
@@ -244,10 +260,7 @@ export class Table {
     }
 
     toJSON(): ITableJson {
-        const columns: ITableColumnJson[] = [];
-        this._columns.forEach((column) => {
-            columns.push(column.toJSON());
-        });
+        const columns = this._columnOrder.map((columnId) => this._columns.get(columnId)!.toJSON());
         return {
             id: this._id,
             name: this._name,
@@ -255,6 +268,7 @@ export class Table {
             options: {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
+                showAutoFilter: this._showAutoFilter,
                 tableStyleId: this._tableStyleId,
             },
             // TODO: support filter
@@ -272,6 +286,9 @@ export class Table {
         this._tableStyleId = json.options.tableStyleId || '';
         this._showHeader = json.options.showHeader ?? true;
         this._showFooter = json.options.showFooter ?? true;
+        this._showAutoFilter = json.options.showAutoFilter ?? true;
+        this._columns.clear();
+        this._columnOrder = [];
         const columns = json.columns;
         columns.forEach((column) => {
             const tableColumn = new TableColumn(column.id, column.displayName);
@@ -289,6 +306,7 @@ export class Table {
         this._tableStyleId = '';
         this._showHeader = true;
         this._showFooter = true;
+        this._showAutoFilter = true;
         // @ts-ignore
         delete this._range;
         this._columns.clear();

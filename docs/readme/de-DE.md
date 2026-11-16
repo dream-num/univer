@@ -6,7 +6,7 @@
 
 <p align="center">Beginnen Sie mit den Open-Source-Versionen von Sheets und Docs und verbinden Sie anschließend Ihre eigene Anwendung oder Ihren Agenten.</p>
 
-<p align="center"><a href="#quick-start">🚀 Schnellstart</a> · <a href="https://docs.univer.ai/">📚 Dokumentation</a> · <a href="https://univer.ai/compare/">⚖️ Funktionsvergleich</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://docs.univer.ai/showcase">🎮 Beispiele</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API-Referenz</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
+<p align="center"><a href="#quick-start">🚀 Schnellstart</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 Dokumentation</a> · <a href="https://univer.ai/compare/">⚖️ Funktionsvergleich</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://docs.univer.ai/showcase">🎮 Beispiele</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API-Referenz</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
 
 <p align="center"><a href="../../README.md">English</a> · <a href="../../docs/readme/fr-FR.md">Français</a> · <strong>Deutsch</strong> · <a href="../../docs/readme/es-ES.md">Español</a> · <a href="../../docs/readme/zh-CN.md">简体中文</a> · <a href="../../docs/readme/zh-TW.md">繁體中文</a> · <a href="../../docs/readme/ja-JP.md">日本語</a> · <a href="../../docs/readme/ko-KR.md">한국어</a></p>
 
@@ -68,6 +68,8 @@
 <p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer** ist ein Office SDK zum Entwickeln von Office-Anwendungen innerhalb Ihres eigenen Produkts. Es bietet Menschen und bestehenden Agenten Funktionen zur Bearbeitung, Berechnung, Zusammenarbeit und Verarbeitung von Office-Dateien und nutzt dabei Ihre Daten und Berechtigungen. Die Produktfamilie umfasst Tabellenkalkulationen, Dokumente, Präsentationen, relationale Tabellen, Zeichenflächen und PDFs.
+
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace: Open Source, sofort nutzbar und erweiterbar, entwickelt mit Univer Office SDK. Auf GitHub mit einem Stern unterstützen." width="720" /></a></p>
 
 Univer Office SDK besteht aus drei Teilen:
 

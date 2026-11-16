@@ -25,6 +25,9 @@ export { objectPermissionMenuItemFactory } from './common/object-permission-menu
 export { EditorDropdown, EditorDropdownTrigger, EditorFloatingToolbar, EditorToolbarButton, EditorToolbarIcon, EditorToolbarTooltip, resolveEditorDropdownSide } from './components/editor-toolbar/EditorFloatingToolbar';
 export { EditorMenuActions, EditorMenuItem, EditorMenuPanel } from './components/editor-toolbar/EditorMenu';
 export { keepFloatingToolbarPanelInteraction, preventFloatingToolbarPanelBlur, shouldKeepFloatingToolbarMouseDownDefault } from './components/editor-toolbar/floating-toolbar-interaction';
+export { MobileTableSizePicker } from './components/table-size-picker/MobileTableSizePicker';
+export { TableSizePicker, useTableSizePicker } from './components/table-size-picker/TableSizePicker';
+export type { ITableSize, ITableSizePickerProps } from './components/table-size-picker/TableSizePicker';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
 export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';

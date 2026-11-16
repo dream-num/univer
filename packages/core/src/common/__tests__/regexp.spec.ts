@@ -32,6 +32,23 @@ describe('regexp utilities', () => {
         expect(regex.test('file-a-index.ts')).toBe(false);
     });
 
+    it('reads a tilde before *, ? or ~ as that literal character, as spreadsheet wildcards do', () => {
+        const question = regexp.createFromWildcard('fy06~?');
+        expect(question.test('fy06?')).toBe(true);
+        expect(question.test('fy06x')).toBe(false);
+
+        const star = regexp.createFromWildcard('5~*3*');
+        expect(star.test('5*3 = 15')).toBe(true);
+        expect(star.test('513')).toBe(false);
+
+        const tilde = regexp.createFromWildcard('a~~b');
+        expect(tilde.test('a~b')).toBe(true);
+        expect(tilde.test('a~~b')).toBe(false);
+
+        // A tilde before any other character stays literal.
+        expect(regexp.createFromWildcard('a~b').test('a~b')).toBe(true);
+    });
+
     it('builds literal regexes from text containing regex syntax', () => {
         const regex = regexp.createLiteralRegExp('a.b+(test)?', 'g');
 

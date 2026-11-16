@@ -284,7 +284,8 @@ export function Sidebar() {
                           univer-flex univer-size-6 univer-cursor-pointer univer-appearance-none univer-items-center
                           univer-justify-center univer-rounded-sm univer-border-none univer-bg-transparent univer-p-0
                           univer-text-gray-500
-                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500
+                          focus-visible:univer-outline-none focus-visible:univer-ring-2
+                          focus-visible:univer-ring-primary-500
                           dark:!univer-text-gray-300
                         `}
                         onClick={handleClose}

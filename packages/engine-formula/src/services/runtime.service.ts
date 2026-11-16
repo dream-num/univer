@@ -844,7 +844,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     const currentColumn = columnIndex - startColumn + column;
                     const cell = unitData[unitId]?.[sheetId]?.cellData.getValue(currentRow, currentColumn);
                     const arrayDataCell = arrayData?.[unitId]?.[sheetId]?.getValue(currentRow, currentColumn);
-                    const shouldClearPreviousCellOfCurrentArrayFormula = this._arrayCellHasData(arrayDataCell) &&
+                    const isFormulaCell = isFormulaString(cell?.f) || isFormulaId(cell?.si);
+                    const shouldClearPreviousCellOfCurrentArrayFormula = !isFormulaCell &&
+                        this._arrayCellHasData(arrayDataCell) &&
                         this._isInArrayFormulaRange(previousArrayFormulaRange, currentRow, currentColumn) &&
                         (cell == null || this._isSameCellValue(cell, arrayDataCell));
 
@@ -852,11 +854,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                         runtimeArrayUnitData.setValue(row, column, errorObject);
                     } else if (shouldClearPreviousCellOfCurrentArrayFormula) {
                         sheetData.setValue(currentRow, currentColumn, null);
-                    } else if (cell != null) {
-                        if (cell.v == null) {
-                            cell.v = '';
-                        }
-                        sheetData.setValue(currentRow, currentColumn, { ...cell });
+                    } else if (cell != null && !isFormulaCell && sheetData.getValue(currentRow, currentColumn) == null) {
+                        sheetData.setValue(currentRow, currentColumn, { ...cell, v: cell.v ?? '' });
                     } // To determine whether a cell has a value, in addition to cell != null, other array formulas may get undefined (displayed as 0). In this case, the value of the existing array formula cannot be modified.
                     else if (this._isInOtherArrayFormulaRange(unitId, sheetId, row, column, currentRow, currentColumn)) {
                         return true;
@@ -1132,12 +1131,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 const currentCell = unitData?.[formulaUnitId]?.[formulaSheetId]?.cellData?.getValue(r, c);
 
                 const featureCell = this._getRuntimeFeatureCellValue(r, c, formulaSheetId, formulaUnitId);
-                const isPreviousCellOfCurrentArrayFormula = this._arrayCellHasData(arrayDataCell) &&
+                const isFormulaCell = isFormulaString(currentCell?.f) || isFormulaId(currentCell?.si);
+                const isPreviousCellOfCurrentArrayFormula = !isFormulaCell &&
+                    this._arrayCellHasData(arrayDataCell) &&
                     this._isInArrayFormulaRange(previousArrayFormulaRange, r, c) &&
                     (currentCell == null || this._isSameCellValue(currentCell, arrayDataCell));
                 const hasRuntimeCell = !isNullCell(cell);
                 const isInOtherArrayFormulaRange = this._isInOtherArrayFormulaRange(formulaUnitId, formulaSheetId, formulaRow, formulaColumn, r, c);
-                const currentCellBlocks = !isNullCell(currentCell) && !isPreviousCellOfCurrentArrayFormula;
+                const currentCellBlocks = isFormulaCell || (!isNullCell(currentCell) && !isPreviousCellOfCurrentArrayFormula);
                 const featureCellBlocks = !isNullCell(featureCell);
 
                 // arrayDataCell may display 0 as {v: null}. Although it is an empty cell, it is considered to have a value.

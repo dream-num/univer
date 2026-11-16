@@ -34,7 +34,9 @@ export class Formulatext extends BaseFunction {
 
     override calculate(reference: FunctionVariantType) {
         if (!reference.isReferenceObject()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return reference.isError() && (reference as ErrorValueObject).getValue() === ErrorType.REF
+                ? ErrorValueObject.create(ErrorType.REF)
+                : ErrorValueObject.create(ErrorType.NA);
         }
 
         const unitId = (reference as BaseReferenceObject).getUnitId();

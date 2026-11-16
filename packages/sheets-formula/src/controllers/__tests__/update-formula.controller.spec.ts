@@ -1563,3 +1563,100 @@ describe('conditional circular references', () => {
         }
     });
 });
+
+describe('Grouped dynamic array formulas', () => {
+    it('recalculates PIVOTBY, GROUPBY and BYCOL from source values and restores the spill on undo', async () => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: {} }, logLevel: LogLevel.SILENT });
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.registerPlugin(UniverFormulaEnginePlugin);
+        univer.registerPlugin(UniverSheetsFormulaPlugin, { initialFormulaComputing: CalculationMode.NO_CALCULATION });
+        const facade = FUniver.newAPI(univer);
+        try {
+            const workbook = facade.createWorkbook({
+                id: 'grouped-formula-com',
+                sheetOrder: ['sheet'],
+                sheets: {
+                    sheet: {
+                        id: 'sheet',
+                        name: 'Data',
+                        rowCount: 20,
+                        columnCount: 22,
+                        cellData: {
+                            0: {
+                                7: { f: '=_xlfn.PIVOTBY(A2:A5,B2:B5,C2:C5,_xleta.SUM)' },
+                                13: { f: '=GROUPBY(A2:A5,C2:C5,HSTACK(SUM,AVERAGE))' },
+                                17: { f: '=ARRAYTOTEXT(BYCOL(C2:C5,_xleta.AVERAGE),1)' },
+                                18: { f: '=FORMULATEXT(E2)' },
+                            },
+                            1: { 0: { v: 'West' }, 1: { v: 2025 }, 2: { v: 9 }, 4: { f: '=NA()' } },
+                            2: { 0: { v: 'East' }, 1: { v: 2024 }, 2: { v: 3 } },
+                            3: { 0: { v: 'West' }, 1: { v: 2024 }, 2: { v: 10 } },
+                            4: { 0: { v: 'East' }, 1: { v: 2025 }, 2: { v: 4 } },
+                            7: { 5: { v: 10 }, 6: { v: 'West' } },
+                            8: { 5: { v: 2 } },
+                            10: {
+                                5: { f: '=GROUPBY(G8:G9,F8:F9,SUM)' },
+                                8: { f: '=ARRAYTOTEXT(GROUPBY(G8:G9,F8:F9,LAMBDA(x,INDEX(x,1))),1)' },
+                            },
+                        },
+                    },
+                },
+            });
+            const sheet = workbook.getActiveSheet();
+            const injector = univer.__getInjector();
+            injector.get(IUniverInstanceService).focusUnit(workbook.getId());
+            const commands = injector.get(ICommandService);
+            const formula = facade.getFormula();
+            const calculate = async (action: () => unknown) => {
+                let subscription: { dispose(): void } | undefined;
+                let timeout: ReturnType<typeof setTimeout> | undefined;
+                const result = new Promise<void>((resolve, reject) => {
+                    subscription = formula.calculationEnd(() => resolve());
+                    timeout = setTimeout(() => reject(new Error('Grouped formula calculation timed out')), 5000);
+                });
+                try {
+                    action();
+                    await result;
+                } finally {
+                    clearTimeout(timeout);
+                    subscription?.dispose();
+                }
+            };
+            const check = (amount: number) => {
+                expect(sheet.getRange('H1:K4').getValues()).toEqual([
+                    ['', 2024, 2025, 'Total'],
+                    ['East', 3, 4, 7],
+                    ['West', 10, amount, amount + 10],
+                    ['Total', 13, amount + 4, amount + 17],
+                ]);
+                expect(sheet.getRange('N1:P4').getValues()).toEqual([
+                    ['', 'SUM', 'AVERAGE'],
+                    ['East', 7, 3.5],
+                    ['West', amount + 10, (amount + 10) / 2],
+                    ['Total', amount + 17, (amount + 17) / 4],
+                ]);
+                expect(sheet.getRange('R1:S1').getValues()).toEqual([[`{${(amount + 17) / 4}}`, '=NA()']]);
+            };
+            await calculate(() => formula.executeCalculation());
+            check(9);
+            expect(sheet.getRange('F11:G13').getValues()).toEqual([['West', 10], [0, 2], ['Total', 12]]);
+            expect(sheet.getRange('I11').getValue()).toBe('{"West",10;,2;"Total",#VALUE!}');
+            await calculate(() => sheet.getRange('C2').setValue(19));
+            check(19);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            check(9);
+            await calculate(() => sheet.getRange('B2').setValue(2026));
+            expect(sheet.getRange('H1:L4').getValues()).toEqual([
+                ['', 2024, 2025, 2026, 'Total'],
+                ['East', 3, 4, '', 7],
+                ['West', 10, '', 9, 19],
+                ['Total', 13, 4, 9, 26],
+            ]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            check(9);
+            expect(sheet.getRange('L1:L4').getValues()).toEqual([[null], [null], [null], [null]]);
+        } finally {
+            univer.dispose();
+        }
+    });
+});

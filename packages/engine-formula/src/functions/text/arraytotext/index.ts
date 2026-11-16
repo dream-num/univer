@@ -48,10 +48,8 @@ export class Arraytotext extends BaseFunction {
     }
 
     private _handleSingleObject(array: BaseValueObject, format: BaseValueObject): BaseValueObject {
-        const _array = this._checkArray(array);
-
-        if (_array.isError()) {
-            return _array;
+        if (array.isError()) {
+            return array;
         }
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(format);
@@ -74,20 +72,15 @@ export class Arraytotext extends BaseFunction {
 
         for (let r = 0; r < arrayRowCount; r++) {
             for (let c = 0; c < arrayColumnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
-
-                let value = `${valueObject.getValue()}`;
-
-                if (valueObject.isNull()) {
-                    value = '';
+                const valueObject = array.isArray() ? (array as ArrayValueObject).getRealValue(r, c) : array;
+                let value = valueObject == null || valueObject.isNull() ? '' : String(valueObject.getValue());
+                if (valueObject?.isNumber()) {
+                    value = formatNumber(Number(valueObject.getValue()));
+                } else if (valueObject?.isBoolean()) {
+                    value = value.toUpperCase();
                 }
-
-                if (valueObject.isBoolean()) {
-                    value = value.toLocaleUpperCase();
-                }
-
-                if (valueObject.isString() && formatValue) {
-                    result += `"${value}"`;
+                if (valueObject?.isString() && formatValue) {
+                    result += `"${value.replace(/"/g, '""')}"`;
                 } else {
                     result += value;
                 }
@@ -116,19 +109,26 @@ export class Arraytotext extends BaseFunction {
 
         return StringValueObject.create(result);
     }
+}
 
-    private _checkArray(array: BaseValueObject): BaseValueObject {
-        if (array.isArray()) {
-            const arrayRowCount = (array as ArrayValueObject).getRowCount();
-            const arrayColumnCount = (array as ArrayValueObject).getColumnCount();
-
-            if (arrayRowCount > 1 || arrayColumnCount > 1) {
-                return array;
-            }
-
-            return (array as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        return array;
+function formatNumber(value: number): string {
+    if (!Number.isFinite(value) || (Number.isInteger(value) && Math.abs(value) < 1e15)) {
+        return String(value);
     }
+    const [coefficient, power] = Math.abs(value).toExponential(14).split('e');
+    const exponent = Number(power);
+    const mantissa = coefficient.replace(/\.?0+$/, '');
+    const sign = value < 0 ? '-' : '';
+    if (exponent >= 20 || exponent < -18) {
+        return `${sign}${mantissa}E${power}`;
+    }
+    const digits = mantissa.replace('.', '');
+    const point = exponent + 1;
+    if (point <= 0) {
+        return `${sign}0.${'0'.repeat(-point)}${digits}`;
+    }
+    if (point >= digits.length) {
+        return sign + digits.padEnd(point, '0');
+    }
+    return `${sign}${digits.slice(0, point)}.${digits.slice(point)}`;
 }

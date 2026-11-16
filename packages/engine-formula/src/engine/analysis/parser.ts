@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, Inject, Injector, sortRules } from '@univerjs/core';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import { Disposable, Inject, Injector, sortRules } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
@@ -81,6 +81,21 @@ class NamedLambdaCallNode extends BaseAstNode {
 
     private _arguments(): FunctionVariantType[] {
         return this.getChildren().map((node) => node.getValue() ?? ErrorValueObject.create(ErrorType.VALUE));
+    }
+}
+
+class EtaReducedFunctionNode extends BaseAstNode {
+    constructor(name: string, private readonly _lambda: BaseAstNode) {
+        super(name);
+    }
+
+    override get nodeType() {
+        return NodeType.VALUE;
+    }
+
+    override execute(): void {
+        this._lambda.execute();
+        this.setValue(this._lambda.getValue());
     }
 }
 
@@ -393,7 +408,7 @@ export class AstTreeBuilder extends Disposable {
                     continue;
                 }
             } else {
-                astNode = this._checkAstNode(item);
+                astNode = this._checkAstNode(item, lexerNode);
             }
 
             if (astNode == null) {
@@ -487,11 +502,19 @@ export class AstTreeBuilder extends Disposable {
     //     }
     // }
 
-    private _checkAstNode(item: LexerNode | string) {
+    private _checkAstNode(item: LexerNode | string, parameter?: LexerNode): BaseAstNode {
         if (item instanceof LexerNode) {
             const namedCall = this._createNamedLambdaCall(item);
             if (namedCall) {
                 return namedCall;
+            }
+        }
+        if (typeof item === 'string' || item.getChildren().length === 0) {
+            const token = typeof item === 'string' ? item : item.getToken();
+            const context = parameter ?? (typeof item === 'string' ? undefined : item.getParent() ?? undefined);
+            const lambda = this._createEtaReducedFunction(token, context);
+            if (lambda) {
+                return lambda;
             }
         }
         let astNode: Nullable<BaseAstNode> = null;
@@ -505,11 +528,6 @@ export class AstTreeBuilder extends Disposable {
         }
 
         if (astNode == null) {
-            const aggregatorNode = this._createGroupByAggregatorTokenNode(item);
-            if (aggregatorNode != null) {
-                return aggregatorNode;
-            }
-
             return new ErrorFunctionNode(typeof item === 'string' ? item : item.getToken());
         }
 
@@ -517,27 +535,50 @@ export class AstTreeBuilder extends Disposable {
         return astNode;
     }
 
-    private _createGroupByAggregatorTokenNode(param: LexerNode | string): Nullable<BaseAstNode> {
-        const token = (typeof param === 'string' ? param : param.getToken()).trim().toUpperCase();
+    private _createEtaReducedFunction(raw: string, parameter?: LexerNode): BaseAstNode | undefined {
+        const token = raw.trim().toUpperCase();
         const prefix = '_XLETA.';
-        if (!token.startsWith(prefix)) {
-            return null;
+        const explicit = token.startsWith(prefix);
+        const name = explicit ? token.slice(prefix.length) : token;
+        if (!/^[A-Z][A-Z0-9.]*$/.test(name)) {
+            return;
         }
-
-        const name = token.slice(prefix.length);
-        if (
-            name !== 'SUM' &&
-            name !== 'COUNT' &&
-            name !== 'COUNTA' &&
-            name !== 'PERCENTOF' &&
-            name !== 'MIN' &&
-            name !== 'MAX' &&
-            name !== 'ARRAYTOTEXT'
-        ) {
-            return null;
+        const arity = this._getEtaReducedFunctionArity(parameter);
+        if ((!explicit && arity == null) || !this._injector.get(IFunctionService).hasExecutor(name)) {
+            return;
         }
+        const args = arity === 2 || name === 'PERCENTOF' ? '_xlpm.etaValue,_xlpm.etaSecond' : '_xlpm.etaValue';
+        const lexer = this._injector.get(Lexer).treeBuilder(`=LAMBDA(${args},${name}(${args}))`);
+        if (!(lexer instanceof LexerNode)) {
+            return;
+        }
+        const root = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
+        const lambda = this._parse(lexer, root)?.getChildren()[0];
+        return lambda ? new EtaReducedFunctionNode(name, lambda) : undefined;
+    }
 
-        return new BaseAstNode(name);
+    private _getEtaReducedFunctionArity(parameter: LexerNode | undefined): number | undefined {
+        let argument = parameter;
+        while (argument?.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
+            const call = argument.getParent();
+            if (!call) {
+                return;
+            }
+            const name = normalizeFunctionToken(call.getToken().trim().toUpperCase());
+            if (name === 'HSTACK' || name === 'VSTACK') {
+                argument = call.getParent() ?? undefined;
+                continue;
+            }
+            const index = call.getChildren().indexOf(argument);
+            if ((name === 'REDUCE' || name === 'SCAN') && index === 2) {
+                return 2;
+            }
+            if ((name === 'PIVOTBY' && index === 3) || (name === 'GROUPBY' && index === 2) ||
+                ((name === 'BYCOL' || name === 'BYROW') && index === 1)) {
+                return 1;
+            }
+            return;
+        }
     }
 
     private _initializeAstNode() {

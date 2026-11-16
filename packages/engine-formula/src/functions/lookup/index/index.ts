@@ -195,6 +195,9 @@ export class Index extends BaseFunction {
         // =INDEX(A6:B6,2) equals =INDEX(A6:B6,1,2)
         if (referenceRowColumnCount.rowCount === 1 && !columnNum) {
             columnNumValue = Math.floor(+_rowNum.getValue());
+            if (columnNumValue > 0) {
+                rowNumValue = 1;
+            }
         } else {
             rowNumValue = Math.floor(+_rowNum.getValue());
 

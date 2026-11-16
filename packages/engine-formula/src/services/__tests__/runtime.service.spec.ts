@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
     CellValueType,
     ContextService,
@@ -28,7 +29,6 @@ import {
     UniverInstanceService,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
@@ -637,6 +637,31 @@ describe('FormulaRuntimeService', () => {
         expect(runtime.getUnitData().unit?.sheet?.getValue(4, 3)?.v).toBe(222);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(4, 3)).toBeUndefined();
+    });
+
+    it.each([
+        { f: '=FORMULATEXT(D2)' },
+        { si: 'sharedFormula' },
+    ])('preserves a formula result when another formula spills into its cell: %j', (cell) => {
+        const { injector, runtime, unitDataMatrix, arrayFormulaCellData, arrayFormulaRange } = createRuntimeService();
+        try {
+            arrayFormulaRange.unit.sheet = {
+                3: { 3: { startRow: 3, startColumn: 3, endRow: 3, endColumn: 4 } },
+            };
+            unitDataMatrix.setValue(3, 4, { ...cell });
+            arrayFormulaCellData.setValue(3, 4, { v: '=NA()', t: CellValueType.STRING });
+            runtime.setCurrent(3, 4, 10, 10, 'sheet', 'unit');
+            runtime.setRuntimeData(StringValueObject.create('=NA()'));
+
+            runtime.setCurrent(3, 3, 10, 10, 'sheet', 'unit');
+            runtime.setRuntimeData(createNewArray([[NumberValueObject.create(1), NumberValueObject.create(2)]], 1, 2));
+
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
+            expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)?.v).toBe('=NA()');
+            expect(unitDataMatrix.getValue(3, 4)).toEqual(cell);
+        } finally {
+            injector.dispose();
+        }
     });
 
     it('should manage feature caches and embedded map', () => {

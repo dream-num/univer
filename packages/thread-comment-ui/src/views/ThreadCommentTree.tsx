@@ -38,7 +38,7 @@ import {
     ThreadCommentModel,
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
-import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useEvent, useObservable, UserInfo } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime, map, of, startWith } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
@@ -124,6 +124,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const userManagerService = useDependency(UserManagerService);
     useObservable(userManagerService.userChange$);
     const user = userManagerService.getUser(item.personId);
+    const userInfo = { userId: item.personId, name: user?.name || item.authorName, avatar: user?.avatar };
+    const userContext = { scene: 'comment-author' as const, unitId, subUnitId, commentId: item.id, threadId: item.threadId };
     const currentUser = useObservable(userManagerService.currentUser$);
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
@@ -188,20 +190,19 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             onMouseEnter={() => setShowReply(true)}
         >
             <div
-                className={`
-                  univer-absolute univer-left-0 univer-top-0 univer-size-6 univer-rounded-full univer-bg-cover
-                  univer-bg-center univer-bg-no-repeat
+                className="
+                  univer-absolute univer-left-0 univer-top-0
                   rtl:univer-left-auto rtl:univer-right-0
-                `}
-                style={{
-                    backgroundImage: `url(${user?.avatar || avatarFallback})`,
-                }}
-            />
-            {user || item.authorName
+                "
+                aria-hidden="true"
+            >
+                <UserInfo user={userInfo} context={userContext} part="avatar" fallbackSrc={avatarFallback} />
+            </div>
+            {item.personId || user || item.authorName
                 ? (
                     <div className="univer-mb-1 univer-flex univer-h-6 univer-items-center univer-justify-between">
                         <div className="univer-text-sm univer-font-medium univer-leading-5">
-                            {user?.name || item.authorName || ' '}
+                            <UserInfo user={userInfo} context={userContext} part="name" />
                         </div>
                         <div>
                             {(isMock || resolved)

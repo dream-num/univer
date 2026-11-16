@@ -1,11 +1,11 @@
-import type { TModuleFormat } from '../tsdown/configs/module.ts';
-import type { IPackageJson } from '../tsdown/types.ts';
-import type { IPresetBuildOptions, IPresetPackageJson } from './types.ts';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
+import type { TModuleFormat } from '../tsdown/configs/module.ts';
+import type { IPackageJson } from '../tsdown/types.ts';
+import type { IPresetBuildOptions, IPresetPackageJson } from './types.ts';
 import { createModuleConfig } from '../tsdown/configs/module.ts';
 import { BUILD_OUTPUT_DIRECTORIES, CLEANUP_DIRECTORIES } from '../tsdown/constants.ts';
 import { createBaseConfig, createInputPlugins } from '../tsdown/utils/base-config.ts';
@@ -108,11 +108,11 @@ export async function buildPresetPackage(options: IPresetBuildOptions = {}) {
     const moduleConfigs = createPresetModuleEntryGroups(getPresetModuleEntries(packageDir)).flatMap((entries) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
-            enableObfuscation: false,
             entries,
             externalPackages,
             facadeExternalPackages: externalPackages,
             format,
+            minify: false,
             outDir: BUILD_OUTPUT_DIRECTORIES[format],
             packageDir,
             plugins,

@@ -54,6 +54,9 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
     return a.startColumn - b.startColumn;
 });
 
+// Duplicate and unique values compare text case-insensitively, as Excel does: "Apple" duplicates "apple".
+const duplicateKey = (value: unknown) => (typeof value === 'string' ? value.toLowerCase() : value);
+
 export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, boolean> {
     // eslint-disable-next-line max-lines-per-function
     override preComputing(row: number, col: number, context: IContext): void {
@@ -85,12 +88,8 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             const cell = context.getCellValue(row, col);
                             const v = getCellValue(cell);
                             if (!isNullable(v)) {
-                                const cache = cacheMap.get(v);
-                                if (cache) {
-                                    cacheMap.set(v, cache + 1);
-                                } else {
-                                    cacheMap.set(v, 1);
-                                }
+                                const key = duplicateKey(v);
+                                cacheMap.set(key, (cacheMap.get(key) ?? 0) + 1);
                             }
                         });
                     });
@@ -387,7 +386,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         return false;
                     }
                     const uniqueCache = preComputingResult.value;
-                    return uniqueCache.get(value) === 1;
+                    return uniqueCache.get(duplicateKey(value)) === 1;
                 }
                 case CFSubRuleType.duplicateValues: {
                     const value = getCellValue(cellValue);
@@ -395,7 +394,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     if (isNullable(value) || !preComputingResult) {
                         return false;
                     }
-                    const uniqueCacheValue = preComputingResult.value.get(value);
+                    const uniqueCacheValue = preComputingResult.value.get(duplicateKey(value));
 
                     return uniqueCacheValue && uniqueCacheValue !== 1;
                 }

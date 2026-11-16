@@ -101,11 +101,11 @@ describe('ValueNode number literals', () => {
     it('converts number literals to canonical text', () => {
         const calculate = createCalculate(testBed);
 
-        expect(calculate('=12.50&""')).toStrictEqual([['12.5']]);
-        expect(calculate('=1.0&"x"')).toStrictEqual([['1x']]);
-        expect(calculate('=1E3&""')).toStrictEqual([['1000']]);
-        expect(calculate('=.5&""')).toStrictEqual([['0.5']]);
-        expect(calculate('=-12.50&""')).toStrictEqual([['-12.5']]);
+        expect(calculate('=12.50&""')).toBe('12.5');
+        expect(calculate('=1.0&"x"')).toBe('1x');
+        expect(calculate('=1E3&""')).toBe('1000');
+        expect(calculate('=.5&""')).toBe('0.5');
+        expect(calculate('=-12.50&""')).toBe('-12.5');
     });
 
     it('treats number literals in array constants as numbers', () => {
@@ -118,7 +118,7 @@ describe('ValueNode number literals', () => {
         const calculate = createCalculate(testBed);
 
         expect(calculate('="12.50"')).toBe('12.50');
-        expect(calculate('="007"&""')).toStrictEqual([['007']]);
+        expect(calculate('="007"&""')).toBe('007');
         expect(calculate('=ISNUMBER("12.50")')).toBe(false);
     });
 

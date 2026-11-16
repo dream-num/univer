@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, CustomRangeType, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 import { DocHyperLinkCommandId } from '@univerjs/docs-hyper-link';
+import { getDocHyperLinkTargetProperties } from '../../utils/hyper-link-target';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -66,7 +67,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
                     startIndex: 0,
                     endIndex: params.label.length + 1,
                     properties: {
-                        url: payload,
+                        ...getDocHyperLinkTargetProperties(payload, doc.getBody(), oldLink?.properties),
                         ...(oldLink?.properties?.textStyleMode ? { textStyleMode: oldLink.properties.textStyleMode } : null),
                         ...(oldLink?.properties?.textColorMode ? { textColorMode: oldLink.properties.textColorMode } : null),
                     },

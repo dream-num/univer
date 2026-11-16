@@ -28,7 +28,9 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
+import { findInternalLinkTarget } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+import { getDocHyperLinkTarget } from '../../utils/hyper-link-target';
 import { isBlankInput } from './utils';
 
 function hasProtocol(url: string): boolean {
@@ -40,6 +42,9 @@ function isEmail(url: string): boolean {
 }
 
 function transformUrl(url: string): string {
+    if (url.startsWith('#')) {
+        return url;
+    }
     return hasProtocol(url) ? url : isEmail(url) ? `mailto://${url}` : `https://${url}`;
 }
 
@@ -53,12 +58,13 @@ export function useDocHyperLinkEdit() {
     const [link, setLink] = useState('');
     const [label, setLabel] = useState('');
     const [showError, setShowError] = useState(false);
-    const isLegal = Tools.isLegalUrl(link);
     const doc = editing
         ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC)
         : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const isLegal = link.startsWith('#')
+        ? findInternalLinkTarget(doc?.getBody(), link.slice(1), link.slice(1)) != null
+        : Tools.isLegalUrl(link);
 
-    // eslint-disable-next-line complexity
     useEffect(() => {
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (!activeRange) {
@@ -75,7 +81,7 @@ export function useDocHyperLinkEdit() {
             if (doc && matchedRange) {
                 // Selection changes are the external source of truth for these controlled inputs.
                 // eslint-disable-next-line react/set-state-in-effect
-                setLink(matchedRange.properties?.url ?? '');
+                setLink(getDocHyperLinkTarget(matchedRange.properties));
                 // eslint-disable-next-line react/set-state-in-effect
                 setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream));
             }
@@ -87,7 +93,7 @@ export function useDocHyperLinkEdit() {
         const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
         if (doc && matchedRange) {
             // eslint-disable-next-line react/set-state-in-effect
-            setLink(matchedRange.properties?.url ?? '');
+            setLink(getDocHyperLinkTarget(matchedRange.properties));
         }
     }, [doc, docSelectionManagerService, editing]);
 

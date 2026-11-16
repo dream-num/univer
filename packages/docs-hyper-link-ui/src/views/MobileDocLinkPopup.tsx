@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import {
     CustomRangeType,
     DocumentDataModel,
@@ -28,9 +27,11 @@ import { MessageType, MobileActionRow } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
-import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
+import { getDocHyperLinkTarget } from '../utils/hyper-link-target';
 
 export function MobileDocLinkPopup() {
     const commandService = useDependency(ICommandService);
@@ -57,7 +58,7 @@ export function MobileDocLinkPopup() {
         return null;
     }
 
-    const url = link.properties?.url;
+    const url = getDocHyperLinkTarget(link.properties);
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
 
@@ -67,7 +68,7 @@ export function MobileDocLinkPopup() {
                 title={<span className="univer-truncate univer-text-primary-600">{url}</span>}
                 aria-label={url}
                 variant="subtle"
-                onClick={() => window.open(url, undefined, 'noopener noreferrer')}
+                onClick={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
             />
             {canCopy && (
                 <MobileActionRow

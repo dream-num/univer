@@ -31,6 +31,7 @@ import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
+import { getDocHyperLinkTarget } from '../utils/hyper-link-target';
 
 export const DocLinkPopup = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
@@ -55,7 +56,7 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const target = link.properties?.url ?? `#${link.properties?.bookmarkId ?? link.properties?.headingId ?? ''}`;
+    const target = getDocHyperLinkTarget(link.properties);
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (

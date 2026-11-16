@@ -141,6 +141,29 @@ describe('Test xlookup', () => {
             }
         });
 
+        it('reads ? and * as ordinary characters in the exact part of match modes -1 and 1', () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const returnArray = ArrayValueObject.create('{1;2;3;4}');
+            const cases: [string, number, ArrayValueObject, ArrayValueObject, number | string][] = [
+                ['a?', -1, lookupArray, returnArray, 2],
+                ['a?', 1, lookupArray, returnArray, 2],
+                ['B*', -1, lookupArray, returnArray, 4],
+                ['b*', 1, lookupArray, returnArray, 4],
+                // No literal "b*": "apple" is the next smaller item, and "banana" is not an exact match.
+                ['b*', -1, ArrayValueObject.create('{"apple";"banana"}'), ArrayValueObject.create('{1;2}'), 1],
+            ];
+            for (const [lookup, matchMode, lookups, returns, expected] of cases) {
+                const result = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    returns,
+                    StringValueObject.create('missing'),
+                    NumberValueObject.create(matchMode)
+                );
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
         it('preserves errors returned by a wildcard match', () => {
             const lookupArray = ArrayValueObject.create('{"alpha";"beta"}');
             const returnArray = ArrayValueObject.create('{#DIV/0!;#N/A}');

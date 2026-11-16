@@ -124,6 +124,10 @@ export class FilterModel extends Disposable {
         this._emitHasCriteria();
     }
 
+    get hasCriteria(): boolean {
+        return this._hasCriteria$.value;
+    }
+
     isRowFiltered(row: number): boolean {
         return this._alreadyFilteredOutRows.has(row);
     }

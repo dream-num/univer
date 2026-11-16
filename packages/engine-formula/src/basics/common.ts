@@ -253,7 +253,7 @@ export interface IUnitExcludedCell {
 
 export interface IUnitRowData {
     // Calculation transport only: distinguish filter exclusions from manually hidden rows in Workers.
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean; subtotalFiltered?: boolean }> }>;
 }
 
 export interface IFormulaDatasetConfig {

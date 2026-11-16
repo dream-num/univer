@@ -30,10 +30,11 @@ import { BaseReferenceObject } from './base-reference-object';
  * - =Table[#All] / [#Data] / [#Headers] / [#Totals] / [#This Row]
  * - =Table[[#All],[Column]]                 // Section + column/column range
  * - =Table[[#Data],[ColA]:[ColB]]
+ * - =Table[[#Data],[#Totals],[Column]] or =Table[[#Headers],[#Data],[Column]]
  * - =Table[[#This Row],[Column]]
  *
  * Not supported (invalid):
- * - Multiple sections in parallel (e.g., [[#Headers],[#Data]])
+ * - Non-adjacent sections (e.g., [[#Headers],[#Totals]])
  * - Non-existent sections (e.g., #Title)
  * - Column indices instead of column names (e.g., [[1]:[3]])
  */
@@ -58,7 +59,7 @@ export class TableReferenceObject extends BaseReferenceObject {
         const { sheetId, range, titleMap } = this._tableData;
         this.setForcedSheetIdDirect(sheetId);
 
-        const { startColumn, endColumn, type } = this._parseStructuredRef(this._columnDataString, titleMap);
+        const { startColumn, endColumn, type, includeHeaders, includeTotals } = this._parseStructuredRef(this._columnDataString, titleMap);
 
         const tableStartRow = range.startRow;
         const tableEndRow = range.endRow;
@@ -74,8 +75,8 @@ export class TableReferenceObject extends BaseReferenceObject {
                 endRow = tableEndRow;
                 break;
             case TableOptionType.DATA:
-                startRow = dataStartRow;
-                endRow = dataEndRow;
+                startRow = includeHeaders ? tableStartRow : dataStartRow;
+                endRow = includeTotals ? tableEndRow : dataEndRow;
                 break;
             case TableOptionType.HEADERS:
                 if (this._tableData.showHeader === false) {
@@ -165,7 +166,7 @@ export class TableReferenceObject extends BaseReferenceObject {
     private _parseStructuredRef(
         raw: string | undefined,
         titleMap: Map<string, number>
-    ): { startColumn: number; endColumn: number; type: TableOptionType } {
+    ): { startColumn: number; endColumn: number; type: TableOptionType; includeHeaders?: boolean; includeTotals?: boolean } {
         const { range } = this._tableData;
         const fullStartCol = range.startColumn ?? 0;
         const fullEndCol = range.endColumn ?? 0;
@@ -221,8 +222,19 @@ export class TableReferenceObject extends BaseReferenceObject {
             const { startColumn, endColumn } = this._parseColumnOrRange(body, titleMap, fullStartCol);
             return { startColumn, endColumn, type: TableOptionType.DATA };
         }
-        const { startColumn, endColumn } = this._parseColumnOrRange(columnsRaw, titleMap, fullStartCol);
+        const nextComma = this._findCommaAtTopLevel(columnsRaw);
+        const next = this._parseSectionMaybeBracketed(nextComma === -1 ? columnsRaw : columnsRaw.slice(0, nextComma));
+        const includesData = section === TableOptionType.DATA || next === TableOptionType.DATA;
+        const includeHeaders = includesData && (section === TableOptionType.HEADERS || next === TableOptionType.HEADERS);
+        const includeTotals = includesData && (section === TableOptionType.TOTALS || next === TableOptionType.TOTALS);
+        if (includeHeaders || includeTotals) {
+            const columns = nextComma === -1
+                ? { startColumn: fullStartCol, endColumn: fullEndCol }
+                : this._parseColumnOrRange(columnsRaw.slice(nextComma + 1).trim(), titleMap, fullStartCol);
+            return { ...columns, type: TableOptionType.DATA, includeHeaders, includeTotals };
+        }
 
+        const { startColumn, endColumn } = this._parseColumnOrRange(columnsRaw, titleMap, fullStartCol);
         return { startColumn, endColumn, type: section };
     }
 

@@ -15,7 +15,7 @@
  */
 
 import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, FormulaType, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, FormulaType, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, Optional, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -38,6 +38,7 @@ import type { IFormulaDataSnapshot } from './formula-data-snapshot';
 import { copyUnitData } from '../basics/runtime';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { deserializeRangeWithSheet } from '../engine/utils/reference';
+import { ISheetRowFilteredService } from '../services/sheet-row-filtered.service';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
 export interface IRangeChange {
@@ -156,7 +157,8 @@ export class FormulaDataModel extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Optional(ISheetRowFilteredService) private readonly _sheetRowFilteredService?: ISheetRowFilteredService
     ) {
         super();
 
@@ -662,14 +664,17 @@ export class FormulaDataModel extends Disposable {
 
                 const startRow = 0;
                 const endRow = sheet.getRowCount() - 1;
-                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean }> = Object.create(null);
+                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData> & { filtered?: boolean; subtotalFiltered?: boolean }> = Object.create(null);
 
                 for (let i = startRow; i <= endRow; i++) {
                     if (!sheet.getRowVisible(i)) {
-                        sheetRowData[i] = {
-                            hd: BooleanNumber.TRUE,
-                            ...(sheet.getRowFiltered(i) ? { filtered: true } : {}),
-                        };
+                        const row: NonNullable<typeof sheetRowData[number]> = { hd: BooleanNumber.TRUE };
+                        sheetRowData[i] = row;
+                        if (sheet.getRowFiltered(i)) {
+                            row.filtered = true;
+                        } else if (this._sheetRowFilteredService?.getRowFiltered(unitId, sheetId, i, true)) {
+                            row.subtotalFiltered = true;
+                        }
                     }
                 }
 

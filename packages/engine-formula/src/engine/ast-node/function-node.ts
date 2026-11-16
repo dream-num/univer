@@ -31,6 +31,7 @@ import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -474,7 +475,8 @@ export class FunctionNode extends BaseAstNode {
             referenceObject.getUnitId(),
             referenceObject.getSheetId(),
             startRow,
-            endRow
+            endRow,
+            this.getToken() === FUNCTION_NAMES_MATH.SUBTOTAL
         );
 
         referenceObject.setFilteredOutRows(filteredOutRows);

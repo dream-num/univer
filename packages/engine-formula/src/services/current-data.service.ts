@@ -150,7 +150,7 @@ export interface IFormulaCurrentConfigService {
 
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
 
-    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number): number[];
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number, forSubtotal?: boolean): number[];
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
 
@@ -388,12 +388,13 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return { rowCount, columnCount };
     }
 
-    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number) {
+    getFilteredOutRows(unitId: string, sheetId: string, startRow: number, endRow: number, forSubtotal?: boolean) {
         const filteredOutRows: number[] = [];
 
         for (let r = startRow; r <= endRow; r++) {
-            if (this._calculationRowData[unitId]?.[sheetId]?.[r]?.filtered
-                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r)) {
+            const row = this._calculationRowData[unitId]?.[sheetId]?.[r];
+            if (row?.filtered || (forSubtotal && row?.subtotalFiltered)
+                || this._sheetRowFilteredService.getRowFiltered(unitId, sheetId, r, forSubtotal)) {
                 filteredOutRows.push(r);
             }
         }

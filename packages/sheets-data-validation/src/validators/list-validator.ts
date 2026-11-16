@@ -206,7 +206,9 @@ export class ListValidator extends BaseSheetValidator {
         const selected = rule.type === DataValidationType.LIST
             ? (value === undefined || value === null || value === '' ? [] : [`${value}`])
             : this.parseCellValue(value!);
-        return selected.every((i) => formula1Result.includes(i));
+        // Excel's list validation ignores case: "green" is in a list of "Green".
+        const options = new Set(formula1Result.map((option) => `${option}`.toLowerCase()));
+        return selected.every((i) => options.has(i.toLowerCase()));
     }
 
     override generateRuleName() {

@@ -202,6 +202,22 @@ describe('list-validator helpers', () => {
             {} as any,
             { ...rule, type: DataValidationType.LIST_MULTIPLE }
         )).resolves.toBe(true);
+        // Excel's list validation ignores case: "green" is in a list of "Green".
+        await expect(validator.isValidType(
+            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as never,
+            {} as never,
+            rule
+        )).resolves.toBe(true);
+        await expect(validator.isValidType(
+            { value: 'RED,blue', unitId: 'unit1', subUnitId: 'sheet1' } as never,
+            {} as never,
+            { ...rule, type: DataValidationType.LIST_MULTIPLE }
+        )).resolves.toBe(true);
+        await expect(validator.isValidType(
+            { value: 'GREY', unitId: 'unit1', subUnitId: 'sheet1' } as never,
+            {} as never,
+            rule
+        )).resolves.toBe(false);
         await expect(validator.isValidType(
             { value: undefined, unitId: 'unit1', subUnitId: 'sheet1' } as any,
             {} as any,

@@ -25,6 +25,10 @@ export { objectPermissionMenuItemFactory } from './common/object-permission-menu
 export { EditorDropdown, EditorDropdownTrigger, EditorFloatingToolbar, EditorToolbarButton, EditorToolbarIcon, EditorToolbarTooltip, resolveEditorDropdownSide } from './components/editor-toolbar/EditorFloatingToolbar';
 export { EditorMenuActions, EditorMenuItem, EditorMenuPanel } from './components/editor-toolbar/EditorMenu';
 export { keepFloatingToolbarPanelInteraction, preventFloatingToolbarPanelBlur, shouldKeepFloatingToolbarMouseDownDefault } from './components/editor-toolbar/floating-toolbar-interaction';
+export { HyperlinkEditor } from './components/hyperlink/HyperlinkEditor';
+export type { IHyperlinkEditorProps } from './components/hyperlink/HyperlinkEditor';
+export { HyperlinkPreview } from './components/hyperlink/HyperlinkPreview';
+export type { IHyperlinkPreviewProps } from './components/hyperlink/HyperlinkPreview';
 export { MobileTableSizePicker } from './components/table-size-picker/MobileTableSizePicker';
 export { TableSizePicker, useTableSizePicker } from './components/table-size-picker/TableSizePicker';
 export type { ITableSize, ITableSizePickerProps } from './components/table-size-picker/TableSizePicker';

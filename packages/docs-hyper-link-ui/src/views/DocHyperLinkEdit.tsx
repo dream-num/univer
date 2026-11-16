@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, Button, clsx, FormLayout, Input } from '@univerjs/design';
-import { KeyCode, useDependency } from '@univerjs/ui';
+import { HyperlinkEditor, useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { useDocHyperLinkEdit } from './hyper-link-edit/use-doc-hyper-link-edit';
 import { isBlankInput } from './hyper-link-edit/utils';
 
-export const DocHyperLinkEdit = () => {
+export const DocHyperLinkEdit = ({ mobile = false }: { mobile?: boolean } = {}) => {
     const localeService = useDependency(LocaleService);
     const {
         doc,
@@ -41,62 +40,23 @@ export const DocHyperLinkEdit = () => {
     }
 
     return (
-        <div
-            className={clsx(`
-              univer-box-border univer-w-[328px] univer-rounded-xl univer-bg-gray-0 univer-px-6 univer-py-5
-              univer-shadow
-              dark:!univer-bg-gray-900
-            `, borderClassName)}
-        >
-            <div>
-                {editing
-                    ? (
-                        <FormLayout
-                            label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.label')}
-                            error={showError && isBlankInput(label) ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.labelError') : ''}
-                        >
-                            <Input
-                                value={label}
-                                onChange={setLabel}
-                                autoFocus
-                                onKeyDown={(event) => {
-                                    if (event.keyCode === KeyCode.ENTER) {
-                                        handleConfirm();
-                                    }
-                                }}
-                            />
-                        </FormLayout>
-                    )
-                    : null}
-                <FormLayout
-                    label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.address')}
-                    error={showError && !isLegal ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.addressError') : ''}
-                >
-                    <Input
-                        value={link}
-                        onChange={setLink}
-                        autoFocus
-                        onKeyDown={(event) => {
-                            if (event.keyCode === KeyCode.ENTER) {
-                                handleConfirm();
-                            }
-                        }}
-                    />
-                </FormLayout>
-            </div>
-            <div className="univer-flex univer-justify-end univer-gap-3">
-                <Button onClick={handleCancel}>
-                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
-                </Button>
-                <Button
-                    variant="primary"
-                    disabled={isBlankInput(link)}
-                    onClick={handleConfirm}
-                >
-                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.confirm')}
-                </Button>
-            </div>
-        </div>
+        <HyperlinkEditor
+            mobile={mobile}
+            url={link}
+            label={editing ? label : undefined}
+            onUrlChange={setLink}
+            onLabelChange={setLabel}
+            onCancel={handleCancel}
+            onConfirm={handleConfirm}
+            labelError={showError && isBlankInput(label) ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.labelError') : undefined}
+            urlError={showError && !isLegal ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.addressError') : undefined}
+            labels={{
+                label: localeService.t<LocaleKey>('docs-hyper-link-ui.edit.label'),
+                address: localeService.t<LocaleKey>('docs-hyper-link-ui.edit.address'),
+                cancel: localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel'),
+                confirm: localeService.t<LocaleKey>('docs-hyper-link-ui.edit.confirm'),
+            }}
+        />
     );
 };
 

@@ -69,7 +69,7 @@
 
 **Univer** 是一套 Office SDK，用於在你自己的產品中建置辦公應用。它基於你的資料和權限，為使用者和現有 Agent 提供辦公編輯、計算、協作及檔案處理能力。產品系列覆蓋試算表、文件、示範文稿、關聯表格、畫布和 PDF。
 
-**[Univer Workspace](https://github.com/dream-num/univer-workspace)** 是使用 Univer Office SDK 建置的開源辦公應用，將文件編輯、協作、AI Agent 和人工審閱整合在同一個工作空間中。你可以參考原始碼建置自己的應用；如果它對你有幫助，歡迎[在 GitHub 上點一顆 ⭐](https://github.com/dream-num/univer-workspace)。
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace：基於 Univer Office SDK 建置，開源、開箱即用、可擴充。歡迎在 GitHub 上點 Star。" width="720" /></a></p>
 
 Univer Office SDK 由三部分組成：
 

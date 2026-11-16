@@ -69,7 +69,7 @@
 
 **Univer**는 자체 제품 안에 오피스 애플리케이션을 구축하기 위한 Office SDK입니다. 자체 데이터와 권한을 사용해 사용자와 기존 에이전트에 오피스 편집, 계산, 협업, 파일 처리 기능을 제공합니다. 제품군에는 스프레드시트, 문서, 프레젠테이션, 관계형 테이블, 캔버스, PDF가 포함됩니다.
 
-**[Univer Workspace](https://github.com/dream-num/univer-workspace)**는 Univer Office SDK로 만든 오픈 소스 오피스 애플리케이션입니다. 문서 편집, 협업, AI 에이전트, 사람의 검토를 하나의 작업 공간에 모았습니다. 자체 애플리케이션을 만들 때 소스 코드를 참고하고, 도움이 된다면 [GitHub에서 ⭐를 눌러 응원해 주세요](https://github.com/dream-num/univer-workspace).
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace: 바로 사용하고 확장할 수 있는 Univer Office SDK 기반 오픈 소스 앱. GitHub에서 별표로 응원해 주세요." width="720" /></a></p>
 
 Univer Office SDK는 세 부분으로 구성됩니다.
 

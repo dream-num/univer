@@ -69,7 +69,7 @@
 
 **Univer** est un SDK bureautique permettant de créer des applications Office au sein de votre propre produit. Il fournit des capacités d'édition, de calcul, de collaboration et de traitement de fichiers Office aux utilisateurs et aux agents existants, avec vos données et vos autorisations. La gamme de produits couvre les feuilles de calcul, les documents, les présentations, les tables relationnelles, les canevas et les PDF.
 
-**[Univer Workspace](https://github.com/dream-num/univer-workspace)** est une application bureautique open source construite avec Univer Office SDK. Elle réunit édition de documents, collaboration, agents IA et révision humaine dans un même espace de travail. Explorez le code source pour votre propre application et, si le projet vous est utile, [offrez-lui une ⭐ sur GitHub](https://github.com/dream-num/univer-workspace).
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace : open source, prêt à l'emploi et extensible, construit avec Univer Office SDK. Soutenez le projet avec une étoile sur GitHub." width="720" /></a></p>
 
 Univer Office SDK comprend trois parties :
 

@@ -69,7 +69,7 @@
 
 **Univer** は、自社製品の中にオフィスアプリケーションを構築するための Office SDK です。独自のデータと権限を使い、ユーザーや既存のエージェントにオフィス編集、計算、共同作業、ファイル処理を提供します。製品群はスプレッドシート、ドキュメント、プレゼンテーション、リレーショナルテーブル、キャンバス、PDF をカバーします。
 
-**[Univer Workspace](https://github.com/dream-num/univer-workspace)** は、Univer Office SDK で構築されたオープンソースのオフィスアプリケーションです。ドキュメント編集、共同作業、AI エージェント、人によるレビューを 1 つのワークスペースにまとめています。独自のアプリケーションを作る際の参考にソースコードをご覧ください。役に立ったら、[GitHub で ⭐ を付けて応援してください](https://github.com/dream-num/univer-workspace)。
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace：すぐに使えて拡張できる、Univer Office SDK 製のオープンソースアプリ。GitHub でスターを付けて応援。" width="720" /></a></p>
 
 Univer Office SDK は 3 つの部分で構成されています。
 

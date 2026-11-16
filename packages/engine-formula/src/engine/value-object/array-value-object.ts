@@ -22,7 +22,7 @@ import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isWildcard } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isLiteralTextMatch, isWildcard } from '../utils/compare';
 import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import {
@@ -661,6 +661,9 @@ export class ArrayValueObject extends BaseValueObject {
      * Due to the inability to effectively utilize the cache,
      * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
      * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
+     *
+     * With literalText, the exact match reads ? and * in a text value as ordinary characters, as XLOOKUP and XMATCH
+     * do outside match mode 2. MATCH leaves it off, because its exact match accepts wildcards.
      */
 
     orderSearch(
@@ -668,8 +671,12 @@ export class ArrayValueObject extends BaseValueObject {
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
         isDesc = false,
         isFuzzyMatching = false,
-        keepFirstNearest = false
+        keepFirstNearest = false,
+        literalText = false
     ) {
+        const literalPattern = literalText && valueObject.isString() && isWildcard(String(valueObject.getValue()))
+            ? String(valueObject.getValue())
+            : null;
         let result: Nullable<BaseValueObject>;
         let maxOrMin: Nullable<BaseValueObject>;
         let resultPosition: Nullable<{ row: number; column: number }>;
@@ -693,6 +700,8 @@ export class ArrayValueObject extends BaseValueObject {
             let matchObject: Nullable<BaseValueObject>;
             if (isFuzzyMatching === true) {
                 matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
+            } else if (literalPattern !== null) {
+                matchObject = BooleanValueObject.create(itemValue.isString() && isLiteralTextMatch(String(itemValue.getValue()), literalPattern));
             } else if (searchType === ArrayOrderSearchType.NORMAL && itemValue.isNumber() && valueObject.isNumber()) {
                 matchObject = BooleanValueObject.create(Number(itemValue.getValue()) === Number(valueObject.getValue()));
             } else {

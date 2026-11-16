@@ -268,6 +268,7 @@ export class Xlookup extends BaseFunction {
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
                 false,
+                true,
                 true
             );
         }

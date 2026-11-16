@@ -89,6 +89,26 @@ describe('Test xmatch', () => {
             }
         });
 
+        it('reads ? and * as ordinary characters in the exact part of match modes -1 and 1', async () => {
+            const lookupArray = ArrayValueObject.create('{"ab";"a?";"banana";"b*"}');
+            const cases: [string, number, ArrayValueObject, number][] = [
+                ['a?', -1, lookupArray, 2],
+                ['a?', 1, lookupArray, 2],
+                ['B*', -1, lookupArray, 4],
+                ['b*', 1, lookupArray, 4],
+                // No literal "b*": "apple" is the next smaller item, and "banana" is not an exact match.
+                ['b*', -1, ArrayValueObject.create('{"apple";"banana"}'), 1],
+            ];
+            for (const [lookup, matchMode, lookups, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
         it('Search single string horizon', async () => {
             const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),

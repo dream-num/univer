@@ -275,6 +275,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         currentRender: IRender,
         skeleton: Nullable<SpreadsheetSkeleton>,
         worksheet: Worksheet,
+        targetObject?: BaseObject,
         getCurrentBound?: () => IBoundRectNoAngle
     ) {
         const calc = () => {
@@ -325,7 +326,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             };
         }
 
-        disposable.add(this._observeChartSheetPositionChanges(currentRender, updatePosition));
+        disposable.add(this._observeChartSheetPositionChanges(currentRender, targetObject!, updatePosition));
 
         return {
             position,
@@ -334,18 +335,18 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
     }
 
-    private _observeChartSheetPositionChanges(currentRender: IRender, updatePosition: () => void) {
+    private _observeChartSheetPositionChanges(currentRender: IRender, targetObject: BaseObject, updatePosition: () => void) {
         const disposable = new DisposableCollection();
         const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
-            // Chart Sheet fits its primary chart after the canvas or viewport resizes, which can apply a later
-            // scene-scale transform. Coalesce these signals so the popup reads the final layout and current bound.
+            // Chart Sheet layout can update the Drawing after viewport and scene transforms. Read the target bound
+            // after those owner signals settle so opening and closing side panels share the same final anchor path.
             disposable.add(merge(
-                currentRender.engine.clientRect$,
                 viewMain.onResized$,
-                fromEventSubject(currentRender.scene.onTransformChange$)
+                fromEventSubject(currentRender.scene.onTransformChange$),
+                fromEventSubject(targetObject.onTransformChange$)
             ).pipe(debounceTime(0)).subscribe(updatePosition));
         }
 
@@ -397,12 +398,12 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const getTargetBound = () => getObjectPopupBound(targetObject, offsetX, offsetY);
         const bound = getTargetBound();
-
         const { position, position$, disposable } = this._createPositionObserver(
             bound,
             currentRender,
             skeleton,
             worksheet,
+            targetObject,
             skeleton ? undefined : getTargetBound
         );
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);

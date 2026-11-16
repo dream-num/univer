@@ -414,6 +414,7 @@ describe('SheetCanvasPopManagerService', () => {
             height: 30,
             classType: RENDER_CLASS_TYPE.SHAPE,
             getPropByKey: () => 'chart',
+            onTransformChange$: createEventSubject<unknown>(),
         };
 
         service.attachPopupToObject(targetObject as never, {
@@ -453,6 +454,7 @@ describe('SheetCanvasPopManagerService', () => {
             height: 30,
             classType: RENDER_CLASS_TYPE.SHAPE,
             getPropByKey: () => 'chart',
+            onTransformChange$: createEventSubject<unknown>(),
         };
 
         service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
@@ -483,14 +485,13 @@ describe('SheetCanvasPopManagerService', () => {
         });
     });
 
-    it('updates a chart sheet drawing popup when the canvas client rect changes', async () => {
+    it('uses the final chart sheet drawing bound after layout transforms settle', async () => {
         const {
             injector,
             popupService,
-            canvas,
-            clientRect$,
         } = createSheetHarness({ withoutSkeleton: true });
         const service = injector.get(SheetCanvasPopManagerService);
+        const targetTransformChange$ = createEventSubject<unknown>();
         const targetObject = {
             left: 20,
             top: 10,
@@ -498,29 +499,22 @@ describe('SheetCanvasPopManagerService', () => {
             height: 30,
             classType: RENDER_CLASS_TYPE.SHAPE,
             getPropByKey: () => 'chart',
+            onTransformChange$: targetTransformChange$,
         };
 
         service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });
         const positions: unknown[] = [];
         popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
 
-        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
-            top: 20,
-            left: 30,
-            width: 100,
-            height: 120,
-            right: 130,
-            bottom: 140,
-            x: 30,
-            y: 20,
-            toJSON: () => ({}),
-        } as DOMRect);
         targetObject.left = 30;
         targetObject.width = 20;
-        clientRect$.next({});
+        targetTransformChange$.emit({});
+        targetObject.left = 40;
+        targetObject.width = 30;
+        targetTransformChange$.emit({});
 
         await vi.waitFor(() => {
-            expect(positions[positions.length - 1]).toEqual({ left: 60, right: 80, top: 30, bottom: 60 });
+            expect(positions[positions.length - 1]).toEqual({ left: 90, right: 150, top: 40, bottom: 100 });
         });
     });
 
@@ -539,6 +533,7 @@ describe('SheetCanvasPopManagerService', () => {
             height: 30,
             classType: RENDER_CLASS_TYPE.SHAPE,
             getPropByKey: () => 'chart',
+            onTransformChange$: createEventSubject<unknown>(),
         };
 
         service.attachPopupToObject(targetObject as never, { componentKey: 'drawing-toolbar' });

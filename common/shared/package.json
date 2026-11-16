@@ -40,7 +40,6 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "happy-dom": "20.14.5",
-        "javascript-obfuscator": "^5.10.0",
         "postcss-preset-env": "^11.6.2",
         "postcss-replace": "^2.0.1",
         "sort-keys": "^6.0.1",

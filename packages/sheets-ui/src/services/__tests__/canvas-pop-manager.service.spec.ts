@@ -518,6 +518,55 @@ describe('SheetCanvasPopManagerService', () => {
         });
     });
 
+    it('uses the settled rendered position for a chart sheet floating DOM popup', async () => {
+        const {
+            canvas,
+            clientRect$,
+            injector,
+            popupService,
+        } = createSheetHarness({ withoutSkeleton: true });
+        const service = injector.get(SheetCanvasPopManagerService);
+        const renderedPosition$ = new BehaviorSubject({ startX: 20, startY: 10, endX: 60, endY: 40 });
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'chart',
+            onTransformChange$: createEventSubject<unknown>(),
+        };
+
+        service.attachPopupToObject(
+            targetObject as never,
+            { componentKey: 'drawing-toolbar' },
+            renderedPosition$
+        );
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+
+        vi.mocked(canvas.getBoundingClientRect).mockReturnValue({
+            top: 40,
+            left: 30,
+            width: 100,
+            height: 120,
+            right: 130,
+            bottom: 160,
+            x: 30,
+            y: 40,
+            toJSON: () => ({}),
+        } as DOMRect);
+        renderedPosition$.next({ startX: 100, startY: 50, endX: 300, endY: 200 });
+        clientRect$.next({});
+
+        await vi.waitFor(() => {
+            expect(positions).toEqual([
+                { left: 50, right: 130, top: 40, bottom: 100 },
+                { left: 130, right: 330, top: 90, bottom: 240 },
+            ]);
+        });
+    });
+
     it('updates a chart sheet drawing popup after zoom-to-fit changes the scene transform', async () => {
         const {
             injector,

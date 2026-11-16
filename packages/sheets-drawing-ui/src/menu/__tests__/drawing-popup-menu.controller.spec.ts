@@ -25,6 +25,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     LocaleType,
+    SheetTypes,
     toDisposable,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -32,11 +33,16 @@ import { OleUIService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
-function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: string) {
+function createControllerHarness(
+    initialDrawingType: DrawingTypeEnum,
+    icon?: string,
+    sheetType = SheetTypes.GRID
+) {
     const injector = new Injector();
     injector.add([IPermissionService, { useValue: { getPermissionPoint: () => undefined } as never }]);
     injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
@@ -52,6 +58,16 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: str
         dispose: vi.fn(),
         canDispose: () => true,
     };
+    const renderedPosition$ = new BehaviorSubject({
+        startX: 10,
+        startY: 20,
+        endX: 110,
+        endY: 120,
+        width: 100,
+        height: 100,
+        rotate: 0,
+        absolute: { left: false, top: false },
+    });
     let drawingType = initialDrawingType;
     let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
     const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
@@ -104,9 +120,17 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: str
     }]);
     injector.add([IUniverInstanceService, {
         useValue: {
+            getUnit: () => ({
+                getSheetBySheetId: () => ({ getConfig: () => ({ type: sheetType }) }),
+            }),
             getCurrentTypeOfUnit$: () => currentWorkbook$,
             getTypeOfUnitDisposed$: () => disposedWorkbook$,
             getAllUnitsForType: () => [{ getUnitId: () => 'unit-1' }],
+        } as never,
+    }]);
+    injector.add([SheetCanvasFloatDomManagerService, {
+        useValue: {
+            getFloatDomInfo: () => ({ position$: renderedPosition$ }),
         } as never,
     }]);
     injector.add([IMessageService, { useValue: { show: () => toDisposable(() => {}) } as never }]);
@@ -136,6 +160,7 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum, icon?: str
         getFeatureMenuIcon,
         injector,
         popupDisposable,
+        renderedPosition$,
         setDrawingType: (nextDrawingType: DrawingTypeEnum) => {
             drawingType = nextDrawingType;
         },
@@ -164,7 +189,8 @@ describe('DrawingPopupMenuController', () => {
                 constrainToCanvas: true,
                 direction: 'left',
                 extraProps: expect.objectContaining({ icon }),
-            })
+            }),
+            undefined
         );
         expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([
             expect.objectContaining({
@@ -172,6 +198,28 @@ describe('DrawingPopupMenuController', () => {
                 label: 'sheets-thread-comment-ui.menu.addComment',
             }),
         ]));
+
+        controller.dispose();
+        injector.dispose();
+    });
+
+    it('uses the drawing rendered position for a chart sheet popup', () => {
+        const {
+            attachPopupToObject,
+            createControl$,
+            drawingObject,
+            injector,
+            renderedPosition$,
+        } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, undefined, SheetTypes.CHART);
+        const controller = injector.get(DrawingPopupMenuController);
+
+        createControl$.next();
+
+        expect(attachPopupToObject).toHaveBeenCalledWith(
+            drawingObject,
+            expect.objectContaining({ constrainToCanvas: true }),
+            renderedPosition$
+        );
 
         controller.dispose();
         injector.dispose();

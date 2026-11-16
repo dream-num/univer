@@ -20,6 +20,7 @@ import type {
     IDisposable,
     INeedCheckDisposable,
     Injector,
+    IPosition,
     IRange,
     Nullable,
     Workbook,
@@ -59,7 +60,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, debounceTime, map, merge, throttleTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, startWith, throttleTime } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -81,6 +82,9 @@ interface IPopupMenuItem {
     disable: boolean;
 }
 type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
+
+// Chart Sheet layout can publish several rendered positions while a side panel is opening or closing.
+const CHART_SHEET_POPUP_POSITION_DEBOUNCE_MS = 50;
 
 export class SheetCanvasPopManagerService extends Disposable {
     private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
@@ -276,12 +280,13 @@ export class SheetCanvasPopManagerService extends Disposable {
         skeleton: Nullable<SpreadsheetSkeleton>,
         worksheet: Worksheet,
         targetObject?: BaseObject,
-        getCurrentBound?: () => IBoundRectNoAngle
+        getCurrentBound?: () => IBoundRectNoAngle,
+        renderedPosition$?: Observable<IPosition>
     ) {
         const calc = () => {
             const { scene } = currentRender;
             const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-            const currentBound = getCurrentBound?.() ?? bound;
+            const currentBound = skeleton ? bound : getCurrentBound?.() ?? bound;
             // Non-grid sheets have no SpreadsheetSkeleton, but their drawing coordinates still use the main viewport.
             const offsetBound = skeleton
                 ? transformBound2OffsetBound(currentBound, scene, skeleton, worksheet)
@@ -326,7 +331,16 @@ export class SheetCanvasPopManagerService extends Disposable {
             };
         }
 
-        disposable.add(this._observeChartSheetPositionChanges(currentRender, targetObject!, updatePosition));
+        if (renderedPosition$) {
+            disposable.add(combineLatest([
+                renderedPosition$,
+                currentRender.engine.clientRect$.pipe(startWith(undefined)),
+            ]).pipe(debounceTime(CHART_SHEET_POPUP_POSITION_DEBOUNCE_MS)).subscribe(([renderedPosition]) => {
+                position$.next(transformRenderedPositionToClientRect(renderedPosition, currentRender));
+            }));
+        } else {
+            disposable.add(this._observeChartSheetPositionChanges(currentRender, targetObject!, updatePosition));
+        }
 
         return {
             position,
@@ -341,8 +355,6 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(updatePosition));
-            // Chart Sheet layout can update the Drawing after viewport and scene transforms. Read the target bound
-            // after those owner signals settle so opening and closing side panels share the same final anchor path.
             disposable.add(merge(
                 viewMain.onResized$,
                 fromEventSubject(currentRender.scene.onTransformChange$),
@@ -353,13 +365,28 @@ export class SheetCanvasPopManagerService extends Disposable {
         return disposable;
     }
 
+    private _getPopupBoundForObject(targetObject: BaseObject): IBoundRectNoAngle {
+        if (targetObject.classType !== RENDER_CLASS_TYPE.SHAPE) {
+            return getObjectPopupBound(targetObject, 0, 0);
+        }
+
+        const drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>)
+            .getPropByKey('drawingType');
+        const offset = drawingType === undefined ? undefined : this._popupMenuOffsetMap.get(drawingType);
+        return getObjectPopupBound(targetObject, offset?.offsetX ?? 0, offset?.offsetY ?? 0);
+    }
+
     /**
      * attach a popup to canvas object
      * @param targetObject target canvas object
      * @param popup popup item
      * @returns disposable
      */
-    attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): INeedCheckDisposable {
+    attachPopupToObject(
+        targetObject: BaseObject,
+        popup: ICanvasPopup,
+        renderedPosition$?: Observable<IPosition>
+    ): INeedCheckDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet || (this._isSelectionMoving && !popup.showOnSelectionMoving)) {
@@ -384,19 +411,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 canDispose: () => true,
             };
         }
-        let offsetX = 0;
-        let offsetY = 0;
-        let drawingType;
-        if (targetObject.classType === RENDER_CLASS_TYPE.SHAPE) {
-            drawingType = (targetObject as Shape<IShapeProps & { drawingType: DrawingTypeEnum }>).getPropByKey('drawingType');
-        }
-        if (drawingType !== undefined && this._popupMenuOffsetMap.has(drawingType)) {
-            const offset = this._popupMenuOffsetMap.get(drawingType)!;
-            offsetX = offset.offsetX;
-            offsetY = offset.offsetY;
-        }
-
-        const getTargetBound = () => getObjectPopupBound(targetObject, offsetX, offsetY);
+        const getTargetBound = () => this._getPopupBoundForObject(targetObject);
         const bound = getTargetBound();
         const { position, position$, disposable } = this._createPositionObserver(
             bound,
@@ -404,7 +419,8 @@ export class SheetCanvasPopManagerService extends Disposable {
             skeleton,
             worksheet,
             targetObject,
-            skeleton ? undefined : getTargetBound
+            getTargetBound,
+            renderedPosition$
         );
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
         const canvasElement = currentRender.engine.getCanvasElement();
@@ -1004,6 +1020,19 @@ function transformBoundByViewport(originBound: IBoundRectNoAngle, viewport: View
         top: topLeft.y,
         right: bottomRight.x,
         bottom: bottomRight.y,
+    };
+}
+
+function transformRenderedPositionToClientRect(position: IPosition, currentRender: IRender): IBoundRectNoAngle {
+    const canvasElement = currentRender.engine.getCanvasElement();
+    const canvasClientRect = canvasElement.getBoundingClientRect();
+    const scaleAdjust = canvasClientRect.width / pxToNum(canvasElement.style.width);
+
+    return {
+        left: position.startX * scaleAdjust + canvasClientRect.left,
+        right: position.endX * scaleAdjust + canvasClientRect.left,
+        top: position.startY * scaleAdjust + canvasClientRect.top,
+        bottom: position.endY * scaleAdjust + canvasClientRect.top,
     };
 }
 

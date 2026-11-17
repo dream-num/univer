@@ -15,13 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Imsum extends BaseFunction {
@@ -63,10 +62,6 @@ export class Imsum extends BaseFunction {
 
         if (result instanceof ErrorValueObject) {
             return result;
-        }
-
-        if (typeof result === 'number' || isRealNum(result)) {
-            return NumberValueObject.create(+result);
         }
 
         return StringValueObject.create(result);

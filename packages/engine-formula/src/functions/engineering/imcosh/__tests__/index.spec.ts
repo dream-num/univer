@@ -41,7 +41,7 @@ describe('Test imcosh function', () => {
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(2.35240961524325);
+            expect(result.getValue()).toBe('2.35240961524325');
         });
 
         it('Value is normal string', () => {
@@ -69,7 +69,7 @@ describe('Test imcosh function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe('1');
         });
 
         it('Value is error', () => {

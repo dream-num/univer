@@ -146,19 +146,19 @@ function formatImaginaryNumber(iValue: Decimal, suffix: string): string {
 }
 
 export class Complex {
-    static getComplex(realNum: number, iNum: number, suffix: string): number | string {
+    static getComplex(realNum: number, iNum: number, suffix: string): string {
         const realValue = new Decimal(realNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const iValue = new Decimal(iNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const _suffix = suffix === '' ? 'i' : suffix;
 
-        let result: number | string;
+        let result: string;
 
         if (realValue.isZero() && iValue.isZero()) {
-            result = 0;
+            result = '0';
         } else if (realValue.isZero()) {
             result = formatImaginaryNumber(iValue, _suffix);
         } else if (iValue.isZero()) {
-            result = realValue.toNumber();
+            result = formatComplexNumber(realValue);
         } else {
             const sign = iValue.gt(0) ? '+' : '';
             result = `${formatComplexNumber(realValue)}${sign}${formatImaginaryNumber(iValue, _suffix)}`;

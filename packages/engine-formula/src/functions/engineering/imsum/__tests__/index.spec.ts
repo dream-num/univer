@@ -35,7 +35,7 @@ describe('Test imsum function', () => {
             const inumber3 = NumberValueObject.create(5);
             const inumber4 = NumberValueObject.create(12);
             const result2 = testFunction.calculate(inumber3, inumber4);
-            expect(result2.getValue()).toBe(17);
+            expect(result2.getValue()).toBe('17');
         });
 
         it('Value is large numbers', () => {

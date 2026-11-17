@@ -39,13 +39,13 @@ describe('Test imlog2 function', () => {
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(24.6151769997071);
+            expect(result.getValue()).toBe('24.6151769997071');
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.584962500721156);
+            expect(result.getValue()).toBe('0.584962500721156');
         });
 
         it('Value is normal string', () => {

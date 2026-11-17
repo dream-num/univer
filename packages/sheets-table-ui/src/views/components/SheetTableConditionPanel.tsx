@@ -15,14 +15,14 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
-import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, Select } from '@univerjs/design';
 import { MoreDownIcon } from '@univerjs/icons';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableStringCompareTypeEnum } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { ConditionSubComponentEnum } from './type';
 import { datePickerSet, getCascaderListOptions, getConditionDateSelect, getSubComponentType } from './util';
 
@@ -128,10 +128,10 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 <div
                     className={clsx(`
                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-between
-                      univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-transition-colors
-                      univer-duration-200
+                      univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-outline-none
+                      univer-transition-colors univer-duration-200
                       hover:univer-border-primary-600
-                      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
+                      focus-visible:univer-border-primary-600 focus-visible:univer-ring-2
                       dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                     `, borderClassName)}
                 >

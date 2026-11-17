@@ -19,9 +19,11 @@ import { describe, expect, it } from 'vitest';
 import { stripErrorMargin } from '../../engine/utils/math-kit';
 import { NumberValueObject } from '../../engine/value-object/primitive-object';
 import {
+    countWorkingDays,
     formatDateDefault,
     getDateSerialNumberByObject,
     getTwoDateDaysByBasis,
+    getWeekDayByDateSerialNumber,
     getWeekendArray,
     isValidDateStr,
     isValidWeekend,
@@ -111,5 +113,53 @@ describe('Test date', () => {
         expect(typeof invalid1900 === 'number' ? invalid1900 : invalid1900.getValue()).toBe(ErrorType.NUM);
         expect(getDateSerialNumberByObject(NumberValueObject.create(2957003), DateSystem.Date1904)).toBe(2957003);
         expect(typeof invalid1904 === 'number' ? invalid1904 : invalid1904.getValue()).toBe(ErrorType.NUM);
+    });
+});
+
+function countDayByDay(start: number, end: number, weekend: number | string, holidays: number[], dateSystem: DateSystem): number {
+    const weekendDays = getWeekendArray(weekend);
+    let count = 0;
+    for (let day = Math.min(Math.floor(start), Math.floor(end)); day <= Math.max(Math.floor(start), Math.floor(end)); day++) {
+        if (!weekendDays.includes(getWeekDayByDateSerialNumber(day, dateSystem)) && !holidays.some((holiday) => Math.floor(holiday) === day)) {
+            count++;
+        }
+    }
+    return Math.floor(end) >= Math.floor(start) ? count : -count;
+}
+
+describe('Working-day counts', () => {
+    it.each([DateSystem.Date1900, DateSystem.Date1904])('returns zero for non-finite date arguments in date system %s', (dateSystem) => {
+        for (const invalid of [Number.NaN, Infinity, -Infinity]) {
+            for (const [from, to] of [[invalid, 10], [10, invalid], [invalid, invalid]]) {
+                for (const weekend of [1, '0000000', '1111111']) {
+                    expect(countWorkingDays(from, to, weekend, [1, 2, 2], dateSystem)).toBeCloseTo(0);
+                }
+            }
+        }
+    });
+
+    it.each([DateSystem.Date1900, DateSystem.Date1904])('matches daily enumeration for every weekend mask in date system %s', (dateSystem) => {
+        const weekends: (number | string)[] = [1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17];
+        for (let mask = 0; mask < 128; mask++) {
+            weekends.push(mask.toString(2).padStart(7, '0'));
+        }
+
+        for (const weekend of weekends) {
+            for (let start = 0; start < 7; start++) {
+                for (const length of [0, 1, 6, 7, 8, 13, 14, 20, 30]) {
+                    const end = start + length;
+                    const holidays = [start - 1, start, start + 0.9, start + 1, start + 3.5, end + 1];
+                    for (const [from, to] of [[start + 0.5, end + 0.9], [end + 0.9, start + 0.5]]) {
+                        expect(countWorkingDays(from, to, weekend, holidays, dateSystem), JSON.stringify({ from, to, weekend, dateSystem }))
+                            .toBe(countDayByDay(from, to, weekend, holidays, dateSystem));
+                    }
+                }
+            }
+        }
+    });
+
+    it('counts a long calendar with repeated holidays', () => {
+        const holidays = Array.from({ length: 5000 }, (_, i) => 45000 + (i % 2500));
+        expect(countWorkingDays(45000, 81524, 1, holidays)).toBe(countDayByDay(45000, 81524, 1, holidays, DateSystem.Date1900));
     });
 });

@@ -582,7 +582,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
 
         it('normalizes xlfn REGEXTEST to REGEXMATCH during formula execution', async () => {

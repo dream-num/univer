@@ -17,7 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { binomialCDF } from '../../../basics/statistical';
+import { betaCDF, binomialCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -99,7 +99,9 @@ export class BinomInv extends BaseFunction {
 
         const quantile = findBinomialQuantile(trialsValue, probabilitySValue, alphaValue);
         if (quantile !== undefined) {
-            return NumberValueObject.create(quantile);
+            return Number.isFinite(quantile)
+                ? NumberValueObject.create(quantile)
+                : ErrorValueObject.create(ErrorType.NUM);
         }
 
         let result = 0;
@@ -121,7 +123,37 @@ function findBinomialQuantile(trials: number, probability: number, alpha: number
         return undefined;
     }
 
-    if (binomialCDF(0, trials, probability) >= alpha) {
+    const direct = searchBinomialQuantile(trials, (successes) => {
+        const cdf = binomialCDF(successes, trials, probability);
+        return Number.isFinite(cdf) ? cdf >= alpha : undefined;
+    });
+    if (direct !== undefined) {
+        return direct;
+    }
+
+    // Restart the bracket when the direct combination sum overflows: its
+    // accumulated rounding error can place the previous lower bound too high.
+    return searchBinomialQuantile(trials, (successes) => {
+        const upperTail = alpha > 0.5;
+        const probabilityAtSuccesses = upperTail
+            ? betaCDF(probability, successes + 1, trials - successes)
+            : betaCDF(1 - probability, trials - successes, successes + 1);
+        if (!Number.isFinite(probabilityAtSuccesses)) {
+            return undefined;
+        }
+
+        // P(X <= k) = I_(1-p)(n-k, k+1); compare its complement directly
+        // near alpha = 1 so subtracting a small tail does not lose precision.
+        return upperTail ? probabilityAtSuccesses <= 1 - alpha : probabilityAtSuccesses >= alpha;
+    }) ?? Number.NaN;
+}
+
+function searchBinomialQuantile(trials: number, reachesAlpha: (successes: number) => boolean | undefined): number | undefined {
+    const atZero = reachesAlpha(0);
+    if (atZero === undefined) {
+        return undefined;
+    }
+    if (atZero) {
         return 0;
     }
 
@@ -129,11 +161,11 @@ function findBinomialQuantile(trials: number, probability: number, alpha: number
     let upper = Math.min(1, trials);
 
     while (upper < trials) {
-        const cdf = binomialCDF(upper, trials, probability);
-        if (Number.isNaN(cdf)) {
+        const reached = reachesAlpha(upper);
+        if (reached === undefined) {
             return undefined;
         }
-        if (cdf >= alpha) {
+        if (reached) {
             break;
         }
         lower = upper;
@@ -142,11 +174,11 @@ function findBinomialQuantile(trials: number, probability: number, alpha: number
 
     while (upper - lower > 1) {
         const middle = lower + Math.floor((upper - lower) / 2);
-        const cdf = binomialCDF(middle, trials, probability);
-        if (Number.isNaN(cdf)) {
+        const reached = reachesAlpha(middle);
+        if (reached === undefined) {
             return undefined;
         }
-        if (cdf >= alpha) {
+        if (reached) {
             upper = middle;
         } else {
             lower = middle;

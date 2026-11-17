@@ -109,3 +109,15 @@ describe('Test lookup', () => {
         });
     });
 });
+
+describe('LOOKUP numeric-looking text in binary search', () => {
+    it('uses the same text ordering for sorted keys and lookup values', () => {
+        const lookup = new Lookup(FUNCTION_NAMES_LOOKUP.LOOKUP);
+        const keys = ArrayValueObject.create('{"10","2","9"}');
+        const values = ArrayValueObject.createByArray([[100, 200, 900]]);
+        for (const [key, expected] of [['10', 100], ['11', 100], ['2', 200], ['02', ErrorType.NA], ['9', 900]] as const) {
+            const result = lookup.calculate(StringValueObject.create(key), keys, values) as BaseValueObject;
+            expect(result.getValue()).toBe(expected);
+        }
+    });
+});

@@ -15,8 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xmatch } from '../index';
 
@@ -161,5 +164,143 @@ describe('Test xmatch', () => {
             // FIXME: fix this test
             // expect(resultObject.getValue()).toBe(ErrorType.NA);
         });
+    });
+});
+
+describe('XMATCH descending binary search', () => {
+    const xmatch = new Xmatch(FUNCTION_NAMES_LOOKUP.XMATCH);
+    const descending = ArrayValueObject.createByArray([[9, 7, 5, 3, 1]]);
+    const searchMode = NumberValueObject.create(-2);
+
+    it('finds exact and nearest numeric matches in rows and columns', () => {
+        const cases: [number, number, number | ErrorType][] = [
+            [9, 0, 1],
+            [5, 0, 3],
+            [1, 0, 5],
+            [6, 0, ErrorType.NA],
+            [6, -1, 3],
+            [6, 1, 2],
+            [0, -1, ErrorType.NA],
+            [10, 1, ErrorType.NA],
+            [0, 1, 5],
+            [10, -1, 1],
+        ];
+        for (const lookupArray of [descending, descending.transpose()]) {
+            for (const [lookup, matchMode, expected] of cases) {
+                const result = xmatch.calculate(NumberValueObject.create(lookup), lookupArray, NumberValueObject.create(matchMode), searchMode);
+                expect(getObjectValue(result)).toBe(expected);
+            }
+        }
+    });
+
+    it('finds case-insensitive text matches and neighboring text', () => {
+        const lookupArray = ArrayValueObject.createByArray([['zebra', 'pear', 'apple']]);
+        const cases: [string, number, number | ErrorType][] = [
+            ['PEAR', 0, 2],
+            ['melon', 0, ErrorType.NA],
+            ['melon', -1, 3],
+            ['melon', 1, 2],
+        ];
+        for (const [lookup, matchMode, expected] of cases) {
+            const result = xmatch.calculate(StringValueObject.create(lookup), lookupArray, NumberValueObject.create(matchMode), searchMode);
+            expect(getObjectValue(result)).toBe(expected);
+        }
+    });
+
+    it('broadcasts lookup and match-mode arrays with descending binary search', () => {
+        const lookups = ArrayValueObject.createByArray([[9, 6, 0]]);
+        const matchModes = ArrayValueObject.createByArray([[-1, 1, 1]]);
+        expect(getObjectValue(xmatch.calculate(lookups, descending, matchModes, searchMode))).toStrictEqual([[1, 2, 5]]);
+    });
+
+    it('accepts a numeric string search mode and retains invalid-mode errors', () => {
+        const lookup = NumberValueObject.create(5);
+        expect(getObjectValue(xmatch.calculate(lookup, descending, undefined, StringValueObject.create('-2')))).toBe(3);
+        const searchModes = ArrayValueObject.createByArray([[-2, 0, -3, 3, 2.5]]);
+        expect(getObjectValue(xmatch.calculate(lookup, descending, undefined, searchModes))).toStrictEqual([
+            [3, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
+        ]);
+    });
+
+    it('retains lookup and optional-argument error propagation', () => {
+        const error = ErrorValueObject.create(ErrorType.REF);
+        const lookup = NumberValueObject.create(5);
+        expect(xmatch.calculate(error, descending, undefined, searchMode)).toBe(error);
+        expect(xmatch.calculate(lookup, descending, error, searchMode)).toBe(error);
+        expect(xmatch.calculate(lookup, descending, undefined, error)).toBe(error);
+    });
+
+    it('rejects wildcard matching with descending binary search', () => {
+        const wildcardMode = NumberValueObject.create(2);
+        const textArray = ArrayValueObject.createByArray([['cc', 'bb', 'aa']]);
+        for (const lookupArray of [textArray, textArray.transpose()]) {
+            expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), lookupArray, wildcardMode, searchMode))).toBe(ErrorType.VALUE);
+        }
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('x'), descending, wildcardMode, searchMode))).toBe(ErrorType.VALUE);
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), textArray, StringValueObject.create('2'), StringValueObject.create('-2')))).toBe(ErrorType.VALUE);
+    });
+
+    it('validates the wildcard combination per broadcast cell and preserves sequential searches', () => {
+        const lookupArray = ArrayValueObject.createByArray([['cc', 'bb', 'ba', 'aa']]);
+        const searchModes = ArrayValueObject.createByArray([[-2, 1, -1]]);
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), lookupArray, NumberValueObject.create(2), searchModes))).toStrictEqual([
+            [ErrorType.VALUE, 2, 3],
+        ]);
+        const matchModes = ArrayValueObject.createByArray([[0, -1, 1, 2]]);
+        expect(getObjectValue(xmatch.calculate(NumberValueObject.create(5), descending, matchModes, searchMode))).toStrictEqual([
+            [3, 3, 3, ErrorType.VALUE],
+        ]);
+    });
+});
+
+describe('XMATCH numeric-looking text in binary search', () => {
+    const xmatch = new Xmatch(FUNCTION_NAMES_LOOKUP.XMATCH);
+
+    it.each([2, -2])('finds exact text IDs in rows and columns with search mode %i', (searchMode) => {
+        const keys = searchMode === -2 ? ['9', '2', '10'] : ['10', '2', '9'];
+        const row = ArrayValueObject.create(`{${keys.map((key) => JSON.stringify(key)).join(',')}}`);
+        expect(row.get(0, 0)?.isString()).toBe(true);
+        for (const lookupArray of [row, row.transpose()]) {
+            for (const [index, key] of keys.entries()) {
+                const result = xmatch.calculate(StringValueObject.create(key), lookupArray, NumberValueObject.create(0), NumberValueObject.create(searchMode));
+                expect(getObjectValue(result)).toBe(index + 1);
+            }
+        }
+    });
+
+    it('does not conflate leading-zero text IDs with their numeric equivalents', () => {
+        for (const searchMode of [2, -2]) {
+            const keys = searchMode === -2 ? ['9', '2', '10'] : ['10', '2', '9'];
+            const row = ArrayValueObject.create(`{${keys.map((key) => JSON.stringify(key)).join(',')}}`);
+            for (const lookupArray of [row, row.transpose()]) {
+                const result = xmatch.calculate(StringValueObject.create('02'), lookupArray, NumberValueObject.create(0), NumberValueObject.create(searchMode));
+                expect(getObjectValue(result)).toBe(ErrorType.NA);
+            }
+        }
+        const distinctIds = ArrayValueObject.create('{"2","10","02"}');
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('02'), distinctIds, NumberValueObject.create(0), NumberValueObject.create(-2)))).toBe(3);
+    });
+
+    it.each([2, -2])('uses text ordering for nearest matches with search mode %i', (searchMode) => {
+        const keys = searchMode === -2 ? ['9', '2', '10'] : ['10', '2', '9'];
+        const lookupArray = ArrayValueObject.create(`{${keys.map((key) => JSON.stringify(key)).join(',')}}`);
+        const cases: [string, number, string | undefined][] = [
+            ['11', -1, '10'],
+            ['11', 1, '2'],
+            ['02', -1, undefined],
+            ['02', 1, '10'],
+            ['99', -1, '9'],
+            ['99', 1, undefined],
+        ];
+        for (const [lookup, matchMode, expected] of cases) {
+            const result = xmatch.calculate(StringValueObject.create(lookup), lookupArray, NumberValueObject.create(matchMode), NumberValueObject.create(searchMode));
+            expect(getObjectValue(result)).toBe(expected === undefined ? ErrorType.NA : keys.indexOf(expected) + 1);
+        }
+    });
+
+    it('broadcasts text lookups without converting individual IDs to numbers', () => {
+        const lookupArray = ArrayValueObject.create('{"9","2","10"}');
+        const lookups = ArrayValueObject.create('{"10","02","2"}');
+        expect(getObjectValue(xmatch.calculate(lookups, lookupArray, NumberValueObject.create(0), NumberValueObject.create(-2)))).toStrictEqual([[3, ErrorType.NA, 2]]);
     });
 });

@@ -1064,3 +1064,27 @@ describe('Test xlookup', () => {
         });
     });
 });
+
+describe('XLOOKUP numeric-looking text in binary search', () => {
+    const xlookup = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+
+    it.each([2, -2])('preserves text IDs for exact and nearest matches with search mode %i', (searchMode) => {
+        const keys = searchMode === -2 ? ['9', '2', '10'] : ['10', '2', '9'];
+        const values = keys.map((key) => `id-${key}`);
+        const lookupArray = ArrayValueObject.create(`{${keys.map((key) => JSON.stringify(key)).join(',')}}`);
+        const returnArray = ArrayValueObject.createByArray([values]);
+        for (const transpose of [false, true]) {
+            const search = transpose ? lookupArray.transpose() : lookupArray;
+            const returned = transpose ? returnArray.transpose() : returnArray;
+            for (const [lookup, matchMode, expected] of [
+                ['10', 0, 'id-10'],
+                ['02', 0, ErrorType.NA],
+                ['11', -1, 'id-10'],
+                ['11', 1, 'id-2'],
+            ] as const) {
+                const result = xlookup.calculate(StringValueObject.create(lookup), search, returned, undefined, NumberValueObject.create(matchMode), NumberValueObject.create(searchMode));
+                expect(getObjectValue(result)).toBe(expected);
+            }
+        }
+    });
+});

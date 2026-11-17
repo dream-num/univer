@@ -414,6 +414,7 @@ function hasHorizontalTableViewport(viewport: Nullable<IDocsTableRenderViewport>
 export class DocEventManagerService extends Disposable implements IRenderModule {
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
+    readonly hoverCustomRangesRealTime$ = this._hoverCustomRanges$.asObservable();
 
     private readonly _clickCustomRanges$ = new Subject<ICustomRangeClickEvent>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();

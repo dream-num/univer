@@ -81,11 +81,19 @@ describe('SheetsSortController compare function', () => {
     it('sorts numbers around forced text that is not a number', async () => {
         const forced: ICellData = { v: 'n/a', t: CellValueType.FORCE_STRING };
         expect(await sortColumn([...numbers, forced])).toEqual([1, 3, 5, 'n/a']);
-        expect(await sortColumn([forced, ...numbers].reverse())).toEqual([1, 3, 5, 'n/a']);
+        expect(await sortColumn([forced, ...numbers])).toEqual([1, 3, 5, 'n/a']);
         expect(await sortColumn([numbers[0], forced, numbers[1], numbers[2]])).toEqual([1, 3, 5, 'n/a']);
     });
 
-    it('still sorts forced numeric text as a number', async () => {
+    it('sorts forced text that is not a number before the numbers in descending order', async () => {
+        const forced: ICellData = { v: 'n/a', t: CellValueType.FORCE_STRING };
+        expect(await sortColumn([...numbers, forced], SortType.DESC)).toEqual(['n/a', 5, 3, 1]);
+        expect(await sortColumn([forced, ...numbers], SortType.DESC)).toEqual(['n/a', 5, 3, 1]);
+    });
+
+    // Contract kept from before this change: forced text that is a number sorts as that number.
+    // Excel's default sorts numbers and numeric text separately; aligning with it is a follow-up.
+    it('keeps sorting forced numeric text as a number', async () => {
         expect(await sortColumn([...numbers, { v: '002', t: CellValueType.FORCE_STRING }])).toEqual([1, '002', 3, 5]);
     });
 });

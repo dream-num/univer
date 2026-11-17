@@ -28,7 +28,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
+import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsSortController } from '../../../controllers/sheets-sort.controller';
 import { SheetsSortService } from '../../../services/sheets-sort.service';
@@ -152,10 +152,11 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             const injector = this._injector;
             injector.add([SheetsSortService]);
             injector.add([SheetsSortController]);
-            injector.add([SheetsSelectionsService, { useClass: mockSelectionManagerService as any }]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonService]);
-            injector.add([FormulaDataModel, { useClass: mockFormulaDataModel }]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
@@ -179,14 +180,4 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         get: injector.get.bind(injector),
         sheet,
     };
-}
-
-class mockSelectionManagerService {
-    replace() {
-    }
-}
-
-class mockFormulaDataModel {
-    getArrayFormulaRange() {
-    }
 }

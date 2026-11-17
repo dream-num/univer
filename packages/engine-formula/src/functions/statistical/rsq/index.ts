@@ -121,8 +121,14 @@ export class Rsq extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        const result = (num / (Math.sqrt(den1) * Math.sqrt(den2))) ** 2;
+        const product = den1 * den2;
+        // Keep ordinary finite normalization; split roots only to avoid range loss.
+        const denominator = Number.isFinite(product) && product > 0
+            ? Math.sqrt(product)
+            : Math.sqrt(den1) * Math.sqrt(den2);
+        const correlation = num / denominator;
+        const result = Number.isFinite(correlation) ? Math.max(-1, Math.min(1, correlation)) : correlation;
 
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(result ** 2);
     }
 }

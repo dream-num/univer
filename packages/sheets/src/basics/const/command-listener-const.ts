@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo, IRange, IUniverInstanceService } from '@univerjs/core';
+import { ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
 import type { IReorderRangeMutationParams } from '../../commands/mutations/reorder-range.mutation';
@@ -34,7 +35,6 @@ import type {
 import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
 import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
-import { ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
@@ -339,8 +339,8 @@ export function getValueChangedEffectedRange(univerInstanceService: IUniverInsta
                 unitId,
                 subUnitId,
                 range: {
-                    startRow: Math.min(...rowIndices),
-                    endRow: Math.max(...rowIndices),
+                    startRow: rowIndices.reduce((min, index) => Math.min(min, index)),
+                    endRow: rowIndices.reduce((max, index) => Math.max(max, index)),
                     startColumn: 0,
                     endColumn: worksheet.getColumnCount() - 1,
                 },
@@ -362,8 +362,8 @@ export function getValueChangedEffectedRange(univerInstanceService: IUniverInsta
                 range: {
                     startRow: 0,
                     endRow: worksheet.getRowCount() - 1,
-                    startColumn: Math.min(...colIndices),
-                    endColumn: Math.max(...colIndices),
+                    startColumn: colIndices.reduce((min, index) => Math.min(min, index)),
+                    endColumn: colIndices.reduce((max, index) => Math.max(max, index)),
                 },
             }];
         }

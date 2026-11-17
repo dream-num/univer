@@ -128,7 +128,7 @@ export class ZTest extends BaseFunction {
 
         const z = (sum / n - xValue) / (sigmaValue / Math.sqrt(n));
 
-        const result = 1 - normalCDF(z, 0, 1);
+        const result = normalCDF(-z, 0, 1);
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);

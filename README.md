@@ -4,7 +4,7 @@
 
 <h1 align="center">Build your own AI office with Univer Office SDK.</h1>
 
-<p align="center">Start with open-source Sheets and Docs, then connect your own application or agent.</p>
+<p align="center">A JavaScript Office SDK with an open-source (Apache-2.0) core: embed spreadsheets and documents in your web app, and let AI agents edit them.</p>
 
 <p align="center"><a href="#quick-start">🚀 Quick start</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 Documentation</a> · <a href="https://univer.ai/compare/">⚖️ Feature comparison</a> · <a href="https://univer.ai/">🌐 Website</a> · <a href="https://docs.univer.ai/showcase">🎮 Showcase</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 Blog</a></p>
 
@@ -39,6 +39,7 @@
 <summary>Table of contents</summary>
 
 - [💡 What is Univer?](#what-is-univer)
+  - [When to choose Univer](#when-to-choose-univer)
   - [Open-source capabilities](#open-source-capabilities)
 - [🚀 Build on the open-source foundation](#what-you-can-build)
   - [Quick start: an open-source spreadsheet editor](#quick-start)
@@ -68,6 +69,35 @@
 <p align="center"><img src="./docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer** is an Office SDK for building Office applications inside your own product. It provides Office editing, calculation, collaboration, and file processing for people and existing agents, using your data and permissions. The product family covers spreadsheets, documents, presentations, relational tables, canvases, and PDFs.
+
+<a id="when-to-choose-univer"></a>
+
+### When to choose Univer
+
+Choose Univer when you need to:
+
+- **Embed a full spreadsheet or document editor in your own web app.** You compose Univer's plugins into your front end, keep your own data, permissions, and storage, and drive the editor from your code through the Facade API. Sheets and Docs editing is part of the Apache-2.0 core and can be used in commercial products.
+- **Work with whole workbooks, not just a table of records.** Multiple worksheets, formulas, defined names, conditional formatting, data validation, sorting, filtering, and comments are all in the open-source Sheets editor.
+- **Process spreadsheets on a server without a UI.** The same content models, commands, and formula engine run headless in Node.js. See the [Headless guide](https://docs.univer.ai/guides/sheets/getting-started/node).
+- **Let AI agents edit spreadsheets, documents, and slides, with a person reviewing the result.** [Univer CLI](https://github.com/dream-num/univer-cli) gives the agent you already use a Skill to create, edit, and check Office files in an isolated draft. [Univer Workspace](https://github.com/dream-num/univer-workspace#connect-an-ai-assistant-mcp) offers the same work to Claude, ChatGPT, Cursor, and other assistants through an MCP server.
+- **Move off Luckysheet.** Luckysheet is no longer maintained; Univer is its successor from the same team. See the [migration guide](https://docs.univer.ai/blog/migrate-from-luckysheet).
+
+Look elsewhere if you only need an editable data grid, or a ready-made office suite with its own interface running on a separate document server.
+
+Real-time collaboration, Office file import and export, charts, pivot tables, the full Slides feature set, and the AI SDK are commercial modules; the open-source core includes a basic Slides model and UI. Try them with Freemium (watermarks and usage limits); see [plans and licensing](https://univer.ai/pricing/).
+
+#### How Univer compares
+
+Checked in November 2026 against each vendor's own README, documentation, and licensing pages. Licenses and editions change; check current terms before you choose.
+
+| | Univer | SpreadJS (MESCIUS) | Handsontable | ONLYOFFICE Docs |
+|---|---|---|---|---|
+| **What it is** | Office SDK you compose into your own front end. Open-source core: Sheets and Docs editing and a basic Slides model. Commercial: full Slides, relational tables, canvases, and PDF | Excel-like JavaScript spreadsheet component | JavaScript data grid with a spreadsheet-like look and feel | Office suite for documents, spreadsheets, presentations, forms, and PDF that runs on its own document server and embeds through its editors |
+| **License** | Apache-2.0 core; commercial modules under Business or Enterprise, Freemium for evaluation | Commercial | Commercial; a one-time trial key for evaluation; a free license for qualifying non-commercial projects | Community edition under AGPL-3.0; Enterprise and Developer editions are commercial |
+| **Real-time co-editing** | Server SDK (commercial) | Collaboration Server add-on, released in v19 (December 2025) | Not built in: you connect your own backend for transport and conflict resolution | Built in |
+| **For AI agents** | Univer CLI with an Agent Skill, Univer Workspace MCP server, and a Docs MCP server for coding agents | AI Assistant add-on (v19) | Agent Skills and a Docs MCP server for coding agents | AI tools inside the editors (installed separately in the open-source edition) |
+
+For the longer story, see [About Univer](https://univer.ai/about/) and the [feature comparison](https://univer.ai/compare/).
 
 <p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="./docs/img/readme/workspace-promo.png" alt="Univer Workspace: open source, ready to use and extend, built with Univer Office SDK. Star on GitHub." width="720" /></a></p>
 

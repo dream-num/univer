@@ -121,12 +121,14 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                         return { value: allValue[safeIndex], type: ruleConfig.subType };
                     }
 
-                    const targetIndex = Math.floor(Tools.clamp(configRule.isBottom ? (configRule.value - 1) : configRule.value, 0, allValue.length));
                     if (configRule.isBottom) {
-                        return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };
-                    } else {
-                        return { value: allValue[Math.max(targetIndex - 1, 0)], type: ruleConfig.subType };
+                        // The Nth smallest value; when N exceeds the count, every value is in the bottom N.
+                        const fromEnd = Math.floor(Tools.clamp(configRule.value - 1, 0, allValue.length - 1));
+                        return { value: allValue[allValue.length - fromEnd - 1], type: ruleConfig.subType };
                     }
+
+                    const targetIndex = Math.floor(Tools.clamp(configRule.value, 0, allValue.length));
+                    return { value: allValue[Math.max(targetIndex - 1, 0)], type: ruleConfig.subType };
                 }
                 case CFSubRuleType.formula: {
                     const _ruleConfig = ruleConfig as IFormulaHighlightCell;

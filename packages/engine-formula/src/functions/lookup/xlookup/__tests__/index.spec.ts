@@ -1087,4 +1087,20 @@ describe('XLOOKUP numeric-looking text in binary search', () => {
             }
         }
     });
+
+    it('uses the last exact descending duplicate for the corresponding return row or column', () => {
+        const search = ArrayValueObject.create('{5,2,2,2,1}');
+        const returned = ArrayValueObject.create('{"first","second","third","fourth","fifth"}');
+        for (const transpose of [false, true]) {
+            const result = xlookup.calculate(
+                NumberValueObject.create(2),
+                transpose ? search.transpose() : search,
+                transpose ? returned.transpose() : returned,
+                undefined,
+                NumberValueObject.create(0),
+                NumberValueObject.create(-2)
+            );
+            expect(getObjectValue(result)).toBe('fourth');
+        }
+    });
 });

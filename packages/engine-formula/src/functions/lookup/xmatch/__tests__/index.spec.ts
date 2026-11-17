@@ -304,3 +304,57 @@ describe('XMATCH numeric-looking text in binary search', () => {
         expect(getObjectValue(xmatch.calculate(lookups, lookupArray, NumberValueObject.create(0), NumberValueObject.create(-2)))).toStrictEqual([[3, ErrorType.NA, 2]]);
     });
 });
+
+describe('XMATCH exact descending binary-search duplicates', () => {
+    const xmatch = new Xmatch(FUNCTION_NAMES_LOOKUP.XMATCH);
+    const exact = NumberValueObject.create(0);
+    const descending = NumberValueObject.create(-2);
+
+    it.each([
+        [[5, 2, 2, 2, 1], 2, 4],
+        [[2, 2, 2, 2, 1], 2, 4],
+        [[5, 2, 2, 2, 2], 2, 5],
+        [[2, 2, 2, 2, 2], 2, 5],
+        [[5, 5, 4, 3, 3, 1, 1], 3, 5],
+        [[2], 2, 1],
+    ] as const)('returns the last exact position in %j for %i', (keys, lookup, expected) => {
+        const row = ArrayValueObject.createByArray([[...keys]]);
+        for (const lookupArray of [row, row.transpose()]) {
+            expect(getObjectValue(xmatch.calculate(NumberValueObject.create(lookup), lookupArray, exact, descending))).toBe(expected);
+        }
+    });
+
+    it.each([
+        ['{"z","b","B","b","a"}', 'B', 4],
+        ['{"9","2","2","2","10","02"}', '2', 4],
+        ['{"9","2","2","2","10","02"}', '02', 6],
+    ] as const)('retains case-insensitive text identity for duplicates in %s', (keys, lookup, expected) => {
+        const row = ArrayValueObject.create(keys);
+        for (const lookupArray of [row, row.transpose()]) {
+            expect(getObjectValue(xmatch.calculate(StringValueObject.create(lookup), lookupArray, exact, descending))).toBe(expected);
+        }
+    });
+
+    it('returns original positions after numeric and text keys are separated', () => {
+        const row = ArrayValueObject.create('{9,"9",2,"2",2,"2",1,"10"}');
+        for (const lookupArray of [row, row.transpose()]) {
+            expect(getObjectValue(xmatch.calculate(NumberValueObject.create(2), lookupArray, exact, descending))).toBe(5);
+            expect(getObjectValue(xmatch.calculate(StringValueObject.create('2'), lookupArray, exact, descending))).toBe(6);
+            expect(getObjectValue(xmatch.calculate(StringValueObject.create('02'), lookupArray, exact, descending))).toBe(ErrorType.NA);
+        }
+    });
+
+    it('broadcasts duplicate lookups and preserves missing-key boundaries', () => {
+        const row = ArrayValueObject.create('{5,2,2,2,1}');
+        const lookups = ArrayValueObject.create('{2,5,1,3,0,6}');
+        const expected = [[4, 1, 5, ErrorType.NA, ErrorType.NA, ErrorType.NA]];
+        expect(getObjectValue(xmatch.calculate(lookups, row, exact, descending))).toStrictEqual(expected);
+        expect(getObjectValue(xmatch.calculate(lookups.transpose(), row.transpose(), exact, descending))).toStrictEqual(expected[0].map((value) => [value]));
+    });
+
+    it('keeps sequential duplicate selection separate from binary tie selection', () => {
+        const row = ArrayValueObject.create('{5,2,2,2,1}');
+        const searches = ArrayValueObject.create('{-2,1,-1}');
+        expect(getObjectValue(xmatch.calculate(NumberValueObject.create(2), row, exact, searches))).toStrictEqual([[4, 2, 4]]);
+    });
+});

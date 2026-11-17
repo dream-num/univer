@@ -826,6 +826,11 @@ export class ArrayValueObject extends BaseValueObject {
             if (compareResult === 0) {
                 // Exact match found
                 exactMatchIndex = middle;
+                if (searchType === ArrayBinarySearchType.MAX && matchType === ArrayOrderSearchType.NORMAL) {
+                    // Descending exact searches select the last equal position.
+                    start = middle + 1;
+                    continue;
+                }
                 break;
             }
 
@@ -840,20 +845,15 @@ export class ArrayValueObject extends BaseValueObject {
             }
         }
 
-        // Determine the result based on matchType
-        if (matchType === ArrayOrderSearchType.NORMAL) {
-            return exactMatchIndex !== -1 ? positionArray[exactMatchIndex] : undefined;
-        }
+        if (exactMatchIndex !== -1) return positionArray[exactMatchIndex];
 
         if (matchType === ArrayOrderSearchType.MIN) {
-            if (exactMatchIndex !== -1) return positionArray[exactMatchIndex];
             return searchType === ArrayBinarySearchType.MIN ?
                 positionArray[nearestSmallerIndex]
                 : positionArray[nearestLargerIndex];
         }
 
         if (matchType === ArrayOrderSearchType.MAX) {
-            if (exactMatchIndex !== -1) return positionArray[exactMatchIndex];
             return searchType === ArrayBinarySearchType.MIN ?
                 positionArray[nearestLargerIndex]
                 : positionArray[nearestSmallerIndex];

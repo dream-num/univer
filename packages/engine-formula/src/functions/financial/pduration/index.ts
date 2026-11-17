@@ -61,11 +61,15 @@ export class Pduration extends BaseFunction {
             const pvValue = +_pvObject.getValue();
             const fvValue = +_fvObject.getValue();
 
-            if (rateValue <= -1) {
+            if (rateValue <= 0 || pvValue <= 0 || fvValue <= 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = (Math.log(fvValue) - Math.log(pvValue)) / Math.log(1 + rateValue);
+            const relativeChange = (fvValue - pvValue) / pvValue;
+            const logGrowth = Math.abs(relativeChange) < 0.5
+                ? Math.log1p(relativeChange)
+                : Math.log(fvValue) - Math.log(pvValue);
+            const result = logGrowth / Math.log1p(rateValue);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

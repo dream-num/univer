@@ -135,6 +135,38 @@ describe('Test xmatch', () => {
             }
         });
 
+        it('reads a single wildcard character and a tilde literally, and keeps match mode 2 wildcards', async () => {
+            const literalCases: [string, string, number][] = [
+                ['?', '{"a";"?"}', 2],
+                ['*', '{"a";"*"}', 2],
+                ['~*', '{"*";"~*"}', 2],
+                ['a*', '{"ab";"a*"}', 2],
+            ];
+            for (const [lookup, lookups, expected] of literalCases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    ArrayValueObject.create(lookups),
+                    NumberValueObject.create(0)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+
+            // Match mode 2 still reads ? and * as wildcards, including the tilde escape.
+            const wildcardCases: [string, string, number][] = [
+                ['~*', '{"*"}', 1],
+                ['a*', '{"ab";"zz"}', 1],
+                ['b?', '{"b0";"b1"}', 1],
+            ];
+            for (const [lookup, lookups, expected] of wildcardCases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    ArrayValueObject.create(lookups),
+                    NumberValueObject.create(2)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
         it('keeps the first fallback candidate in the search direction', async () => {
             const duplicateText = ArrayValueObject.create('{"b";"b"}');
             const forward = testFunction.calculate(

@@ -192,6 +192,34 @@ describe('Test xlookup', () => {
             }
         });
 
+        it('reads a single wildcard character and a tilde literally, and keeps match mode 2 wildcards', () => {
+            const cases: [string, string, number | string][] = [
+                ['?', '{"a";"?"}', 2],
+                ['~*', '{"*";"~*"}', 2],
+                ['a?c', '{"abc";"a?c"}', 2],
+                ['b*', '{"apple";"banana"}', 'missing'],
+            ];
+            for (const [lookup, lookups, expected] of cases) {
+                const result = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    ArrayValueObject.create(lookups),
+                    ArrayValueObject.create('{1;2}'),
+                    StringValueObject.create('missing')
+                );
+                expect(result.getValue()).toBe(expected);
+            }
+
+            // Match mode 2 still reads a tilde escape as the wildcard character.
+            const wildcard = testFunction.calculate(
+                StringValueObject.create('~*'),
+                ArrayValueObject.create('{"*";"~*"}'),
+                ArrayValueObject.create('{1;2}'),
+                StringValueObject.create('missing'),
+                NumberValueObject.create(2)
+            );
+            expect(wildcard.getValue()).toBe(1);
+        });
+
         it('keeps the first fallback candidate in the search direction', () => {
             const lookupArray = ArrayValueObject.create('{"b";"b"}');
             const returnArray = ArrayValueObject.create('{1;2}');

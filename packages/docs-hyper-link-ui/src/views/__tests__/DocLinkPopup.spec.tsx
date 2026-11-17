@@ -462,6 +462,7 @@ describe('DocLinkPopup', () => {
         root = createRoot(container);
         const actions = renderPopup(root, container, currentTestBed);
         expect(container.textContent).toContain('#_TocExample');
+        expect(container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]')?.disabled).toBe(false);
         expect(actions.edit).toBeNull();
         expect(actions.remove).toBeNull();
         expect(currentTestBed.popupService.showEditPopup(UNIT_ID, info)).toBeNull();

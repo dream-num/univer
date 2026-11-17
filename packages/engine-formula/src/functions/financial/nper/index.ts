@@ -86,8 +86,13 @@ export class Nper extends BaseFunction {
             } else {
                 const num = pmtValue * (1 + rateValue * typeValue) - fvValue * rateValue;
                 const den = pvValue * rateValue + pmtValue * (1 + rateValue * typeValue);
+                // (num - den) / den without cancelling the shared payment term.
+                const relativeChange = -rateValue * (pvValue + fvValue) / den;
+                const logRatio = Number.isFinite(num) && Number.isFinite(den) && num / den > 0 && Math.abs(relativeChange) < 0.5
+                    ? Math.log1p(relativeChange)
+                    : Math.log(num / den);
 
-                result = Math.log(num / den) / Math.log(1 + rateValue);
+                result = logRatio / Math.log1p(rateValue);
             }
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {

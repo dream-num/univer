@@ -27,6 +27,35 @@ describe('Test rri function', () => {
     const testFunction = new Rri(FUNCTION_NAMES_FINANCIAL.RRI);
 
     describe('Rri', () => {
+        // Expected rates use (fv / pv) ** (1 / nper) - 1 with 90-digit decimal arithmetic.
+        it.each([
+            [100, 10000, 10000.000001, 1.000000338486256e-12],
+            [1e12, 1, 2, 6.931471805601855e-13],
+            [1000, 1e-300, 1e300, 2.9810717055349727],
+            [1000, 1e300, 1e-300, -0.748811356849042],
+            [100, -10000, -10000.000001, 1.000000338486256e-12],
+            [96, 10000, 11000, 0.0009933073762913949],
+            [2, 4, 1, -0.5],
+        ])('retains finite rates for periods=%s, present=%s, future=%s', (nper, pv, fv, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(nper), NumberValueObject.create(pv), NumberValueObject.create(fv));
+            expect(result.isNumber()).toBe(true);
+            expect(+result.getValue() / expected).toBeCloseTo(1, 12);
+        });
+
+        it.each([
+            [1, 1e-300, 1e300, ErrorType.NUM],
+            [1000, 1e300, -1e-300, ErrorType.NUM],
+            [1000, -1e300, 1e-300, ErrorType.NUM],
+            [2, 0, 0, 0],
+            [2, 1, 0, -1],
+            [2, -1, 0, -1],
+            [2, 0, 1, ErrorType.NUM],
+            [2, 1, 1, 0],
+        ])('preserves valid zero cases and rejects invalid rates (%s, %s, %s)', (nper, pv, fv, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(nper as number), NumberValueObject.create(pv as number), NumberValueObject.create(fv as number));
+            expect(result.getValue()).toBe(expected);
+        });
+
         it('Value is normal', () => {
             const nper = NumberValueObject.create(96);
             const pv = NumberValueObject.create(10000);

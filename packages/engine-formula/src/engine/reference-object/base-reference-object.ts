@@ -594,10 +594,6 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeArrayFormulaCellData = this.getCurrentRuntimeActiveArrayFormulaCellData();
 
-        const activeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentActiveArrayFormulaRange());
-
-        const activeRuntimeArrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this.getCurrentRuntimeActiveArrayFormulaRange());
-
         const runtimeCell = activeRuntimeData?.getValue(row, column);
         const clearsImportedSpill = runtimeCell === CLEAR_IMPORTED_SPILL_CELL;
         let cellData: Nullable<ICellData> = (clearsImportedSpill ? null : runtimeCell) ||
@@ -615,29 +611,37 @@ export class BaseReferenceObject extends ObjectClassType {
         cellData = activeArrayFormulaCellData?.getValue(row, column);
 
         if (cellData) {
-            // Check if the cell is in the runtime array formula range. if so, do not return the original array formula cell data.
-            let isInRuntimeArrayFormulaRange = false;
-
-            activeArrayFormulaRangeMatrix.forValue((_row, _column, range) => {
-                if (!(row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn)) {
-                    return;
-                }
-                const runtimeAnchor = activeRuntimeData?.getValue(_row, _column);
+            const runtimeRanges = this.getCurrentRuntimeActiveArrayFormulaRange();
+            for (const [anchorRow, anchorColumn] of this._getImportedSpillAnchors(row, column)) {
+                const runtimeAnchor = activeRuntimeData?.getValue(anchorRow, anchorColumn);
                 const anchorCalculated = runtimeAnchor && !isFormulaString(runtimeAnchor.f) && !isFormulaId(runtimeAnchor.si);
-                if (activeRuntimeArrayFormulaRangeMatrix.getValue(_row, _column) || anchorCalculated) {
-                    isInRuntimeArrayFormulaRange = true;
-                    return false;
+                if (runtimeRanges?.[anchorRow]?.[anchorColumn] || anchorCalculated) {
+                    return null;
                 }
-            });
-
-            if (!isInRuntimeArrayFormulaRange) {
-                return cellData;
             }
-
-            return null;
+            return cellData;
         }
 
         return activeSheetData?.cellData.getValue(row, column);
+    }
+
+    private _getImportedSpillAnchors(row: number, column: number): Iterable<[number, number]> {
+        const source = this.getCurrentActiveArrayFormulaRange();
+        if (!source) {
+            return [];
+        }
+        const cache = this._calculationCache;
+        if (cache && !cache.closed) {
+            return cache.getImportedSpillAnchors(this.getUnitId(), this.getSheetId(), source, row, column);
+        }
+
+        const anchors: [number, number][] = [];
+        new ObjectMatrix<IRange>(source).forValue((anchorRow, anchorColumn, range) => {
+            if (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn) {
+                anchors.push([anchorRow, anchorColumn]);
+            }
+        });
+        return anchors;
     }
 
     getRuntimeFeatureCellValue(row: number, column: number) {

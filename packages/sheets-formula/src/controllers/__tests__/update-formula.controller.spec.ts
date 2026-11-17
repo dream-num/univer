@@ -1648,11 +1648,15 @@ describe('Grouped dynamic array formulas', () => {
                                 3: { f: '=FILTER(Source!B1:B2,Source!D1:D2>0)' },
                                 4: { f: '=FILTER(Source!B1:B2,Source!D1:D2=0.1)' },
                                 5: { f: '=FILTER(Source!B1:B2,{0;0},)' },
-                                6: { f: '=SUM(CONVERT(1*Source!B1:B2,"m","cm"))' },
+                                6: { f: '=SUM(CONVERT(+Source!B1:B2,"m","cm"))' },
                                 7: { f: '=CONVERT(Source!B1:B2,"m","cm")' },
                                 8: { f: '=WORKDAY(DATE(2024,3,15),-1.9)' },
                                 9: { f: '=WORKDAY.INTL(DATE(2024,3,15),-0.1)' },
                                 10: { f: '=TEXTJOIN("|",FALSE,CONVERT(1,"m",{"cm","in","ft"}))' },
+                                11: { f: '=ARRAYTOTEXT(FILTER(Source!B1:B3,REGEXTEST(Source!E1:E3,"^m")),1)' },
+                                12: { f: '=ISREF(+Source!B1:B2)' },
+                                13: { f: '=TYPE(+TRUE)' },
+                                14: { f: '=ODDLYIELD(DATE(2008,4,20),DATE(2008,6,15),DATE(2007,12,24),0.0375,IF(Source!B1>25,99.5,99.875),100,2)' },
                             },
                         },
                     },
@@ -1662,9 +1666,9 @@ describe('Grouped dynamic array formulas', () => {
                         rowCount: 20,
                         columnCount: 22,
                         cellData: {
-                            0: { 0: { v: 45170 }, 1: { v: 19 }, 3: { f: '=1/(B1-19)' } },
-                            1: { 1: { v: 23 }, 2: { f: '=PreviousRow', si: 'previous-shared' } },
-                            2: { 2: { si: 'previous-shared' } },
+                            0: { 0: { v: 45170 }, 1: { v: 19 }, 3: { f: '=1/(B1-19)' }, 4: { f: '=IF(B1>25,"desk","motor")' } },
+                            1: { 1: { v: 23 }, 2: { f: '=PreviousRow', si: 'previous-shared' }, 4: { v: 'desk' } },
+                            2: { 1: { v: 31 }, 2: { si: 'previous-shared' }, 4: { v: 'millimeter' } },
                         },
                     },
                 },
@@ -1753,6 +1757,8 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
             expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
 
             const source = workbook.getSheetByName('Source')!;
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
@@ -1762,6 +1768,8 @@ describe('Grouped dynamic array formulas', () => {
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(187.0964, 10);
             expect(sheet.getRange('D20:F20').getValues()).toEqual([[29, 29, '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[5200, '#VALUE!', 45364, 45365]]);
+            expect(sheet.getRange('L20').getValue()).toBe('{31}');
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.06973332831835138, 12);
             expect(source.getRange('C2:C3').getValues()).toEqual([[29], [23]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
@@ -1770,6 +1778,8 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);
             expect(sheet.getRange('K20').getValue()).toBe('100|39.3700787401575|3.28083989501312');
+            expect(sheet.getRange('L20:N20').getValues()).toEqual([['{19;31}', 0, 4]]);
+            expect(sheet.getRange('O20').getValue()).toBeCloseTo(0.04519223562916916, 12);
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
         } finally {
             univer.dispose();

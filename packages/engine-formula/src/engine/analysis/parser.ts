@@ -21,6 +21,7 @@ import { Disposable, Inject, Injector, sortRules } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
+import { operatorToken } from '../../basics/token';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_LET_FUNCTION_NAME,
@@ -472,7 +473,13 @@ export class AstTreeBuilder extends Disposable {
                     calculateStack.push(astNode);
                     break;
                 case NodeType.PREFIX:
-                    // this._setPrefixRefOffset(astNode);
+                    if (item === operatorToken.UNARY_PLUS) {
+                        const operand = calculateStack.pop();
+                        if (!operand) {
+                            return ErrorNode.create(ErrorType.VALUE);
+                        }
+                        operand.setParent(astNode);
+                    }
                     calculateStack.push(astNode);
                     break;
                 case NodeType.SUFFIX:

@@ -94,7 +94,9 @@ export class Oddlprice extends BaseFunction {
         }
 
         // TODO: now result is same as ptc, but some results is different from excel
-        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue);
+        // The odd coupon uses its actual length for all three actual-day bases.
+        const couponBasis = basisValue >= 1 && basisValue <= 3 ? 1 : basisValue;
+        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, couponBasis);
 
         return NumberValueObject.create(result);
     }

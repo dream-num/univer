@@ -979,12 +979,12 @@ export class LexerTreeBuilder extends Disposable {
                 }
 
                 if (OPERATOR_TOKEN_SET.has(char)) {
-                    // fix =-(+2)+2
-                    if (char === operatorToken.PLUS && this._deletePlusForPreNode(children[i - 1])) {
+                    if (char === operatorToken.PLUS && this._expectsOperand(children[i - 1])) {
+                        symbolStack.push(operatorToken.UNARY_PLUS);
                         continue;
                     }
                     // =-(2)+*9, return error
-                    if (char !== operatorToken.PLUS && char !== operatorToken.MINUS && this._deletePlusForPreNode(children[i - 1])) {
+                    if (char !== operatorToken.PLUS && char !== operatorToken.MINUS && this._expectsOperand(children[i - 1])) {
                         return false;
                     }
                     while (symbolStack.length > 0) {
@@ -1091,7 +1091,7 @@ export class LexerTreeBuilder extends Disposable {
         return OPERATOR_TOKEN_SET.has(node);
     }
 
-    private _deletePlusForPreNode(preNode: Nullable<string | LexerNode>) {
+    private _expectsOperand(preNode: Nullable<string | LexerNode>) {
         if (preNode == null) {
             return true;
         }

@@ -632,7 +632,7 @@ function processReferences(references: IReference[], captureCount: number): void
     }
 };
 
-export function handleRegExp(regExpString: string, isGlobal: boolean) {
+export function handleRegExp(regExpString: string, isGlobal: boolean, ignoreCase = false) {
     if (!isValidRegExp(regExpString)) {
         return {
             isError: true,
@@ -641,7 +641,7 @@ export function handleRegExp(regExpString: string, isGlobal: boolean) {
     }
 
     try {
-        const regExp = new RegExp(regExpString, isGlobal ? 'ug' : 'u');
+        const regExp = new RegExp(regExpString, `u${isGlobal ? 'g' : ''}${ignoreCase ? 'i' : ''}`);
 
         if (!isSafeRegExp(regExp)) {
             return {

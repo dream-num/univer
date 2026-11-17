@@ -25,10 +25,9 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Oddlyield extends BaseFunction {
-    // TODO(formula-contract): Align these bounds with the seven required arguments plus optional basis used by calculate.
-    override minParams = 8;
+    override minParams = 7;
 
-    override maxParams = 9;
+    override maxParams = 8;
 
     override calculate(
         settlement: BaseValueObject,
@@ -94,7 +93,9 @@ export class Oddlyield extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, basisValue);
+        // The odd coupon uses its actual length for all three actual-day bases.
+        const couponBasis = basisValue >= 1 && basisValue <= 3 ? 1 : basisValue;
+        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, couponBasis);
 
         return NumberValueObject.create(result);
     }

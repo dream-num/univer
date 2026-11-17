@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { AstRootNode } from '../engine/ast-node/ast-root-node';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { Disposable, LRUMap } from '@univerjs/core';
+import { Disposable, LRUMap, ObjectMatrix, RTree } from '@univerjs/core';
 import { FormulaAstLRU } from '../basics/cache-lru';
 import { normalizeFunctionToken } from '../basics/function';
 import { InvertedIndexCache } from '../basics/inverted-index-cache';
@@ -37,10 +37,43 @@ function usesFunction(node: BaseAstNode | LexerNode, names: Set<string>): boolea
 export class FormulaCalculationCache extends Disposable {
     readonly references = new FormulaAstLRU<ArrayValueObject>(10000);
     readonly invertedIndex = new InvertedIndexCache();
+    private _importedSpills = new WeakMap<IObjectMatrixPrimitiveType<IRange>, {
+        tree: RTree;
+        unitId: string;
+        sheetId: string;
+    }>();
+
     readCycleCell?: (unitId: string, sheetId: string, row: number, column: number) => ICellData | undefined;
 
     get closed(): boolean {
         return this._disposed;
+    }
+
+    * getImportedSpillAnchors(unitId: string, sheetId: string, source: IObjectMatrixPrimitiveType<IRange>, row: number, column: number): IterableIterator<[number, number]> {
+        const ownRange = source[row]?.[column];
+        if (ownRange && ownRange.startRow === row && ownRange.endRow === row && ownRange.startColumn === column && ownRange.endColumn === column) {
+            yield [row, column];
+        }
+
+        let index = this._importedSpills.get(source);
+        if (!index) {
+            const tree = new RTree();
+            new ObjectMatrix(source).forValue((anchorRow, anchorColumn, range) => {
+                // A spill covering only its own anchor can be found directly in the matrix.
+                if (range.startRow === anchorRow && range.endRow === anchorRow && range.startColumn === anchorColumn && range.endColumn === anchorColumn) {
+                    return;
+                }
+                tree.insert({ unitId, sheetId, range, id: `${anchorRow}:${anchorColumn}` });
+            });
+            index = { tree, unitId, sheetId };
+            this._importedSpills.set(source, index);
+        }
+
+        const point = { startRow: row, endRow: row, startColumn: column, endColumn: column };
+        for (const id of index.tree.searchGenerator({ unitId: index.unitId, sheetId: index.sheetId, range: point })) {
+            const [anchorRow, anchorColumn] = String(id).split(':').map(Number);
+            yield [anchorRow, anchorColumn];
+        }
     }
 
     clearUnit(unitId: string): void {
@@ -50,12 +83,14 @@ export class FormulaCalculationCache extends Disposable {
             }
         });
         this.invertedIndex.deleteUnit(unitId);
+        this._importedSpills = new WeakMap();
     }
 
     override dispose(): void {
         super.dispose();
         this.references.clear();
         this.invertedIndex.clear();
+        this._importedSpills = new WeakMap();
     }
 }
 

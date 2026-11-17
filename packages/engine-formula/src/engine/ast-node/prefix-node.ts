@@ -20,7 +20,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../reference-obje
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
-import { OPERATOR_TOKEN_COMPARE_SET, prefixToken } from '../../basics/token';
+import { OPERATOR_TOKEN_COMPARE_SET, operatorToken, prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
@@ -71,6 +71,15 @@ export class PrefixNode extends BaseAstNode {
                 NumberValueObject.create(0),
                 (value as BaseValueObject).withDateSystem(dateSystem)
             ) as FunctionVariantType;
+        } else if (this._operatorString === prefixToken.PLUS) {
+            if (value.isReferenceObject()) {
+                const reference = (value as BaseReferenceObject).withDateSystem(dateSystem);
+                result = reference.getRowCount() === 1 && reference.getColumnCount() === 1
+                    ? reference.getFirstCell()
+                    : reference.toArrayValueObject();
+            } else {
+                result = value;
+            }
         } else if (this._operatorString === prefixToken.AT) {
             result = this._handlerAT(value);
         } else {
@@ -188,6 +197,9 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
+        if (param === operatorToken.UNARY_PLUS) {
+            return new PrefixNode(this._runtimeService, prefixToken.PLUS);
+        }
         if (!(param instanceof LexerNode)) {
             return;
         }

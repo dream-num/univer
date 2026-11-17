@@ -27,6 +27,24 @@ describe('Test mmult function', () => {
     const testFunction = new Mmult(FUNCTION_NAMES_MATH.MMULT);
 
     describe('Mmult', () => {
+        it.each([1, 2, 5])('preserves accumulation order and inputs with %s output columns', (columns) => {
+            const weights = Array.from({ length: columns }, (_, column) => column % 2 + 1);
+            const left = ArrayValueObject.createByArray([[1e16, 1, -1e16], [1e16, -1e16, 1], [-0, 0, -0]]);
+            const right = ArrayValueObject.createByArray([weights, weights, weights]);
+            const originalLeft = getObjectValue(left);
+            const originalRight = getObjectValue(right);
+
+            const result = testFunction.calculate(left, right);
+
+            expect(getObjectValue(result)).toStrictEqual([
+                Array.from({ length: columns }, () => 0),
+                weights,
+                Array.from({ length: columns }, () => 0),
+            ]);
+            expect(getObjectValue(left)).toStrictEqual(originalLeft);
+            expect(getObjectValue(right)).toStrictEqual(originalRight);
+        });
+
         it('Value is normal number', () => {
             const array1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

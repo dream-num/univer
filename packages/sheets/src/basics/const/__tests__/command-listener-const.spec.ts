@@ -16,8 +16,8 @@
 
 import { IUniverInstanceService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createCommandTestBed } from '../../commands/mutations/__tests__/create-command-test-bed';
-import { getValueChangedEffectedRange, SheetValueChangeType } from '../const/command-listener-const';
+import { createCommandTestBed } from '../../../commands/mutations/__tests__/create-command-test-bed';
+import { getValueChangedEffectedRange, SheetValueChangeType } from '../command-listener-const';
 
 describe('row and column data change ranges', () => {
     let testBed: ReturnType<typeof createCommandTestBed>;

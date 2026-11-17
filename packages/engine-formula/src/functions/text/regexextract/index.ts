@@ -74,7 +74,7 @@ export class Regexextract extends BaseFunction {
         }
 
         if (result.length > 1) {
-            const resultArray = result.slice(1).map((item) => StringValueObject.create(item));
+            const resultArray = result.slice(1).map((item) => StringValueObject.create(item ?? ''));
 
             if (resultArray.length > 1) {
                 return ArrayValueObject.create({

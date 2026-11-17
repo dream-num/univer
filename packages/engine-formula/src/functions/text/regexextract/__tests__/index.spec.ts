@@ -105,6 +105,16 @@ describe('Test regexextract function', () => {
             ]);
         });
 
+        it.each([
+            { text: 'b', pattern: '(a)?b', expected: '' },
+            { text: 'b', pattern: '(a)?(b)', expected: [['', 'b']] },
+            { text: 'a', pattern: '(a)|(b)', expected: [['a', '']] },
+            { text: 'ab', pattern: '(a)?(b)', expected: [['a', 'b']] },
+        ])('returns strings for unmatched capture groups in $text with $pattern', ({ text, pattern, expected }) => {
+            const result = testFunction.calculate(StringValueObject.create(text), StringValueObject.create(pattern));
+            expect(getObjectValue(result)).toStrictEqual(expected);
+        });
+
         it('Is not valid or safe RegExp', () => {
             let text = StringValueObject.create('');
             let regularExpression = StringValueObject.create('[a-Z]+');

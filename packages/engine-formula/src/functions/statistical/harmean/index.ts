@@ -31,6 +31,26 @@ export class Harmean extends BaseFunction {
         let sum = 0;
         let len = 0;
         let isNonPositive = false;
+        let minValue = Infinity;
+        let scaledSum = 0;
+
+        const accumulate = (value: number) => {
+            if (value <= 0) {
+                isNonPositive = true;
+            }
+            sum += 1 / value;
+            len++;
+
+            // Scale reciprocal terms by the smallest finite positive input.
+            if (value > 0 && Number.isFinite(value)) {
+                if (value < minValue) {
+                    scaledSum = scaledSum * (value / minValue) + 1;
+                    minValue = value;
+                } else {
+                    scaledSum += minValue / value;
+                }
+            }
+        };
 
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
@@ -56,12 +76,7 @@ export class Harmean extends BaseFunction {
                         return true;
                     }
 
-                    if (+value <= 0) {
-                        isNonPositive = true;
-                    }
-
-                    sum += 1 / +value;
-                    len++;
+                    accumulate(+value);
                 });
 
                 if (isError) {
@@ -90,12 +105,7 @@ export class Harmean extends BaseFunction {
                     continue;
                 }
 
-                if (+value <= 0) {
-                    isNonPositive = true;
-                }
-
-                sum += 1 / +value;
-                len++;
+                accumulate(+value);
             }
         }
 
@@ -109,6 +119,6 @@ export class Harmean extends BaseFunction {
 
         const result = len / sum;
 
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(Number.isFinite(result) && result > 0 ? result : (len / scaledSum) * minValue);
     }
 }

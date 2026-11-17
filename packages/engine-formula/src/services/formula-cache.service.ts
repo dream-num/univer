@@ -25,6 +25,7 @@ import { FormulaAstLRU } from '../basics/cache-lru';
 import { normalizeFunctionToken } from '../basics/function';
 import { InvertedIndexCache } from '../basics/inverted-index-cache';
 import { prefixToken } from '../basics/token';
+import { FUNCTION_NAMES_TEXT } from '../functions/text/function-names';
 
 function usesFunction(node: BaseAstNode | LexerNode, names: Set<string>): boolean {
     let token = node.getToken().trim().toUpperCase();
@@ -131,6 +132,9 @@ export class FormulaCacheService extends Disposable {
 
     clearFunctions(functionNames: IFunctionNames[]): void {
         const names = new Set(functionNames.map((name) => String(name).toUpperCase()));
+        if (names.has(FUNCTION_NAMES_TEXT.REGEXMATCH)) {
+            names.add(FUNCTION_NAMES_TEXT.REGEXTEST);
+        }
         this._asts.forEach((entry, key) => {
             if (usesFunction(entry.node, names)) {
                 this._asts.delete(key);

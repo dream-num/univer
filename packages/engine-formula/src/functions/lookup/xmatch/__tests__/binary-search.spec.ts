@@ -85,4 +85,26 @@ describe('XMATCH descending binary search', () => {
         expect(xmatch.calculate(lookup, descending, error, searchMode)).toBe(error);
         expect(xmatch.calculate(lookup, descending, undefined, error)).toBe(error);
     });
+
+    it('rejects wildcard matching with descending binary search', () => {
+        const wildcardMode = NumberValueObject.create(2);
+        const textArray = ArrayValueObject.createByArray([['cc', 'bb', 'aa']]);
+        for (const lookupArray of [textArray, textArray.transpose()]) {
+            expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), lookupArray, wildcardMode, searchMode))).toBe(ErrorType.VALUE);
+        }
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('x'), descending, wildcardMode, searchMode))).toBe(ErrorType.VALUE);
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), textArray, StringValueObject.create('2'), StringValueObject.create('-2')))).toBe(ErrorType.VALUE);
+    });
+
+    it('validates the wildcard combination per broadcast cell and preserves sequential searches', () => {
+        const lookupArray = ArrayValueObject.createByArray([['cc', 'bb', 'ba', 'aa']]);
+        const searchModes = ArrayValueObject.createByArray([[-2, 1, -1]]);
+        expect(getObjectValue(xmatch.calculate(StringValueObject.create('b*'), lookupArray, NumberValueObject.create(2), searchModes))).toStrictEqual([
+            [ErrorType.VALUE, 2, 3],
+        ]);
+        const matchModes = ArrayValueObject.createByArray([[0, -1, 1, 2]]);
+        expect(getObjectValue(xmatch.calculate(NumberValueObject.create(5), descending, matchModes, searchMode))).toStrictEqual([
+            [3, 3, 3, ErrorType.VALUE],
+        ]);
+    });
 });

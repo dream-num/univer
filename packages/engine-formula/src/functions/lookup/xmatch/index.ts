@@ -120,6 +120,10 @@ export class Xmatch extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        if (matchModeValue === 2 && searchModeValue === -2) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         return this._getResult(lookupValue, lookupArray, matchModeValue, searchModeValue);
     }
 

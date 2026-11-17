@@ -26,6 +26,26 @@ describe('Test dollarde function', () => {
     const testFunction = new Dollarde(FUNCTION_NAMES_FINANCIAL.DOLLARDE);
 
     describe('Dollarde', () => {
+        it.each([
+            [1.1, 3, 4 / 3],
+            [-1.1, 3, -4 / 3],
+            [0.001, 2, 0.005],
+            [1e-7, 16, 6.25e-7],
+            [-1e-7, 16, -6.25e-7],
+            [1e21, 16, 1e21],
+            [1e308, 16, 1e308],
+            [1.5, 1e21, 1.5],
+            [1.02, 1.6e21, 1.125],
+            [1.1, 1000000000000001, 1.999999999999999],
+            [1.5, 1e100, 1.5],
+            [1.02, 16.75, 1.125],
+            [1.1, 32, 1.3125],
+            [0, 16, 0],
+        ])('converts %s with denominator %s without losing precision', (amount, fraction, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(amount), NumberValueObject.create(fraction));
+            expect(result.getValue()).toBe(expected);
+        });
+
         it('Value is normal', () => {
             const fractionalDollar = NumberValueObject.create(1.02);
             const fraction = NumberValueObject.create(16);

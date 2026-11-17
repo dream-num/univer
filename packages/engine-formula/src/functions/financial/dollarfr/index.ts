@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import Decimal from 'decimal.js';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -36,7 +37,7 @@ export class Dollarfr extends BaseFunction {
         const [decimalDollarObject, fractionObject] = variants as BaseValueObject[];
 
         const decimalDollarValue = +decimalDollarObject.getValue();
-        let fractionValue = Math.floor(+fractionObject.getValue());
+        const fractionValue = Math.floor(+fractionObject.getValue());
 
         if (Number.isNaN(decimalDollarValue) || Number.isNaN(fractionValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -50,14 +51,10 @@ export class Dollarfr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        fractionValue = Number.parseInt(`${fractionValue}`, 10);
+        const amount = new Decimal(decimalDollarValue);
+        const scale = Decimal.pow(10, Decimal.log10(fractionValue).ceil());
+        const fractionalPart = amount.mod(1).mul(fractionValue).div(scale);
 
-        // Compute integer part
-        let result = Number.parseInt(`${decimalDollarValue}`, 10);
-
-        // Add decimal part
-        result += (decimalDollarValue % 1) * 10 ** -Math.ceil(Math.log(fractionValue) / Math.LN10) * fractionValue;
-
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(amount.trunc().add(fractionalPart).toNumber());
     }
 }

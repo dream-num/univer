@@ -3045,6 +3045,45 @@ describe('documents render', () => {
         univer.dispose();
     });
 
+    it.each([
+        { fieldType: 'PAGE', expected: 'iv' },
+        { fieldType: 'NUMPAGES', expected: '12' },
+    ])('renders embedded $fieldType using its host page without changing the shared snapshot', ({ fieldType, expected }) => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        const model = injector.createInstance(DocumentDataModel, {
+            id: 'embedded-page-field',
+            body: {
+                dataStream: '\u001F67\u001E\r\n',
+                paragraphs: [{ startIndex: 4, paragraphId: 'embedded-p' }],
+                textRuns: [{ st: 1, ed: 2, ts: { fs: 11 } }, { st: 2, ed: 3, ts: { fs: 12 } }],
+                customRanges: [{ startIndex: 0, endIndex: 3, rangeId: 'field', rangeType: CustomRangeType.FIELD, properties: { fieldType } }],
+            },
+            documentStyle: { pageSize: { width: 320, height: 400 } },
+        });
+        const before = structuredClone(model.getSnapshot());
+        const viewModel = injector.createInstance(DocumentViewModel, model);
+        injector.add([DocumentSkeleton, { useFactory: () => DocumentSkeleton.create(viewModel, injector.get(LocaleService)) }]);
+        const skeleton = injector.get(DocumentSkeleton);
+        skeleton.calculate();
+        const config = { pageMarginLeft: 0, pageMarginTop: 0, pageFieldContext: { pageNumber: 4, pageCount: 12, pageNumberFormat: 'lowerRoman' } };
+        const documents = injector.createInstance(Documents, model.getUnitId(), skeleton, config);
+        scene.addObject(documents, 1);
+        const ctx = canvas.getContext();
+        const text = vi.spyOn(ctx, 'fillText');
+        try {
+            documents.draw(ctx);
+            expect(text.mock.calls.map(([value]) => value).filter((value) => /[\div]/.test(String(value)))).toEqual([expected]);
+            expect(model.getSnapshot()).toEqual(before);
+        } finally {
+            documents.dispose();
+            skeleton.dispose();
+            viewModel.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
     it.each(['PAGE', 'NUMPAGES'])('renders %s once, excluding sentinels and subsequent cached digit runs', (fieldType) => {
         const univer = new Univer();
         const model = new DocumentDataModel({

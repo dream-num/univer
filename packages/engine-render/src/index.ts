@@ -56,6 +56,7 @@ export type {
     IDocCustomGlyphRenderInput,
 } from './components/docs/custom-glyph-renderer';
 export { DocBackground } from './components/docs/doc-background';
+export type { IDocumentsConfig } from './components/docs/doc-component';
 export { DOCS_EXTENSION_TYPE } from './components/docs/doc-extension';
 export { Documents } from './components/docs/document';
 export type { IDocumentGlyphPaint, IDocumentOffsetConfig, IPageRenderConfig } from './components/docs/document';

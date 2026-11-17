@@ -41,6 +41,8 @@ export interface IPageMarginLayout {
 }
 
 export interface IDocumentsConfig extends IPageMarginLayout {
+    /** Page fields inside an embedded document use its host's pagination. Runtime only. */
+    pageFieldContext?: Pick<IDocumentSkeletonPage, 'pageNumber' | 'pageNumberFormat'> & { pageCount: number };
     hasEditor?: boolean;
     backgroundFillColor?: string;
     pageFillColor?: string;

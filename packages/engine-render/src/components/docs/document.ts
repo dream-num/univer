@@ -318,9 +318,11 @@ export class Documents extends DocComponent {
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
     private _inactiveAreaOpacity = 1;
+    private readonly _pageFieldContext?: IDocumentsConfig['pageFieldContext'];
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
+        this._pageFieldContext = config?.pageFieldContext;
 
         this._initialDefaultExtension();
 
@@ -460,6 +462,7 @@ export class Documents extends DocComponent {
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const isContinuousLayout = this.getSkeleton()?.getViewModel?.().getDataModel().documentStyle.documentFlavor === DocumentFlavor.MODERN;
         const isTraditionalLayout = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+        const bodyFieldContext = this._getEmbeddedPageFieldContext();
         const dataModel = this.getSkeleton()?.getViewModel?.().getDataModel();
         const sectionBorders = new Map((dataModel?.getBody?.()?.sectionBreaks ?? [])
             .map((section) => [section.sectionId, section.pageBorders]));
@@ -573,7 +576,8 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    bodyFieldContext
                 );
                 ctx.restore();
             }
@@ -745,6 +749,7 @@ export class Documents extends DocComponent {
         const { sections, marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0 } = page;
         const { verticalAlign = VerticalAlign.TOP, wrapStrategy = WrapStrategy.UNSPECIFIED } = renderConfig;
         const isVertical = renderConfig.vertexAngle === VERTICAL_ROTATE_ANGLE && renderConfig.centerAngle === VERTICAL_ROTATE_ANGLE;
+        const fieldContext = this._getEmbeddedPageFieldContext();
         const clip = bounds?.glyphClipBound;
         const matrix = clip ? ctx.getTransform() : undefined;
         // Unknown extensions and deferred streams must receive their original complete glyph sequence.
@@ -849,7 +854,7 @@ export class Documents extends DocComponent {
 
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
-                            const { glyphGroup } = divide;
+                            const glyphGroup = fieldContext ? resolveHeaderFooterFieldGlyphGroup(divide, fieldContext) : divide.glyphGroup;
 
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
@@ -1243,13 +1248,24 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    this._getEmbeddedPageFieldContext()
                 );
                 drawLiquid.translateRestore();
             }
 
             drawLiquid.translateRestore();
         }
+    }
+
+    private _getEmbeddedPageFieldContext(): IHeaderFooterFieldContext | undefined {
+        if (!this._pageFieldContext) {
+            return undefined;
+        }
+        const viewModel = this.getSkeleton()?.getViewModel();
+        return viewModel
+            ? { ...this._pageFieldContext, customRanges: viewModel.getBody()?.customRanges ?? [], viewModel }
+            : undefined;
     }
 
     private _drawTableCellBackgrounds(

@@ -54,7 +54,7 @@ import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-upd
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
 import { DocDrawingPublicationTracker, DocDrawingTransformUpdateController, getDocsDrawingBehindText, getDocsDrawingClipPage, getDocsDrawingPageClipBounds, getDocsOverlayRuntimeDrawing, getDocsPageRelativeDrawingAnchorPage, getDocsPageRelativeDrawingLeft, getDocsPageRelativeDrawingTop, getDocsTableCellDrawingOffset, shouldRefreshDocDrawingTransform } from '../doc-drawing-transform-update.controller';
 
-async function createRepeatedImageTestBed(unitId: string) {
+async function createRepeatedImageTestBed(unitId: string, drawingType = DrawingTypeEnum.DRAWING_IMAGE) {
     const testBed = createDocDrawingTestBed(unitId);
     const { univer, model, render } = testBed;
     const injector = univer.__getInjector();
@@ -74,6 +74,7 @@ async function createRepeatedImageTestBed(unitId: string) {
     snapshot.documentStyle!.defaultHeaderId = 'header';
     const drawing = snapshot.drawings!.a;
     Object.assign(drawing, {
+        drawingType,
         source: 'cached-header-image',
         imageSourceType: ImageSourceType.BASE64,
         isMultiTransform: BooleanNumber.TRUE,
@@ -121,7 +122,7 @@ async function createRepeatedImageTestBed(unitId: string) {
     skeletonManager.getSkeleton().makeDirty(true);
     skeletonManager.recalculate();
     expect(skeletonManager.getSkeleton().getSkeletonData()!.pages).toHaveLength(2);
-    render.mainComponent = new Documents(`${unitId}-document`);
+    render.mainComponent = injector.createInstance(Documents, `${unitId}-document`);
     render.addRenderDependencies([[DocDrawingTransformUpdateController]]);
     const controller = render.with(DocDrawingTransformUpdateController);
     expect(manager.getDrawingByParam(drawing)).toMatchObject({ hidden: false, transforms: [expect.anything(), expect.anything()] });
@@ -133,6 +134,23 @@ async function createRepeatedImageTestBed(unitId: string) {
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('publishes distinct runtime page contexts for a shared header shape without persisting them', async () => {
+        vi.useFakeTimers();
+        const { univer, model, drawing, manager } = await createRepeatedImageTestBed('header-shape-page-fields', DrawingTypeEnum.DRAWING_SHAPE);
+        try {
+            const transforms = manager.getDrawingByParam(drawing)!.transforms as Array<{ pageFieldContext?: unknown }>;
+            expect(transforms.map((transform) => transform.pageFieldContext)).toEqual([
+                { pageNumber: 1, pageCount: 2 },
+                { pageNumber: 2, pageCount: 2 },
+            ]);
+            expect(JSON.stringify(model.getSnapshot())).not.toContain('pageFieldContext');
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
     });
 
     it('keeps published header images while pages are appended and removes only surplus instances', () => {

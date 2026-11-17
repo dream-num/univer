@@ -29,6 +29,7 @@ import type {
     IDocsCustomBlockRenderViewport,
     IDocsTableRenderViewport,
     IDocumentLayoutProgress,
+    IDocumentsConfig,
     IDocumentSkeletonCached,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonHeaderFooter,
@@ -116,6 +117,7 @@ function mergePublishedDrawing(
 
 interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: IDrawingClipBounds;
+    pageFieldContext?: IDocumentsConfig['pageFieldContext'];
 }
 
 type DrawingRefreshParam = Partial<IDrawingParam> & {
@@ -1302,6 +1304,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             flipX: runtimeDrawing.docTransform.flipX,
             flipY: runtimeDrawing.docTransform.flipY,
             clipBounds,
+            pageFieldContext: this._getShapePageFieldContext(context, runtimeDrawing.drawingType),
         };
         mergePublishedDrawing(context.updateDrawingMap, {
             unitId: context.unitId,
@@ -1317,6 +1320,18 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         if (runtimeDrawing.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
             this._collectGroupChildren(drawingId, context, behindText, isMultiTransform, new Set([drawingId]));
         }
+    }
+
+    private _getShapePageFieldContext(context: IDrawingPositionContext, drawingType?: DrawingTypeEnum): IDocumentsConfig['pageFieldContext'] {
+        const page = context.hostPage ?? context.page;
+        if (drawingType !== DrawingTypeEnum.DRAWING_SHAPE || !Number.isFinite(page.pageHeight) || page.pageNumber == null) {
+            return undefined;
+        }
+        return {
+            pageNumber: page.pageNumber,
+            pageNumberFormat: page.pageNumberFormat,
+            pageCount: this._docSkeletonManagerService.getSkeleton()?.getSkeletonData()?.pages.length ?? 1,
+        };
     }
 
     private _collectGroupChildren(
@@ -1341,6 +1356,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 angle,
                 flipX,
                 flipY,
+                pageFieldContext: this._getShapePageFieldContext(context, child.drawingType),
             };
             mergePublishedDrawing(context.updateDrawingMap, {
                 unitId: context.unitId,

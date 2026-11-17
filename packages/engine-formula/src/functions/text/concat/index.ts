@@ -43,6 +43,10 @@ export class Concat extends BaseFunction {
         };
 
         for (const textValue of textValues) {
+            if (textValue.isError()) {
+                return textValue;
+            }
+
             if (textValue.isArray()) {
                 (textValue as ArrayValueObject).iterator((valueObject) => {
                     if (valueObject == null || valueObject.isNull()) {
@@ -60,7 +64,7 @@ export class Concat extends BaseFunction {
                 if (isError) {
                     return isError;
                 }
-            } else if (!textValue.isError() && !textValue.isNull()) {
+            } else if (!textValue.isNull()) {
                 // Direct concatenation if it's a single value
                 appendText(formatValueForFormulaText(textValue.getValue()));
             }

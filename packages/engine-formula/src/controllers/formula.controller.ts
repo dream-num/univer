@@ -48,7 +48,6 @@ import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../functions';
-import { offlineCubeFunctions } from '../functions/cube/function-map';
 import { IFunctionService } from '../services/function.service';
 import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
 
@@ -139,7 +138,7 @@ export class FormulaController extends Disposable {
     private _registerFunctions() {
         const config = this._configService.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
-        const functions: BaseFunction[] = ALL_IMPLEMENTED_FUNCTIONS.concat(offlineCubeFunctions, config?.function ?? [])
+        const functions: BaseFunction[] = ALL_IMPLEMENTED_FUNCTIONS.concat(config?.function ?? [])
             .map((registerObject) => {
                 const Func = registerObject[0] as Ctor<BaseFunction>;
                 const name = registerObject[1] as IFunctionNames;

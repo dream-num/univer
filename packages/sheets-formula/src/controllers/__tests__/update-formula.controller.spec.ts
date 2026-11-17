@@ -1669,6 +1669,8 @@ describe('Grouped dynamic array formulas', () => {
                                 12: { f: '=ISREF(+Source!B1:B2)' },
                                 13: { f: '=TYPE(+TRUE)' },
                                 14: { f: '=ODDLYIELD(DATE(2008,4,20),DATE(2008,6,15),DATE(2007,12,24),0.0375,IF(Source!B1>25,99.5,99.875),100,2)' },
+                                15: { f: '=IFNA(A20,0)' },
+                                16: { f: '=ISNA(A20)' },
                             },
                         },
                     },
@@ -1764,7 +1766,10 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
             expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
             expect(sheet.getRange('H18:J18').getValues()).toEqual([[46, '#NULL!', '#REF!']]);
-            expect(sheet.getRange('A20:B20').getValues()).toEqual([['#N/A', '#N/A']]);
+            expect(sheet.getRange('A20:B20').getValues()).toEqual([['#NAME?', '#NAME?']]);
+            expect(sheet.getRange('P20:Q20').getValues()).toEqual([['#NAME?', 0]]);
+            const savedCells = workbook.save().sheets[sheet.getSheetId()]?.cellData;
+            expect(savedCells?.[19]?.[0]?.f).toBe('=CUBEVALUE("NoSuchConnection")');
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
             expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(sheet.getRange('G20:J20').getValues()).toEqual([[4200, '#VALUE!', 45364, 45365]]);

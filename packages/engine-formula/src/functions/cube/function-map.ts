@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../basics/error-type';
-import { ErrorValueObject } from '../../engine/value-object/base-value-object';
-import { BaseFunction } from '../base-function';
-import { FUNCTION_NAMES_CUBE } from './function-names';
+// import { Cubekpimember } from './cubekpimember';
+// import { Cubemember } from './cubemember';
+// import { Cubememberproperty } from './cubememberproperty';
+// import { Cuberankedmember } from './cuberankedmember';
+// import { Cubeset } from './cubeset';
+// import { Cubesetcount } from './cubesetcount';
+// import { Cubevalue } from './cubevalue';
+// import { FUNCTION_NAMES_CUBE } from './function-names';
 
-export const functionCube = [];
-
-class UnavailableCubeFunction extends BaseFunction {
-    override needsReferenceObject = true;
-
-    override calculate() {
-        return ErrorValueObject.create(ErrorType.NA);
-    }
-}
-
-// Register the unavailable-connection result without listing OLAP queries as implemented.
-export const offlineCubeFunctions: Array<[typeof UnavailableCubeFunction, FUNCTION_NAMES_CUBE]> =
-    Object.values(FUNCTION_NAMES_CUBE).map((name) => [UnavailableCubeFunction, name]);
+export const functionCube = [
+    // [Cubekpimember, FUNCTION_NAMES_CUBE.CUBEKPIMEMBER],
+    // [Cubemember, FUNCTION_NAMES_CUBE.CUBEMEMBER],
+    // [Cubememberproperty, FUNCTION_NAMES_CUBE.CUBEMEMBERPROPERTY],
+    // [Cuberankedmember, FUNCTION_NAMES_CUBE.CUBERANKEDMEMBER],
+    // [Cubeset, FUNCTION_NAMES_CUBE.CUBESET],
+    // [Cubesetcount, FUNCTION_NAMES_CUBE.CUBESETCOUNT],
+    // [Cubevalue, FUNCTION_NAMES_CUBE.CUBEVALUE],
+];

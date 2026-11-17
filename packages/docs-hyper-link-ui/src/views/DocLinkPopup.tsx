@@ -26,7 +26,7 @@ import {
 import { MessageType } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { HyperlinkPreview, IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { HyperlinkPreview, IClipboardInterfaceService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
@@ -37,6 +37,7 @@ export const DocLinkPopup = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
+    const clipboardService = useDependency(IClipboardInterfaceService);
     const localeService = useDependency(LocaleService);
     const currentPopup = useObservable(hyperLinkService.showingLink$, hyperLinkService.showing);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -73,7 +74,7 @@ export const DocLinkPopup = () => {
             onDismiss={() => hyperLinkService.hideInfoPopup()}
             onOpen={() => commandService.executeCommand(ClickDocHyperLinkOperation.id, { unitId, linkId, segmentId })}
             onCopy={async () => {
-                await navigator.clipboard.writeText(target);
+                await clipboardService.writeText(target);
                 messageService.show({ content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'), type: MessageType.Info });
             }}
             onEdit={canEdit ? () => commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, { link: currentPopup }) : undefined}

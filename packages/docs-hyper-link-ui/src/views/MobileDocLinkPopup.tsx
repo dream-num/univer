@@ -26,7 +26,7 @@ import {
 import { MessageType, MobileActionRow } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { IClipboardInterfaceService, IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
@@ -38,6 +38,7 @@ export function MobileDocLinkPopup() {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
+    const clipboardService = useDependency(IClipboardInterfaceService);
     const permissionService = useDependency(IPermissionService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const currentPopup = useObservable(hyperLinkService.showingLink$, hyperLinkService.showing);
@@ -76,7 +77,7 @@ export function MobileDocLinkPopup() {
                     title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}
                     aria-label={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}
                     variant="subtle"
-                    onClick={() => navigator.clipboard.writeText(url).then(() => {
+                    onClick={() => clipboardService.writeText(url).then(() => {
                         messageService.show({
                             content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
                             type: MessageType.Info,

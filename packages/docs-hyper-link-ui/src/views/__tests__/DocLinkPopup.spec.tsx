@@ -32,7 +32,7 @@ import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutatio
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
+import { BrowserClipboardService, IClipboardInterfaceService, IDialogService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
@@ -50,6 +50,7 @@ import { MobileDocLinkPopup } from '../MobileDocLinkPopup';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const UNIT_ID = 'doc-link-popup-doc';
+const execCommandDescriptor = Object.getOwnPropertyDescriptor(document, 'execCommand');
 
 class TestDocCanvasPopManagerService {
     disposeCount = 0;
@@ -112,6 +113,7 @@ function createPopupTestBed(documentData = createDocData()) {
     injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
+    injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
     injector.add([IDialogService, {
         useValue: {
             close: () => {},
@@ -213,6 +215,11 @@ describe('DocLinkPopup', () => {
         container = undefined;
         currentTestBed = undefined;
         vi.restoreAllMocks();
+        if (execCommandDescriptor) {
+            Object.defineProperty(document, 'execCommand', execCommandDescriptor);
+        } else {
+            Reflect.deleteProperty(document, 'execCommand');
+        }
         vi.useRealTimers();
     });
 
@@ -467,6 +474,40 @@ describe('DocLinkPopup', () => {
         expect(actions.remove).toBeNull();
         expect(currentTestBed.popupService.showEditPopup(UNIT_ID, info)).toBeNull();
         expect(currentTestBed.popupService.editing).toBeNull();
+    });
+
+    it.each([false, true])('copies the original internal target without the native clipboard API (mobile: %s)', async (mobile) => {
+        const data = createDocData();
+        data.body!.customRanges![0].properties = { bookmarkId: '_TocExample' };
+        data.body!.customRanges!.push({ startIndex: 0, endIndex: 4, rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, properties: { bookmarkId: '_TocExample' } });
+        currentTestBed = createPopupTestBed(data);
+        showExistingLink(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        act(() => root!.render(<RediContext.Provider value={{ injector: currentTestBed!.injector }}>{mobile ? <MobileDocLinkPopup /> : <DocLinkPopup />}</RediContext.Provider>));
+
+        vi.spyOn(navigator, 'clipboard', 'get').mockReturnValue(undefined as never);
+        const snapshot = structuredClone(currentTestBed.doc.getSnapshot());
+        const copied: string[] = [];
+        const execCommand = vi.fn((command: string) => {
+            expect(command).toBe('copy');
+            copied.push(document.querySelector('textarea')!.value);
+            return true;
+        });
+        Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
+        expect(container.querySelector('button[aria-label="Hello"]')).toBeTruthy();
+        const copy = container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]')!;
+        container.tabIndex = 0;
+        container.focus();
+        await act(async () => {
+            copy.click();
+            await Promise.resolve();
+        });
+        expect(copied).toEqual(['#_TocExample']);
+        expect(document.activeElement).toBe(container);
+        expect(document.querySelector('textarea')).toBeNull();
+        expect(currentTestBed.doc.getSnapshot()).toEqual(snapshot);
     });
 
     it('navigates a mobile internal link within the document', async () => {

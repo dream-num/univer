@@ -62,7 +62,7 @@ describe('Test address', () => {
         });
 
         it('Absolute reference to another workbook and worksheet', async () => {
-            expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe("'[Book1]Sheet1'!R2C3");
+            expect(calculate(2, 3, 1, false, '[Book1]Sheet1')).toBe('[Book1]Sheet1!R2C3');
         });
 
         it('Absolute reference to sheet name with single quote', async () => {

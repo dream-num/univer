@@ -166,6 +166,59 @@ function getCouponSchedule(
     return { previousSerial, nextSerial, count };
 }
 
+export function calculateAccruedInterest(
+    issue: number,
+    first: number,
+    settlement: number,
+    rate: number,
+    par: number,
+    frequency: number,
+    basis: number,
+    fromIssue: boolean,
+    dateSystem: DateSystem
+): number | ErrorType {
+    const months = 12 / frequency;
+    const anchor = getCouponDateParts(first, dateSystem);
+    const issued = getCouponDateParts(issue, dateSystem);
+    const couponAt = (index: number) => getCouponDateSerial(addCouponMonths(anchor, index * months), dateSystem);
+    let index = Math.trunc(((issued.year - anchor.year) * 12 + issued.month - anchor.month) / months);
+    if (couponAt(index) > issue) index--;
+    let previous = couponAt(index);
+    if (dateSystem === DateSystem.Date1900 && previous <= 0) return ErrorType.NUM;
+
+    const periodLength = (start: number, end: number) => basis === 1 ? end - start : (basis === 3 ? 365 : 360) / frequency;
+    const firstLength = periodLength(couponAt(-1), first);
+    if (!fromIssue && first < settlement) {
+        return rate * par / frequency * accruedDays(issue, settlement, basis, dateSystem) / firstLength;
+    }
+
+    let accrued = 0;
+    while (previous < settlement) {
+        const next = couponAt(++index);
+        if (next <= previous) return ErrorType.NUM;
+        if (issue <= previous && next <= settlement) {
+            accrued += 1;
+        } else {
+            const length = previous >= first ? firstLength : periodLength(previous, next);
+            accrued += accruedDays(Math.max(issue, previous), Math.min(settlement, next), basis, dateSystem) / length;
+        }
+        previous = next;
+    }
+    return rate * par / frequency * accrued;
+}
+
+function accruedDays(start: number, end: number, basis: number, dateSystem: DateSystem): number {
+    if (basis !== 0) return getTwoDateDaysByBasis(start, end, basis, dateSystem).days;
+
+    const from = getCouponDateParts(start, dateSystem);
+    const to = getCouponDateParts(end, dateSystem);
+    const lastFebruaryFrom = from.month === 2 && from.monthEnd;
+    const lastFebruaryTo = to.month === 2 && to.monthEnd;
+    const firstDay = lastFebruaryFrom ? 30 : Math.min(from.day, 30);
+    const lastDay = (lastFebruaryFrom && lastFebruaryTo) || (to.day === 31 && firstDay === 30) ? 30 : to.day;
+    return (to.year - from.year) * 360 + (to.month - from.month) * 30 + lastDay - firstDay;
+}
+
 export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number, dateSystem = DateSystem.Date1900): number {
     const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
 

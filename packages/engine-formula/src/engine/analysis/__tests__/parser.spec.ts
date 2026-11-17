@@ -15,8 +15,6 @@
  */
 
 import type { ICellData, Injector, IWorkbookData } from '@univerjs/core';
-import { CellValueType, FormulaType, ILogService, LocaleType, LogLevel, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../../basics/common';
 import type { IDefinedNameMapItem } from '../../../services/defined-names.service';
 import type { IAllRuntimeData } from '../../../services/runtime.service';
@@ -25,6 +23,8 @@ import type { BaseReferenceObject } from '../../reference-object/base-reference-
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import type { BaseValueObject } from '../../value-object/base-value-object';
 import type { LexerNode } from '../lexer-node';
+import { CellValueType, FormulaType, ILogService, LocaleType, LogLevel, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { AsyncCustomFunction } from '../../../functions/custom-function';
 import { FUNCTION_NAMES_INFORMATION } from '../../../functions/information/function-names';
@@ -1076,6 +1076,20 @@ describe('ETS dependency recalculation', () => {
 
 describe('Linear forecasts and scalar arguments', () => {
     it.each([
+        ['=ADDRESS(2,3,1,TRUE,"[Book.xlsx]Sheet1")', '[Book.xlsx]Sheet1!$C$2'],
+        ['=ADDRESS(2,3,1,TRUE,"")', '!$C$2'],
+        ['=ADDRESS(0,0,4,FALSE)', 'RC'],
+        ['=ADDRESS(-1,-2,4,FALSE)', 'R[-1]C[-2]'],
+        ['=ADDRESS(1048577,1)', ErrorType.VALUE],
+        ['=ADDRESS(2,3,1,"abc")', ErrorType.VALUE],
+        ['=PROB({0,1,2,3,4},{0.1,0.2,0.4,0.2,0.1},2)', 0.4],
+        ['=PROB({0,1},{1.5,-0.5},1)', -0.5],
+        ['=PROB({0,1},{0.5,0.500000000001},1)', ErrorType.NUM],
+        ['=PROB({0,1},{0.2,0.3,0.5},1)', ErrorType.NA],
+        ['=PROB({0,1,TRUE},{0.2,0.3,0.5},1)', ErrorType.NUM],
+        ['=SUM(PROB({0,1,2},{0.2,0.3,0.5},0,{0,1,2}))', 1.7],
+        ['=ACCRINT(DATE(2023,11,15),DATE(2024,5,15),DATE(2024,3,15),0.0575,1000,2,2)', 19.32638888888889],
+        ['=ACCRINT(DATE(2023,11,15),DATE(2024,5,15),DATE(2025,2,1),0.0575,1000,2,1,FALSE)', 70.13736263736264],
         ['=XNPV(0.09,{-10000,11000},{44927.9,45292.1})', 91.74311926605515],
         ['=XNPV(0,{-1000,1100},{44927,45292})', ErrorType.NUM],
         ['=XIRR({-1000,900},{44927,45292})', -0.10000000335276127],

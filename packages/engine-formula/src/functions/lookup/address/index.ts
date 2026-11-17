@@ -21,10 +21,9 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { AbsoluteRefType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { serializeRangeToR1C1 } from '../../../engine/utils/r1c1-reference';
 import { addQuotesBothSides, serializeRange } from '../../../engine/utils/reference';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Address extends BaseFunction {
@@ -46,7 +45,7 @@ export class Address extends BaseFunction {
         const columnNumber = this._getArgumentValue(columnInput);
         const absNumber = absInput && this._getArgumentValue(absInput);
         const a1 = a1Input && this._getArgumentValue(a1Input);
-        const sheetText = sheetInput && this._getArgumentValue(sheetInput);
+        const sheetText = sheetInput && this._getArgumentValue(sheetInput, true);
 
         if (rowNumber.isError()) {
             return rowNumber;
@@ -70,7 +69,7 @@ export class Address extends BaseFunction {
 
         const _absNumber = absNumber == null || absNumber.isNull() ? NumberValueObject.create(1) : absNumber;
         const _a1 = a1 == null || a1.isNull() ? BooleanValueObject.create(true) : a1;
-        const _sheetText = sheetText == null || sheetText.isNull() ? StringValueObject.create('') : sheetText;
+        const _sheetText = sheetText ?? NullValueObject.create();
 
         if ([rowNumber, columnNumber, _absNumber, _a1, _sheetText].every((value) => !value.isArray())) {
             return this._calculateSingleCell(rowNumber, columnNumber, _absNumber, _a1, _sheetText);
@@ -130,7 +129,7 @@ export class Address extends BaseFunction {
         });
     }
 
-    private _getArgumentValue(input: FunctionVariantType): BaseValueObject {
+    private _getArgumentValue(input: FunctionVariantType, isSheet = false): BaseValueObject {
         if (!input.isReferenceObject()) {
             return input as BaseValueObject;
         }
@@ -139,34 +138,50 @@ export class Address extends BaseFunction {
             return values;
         }
         const cell = values.getFirstCell();
-        return cell.isNull() ? NumberValueObject.create(0) : cell;
+        return cell.isNull() ? (isSheet ? StringValueObject.create('') : NumberValueObject.create(0)) : cell;
     }
 
     private _calculateSingleCell(rowNumber: BaseValueObject, columnNumber: BaseValueObject, absNumber: BaseValueObject, a1: BaseValueObject, sheetText: BaseValueObject) {
-        const row = Number.parseInt(`${Number(rowNumber.getValue()) - 1}`);
-        const column = Number.parseInt(`${Number(columnNumber.getValue()) - 1}`);
-        const absNumberValue = Number.parseInt(`${Number(absNumber.getValue())}`);
+        const row = Math.trunc(Number(rowNumber.getValue()));
+        const column = Math.trunc(Number(columnNumber.getValue()));
+        const absNumberValue = Math.trunc(Number(absNumber.getValue()));
+        const logical = a1.isString() ? String(a1.getValue()).toUpperCase() : a1.getValue();
+        if (typeof logical === 'string' && logical !== 'TRUE' && logical !== 'FALSE') {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        const isA1 = typeof logical === 'string' ? logical === 'TRUE' : Boolean(logical);
+        const relativeRow = !isA1 && (absNumberValue === 3 || absNumberValue === 4);
+        const relativeColumn = !isA1 && (absNumberValue === 2 || absNumberValue === 4);
 
-        if (Number.isNaN(row) || Number.isNaN(column) || Number.isNaN(absNumberValue) || absNumberValue < 1 || absNumberValue > 4) {
+        if (!Number.isFinite(row) || !Number.isFinite(column) || !Number.isFinite(absNumberValue) ||
+            row < (relativeRow ? -1048576 : 1) || row > 1048576 ||
+            column < (relativeColumn ? -16384 : 1) || column > 16384 ||
+            absNumberValue < 1 || absNumberValue > 4) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const absType = transformAbsoluteRefType(absNumberValue);
-        const a1Value = this.getZeroOrOneByOneDefault(a1);
-        const sheetTextValue = `${sheetText.getValue()}`;
-        const sheetName = addQuotesBothSides(sheetTextValue);
+        const sheetTextValue = sheetText.isNull() ? '' : String(sheetText.getValue());
+        const simpleBookRef = /^\[[\p{L}\p{N}_.]+\][\p{L}\p{N}_.]*$/u.test(sheetTextValue);
+        const prefix = sheetText.isNull() ? '' : `${simpleBookRef ? sheetTextValue : addQuotesBothSides(sheetTextValue)}!`;
+        if (!isA1) {
+            const coordinate = (index: number, relative: boolean) => {
+                if (!relative) return String(index);
+                return index === 0 ? '' : `[${index}]`;
+            };
+            return StringValueObject.create(`${prefix}R${coordinate(row, relativeRow)}C${coordinate(column, relativeColumn)}`);
+        }
 
         const range: IRange = {
-            startRow: row,
-            startColumn: column,
-            endRow: row,
-            endColumn: column,
+            startRow: row - 1,
+            startColumn: column - 1,
+            endRow: row - 1,
+            endColumn: column - 1,
             startAbsoluteRefType: absType,
             endAbsoluteRefType: absType,
         };
 
-        const rangeString = a1 && !a1Value ? serializeRangeToR1C1(range) : serializeRange(range);
-        return StringValueObject.create(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
+        return StringValueObject.create(prefix + serializeRange(range));
     }
 }
 

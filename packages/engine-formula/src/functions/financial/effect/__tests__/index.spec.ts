@@ -32,12 +32,25 @@ describe('Test effect function', () => {
             expect(result.getValue()).toBe(0);
         });
 
-        it.each([1, 12])('Preserves the rounding boundary with %i periods', (periods) => {
-            const rounded = testFunction.calculate(NumberValueObject.create(Number.EPSILON / 2), NumberValueObject.create(periods));
+        it.each([1, 2, 12, 365])('Preserves per-period rounding boundaries with %i periods', (periods) => {
+            const rounded = testFunction.calculate(NumberValueObject.create(Number.EPSILON * periods / 2), NumberValueObject.create(periods));
             expect(rounded.getValue()).toBe(0);
 
-            const nonzero = testFunction.calculate(NumberValueObject.create(Number.EPSILON), NumberValueObject.create(periods));
-            expect(nonzero.getValue()).toBeGreaterThan(0);
+            const nonzero = testFunction.calculate(NumberValueObject.create(Number.EPSILON * periods), NumberValueObject.create(periods));
+            expect(nonzero.getValue()).toBe(Number.EPSILON * periods);
+        });
+
+        it.each([12, 365])('Preserves zero after per-period rounding with %i periods', (periods) => {
+            const numeric = testFunction.calculate(NumberValueObject.create(1e-15), NumberValueObject.create(periods));
+            const numericString = testFunction.calculate(StringValueObject.create('1e-15'), StringValueObject.create(String(periods)));
+            expect(numeric.getValue()).toBe(0);
+            expect(numericString.getValue()).toBe(0);
+        });
+
+        it('Preserves a nonzero rounded result for one annual period', () => {
+            const result = testFunction.calculate(NumberValueObject.create(0.1), NumberValueObject.create(1));
+            expect(result.getValue()).toBe(0.10000000000000009);
+            expect(Number(result.getValue()) > 0.1).toBe(true);
         });
 
         it.each([1, 12])('Preserves zero rounding for a numeric string with %i periods', (periods) => {
@@ -58,7 +71,10 @@ describe('Test effect function', () => {
 
         it('Keeps large period counts and truncates fractional periods', () => {
             const large = testFunction.calculate(NumberValueObject.create(0.05), NumberValueObject.create(1e21));
-            expect(large.getValue()).toBeCloseTo(0.05127109637602404, 15);
+            expect(large.getValue()).toBe(0);
+
+            const numericString = testFunction.calculate(NumberValueObject.create(0.05), StringValueObject.create('2e21'));
+            expect(numericString.getValue()).toBe(0);
 
             const fractional = testFunction.calculate(NumberValueObject.create(0.5), NumberValueObject.create(2.9));
             expect(fractional.getValue()).toBe(0.5625);

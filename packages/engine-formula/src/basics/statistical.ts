@@ -667,8 +667,7 @@ export function lognormalPDF(x: number, mean: number, standardDev: number): numb
         return 0;
     }
 
-    const z = standardizeNormalValue(Math.log(x), mean, standardDev);
-    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - z ** 2 / 2);
+    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - ((Math.log(x) - mean) ** 2) / (2 * standardDev * standardDev));
 }
 
 export function lognormalINV(probability: number, mean: number, standardDev: number): number {
@@ -712,8 +711,7 @@ export function normalCDF(x: number, mean: number, standardDev: number): number 
 }
 
 export function normalPDF(x: number, mean: number, standardDev: number): number {
-    const z = standardizeNormalValue(x, mean, standardDev);
-    return Math.exp(-0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - z ** 2 / 2);
+    return Math.exp(-0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - (x - mean) ** 2 / (2 * standardDev * standardDev));
 }
 
 export function normalINV(probability: number, mean: number, standardDev: number): number {

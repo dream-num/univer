@@ -33,16 +33,29 @@ describe('Test dollarfr function', () => {
             [1e308, 16, 1e308],
             [1.5, 1e21, 1.5],
             [1.125, 1.6e21, 1.02],
-            [1.125, 1000000000000001, 1.0125],
+            [1.125, 1000000000000001, 1.1250000000000002],
             [1.5, 1e100, 1.5],
             [1.125, 16, 1.02],
             [1.125, 32, 1.04],
             [1.125, 16.75, 1.02],
             [-1.125, 16, -1.02],
             [0, 16, 0],
-        ])('converts %s with denominator %s without losing precision', (amount, fraction, expected) => {
+        ])('converts %s with denominator %s using the existing arithmetic', (amount, fraction, expected) => {
             const result = testFunction.calculate(NumberValueObject.create(amount), NumberValueObject.create(fraction));
             expect(result.getValue()).toBe(expected);
+        });
+
+        it('Preserves the power-of-ten boundary for numeric strings', () => {
+            const result = testFunction.calculate(StringValueObject.create('1.125'), StringValueObject.create('1000000000000001'));
+            expect(result.getValue()).toBe(1.1250000000000002);
+        });
+
+        it.each([
+            [Number.POSITIVE_INFINITY, 16],
+            [1.5, Number.POSITIVE_INFINITY],
+        ])('Preserves nonfinite input handling (%s, %s)', (amount, fraction) => {
+            const result = testFunction.calculate(NumberValueObject.create(amount), NumberValueObject.create(fraction));
+            expect(result.getValue()).toBeNaN();
         });
 
         it('Value is normal', () => {

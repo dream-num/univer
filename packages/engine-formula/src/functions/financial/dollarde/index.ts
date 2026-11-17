@@ -51,10 +51,25 @@ export class Dollarde extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        const amount = new Decimal(fractionalDollarValue);
-        const scale = Decimal.pow(10, Decimal.log10(fractionValue).ceil());
-        const fractionalPart = amount.mod(1).mul(scale).div(fractionValue);
+        const scaleDigits = Math.ceil(Math.log(fractionValue) / Math.LN10);
+        let result = Math.trunc(fractionalDollarValue);
+        result += ((fractionalDollarValue % 1) * 10 ** scaleDigits) / fractionValue;
 
-        return NumberValueObject.create(amount.trunc().add(fractionalPart).toNumber());
+        const roundingDigits = Math.ceil(Math.log(fractionValue) / Math.LN2) + 1;
+        const power = 10 ** roundingDigits;
+        const scaled = result * power;
+
+        if (Number.isFinite(scaled) || !Number.isFinite(fractionalDollarValue) || !Number.isFinite(fractionValue)) {
+            return NumberValueObject.create(Math.round(scaled) / power);
+        }
+
+        // An overflowing conversion or rounding scale must not erase a finite price.
+        const preciseResult = Number.isFinite(result)
+            ? new Decimal(result)
+            : new Decimal(Math.trunc(fractionalDollarValue)).add(
+                new Decimal(fractionalDollarValue % 1).mul(Decimal.pow(10, scaleDigits)).div(fractionValue)
+            );
+
+        return NumberValueObject.create(preciseResult.toDecimalPlaces(roundingDigits, Decimal.ROUND_HALF_CEIL).toNumber());
     }
 }

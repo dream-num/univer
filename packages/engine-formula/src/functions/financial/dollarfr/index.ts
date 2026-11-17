@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import Decimal from 'decimal.js';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -51,10 +50,9 @@ export class Dollarfr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        const amount = new Decimal(decimalDollarValue);
-        const scale = Decimal.pow(10, Decimal.log10(fractionValue).ceil());
-        const fractionalPart = amount.mod(1).mul(fractionValue).div(scale);
+        let result = Math.trunc(decimalDollarValue);
+        result += (decimalDollarValue % 1) * 10 ** -Math.ceil(Math.log(fractionValue) / Math.LN10) * fractionValue;
 
-        return NumberValueObject.create(amount.trunc().add(fractionalPart).toNumber());
+        return NumberValueObject.create(result);
     }
 }

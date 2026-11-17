@@ -496,6 +496,59 @@ function createCompositionInputTestBed() {
 }
 
 describe('DocSelectionRenderService composition input transactions', () => {
+    it.each(['中', '中文'])('commits a same-turn composition update and end as %s', async (finalText) => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中' }), '中');
+            bed.dispatch(new InputEvent('beforeinput', { inputType: 'insertCompositionText', data: finalText }));
+            bed.dispatch(new CompositionEvent('compositionend', { data: finalText }), finalText);
+            bed.dispatch(new InputEvent('input', { inputType: 'insertCompositionText', data: finalText }));
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe(`${finalText}\r\n`);
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it('replaces successive composition updates delivered in the same turn', async () => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            for (const text of ['中', '中文', '中文']) {
+                bed.dispatch(new CompositionEvent('compositionupdate', { data: text }), text);
+            }
+            bed.dispatch(new CompositionEvent('compositionend', { data: '中文' }), '中文');
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe('中文\r\n');
+        } finally {
+            bed.dispose();
+        }
+    });
+
+    it.each([
+        { previousFinal: '中文', expected: '中文新内容\r\n' },
+        { previousFinal: '', expected: '新内容\r\n' },
+    ])('keeps a new composition when the previous end "$previousFinal" is still settling', async ({ previousFinal, expected }) => {
+        const bed = createCompositionInputTestBed();
+        try {
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '中' }), '中');
+            bed.dispatch(new CompositionEvent('compositionend', { data: previousFinal }), previousFinal);
+            bed.dispatch(new CompositionEvent('compositionstart', { data: '' }));
+            bed.dispatch(new CompositionEvent('compositionupdate', { data: '新' }), '新');
+            await awaitTime(0);
+            bed.dispatch(new CompositionEvent('compositionend', { data: '新内容' }), '新内容');
+            await awaitTime(0);
+
+            expect(bed.doc.getBody()?.dataStream).toBe(expected);
+        } finally {
+            bed.dispose();
+        }
+    });
+
     it('commits Firefox composition once when its final input follows compositionend', async () => {
         const bed = createCompositionInputTestBed();
         try {

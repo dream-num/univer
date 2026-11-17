@@ -140,3 +140,25 @@ describe('Test complex', () => {
         expect(Complex.getComplex(1e21, 1, 'i')).toBe('1E+21+i');
     });
 });
+
+describe('Complex argument small phases', () => {
+    it('retains small signed phases along the positive real axis', () => {
+        for (const imaginary of [1e-10, 1e-12, 1e-100, 1e-300]) {
+            for (const sign of [1, -1]) {
+                const input = `1${sign > 0 ? '+' : '-'}${imaginary}i`;
+                // atan(y) = y + O(y^3), below one double ULP for these y.
+                const expected = sign * imaginary;
+                expect(new Complex(input).Argument()).toBe(expected);
+            }
+        }
+    });
+
+    it('keeps subnormal precision inside the complex helper', () => {
+        expect(new Complex('1+5e-324i').Argument()).toBe(Number.MIN_VALUE);
+        expect(new Complex('1-5e-324i').Argument()).toBe(-Number.MIN_VALUE);
+    });
+
+    it('retains the undefined argument of zero', () => {
+        expect(new Complex('0').Argument()).toBeNaN();
+    });
+});

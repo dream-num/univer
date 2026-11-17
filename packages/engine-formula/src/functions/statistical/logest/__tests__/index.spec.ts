@@ -421,3 +421,59 @@ describe('Test logest function', () => {
         });
     });
 });
+
+function regressionArray(values: number[], column: boolean) {
+    return ArrayValueObject.createByArray(column ? values.map((value) => [value]) : [values]);
+}
+
+describe('LOGEST single-predictor stability', () => {
+    const logest = new Logest(FUNCTION_NAMES_STATISTICAL.LOGEST);
+
+    it('fits constant exponential responses with large predictor offsets', () => {
+        const offset = 1e9;
+        for (const column of [false, true]) {
+            const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], column);
+            const ys = regressionArray([1, 1, 1, 1], column);
+            expect(getObjectValue(logest.calculate(ys, xs))).toEqual([[1, 1]]);
+        }
+    });
+
+    it('uses a unit multiplier and geometric response mean for constant predictors', () => {
+        for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([x, x, x], column);
+                const ys = regressionArray([1, 4, 16], column);
+                expect(getObjectValue(logest.calculate(ys, xs), true)).toEqual([[1, 4]]);
+            }
+        }
+    });
+
+    it('retains an exponential fit when an intercept is disabled', () => {
+        const xs = regressionArray([2, 2, 2], false);
+        const ys = regressionArray([4, 4, 4], false);
+        expect(getObjectValue(logest.calculate(ys, xs, BooleanValueObject.create(false)), true)).toEqual([[2, 1]]);
+    });
+
+    it('adjusts log-space statistics for the omitted constant predictor', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const ys = regressionArray([1, 4, 16], false);
+        const result = getObjectValue(logest.calculate(ys, xs, BooleanValueObject.create(true), BooleanValueObject.create(true))) as Array<Array<number | string>>;
+        expect(result[0][0]).toBe(1);
+        expect(result[0][1]).toBeCloseTo(4, 14);
+        expect(result[1][0]).toBe(0);
+        expect(result[1][1]).toBeCloseTo(Math.log(4) / Math.sqrt(3), 14);
+        expect(result[2][0]).toBe(0);
+        expect(result[2][1]).toBeCloseTo(Math.log(4), 14);
+        expect(result[3]).toEqual([ErrorType.NUM, 2]);
+        expect(result[4][0]).toBe(0);
+        expect(result[4][1]).toBeCloseTo(2 * Math.log(4) ** 2, 14);
+    });
+
+    it('retains errors for nonpositive responses with a constant predictor', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        for (const values of [[0, 0, 0], [0, 1, 2], [-1, -1, -1], [1, -1, 2]]) {
+            const ys = regressionArray(values, false);
+            expect(getObjectValue(logest.calculate(ys, xs))).toBe(ErrorType.NA);
+        }
+    });
+});

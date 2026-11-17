@@ -179,7 +179,7 @@ export class Linest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+        const { slope: m, intercept: b, isConstantPredictor } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -203,9 +203,9 @@ export class Linest extends BaseFunction {
                     sumX += knownXsValuesFlat[i];
                 }
 
-                meanY = sumY / n;
-                meanX = sumX / n;
-                df = n - 2;
+                meanY = isConstantPredictor ? b : sumY / n;
+                meanX = isConstantPredictor ? knownXsValuesFlat[0] : sumX / n;
+                df = isConstantPredictor ? n - 1 : n - 2;
             }
 
             let sstotal = 0;
@@ -226,7 +226,9 @@ export class Linest extends BaseFunction {
             let sey = 0;
 
             if (df > 0) {
-                if (ssx > 0) {
+                if (isConstantPredictor) {
+                    seb = Math.sqrt(ssresid / df / n);
+                } else if (ssx > 0) {
                     se = Math.sqrt(ssresid / df / ssx);
                     seb = Math.sqrt(ssresid / df * (1 / n + meanX ** 2 / ssx));
                 }
@@ -234,7 +236,7 @@ export class Linest extends BaseFunction {
                 sey = Math.sqrt(ssresid / df);
             }
 
-            const F = df > 0 ? (ssreg / 1) / (ssresid / df) : ErrorType.NUM;
+            const F = df > 0 && !isConstantPredictor ? (ssreg / 1) / (ssresid / df) : ErrorType.NUM;
 
             // seb = #N/A when const is FALSE
             if (!constb) {
@@ -249,9 +251,7 @@ export class Linest extends BaseFunction {
                 [ssreg, ssresid], // [ssreg, ssresid]
             ];
         } else {
-            result = [
-                [m, b], // [m, b]
-            ];
+            result = [[m, b]];
         }
 
         return ArrayValueObject.createByArray(result);

@@ -623,3 +623,48 @@ describe('Test growth function', () => {
         });
     });
 });
+
+function regressionArray(values: number[], column: boolean) {
+    return ArrayValueObject.createByArray(column ? values.map((value) => [value]) : [values]);
+}
+
+describe('GROWTH single-predictor stability', () => {
+    const growth = new Growth(FUNCTION_NAMES_STATISTICAL.GROWTH);
+
+    it('fits constant exponential responses with large predictor offsets', () => {
+        const offset = 1e9;
+        for (const column of [false, true]) {
+            const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], column);
+            const ys = regressionArray([1, 1, 1, 1], column);
+            const newXs = regressionArray([offset - 1, offset + 4], column);
+            expect(getObjectValue(growth.calculate(ys, xs, newXs))).toEqual(column ? [[1], [1]] : [[1, 1]]);
+        }
+    });
+
+    it('predicts the geometric response mean for constant predictors', () => {
+        for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([x, x, x], column);
+                const ys = regressionArray([1, 4, 16], column);
+                const newXs = regressionArray([-1, 0, 1], column);
+                expect(getObjectValue(growth.calculate(ys, xs, newXs), true)).toEqual(column ? [[4], [4], [4]] : [[4, 4, 4]]);
+            }
+        }
+    });
+
+    it('retains an exponential fit when an intercept is disabled', () => {
+        const xs = regressionArray([2, 2, 2], false);
+        const ys = regressionArray([4, 4, 4], false);
+        const newXs = regressionArray([0, 1, 3], false);
+        expect(getObjectValue(growth.calculate(ys, xs, newXs, BooleanValueObject.create(false)), true)).toEqual([[1, 2, 8]]);
+    });
+
+    it('retains errors for nonpositive responses with a constant predictor', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const newXs = regressionArray([0, 1], false);
+        for (const values of [[0, 0, 0], [0, 1, 2], [-1, -1, -1], [1, -1, 2]]) {
+            const ys = regressionArray(values, false);
+            expect(getObjectValue(growth.calculate(ys, xs, newXs))).toEqual([[ErrorType.NUM, ErrorType.NUM]]);
+        }
+    });
+});

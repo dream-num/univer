@@ -619,3 +619,46 @@ describe('Test trend function', () => {
         });
     });
 });
+
+function regressionArray(values: number[], column: boolean) {
+    return ArrayValueObject.createByArray(column ? values.map((value) => [value]) : [values]);
+}
+
+describe('TREND single-predictor stability', () => {
+    const trend = new Trend(FUNCTION_NAMES_STATISTICAL.TREND);
+
+    it('predicts new values with translated row and column input arrays', () => {
+        const offset = 1e9;
+        for (const column of [false, true]) {
+            const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], column);
+            const ys = regressionArray([7, 9, 11, 13], column);
+            const newXs = regressionArray([offset - 1, offset + 4], column);
+            expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[5], [15]] : [[5, 15]]);
+        }
+    });
+
+    it('returns the constant response for a rounded constant predictor mean', () => {
+        for (const column of [false, true]) {
+            const values = regressionArray([0.1, 0.1, 0.1], column);
+            expect(getObjectValue(trend.calculate(values, values, NumberValueObject.create(1)))).toEqual([[0.1]]);
+        }
+    });
+
+    it('predicts the response mean independently of new predictors', () => {
+        for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([x, x, x], column);
+                const ys = regressionArray([1, 2, 3], column);
+                const newXs = regressionArray([-1, 0, 1], column);
+                expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[2], [2], [2]] : [[2, 2, 2]]);
+            }
+        }
+    });
+
+    it('retains the fit through the origin when an intercept is disabled', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const ys = regressionArray([0.2, 0.2, 0.2], false);
+        const newXs = regressionArray([0, 1, 2], false);
+        expect(getObjectValue(trend.calculate(ys, xs, newXs, BooleanValueObject.create(false)), true)).toEqual([[0, 2, 4]]);
+    });
+});

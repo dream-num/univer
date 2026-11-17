@@ -505,3 +505,75 @@ describe('Test linest function', () => {
         });
     });
 });
+
+function regressionArray(values: number[], column: boolean) {
+    return ArrayValueObject.createByArray(column ? values.map((value) => [value]) : [values]);
+}
+
+describe('LINEST single-predictor stability', () => {
+    const linest = new Linest(FUNCTION_NAMES_STATISTICAL.LINEST);
+
+    it('retains slope and intercept under translation of the predictor', () => {
+        for (const offset of [1e9, -1e9, 2 ** 40]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], column);
+                const ys = regressionArray([7, 9, 11, 13], column);
+                expect(getObjectValue(linest.calculate(ys, xs))).toEqual([[2, 7 - 2 * offset]]);
+            }
+        }
+    });
+
+    it('returns consistent statistics for a translated exact line', () => {
+        const offset = 1e9;
+        const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], false);
+        const ys = regressionArray([7, 9, 11, 13], false);
+        const result = getObjectValue(linest.calculate(ys, xs, BooleanValueObject.create(true), BooleanValueObject.create(true))) as number[][];
+        expect(result[0]).toEqual([2, 7 - 2 * offset]);
+        expect(result[1]).toEqual([0, 0]);
+        expect(result[2]).toEqual([1, 0]);
+        expect(result[3][1]).toBe(2);
+        expect(result[4]).toEqual([20, 0]);
+    });
+
+    it('omits exactly constant predictors even when their mean rounds away', () => {
+        for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([x, x, x], column);
+                const ys = regressionArray([1, 2, 3], column);
+                expect(getObjectValue(linest.calculate(ys, xs))).toEqual([[0, 2]]);
+            }
+        }
+    });
+
+    it('retains the exact response when both input vectors are constant', () => {
+        for (const column of [false, true]) {
+            const values = regressionArray([0.1, 0.1, 0.1], column);
+            expect(getObjectValue(linest.calculate(values, values))).toEqual([[0, 0.1]]);
+        }
+    });
+
+    it('does not discard distinct predictors separated by a few ulps', () => {
+        const step = 2 ** -50;
+        const xs = regressionArray([1, 1 + step, 1 + 2 * step], false);
+        const ys = regressionArray([0, step, 2 * step], false);
+        expect(getObjectValue(linest.calculate(ys, xs))).toEqual([[1, -1]]);
+    });
+
+    it('retains the slope when an intercept is disabled', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const ys = regressionArray([0.2, 0.2, 0.2], false);
+        expect(getObjectValue(linest.calculate(ys, xs, BooleanValueObject.create(false)), true)).toEqual([[2, 0]]);
+    });
+
+    it('adjusts statistics for the omitted constant predictor', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const ys = regressionArray([1, 2, 3], false);
+        const result = getObjectValue(linest.calculate(ys, xs, BooleanValueObject.create(true), BooleanValueObject.create(true))) as Array<Array<number | string>>;
+        expect(result[0]).toEqual([0, 2]);
+        expect(result[1][0]).toBe(0);
+        expect(result[1][1]).toBeCloseTo(Math.sqrt(1 / 3), 14);
+        expect(result[2]).toEqual([0, 1]);
+        expect(result[3]).toEqual([ErrorType.NUM, 2]);
+        expect(result[4]).toEqual([0, 2]);
+    });
+});

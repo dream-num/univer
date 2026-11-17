@@ -15,12 +15,12 @@
  */
 
 import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
-import { BooleanNumber, isRealNum } from '@univerjs/core';
 import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
@@ -900,9 +900,10 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
     }
 
     let slope, intercept;
+    let isConstantPredictor = false;
 
     if (constb) {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
+        ({ slope, intercept, isConstantPredictor } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
     } else {
         ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, Y));
     }
@@ -916,11 +917,23 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
         slope = 0;
     }
 
-    return { slope, intercept, Y };
+    return { slope, intercept, Y, isConstantPredictor };
 }
 
 function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {
     const n = knownYsValues.length;
+    const firstX = knownXsValues[0];
+
+    // A constant predictor is redundant with the intercept. Test the inputs
+    // directly: their computed mean can round away from the repeated value.
+    if (n > 1 && Number.isFinite(firstX) && knownXsValues.every((value) => value === firstX) && knownYsValues.every(Number.isFinite)) {
+        const firstY = knownYsValues[0];
+        const intercept = knownYsValues.every((value) => value === firstY)
+            ? firstY
+            : knownYsValues.reduce((sum, value) => sum + value, 0) / n;
+
+        return { slope: 0, intercept, isConstantPredictor: true };
+    }
 
     let sumX = 0;
     let sumY = 0;
@@ -947,6 +960,7 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
     return {
         slope,
         intercept,
+        isConstantPredictor: false,
     };
 }
 

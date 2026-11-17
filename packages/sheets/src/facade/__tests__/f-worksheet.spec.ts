@@ -373,6 +373,15 @@ describe('Test FWorksheet', () => {
         expect(sheet?.getMaxRows()).toBe(98);
     });
 
+    it('Worksheet deleteRowsByPoints preserves the first range', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+        activeSheet.getRange(0, 0, 8, 1).setValues(Array.from({ length: 8 }, (_, row) => [row]));
+
+        expect(activeSheet.deleteRowsByPoints([6, [1, 3]])).toBe(activeSheet);
+        expect(activeSheet.getMaxRows()).toBe(96);
+        expect(activeSheet.getRange(0, 0, 4, 1).getValues()).toEqual([[0], [4], [5], [7]]);
+    });
+
     it('Worksheet moveRows', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
 
@@ -539,6 +548,15 @@ describe('Test FWorksheet', () => {
         const sheet = await activeSheet?.deleteColumns(0, 2);
         expect(sheet).toBeDefined();
         expect(sheet?.getMaxColumns()).toBe(98);
+    });
+
+    it('Worksheet deleteColumnsByPoints preserves the first range', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+        activeSheet.getRange(0, 0, 1, 8).setValues([Array.from({ length: 8 }, (_, column) => column)]);
+
+        expect(activeSheet.deleteColumnsByPoints([6, [1, 3]])).toBe(activeSheet);
+        expect(activeSheet.getMaxColumns()).toBe(96);
+        expect(activeSheet.getRange(0, 0, 1, 4).getValues()).toEqual([[0, 4, 5, 7]]);
     });
 
     it('Worksheet moveColumns', async () => {

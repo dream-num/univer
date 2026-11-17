@@ -24,7 +24,7 @@ export function generateIntervalsByPoints(points: Array<number | [number, number
 
     const intervals: [number, number][] = [];
     let currentStart = Array.isArray(sortedPoints[0]) ? sortedPoints[0][0] : sortedPoints[0];
-    let currentEnd = currentStart;
+    let currentEnd = Array.isArray(sortedPoints[0]) ? sortedPoints[0][1] : currentStart;
 
     for (let i = 1; i < sortedPoints.length; i++) {
         const point = sortedPoints[i];

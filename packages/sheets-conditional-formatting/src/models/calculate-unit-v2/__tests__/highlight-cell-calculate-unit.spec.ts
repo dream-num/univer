@@ -15,10 +15,10 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IConditionFormattingRule, ITimePeriodHighlightCell } from '../../type';
 import { BooleanNumber, CellValueType, excelDateTimeSerial } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CFRuleType, CFSubRuleType, CFTimePeriodOperator } from '../../../base/const';
+import type { IConditionFormattingRule, ITextHighlightCell, ITimePeriodHighlightCell } from '../../type';
+import { CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../../base/const';
 import { AddConditionalRuleMutation } from '../../../commands/mutations/add-conditional-rule.mutation';
 import { createTestBed } from './test.util';
 
@@ -178,5 +178,52 @@ describe('HighlightCellCalculateUnit time periods', () => {
             { style: { bl: BooleanNumber.TRUE } },
             { style: {} },
         ]);
+    });
+});
+
+describe('HighlightCellCalculateUnit text', () => {
+    let testBed: ReturnType<typeof createTestBed> | undefined;
+
+    afterEach(() => {
+        testBed?.univer.dispose();
+        testBed = undefined;
+    });
+
+    // Lower-casing turns a Greek capital sigma into final ς at the end of a word and σ
+    // elsewhere; Excel still matches these, case-insensitively.
+    it.each([
+        { operator: CFTextOperator.beginsWith, cell: 'ΟΣΑ', value: 'ΟΣ' },
+        { operator: CFTextOperator.containsText, cell: 'ΟΣΑ', value: 'ΟΣ' },
+        { operator: CFTextOperator.endsWith, cell: 'ΟΣ', value: 'Σ' },
+    ])('matches $cell $operator "$value"', ({ operator, cell, value }) => {
+        testBed = createTestBed();
+        testBed.getConditionalFormattingViewModel();
+        const { unitId, subUnitId } = testBed;
+
+        (testBed.workbook as Workbook).getSheetBySheetId(subUnitId)!.getCellMatrix().setValue(0, 0, {
+            v: cell,
+            t: CellValueType.STRING,
+        });
+
+        const rule: IConditionFormattingRule<ITextHighlightCell> = {
+            cfId: 'greek-text',
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            stopIfTrue: false,
+            rule: {
+                type: CFRuleType.highlightCell,
+                subType: CFSubRuleType.text,
+                operator,
+                value,
+                style: { bl: BooleanNumber.TRUE },
+            },
+        };
+        testBed.commandService.syncExecuteCommand(AddConditionalRuleMutation.id, {
+            unitId,
+            subUnitId,
+            rule,
+        });
+
+        const service = testBed.getConditionalFormattingService();
+        expect(service.composeStyle(unitId, subUnitId, 0, 0)).toEqual({ style: { bl: BooleanNumber.TRUE } });
     });
 });

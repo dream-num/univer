@@ -54,6 +54,15 @@ const sortRangesByTopLeft = <T extends { startRow: number; startColumn: number }
     return a.startColumn - b.startColumn;
 });
 
+/**
+ * Folds case for a case-insensitive text comparison. Lower-casing alone is not enough: a Greek
+ * capital sigma lowers to final ς at the end of a word and to σ elsewhere, so ΟΣΑ and ΟΣ would
+ * lower to different letters. Both sides therefore also fold ς to σ.
+ */
+function foldTextCase(text: string): string {
+    return text.toLowerCase().replace(/ς/g, 'σ');
+}
+
 // Duplicate and unique values compare text case-insensitively, as Excel does: "Apple" duplicates "apple".
 const duplicateKey = (value: unknown) => (typeof value === 'string' ? value.toLowerCase() : value);
 
@@ -275,12 +284,13 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue);
                     const v = isNullable(value) ? '' : String(value);
-                    // Excel builds text rules from SEARCH and "=", which ignore case.
-                    const text = v.toLowerCase();
-                    const condition = (subRuleConfig.value || '').toLowerCase();
+                    // Excel builds text rules from SEARCH and "=", which ignore case. Only the
+                    // operators that compare text fold it.
+                    const text = () => foldTextCase(v);
+                    const condition = () => foldTextCase(subRuleConfig.value || '');
                     switch (subRuleConfig.operator) {
                         case CFTextOperator.beginsWith: {
-                            return text.startsWith(condition);
+                            return text().startsWith(condition());
                         }
                         case CFTextOperator.containsBlanks: {
                             return /^\s*$/.test(v);
@@ -295,19 +305,19 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                             return !(ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.containsText: {
-                            return text.includes(condition);
+                            return text().includes(condition());
                         }
                         case CFTextOperator.notContainsText: {
-                            return !text.includes(condition);
+                            return !text().includes(condition());
                         }
                         case CFTextOperator.endsWith: {
-                            return text.endsWith(condition);
+                            return text().endsWith(condition());
                         }
                         case CFTextOperator.equal: {
-                            return text === condition;
+                            return text() === condition();
                         }
                         case CFTextOperator.notEqual: {
-                            return text !== condition;
+                            return text() !== condition();
                         }
                         default: {
                             return false;

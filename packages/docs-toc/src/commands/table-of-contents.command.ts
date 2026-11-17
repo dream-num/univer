@@ -654,6 +654,14 @@ export function buildTableOfContentsBody(
                 sourceParagraph: oldParagraphsByTarget.get(heading.bookmarkId ?? heading.headingId) ?? oldParagraphsByTarget.get(heading.paragraph.paragraphId),
             }
         );
+        if (!heading.text && rightAlignPageNumbers && showEntryPageNumber) {
+            const tabs = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles: options?.styles, paragraphStyleId: paragraph.styleId }).tabStops ?? [];
+            const pageTab = tabs.find((tab) => !tab.clear && tab.alignment === TabStopAlignment.END);
+            if (pageTab) {
+                // An object-only heading has no number/label tab before its page number.
+                paragraph.paragraphStyle = { ...paragraph.paragraphStyle, tabStops: tabs.map((tab) => tab.offset < pageTab.offset ? { ...tab, clear: true } : tab) };
+            }
+        }
         formatNumberedEntry(paragraph, heading, toc.rangeId, options);
         result.paragraphs!.push(paragraph);
     }

@@ -405,8 +405,13 @@ describe('table of contents body builder', () => {
     it.each([true, false].flatMap((showPageNumbers) => [true, false].map((hyperlinks) => ({ showPageNumbers, hyperlinks }))))('keeps object-only heading ranges valid (pages=$showPageNumbers, hyperlinks=$hyperlinks)', ({ showPageNumbers, hyperlinks }) => {
         const dataStream = '\u001FSTALE\u001E\r\n';
         const body: IDocumentBody = { dataStream, customRanges: [{ rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 6, properties: { fieldType: 'TOC', instruction: `TOC \\o "1-1"${hyperlinks ? ' \\h' : ''}` } }] };
+        const pageTab = { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT };
+        const styles = { TOC1: { name: 'toc 1', type: DocStyleType.paragraph, paragraphStyle: { tabStops: [{ offset: 16, alignment: TabStopAlignment.START }] } } };
+        body.paragraphs = [{ startIndex: 7, paragraphId: 'cached', styleId: 'TOC1', paragraphStyle: { tabStops: [{ offset: 22, alignment: TabStopAlignment.START }, pageTab] } }];
+        const before = structuredClone(body);
         let identity = 0;
         const result = buildTableOfContentsBody(body, body.customRanges![0], () => 7, () => `entry-${identity++}`, {
+            styles,
             showPageNumbers,
             entries: [{ text: '', startOffset: 100, headingId: 'image-heading', level: 1, paragraph: { paragraphId: 'image-heading', startIndex: 101 } }],
         })!;
@@ -414,6 +419,10 @@ describe('table of contents body builder', () => {
         const links = result.customRanges!.filter((range) => range.rangeType === CustomRangeType.HYPERLINK);
         expect(links).toHaveLength(showPageNumbers && hyperlinks ? 1 : 0);
         expect(result.customRanges!.every((range) => range.startIndex <= range.endIndex)).toBe(true);
+        const paragraph = result.paragraphs![0];
+        const tabs = resolveDocumentParagraphStyle(undefined, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId }).tabStops!.filter((tab) => !tab.clear);
+        expect(tabs).toEqual(showPageNumbers ? [pageTab] : [{ offset: 16, alignment: TabStopAlignment.START }, { offset: 22, alignment: TabStopAlignment.START }, pageTab]);
+        expect(body).toEqual(before);
     });
 
     it('separates an authored host paragraph when the cached directory has no leading break', () => {

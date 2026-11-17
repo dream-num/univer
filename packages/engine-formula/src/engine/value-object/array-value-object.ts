@@ -35,6 +35,8 @@ import {
     StringValueObject,
 } from './primitive-object';
 
+const INVERTED_INDEX_ERROR_KEYS = [...ERROR_TYPE_SET].map((error) => error.toLowerCase());
+
 enum BatchOperatorType {
     MINUS,
     PLUS,
@@ -1566,6 +1568,24 @@ export class ArrayValueObject extends BaseValueObject {
             );
 
             if (rowsInCache.length > 0) {
+                const cachedRows = this._calculationCache!.invertedIndex.getCellValuePositions(unitId, sheetId, column + startColumn);
+                const compareErrorRows = (positions: Set<number>) => {
+                    // An error and the same text share a normalized key.
+                    for (const row of positions) {
+                        const r = row - startRow;
+                        if (r >= 0 && r < rowCount) {
+                            const currentValue = this.getValueOrDefault(r, column);
+                            result[r] ??= [];
+                            if (currentValue.isError()) {
+                                result[r][column] = currentValue;
+                            } else if (valueObject.isError()) {
+                                result[r][column] = valueObject;
+                            } else {
+                                result[r][column] = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
+                            }
+                        }
+                    }
+                };
                 if (operator === compareToken.EQUALS && !(valueObject.isString() && isWildcard(valueObject.getValue() as string))) {
                     const rowPositions = this._calculationCache!.invertedIndex.getCellPositions(
                         unitId,
@@ -1588,45 +1608,42 @@ export class ArrayValueObject extends BaseValueObject {
                             result[r][column] = BooleanValueObject.create(true);
                         });
                     }
-                } else {
-                    const rowValuePositions = this._calculationCache!.invertedIndex.getCellValuePositions(
-                        unitId,
-                        sheetId,
-                        column + startColumn
-                    );
-
-                    if (rowValuePositions != null) {
-                        rowValuePositions.forEach((rowPositions, rowValue) => {
-                            let currentValue: Nullable<BaseValueObject> = NullValueObject.create(); // handle blank cell
-                            if (ERROR_TYPE_SET.has(rowValue as ErrorType)) {
-                                currentValue = ErrorValueObject.create(rowValue as ErrorType);
-                            } else if (typeof rowValue === 'string') {
-                                currentValue = StringValueObject.create(rowValue);
-                            } else if (typeof rowValue === 'number') {
-                                currentValue = NumberValueObject.create(rowValue);
-                            } else if (typeof rowValue === 'boolean') {
-                                currentValue = BooleanValueObject.create(rowValue);
+                    if (cachedRows) {
+                        for (const key of INVERTED_INDEX_ERROR_KEYS) {
+                            const positions = cachedRows.get(key);
+                            if (positions) {
+                                compareErrorRows(positions);
                             }
-
-                            let matchResult;
-                            if (currentValue.isError()) {
-                                matchResult = currentValue;
-                            } else if (valueObject.isError()) {
-                                matchResult = valueObject;
-                            } else {
-                                matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
-                            }
-
-                            rowPositions.forEach((index) => {
-                                if (index >= startRow && index <= startRow + rowCount - 1) {
-                                    if (result[index - startRow] == null) {
-                                        result[index - startRow] = [];
-                                    }
-                                    result[index - startRow][column] = matchResult;
-                                }
-                            });
-                        });
+                        }
                     }
+                } else {
+                    cachedRows?.forEach((rowPositions, rowValue) => {
+                        let currentValue: BaseValueObject = NullValueObject.create(); // handle blank cell
+                        if (typeof rowValue === 'string' && rowValue[0] === '#' && ERROR_TYPE_SET.has(rowValue.toUpperCase() as ErrorType)) {
+                            compareErrorRows(rowPositions);
+                            return;
+                        }
+                        if (typeof rowValue === 'string') {
+                            currentValue = StringValueObject.create(rowValue);
+                        } else if (typeof rowValue === 'number') {
+                            currentValue = NumberValueObject.create(rowValue);
+                        } else if (typeof rowValue === 'boolean') {
+                            currentValue = BooleanValueObject.create(rowValue);
+                        }
+
+                        const matchResult = valueObject.isError()
+                            ? valueObject
+                            : currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
+
+                        rowPositions.forEach((index) => {
+                            if (index >= startRow && index <= startRow + rowCount - 1) {
+                                if (result[index - startRow] == null) {
+                                    result[index - startRow] = [];
+                                }
+                                result[index - startRow][column] = matchResult;
+                            }
+                        });
+                    });
                 }
 
                 // handle the not in cache rows

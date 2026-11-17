@@ -1645,6 +1645,9 @@ describe('Grouped dynamic array formulas', () => {
                                 0: { f: '=CUBEVALUE("NoSuchConnection")' },
                                 1: { f: '=CUBEMEMBER("ThisWorkbookDataModel","[Product].[Bikes]")' },
                                 2: { f: '=CONVERT(Source!B1,"in2","cm2")' },
+                                3: { f: '=FILTER(Source!B1:B2,Source!D1:D2>0)' },
+                                4: { f: '=FILTER(Source!B1:B2,Source!D1:D2=0.1)' },
+                                5: { f: '=FILTER(Source!B1:B2,{0;0},)' },
                             },
                         },
                     },
@@ -1654,7 +1657,7 @@ describe('Grouped dynamic array formulas', () => {
                         rowCount: 20,
                         columnCount: 22,
                         cellData: {
-                            0: { 0: { v: 45170 }, 1: { v: 19 } },
+                            0: { 0: { v: 45170 }, 1: { v: 19 }, 3: { f: '=1/(B1-19)' } },
                             1: { 1: { v: 23 }, 2: { f: '=PreviousRow', si: 'previous-shared' } },
                             2: { 2: { si: 'previous-shared' } },
                         },
@@ -1742,6 +1745,7 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('H18:J18').getValues()).toEqual([[46, '#NULL!', '#REF!']]);
             expect(sheet.getRange('A20:B20').getValues()).toEqual([['#N/A', '#N/A']]);
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
 
             const source = workbook.getSheetByName('Source')!;
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
@@ -1749,11 +1753,13 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45170, 45170], [45174, 45174]]);
             expect(sheet.getRange('D18:G18').getValues()).toEqual([[81, 2, 1, 23]]);
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(187.0964, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([[29, 29, '#CALC!']]);
             expect(source.getRange('C2:C3').getValues()).toEqual([[29], [23]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
             expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
             expect(Number(sheet.getRange('C20').getValue())).toBeCloseTo(122.5804, 10);
+            expect(sheet.getRange('D20:F20').getValues()).toEqual([['#DIV/0!', '#DIV/0!', '#CALC!']]);
             expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
         } finally {
             univer.dispose();

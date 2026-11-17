@@ -15,8 +15,9 @@
  */
 
 /**
- * A parsed SEARCH pattern. `?` matches one character, `*` any text, and `~` before `?` or `*`
- * makes that character literal.
+ * A parsed SEARCH pattern. `?` matches one character, `*` any text, and `~` makes the character
+ * after it literal, as Excel does: `~~` is a tilde, `~*` an asterisk, `~x` an x, and a trailing
+ * `~` matches nothing.
  */
 export interface IWildcardSearchPattern {
     /** The text to find, with escapes removed, when the pattern has no wildcard. */
@@ -31,11 +32,13 @@ export function parseWildcardSearchPattern(pattern: string): IWildcardSearchPatt
 
     for (let i = 0; i < pattern.length; i++) {
         const char = pattern[i];
-        const next = pattern[i + 1];
 
-        if (char === '~' && (next === '*' || next === '?')) {
-            segments[segments.length - 1].push(next);
-            i++;
+        if (char === '~') {
+            // Whatever follows a tilde is literal; a trailing tilde adds nothing to the pattern.
+            if (i + 1 < pattern.length) {
+                segments[segments.length - 1].push(pattern[i + 1]);
+                i++;
+            }
         } else if (char === '*') {
             hasWildcard = true;
             segments.push([]);
@@ -68,7 +71,7 @@ export function searchWildcard(text: string, pattern: IWildcardSearchPattern, fr
         return -1;
     }
 
-    let position = start + first.length;
+    let position = matchSegmentAt(text, first, start);
 
     for (const segment of rest) {
         const found = findSegment(text, segment, position);
@@ -77,26 +80,53 @@ export function searchWildcard(text: string, pattern: IWildcardSearchPattern, fr
             return -1;
         }
 
-        position = found + segment.length;
+        position = matchSegmentAt(text, segment, found);
     }
 
     return start;
 }
 
+/** Leftmost start at or after `fromIndex` where `segment` matches, or -1. */
 function findSegment(text: string, segment: ReadonlyArray<string | null>, fromIndex: number): number {
+    // Every token covers at least one UTF-16 unit, so a segment never fits in fewer.
     for (let start = fromIndex; start + segment.length <= text.length; start++) {
-        let matched = 0;
-
-        while (matched < segment.length && (segment[matched] === null || segment[matched] === text[start + matched])) {
-            matched++;
-        }
-
-        if (matched === segment.length) {
+        if (matchSegmentAt(text, segment, start) !== -1) {
             return start;
         }
     }
 
     return -1;
+}
+
+/**
+ * End of `segment` matched at `start`, or -1. `?` covers one character, so a surrogate pair
+ * such as an emoji is a single `?`; positions stay in UTF-16 units, as LEN counts them.
+ */
+function matchSegmentAt(text: string, segment: ReadonlyArray<string | null>, start: number): number {
+    let position = start;
+
+    for (const token of segment) {
+        if (position >= text.length) {
+            return -1;
+        }
+
+        if (token === null) {
+            position += isSurrogatePairAt(text, position) ? 2 : 1;
+        } else if (token === text[position]) {
+            position++;
+        } else {
+            return -1;
+        }
+    }
+
+    return position;
+}
+
+function isSurrogatePairAt(text: string, index: number): boolean {
+    const high = text.charCodeAt(index);
+    const low = text.charCodeAt(index + 1);
+
+    return high >= 0xD800 && high <= 0xDBFF && low >= 0xDC00 && low <= 0xDFFF;
 }
 
 /**

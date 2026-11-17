@@ -155,6 +155,24 @@ describe('Test search function', () => {
             }
         });
 
+        it('Reads the character after ~ literally, as Excel does', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['~~', 'a~b', 1, 2],
+                ['~~~*', 'a~*b', 1, 2],
+                ['~x', 'a~xb', 1, 3],
+                ['~', 'a~b', 1, 1],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
+
+        it('Matches a surrogate pair with a single ?', () => {
+            const result = testFunction.calculate(StringValueObject.create('?b'), StringValueObject.create('😀b'), NumberValueObject.create(1));
+            expect(getObjectValue(result)).toStrictEqual(1);
+        });
+
         it('Returns the earliest match, counted in the original text', () => {
             const cases: [string, string, number, number | string][] = [
                 ['b*', 'abcb', 1, 2],

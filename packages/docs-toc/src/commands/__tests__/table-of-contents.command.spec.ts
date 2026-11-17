@@ -121,6 +121,24 @@ describe('canonical directory style selection', () => {
 });
 
 describe('table of contents body builder', () => {
+    it.each([
+        { switches: '', hyperlinks: false },
+        { switches: ' \\h', hyperlinks: true },
+        { switches: ' \\t "Literal \\h label,1"', hyperlinks: false },
+    ])('respects the Word hyperlink switch outside quoted style names ($switches)', ({ switches, hyperlinks }) => {
+        const { body, toc } = createBody();
+        toc.properties!.instruction = `TOC \\o "1-2"${switches}`;
+        const before = structuredClone(body);
+        let identity = 0;
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => `generated-${identity++}`)!;
+        expect(result.customRanges!.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)).toHaveLength(hyperlinks ? 2 : 0);
+        const pages = result.customRanges!.filter((range) => range.properties?.fieldType === 'PAGEREF');
+        expect(pages).toHaveLength(2);
+        expect(pages.every((range) => range.properties?.instruction.endsWith(' \\h'))).toBe(hyperlinks);
+        expect(result.customRanges!.find((range) => range.rangeId === toc.rangeId)!.properties!.cachedResult).toBe('Heading One\t1\rSubheading\t1\r');
+        expect(body).toEqual(before);
+    });
+
     it('formats numbered headings on initial insertion without decorating the trailing paragraph', () => {
         const { toc } = createBody();
         const body: IDocumentBody = { dataStream: 'Heading\r\n', paragraphs: [{ startIndex: 7, paragraphId: 'heading', paragraphStyle: { outlineLevel: 0 }, bullet: { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 } }] };
@@ -384,9 +402,9 @@ describe('table of contents body builder', () => {
         expect(body).toEqual(before);
     });
 
-    it.each([true, false])('keeps an object-only heading link valid when page labels are enabled: %s', (showPageNumbers) => {
+    it.each([true, false].flatMap((showPageNumbers) => [true, false].map((hyperlinks) => ({ showPageNumbers, hyperlinks }))))('keeps object-only heading ranges valid (pages=$showPageNumbers, hyperlinks=$hyperlinks)', ({ showPageNumbers, hyperlinks }) => {
         const dataStream = '\u001FSTALE\u001E\r\n';
-        const body: IDocumentBody = { dataStream, customRanges: [{ rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 6, properties: { fieldType: 'TOC', instruction: 'TOC \\o "1-1"' } }] };
+        const body: IDocumentBody = { dataStream, customRanges: [{ rangeId: 'toc', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 6, properties: { fieldType: 'TOC', instruction: `TOC \\o "1-1"${hyperlinks ? ' \\h' : ''}` } }] };
         let identity = 0;
         const result = buildTableOfContentsBody(body, body.customRanges![0], () => 7, () => `entry-${identity++}`, {
             showPageNumbers,
@@ -394,7 +412,7 @@ describe('table of contents body builder', () => {
         })!;
         expect(result.dataStream).toBe(showPageNumbers ? '\u001F\t\u001F7\u001E\r\u001E' : '\u001F\r\u001E');
         const links = result.customRanges!.filter((range) => range.rangeType === CustomRangeType.HYPERLINK);
-        expect(links).toHaveLength(showPageNumbers ? 1 : 0);
+        expect(links).toHaveLength(showPageNumbers && hyperlinks ? 1 : 0);
         expect(result.customRanges!.every((range) => range.startIndex <= range.endIndex)).toBe(true);
     });
 

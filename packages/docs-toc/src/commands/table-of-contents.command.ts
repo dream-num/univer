@@ -507,6 +507,7 @@ export function buildTableOfContentsBody(
     }
     options = { ...options, availableWidth: options?.availableWidth ?? getDocumentTextWidth(body, toc.startIndex, options?.documentStyle) };
     const instruction = String(toc.properties?.instruction ?? '');
+    const hyperlinks = instruction.replace(/"[^"]*"/g, '').split(/\s+/).some((token) => token.toLowerCase() === '\\h');
     if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
@@ -612,7 +613,7 @@ export function buildTableOfContentsBody(
                 textStyleMode: 'text',
             },
         };
-        if (heading.text.length || showEntryPageNumber) {
+        if (hyperlinks && (heading.text.length || showEntryPageNumber)) {
             ranges.push(link);
         }
         if (showEntryPageNumber) {
@@ -628,7 +629,7 @@ export function buildTableOfContentsBody(
                 wholeEntity: false,
                 properties: {
                     fieldType: 'PAGEREF',
-                    instruction: `PAGEREF ${targetId} \\h`,
+                    instruction: `PAGEREF ${targetId}${hyperlinks ? ' \\h' : ''}`,
                     cachedResult: String(pageNumber),
                     sourceKind: 'complex',
                 },

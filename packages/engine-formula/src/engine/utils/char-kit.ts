@@ -49,6 +49,40 @@ export function getCharLenByteInText(text: string, charIndex: number, direction:
     return codePoint > 255 ? 2 : 1;
 }
 
+/**
+ * Whether the code unit at `index` and the one after it form a surrogate pair, which
+ * together make up one character.
+ */
+export function isSurrogatePairAt(text: string, index: number): boolean {
+    const high = text.charCodeAt(index);
+    const low = text.charCodeAt(index + 1);
+
+    return high >= 0xD800 && high <= 0xDBFF && low >= 0xDC00 && low <= 0xDFFF;
+}
+
+/**
+ * Upper-cases text for a case-insensitive search without changing its length, so an
+ * index in the result is also the index in the original text. A character whose upper
+ * case is longer, such as ß becoming SS, is left as it is. The host locale is ignored,
+ * as it is for the wildcard comparisons in `compare.ts`.
+ */
+export function upperCaseKeepingPositions(text: string): string {
+    const upperCase = text.toUpperCase();
+
+    if (upperCase.length === text.length) {
+        return upperCase;
+    }
+
+    let result = '';
+
+    for (const char of text) {
+        const upperChar = char.toUpperCase();
+        result += upperChar.length === char.length ? upperChar : char;
+    }
+
+    return result;
+}
+
 function highSurrogate(charCode: number): boolean {
     return charCode >= 0xD800 && charCode <= 0xDBFF;
 }

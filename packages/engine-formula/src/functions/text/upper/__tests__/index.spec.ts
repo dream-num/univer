@@ -75,5 +75,15 @@ describe('Test upper function', () => {
             const result2 = testFunction.calculate(text2);
             expect(getObjectValue(result2)).toStrictEqual('HELLO中文O😊WO😊RLD');
         });
+
+        it('Expands ß to SS, as Google Sheets does', () => {
+            // Google Sheets (executed 2026-11-17): UPPER("ß") is SS and LEN("ß") is 1.
+            // SEARCH returns a position, so it keeps text length; see the search specs.
+            const result = testFunction.calculate(StringValueObject.create('ß'));
+            expect(getObjectValue(result)).toStrictEqual('SS');
+
+            const result2 = testFunction.calculate(StringValueObject.create('straße'));
+            expect(getObjectValue(result2)).toStrictEqual('STRASSE');
+        });
     });
 });

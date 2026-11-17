@@ -150,6 +150,9 @@ describe('Test searchb function', () => {
                 ['欢*', '你好，欢迎', 7],
                 ['~?', '中?', 3],
                 ['~~', 'a~b', 2],
+                ['~~~*', 'a~*b', 2],
+                ['~x', 'a~xb', 3],
+                ['?b', '😀b', 1],
                 ['x?z', 'abc', ErrorType.VALUE],
             ];
             for (const [find, within, expected] of cases) {

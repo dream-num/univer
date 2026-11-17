@@ -82,7 +82,7 @@ export function calculateMdeterm(matrix: number[][]): number {
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
     }
 
-    const { rowSwap, smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix);
+    const { rowSwap, smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix, true, 0);
 
     if (smallPivotDetected) {
         return 0; // Matrix is irreversible

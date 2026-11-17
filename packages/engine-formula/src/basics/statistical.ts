@@ -720,7 +720,21 @@ export function poissonCDF(x: number, mean: number): number {
 }
 
 export function poissonPDF(x: number, mean: number): number {
-    return Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
+    if (x === 0) {
+        return Math.exp(-mean);
+    }
+
+    if (mean === 0 && x > 0) {
+        return 0;
+    }
+
+    const result = Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
+
+    if (Number.isFinite(result) && result !== 0) {
+        return result;
+    }
+
+    return Math.exp(x * Math.log(mean) - mean - gammaln(x + 1));
 }
 
 export function studentTCDF(x: number, degFreedom: number): number {

@@ -111,7 +111,7 @@ export class Substitute extends BaseFunction {
         for (let i = 0; i < textValue.length; i++) {
             const str = textValue.substr(i, oldTextValue.length);
 
-            if (str === oldTextValue || (str.length === oldTextValue.length && str.trim() === oldTextValue.trim())) {
+            if (str === oldTextValue) {
                 num++;
 
                 if (num === instanceNumValue) {

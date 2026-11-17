@@ -27,6 +27,32 @@ describe('Test substitute function', () => {
     const testFunction = new Substitute(FUNCTION_NAMES_TEXT.SUBSTITUTE);
 
     describe('Substitute', () => {
+        it.each([
+            ['A\tB\nC\u00A0D E', ' ', 'A\tB\nC\u00A0D_E'],
+            ['A\tB\nC\u00A0D E', '\t', 'A_B\nC\u00A0D E'],
+            ['A\tB\nC\u00A0D E', '\n', 'A\tB_C\u00A0D E'],
+            ['A\tB\nC\u00A0D E', '\u00A0', 'A\tB\nC_D E'],
+            ['a b', ' a', 'a b'],
+            [' a', 'a ', ' a'],
+        ])('Matches only the exact old text in %s', (text, oldText, expected) => {
+            const result = testFunction.calculate(
+                StringValueObject.create(text),
+                StringValueObject.create(oldText),
+                StringValueObject.create('_')
+            );
+            expect(getObjectValue(result)).toBe(expected);
+        });
+
+        it('Counts only exact occurrences for instance_num', () => {
+            const result = testFunction.calculate(
+                StringValueObject.create('\ta b c'),
+                StringValueObject.create(' '),
+                StringValueObject.create('_'),
+                NumberValueObject.create(2)
+            );
+            expect(getObjectValue(result)).toBe('\ta b_c');
+        });
+
         it('Value is normal', () => {
             const text = StringValueObject.create('Hello Univer');
             const oldText = StringValueObject.create('Hello');

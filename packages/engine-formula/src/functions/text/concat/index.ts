@@ -16,7 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject, formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -27,6 +28,19 @@ export class Concat extends BaseFunction {
     override calculate(...textValues: BaseValueObject[]) {
         let concatenatedString = '';
         let isError: BaseValueObject | null = null;
+        let exceedsCellLimit = false;
+
+        const appendText = (text: string) => {
+            if (exceedsCellLimit) {
+                return;
+            }
+
+            if (concatenatedString.length + text.length > 32767) {
+                exceedsCellLimit = true;
+            } else {
+                concatenatedString += text;
+            }
+        };
 
         for (const textValue of textValues) {
             if (textValue.isArray()) {
@@ -40,7 +54,7 @@ export class Concat extends BaseFunction {
                         return false; // break
                     }
 
-                    concatenatedString += formatValueForFormulaText(valueObject.getValue());
+                    appendText(formatValueForFormulaText(valueObject.getValue()));
                 });
 
                 if (isError) {
@@ -48,10 +62,10 @@ export class Concat extends BaseFunction {
                 }
             } else if (!textValue.isError() && !textValue.isNull()) {
                 // Direct concatenation if it's a single value
-                concatenatedString += formatValueForFormulaText(textValue.getValue());
+                appendText(formatValueForFormulaText(textValue.getValue()));
             }
         }
 
-        return StringValueObject.create(concatenatedString);
+        return exceedsCellLimit ? ErrorValueObject.create(ErrorType.VALUE) : StringValueObject.create(concatenatedString);
     }
 }

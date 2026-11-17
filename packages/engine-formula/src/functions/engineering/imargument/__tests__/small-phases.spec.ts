@@ -19,7 +19,8 @@ import { Complex } from '../../../../basics/complex';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { Complex as ComplexFunction } from '../../complex';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Imargument } from '../index';
 
@@ -40,8 +41,43 @@ describe('IMARGUMENT small phases', () => {
                 expect(new Complex(input).Argument()).toBe(expected);
             }
         }
-        expect(calculate('1+5e-324i')).toBe(Number.MIN_VALUE);
-        expect(calculate('1-5e-324i')).toBe(-Number.MIN_VALUE);
+    });
+
+    it.each([
+        '1+5e-324i',
+        '1-5e-324i',
+        '1+2.2250738585072e-308i',
+        '1-2.2250738585072e-308i',
+        '1e300+1e-20i',
+        '1e300-1e-20i',
+    ])('flushes the subnormal worksheet phase of %s to positive zero', (input) => {
+        expect(Object.is(calculate(input), 0)).toBe(true);
+    });
+
+    it('flushes subnormal results returned by IMARGUMENT after COMPLEX', () => {
+        const complex = new ComplexFunction(FUNCTION_NAMES_ENGINEERING.COMPLEX);
+        for (const sign of [1, -1]) {
+            const input = complex.calculate(NumberValueObject.create(1e300), NumberValueObject.create(sign * 1e-20));
+            expect(Object.is(fn.calculate(input).getValue(), 0)).toBe(true);
+        }
+    });
+
+    it('retains signed normal worksheet phases immediately above the subnormal boundary', () => {
+        for (const sign of [1, -1]) {
+            const input = `1${sign > 0 ? '+' : '-'}2.225073858507202e-308i`;
+            const result = calculate(input);
+            expect(Math.abs(result)).toBeGreaterThanOrEqual(2 ** -1022);
+            expect(result).toBe(sign * 2.225073858507202e-308);
+        }
+    });
+
+    it('keeps subnormal precision inside the complex helper', () => {
+        expect(new Complex('1+5e-324i').Argument()).toBe(Number.MIN_VALUE);
+        expect(new Complex('1-5e-324i').Argument()).toBe(-Number.MIN_VALUE);
+    });
+
+    it('flushes a subnormal phase from a single-cell array', () => {
+        expect(Object.is(fn.calculate(ArrayValueObject.createByArray([['1e300-1e-20i']])).getValue(), 0)).toBe(true);
     });
 
     it('retains the distance from the negative real axis', () => {

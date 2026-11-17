@@ -97,6 +97,11 @@ export class BinomInv extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        const quantile = findBinomialQuantile(trialsValue, probabilitySValue, alphaValue);
+        if (quantile !== undefined) {
+            return NumberValueObject.create(quantile);
+        }
+
         let result = 0;
 
         while (result <= trialsValue) {
@@ -109,4 +114,44 @@ export class BinomInv extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+}
+
+function findBinomialQuantile(trials: number, probability: number, alpha: number): number | undefined {
+    if (!Number.isSafeInteger(trials) || !Number.isFinite(probability) || !Number.isFinite(alpha)) {
+        return undefined;
+    }
+
+    if (binomialCDF(0, trials, probability) >= alpha) {
+        return 0;
+    }
+
+    let lower = 0;
+    let upper = Math.min(1, trials);
+
+    while (upper < trials) {
+        const cdf = binomialCDF(upper, trials, probability);
+        if (Number.isNaN(cdf)) {
+            return undefined;
+        }
+        if (cdf >= alpha) {
+            break;
+        }
+        lower = upper;
+        upper = Math.min(2 * upper, trials);
+    }
+
+    while (upper - lower > 1) {
+        const middle = lower + Math.floor((upper - lower) / 2);
+        const cdf = binomialCDF(middle, trials, probability);
+        if (Number.isNaN(cdf)) {
+            return undefined;
+        }
+        if (cdf >= alpha) {
+            upper = middle;
+        } else {
+            lower = middle;
+        }
+    }
+
+    return upper;
 }

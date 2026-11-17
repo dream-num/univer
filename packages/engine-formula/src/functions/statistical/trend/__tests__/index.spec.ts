@@ -627,6 +627,53 @@ function regressionArray(values: number[], column: boolean) {
 describe('TREND single-predictor stability', () => {
     const trend = new Trend(FUNCTION_NAMES_STATISTICAL.TREND);
 
+    it('predicts around adjacent translated predictors without reconstructing their mean', () => {
+        for (const xOffset of [0, 2 ** 52, -(2 ** 52)]) {
+            for (const yOffset of [0, 2 ** 52]) {
+                for (const column of [false, true]) {
+                    const xs = regressionArray([xOffset, xOffset + 1], column);
+                    const ys = regressionArray([yOffset + 1, yOffset + 3], column);
+                    const newXs = regressionArray([-1, 0, 1, 2].map((value) => value + xOffset), column);
+                    const expected = [-1, 1, 3, 5].map((value) => value + yOffset);
+                    expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? expected.map((value) => [value]) : [expected]);
+                    expect(getObjectValue(trend.calculate(ys, xs))).toEqual(getObjectValue(ys));
+                }
+            }
+        }
+    });
+
+    it('preserves non-exact fits when only the predictor origin changes', () => {
+        for (const offset of [0, 2 ** 52, -(2 ** 52)]) {
+            const xs = regressionArray([0, 1, 2, 4].map((value) => value + offset), false);
+            const ys = regressionArray([1, 3, 4, 8], false);
+            const newXs = regressionArray([-1, 0, 1, 2, 3, 4, 5].map((value) => value + offset), false);
+            const result = getObjectValue(trend.calculate(ys, xs, newXs)) as number[][];
+            for (let index = 0; index < result[0].length; index++) {
+                expect(result[0][index]).toBeCloseTo(1 + 12 / 7 * (index - 1), 13);
+            }
+        }
+    });
+
+    it('retains zero-slope predictions far from large known predictors', () => {
+        const xs = regressionArray([Number.MAX_VALUE, Number.MAX_VALUE - 2 ** 971], false);
+        const ys = regressionArray([2, 2], false);
+        expect(getObjectValue(trend.calculate(ys, xs, NumberValueObject.create(-Number.MAX_VALUE)))).toEqual([[2]]);
+    });
+
+    it('retains finite predictions when anchored coefficients need an overflow fallback', () => {
+        const cases = [
+            { x: [1e308, -1e307, -1e307], y: [2, 2, 2], expected: 2 },
+            { x: [1, 2, 3], y: [1e308, -1e307, -1e307], expected: 1.3666666666666667e308 },
+            { x: [2, 3, 4], y: [1e308, 4e307, 2e307], expected: 1.7333333333333333e308 },
+        ];
+        for (const { x, y, expected } of cases) {
+            for (const column of [false, true]) {
+                const result = getObjectValue(trend.calculate(regressionArray(y, column), regressionArray(x, column), NumberValueObject.create(0))) as number[][];
+                expect(Math.abs(result[0][0] / expected - 1)).toBeLessThan(1e-14);
+            }
+        }
+    });
+
     it('predicts new values with translated row and column input arrays', () => {
         const offset = 1e9;
         for (const column of [false, true]) {

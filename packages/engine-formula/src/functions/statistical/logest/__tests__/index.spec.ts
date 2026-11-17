@@ -429,6 +429,35 @@ function regressionArray(values: number[], column: boolean) {
 describe('LOGEST single-predictor stability', () => {
     const logest = new Logest(FUNCTION_NAMES_STATISTICAL.LOGEST);
 
+    it('retains the multiplier for adjacent predictors at a large offset', () => {
+        for (const offset of [0, 2 ** 52]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([offset, offset + 1], column);
+                const ys = regressionArray([1, 4], column);
+                const result = getObjectValue(logest.calculate(ys, xs)) as number[][];
+                expect(result[0][0]).toBeCloseTo(4, 14);
+                expect(result[0][1]).toBe(offset === 0 ? 1 : 0);
+            }
+        }
+    });
+
+    it('evaluates translated residual statistics in log space', () => {
+        // 120-digit log-space least-squares reference for x=[0,1,2,4], y=[1,4,8,64].
+        for (const offset of [0, 2 ** 52]) {
+            const xs = regressionArray([0, 1, 2, 4].map((value) => value + offset), false);
+            const ys = regressionArray([1, 4, 8, 64], false);
+            const result = getObjectValue(logest.calculate(ys, xs, BooleanValueObject.create(true), BooleanValueObject.create(true))) as number[][];
+            expect(result[0][0]).toBeCloseTo(2.7456407252106105, 13);
+            expect(result[1][0]).toBeCloseTo(0.06860377907731106, 14);
+            expect(result[2][0]).toBeCloseTo(867 / 875, 14);
+            expect(result[2][1]).toBeCloseTo(0.2029327152217562, 14);
+            expect(result[3][0]).toBeCloseTo(216.75, 10);
+            expect(result[3][1]).toBe(2);
+            expect(result[4][0]).toBeCloseTo(8.926130637151727, 13);
+            expect(result[4][1]).toBeCloseTo(0.08236337381454882, 14);
+        }
+    });
+
     it('fits constant exponential responses with large predictor offsets', () => {
         const offset = 1e9;
         for (const column of [false, true]) {

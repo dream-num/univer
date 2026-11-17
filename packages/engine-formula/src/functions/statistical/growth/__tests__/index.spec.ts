@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Growth } from '../index';
@@ -630,6 +630,42 @@ function regressionArray(values: number[], column: boolean) {
 
 describe('GROWTH single-predictor stability', () => {
     const growth = new Growth(FUNCTION_NAMES_STATISTICAL.GROWTH);
+
+    it('predicts beside adjacent large predictors without overflowing coefficients', () => {
+        for (const offset of [0, 2 ** 52, -(2 ** 52)]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([offset, offset + 1], column);
+                const ys = regressionArray([1, 4], column);
+                const newXs = regressionArray([-1, 0, 1, 2].map((value) => value + offset), column);
+                const result = getObjectValue(growth.calculate(ys, xs, newXs)) as number[][];
+                const values = result.flat();
+                expect(result.length).toBe(column ? 4 : 1);
+                for (const [index, expected] of [0.25, 1, 4, 16].entries()) {
+                    expect(values[index]).toBeCloseTo(expected, 13);
+                }
+            }
+        }
+    });
+
+    it('retains high-precision non-exact predictions after translating predictors', () => {
+        // Independent 120-digit logarithmic least-squares predictions.
+        const expected = [0.4183716916964515, 1.148698354997035, 3.1539129844622944, 8.659511933910213, 23.775908626191175, 65.28010300295675, 179.2357093508615];
+        for (const offset of [0, 2 ** 52, -(2 ** 52)]) {
+            const xs = regressionArray([0, 1, 2, 4].map((value) => value + offset), false);
+            const ys = regressionArray([1, 4, 8, 64], false);
+            const newXs = regressionArray([-1, 0, 1, 2, 3, 4, 5].map((value) => value + offset), false);
+            const result = getObjectValue(growth.calculate(ys, xs, newXs)) as number[][];
+            for (const [index, value] of expected.entries()) {
+                expect(Math.abs(result[0][index] / value - 1)).toBeLessThan(1e-13);
+            }
+        }
+    });
+
+    it('retains unit-multiplier predictions far from large known predictors', () => {
+        const xs = regressionArray([Number.MAX_VALUE, Number.MAX_VALUE - 2 ** 971], false);
+        const ys = regressionArray([4, 4], false);
+        expect(getObjectValue(growth.calculate(ys, xs, NumberValueObject.create(-Number.MAX_VALUE)))).toEqual([[4]]);
+    });
 
     it('fits constant exponential responses with large predictor offsets', () => {
         const offset = 1e9;

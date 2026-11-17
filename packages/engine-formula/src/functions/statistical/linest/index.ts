@@ -179,7 +179,7 @@ export class Linest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b, isConstantPredictor } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+        const { slope: m, intercept: b, isConstantPredictor, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -195,16 +195,8 @@ export class Linest extends BaseFunction {
             let df = n - 1;
 
             if (constb) {
-                let sumY = 0;
-                let sumX = 0;
-
-                for (let i = 0; i < n; i++) {
-                    sumY += knownYsValuesFlat[i];
-                    sumX += knownXsValuesFlat[i];
-                }
-
-                meanY = isConstantPredictor ? b : sumY / n;
-                meanX = isConstantPredictor ? knownXsValuesFlat[0] : sumX / n;
+                meanY = centered ? centered.yAnchor + centered.meanYOffset : b;
+                meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
                 df = isConstantPredictor ? n - 1 : n - 2;
             }
 
@@ -213,9 +205,11 @@ export class Linest extends BaseFunction {
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (knownYsValuesFlat[i] - meanY) ** 2;
-                ssresid += (knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
-                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+                const dy = centered ? (knownYsValuesFlat[i] - centered.yAnchor) - centered.meanYOffset : knownYsValuesFlat[i] - meanY;
+                const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
+                sstotal += dy ** 2;
+                ssresid += (centered ? dy - m * dx : knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
+                ssx += dx ** 2;
             }
 
             const ssreg = sstotal - ssresid;

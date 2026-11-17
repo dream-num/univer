@@ -901,9 +901,10 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
 
     let slope, intercept;
     let isConstantPredictor = false;
+    let centered;
 
     if (constb) {
-        ({ slope, intercept, isConstantPredictor } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
+        ({ slope, intercept, isConstantPredictor, centered } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
     } else {
         ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, Y));
     }
@@ -917,7 +918,7 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
         slope = 0;
     }
 
-    return { slope, intercept, Y, isConstantPredictor };
+    return { slope, intercept, Y, isConstantPredictor, centered };
 }
 
 function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {
@@ -932,18 +933,30 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
             ? firstY
             : knownYsValues.reduce((sum, value) => sum + value, 0) / n;
 
-        return { slope: 0, intercept, isConstantPredictor: true };
+        return { slope: 0, intercept, isConstantPredictor: true, centered: undefined };
     }
 
-    // Center offsets from an observed point so a large, unrepresentable mean
-    // cannot erase differences between adjacent representable predictors.
+    // Keep the means as offsets from observed values. Reconstructing a large
+    // absolute mean can discard half a unit between adjacent predictors.
+    // Fall back to an absolute mean if accumulating the offsets overflows.
     const firstY = knownYsValues[0];
+    let xAnchor = firstX;
+    let yAnchor = firstY;
     let sumXOffset = 0;
     let sumYOffset = 0;
 
     for (let i = 0; i < n; i++) {
-        sumXOffset += knownXsValues[i] - firstX;
-        sumYOffset += knownYsValues[i] - firstY;
+        sumXOffset += knownXsValues[i] - xAnchor;
+        sumYOffset += knownYsValues[i] - yAnchor;
+    }
+
+    if (!Number.isFinite(sumXOffset)) {
+        xAnchor = 0;
+        sumXOffset = knownXsValues.reduce((sum, value) => sum + value, 0);
+    }
+    if (!Number.isFinite(sumYOffset)) {
+        yAnchor = 0;
+        sumYOffset = knownYsValues.reduce((sum, value) => sum + value, 0);
     }
 
     const meanXOffset = sumXOffset / n;
@@ -952,18 +965,22 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
     let sumXY = 0;
 
     for (let i = 0; i < n; i++) {
-        const centeredX = (knownXsValues[i] - firstX) - meanXOffset;
+        const centeredX = (knownXsValues[i] - xAnchor) - meanXOffset;
         sumX2 += centeredX * centeredX;
-        sumXY += centeredX * ((knownYsValues[i] - firstY) - meanYOffset);
+        sumXY += centeredX * ((knownYsValues[i] - yAnchor) - meanYOffset);
     }
 
     const slope = sumXY / sumX2;
-    const intercept = firstY - slope * firstX + (meanYOffset - slope * meanXOffset);
+    let intercept = (yAnchor - slope * xAnchor) + (meanYOffset - slope * meanXOffset);
+    if (!Number.isFinite(intercept)) {
+        intercept = (yAnchor + meanYOffset) - slope * (xAnchor + meanXOffset);
+    }
 
     return {
         slope,
         intercept,
         isConstantPredictor: false,
+        centered: { xAnchor, yAnchor, meanXOffset, meanYOffset, slope },
     };
 }
 

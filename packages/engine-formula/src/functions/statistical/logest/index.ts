@@ -187,7 +187,7 @@ export class Logest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b, Y, isConstantPredictor } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const { slope: m, intercept: b, Y, isConstantPredictor, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -203,16 +203,8 @@ export class Logest extends BaseFunction {
             let df = n - 1;
 
             if (constb) {
-                let sumY = 0;
-                let sumX = 0;
-
-                for (let i = 0; i < n; i++) {
-                    sumY += Y[i];
-                    sumX += knownXsValuesFlat[i];
-                }
-
-                meanY = isConstantPredictor && Y.every((value) => value === Y[0]) ? Y[0] : sumY / n;
-                meanX = isConstantPredictor ? knownXsValuesFlat[0] : sumX / n;
+                meanY = centered ? centered.yAnchor + centered.meanYOffset : Y.every((value) => value === Y[0]) ? Y[0] : Y.reduce((sum, value) => sum + value, 0) / n;
+                meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
                 df = isConstantPredictor ? n - 1 : n - 2;
             }
 
@@ -221,9 +213,11 @@ export class Logest extends BaseFunction {
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (Y[i] - meanY) ** 2;
-                ssresid += (Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
-                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+                const dy = centered ? (Y[i] - centered.yAnchor) - centered.meanYOffset : Y[i] - meanY;
+                const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
+                sstotal += dy ** 2;
+                ssresid += (centered ? dy - centered.slope * dx : Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
+                ssx += dx ** 2;
             }
 
             const ssreg = sstotal - ssresid;

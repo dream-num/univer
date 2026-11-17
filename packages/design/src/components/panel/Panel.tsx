@@ -17,7 +17,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { DownIcon } from '@univerjs/icons';
 import { useId, useState } from 'react';
+import type { IFieldProps } from '../field/Field';
 import { clsx } from '../../helper/clsx';
+import { Field } from '../field/Field';
 
 // ================= Panel =================
 export interface IPanelProps {
@@ -110,7 +112,7 @@ export function PanelSection(props: IPanelSectionProps) {
 // ================= PanelField =================
 export interface IPanelFieldProps {
     label: ReactNode;
-    children: ReactNode;
+    children: IFieldProps['children'];
     className?: string;
     required?: boolean;
     error?: string;
@@ -119,27 +121,18 @@ export interface IPanelFieldProps {
 export function PanelField(props: IPanelFieldProps) {
     const { label, children, className, required, error } = props;
     return (
-        <div
-            data-u-comp="panel-field"
-            className={clsx('univer-flex univer-flex-col univer-gap-1.5', className)}
-        >
-            <div className="univer-flex univer-items-center univer-gap-1">
-                <span
-                    className={`
-                      univer-text-xs univer-text-gray-600
-                      dark:!univer-text-gray-300
-                    `}
-                >
+        <Field
+            className={clsx('univer-flex-none univer-gap-1.5', className)}
+            labelClassName="univer-mb-0 univer-text-xs dark:!univer-text-gray-300"
+            label={(
+                <span className="univer-flex univer-items-center univer-gap-1">
                     {label}
+                    {required && <span className="univer-text-xs univer-text-red-500">*</span>}
                 </span>
-                {required && (
-                    <span className="univer-text-xs univer-text-red-500">*</span>
-                )}
-            </div>
-            <div className="univer-w-full">{children}</div>
-            {error && (
-                <span className="univer-text-xs univer-text-red-500">{error}</span>
             )}
-        </div>
+            error={error || undefined}
+        >
+            {children}
+        </Field>
     );
 }

@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, Inject, RegionService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, RegionService } from '@univerjs/core';
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
 import type { TextComparer } from './utils';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
-import { compareNull, compareNumber, compareString, createRegionTextComparer, isNullValue } from './utils';
-
-export type ICommonComparableCellValue = number | string | null;
+import { compareCells, createRegionTextComparer } from './utils';
 
 export class SheetsSortController extends Disposable {
     private _compareText: TextComparer;
@@ -54,53 +51,7 @@ export class SheetsSortController extends Disposable {
     }
 
     private _registerCompareFns(): void {
-        const commonFn: ICellValueCompareFn = (type, a, b) => {
-            const valueA: ICommonComparableCellValue = this._getCommonValue(a);
-            const valueB: ICommonComparableCellValue = this._getCommonValue(b);
-
-            const compareTypeFns = [
-                compareNull,
-                (x: ICommonComparableCellValue, y: ICommonComparableCellValue, sortType: typeof type) => compareString(x, y, sortType, this._compareText),
-                compareNumber,
-            ];
-
-            for (let i = 0; i < compareTypeFns.length; i++) {
-                const res = compareTypeFns[i](valueA, valueB, type);
-                if (res !== null) {
-                    return res;
-                }
-            }
-
-            return null;
-        };
-        this._sortService.registerCompareFn(commonFn);
-    }
-
-    private _getCommonValue(a: Nullable<ICellData>): ICommonComparableCellValue {
-        if (isNullValue(a)) {
-            return null;
-        }
-
-        const richTextValue = a?.p?.body?.dataStream;
-        if (richTextValue) {
-            return richTextValue;
-        }
-
-        if (a?.t === CellValueType.NUMBER) {
-            return Number.parseFloat(`${a.v}`);
-        }
-        if (a?.t === CellValueType.STRING) {
-            if (typeof a.v === 'number') {
-                return a.v;
-            }
-            return `${a.v}`;
-        }
-        if (a?.t === CellValueType.BOOLEAN) {
-            return `${a.v}`;
-        }
-        if (a?.t === CellValueType.FORCE_STRING) {
-            return Number.parseFloat(`${a.v}`);
-        }
-        return `${a?.v}`;
+        const compareFn: ICellValueCompareFn = (type, a, b) => compareCells(type, a, b, this._compareText);
+        this._sortService.registerCompareFn(compareFn);
     }
 }

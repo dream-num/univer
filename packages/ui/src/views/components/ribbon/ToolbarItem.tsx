@@ -149,7 +149,6 @@ const toolbarSelectorRootVariants = cva(
       univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex univer-h-7
       univer-cursor-pointer univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded univer-px-1
       univer-transition-colors
-      focus-within:univer-ring-2 focus-within:univer-ring-inset focus-within:univer-ring-primary-600
       hover:univer-bg-gray-100
       focus-visible:univer-outline-none focus-visible:univer-ring-2 focus-visible:univer-ring-inset
       focus-visible:univer-ring-primary-600
@@ -375,7 +374,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
+                            <MoreDownIcon className="univer-size-3" preserveStrokeWidth={preserveStrokeWidth} />
                         </button>
                     </DropdownMenuWrapper>
                 </div>
@@ -428,7 +427,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                             label={label}
                                             onChange={handleSelectionsValueChange}
                                         />
-                                        <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
+                                        <MoreDownIcon className="univer-size-3" preserveStrokeWidth={preserveStrokeWidth} />
                                     </div>
                                 </>
                             )
@@ -460,7 +459,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                           focus-visible:univer-ring-inset focus-visible:univer-ring-primary-600
                                         `)}
                                     >
-                                        <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
+                                        <MoreDownIcon className="univer-size-3" preserveStrokeWidth={preserveStrokeWidth} />
                                     </SelectorTrigger>
                                 </>
                             )}
@@ -487,7 +486,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
             `
             : showLabel
                 ? 'univer-gap-1 univer-px-1.5 univer-text-sm'
-                : 'univer-text-sm', grid && fullWidth && isCustomComponent && '!univer-px-0', overflow && `
+                : 'univer-text-sm', grid && (fullWidth || large) && isCustomComponent && '!univer-p-0', overflow && `
                   !univer-h-auto univer-min-h-7 univer-w-full univer-justify-start univer-gap-1.5
                   univer-whitespace-normal univer-px-1.5 univer-py-1 univer-text-start univer-text-xs
                   focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
@@ -514,6 +513,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 >
                     <CustomLabel
                         className={grid && fullWidth ? '!univer-w-full' : undefined}
+                        iconSize={iconSize}
+                        preserveStrokeWidth={preserveStrokeWidth}
                         title={overflow ? undefined : grid && showLabel ? gridLabel! : title!}
                         value={value}
                         label={label}

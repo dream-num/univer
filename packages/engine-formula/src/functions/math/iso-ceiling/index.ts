@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import { CeilingPrecise } from '../ceiling-precise';
 
-export class IsoCeiling extends NotImplementedFunction {
-    override minParams = 1;
-
-    override maxParams = 2;
-
-    // TODO: Implement ISO 8601 ceiling semantics and Excel-compatible error handling.
-}
+/**
+ * ISO.CEILING rounds a number up to the nearest multiple of the significance's absolute value, whatever the
+ * signs, and returns 0 when either argument is 0. Excel defines it with the same result as CEILING.PRECISE.
+ */
+export class IsoCeiling extends CeilingPrecise {}

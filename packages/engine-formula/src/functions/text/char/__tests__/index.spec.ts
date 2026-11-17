@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
+import { Code } from '../../code';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Char } from '../index';
 
@@ -36,6 +37,38 @@ describe('Test char function', () => {
             const number = NumberValueObject.create(-2.34);
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Number is a code point above U+FFFF', () => {
+            // Google Sheets' CHAR accepts full code points; CHAR and UNICHAR behave the same there.
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(128512)))).toStrictEqual('\u{1F600}');
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(65601)))).toStrictEqual('\u{10041}');
+        });
+
+        it('Number is between 128 and 159', () => {
+            // Unicode code points, not the Windows-1252 code page: CHAR(128) is U+0080, not the euro sign.
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(128)))).toStrictEqual('\u0080');
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(150)))).toStrictEqual('\u0096');
+        });
+
+        it('Number is a surrogate or non-character code point', () => {
+            for (const codePoint of [55296, 57343, 64976, 65535, 1114111]) {
+                expect(getObjectValue(testFunction.calculate(NumberValueObject.create(codePoint)))).toStrictEqual(ErrorType.NA);
+            }
+        });
+
+        it('Number is above the last code point', () => {
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1114112)))).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1234567890)))).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Round trips with CODE', () => {
+            const code = new Code(FUNCTION_NAMES_TEXT.CODE);
+
+            for (const codePoint of [65, 256, 8364, 65601, 128512]) {
+                const character = testFunction.calculate(NumberValueObject.create(codePoint));
+                expect(getObjectValue(code.calculate(character))).toStrictEqual(codePoint);
+            }
         });
 
         it('Value is array', () => {
@@ -69,7 +102,7 @@ describe('Test char function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(number2);
-            expect(getObjectValue(result2)).toStrictEqual('˒');
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
 
             const number3 = NumberValueObject.create(28);
             const result3 = testFunction.calculate(number3);

@@ -18,6 +18,7 @@ import { DataStreamTreeTokenType } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { isNonCharacterCodePoint, isSurrogateCodePoint } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -35,15 +36,6 @@ const filterCodeArray = Object.values(DataStreamTreeTokenType).filter((value) =>
         DataStreamTreeTokenType.CUSTOM_BLOCK,
     ].includes(value as DataStreamTreeTokenType);
 });
-
-function isSurrogateCodePoint(codePoint: number) {
-    return codePoint >= 0xD800 && codePoint <= 0xDFFF;
-}
-
-function isNonCharacterCodePoint(codePoint: number) {
-    // U+FDD0-U+FDEF and the last two code points of every plane (xFFFE, xFFFF).
-    return (codePoint >= 0xFDD0 && codePoint <= 0xFDEF) || (codePoint & 0xFFFF) >= 0xFFFE;
-}
 
 export class Unichar extends BaseFunction {
     override minParams = 1;

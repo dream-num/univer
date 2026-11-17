@@ -17,6 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { isSurrogateCodePoint } from '../../../engine/utils/char-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -55,11 +56,12 @@ export class Code extends BaseFunction {
             textValue = textValue.toLocaleUpperCase();
         }
 
-        if (textValue === '') {
+        const result = textValue.codePointAt(0);
+
+        // Excel documents #VALUE! for empty text and for partial surrogates.
+        if (result === undefined || isSurrogateCodePoint(result)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        const result = textValue.charCodeAt(0);
 
         return NumberValueObject.create(result);
     }

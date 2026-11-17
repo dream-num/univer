@@ -29,7 +29,7 @@ export class Improduct extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
-        let result: number | string | ErrorValueObject = '';
+        let result: string | ErrorValueObject = '';
 
         for (let i = 0; i < variants.length; i++) {
             if (result instanceof ErrorValueObject) {
@@ -43,7 +43,7 @@ export class Improduct extends BaseFunction {
                 let errorObject: Nullable<ErrorValueObject>;
 
                 (variant as ArrayValueObject).iterator((valueObject) => {
-                    result = this._handleSingleObject(valueObject as BaseValueObject, result as number | string);
+                    result = this._handleSingleObject(valueObject as BaseValueObject, result as string);
 
                     if (result instanceof ErrorValueObject) {
                         isError = true;
@@ -67,7 +67,7 @@ export class Improduct extends BaseFunction {
         return StringValueObject.create(result);
     }
 
-    private _handleSingleObject(variant: BaseValueObject, result: number | string): number | string | ErrorValueObject {
+    private _handleSingleObject(variant: BaseValueObject, result: string): string | ErrorValueObject {
         let _result = result;
 
         if (variant.isError()) {
@@ -80,7 +80,7 @@ export class Improduct extends BaseFunction {
 
         const value = `${variant.getValue()}`;
 
-        if (typeof result !== 'number' && !result) {
+        if (!result) {
             const complex = new Complex(value, this.getDateSystem());
 
             if (complex.isError()) {

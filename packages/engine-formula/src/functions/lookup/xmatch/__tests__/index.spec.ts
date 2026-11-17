@@ -109,6 +109,66 @@ describe('Test xmatch', () => {
             }
         });
 
+        it('orders the fallback candidates of match modes -1 and 1 by value', async () => {
+            const cases: [string, number, ArrayValueObject, number | string][] = [
+                // The nearest smaller or larger item by text order, not the first candidate found.
+                ['c', -1, ArrayValueObject.create('{"a";"b"}'), 2],
+                ['c', 1, ArrayValueObject.create('{"a";"b"}'), ErrorType.NA],
+                ['dog', -1, ArrayValueObject.create('{"ant";"cat"}'), 2],
+                // ? and * are ordinary characters, and "b!" < "b?" < "b0" in text order.
+                ['b?', -1, ArrayValueObject.create('{"b!";"b0"}'), 1],
+                ['b?', 1, ArrayValueObject.create('{"b!";"b0"}'), 2],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b!"}'), 2],
+                ['b?', 1, ArrayValueObject.create('{"b0";"b1"}'), 1],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b1"}'), ErrorType.NA],
+                ['c*', -1, ArrayValueObject.create('{"a";"b"}'), 2],
+                ['a*', -1, ArrayValueObject.create('{"ab";"zz"}'), ErrorType.NA],
+                ['a*c', -1, ArrayValueObject.create('{"abc";"abd"}'), ErrorType.NA],
+            ];
+            for (const [lookup, matchMode, lookups, expected] of cases) {
+                const resultObject = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    NumberValueObject.create(matchMode)
+                );
+                expect(resultObject.getValue()).toBe(expected);
+            }
+        });
+
+        it('keeps the first fallback candidate in the search direction', async () => {
+            const duplicateText = ArrayValueObject.create('{"b";"b"}');
+            const forward = testFunction.calculate(
+                StringValueObject.create('c'),
+                duplicateText,
+                NumberValueObject.create(-1)
+            );
+            expect(forward.getValue()).toBe(1);
+
+            const reverse = testFunction.calculate(
+                StringValueObject.create('c'),
+                duplicateText,
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            );
+            expect(reverse.getValue()).toBe(2);
+
+            const duplicateNumber = ArrayValueObject.create('{1;1}');
+            const numberForward = testFunction.calculate(
+                NumberValueObject.create(2),
+                duplicateNumber,
+                NumberValueObject.create(-1)
+            );
+            expect(numberForward.getValue()).toBe(1);
+
+            const numberReverse = testFunction.calculate(
+                NumberValueObject.create(2),
+                duplicateNumber,
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            );
+            expect(numberReverse.getValue()).toBe(2);
+        });
+
         it('Search single string horizon', async () => {
             const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),

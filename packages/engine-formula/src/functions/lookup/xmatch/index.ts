@@ -148,7 +148,8 @@ export class Xmatch extends BaseFunction {
 
             rowOrColumn = _lookupArray.getRowCount() === 1 ? position.column : position.row;
         } else if (matchMode === -1 || matchMode === 1) {
-            const position = _lookupArray.orderSearch(lookupValue, matchMode === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN, searchMode === -1, false, false, true);
+            // keepFirstNearest: a tie between fallback candidates keeps the first one in the search direction, as Excel does.
+            const position = _lookupArray.orderSearch(lookupValue, matchMode === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN, searchMode === -1, false, true, true);
 
             if (position == null) {
                 return ErrorValueObject.create(ErrorType.NA);

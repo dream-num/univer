@@ -164,6 +164,57 @@ describe('Test xlookup', () => {
             }
         });
 
+        it('orders the fallback candidates of match modes -1 and 1 by value', () => {
+            const cases: [string, number, ArrayValueObject, ArrayValueObject, number | string][] = [
+                // The nearest smaller or larger item by text order, not the first candidate found.
+                ['c', -1, ArrayValueObject.create('{"a";"b"}'), ArrayValueObject.create('{1;2}'), 2],
+                ['c', 1, ArrayValueObject.create('{"a";"b"}'), ArrayValueObject.create('{1;2}'), 'missing'],
+                ['dog', -1, ArrayValueObject.create('{"ant";"cat"}'), ArrayValueObject.create('{1;2}'), 2],
+                // ? and * are ordinary characters, and "b!" < "b?" < "b0" in text order.
+                ['b?', -1, ArrayValueObject.create('{"b!";"b0"}'), ArrayValueObject.create('{1;2}'), 1],
+                ['b?', 1, ArrayValueObject.create('{"b!";"b0"}'), ArrayValueObject.create('{1;2}'), 2],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b!"}'), ArrayValueObject.create('{1;2}'), 2],
+                ['b?', 1, ArrayValueObject.create('{"b0";"b1"}'), ArrayValueObject.create('{1;2}'), 1],
+                ['b?', -1, ArrayValueObject.create('{"b0";"b1"}'), ArrayValueObject.create('{1;2}'), 'missing'],
+                ['c*', -1, ArrayValueObject.create('{"a";"b"}'), ArrayValueObject.create('{1;2}'), 2],
+                ['a*', -1, ArrayValueObject.create('{"ab";"zz"}'), ArrayValueObject.create('{1;2}'), 'missing'],
+                ['a*c', -1, ArrayValueObject.create('{"abc";"abd"}'), ArrayValueObject.create('{1;2}'), 'missing'],
+            ];
+            for (const [lookup, matchMode, lookups, returns, expected] of cases) {
+                const result = testFunction.calculate(
+                    StringValueObject.create(lookup),
+                    lookups,
+                    returns,
+                    StringValueObject.create('missing'),
+                    NumberValueObject.create(matchMode)
+                );
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
+        it('keeps the first fallback candidate in the search direction', () => {
+            const lookupArray = ArrayValueObject.create('{"b";"b"}');
+            const returnArray = ArrayValueObject.create('{1;2}');
+            const forward = testFunction.calculate(
+                StringValueObject.create('c'),
+                lookupArray,
+                returnArray,
+                StringValueObject.create('missing'),
+                NumberValueObject.create(-1)
+            );
+            expect(forward.getValue()).toBe(1);
+
+            const reverse = testFunction.calculate(
+                StringValueObject.create('c'),
+                lookupArray,
+                returnArray,
+                StringValueObject.create('missing'),
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            );
+            expect(reverse.getValue()).toBe(2);
+        });
+
         it('preserves errors returned by a wildcard match', () => {
             const lookupArray = ArrayValueObject.create('{"alpha";"beta"}');
             const returnArray = ArrayValueObject.create('{#DIV/0!;#N/A}');

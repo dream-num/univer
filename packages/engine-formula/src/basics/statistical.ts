@@ -747,7 +747,8 @@ export function getTwoArrayNumberValues(
     array2: BaseValueObject,
     count: number,
     array1ColumnCount: number,
-    array2ColumnCount: number
+    array2ColumnCount: number,
+    numbersOnly = false
 ) {
     const array1Values: number[] = [];
     const array2Values: number[] = [];
@@ -784,6 +785,10 @@ export function getTwoArrayNumberValues(
         }
 
         if (array1Object.isNull() || array2Object.isNull() || array1Object.isBoolean() || array2Object.isBoolean()) {
+            continue;
+        }
+
+        if (numbersOnly && (!array1Object.isNumber() || !array2Object.isNumber())) {
             continue;
         }
 

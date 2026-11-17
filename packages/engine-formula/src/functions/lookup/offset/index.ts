@@ -214,10 +214,9 @@ export class Offset extends BaseFunction {
             return _columnsValue;
         }
 
-        const rowOffset = +_rowsValue.getValue();
-        const columnOffset = +_columnsValue.getValue();
-
-        if (typeof rowOffset !== 'number' || typeof columnOffset !== 'number') {
+        const rowOffset = Math.trunc(+_rowsValue.getValue());
+        const columnOffset = Math.trunc(+_columnsValue.getValue());
+        if (!Number.isFinite(rowOffset) || !Number.isFinite(columnOffset)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -228,12 +227,23 @@ export class Offset extends BaseFunction {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        const heightCount = this.getIndexNumValue(heightValue);
-        const widthCount = this.getIndexNumValue(widthValue);
+        if (heightValue.isError()) {
+            return heightValue;
+        }
 
-        if (typeof heightCount !== 'number' || typeof widthCount !== 'number') {
+        if (widthValue.isError()) {
+            return widthValue;
+        }
+
+        const height = heightValue.isNull() ? 0 : this.getIndexNumValue(heightValue);
+        const width = widthValue.isNull() ? 0 : this.getIndexNumValue(widthValue);
+
+        if (typeof height !== 'number' || typeof width !== 'number') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
+
+        const heightCount = Math.trunc(height);
+        const widthCount = Math.trunc(width);
 
         if (heightCount === 0 || widthCount === 0) {
             return ErrorValueObject.create(ErrorType.REF);

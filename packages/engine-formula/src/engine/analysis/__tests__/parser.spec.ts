@@ -1060,6 +1060,31 @@ describe('Database field arguments', () => {
     });
 });
 
+describe('Linear forecasts and scalar arguments', () => {
+    it.each([
+        ['=FORECAST(5,{2,4,"100",8},{1,2,3,4})', 10],
+        ['=SUM(COUPDAYS(DATE(2024,3,15),DATE(2030,11,15),2,{0,1,2,3,4}))', 904.5],
+        ['=COUPDAYBS(DATE(2024,3,15)+0.99,DATE(2030,11,15)+0.9,2,1)', 121],
+        ['=COUPNUM(DATE(2024,3,15),DATE(2030,11,15),2,5)', ErrorType.NUM],
+        ['=FORECAST.LINEAR(5,{2,4,"100",8},{1,2,3,4})', 10],
+        ['=FORECAST(5,{"2","4","8"},{1,2,4})', ErrorType.DIV_BY_ZERO],
+        ['=DOLLAR(1234.567,)', '¥1,235'],
+        ['=DOLLAR(-0.00001,2)', '(¥0.00)'],
+        ['=XMATCH(20,{30;20;10},0,-2)', 2],
+        ['=XMATCH("a*",{"a","b","c"},2,2)', ErrorType.VALUE],
+        ['=OFFSET(A1,0.9,1.9)', 2],
+        ['=OFFSET(B1,0,0,C1,1)', ErrorType.REF],
+        ['=OFFSET(B1,0,0,NA(),1)', ErrorType.NA],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string, { input: 2 }))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
 const RECURSIVE_DEFINED_NAMES: IDefinedNameMapItem = {
     fact: { id: 'fact', name: 'FACTREC', formulaOrRefString: '=LAMBDA(n,IF(n<=1,1,n*FACTREC(n-1)))' },
     fib: { id: 'fib', name: 'FIB', formulaOrRefString: '=LAMBDA(n,IF(n<2,n,FIB(n-1)+FIB(n-2)))' },

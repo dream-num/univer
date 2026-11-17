@@ -189,8 +189,11 @@ describe('table of contents body builder', () => {
         const { body, toc } = createBody();
         body.paragraphs![1].bullet = { listId: 'ordered', listType: PresetListType.ORDER_LIST, nestingLevel: 0 };
         body.paragraphs![1].paragraphStyle!.paragraphMarkTextStyle = { ff: 'Courier New', fs: 24 };
-        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry')!;
-        expect(result.textRuns?.find((run) => run.st === 1 && run.ed === 3)?.ts).toEqual({ ff: 'Courier New' });
+        body.paragraphs![1].paragraphStyle!.paragraphMarkStyleId = 'NumberMark';
+        const result = buildTableOfContentsBody(body, toc, () => 1, () => 'entry', {
+            styles: { NumberMark: { name: 'NumberMark', type: DocStyleType.character, textStyle: { bl: BooleanNumber.TRUE, it: BooleanNumber.TRUE } } },
+        })!;
+        expect(result.textRuns?.find((run) => run.st === 1 && run.ed === 3)?.ts).toEqual({ ff: 'Courier New', bl: BooleanNumber.TRUE, it: BooleanNumber.TRUE });
     });
 
     it.each([false, true])('copies tabs inside a numbered heading only with the Word preserve-tabs switch (%s)', (preserveTabs) => {

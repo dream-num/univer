@@ -816,7 +816,8 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
         if (label && !/\\w(?:\s|$)/i.test(String(toc?.properties?.instruction ?? ''))) {
             text = text.replace(/\t/g, ' ');
         }
-        const numberFont = Object.fromEntries(Object.entries(paragraph.paragraphStyle?.paragraphMarkTextStyle ?? {}).filter(([key]) => ['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'complexScriptFontFamily', 'fontHint'].includes(key)));
+        const markStyle = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId }).paragraphMarkTextStyle;
+        const numberFont = Object.fromEntries(Object.entries(markStyle ?? {}).filter(([key]) => ['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'complexScriptFontFamily', 'fontHint', 'bl', 'it'].includes(key)));
         return [{
             bookmarkId: bookmark?.properties?.bookmarkId,
             headingId,
@@ -825,7 +826,7 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
             startOffset,
             text: `${prefix}${text}`,
             numberingText: prefix && separator === '\t' ? prefix.slice(0, -1) : undefined,
-            // The local numbering font survives; size and separator follow the directory style.
+            // The numbering font and emphasis survive; size and separator follow the directory style.
             textRuns: prefix && Object.keys(numberFont).length ? [{ st: 0, ed: prefix.length - separator.length, ts: numberFont }] : undefined,
             specialCharacters: characters.filter((range) => range.properties.kind === SpecialCharacterKind.NON_BREAKING_HYPHEN).map((range) => ({
                 ...range,

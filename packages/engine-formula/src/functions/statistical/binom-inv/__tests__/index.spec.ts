@@ -192,6 +192,34 @@ describe('BINOM.INV quantile search', () => {
         expect(calculate(trials, probability, alpha)).toBe(expected);
     });
 
+    // For an odd fair binomial, symmetry gives F((n - 1) / 2) = 1/2 exactly.
+    it.each([1101, 1000001])('keeps the first crossing at the exact fair median for %s trials', (trials) => {
+        const lowerMedian = (trials - 1) / 2;
+        expect(calculate(trials, 0.5, 0.5)).toBe(lowerMedian);
+        expect(calculate(trials, 0.5, 0.5 - Number.EPSILON / 4)).toBe(lowerMedian);
+        expect(calculate(trials, 0.5, 0.5 + Number.EPSILON / 2)).toBe(lowerMedian + 1);
+    });
+
+    // Independent 100-digit PMF recurrences bound the omitted tail below 1e-90.
+    it.each([
+        [1000001, 0.49, 0.1, 489360],
+        [1000001, 0.49, 0.499, 489999],
+        [1000001, 0.49, 0.5, 490000],
+        [1000001, 0.49, 0.501, 490002],
+        [1000001, 0.49, 0.9, 490641],
+        [1000001, 0.51, 0.1, 509360],
+        [1000001, 0.51, 0.499, 509999],
+        [1000001, 0.51, 0.5, 510001],
+        [1000001, 0.51, 0.501, 510002],
+        [1000001, 0.51, 0.9, 510641],
+        [1000001, 0.5, 0.1, 499360],
+        [1000001, 0.5, 0.499, 499999],
+        [1000001, 0.5, 0.501, 500002],
+        [1000001, 0.5, 0.9, 500641],
+    ])('converges around the large-trial median for BINOM.INV(%s, %s, %s)', (trials, probability, alpha, expected) => {
+        expect(calculate(trials, probability, alpha)).toBe(expected);
+    });
+
     it('broadcasts the overflow-range quantiles across trial and probability arrays', () => {
         const result = getObjectValue(fn.calculate(
             ArrayValueObject.createByArray([[1100], [1500]]),
@@ -236,6 +264,10 @@ describe('BINOM.INV quantile search', () => {
     it('keeps the upper endpoint and existing unsupported-range zero result', () => {
         expect(calculate(1100, 0.99, 1 - Number.EPSILON)).toBe(1100);
         expect(calculate(Number.MAX_SAFE_INTEGER + 1, 1e-18, 0.5)).toBe(0);
+    });
+
+    it('reports an error instead of accepting an unreliable large-parameter tail', () => {
+        expect(calculate(1000000000000001, 0.5, 0.499)).toBe(ErrorType.NUM);
     });
 
     it('retains existing non-finite argument results', () => {

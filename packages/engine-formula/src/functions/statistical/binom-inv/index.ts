@@ -17,7 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { betaCDF, binomialCDF } from '../../../basics/statistical';
+import { binomialCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -136,8 +136,8 @@ function findBinomialQuantile(trials: number, probability: number, alpha: number
     return searchBinomialQuantile(trials, (successes) => {
         const upperTail = alpha > 0.5;
         const probabilityAtSuccesses = upperTail
-            ? betaCDF(probability, successes + 1, trials - successes)
-            : betaCDF(1 - probability, trials - successes, successes + 1);
+            ? binomialBetaTail(probability, 1 - probability, successes + 1, trials - successes)
+            : binomialBetaTail(1 - probability, probability, trials - successes, successes + 1);
         if (!Number.isFinite(probabilityAtSuccesses)) {
             return undefined;
         }
@@ -186,4 +186,101 @@ function searchBinomialQuantile(trials: number, reachesAlpha: (successes: number
     }
 
     return upper;
+}
+
+// https://dlmf.nist.gov/8.17#E22, with the complementary tail chosen for convergence.
+// This private path must converge before its value can bracket an integer
+// quantile; the shared Beta helper's fixed 100 iterations are insufficient
+// near the median for large trial counts.
+function binomialBetaTail(x: number, complement: number, a: number, b: number): number {
+    if (x === 0.5 && a === b) {
+        return 0.5;
+    }
+
+    const complemented = x >= (a + 1) / (a + b + 2);
+    const first = complemented ? b : a;
+    const second = complemented ? a : b;
+    const probability = complemented ? complement : x;
+    const logFactor = binomialBetaLogFactor(x, complement, a, b);
+    if (logFactor === Number.NEGATIVE_INFINITY) {
+        return complemented ? 1 : 0;
+    }
+
+    const minimum = Number.MIN_VALUE / Number.EPSILON;
+    const nonzero = (value: number) => Math.abs(value) < minimum ? (value < 0 ? -minimum : minimum) : value;
+    let c = 1;
+    let d = 1 / nonzero(1 - (first + second) * probability / (first + 1));
+    let fraction = d;
+
+    for (let iteration = 1; iteration <= 10000; iteration++) {
+        const twice = 2 * iteration;
+        const even = iteration * (second - iteration) * probability / ((first + twice - 1) * (first + twice));
+        d = 1 / nonzero(1 + even * d);
+        c = nonzero(1 + even / c);
+        fraction *= d * c;
+
+        const odd = -(first + iteration) * (first + second + iteration) * probability / ((first + twice) * (first + twice + 1));
+        d = 1 / nonzero(1 + odd * d);
+        c = nonzero(1 + odd / c);
+        const ratio = d * c;
+        fraction *= ratio;
+        if (Math.abs(ratio - 1) <= 4 * Number.EPSILON) {
+            const tail = Math.exp(logFactor + Math.log(fraction) - Math.log(first));
+            if (tail < 0 || tail > 1) {
+                return Number.NaN;
+            }
+            return complemented ? 1 - tail : tail;
+        }
+    }
+
+    return Number.NaN;
+}
+
+function binomialBetaLogFactor(x: number, complement: number, a: number, b: number): number {
+    // A short factorial ratio avoids subtracting large log-gamma values when
+    // one shape is small; all shapes here are positive integers.
+    const small = Math.min(a, b);
+    if (small < 16) {
+        const large = Math.max(a, b);
+        let ratio = Math.log(large);
+        for (let i = 1; i < small; i++) {
+            ratio += Math.log(large + i) - Math.log(i);
+        }
+        const logX = x < 0.5 ? Math.log(x) : Math.log1p(-complement);
+        const logComplement = complement < 0.5 ? Math.log(complement) : Math.log1p(-x);
+        return ratio + a * logX + b * logComplement;
+    }
+
+    // Stirling's correction and the binomial deviance retain the small
+    // logarithm near the mode instead of cancelling O(n log n) terms.
+    const total = a + b;
+    return 0.5 * (Math.log(a) + Math.log(b) - Math.log(total) - Math.log(2 * Math.PI))
+        + binomialStirlingCorrection(total) - binomialStirlingCorrection(a) - binomialStirlingCorrection(b)
+        - binomialDeviance(a, total * x) - binomialDeviance(b, total * complement);
+}
+
+function binomialStirlingCorrection(value: number): number {
+    const inverse = 1 / value;
+    const square = inverse * inverse;
+    return inverse * (1 / 12 - square * (1 / 360 - square * (1 / 1260 - square * (1 / 1680 - square / 1188))));
+}
+
+function binomialDeviance(value: number, mean: number): number {
+    const difference = value - mean;
+    if (Math.abs(difference) >= 0.1 * (value + mean)) {
+        return value * Math.log(value / mean) + mean - value;
+    }
+
+    const ratio = difference / (value + mean);
+    const square = ratio * ratio;
+    let sum = difference * ratio;
+    let term = 2 * value * ratio;
+    for (let denominator = 3; ; denominator += 2) {
+        term *= square;
+        const next = sum + term / denominator;
+        if (next === sum) {
+            return sum;
+        }
+        sum = next;
+    }
 }

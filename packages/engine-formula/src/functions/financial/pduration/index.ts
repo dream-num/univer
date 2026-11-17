@@ -65,10 +65,8 @@ export class Pduration extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const relativeChange = (fvValue - pvValue) / pvValue;
-            const logGrowth = Math.abs(relativeChange) < 0.5
-                ? Math.log1p(relativeChange)
-                : Math.log(fvValue) - Math.log(pvValue);
+            // Preserve Excel's zero periods when the separate logarithms coincide.
+            const logGrowth = Math.log(fvValue) - Math.log(pvValue);
             const result = logGrowth / Math.log1p(rateValue);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {

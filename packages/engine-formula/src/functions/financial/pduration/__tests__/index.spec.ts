@@ -27,6 +27,15 @@ describe('Test pduration function', () => {
     const testFunction = new Pduration(FUNCTION_NAMES_FINANCIAL.PDURATION);
 
     describe('Pduration', () => {
+        it.each([1e-15, 1])('Preserves Excel zero periods when logarithms coincide: rate=%s', (rate) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(rate),
+                NumberValueObject.create(1e15),
+                NumberValueObject.create(1e15 + 1)
+            );
+            expect(result.getValue()).toBe(0);
+        });
+
         it.each([-0.5, -0.01, 0])('Rejects nonpositive rates: %s', (rate) => {
             const result = testFunction.calculate(NumberValueObject.create(rate), NumberValueObject.create(1000), NumberValueObject.create(1200));
             expect(result.getValue()).toBe(ErrorType.NUM);
@@ -40,7 +49,7 @@ describe('Test pduration function', () => {
             expect(testFunction.calculate(rate, present, present).getValue()).toBe(0);
         });
 
-        it('Retains a one-period change between nearby large values', () => {
+        it('Preserves zero periods when nearby large values have the same logarithm', () => {
             const rate = 2 ** -50;
             const present = 2 ** 1000;
             const result = testFunction.calculate(
@@ -48,7 +57,7 @@ describe('Test pduration function', () => {
                 NumberValueObject.create(present),
                 NumberValueObject.create(present * (1 + rate))
             );
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(0);
         });
 
         it.each([

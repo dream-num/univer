@@ -50,46 +50,95 @@ const symbolRank = (symbol: string) => {
     return rank === -1 ? EXCEL_SYMBOL_ORDER.length : rank;
 };
 
-const compareUnit = (a: string, b: string, collator: Intl.Collator) => {
-    const classA = unitClass(a);
-    const classB = unitClass(b);
+const isAsciiDigit = (unit: string) => unit >= '0' && unit <= '9';
 
-    if (classA !== classB) return classA - classB;
+/** A text split into the units it sorts by, with each unit's class worked out once. */
+interface IPreparedText {
+    readonly units: readonly string[];
+    readonly classes: readonly UnitClass[];
+}
 
-    if (classA === UnitClass.SYMBOL) {
-        return symbolRank(a) - symbolRank(b) || (a < b ? -1 : a > b ? 1 : 0);
-    }
+// Excel ignores case, hyphens and apostrophes when it sorts text.
+const normalizeText = (text: string) => text.toLocaleLowerCase().replace(/-/g, '').replace(/'/g, '');
 
-    return collator.compare(a, b);
+const prepareText = (text: string): IPreparedText => {
+    const units = normalizeText(text).match(TEXT_UNITS) ?? [];
+    return { units, classes: units.map(unitClass) };
 };
 
-const compareUnits = (a: string[], b: string[], collator: Intl.Collator) => {
-    const length = Math.min(a.length, b.length);
+const compareUnits = (a: IPreparedText, b: IPreparedText, collator: Intl.Collator) => {
+    const length = Math.min(a.units.length, b.units.length);
 
     for (let i = 0; i < length; i++) {
-        const order = compareUnit(a[i], b[i], collator);
+        const unitA = a.units[i];
+        const unitB = b.units[i];
+
+        // Identical units are equal in every class, and shared prefixes are common in a sort.
+        if (unitA === unitB) continue;
+
+        const classA = a.classes[i];
+        const classB = b.classes[i];
+
+        if (classA !== classB) return classA - classB;
+
+        const order = classA === UnitClass.SYMBOL
+            ? symbolRank(unitA) - symbolRank(unitB) || (unitA < unitB ? -1 : 1)
+            : classA === UnitClass.DIGIT && isAsciiDigit(unitA) && isAsciiDigit(unitB)
+                // ASCII digits collate by value in every locale, and a digit unit is one character.
+                ? unitA.charCodeAt(0) - unitB.charCodeAt(0)
+                : collator.compare(unitA, unitB);
+
         if (order !== 0) return order;
     }
 
-    return a.length - b.length;
+    return a.units.length - b.units.length;
 };
 
+// Bounds the prepared texts a comparer keeps if a sort is larger than this.
+const MAX_PREPARED_TEXTS = 200_000;
+
 /**
- * Compares text in Excel's order: runs of letters by the locale's collation, so an accented
- * letter sorts beside its base letter, and digits before spaces and punctuation before letters.
- * Accents only break ties between texts that are otherwise equal.
+ * Compares text in Excel's order, ignoring case, hyphens and apostrophes: runs of letters by the
+ * locale's collation, so an accented letter sorts beside its base letter, and digits before
+ * spaces and punctuation before letters. Accents only break ties between texts that are
+ * otherwise equal.
+ *
+ * A sort compares each text many times, so each text is normalized and split once and kept
+ * until the current task ends; the comparer holds no texts between sorts.
  */
 export const createTextComparer = (locale?: string): TextComparer => {
     const baseCollator = new Intl.Collator(locale, { sensitivity: 'base' });
     const accentCollator = new Intl.Collator(locale, { sensitivity: 'accent' });
+    const prepared = new Map<string, IPreparedText>();
+    let releaseScheduled = false;
+
+    const prepare = (text: string): IPreparedText => {
+        let entry = prepared.get(text);
+
+        if (entry === undefined) {
+            if (prepared.size >= MAX_PREPARED_TEXTS) prepared.clear();
+            entry = prepareText(text);
+            prepared.set(text, entry);
+
+            if (!releaseScheduled) {
+                releaseScheduled = true;
+                queueMicrotask(() => {
+                    prepared.clear();
+                    releaseScheduled = false;
+                });
+            }
+        }
+
+        return entry;
+    };
 
     return (a, b) => {
         if (a === b) return 0;
 
-        const unitsA = a.match(TEXT_UNITS) ?? [];
-        const unitsB = b.match(TEXT_UNITS) ?? [];
+        const preparedA = prepare(a);
+        const preparedB = prepare(b);
 
-        return compareUnits(unitsA, unitsB, baseCollator) || compareUnits(unitsA, unitsB, accentCollator);
+        return compareUnits(preparedA, preparedB, baseCollator) || compareUnits(preparedA, preparedB, accentCollator);
     };
 };
 
@@ -103,10 +152,6 @@ export const createRegionTextComparer = (region: string): TextComparer => {
 };
 
 const defaultTextComparer = createTextComparer();
-
-const removeStringSymbol = (str: string) => {
-    return str.replace(/-/gi, '').replace(/'/gi, '');
-};
 
 export const compareNull = (
     a1: ICommonComparableCellValue,
@@ -162,18 +207,12 @@ export const compareString = (
     const isA1Str = typeof a1 === 'string';
     const isA2Str = typeof a2 === 'string';
 
-    if (isA1Str) {
-        a1 = removeStringSymbol((a1 as string).toLocaleLowerCase()) as string;
-    }
-    if (isA2Str) {
-        a2 = removeStringSymbol((a2 as string).toLocaleLowerCase()) as string;
-    }
-
     if (!isA1Str && !isA2Str) {
         return null;
     }
 
     if (isA1Str && isA2Str) {
+        // The comparer normalizes each text itself, once per sort.
         const order = compareText(a1 as string, a2 as string);
         if (order < 0) {
             return type === SortType.ASC ? ORDER.NEGATIVE : ORDER.POSITIVE;

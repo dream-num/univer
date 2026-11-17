@@ -1574,7 +1574,7 @@ export class ArrayValueObject extends BaseValueObject {
                     for (const row of positions) {
                         const r = row - startRow;
                         if (r >= 0 && r < rowCount) {
-                            const currentValue = this.getValueOrDefault(r, column);
+                            const currentValue = this.getValueOrDefault(r, column) ?? NullValueObject.create();
                             result[r] ??= [];
                             if (currentValue.isError()) {
                                 result[r][column] = currentValue;

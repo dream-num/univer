@@ -19,7 +19,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Filter extends BaseFunction {
@@ -60,7 +60,9 @@ export class Filter extends BaseFunction {
     }
 
     private _getIncludeValue(include: BaseValueObject, row: number, column: number): BaseValueObject {
-        const value = include.isArray() ? (include as ArrayValueObject).getValueOrDefault(row, column) : include;
+        const value = include.isArray()
+            ? (include as ArrayValueObject).getValueOrDefault(row, column) ?? NullValueObject.create()
+            : include;
         if (!value.isString()) {
             return value;
         }

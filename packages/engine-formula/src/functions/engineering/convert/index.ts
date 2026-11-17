@@ -136,12 +136,35 @@ const units: Unit[] = [
 const unitsBySymbol = new Map(units.flatMap((unit) => [unit[0], ...unit[1]].map((symbol) => [symbol, unit] as const)));
 
 const prefixes: Array<[prefix: string, factor: number, binary?: true]> = [
-    ['Yi', 2 ** 80, true], ['Zi', 2 ** 70, true], ['Ei', 2 ** 60, true], ['Pi', 2 ** 50, true],
-    ['Ti', 2 ** 40, true], ['Gi', 2 ** 30, true], ['Mi', 2 ** 20, true], ['ki', 2 ** 10, true],
-    ['da', 1e1], ['Y', 1e24], ['Z', 1e21], ['E', 1e18], ['P', 1e15], ['T', 1e12],
-    ['G', 1e9], ['M', 1e6], ['k', 1e3], ['h', 1e2], ['e', 1e1], ['d', 1e-1],
-    ['c', 1e-2], ['m', 1e-3], ['u', 1e-6], ['n', 1e-9], ['p', 1e-12], ['f', 1e-15],
-    ['a', 1e-18], ['z', 1e-21], ['y', 1e-24],
+    ['Yi', 2 ** 80, true],
+    ['Zi', 2 ** 70, true],
+    ['Ei', 2 ** 60, true],
+    ['Pi', 2 ** 50, true],
+    ['Ti', 2 ** 40, true],
+    ['Gi', 2 ** 30, true],
+    ['Mi', 2 ** 20, true],
+    ['ki', 2 ** 10, true],
+    ['da', 1e1],
+    ['Y', 1e24],
+    ['Z', 1e21],
+    ['E', 1e18],
+    ['P', 1e15],
+    ['T', 1e12],
+    ['G', 1e9],
+    ['M', 1e6],
+    ['k', 1e3],
+    ['h', 1e2],
+    ['e', 1e1],
+    ['d', 1e-1],
+    ['c', 1e-2],
+    ['m', 1e-3],
+    ['u', 1e-6],
+    ['n', 1e-9],
+    ['p', 1e-12],
+    ['f', 1e-15],
+    ['a', 1e-18],
+    ['z', 1e-21],
+    ['y', 1e-24],
 ];
 
 function lookupUnit(symbol: string): [Unit, number] | undefined {
@@ -184,7 +207,11 @@ export class Convert extends BaseFunction {
         const missing = ErrorValueObject.create(ErrorType.NA);
         const [values, sources, targets] = inputs.map((input) => expandArrayValueObject(rows, columns, input, missing));
         return values.mapValue((value, row, column) =>
-            this._convert(value ?? missing, sources.getValueOrDefault(row, column), targets.getValueOrDefault(row, column))
+            this._convert(
+                value ?? missing,
+                sources.getValueOrDefault(row, column) ?? missing,
+                targets.getValueOrDefault(row, column) ?? missing
+            )
         );
     }
 

@@ -22,6 +22,7 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     IConfigService,
+    Injector,
     LocaleService,
     LocaleType,
     RANGE_TYPE,
@@ -744,6 +745,53 @@ describe('Configured cell text line gap', () => {
             baseline.dispose();
             spaced.dispose();
             univer.dispose();
+            environment.restore();
+        }
+    });
+});
+
+describe('initial wrapped rich-text layout', () => {
+    it.each([false, true])('uses the final cell width before calculating (merged: %s)', (merged) => {
+        const environment = setupRenderTestEnv();
+        const root = new Injector([[Univer]]);
+        const univer = root.get(Univer);
+        const text = 'Wrapped 中文 text '.repeat(30);
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'initial-wrapped-rich-layout',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: 10,
+                columnCount: 5,
+                defaultColumnWidth: 100,
+                defaultRowHeight: 200,
+                mergeData: merged ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [],
+                cellData: { 0: { 0: { s: { tb: WrapStrategy.WRAP }, p: {
+                    id: 'wrapped-rich-cell',
+                    body: { dataStream: `${text}\r\n`, paragraphs: [{ startIndex: text.length, paragraphId: 'wrapped-rich-paragraph' }], textRuns: [{ st: 0, ed: text.length, ts: { ff: 'Arial', fs: 12 } }] },
+                    documentStyle: { pageSize: { width: 700, height: 1000 } },
+                } } } },
+            } },
+        });
+        const injector = univer.__getInjector();
+        injector.add([SpreadsheetSkeleton, { useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()) }]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        try {
+            skeleton.calculate();
+            const before = Tools.deepClone(workbook.getSnapshot());
+            const cell = skeleton.worksheet.getCellRaw(0, 0)!;
+            skeleton._setFontStylesCache(0, 0, cell, skeleton.worksheet.getComposedCellStyle(0, 0), true);
+            const document = skeleton.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!;
+            const model = document.getViewModel().getDataModel();
+            expect(model.documentStyle.pageSize!.width).toBe(merged ? 200 : 100);
+            expect(document.getSkeletonData()!.pages[0].sections[0].columns[0].lines.length).toBeGreaterThan(1);
+            const data = document.getSkeletonData();
+            model.updateDocumentDataPageSize(merged ? 200 : 100);
+            document.calculate();
+            expect(document.getSkeletonData()).toBe(data);
+            expect(workbook.getSnapshot()).toEqual(before);
+        } finally {
+            root.dispose();
             environment.restore();
         }
     });

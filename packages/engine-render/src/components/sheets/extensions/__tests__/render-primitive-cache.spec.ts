@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
+import { createIdentifier, Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverRenderingContext } from '../../../../context';
 import { FontCache } from '../../../docs/layout/shaping-engine/font-cache';
 import { Border } from '../border';
+import { Font } from '../font';
 import { RenderPrimitiveCache } from '../render-primitive-cache';
+
+const IFontPrimitiveCache = createIdentifier<RenderPrimitiveCache>('render.test.font-primitive-cache');
 
 describe('render primitive raster cache', () => {
     let injector: Injector;
@@ -34,6 +37,11 @@ describe('render primitive raster cache', () => {
         injector = new Injector([
             [RenderPrimitiveCache],
             [Border],
+            [Font],
+            [IFontPrimitiveCache, {
+                useFactory: (font: Font) => Reflect.get(font, '_primitiveCache') as RenderPrimitiveCache,
+                deps: [Font],
+            }],
             [EventTarget],
             [CanvasRenderingContext2D, { useValue: native }],
             [UniverRenderingContext, {
@@ -455,6 +463,158 @@ describe('render primitive raster cache', () => {
         cache.draw(ctx, () => ctx.fillText('Merged title', 10, 20));
     }
 
+    it.each([[-40, 20], [340, 20], [20, -40], [20, 190]])('skips glyph rasters outside the physical canvas at %s, %s', (x, y) => {
+        const image = vi.spyOn(native, 'drawImage');
+        const fill = vi.spyOn(native, 'fillText');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        } as TextMetrics);
+        cache.draw(ctx, () => ctx.fillText('outside', x, y));
+        expect(image).not.toHaveBeenCalled();
+        expect(fill).not.toHaveBeenCalled();
+    });
+
+    it('skips cached glyphs outside the physical damage bound without changing raster coordinates', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        } as TextMetrics);
+        const draw = () => ctx.fillText('visible', 20, 30);
+        cache.draw(ctx, draw);
+        const bitmap = image.mock.calls[0][0] as HTMLCanvasElement;
+        const size = [bitmap.width, bitmap.height];
+        const destination = image.mock.calls[0].slice(1);
+        ctx.setTransform(2, 0, 0, 2, 10, 14);
+        cache.draw(ctx, draw, undefined, { left: 100, top: 0, right: 200, bottom: 150 });
+        expect(image).toHaveBeenCalledOnce();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        cache.draw(ctx, draw, undefined, { left: 0, top: 0, right: 100, bottom: 150 });
+        expect(image).toHaveBeenCalledTimes(2);
+        expect(image.mock.calls[1].slice(3, 5)).toEqual(size);
+        expect(image.mock.calls[1].slice(5, 7)).toEqual(destination);
+    });
+
+    it('retains overhanging ink and the two physical pixel antialiasing halo', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 8,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        } as TextMetrics);
+        cache.draw(ctx, () => ctx.fillText('overhang', 107, 30), undefined, { left: 0, top: 0, right: 100, bottom: 100 });
+        cache.draw(ctx, () => ctx.fillText('halo', 110, 30), undefined, { left: 0, top: 0, right: 100, bottom: 100 });
+        expect(image).toHaveBeenCalledTimes(2);
+    });
+
+    it('restores the outer glyph damage bound after nested drawing fails', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+        } as TextMetrics);
+        cache.draw(ctx, () => {
+            expect(() => cache.draw(ctx, () => {
+                throw new Error('inner draw');
+            }, undefined, {
+                left: 100,
+                top: 0,
+                right: 200,
+                bottom: 150,
+            })).toThrow('inner draw');
+            ctx.fillText('outer', 20, 30);
+        }, undefined, { left: 0, top: 0, right: 100, bottom: 150 });
+        expect(image).toHaveBeenCalledOnce();
+        expect(ctx._context).toBe(native);
+    });
+
+    it('retains a visible rich-text glyph working set beyond 128 entries within the original pixel budget', () => {
+        cache.dispose();
+        cache = injector.get(IFontPrimitiveCache);
+        const image = vi.spyOn(native, 'drawImage');
+        for (let i = 0; i < 512; i++) {
+            cache.draw(ctx, () => ctx.fillText(`glyph-${i}`, 10, 20));
+        }
+        cache.draw(ctx, () => ctx.fillText('glyph-0', 10, 20));
+        cache.draw(ctx, () => ctx.fillText('glyph-0', 10, 20));
+        expect(image.mock.calls[513]).toEqual(image.mock.calls[512]);
+        expect((image.mock.calls[512][0] as HTMLCanvasElement).width).toBeGreaterThan(0);
+        const bitmaps = new Set(image.mock.calls.map(([bitmap]) => bitmap as HTMLCanvasElement));
+        expect([...bitmaps].reduce((pixels, bitmap) => pixels + bitmap.width * bitmap.height, 0)).toBeLessThanOrEqual(512 * 1024);
+        cache.dispose();
+        expect([...bitmaps].every((bitmap) => bitmap.width === 0 && bitmap.height === 0)).toBe(true);
+    });
+
+    it('evicts large font rasters within the original pixel budget and releases them on clear', () => {
+        cache.dispose();
+        cache = injector.get(IFontPrimitiveCache);
+        const image = vi.spyOn(native, 'drawImage');
+        vi.spyOn(native, 'measureText').mockReturnValue({
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 10_000,
+            actualBoundingBoxAscent: 6,
+            actualBoundingBoxDescent: 0,
+        } as TextMetrics);
+        for (let i = 0; i < 20; i++) {
+            cache.draw(ctx, () => ctx.fillText(`wide-glyph-${i}`, 10, 20));
+        }
+        const bitmaps = image.mock.calls.map(([bitmap]) => bitmap as HTMLCanvasElement);
+        expect(bitmaps[0].width).toBe(0);
+        expect(bitmaps[bitmaps.length - 1].width).toBeGreaterThan(0);
+        expect(bitmaps.reduce((pixels, bitmap) => pixels + bitmap.width * bitmap.height, 0)).toBeLessThanOrEqual(512 * 1024);
+        cache.clear();
+        expect(bitmaps.every((bitmap) => bitmap.width === 0 && bitmap.height === 0)).toBe(true);
+    });
+
+    it('retains thousands of glyphs in bounded shared storage without rerasterizing the first glyph', () => {
+        cache.dispose();
+        cache = injector.get(IFontPrimitiveCache);
+        const image = vi.spyOn(native, 'drawImage');
+        for (let i = 0; i < 2400; i++) {
+            cache.draw(ctx, () => ctx.fillText(`glyph-${i}`, 10, 20));
+        }
+        cache.draw(ctx, () => ctx.fillText('glyph-0', 10, 20));
+        expect(image.mock.calls[2400]).toHaveLength(9);
+        cache.draw(ctx, () => ctx.fillText('glyph-0', 10, 20));
+        expect(image.mock.calls[2401]).toEqual(image.mock.calls[2400]);
+        const bitmaps = Reflect.get(cache, '_bitmaps') as Map<string, { canvas: HTMLCanvasElement }>;
+        const pages = Reflect.get(cache, '_textPages') as Set<{ canvas: HTMLCanvasElement }>;
+        const pool = Reflect.get(cache, '_textRasterPool') as HTMLCanvasElement[];
+        const surfaces = new Set([...Array.from(bitmaps.values(), (bitmap) => bitmap.canvas), ...Array.from(pages, (page) => page.canvas), ...pool]);
+        expect([...surfaces].reduce((pixels, canvas) => pixels + canvas.width * canvas.height, 0)).toBeLessThanOrEqual(512 * 1024);
+        expect(surfaces.size).toBeLessThan(128);
+        cache.clear();
+        expect([...surfaces].every((canvas) => canvas.width === 0 && canvas.height === 0)).toBe(true);
+    });
+
+    it('keeps standalone decoration surfaces bounded when shared text has a larger entry allowance', () => {
+        cache.dispose();
+        cache = injector.get(IFontPrimitiveCache);
+        const image = vi.spyOn(native, 'drawImage');
+        for (let i = 0; i < 1100; i++) {
+            ctx.strokeStyle = `#${i.toString(16).padStart(6, '0')}`;
+            cache.draw(ctx, () => {
+                ctx.beginPath();
+                ctx.moveTo(0.5, 0.5);
+                ctx.lineTo(1.5, 0.5);
+                ctx.stroke();
+            });
+        }
+        const surfaces = image.mock.calls.map(([canvas]) => canvas as HTMLCanvasElement);
+        expect(surfaces[0].width).toBe(0);
+        expect(surfaces[surfaces.length - 1].width).toBeGreaterThan(0);
+        expect(surfaces.filter((canvas) => canvas.width > 0)).toHaveLength(1024);
+        expect(surfaces.reduce((pixels, canvas) => pixels + canvas.width * canvas.height, 0)).toBeLessThanOrEqual(512 * 1024);
+    });
+
     it('restores text raster state and the caller save stack when a bitmap submission fails', () => {
         native.save();
         ctx.setTransform(2, 0, 0, 2, 4, 8);
@@ -475,9 +635,16 @@ describe('render primitive raster cache', () => {
 
     it('reuses physical text bitmaps after integral translations and invalidates for color and font changes', () => {
         const fill = vi.spyOn(native, 'fillText');
-        const image = vi.spyOn(native, 'drawImage');
+        const rasterStates: Array<{ color: string | CanvasGradient | CanvasPattern; font: string }> = [];
+        const image = vi.spyOn(native, 'drawImage').mockImplementation((source: CanvasImageSource, ...args: number[]) => {
+            if (args.length === 2) {
+                const paint = (source as HTMLCanvasElement).getContext('2d')!;
+                rasterStates.push({ color: paint.fillStyle, font: paint.font });
+            }
+        });
+        ctx.setTransform(1, 0, 0, 1, 200, 0);
         text();
-        ctx.setTransform(1, 0, 0, 1, -162, 100);
+        ctx.setTransform(1, 0, 0, 1, 38, 100);
         text();
         ctx.fillStyle = '#be123c';
         text();
@@ -485,8 +652,10 @@ describe('render primitive raster cache', () => {
         text();
         expect(fill).not.toHaveBeenCalled();
         expect(image).toHaveBeenCalledTimes(4);
-        expect(image.mock.calls[1][0]).toBe(image.mock.calls[0][0]);
-        expect(new Set(image.mock.calls.map((call) => call[0])).size).toBe(3);
+        expect(image.mock.calls[1].slice(3, 5)).toEqual(image.mock.calls[1].slice(7, 9));
+        expect(rasterStates).toHaveLength(3);
+        expect(rasterStates[0].color).not.toBe(rasterStates[1].color);
+        expect(rasterStates[1].font).not.toBe(rasterStates[2].font);
     });
 
     it.each(['loadingdone', 'loadingerror', 'metrics'])('repaints glyphs after %s and releases font listeners', (event) => {
@@ -510,15 +679,190 @@ describe('render primitive raster cache', () => {
         const container = document.createElement('div');
         container.lang = 'zh-CN';
         container.append(native.canvas);
-        const image = vi.spyOn(native, 'drawImage');
+        const languages: string[] = [];
+        const image = vi.spyOn(native, 'drawImage').mockImplementation((source: CanvasImageSource, ...args: number[]) => {
+            if (args.length === 2) {
+                languages.push((source as HTMLCanvasElement).lang);
+            }
+        });
         text();
         container.lang = 'ja';
         text();
-        const before = image.mock.calls[0][0] as HTMLCanvasElement;
-        const after = image.mock.calls[1][0] as HTMLCanvasElement;
-        expect(before.lang).toBe('zh-CN');
-        expect(after.lang).toBe('ja');
-        expect(after).not.toBe(before);
+        text();
+        expect(image).toHaveBeenCalledTimes(3);
+        expect(languages).toEqual(['zh-CN', 'ja']);
+    });
+
+    it('keeps shared text pages unchanged until the outer draw finishes, including a failed nested draw', () => {
+        const image = vi.spyOn(native, 'drawImage');
+        cache.draw(ctx, () => {
+            ctx.fillText('first', 10, 20);
+            ctx.fillText('second', 10, 20);
+        });
+        cache.draw(ctx, () => {
+            ctx.fillText('first', 10, 20);
+            ctx.fillText('second', 10, 20);
+        });
+        const first = image.mock.calls[2];
+        const second = image.mock.calls[3];
+        expect(first[0]).toBe(second[0]);
+        expect(first.slice(1, 3)).not.toEqual(second.slice(1, 3));
+        const page = (first[0] as HTMLCanvasElement).getContext('2d')!;
+        const upload = vi.spyOn(page, 'drawImage');
+        const before = upload.mock.calls.length;
+        cache.draw(ctx, () => {
+            ctx.fillText('first', 10, 20);
+            expect(() => cache.draw(ctx, () => {
+                ctx.fillText('third', 10, 20);
+                throw new Error('nested draw');
+            })).toThrow('nested draw');
+            expect(upload).toHaveBeenCalledTimes(before);
+            ctx.fillText('second', 10, 20);
+        });
+        expect(upload).toHaveBeenCalledTimes(before + 1);
+        expect(ctx._context).toBe(native);
+    });
+
+    it('reuses evicted text slots without changing surviving glyph locations', () => {
+        cache.dispose();
+        const child = injector.createChild([[RenderPrimitiveCache, {
+            useFactory: (container: Injector) => container.createInstance(RenderPrimitiveCache, 2),
+            deps: [Injector],
+        }]]);
+        try {
+            cache = child.get(RenderPrimitiveCache);
+            const image = vi.spyOn(native, 'drawImage');
+            const draw = (value: string) => cache.draw(ctx, () => ctx.fillText(value, 10, 20));
+            draw('first');
+            draw('second');
+            draw('second');
+            const survivor = image.mock.calls[2];
+            draw('third');
+            draw('second');
+            expect(image.mock.calls[4]).toEqual(survivor);
+            draw('first');
+            const raster = image.mock.calls[5][0] as HTMLCanvasElement;
+            expect(raster.getContext('2d')!.fillText).toHaveBeenLastCalledWith('first', 0, 0);
+            expect(image.mock.calls[5]).toHaveLength(3);
+        } finally {
+            child.dispose();
+        }
+    });
+
+    it('retains a warm glyph when the canvas budget only permits its original raster', () => {
+        const child = injector.createChild([[RenderPrimitiveCache, {
+            useFactory: (container: Injector) => container.createInstance(RenderPrimitiveCache, 1),
+            deps: [Injector],
+        }]]);
+        try {
+            const single = child.get(RenderPrimitiveCache);
+            const image = vi.spyOn(native, 'drawImage');
+            const draw = () => single.draw(ctx, () => ctx.fillText('cached', 10, 20));
+            draw();
+            const raster = image.mock.calls[0][0] as HTMLCanvasElement;
+            expect(raster.width).toBeGreaterThan(0);
+            draw();
+            expect(image.mock.calls[1]).toEqual(image.mock.calls[0]);
+            expect(raster.getContext('2d')!.fillText).toHaveBeenCalledOnce();
+            expect(ctx._context).toBe(native);
+            single.dispose();
+            expect([raster.width, raster.height]).toEqual([0, 0]);
+        } finally {
+            child.dispose();
+        }
+    });
+
+    it('retains the original glyph when the native platform cannot upload a shared page', () => {
+        const original = vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!;
+        const pages: HTMLCanvasElement[] = [];
+        const getContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            const context = original.call(this, '2d') as CanvasRenderingContext2D;
+            if (this.width === 256 && this.height === 64) {
+                pages.push(this);
+                vi.spyOn(context, 'drawImage').mockImplementation(() => {
+                    throw new Error('Native page upload failed');
+                });
+            }
+            return context;
+        });
+        try {
+            const image = vi.spyOn(native, 'drawImage');
+            text();
+            const raster = image.mock.calls[0][0] as HTMLCanvasElement;
+            text();
+            expect(pages.length).toBeGreaterThan(0);
+            expect(pages.every((page) => page.width === 0 && page.height === 0)).toBe(true);
+            expect(image.mock.calls[1]).toEqual(image.mock.calls[0]);
+            expect(raster.getContext('2d')!.fillText).toHaveBeenCalledOnce();
+            expect(ctx._context).toBe(native);
+            cache.clear();
+            expect([raster.width, raster.height]).toEqual([0, 0]);
+        } finally {
+            getContext.mockImplementation(original);
+        }
+    });
+
+    it('releases shared and temporary text surfaces and keeps disposal terminal', () => {
+        const create = vi.spyOn(document, 'createElement');
+        const image = vi.spyOn(native, 'drawImage');
+        text();
+        text();
+        const surfaces = create.mock.results.map((result) => result.value as HTMLCanvasElement);
+        expect(surfaces.some((canvas) => canvas.width > 0)).toBe(true);
+        cache.dispose();
+        expect(surfaces.every((canvas) => canvas.width === 0 && canvas.height === 0)).toBe(true);
+        const allocated = create.mock.calls.length;
+        const submitted = image.mock.calls.length;
+        const fill = vi.spyOn(native, 'fillText');
+        text();
+        expect(fill).toHaveBeenCalledWith('Merged title', 10, 20);
+        expect(create).toHaveBeenCalledTimes(allocated);
+        expect(image).toHaveBeenCalledTimes(submitted);
+    });
+
+    it.each(['context', 'paint'])('releases a temporary text raster when native %s creation fails', (failure) => {
+        const original = vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementationOnce(function (this: HTMLCanvasElement) {
+            if (failure === 'context') {
+                throw new Error('Native context failed');
+            }
+            const context = original.call(this, '2d') as CanvasRenderingContext2D;
+            vi.spyOn(context, 'fillText').mockImplementationOnce(() => {
+                throw new Error('Native paint failed');
+            });
+            return context;
+        });
+        expect(text).toThrow(failure === 'context' ? 'Native context failed' : 'Native paint failed');
+        expect(ctx._context).toBe(native);
+        expect(Reflect.get(cache, '_pixels')).toBe(0);
+        expect(Reflect.get(cache, '_canvasCount')).toBe(0);
+        const image = vi.spyOn(native, 'drawImage');
+        text();
+        text();
+        expect(image.mock.calls[1]).toHaveLength(9);
+    });
+
+    it.each(['null', 'throw'])('retains the original text raster if shared page creation returns %s', (failure) => {
+        const original = vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext')
+            .mockImplementationOnce(function (this: HTMLCanvasElement) {
+                return original.call(this, '2d');
+            })
+            .mockImplementationOnce(() => {
+                if (failure === 'throw') {
+                    throw new Error('No shared context');
+                }
+                return null;
+            });
+        const image = vi.spyOn(native, 'drawImage');
+        text();
+        text();
+        const first = image.mock.calls[0][0] as HTMLCanvasElement;
+        expect(image.mock.calls[1][0]).toBe(first);
+        expect(first.getContext('2d')!.fillText).toHaveBeenCalledOnce();
+        expect(Reflect.get(cache, '_pixels')).toBe(first.width * first.height);
+        cache.clear();
+        expect([first.width, first.height]).toEqual([0, 0]);
     });
 
     it.each(['loading', 'maxWidth', 'rotation', 'shadow', 'metrics', 'direction'])('retains native text rendering for %s', (mode) => {

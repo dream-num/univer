@@ -23,6 +23,31 @@ import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 const MAX_ENTRIES = 128;
 const MAX_PIXELS = 512 * 1024;
 const MAX_STROKE_PIXELS = 128 * 1024;
+const MAX_CANVASES = 1024;
+const TEXT_PAGE_WIDTH = 256;
+const TEXT_PAGE_HEIGHT = 64;
+const TEXT_RASTER_POOL_SIZE = 64;
+
+interface ITextPageRow {
+    y: number;
+    height: number;
+    free: Array<{ x: number; width: number }>;
+}
+
+interface ITextPage {
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    rows: ITextPageRow[];
+    entries: number;
+}
+
+interface ITextSlot {
+    page: ITextPage;
+    row: ITextPageRow;
+    x: number;
+    width: number;
+    height: number;
+}
 
 interface IStrokePath {
     points: Array<[number, number]>;
@@ -35,6 +60,7 @@ interface IStrokeBitmap {
     pixels: number;
     offsetX?: number;
     offsetY?: number;
+    slot?: ITextSlot;
 }
 
 const TEXT_PROPERTIES = [
@@ -56,42 +82,67 @@ export class RenderPrimitiveCache extends Disposable {
     private readonly _bitmaps = new Map<string, IStrokeBitmap>();
     private _contexts = new WeakMap<CanvasRenderingContext2D, CanvasRenderingContext2D>();
     private _pixels = 0;
+    private _canvasCount = 0;
     private _fontRevision = -1;
     private _fonts?: FontFaceSet;
     private _textClipBound?: IBoundRectNoAngle;
+    private _rasterClipBound?: IBoundRectNoAngle;
     private _textClipRepairCanvas?: HTMLCanvasElement;
+    private readonly _textPages = new Set<ITextPage>();
+    private readonly _pendingTextBitmaps = new Set<IStrokeBitmap>();
+    private readonly _textRasterPool: HTMLCanvasElement[] = [];
+    private _drawDepth = 0;
 
     constructor(private readonly _maxEntries = MAX_ENTRIES) {
         super();
     }
 
-    draw(ctx: UniverRenderingContext, draw: () => void, textClipBound?: IBoundRectNoAngle): void {
+    draw(ctx: UniverRenderingContext, draw: () => void, textClipBound?: IBoundRectNoAngle, rasterClipBound?: IBoundRectNoAngle): void {
         const original = ctx._context;
         const colorSpace = original?.getContextAttributes?.()?.colorSpace;
-        if (ctx.__mode === 'printing' || !original || typeof document === 'undefined'
+        if (this._disposed || ctx.__mode === 'printing' || !original || typeof document === 'undefined'
             || (colorSpace && colorSpace !== 'srgb')) {
             draw();
             return;
         }
         const previousTextClipBound = this._textClipBound;
+        const previousRasterClipBound = this._rasterClipBound;
         this._textClipBound = textClipBound;
+        this._rasterClipBound = rasterClipBound;
         ctx._context = this._getContext(original);
+        this._drawDepth++;
         try {
             draw();
         } finally {
             ctx._context = original;
             this._textClipBound = previousTextClipBound;
+            this._rasterClipBound = previousRasterClipBound;
+            if (--this._drawDepth === 0) {
+                // Keep pages immutable while the caller interleaves text and other extensions.
+                this._flushTextBitmaps();
+            }
         }
     }
 
     clear(): void {
-        for (const bitmap of this._bitmaps.values()) {
-            bitmap.canvas.width = 0;
-            bitmap.canvas.height = 0;
+        const canvases = new Set(Array.from(this._bitmaps.values(), (bitmap) => bitmap.canvas));
+        for (const page of this._textPages) {
+            canvases.add(page.canvas);
+        }
+        for (const canvas of this._textRasterPool) {
+            canvases.add(canvas);
+        }
+        for (const canvas of canvases) {
+            canvas.width = 0;
+            canvas.height = 0;
         }
         this._bitmaps.clear();
+        this._textPages.clear();
+        this._pendingTextBitmaps.clear();
+        this._textRasterPool.length = 0;
         this._contexts = new WeakMap();
         this._pixels = 0;
+        this._canvasCount = 0;
         if (this._textClipRepairCanvas) {
             this._textClipRepairCanvas.width = 0;
             this._textClipRepairCanvas.height = 0;
@@ -173,7 +224,7 @@ export class RenderPrimitiveCache extends Disposable {
 
     private _stroke(native: CanvasRenderingContext2D, path: IStrokePath, args: unknown[]): void {
         const m = native.getTransform();
-        if (this._textClipBound || args.length || path.unsupported || path.points.length !== 2 || m.a !== m.d || m.a <= 0 || m.b || m.c
+        if (this._disposed || this._textClipBound || args.length || path.unsupported || path.points.length !== 2 || m.a !== m.d || m.a <= 0 || m.b || m.c
             || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
             || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
             || (native.filter && native.filter !== 'none') || typeof native.strokeStyle !== 'string'
@@ -217,6 +268,7 @@ export class RenderPrimitiveCache extends Disposable {
         ]);
         let bitmap = this._bitmaps.get(key);
         if (!bitmap) {
+            this._trim(width * height);
             const canvas = createCanvasElement();
             canvas.width = width;
             canvas.height = height;
@@ -264,9 +316,9 @@ export class RenderPrimitiveCache extends Disposable {
                 paint.stroke();
             }
             bitmap = { canvas, pixels: width * height };
-            this._trim(bitmap.pixels);
             this._bitmaps.set(key, bitmap);
             this._pixels += bitmap.pixels;
+            this._canvasCount++;
         }
         const smoothing = native.imageSmoothingEnabled;
         native.setTransform(1, 0, 0, 1, 0, 0);
@@ -282,7 +334,7 @@ export class RenderPrimitiveCache extends Disposable {
     private _fillText(native: CanvasRenderingContext2D, args: unknown[]): void {
         const m = native.getTransform();
         const fallback = () => Reflect.apply(native.fillText, native, args);
-        if (args.length !== 3 || typeof args[0] !== 'string' || m.a !== m.d || m.a <= 0 || m.b || m.c
+        if (this._disposed || args.length !== 3 || typeof args[0] !== 'string' || m.a !== m.d || m.a <= 0 || m.b || m.c
             || native.shadowBlur || native.shadowOffsetX || native.shadowOffsetY
             || !['rgba(0, 0, 0, 0)', 'transparent', '#00000000'].includes(native.shadowColor)
             || (native.filter && native.filter !== 'none') || typeof native.fillStyle !== 'string'
@@ -313,9 +365,16 @@ export class RenderPrimitiveCache extends Disposable {
         const py = (args[2] as number) * m.d + m.f;
         const ix = Math.floor(px);
         const iy = Math.floor(py);
-        let metrics: TextMetrics | undefined;
+        const metrics = native.measureText(text);
+        const clip = this._rasterClipBound;
+        // Canvas clipping does not prevent glyph raster allocation; retain its physical antialiasing halo.
+        if (px + metrics.actualBoundingBoxRight * m.a < (clip?.left ?? 0) - 2
+            || px - metrics.actualBoundingBoxLeft * m.a > (clip?.right ?? native.canvas.width) + 2
+            || py + metrics.actualBoundingBoxDescent * m.d < (clip?.top ?? 0) - 2
+            || py - metrics.actualBoundingBoxAscent * m.d > (clip?.bottom ?? native.canvas.height) + 2) {
+            return;
+        }
         if (this._textClipBound) {
-            metrics = native.measureText(text);
             const left = px - metrics.actualBoundingBoxLeft * m.a;
             const right = px + metrics.actualBoundingBoxRight * m.a;
             const top = py - metrics.actualBoundingBoxAscent * m.d;
@@ -336,7 +395,6 @@ export class RenderPrimitiveCache extends Disposable {
         }
         const direction = native.direction === 'inherit' ? (native.canvas.dir as 'ltr' | 'rtl') : native.direction;
         if (this._textClipBound) {
-            metrics ??= native.measureText(text);
             const left = Math.max(0, Math.floor(px - metrics.actualBoundingBoxLeft * m.a) - 2);
             const top = Math.max(0, Math.floor(py - metrics.actualBoundingBoxAscent * m.d) - 2);
             const width = Math.min(native.canvas.width, Math.ceil(px + metrics.actualBoundingBoxRight * m.a) + 2) - left;
@@ -395,7 +453,6 @@ export class RenderPrimitiveCache extends Disposable {
         ]);
         let bitmap = this._bitmaps.get(key);
         if (!bitmap) {
-            metrics ??= native.measureText(text);
             const left = Math.floor(px - metrics.actualBoundingBoxLeft * m.a) - 2;
             const top = Math.floor(py - metrics.actualBoundingBoxAscent * m.d) - 2;
             const width = Math.ceil(px + metrics.actualBoundingBoxRight * m.a) - left + 2;
@@ -404,51 +461,203 @@ export class RenderPrimitiveCache extends Disposable {
                 fallback();
                 return;
             }
-            const canvas = createCanvasElement();
-            canvas.width = width;
-            canvas.height = height;
+            const poolIndex = this._textRasterPool.findIndex((canvas) => canvas.width === width && canvas.height === height);
+            const reused = poolIndex >= 0;
+            const canvas = reused ? this._textRasterPool.splice(poolIndex, 1)[0] : createCanvasElement();
+            this._trim(reused ? 0 : width * height);
+            if (!reused) {
+                canvas.width = width;
+                canvas.height = height;
+                this._pixels += width * height;
+                this._canvasCount++;
+            }
             canvas.dir = direction;
             canvas.lang = language;
-            const paint = canvas.getContext('2d');
+            let paint: CanvasRenderingContext2D | null;
+            try {
+                paint = canvas.getContext('2d');
+            } catch (error) {
+                this._discardCanvas(canvas);
+                throw error;
+            }
             if (!paint) {
+                this._discardCanvas(canvas);
                 fallback();
                 return;
             }
-            TEXT_PROPERTIES.forEach((property, index) => {
-                if (values[index] !== undefined) {
-                    Reflect.set(paint, property, values[index]);
-                }
-            });
-            paint.direction = direction;
-            paint.fillStyle = native.fillStyle;
-            paint.setTransform(m.a, 0, 0, m.d, px - left, py - top);
-            paint.fillText(text, 0, 0);
+            try {
+                paint.setTransform(1, 0, 0, 1, 0, 0);
+                paint.clearRect(0, 0, width, height);
+                TEXT_PROPERTIES.forEach((property, index) => {
+                    if (values[index] !== undefined) {
+                        Reflect.set(paint, property, values[index]);
+                    }
+                });
+                paint.direction = direction;
+                paint.fillStyle = native.fillStyle;
+                paint.setTransform(m.a, 0, 0, m.d, px - left, py - top);
+                paint.fillText(text, 0, 0);
+            } catch (error) {
+                this._discardCanvas(canvas);
+                throw error;
+            }
             bitmap = { canvas, pixels: width * height, offsetX: left - ix, offsetY: top - iy };
-            this._trim(bitmap.pixels);
             this._bitmaps.set(key, bitmap);
-            this._pixels += bitmap.pixels;
+            // A shared page needs room for both the source raster and its destination.
+            if (this._maxEntries > 1 && width <= TEXT_PAGE_WIDTH && height <= TEXT_PAGE_HEIGHT) {
+                this._pendingTextBitmaps.add(bitmap);
+            }
         }
-        native.save();
+        // Bitmap replay changes only these two fields; preserve the caller's save stack.
+        const smoothing = native.imageSmoothingEnabled;
         try {
             native.setTransform(1, 0, 0, 1, 0, 0);
             native.imageSmoothingEnabled = false;
-            native.drawImage(bitmap.canvas, ix + bitmap.offsetX!, iy + bitmap.offsetY!);
+            const slot = bitmap.slot;
+            if (slot) {
+                native.drawImage(bitmap.canvas, slot.x, slot.row.y, slot.width, slot.height, ix + bitmap.offsetX!, iy + bitmap.offsetY!, slot.width, slot.height);
+            } else {
+                native.drawImage(bitmap.canvas, ix + bitmap.offsetX!, iy + bitmap.offsetY!);
+            }
         } finally {
-            native.restore();
+            native.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+            native.imageSmoothingEnabled = smoothing;
         }
     }
 
-    private _trim(incoming: number): void {
-        while (this._bitmaps.size >= this._maxEntries || this._pixels + incoming > MAX_PIXELS) {
+    private _flushTextBitmaps(): void {
+        for (const bitmap of this._pendingTextBitmaps) {
+            const { width, height } = bitmap.canvas;
+            const rowHeight = Math.ceil(height / 2) * 2;
+            let slot = this._takeTextSlot(width, height, rowHeight);
+            if (!slot) {
+                this._trim(TEXT_PAGE_WIDTH * TEXT_PAGE_HEIGHT, false);
+                if (!this._pendingTextBitmaps.has(bitmap)) {
+                    continue;
+                }
+                const canvas = createCanvasElement();
+                canvas.width = TEXT_PAGE_WIDTH;
+                canvas.height = TEXT_PAGE_HEIGHT;
+                let context: CanvasRenderingContext2D | null;
+                try {
+                    context = canvas.getContext('2d');
+                } catch {
+                    context = null;
+                }
+                if (!context) {
+                    canvas.width = 0;
+                    canvas.height = 0;
+                    this._pendingTextBitmaps.delete(bitmap);
+                    continue;
+                }
+                this._textPages.add({ canvas, context, rows: [], entries: 0 });
+                this._pixels += canvas.width * canvas.height;
+                this._canvasCount++;
+                slot = this._takeTextSlot(width, height, rowHeight)!;
+            }
+            this._pendingTextBitmaps.delete(bitmap);
+            const canvas = bitmap.canvas;
+            try {
+                slot.page.context.clearRect(slot.x, slot.row.y, width, height);
+                slot.page.context.drawImage(canvas, slot.x, slot.row.y);
+            } catch {
+                // Retain the original standalone raster if the platform cannot upload it.
+                this._releaseTextSlot(slot);
+                continue;
+            }
+            bitmap.canvas = slot.page.canvas;
+            bitmap.slot = slot;
+            this._recycleTextRaster(canvas);
+        }
+    }
+
+    private _takeTextSlot(width: number, height: number, rowHeight: number): ITextSlot | undefined {
+        for (const page of this._textPages) {
+            let row = page.rows.find((row) => row.height === rowHeight && row.free.some((space) => space.width >= width));
+            if (!row) {
+                const last = page.rows[page.rows.length - 1];
+                const y = last ? last.y + last.height : 0;
+                if (y + rowHeight > page.canvas.height) {
+                    continue;
+                }
+                row = { y, height: rowHeight, free: [{ x: 0, width: page.canvas.width }] };
+                page.rows.push(row);
+            }
+            const index = row.free.findIndex((space) => space.width >= width);
+            const space = row.free[index];
+            const x = space.x;
+            space.x += width;
+            space.width -= width;
+            if (!space.width) {
+                row.free.splice(index, 1);
+            }
+            page.entries++;
+            return { page, row, x, width, height };
+        }
+    }
+
+    private _releaseTextSlot(slot: ITextSlot): void {
+        const { page, row } = slot;
+        let { x, width } = slot;
+        for (let i = row.free.length - 1; i >= 0; i--) {
+            const space = row.free[i];
+            if (space.x + space.width === x) {
+                x = space.x;
+                width += space.width;
+                row.free.splice(i, 1);
+            } else if (x + width === space.x) {
+                width += space.width;
+                row.free.splice(i, 1);
+            }
+        }
+        row.free.push({ x, width });
+        if (--page.entries === 0) {
+            this._discardCanvas(page.canvas);
+            this._textPages.delete(page);
+        }
+    }
+
+    private _recycleTextRaster(canvas: HTMLCanvasElement): void {
+        if (this._textRasterPool.length < TEXT_RASTER_POOL_SIZE && canvas.width <= TEXT_PAGE_WIDTH && canvas.height <= TEXT_PAGE_HEIGHT) {
+            this._textRasterPool.push(canvas);
+        } else {
+            this._discardCanvas(canvas);
+        }
+    }
+
+    private _discardCanvas(canvas: HTMLCanvasElement): void {
+        this._pixels -= canvas.width * canvas.height;
+        this._canvasCount--;
+        canvas.width = 0;
+        canvas.height = 0;
+    }
+
+    private _trim(incoming: number, addEntry = true): void {
+        const entryLimit = addEntry ? this._maxEntries : Number.POSITIVE_INFINITY;
+        const incomingCanvases = incoming > 0 ? 1 : 0;
+        const canvasLimit = Math.min(MAX_CANVASES, this._maxEntries);
+        while (this._bitmaps.size >= entryLimit || this._pixels + incoming > MAX_PIXELS
+            || this._canvasCount + incomingCanvases > canvasLimit) {
+            if ((this._pixels + incoming > MAX_PIXELS || this._canvasCount + incomingCanvases > canvasLimit)
+                && this._textRasterPool.length) {
+                const canvas = this._textRasterPool.pop()!;
+                this._discardCanvas(canvas);
+                continue;
+            }
             const key = this._bitmaps.keys().next().value;
             if (key === undefined) {
                 break;
             }
             const bitmap = this._bitmaps.get(key)!;
-            this._pixels -= bitmap.pixels;
-            bitmap.canvas.width = 0;
-            bitmap.canvas.height = 0;
             this._bitmaps.delete(key);
+            this._pendingTextBitmaps.delete(bitmap);
+            if (bitmap.slot) {
+                this._releaseTextSlot(bitmap.slot);
+            } else if (bitmap.offsetX !== undefined) {
+                this._recycleTextRaster(bitmap.canvas);
+            } else {
+                this._discardCanvas(bitmap.canvas);
+            }
         }
     }
 }

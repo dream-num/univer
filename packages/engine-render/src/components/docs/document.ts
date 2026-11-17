@@ -24,6 +24,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
+    BaselineOffset,
     BooleanNumber,
     CellValueType,
     ColumnSeparatorType,
@@ -50,11 +51,11 @@ import type {
     IDocumentSkeletonTable,
 } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
-import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
+import type { IDocumentRenderBounds, IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { IDocumentLayoutRenderConfig } from './document-layout-presentation';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
@@ -69,7 +70,11 @@ import { DrawingGroupObject } from '../../drawing-group';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
+import { Background } from './extensions/background';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
+import { Border } from './extensions/border';
+import { FontAndBaseLine } from './extensions/font-and-base-line';
+import { Line } from './extensions/line';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
@@ -85,7 +90,6 @@ import {
     hasDocsTableHorizontalViewport,
 } from './table-render-viewport';
 import { DocumentEditArea } from './view-model/document-view-model';
-import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     color: {
@@ -430,11 +434,11 @@ export class Documents extends DocComponent {
         }
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IDocumentRenderBounds) {
         this.draw(ctx, bounds);
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    override draw(ctx: UniverRenderingContext, bounds?: IDocumentRenderBounds) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null || this._drawLiquid == null) {
@@ -724,7 +728,7 @@ export class Documents extends DocComponent {
         parentScale: IScale,
         isContinuousLayout: boolean,
         pageTop: number,
-        bounds?: IViewportInfo
+        bounds?: IDocumentRenderBounds
     ): void {
         if (this._drawLiquid == null) {
             return;
@@ -732,6 +736,18 @@ export class Documents extends DocComponent {
         const { sections, marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0 } = page;
         const { verticalAlign = VerticalAlign.TOP, wrapStrategy = WrapStrategy.UNSPECIFIED } = renderConfig;
         const isVertical = renderConfig.vertexAngle === VERTICAL_ROTATE_ANGLE && renderConfig.centerAngle === VERTICAL_ROTATE_ANGLE;
+        const clip = bounds?.glyphClipBound;
+        const matrix = clip ? ctx.getTransform() : undefined;
+        // Unknown extensions and deferred streams must receive their original complete glyph sequence.
+        const canClipGlyphs = this.constructor === Documents && clip && matrix && matrix.a > 0 && matrix.d > 0 && !matrix.b && !matrix.c
+            && [clip.top, clip.bottom, matrix.d, matrix.f].every(Number.isFinite)
+            && !vertexAngle && !centerAngle && !renderConfig.stackedText && !this._glyphPaintSink
+            && renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
+            && !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY
+            && (!ctx.filter || ctx.filter === 'none') && ctx.globalCompositeOperation === 'source-over'
+            && extensions.every((extension) => [Background, Border, FontAndBaseLine, Line].some((type) => extension.constructor === type));
+        const glyphClipTop = canClipGlyphs ? (clip.top - 2 - matrix.f) / matrix.d : undefined;
+        const glyphClipBottom = canClipGlyphs ? (clip.bottom + 2 - matrix.f) / matrix.d : undefined;
 
         for (const [sectionIndex, section] of sections.entries()) {
             const { columns } = section;
@@ -819,6 +835,8 @@ export class Documents extends DocComponent {
                         this._drawLineBackground(ctx, page, line, column.width);
 
                         const divideLength = divides.length;
+                        const skipGlyphs = glyphClipTop !== undefined && glyphClipBottom !== undefined
+                            && this._isPlainLineOutsideClip(line, this._drawLiquid.y + alignOffset.y, glyphClipTop, glyphClipBottom);
 
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
@@ -839,11 +857,22 @@ export class Documents extends DocComponent {
                                 preTextBackgroundExtensions
                             );
 
-                            // Draw text\border\lines etc.
+                            let textGlyphs = glyphGroup;
+                            if (skipGlyphs) {
+                                // Later unstyled glyphs inherit the final Canvas text state of this divide.
+                                // Dispatch one invisible glyph through the original extensions to retain that state.
+                                textGlyphs = [];
+                                for (let j = glyphGroup.length - 1; j >= 0; j--) {
+                                    if (glyphGroup[j].content) {
+                                        textGlyphs = [glyphGroup[j]];
+                                        break;
+                                    }
+                                }
+                            }
                             this._drawGlyphGroup(
                                 ctx,
                                 parentScale,
-                                glyphGroup,
+                                textGlyphs,
                                 line,
                                 alignOffset,
                                 centerAngle,
@@ -866,6 +895,33 @@ export class Documents extends DocComponent {
 
             this._drawLiquid.translateRestore();
         }
+    }
+
+    private _isPlainLineOutsideClip(line: IDocumentSkeletonLine, top: number, clipTop: number, clipBottom: number): boolean {
+        // Keep backgrounds and paragraph borders on their original path. Only ordinary text ink is culled.
+        const baseline = top + line.asc;
+        let ascent = Math.max(line.lineHeight, line.contentHeight);
+        let descent = ascent;
+        for (const divide of line.divides) {
+            for (const glyph of divide.glyphGroup) {
+                const style = glyph.ts;
+                const box = glyph.bBox;
+                if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
+                    || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
+                    || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
+                    || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
+                    || style.bbl || style.bd
+                    || style.textOutline || style.textFill || style.glow || style.outerShadow
+                    || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
+                    || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
+                    return false;
+                }
+                ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
+                descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
+            }
+        }
+        return [baseline, ascent, descent].every(Number.isFinite)
+            && (baseline + descent < clipTop || baseline - ascent > clipBottom);
     }
 
     private _getColumnDrawLayout(
@@ -1408,7 +1464,8 @@ export class Documents extends DocComponent {
             return;
         }
 
-        for (const glyph of glyphGroup) {
+        // Deferred paint streams retain their original glyph records, including empty background dispatches.
+        for (const glyph of preTextBackgroundExtensions.length || this._glyphPaintSink ? glyphGroup : []) {
             if (!glyph.content) {
                 continue;
             }

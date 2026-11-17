@@ -136,6 +136,32 @@ describe('DependencyManagerService', () => {
         service.dispose();
     });
 
+    it('removes all bounds of an edited formula across multiple workbooks', () => {
+        const service = createService();
+        const edited = createTree(1, 0, 0);
+        const kept = createTree(2, 10, 10);
+        const first = edited.rangeList[0];
+        const otherSheet = { ...first, sheetId: 'sheet-2' };
+        const otherUnit = { ...first, unitId: 'unit-2' };
+        const disjoint = { ...first, range: { startRow: 20, endRow: 20, startColumn: 21, endColumn: 21 } };
+        const previous = [first, disjoint, otherSheet, otherUnit];
+        edited.rangeList = previous;
+        kept.rangeList = [first];
+        service.refreshDependencyRTreeCaches([edited, kept]);
+        service.openKdTree();
+        expect(service.searchDependency(previous)).toEqual(new Set([1, 2]));
+        service.closeKdTree();
+
+        edited.rangeList = [{ ...first, sheetId: 'sheet-3' }];
+        kept.isCache = true;
+        service.refreshDependencyRTreeCaches([edited, kept]);
+        service.openKdTree();
+        expect(service.searchDependency(previous)).toEqual(new Set([2]));
+        expect(service.searchDependency(edited.rangeList)).toEqual(new Set([1]));
+        expect(first.range.endRow).toBe(0);
+        service.dispose();
+    });
+
     it('does not search overlapping entries when indexing new trees', () => {
         const service = createService();
         const index = (service as unknown as { _dependencyRTreeCache: { remove: (...args: unknown[]) => void } })._dependencyRTreeCache;

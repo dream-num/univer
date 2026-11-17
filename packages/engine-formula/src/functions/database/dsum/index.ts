@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -46,15 +47,17 @@ export class Dsum extends BaseFunction {
         let result = 0;
 
         for (let r = 1; r < databaseValues.length; r++) {
-            const value = databaseValues[r][fieldIndex];
-
-            if (typeof value !== 'number') {
+            const cell = (database as ArrayValueObject).get(r, fieldIndex);
+            if (!cell || (!cell.isNumber() && !cell.isError())) {
                 continue;
             }
-
-            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
-                result += value;
+            if (!isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
+                continue;
             }
+            if (cell.isError()) {
+                return cell;
+            }
+            result += Number(cell.getValue());
         }
 
         return NumberValueObject.create(result);

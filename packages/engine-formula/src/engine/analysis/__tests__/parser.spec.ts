@@ -1029,6 +1029,37 @@ function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem, singleCellA
     };
 }
 
+describe('Worksheet trigonometric range', () => {
+    it.each(['SIN', 'COS', 'TAN', 'COT', 'SEC', 'CSC'])('checks the Excel limit for %s', async (name) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(`=${name}(134217727)`))?.t).toBe(CellValueType.NUMBER);
+            expect((await bed.calculate(`=${name}(-134217728)`))?.v).toBe(ErrorType.NUM);
+            expect((await bed.calculate(`=${name}(134217728)`))?.v).toBe(ErrorType.NUM);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Database field arguments', () => {
+    it.each([
+        ['=DCOUNT({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},,{"Tree";"Apple"})', 2],
+        ['=DCOUNT({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},2,{"Tree";"Apple"})', 1],
+        ['=DCOUNTA({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},,{"Tree";"Apple"})', 2],
+        ['=DCOUNT({"Tree","Yield";"Apple",7},C1,{"Tree";"Apple"})', ErrorType.VALUE],
+        ['=DSUM({"Tree","Yield";"Apple",7},"2",{"Tree";"Apple"})', ErrorType.VALUE],
+        ['=DSUM({"Tree","Yield";"Apple",7;"Apple",#N/A},2,{"Tree";"Apple"})', ErrorType.NA],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
 const RECURSIVE_DEFINED_NAMES: IDefinedNameMapItem = {
     fact: { id: 'fact', name: 'FACTREC', formulaOrRefString: '=LAMBDA(n,IF(n<=1,1,n*FACTREC(n-1)))' },
     fib: { id: 'fib', name: 'FIB', formulaOrRefString: '=LAMBDA(n,IF(n<2,n,FIB(n-1)+FIB(n-2)))' },

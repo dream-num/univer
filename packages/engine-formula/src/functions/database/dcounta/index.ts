@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -23,15 +24,16 @@ export class Dcounta extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
+    override needsReferenceObject = true;
 
-    override calculate(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject) {
+    override calculate(database: FunctionVariantType, field: FunctionVariantType, criteria: FunctionVariantType) {
         const { isError: databaseIsError, errorObject: databaseErrorObject, databaseValues } = checkDatabase(database);
 
         if (databaseIsError) {
             return databaseErrorObject as ErrorValueObject;
         }
 
-        const { isError: fieldIsError, errorObject: filedErrorObject, fieldIndex } = checkField(field, databaseValues);
+        const { isError: fieldIsError, errorObject: filedErrorObject, fieldIndex } = checkField(field, databaseValues, true);
 
         if (fieldIsError) {
             return filedErrorObject as ErrorValueObject;
@@ -48,7 +50,7 @@ export class Dcounta extends BaseFunction {
         for (let r = 1; r < databaseValues.length; r++) {
             const value = databaseValues[r][fieldIndex];
 
-            if (value === null || value === undefined) {
+            if (fieldIndex >= 0 && value == null) {
                 continue;
             }
 

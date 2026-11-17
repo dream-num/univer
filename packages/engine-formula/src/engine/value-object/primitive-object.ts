@@ -24,6 +24,8 @@ import { compareWithWildcard, isWildcard, normalizeTextForComparison } from '../
 import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
+const EXCEL_TRIGONOMETRIC_LIMIT = 2 ** 27;
+
 export type PrimitiveValueType = string | boolean | number | null;
 
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
@@ -971,7 +973,7 @@ export class NumberValueObject extends BaseValueObject {
     override cos(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -1035,7 +1037,7 @@ export class NumberValueObject extends BaseValueObject {
     override sin(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -1099,7 +1101,7 @@ export class NumberValueObject extends BaseValueObject {
     override tan(): BaseValueObject {
         const currentValue = this.getValue();
 
-        if (!Number.isFinite(currentValue)) {
+        if (!(Math.abs(currentValue) < EXCEL_TRIGONOMETRIC_LIMIT)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

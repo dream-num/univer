@@ -559,6 +559,15 @@ describe('LINEST single-predictor stability', () => {
         expect(getObjectValue(linest.calculate(ys, xs))).toEqual([[1, -1]]);
     });
 
+    it.each([false, true])('retains adjacent predictors whose mean is not representable (column=%s)', (column) => {
+        const offset = 2 ** 52;
+        for (const reverse of [false, true]) {
+            const xs = regressionArray(reverse ? [offset + 1, offset] : [offset, offset + 1], column);
+            const ys = regressionArray(reverse ? [3, 1] : [1, 3], column);
+            expect(getObjectValue(linest.calculate(ys, xs))).toEqual([[2, 1 - 2 * offset]]);
+        }
+    });
+
     it('retains the slope when an intercept is disabled', () => {
         const xs = regressionArray([0.1, 0.1, 0.1], false);
         const ys = regressionArray([0.2, 0.2, 0.2], false);

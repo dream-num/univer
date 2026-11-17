@@ -644,6 +644,14 @@ describe('TREND single-predictor stability', () => {
         }
     });
 
+    it.each([false, true])('predicts from adjacent predictors whose mean is not representable (column=%s)', (column) => {
+        const offset = 2 ** 52;
+        const xs = regressionArray([offset, offset + 1], column);
+        const ys = regressionArray([1, 3], column);
+        const newXs = regressionArray([offset, offset + 1, offset + 2], column);
+        expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[1], [3], [5]] : [[1, 3, 5]]);
+    });
+
     it('predicts the response mean independently of new predictors', () => {
         for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
             for (const column of [false, true]) {

@@ -935,27 +935,30 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
         return { slope: 0, intercept, isConstantPredictor: true };
     }
 
-    let sumX = 0;
-    let sumY = 0;
+    // Center offsets from an observed point so a large, unrepresentable mean
+    // cannot erase differences between adjacent representable predictors.
+    const firstY = knownYsValues[0];
+    let sumXOffset = 0;
+    let sumYOffset = 0;
 
     for (let i = 0; i < n; i++) {
-        sumX += knownXsValues[i];
-        sumY += knownYsValues[i];
+        sumXOffset += knownXsValues[i] - firstX;
+        sumYOffset += knownYsValues[i] - firstY;
     }
 
-    const meanX = sumX / n;
-    const meanY = sumY / n;
+    const meanXOffset = sumXOffset / n;
+    const meanYOffset = sumYOffset / n;
     let sumX2 = 0;
     let sumXY = 0;
 
     for (let i = 0; i < n; i++) {
-        const centeredX = knownXsValues[i] - meanX;
+        const centeredX = (knownXsValues[i] - firstX) - meanXOffset;
         sumX2 += centeredX * centeredX;
-        sumXY += centeredX * (knownYsValues[i] - meanY);
+        sumXY += centeredX * ((knownYsValues[i] - firstY) - meanYOffset);
     }
 
     const slope = sumXY / sumX2;
-    const intercept = meanY - slope * meanX;
+    const intercept = firstY - slope * firstX + (meanYOffset - slope * meanXOffset);
 
     return {
         slope,

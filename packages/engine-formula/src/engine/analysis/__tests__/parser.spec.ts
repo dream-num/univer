@@ -1060,8 +1060,39 @@ describe('Database field arguments', () => {
     });
 });
 
+describe('ETS dependency recalculation', () => {
+    it('recalculates the forecast after changing and restoring an observation', async () => {
+        const bed = createNamedLambdaTestBed({});
+        const formula = '=FORECAST.ETS(5,HSTACK(B1,14,11,20),{1,2,3,4},0)';
+        try {
+            expect((await bed.calculate(formula, { input: 8 }))?.v).toBeCloseTo(21.716830212285714, 10);
+            expect((await bed.calculate(formula, { input: 9, forceCalculate: false }))?.v).toBeCloseTo(21.56827976442857, 10);
+            expect((await bed.calculate(formula, { input: 8, forceCalculate: false }))?.v).toBeCloseTo(21.716830212285714, 10);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
 describe('Linear forecasts and scalar arguments', () => {
     it.each([
+        ['=XNPV(0.09,{-10000,11000},{44927.9,45292.1})', 91.74311926605515],
+        ['=XNPV(0,{-1000,1100},{44927,45292})', ErrorType.NUM],
+        ['=XIRR({-1000,900},{44927,45292})', -0.10000000335276127],
+        ['=XIRR({-1000,1100},{44927,45292},0)', 0.0999999951171875],
+        ['=DECIMAL("  FF",16)', 255],
+        ['=DECIMAL("FF  ",16)', ErrorType.NUM],
+        ['=VDB(2400,300,10,2.25,7.75)', 1028.8644096],
+        ['=VDB(2400,300,10,0,5,,TRUE)', 0],
+        ['=VDB(2400,300,10,0,5,,FALSE)', 1050],
+        ['=DECIMAL(REPT("0",256),16)', ErrorType.VALUE],
+        ['=VDB(2400,300,10,0,5,0)', 1050],
+        ['=VDB(2400,300,10,8,10,2,"TRUE")', 102.653184],
+        ['=FORECAST.ETS(5,{8,14,11,20},{1,2,3,4},0)', 21.716830212285714],
+        ['=FORECAST.ETS.STAT({8,14,11,20},{1,2,3,4},2,0)', 0.001],
+        ['=FORECAST.ETS.SEASONALITY({18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8})', 2],
+        ['=FORECAST.ETS.CONFINT(9,{18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8},0.95,4)', 0],
+        ['=FORECAST.ETS(NA(),{8,14,11,20},{1,2,3,4})', ErrorType.NA],
         ['=FORECAST(5,{2,4,"100",8},{1,2,3,4})', 10],
         ['=SUM(COUPDAYS(DATE(2024,3,15),DATE(2030,11,15),2,{0,1,2,3,4}))', 904.5],
         ['=COUPDAYBS(DATE(2024,3,15)+0.99,DATE(2030,11,15)+0.9,2,1)', 121],
@@ -1078,7 +1109,12 @@ describe('Linear forecasts and scalar arguments', () => {
     ])('calculates %s', async (formula, expected) => {
         const bed = createNamedLambdaTestBed({});
         try {
-            expect((await bed.calculate(formula as string, { input: 2 }))?.v).toBe(expected);
+            const actual = (await bed.calculate(formula as string, { input: 2 }))?.v;
+            if (typeof expected === 'number' && !Number.isInteger(expected)) {
+                expect(actual).toBeCloseTo(expected, 10);
+            } else {
+                expect(actual).toBe(expected);
+            }
         } finally {
             bed.univer.dispose();
         }

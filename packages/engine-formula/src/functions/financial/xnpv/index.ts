@@ -35,18 +35,13 @@ interface ICheckErrorDates extends ICheckErrorType {
     _dates?: number[];
 }
 
-interface ICheckNumber {
-    positive: boolean;
-    negative: boolean;
-}
-
 export class Xnpv extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
 
     override calculate(rate: BaseValueObject, values: BaseValueObject, dates: BaseValueObject): BaseValueObject {
-        if (rate.isNull() || values.isNull() || dates.isNull()) {
+        if (values.isNull() || dates.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
@@ -73,7 +68,7 @@ export class Xnpv extends BaseFunction {
         _values = _values as number[];
         _dates = _dates as number[];
 
-        if (rateValue < 0 || _values.length !== _dates.length) {
+        if (rateValue <= 0 || _values.length !== _dates.length || _dates.some((date) => date < _dates[0] || date < 1 || date > 2958465)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -146,9 +141,9 @@ export class Xnpv extends BaseFunction {
                     return false;
                 }
 
-                if (_valuesObject.isNull() || _valuesObject.isBoolean() || (_valuesObject.isString() && _valuesObject.getValue() === '')) {
+                if (!_valuesObject.isNumber()) {
                     isError = true;
-                    errorObejct = ErrorValueObject.create(ErrorType.VALUE);
+                    errorObejct = ErrorValueObject.create(_valuesObject.isNull() || _values.length === 0 ? ErrorType.VALUE : ErrorType.NUM);
                     return false;
                 }
 
@@ -221,7 +216,7 @@ export class Xnpv extends BaseFunction {
                     return false;
                 }
 
-                if (_datesObject.isNull() || _datesObject.isBoolean()) {
+                if (!_datesObject.isNumber()) {
                     isError = true;
                     errorObejct = ErrorValueObject.create(ErrorType.VALUE);
                     return false;
@@ -263,7 +258,7 @@ export class Xnpv extends BaseFunction {
                 };
             }
 
-            if (dates.isNull() || dates.isBoolean()) {
+            if (!dates.isNumber()) {
                 return {
                     isError: true,
                     errorObejct: ErrorValueObject.create(ErrorType.VALUE),

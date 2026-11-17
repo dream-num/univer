@@ -18,6 +18,7 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
 import { CellValueType, Disposable, ICommandService, Inject, isRealNum } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
+import { getCellValue } from '@univerjs/sheets';
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SortType } from '../services/interface';
@@ -47,39 +48,29 @@ export class SheetsSortController extends Disposable {
             const valueA: ICommonComparableCellValue = this._getCommonValue(a);
             const valueB: ICommonComparableCellValue = this._getCommonValue(b);
 
-            const compareTypeFns = [
-                compareNull,
-                (left: ICommonComparableCellValue, right: ICommonComparableCellValue) => {
-                    if (left === null || left === '' || right === null || right === '') return null;
-                    const category = (cell: Nullable<ICellData>, value: ICommonComparableCellValue) => {
-                        if (cell?.p?.body?.dataStream) return 1;
-                        if (cell?.t === CellValueType.BOOLEAN) return 2;
-                        if (cell?.t === CellValueType.STRING && typeof cell.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) return 3;
-                        return typeof value === 'number' ? 0 : 1;
-                    };
-                    const leftCategory = category(a, left);
-                    const difference = leftCategory - category(b, right);
-                    if (difference !== 0) return (type === SortType.ASC ? 1 : -1) * difference;
-                    if (leftCategory === 3) return 0;
-                    if (a?.t === CellValueType.BOOLEAN && b?.t === CellValueType.BOOLEAN && !a.p?.body?.dataStream && !b.p?.body?.dataStream) {
-                        const logicalValue = (cell: Nullable<ICellData>) => cell?.v === true || cell?.v === 1 || cell?.v === 'true' || cell?.v === '1' ? 1 : 0;
-                        const logicalDifference = logicalValue(a) - logicalValue(b);
-                        return (type === SortType.ASC ? 1 : -1) * Math.sign(logicalDifference);
-                    }
-                    return null;
-                },
-                compareString,
-                compareNumber,
-            ];
+            const nullComparison = compareNull(valueA, valueB);
+            if (nullComparison !== null) return nullComparison;
 
-            for (let i = 0; i < compareTypeFns.length; i++) {
-                const res = compareTypeFns[i](valueA, valueB, type);
-                if (res !== null) {
-                    return res;
-                }
+            let categoryA = typeof valueA === 'number' ? 0 : 1;
+            let categoryB = typeof valueB === 'number' ? 0 : 1;
+            if (a?.p?.body?.dataStream) categoryA = 1;
+            else if (a?.t === CellValueType.BOOLEAN) categoryA = 2;
+            else if (a?.t === CellValueType.STRING && typeof a.v === 'string' && ERROR_TYPE_SET.has(a.v as ErrorType)) categoryA = 3;
+            if (b?.p?.body?.dataStream) categoryB = 1;
+            else if (b?.t === CellValueType.BOOLEAN) categoryB = 2;
+            else if (b?.t === CellValueType.STRING && typeof b.v === 'string' && ERROR_TYPE_SET.has(b.v as ErrorType)) categoryB = 3;
+
+            if (categoryA !== categoryB) {
+                return (type === SortType.ASC ? 1 : -1) * Math.sign(categoryA - categoryB);
+            }
+            if (categoryA === 3) return 0;
+            if (categoryA === 2) {
+                return (type === SortType.ASC ? 1 : -1) * Math.sign(
+                    Number(getCellValue(CellValueType.BOOLEAN, a!)) - Number(getCellValue(CellValueType.BOOLEAN, b!))
+                );
             }
 
-            return null;
+            return categoryA === 0 ? compareNumber(valueA, valueB, type) : compareString(valueA, valueB, type);
         };
         this._sortService.registerCompareFn(commonFn);
     }

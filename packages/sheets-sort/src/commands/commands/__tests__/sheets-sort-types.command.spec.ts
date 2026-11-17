@@ -64,6 +64,17 @@ async function sortRows(type: SortType, secondary = false, sortValues = values) 
 }
 
 describe('SortRangeCommand mixed cell types', () => {
+    it('sorts uppercase logical values in both directions', async () => {
+        const logicalValues = [
+            { v: 'TRUE', t: CellValueType.BOOLEAN },
+            { v: 'FALSE', t: CellValueType.BOOLEAN },
+            { v: 'TRUE', t: CellValueType.BOOLEAN },
+            { v: 'FALSE', t: CellValueType.BOOLEAN },
+        ];
+        expect(await sortRows(SortType.ASC, false, logicalValues)).toEqual([1, 3, 0, 2]);
+        expect(await sortRows(SortType.DESC, false, logicalValues)).toEqual([0, 2, 1, 3]);
+    });
+
     it('keeps row identity while sorting type groups and blanks last', async () => {
         expect(await sortRows(SortType.ASC)).toEqual([4, 7, 5, 0, 2, 1, 3, 6]);
         expect(await sortRows(SortType.DESC)).toEqual([3, 1, 2, 0, 5, 7, 4, 6]);

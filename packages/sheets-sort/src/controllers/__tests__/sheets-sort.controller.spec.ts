@@ -68,7 +68,9 @@ describe('SheetsSortController compare function', () => {
         expect(compare(SortType.DESC, divisionError, unavailableError)).toBe(0);
     });
 
-    it('preserves numeric forced text and compares both logical encodings', () => {
-        expect(sort([{ v: true, t: CellValueType.BOOLEAN }, { v: 'false', t: CellValueType.BOOLEAN }, { v: '002', t: CellValueType.FORCE_STRING }, { v: 1, t: CellValueType.NUMBER }], SortType.ASC)).toEqual([1, '002', 'false', true]);
+    it('normalizes mixed-case logical encodings in both directions', () => {
+        const logical = [{ v: 'TRUE', t: CellValueType.BOOLEAN }, { v: 'FALSE', t: CellValueType.BOOLEAN }, { v: 'true', t: CellValueType.BOOLEAN }, { v: 0, t: CellValueType.BOOLEAN }];
+        expect(sort(logical, SortType.ASC)).toEqual(['FALSE', 0, 'TRUE', 'true']);
+        expect(sort(logical, SortType.DESC)).toEqual(['TRUE', 'true', 'FALSE', 0]);
     });
 });

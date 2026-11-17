@@ -27,12 +27,23 @@ describe('Test rri function', () => {
     const testFunction = new Rri(FUNCTION_NAMES_FINANCIAL.RRI);
 
     describe('Rri', () => {
+        it.each([
+            [1000, 1e-300, 1e300, ErrorType.NUM],
+            [1000, 1e300, 1e-300, -1],
+            [1e20, 1, 2, 0],
+        ])('Preserves Excel overflow, underflow, and zero-rate results (%s, %s, %s)', (nper, pv, fv, expected) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(nper as number),
+                NumberValueObject.create(pv as number),
+                NumberValueObject.create(fv as number)
+            );
+            expect(result.getValue()).toBe(expected);
+        });
+
         // Expected rates use (fv / pv) ** (1 / nper) - 1 with 90-digit decimal arithmetic.
         it.each([
             [100, 10000, 10000.000001, 1.000000338486256e-12],
             [1e12, 1, 2, 6.931471805601855e-13],
-            [1000, 1e-300, 1e300, 2.9810717055349727],
-            [1000, 1e300, 1e-300, -0.748811356849042],
             [100, -10000, -10000.000001, 1.000000338486256e-12],
             [96, 10000, 11000, 0.0009933073762913949],
             [2, 4, 1, -0.5],

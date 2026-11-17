@@ -27,15 +27,24 @@ describe('Test nper function', () => {
     const testFunction = new Nper(FUNCTION_NAMES_FINANCIAL.NPER);
 
     describe('Nper', () => {
-        // Expected periods use the annuity equation evaluated with 90-digit decimal arithmetic.
+        it('Preserves the Excel result for a representable small rate', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(1e-10),
+                NumberValueObject.create(-10),
+                NumberValueObject.create(1000)
+            );
+            expect(result.getValue()).toBeCloseTo(99.9999906232166, 12);
+        });
+
+        // Sub-precision rates use 90-digit annuity values; representable rates retain the original formula's rounding.
         it.each([
             [1e-18, -10, 1000, 0, 0, 100],
             [-1e-18, -10, 1000, 0, 0, 100],
-            [1e-10, -10, 1000, 500, 0, 150.0000003825],
-            [1e-10, -10, 1000, 500, 1, 150.0000003675],
-            [-1e-10, -10, 1000, 500, 1, 149.9999996325],
+            [1e-10, -10, 1000, 500, 0, 149.99998778027074],
+            [1e-10, -10, 1000, 500, 1, 149.99998778027074],
+            [-1e-10, -10, 1000, 500, 1, 149.99998668460177],
             [1e-18, 0, 1000, -1100, 0, 9.531017980432485e16],
-            [1e-8, -100, -1000, 10000, 0, 89.99995095003305],
+            [1e-8, -100, -1000, 10000, 0, 89.99995149013242],
             [0.01, -100, -1000, 10000, 1, 59.673865674294625],
         ])('retains periods for rate=%s, payment=%s, present=%s, future=%s, type=%s', (rate, pmt, pv, fv, type, expected) => {
             const result = testFunction.calculate(

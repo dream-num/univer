@@ -78,6 +78,17 @@ export class Rri extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
+            // Keep Excel's direct-ratio overflow, underflow, and rounded-zero results.
+            const directResult = (fvValue / pvValue) ** (1 / nperValue) - 1;
+
+            if (!Number.isFinite(directResult)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            if (directResult === -1 || directResult === 0) {
+                return NumberValueObject.create(directResult);
+            }
+
             const relativeChange = (fvValue - pvValue) / pvValue;
             const logRatio = Math.abs(relativeChange) < 0.5
                 ? Math.log1p(relativeChange)

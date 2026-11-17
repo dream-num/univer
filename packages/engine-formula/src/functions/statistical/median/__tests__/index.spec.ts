@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
+import { getMedianResult } from '../../../../basics/statistical';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -107,5 +108,51 @@ describe('Test median function', () => {
             const result3 = testFunction.calculate(number2, number3, number5);
             expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
         });
+    });
+});
+
+describe('Finite median midpoints', () => {
+    const median = new Median(FUNCTION_NAMES_STATISTICAL.MEDIAN);
+
+    it('keeps finite medians when the two middle values overflow their sum', () => {
+        const fixtures: [number[], number][] = [
+            [[Number.MAX_VALUE, Number.MAX_VALUE], Number.MAX_VALUE],
+            [[-Number.MAX_VALUE, -Number.MAX_VALUE], -Number.MAX_VALUE],
+            [[2 ** 1023, 1.5 * 2 ** 1023], 1.25 * 2 ** 1023],
+            [[-(2 ** 1023), -1.5 * 2 ** 1023], -1.25 * 2 ** 1023],
+            [[0, Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE], Number.MAX_VALUE],
+        ];
+        for (const [values, expected] of fixtures) {
+            expect(getObjectValue(median.calculate(...values.map((value) => NumberValueObject.create(value))))).toBe(expected);
+            expect(getObjectValue(median.calculate(ArrayValueObject.createByArray([values])))).toBe(expected);
+        }
+    });
+
+    it('retains subnormal midpoints, cancellation and ordinary medians', () => {
+        const fixtures: [number[], number][] = [
+            [[Number.MIN_VALUE, Number.MIN_VALUE], Number.MIN_VALUE],
+            [[-Number.MIN_VALUE, -Number.MIN_VALUE], -Number.MIN_VALUE],
+            [[Number.MIN_VALUE, 2 * Number.MIN_VALUE], 2 * Number.MIN_VALUE],
+            [[-Number.MAX_VALUE, Number.MAX_VALUE], 0],
+            [[1, 2, 9, 10], 5.5],
+            [[3, Number.MAX_VALUE, 1], 3],
+            [[Number.MAX_VALUE], Number.MAX_VALUE],
+        ];
+        for (const [values, expected] of fixtures) {
+            expect(getObjectValue(median.calculate(ArrayValueObject.createByArray([values])))).toBe(expected);
+        }
+    });
+
+    it('retains non-finite helper results and formula error propagation', () => {
+        for (const [values, expected] of [
+            [[Infinity, Infinity], Infinity],
+            [[-Infinity, -Infinity], -Infinity],
+            [[-Infinity, Infinity], NaN],
+            [[NaN, 1], NaN],
+        ] as const) {
+            expect(getObjectValue(getMedianResult([...values]))).toBe(expected);
+        }
+        expect(getObjectValue(median.calculate(NumberValueObject.create(Number.MAX_VALUE), ErrorValueObject.create(ErrorType.REF)))).toBe(ErrorType.REF);
+        expect(getObjectValue(median.calculate(ArrayValueObject.createByArray([[null, true, 'text']])))).toBe(ErrorType.NUM);
     });
 });

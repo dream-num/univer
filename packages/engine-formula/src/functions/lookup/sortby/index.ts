@@ -160,17 +160,26 @@ export class Sortby extends BaseFunction {
                 let arrayValue = array.getArrayValue();
 
                 if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
-                    if (byArray1RowCount === 1) {
-                        arrayValue = arrayValue.concat(byArrays);
-                        arrayValue = this._transposeArray(arrayValue);
-                        arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
-                        arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
-                    } else if (byArray1ColumnCount === 1) {
+                    if (byArray1ColumnCount === 1 && arrayColumnCount === 1) {
+                        // A single data column has no wide payload to avoid transposing.
                         arrayValue = this._transposeArray(arrayValue);
                         arrayValue = arrayValue.concat(byArrays);
                         arrayValue = this._transposeArray(arrayValue);
                         arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
                         arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
+                    } else {
+                        const indices = this._sortIndices(byArrays, sortOrders as Array<1 | -1>);
+                        if (byArray1RowCount === 1) {
+                            arrayValue = arrayValue.map((row) => {
+                                const result: Nullable<BaseValueObject>[] = [];
+                                for (let i = 0; i < indices.length; i++) {
+                                    result[i] = row[indices[i]];
+                                }
+                                return result;
+                            });
+                        } else if (byArray1ColumnCount === 1) {
+                            arrayValue = indices.map((index) => arrayValue[index].slice());
+                        }
                     }
                 }
 
@@ -296,6 +305,26 @@ export class Sortby extends BaseFunction {
 
             return result;
         };
+    }
+
+    private _sortIndices(byArrays: Nullable<BaseValueObject>[][], sortOrders: Array<1 | -1>) {
+        const compare = getCompare();
+        const primary = byArrays[0];
+        const primaryOrder = sortOrders[0];
+        const indices = Array.from({ length: primary.length }, (_, index) => index);
+        indices.sort((a, b) => {
+            let result = this._compare(primary[a] as BaseValueObject, primary[b] as BaseValueObject, primaryOrder, compare);
+            if (result === 0) {
+                for (let i = 1; i < sortOrders.length; i++) {
+                    result = this._compare(byArrays[i][a] as BaseValueObject, byArrays[i][b] as BaseValueObject, sortOrders[i], compare);
+                    if (result !== 0) {
+                        return result;
+                    }
+                }
+            }
+            return result;
+        });
+        return indices;
     }
 
     private _compare(columnA: BaseValueObject, columnB: BaseValueObject, sortOrder: 1 | -1, compare: Function): number {

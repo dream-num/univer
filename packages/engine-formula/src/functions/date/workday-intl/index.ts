@@ -81,7 +81,7 @@ export class WorkdayIntl extends BaseFunction {
         if (typeof serial !== 'number') {
             return serial;
         }
-        const workingDays = Math.trunc(+days.getValue());
+        const workingDays = Math.floor(+days.getValue());
         if (Number.isNaN(workingDays)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

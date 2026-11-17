@@ -17,7 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject, formatNumberForFormulaText } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -113,7 +113,9 @@ export class Textjoin extends BaseFunction {
                     return valueObject as ErrorValueObject;
                 }
 
-                let value = `${valueObject.getValue()}`;
+                let value = valueObject.isNumber()
+                    ? formatNumberForFormulaText(Number(valueObject.getValue()))
+                    : String(valueObject.getValue());
 
                 if (valueObject.isNull()) {
                     value = '';
@@ -150,7 +152,9 @@ export class Textjoin extends BaseFunction {
                         continue;
                     }
 
-                    let value = `${valueObject.getValue()}`;
+                    let value = valueObject.isNumber()
+                        ? formatNumberForFormulaText(Number(valueObject.getValue()))
+                        : String(valueObject.getValue());
 
                     if (valueObject.isBoolean()) {
                         value = value.toLocaleUpperCase();

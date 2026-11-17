@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -162,7 +165,30 @@ export class Convert extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(number: BaseValueObject, fromUnit: BaseValueObject, toUnit: BaseValueObject): BaseValueObject {
+    override needsReferenceObject = true;
+
+    override rejectsMultiCellReference = true;
+
+    override calculate(number: FunctionVariantType, fromUnit: FunctionVariantType, toUnit: FunctionVariantType): BaseValueObject {
+        const inputs = [number, fromUnit, toUnit].map((argument) => argument.isReferenceObject()
+            ? (argument as BaseReferenceObject).getFirstCell()
+            : argument as BaseValueObject
+        );
+        const arrays = inputs.filter((input): input is ArrayValueObject => input.isArray());
+        if (arrays.length === 0) {
+            return this._convert(inputs[0], inputs[1], inputs[2]);
+        }
+
+        const rows = Math.max(...arrays.map((input) => input.getRowCount()));
+        const columns = Math.max(...arrays.map((input) => input.getColumnCount()));
+        const missing = ErrorValueObject.create(ErrorType.NA);
+        const [values, sources, targets] = inputs.map((input) => expandArrayValueObject(rows, columns, input, missing));
+        return values.mapValue((value, row, column) =>
+            this._convert(value ?? missing, sources.getValueOrDefault(row, column), targets.getValueOrDefault(row, column))
+        );
+    }
+
+    private _convert(number: BaseValueObject, fromUnit: BaseValueObject, toUnit: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(number, fromUnit, toUnit);
         if (isError) {
             return errorObject as ErrorValueObject;

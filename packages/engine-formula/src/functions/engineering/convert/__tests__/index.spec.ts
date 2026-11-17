@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
@@ -102,23 +102,17 @@ describe('Test convert function', () => {
             expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
-        it('Value is array', () => {
-            const number = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
-                ]),
-                rowCount: 2,
-                columnCount: 6,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const fromUnit = StringValueObject.create('lbm');
-            const toUnit = StringValueObject.create('kg');
-            const result = testFunction.calculate(number, fromUnit, toUnit);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        it('broadcasts conversion arguments and keeps per-cell errors', () => {
+            const values = ArrayValueObject.create('{1;2}');
+            const sources = ArrayValueObject.create('{"m";"cm"}');
+            const targets = ArrayValueObject.create('{"cm","mm","s"}');
+            expect(getObjectValue(testFunction.calculate(values, sources, targets))).toEqual([
+                [100, 1000, ErrorType.NA],
+                [2, 20, ErrorType.NA],
+            ]);
+            expect(getObjectValue(testFunction.calculate(ArrayValueObject.create('{1,TRUE,"2","bad"}'), StringValueObject.create('m'), StringValueObject.create('cm')))).toEqual([
+                [100, ErrorType.VALUE, 200, ErrorType.VALUE],
+            ]);
         });
 
         it('Value with binary prefix', () => {

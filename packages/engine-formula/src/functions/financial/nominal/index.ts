@@ -36,7 +36,7 @@ export class Nominal extends BaseFunction {
         const [effectRateObject, nperyObject] = variants as BaseValueObject[];
 
         const effectRateValue = +effectRateObject.getValue();
-        let nperyValue = Math.floor(+nperyObject.getValue());
+        const nperyValue = Math.floor(+nperyObject.getValue());
 
         if (Number.isNaN(effectRateValue) || Number.isNaN(nperyValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -46,10 +46,10 @@ export class Nominal extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        nperyValue = Number.parseInt(`${nperyValue}`, 10);
-
         // Return nominal annual interest rate
-        const result = ((effectRateValue + 1) ** (1 / nperyValue) - 1) * nperyValue;
+        const result = nperyValue === 1
+            ? effectRateValue
+            : Math.expm1(Math.log1p(effectRateValue) / nperyValue) * nperyValue;
 
         return NumberValueObject.create(result);
     }

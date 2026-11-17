@@ -27,6 +27,24 @@ describe('Test effect function', () => {
     const testFunction = new Effect(FUNCTION_NAMES_FINANCIAL.EFFECT);
 
     describe('Effect', () => {
+        it.each([1, 2, 12, 365])('Preserves small rates with %i periods', (periods) => {
+            const result = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(periods));
+            expect(result.getValue()).toBe(1e-20);
+        });
+
+        it('Keeps large period counts and truncates fractional periods', () => {
+            const large = testFunction.calculate(NumberValueObject.create(0.05), NumberValueObject.create(1e21));
+            expect(large.getValue()).toBeCloseTo(0.05127109637602404, 15);
+
+            const fractional = testFunction.calculate(NumberValueObject.create(0.5), NumberValueObject.create(2.9));
+            expect(fractional.getValue()).toBe(0.5625);
+        });
+
+        it('Preserves the rate for a single annual period', () => {
+            const result = testFunction.calculate(NumberValueObject.create(1e300), NumberValueObject.create(1));
+            expect(result.getValue()).toBe(1e300);
+        });
+
         it('Value is normal', () => {
             const nominalRate = NumberValueObject.create(0.0525);
             const npery = NumberValueObject.create(4);

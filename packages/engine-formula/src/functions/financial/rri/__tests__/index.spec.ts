@@ -19,6 +19,8 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BinomDist } from '../../../statistical/binom-dist';
+import { FUNCTION_NAMES_STATISTICAL } from '../../../statistical/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Rri } from '../index';
@@ -40,17 +42,60 @@ describe('Test rri function', () => {
             expect(result.getValue()).toBe(expected);
         });
 
-        // Expected rates use (fv / pv) ** (1 / nper) - 1 with 90-digit decimal arithmetic.
+        // Preserve the existing binary64 rounding instead of substituting higher-precision rates.
         it.each([
-            [100, 10000, 10000.000001, 1.000000338486256e-12],
-            [1e12, 1, 2, 6.931471805601855e-13],
-            [100, -10000, -10000.000001, 1.000000338486256e-12],
-            [96, 10000, 11000, 0.0009933073762913949],
+            [100, 10000, 10000.000001, 1.000088900582341e-12],
+            [1e12, 1, 2, 6.932232565759477e-13],
+            [100, -10000, -10000.000001, 1.000088900582341e-12],
+            [96, 10000, 11000, 0.0009933073762913303],
             [2, 4, 1, -0.5],
         ])('retains finite rates for periods=%s, present=%s, future=%s', (nper, pv, fv, expected) => {
             const result = testFunction.calculate(NumberValueObject.create(nper), NumberValueObject.create(pv), NumberValueObject.create(fv));
             expect(result.isNumber()).toBe(true);
             expect(+result.getValue() / expected).toBeCloseTo(1, 12);
+        });
+
+        it('Preserves a nonzero rounded ratio and its downstream comparison', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(1),
+                NumberValueObject.create(1e15),
+                NumberValueObject.create(1e15 + 1)
+            );
+            expect(result.getValue()).toBe(1.1102230246251565e-15);
+            expect(Number(result.getValue()) > 1.05e-15).toBe(true);
+
+            const numericString = testFunction.calculate(
+                StringValueObject.create('1'),
+                StringValueObject.create('1000000000000000'),
+                StringValueObject.create('1000000000000001')
+            );
+            expect(numericString.getValue()).toBe(result.getValue());
+        });
+
+        it('Validates a calculated period before returning a zero future value', () => {
+            const binomial = new BinomDist(FUNCTION_NAMES_STATISTICAL.BINOM_DIST);
+            const periods = binomial.calculate(
+                NumberValueObject.create(512),
+                NumberValueObject.create(1100),
+                NumberValueObject.create(0.99),
+                BooleanValueObject.create(true)
+            );
+            const result = testFunction.calculate(periods, NumberValueObject.create(1), NumberValueObject.create(0));
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
+        it.each([
+            [Number.NaN, 1, ErrorType.NUM],
+            [1, Number.NaN, ErrorType.NUM],
+            [Number.POSITIVE_INFINITY, 1, 0],
+            [1, Number.POSITIVE_INFINITY, -1],
+        ])('Validates nonfinite inputs with a zero future value (%s, %s)', (periods, present, expected) => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(periods as number),
+                NumberValueObject.create(present as number),
+                NumberValueObject.create(0)
+            );
+            expect(result.getValue()).toBe(expected);
         });
 
         it.each([

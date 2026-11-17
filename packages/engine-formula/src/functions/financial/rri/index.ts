@@ -70,32 +70,13 @@ export class Rri extends BaseFunction {
                 return NumberValueObject.create(0);
             }
 
-            if (fvValue === 0) {
-                return NumberValueObject.create(-1);
-            }
-
-            if (pvValue === 0 || (pvValue < 0) !== (fvValue < 0)) {
+            if (pvValue === 0 || (fvValue !== 0 && (pvValue < 0) !== (fvValue < 0))) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            // Keep Excel's direct-ratio overflow, underflow, and rounded-zero results.
-            const directResult = (fvValue / pvValue) ** (1 / nperValue) - 1;
+            const result = (fvValue / pvValue) ** (1 / nperValue) - 1;
 
-            if (!Number.isFinite(directResult)) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            if (directResult === -1 || directResult === 0) {
-                return NumberValueObject.create(directResult);
-            }
-
-            const relativeChange = (fvValue - pvValue) / pvValue;
-            const logRatio = Math.abs(relativeChange) < 0.5
-                ? Math.log1p(relativeChange)
-                : Math.log(Math.abs(fvValue)) - Math.log(Math.abs(pvValue));
-            const result = Math.expm1(logRatio / nperValue);
-
-            if (Number.isNaN(result) || !Number.isFinite(result)) {
+            if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

@@ -508,8 +508,8 @@ export class RenderPrimitiveCache extends Disposable {
                 this._pendingTextBitmaps.add(bitmap);
             }
         }
-        // Bitmap replay changes only these two fields; preserve the caller's save stack.
-        const smoothing = native.imageSmoothingEnabled;
+        // Matrix readback can lose precision; restore the caller's native transform from its save stack.
+        native.save();
         try {
             native.setTransform(1, 0, 0, 1, 0, 0);
             native.imageSmoothingEnabled = false;
@@ -520,8 +520,7 @@ export class RenderPrimitiveCache extends Disposable {
                 native.drawImage(bitmap.canvas, ix + bitmap.offsetX!, iy + bitmap.offsetY!);
             }
         } finally {
-            native.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
-            native.imageSmoothingEnabled = smoothing;
+            native.restore();
         }
     }
 

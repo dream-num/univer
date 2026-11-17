@@ -463,6 +463,36 @@ describe('render primitive raster cache', () => {
         cache.draw(ctx, () => ctx.fillText('Merged title', 10, 20));
     }
 
+    it('preserves the native text transform when matrix readback loses precision', () => {
+        const implementation = vi.mocked(native.getTransform).getMockImplementation()!;
+        const getTransform = implementation.bind(native);
+        const image = vi.spyOn(native, 'drawImage');
+        native.setTransform(1.1, 0, 0, 1.1, 10.123456789, 20.987654321);
+        const before = getTransform();
+        // Native Canvas matrix readback can round values retained by its save stack.
+        const readback = vi.spyOn(native, 'getTransform').mockImplementation(() => {
+            const matrix = getTransform();
+            return {
+                a: Math.fround(matrix.a),
+                b: matrix.b,
+                c: matrix.c,
+                d: Math.fround(matrix.d),
+                e: Math.fround(matrix.e),
+                f: Math.fround(matrix.f),
+            } as DOMMatrix;
+        });
+
+        try {
+            for (let index = 0; index < 2; index++) {
+                text();
+                expect(getTransform()).toEqual(before);
+            }
+            expect(image).toHaveBeenCalledTimes(2);
+        } finally {
+            readback.mockImplementation(implementation);
+        }
+    });
+
     it.each([[-40, 20], [340, 20], [20, -40], [20, 190]])('skips glyph rasters outside the physical canvas at %s, %s', (x, y) => {
         const image = vi.spyOn(native, 'drawImage');
         const fill = vi.spyOn(native, 'fillText');

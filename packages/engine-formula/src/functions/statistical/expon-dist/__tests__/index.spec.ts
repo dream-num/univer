@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
+import { exponentialCDF } from '../../../../basics/statistical';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -35,8 +36,6 @@ describe('Test exponDist function', () => {
                 [1e-10, 2, 1.9999999998e-10],
                 [1e-12, 0.25, 2.4999999999996874e-13],
                 [1e-200, 1e100, 1e-100],
-                [1e-308, 0.5, 5e-309],
-                [Number.MIN_VALUE, 1, Number.MIN_VALUE],
             ];
             for (const name of [FUNCTION_NAMES_STATISTICAL.EXPON_DIST, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST]) {
                 const fn = new ExponDist(name);
@@ -46,6 +45,29 @@ describe('Test exponDist function', () => {
                     expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-14);
                 }
             }
+        });
+
+        it('Flushes subnormal cumulative results to positive zero in both aliases', () => {
+            for (const name of [FUNCTION_NAMES_STATISTICAL.EXPON_DIST, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST]) {
+                const fn = new ExponDist(name);
+                for (const [x, lambda] of [[1e-200, 1e-110], [1e-308, 0.5], [Number.MIN_VALUE, 1]]) {
+                    const result = fn.calculate(NumberValueObject.create(x), NumberValueObject.create(lambda), BooleanValueObject.create(true));
+                    expect(getObjectValue(result)).toBe(0);
+                }
+            }
+        });
+
+        it('Preserves the smallest normal cumulative result while broadcasting rates', () => {
+            const factor = 2 ** -511;
+            const lambda = ArrayValueObject.createByArray([[factor * (1 - Number.EPSILON), factor, factor * (1 + Number.EPSILON)]]);
+            const result = testFunction.calculate(NumberValueObject.create(factor), lambda, BooleanValueObject.create(true));
+            expect(getObjectValue(result)).toEqual([[0, 2 ** -1022, 2 ** -1022 + Number.MIN_VALUE]]);
+        });
+
+        it('Keeps subnormal precision in the mathematical helper', () => {
+            const result = exponentialCDF(1e-200, 1e-110);
+            expect(result).toBeGreaterThan(0);
+            expect(result).toBeLessThan(2 ** -1022);
         });
 
         it('Preserves small cumulative probabilities while broadcasting arrays', () => {

@@ -36,7 +36,6 @@ describe('Test weibullDist function', () => {
                 [1e-40, 0.5, 1, 1e-20],
                 [1e-6, 3, 2, 1.2499999999999998e-19],
                 [1e-100, 2, 1e50, 9.999999999999999e-301],
-                [Number.MIN_VALUE, 1, 1, Number.MIN_VALUE],
             ];
             for (const name of [FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST, FUNCTION_NAMES_COMPATIBILITY.WEIBULL]) {
                 const fn = new WeibullDist(name);
@@ -51,6 +50,28 @@ describe('Test weibullDist function', () => {
                     expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-14);
                 }
             }
+        });
+
+        it('Flushes subnormal cumulative results to positive zero in both aliases', () => {
+            for (const name of [FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST, FUNCTION_NAMES_COMPATIBILITY.WEIBULL]) {
+                const fn = new WeibullDist(name);
+                for (const [x, alpha] of [[1e-155, 2], [Number.MIN_VALUE, 1]]) {
+                    const result = fn.calculate(
+                        NumberValueObject.create(x),
+                        NumberValueObject.create(alpha),
+                        NumberValueObject.create(1),
+                        BooleanValueObject.create(true)
+                    );
+                    expect(getObjectValue(result)).toBe(0);
+                }
+            }
+        });
+
+        it('Preserves the smallest normal cumulative result while broadcasting inputs', () => {
+            const factor = 2 ** -511;
+            const x = ArrayValueObject.createByArray([[factor * (1 - Number.EPSILON), factor, factor * (1 + Number.EPSILON)]]);
+            const result = testFunction.calculate(x, NumberValueObject.create(2), NumberValueObject.create(1), BooleanValueObject.create(true));
+            expect(getObjectValue(result)).toEqual([[0, 2 ** -1022, 2 ** -1022 + 2 * Number.MIN_VALUE]]);
         });
 
         it('Preserves small cumulative probabilities while broadcasting shape parameters', () => {

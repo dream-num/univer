@@ -44,6 +44,9 @@ export class Fisherinv extends BaseFunction {
 
         const yValue = +yObject.getValue();
 
-        return NumberValueObject.create(Math.tanh(yValue));
+        // Preserve the original formula's zero numerator when the exponential rounds to 1.
+        const result = Math.exp(2 * yValue) === 1 ? 0 : Math.tanh(yValue);
+
+        return NumberValueObject.create(result);
     }
 }

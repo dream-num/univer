@@ -27,9 +27,28 @@ describe('Test fisher function', () => {
     const testFunction = new Fisher(FUNCTION_NAMES_STATISTICAL.FISHER);
 
     describe('Fisher', () => {
-        it.each([1e-12, -1e-12, 1e-20, -1e-20])('Preserves small input %s', (value) => {
+        it.each([1e-12, -1e-12, 2 ** -53, -(2 ** -53)])('Preserves nonzero small input %s', (value) => {
             const result = testFunction.calculate(NumberValueObject.create(value));
             expect(getObjectValue(result)).toBe(value);
+        });
+
+        it.each([1e-20, -1e-20, 2 ** -54, -(2 ** -54)])('Preserves rounding to zero for input %s', (value) => {
+            const result = testFunction.calculate(NumberValueObject.create(value));
+            expect(getObjectValue(result)).toBe(0);
+        });
+
+        it('Preserves zero rounding and nonzero values in arrays and numeric strings', () => {
+            const values = [1e-20, '-1e-20', 1e-12, '-1e-12'];
+            const input = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([values]),
+                rowCount: 1,
+                columnCount: values.length,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(getObjectValue(testFunction.calculate(input))).toStrictEqual([[0, 0, 1e-12, -1e-12]]);
         });
 
         it('Value is normal', () => {

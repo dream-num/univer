@@ -50,7 +50,8 @@ export class Fisher extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = Math.atanh(xValue);
+        // Preserve the original formula's zero result when the ratio rounds to 1.
+        const result = (1 + xValue) / (1 - xValue) === 1 ? 0 : Math.atanh(xValue);
 
         return NumberValueObject.create(result);
     }

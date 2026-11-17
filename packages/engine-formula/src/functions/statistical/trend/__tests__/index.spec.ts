@@ -86,14 +86,11 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result, true)).toStrictEqual([
-                [12452.380952381],
-                [48898.0952380952],
-                [85343.8095238095],
-                [121789.523809524],
-                [158235.238095238],
-                [194680.952380952],
-            ]);
+            const actual = getObjectValue(result) as number[][];
+            // Independent 100-digit least-squares reference.
+            const expected = [12452.380952380952, 48898.09523809524, 85343.80952380953, 121789.52380952382, 158235.2380952381, 194680.95238095237];
+            expect(actual.map((row) => row.length)).toEqual(new Array(expected.length).fill(1));
+            for (let i = 0; i < expected.length; i++) expect(Math.abs(actual[i][0] / expected[i] - 1)).toBeLessThan(1e-12);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

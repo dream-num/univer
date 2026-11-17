@@ -86,14 +86,11 @@ describe('Test growth function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result, true)).toStrictEqual([
-                [32618.2037735398],
-                [47729.4226147478],
-                [69841.3008562175],
-                [102197.073378832],
-                [149542.486740046],
-                [218821.876214595],
-            ]);
+            const actual = getObjectValue(result) as number[][];
+            // Independent 100-digit least-squares reference on log(knownYs).
+            const expected = [32618.2037735398, 47729.42261474788, 69841.30085621761, 102197.07337883263, 149542.48674004624, 218821.8762145961];
+            expect(actual.map((row) => row.length)).toEqual(new Array(expected.length).fill(1));
+            for (let i = 0; i < expected.length; i++) expect(Math.abs(actual[i][0] / expected[i] - 1)).toBeLessThan(1e-12);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

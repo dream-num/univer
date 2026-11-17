@@ -924,19 +924,25 @@ function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValu
 
     let sumX = 0;
     let sumY = 0;
-    let sumX2 = 0;
-    let sumXY = 0;
 
     for (let i = 0; i < n; i++) {
         sumX += knownXsValues[i];
         sumY += knownYsValues[i];
-        sumX2 += knownXsValues[i] * knownXsValues[i];
-        sumXY += knownXsValues[i] * knownYsValues[i];
     }
 
-    const temp = n * sumXY - sumX * sumY;
-    const slope = temp / (n * sumX2 - sumX * sumX);
-    const intercept = 1 / n * sumY - slope * (1 / n) * sumX;
+    const meanX = sumX / n;
+    const meanY = sumY / n;
+    let sumX2 = 0;
+    let sumXY = 0;
+
+    for (let i = 0; i < n; i++) {
+        const centeredX = knownXsValues[i] - meanX;
+        sumX2 += centeredX * centeredX;
+        sumXY += centeredX * (knownYsValues[i] - meanY);
+    }
+
+    const slope = sumXY / sumX2;
+    const intercept = meanY - slope * meanX;
 
     return {
         slope,

@@ -95,9 +95,11 @@ describe('Test logest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result, true)).toStrictEqual([
-                [1.46327562812, 22291.2232984654],
-            ]);
+            const actual = getObjectValue(result) as number[][];
+            // Independent 100-digit least-squares reference on log(knownYs).
+            const expected = [1.4632756281161758, 22291.22329846534];
+            expect(actual.map((row) => row.length)).toEqual([2]);
+            for (let i = 0; i < expected.length; i++) expect(Math.abs(actual[0][i] / expected[i] - 1)).toBeLessThan(1e-12);
         });
 
         // Coefficients verified using 80-digit QR least squares on log(knownYs).

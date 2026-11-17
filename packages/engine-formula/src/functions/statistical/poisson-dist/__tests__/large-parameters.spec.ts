@@ -115,4 +115,58 @@ describe('Poisson probabilities with large parameters', () => {
             }
         }
     });
+
+    it.each([
+        [10, 760],
+        [1, 746],
+        [0, 709],
+        [0, 708.3964185322642],
+    ])('flushes subnormal worksheet results for x=%s and mean=%s to positive zero', (x, mean) => {
+        for (const fn of functions) {
+            for (const mode of [density, cumulative]) {
+                const result = fn.calculate(NumberValueObject.create(x), NumberValueObject.create(mean), mode);
+                expect(Object.is(getObjectValue(result), 0)).toBe(true);
+            }
+        }
+    });
+
+    it.each([
+        [1, 2 ** -1022, 2 ** -1022],
+        [1, 2 ** -1021, 2 ** -1021],
+        [0, 708.396418532264, 2.2250738585075156e-308],
+    ])('retains normal worksheet mass for x=%s and mean=%s', (x, mean, expected) => {
+        for (const fn of functions) {
+            const result = getObjectValue(fn.calculate(NumberValueObject.create(x), NumberValueObject.create(mean), density)) as number;
+            expect(result).toBeGreaterThanOrEqual(2 ** -1022);
+            expectProbability(result, expected);
+        }
+    });
+
+    it('sums subnormal masses before applying the worksheet range to a cumulative result', () => {
+        // Each mass through x=10 is below the normal range, but their sum is normal.
+        // Independent 100-digit mpmath references.
+        const count = NumberValueObject.create(10);
+        const mean = NumberValueObject.create(759.6252709727578);
+        for (const fn of functions) {
+            expect(Object.is(getObjectValue(fn.calculate(count, mean, density)), 0)).toBe(true);
+            expectProbability(getObjectValue(fn.calculate(count, mean, cumulative)) as number, 2.243442742954619e-308);
+        }
+    });
+
+    it('applies the worksheet range independently to broadcast results', () => {
+        const counts = ArrayValueObject.createByArray([[10, 1, 0, 1]]);
+        const means = ArrayValueObject.createByArray([[760, 746, 708.396418532264, 2 ** -1022]]);
+        const modes = ArrayValueObject.createByArray([[false], [true]]);
+        for (const fn of functions) {
+            const result = getObjectValue(fn.calculate(counts, means, modes)) as number[][];
+            expect(result.map((row) => row.length)).toEqual([4, 4]);
+            for (const row of result) {
+                expect(Object.is(row[0], 0)).toBe(true);
+                expect(Object.is(row[1], 0)).toBe(true);
+                expectProbability(row[2], 2.2250738585075156e-308);
+            }
+            expect(result[0][3]).toBe(2 ** -1022);
+            expect(result[1][3]).toBe(1);
+        }
+    });
 });

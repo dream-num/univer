@@ -105,6 +105,7 @@ export class PoissonDist extends BaseFunction {
             result = poissonPDF(xValue, meanValue);
         }
 
-        return NumberValueObject.create(result);
+        // Apply Excel's worksheet range after summing any subnormal masses.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

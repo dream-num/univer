@@ -45,6 +45,7 @@ export interface IDependencyManagerService {
     addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
+    refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void;
     hasDependencyRTreeCache(treeId: number): boolean;
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
@@ -164,6 +165,14 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
         return this._formulaData.get(unitId)?.get(sheetId)?.getValue(row, column);
     }
 
+    refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void {
+        for (const tree of trees) {
+            if (!tree.isCache) {
+                this.addDependencyRTreeCache(tree);
+            }
+        }
+    }
+
     addDependencyRTreeCache(tree: IFormulaDependencyTree) {
         const searchRanges: IRTreeItem[] = [];
         for (let i = 0; i < tree.rangeList.length; i++) {
@@ -253,10 +262,23 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
     }
 
     override addDependencyRTreeCache(tree: IFormulaDependencyTree) {
-        // Replacement must use the old bounds; a new tree has no entries to remove.
-        this._removeDependencyRTreeCache(tree.treeId);
-        this._removeAllTreeMap(tree.treeId);
+        if (this.hasDependencyRTreeCache(tree.treeId)) {
+            this._removeDependencyRTreeCache(tree.treeId);
+        }
         super.addDependencyRTreeCache(tree);
+    }
+
+    override refreshDependencyRTreeCaches(trees: readonly IFormulaDependencyTree[]): void {
+        const replacedIds: number[] = [];
+        for (const tree of trees) {
+            if (!tree.isCache && this.hasDependencyRTreeCache(tree.treeId)) {
+                replacedIds.push(tree.treeId);
+            }
+        }
+
+        // Remove the old entries together so overlapping ranges share a single index scan.
+        this._removeDependencyRTreeCaches(replacedIds);
+        super.refreshDependencyRTreeCaches(trees);
     }
 
     override reset() {

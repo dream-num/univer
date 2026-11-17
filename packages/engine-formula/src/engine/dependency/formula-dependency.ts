@@ -878,13 +878,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         this._reusableSheetSignature = sheetSignature;
 
-        for (let i = 0, len = treeList.length; i < len; i++) {
-            const tree = treeList[i];
-            if (tree.isCache) {
-                continue;
-            }
-            this._dependencyManagerService.addDependencyRTreeCache(tree);
-        }
+        this._dependencyManagerService.refreshDependencyRTreeCaches(treeList);
 
         await this._calculateListByFunctionRefNode(treeList);
         return treeList;

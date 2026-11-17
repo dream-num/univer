@@ -124,10 +124,11 @@ describe('Test searchb function', () => {
         it('More test', () => {
             const findText = StringValueObject.create('O');
             const withinText = StringValueObject.create('Hello中文o😊Wo😊rld');
+            // start_num counts bytes: 9 is the second byte of 文 and 13 is inside the first 😊.
             const startNum = ArrayValueObject.create('{1,6,9,13}');
             const result = testFunction.calculate(findText, withinText, startNum);
             expect(getObjectValue(result)).toStrictEqual([
-                [5, 10, 16, ErrorType.VALUE],
+                [5, 10, 10, 16],
             ]);
 
             const findText2 = StringValueObject.create('2');
@@ -142,6 +143,27 @@ describe('Test searchb function', () => {
             const withinText3 = StringValueObject.create('你好，欢迎');
             const result3 = testFunction.calculate(findText3, withinText3);
             expect(getObjectValue(result3)).toStrictEqual(7);
+        });
+
+        it('Reads start_num as a byte position on the literal and wildcard paths', () => {
+            // 中 takes bytes 1 and 2, a is byte 3 and b is byte 4.
+            const cases: [string, string, number, number | string][] = [
+                ['a', '中ab', 3, 3],
+                ['?b', '中ab', 3, 3],
+                ['b', '中ab', 4, 4],
+                ['*', '中ab', 4, 4],
+                ['a', '中ab', 4, ErrorType.VALUE],
+                ['a', '中ab', 5, ErrorType.VALUE],
+                // Byte 2 is inside 中, so the search starts at the next character.
+                ['a', '中ab', 2, 3],
+                ['中', '中ab中', 2, 5],
+                ['?', '中ab中', 2, 3],
+                ['', '中ab', 3, 3],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
         });
 
         it('Matches ? and * as wildcards and ~ as their escape, counting bytes', () => {

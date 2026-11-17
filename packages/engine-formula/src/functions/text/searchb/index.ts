@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { charLenByte, upperCaseKeepingPositions } from '../../../engine/utils/char-kit';
+import { charLenByte, getCharIndexByByteNum, upperCaseKeepingPositions } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { parseWildcardPattern, searchWildcard } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -90,7 +90,8 @@ export class Searchb extends BaseFunction {
 
         const startNumValue = Math.floor(+startNumObject.getValue());
 
-        if (withinText.isNull() || startNumValue <= 0 || startNumValue > withinTextValue.length) {
+        // start_num is a byte position, like the result: a double-byte character takes two.
+        if (withinText.isNull() || startNumValue <= 0 || startNumValue > charLenByte(withinTextValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -99,7 +100,7 @@ export class Searchb extends BaseFunction {
         }
 
         // SEARCHB reads ? and * as wildcards and ~ as their escape, as SEARCH does.
-        const index = searchWildcard(withinTextValue, parseWildcardPattern(findTextValue), startNumValue - 1);
+        const index = searchWildcard(withinTextValue, parseWildcardPattern(findTextValue), getCharIndexByByteNum(withinTextValue, startNumValue));
 
         if (index === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

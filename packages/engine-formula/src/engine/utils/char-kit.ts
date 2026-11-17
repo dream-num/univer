@@ -50,6 +50,26 @@ export function getCharLenByteInText(text: string, charIndex: number, direction:
 }
 
 /**
+ * The index in `text` of the first character that starts at or after byte `byteNum`, which is
+ * 1-based and counts each double-byte character as two bytes, as `charLenByte` does. A byte
+ * inside a double-byte character belongs to a character that has already started, so it
+ * resolves to the next one. Returns `text.length` when `byteNum` is past the last character.
+ */
+export function getCharIndexByByteNum(text: string, byteNum: number): number {
+    let index = 0;
+    let byteCount = 0;
+
+    while (index < text.length && byteCount < byteNum - 1) {
+        const charLength = isSurrogatePairAt(text, index) ? 2 : 1;
+
+        byteCount += charLenByte(text.substring(index, index + charLength));
+        index += charLength;
+    }
+
+    return index;
+}
+
+/**
  * Whether the code unit at `index` and the one after it form a surrogate pair, which
  * together make up one character.
  */

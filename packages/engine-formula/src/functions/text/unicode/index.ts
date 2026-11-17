@@ -58,7 +58,8 @@ export class Unicode extends BaseFunction {
         // codePointAt reads a character above U+FFFF whole, not its first UTF-16 half.
         const result = textValue.codePointAt(0);
 
-        if (result === undefined) {
+        // Excel documents #VALUE! for empty text and for partial surrogates.
+        if (result === undefined || (result >= 0xD800 && result <= 0xDFFF)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

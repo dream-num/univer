@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DataStreamTreeTokenType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -35,6 +35,15 @@ const filterCodeArray = Object.values(DataStreamTreeTokenType).filter((value) =>
         DataStreamTreeTokenType.CUSTOM_BLOCK,
     ].includes(value as DataStreamTreeTokenType);
 });
+
+function isSurrogateCodePoint(codePoint: number) {
+    return codePoint >= 0xD800 && codePoint <= 0xDFFF;
+}
+
+function isNonCharacterCodePoint(codePoint: number) {
+    // U+FDD0-U+FDEF and the last two code points of every plane (xFFFE, xFFFF).
+    return (codePoint >= 0xFDD0 && codePoint <= 0xFDEF) || (codePoint & 0xFFFF) >= 0xFFFE;
+}
 
 export class Unichar extends BaseFunction {
     override minParams = 1;
@@ -70,13 +79,9 @@ export class Unichar extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        // for excel
-        if (numberValue === 1114111 || numberValue === 1114110) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        // A code point in the surrogate block is half of a UTF-16 pair, not a character.
-        if (numberValue >= 0xD800 && numberValue <= 0xDFFF) {
+        // Excel returns #N/A for code points that do not name a character: the
+        // surrogate block and the Unicode noncharacters.
+        if (isSurrogateCodePoint(numberValue) || isNonCharacterCodePoint(numberValue)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 

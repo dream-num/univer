@@ -462,8 +462,8 @@ describe('DocLinkPopup', () => {
         root = createRoot(container);
         const actions = renderPopup(root, container, currentTestBed);
         expect(container.textContent).toContain('#_TocExample');
-        expect(actions.edit).toBeUndefined();
-        expect(actions.remove).toBeUndefined();
+        expect(actions.edit).toBeNull();
+        expect(actions.remove).toBeNull();
         expect(currentTestBed.popupService.showEditPopup(UNIT_ID, info)).toBeNull();
         expect(currentTestBed.popupService.editing).toBeNull();
     });

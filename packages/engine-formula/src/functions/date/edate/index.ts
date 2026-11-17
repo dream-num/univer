@@ -77,7 +77,8 @@ export class Edate extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const monthsValue = Math.floor(+monthsValueObject.getValue());
+            // Excel truncates a fractional months argument toward zero, so -1.5 is -1, not -2.
+            const monthsValue = Math.trunc(+monthsValueObject.getValue());
 
             const _startDate = excelSerialToDate(startDateSerial, this.getDateSystem());
 

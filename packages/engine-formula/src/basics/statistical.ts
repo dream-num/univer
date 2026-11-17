@@ -1624,6 +1624,16 @@ export function getSmallResult(array: number[], k: number): BaseValueObject {
     return NumberValueObject.create(array[_k - 1]);
 }
 
+function interpolatePercentile(lower: number, upper: number, fraction: number): number {
+    const difference = upper - lower;
+
+    // Opposite finite extremes can overflow the difference even when the
+    // interpolated value is finite. Preserve the existing arithmetic otherwise.
+    return Number.isFinite(difference)
+        ? lower + fraction * difference
+        : (1 - fraction) * lower + fraction * upper;
+}
+
 // PERCENTILE.INC(array, k): returns the k-th percentile of values in a range, where k is in the range 0..1, inclusive.
 export function getPercentileIncResult(array: number[], k: number): BaseValueObject {
     const n = array.length;
@@ -1642,7 +1652,7 @@ export function getPercentileIncResult(array: number[], k: number): BaseValueObj
         return NumberValueObject.create(array[integerPart]);
     }
 
-    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+    const result = interpolatePercentile(array[integerPart], array[integerPart + 1], fractionPart);
 
     return NumberValueObject.create(result);
 }
@@ -1665,7 +1675,7 @@ export function getPercentileExcResult(array: number[], k: number): BaseValueObj
         return NumberValueObject.create(array[integerPart]);
     }
 
-    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+    const result = interpolatePercentile(array[integerPart], array[integerPart + 1], fractionPart);
 
     return NumberValueObject.create(result);
 }
@@ -1689,7 +1699,7 @@ export function getQuartileIncResult(array: number[], quart: number): BaseValueO
         return NumberValueObject.create(array[integerPart]);
     }
 
-    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+    const result = interpolatePercentile(array[integerPart], array[integerPart + 1], fractionPart);
 
     return NumberValueObject.create(result);
 }
@@ -1718,7 +1728,7 @@ export function getQuartileExcResult(array: number[], quart: number): BaseValueO
         return NumberValueObject.create(array[integerPart]);
     }
 
-    const result = array[integerPart] + fractionPart * (array[integerPart + 1] - array[integerPart]);
+    const result = interpolatePercentile(array[integerPart], array[integerPart + 1], fractionPart);
 
     return NumberValueObject.create(result);
 }

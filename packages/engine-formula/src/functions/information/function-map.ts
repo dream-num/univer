@@ -31,7 +31,7 @@ import { Isna } from './isna';
 import { Isnontext } from './isnontext';
 import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
-// import { Isomitted } from './isomitted';
+import { Isomitted } from './isomitted';
 import { Isref } from './isref';
 import { Istext } from './istext';
 import { Isurl } from './isurl';
@@ -58,7 +58,7 @@ export const functionInformation = [
     [Isnontext, FUNCTION_NAMES_INFORMATION.ISNONTEXT],
     [Isnumber, FUNCTION_NAMES_INFORMATION.ISNUMBER],
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
-    // [Isomitted, FUNCTION_NAMES_INFORMATION.ISOMITTED],
+    [Isomitted, FUNCTION_NAMES_INFORMATION.ISOMITTED],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
     [Isurl, FUNCTION_NAMES_INFORMATION.ISURL],

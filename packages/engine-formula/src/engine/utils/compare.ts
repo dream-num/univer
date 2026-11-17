@@ -70,6 +70,14 @@ export function normalizeTextForComparison(value: string): string {
         : lower;
 }
 
+/**
+ * Text equality for an exact lookup, where ? and * are ordinary characters (XLOOKUP and XMATCH
+ * match mode 0). It ignores case, as the `=` comparison does.
+ */
+export function isLiteralTextMatch(currentValue: string, value: string): boolean {
+    return normalizeTextForComparison(currentValue) === normalizeTextForComparison(value);
+}
+
 export function isMatchWildcard(currentValue: string, value: string) {
     const pattern = escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
         if (match.startsWith('~')) {

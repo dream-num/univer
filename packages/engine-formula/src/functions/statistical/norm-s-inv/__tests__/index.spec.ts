@@ -92,3 +92,19 @@ describe('Test normSInv function', () => {
         });
     });
 });
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    it('inverse normal and lognormal formulas resolve small probabilities', () => {
+        const cases = [
+            [1e-20, -9.262340089798407, 9.493291347224349e-5],
+            [1e-30, -11.464024688443615, 1.0501161493987006e-5],
+            [1e-50, -14.933337534788489, 3.269895790882902e-7],
+        ];
+        const standard = new NormSInv(FUNCTION_NAMES_STATISTICAL.NORM_S_INV);
+        for (const [p, expectedNormal] of cases) {
+            const probability = NumberValueObject.create(p);
+            expect(getObjectValue(standard.calculate(probability))).toBeCloseTo(expectedNormal, 12);
+        }
+    });
+});

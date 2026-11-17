@@ -115,3 +115,25 @@ describe('Test lognormInv function', () => {
         });
     });
 });
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    const zero = NumberValueObject.create(0);
+    const one = NumberValueObject.create(1);
+    function expectRelative(actual: number, expected: number) {
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-12);
+    }
+
+    it('inverse normal and lognormal formulas resolve small probabilities', () => {
+        const cases = [
+            [1e-20, -9.262340089798407, 9.493291347224349e-5],
+            [1e-30, -11.464024688443615, 1.0501161493987006e-5],
+            [1e-50, -14.933337534788489, 3.269895790882902e-7],
+        ];
+        const lognormal = new LognormInv(FUNCTION_NAMES_STATISTICAL.LOGNORM_INV);
+        for (const [p, , expectedLognormal] of cases) {
+            const probability = NumberValueObject.create(p);
+            expectRelative(getObjectValue(lognormal.calculate(probability, zero, one)) as number, expectedLognormal);
+        }
+    });
+});

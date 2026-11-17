@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { Complex } from '../complex';
-import { BESSEL } from '../engineering';
+import { BESSEL, erf, erfc } from '../engineering';
 
 describe('Test ref regex', () => {
     it('BESSEL.besselj test', () => {
@@ -86,5 +86,44 @@ describe('Test ref regex', () => {
 
         complex = new Complex('1-i');
         expect(complex.isError()).toStrictEqual(false);
+    });
+});
+
+describe('Complementary error-function tails', () => {
+    it('retains representable positive tails', () => {
+        // References evaluated with 120-digit mpmath arithmetic.
+        const cases = [
+            [5, 1.537459794428035e-12],
+            [6, 2.1519736712498913e-17],
+            [10, 2.088487583762545e-45],
+            [20, 5.395865611607901e-176],
+            [26, 5.663192408856143e-296],
+        ];
+        for (const [x, expected] of cases) {
+            expect(Math.abs(erfc(x) / expected - 1)).toBeLessThan(1e-12);
+        }
+    });
+
+    it('retains a subnormal complementary tail', () => {
+        const actual = erfc(27);
+        expect(actual).toBeGreaterThan(0);
+        expect(Math.abs(actual - 5.23705e-319)).toBeLessThanOrEqual(2 * Number.MIN_VALUE);
+    });
+
+    it('retains zero, symmetry and limiting values', () => {
+        expect(erfc(0)).toBe(1);
+        expect(erfc(-0)).toBe(1);
+        expect(erfc(Infinity)).toBe(0);
+        expect(erfc(-Infinity)).toBe(2);
+        expect(erfc(Number.NaN)).toBeNaN();
+        expect(erf(0)).toBe(0);
+        expect(erf(-0)).toBe(0);
+        expect(erf(Infinity)).toBe(1);
+        expect(erf(-Infinity)).toBe(-1);
+        expect(erf(Number.NaN)).toBeNaN();
+        for (const x of [0.125, 0.5, 1, 2, 5]) {
+            expect(erf(-x)).toBe(-erf(x));
+            expect(erfc(-x)).toBeCloseTo(2 - erfc(x), 15);
+        }
     });
 });

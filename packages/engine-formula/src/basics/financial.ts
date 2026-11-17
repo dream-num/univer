@@ -20,6 +20,7 @@ import {
     dateAddMonths,
     getDaysInMonth,
     getTwoDateDaysByBasis,
+    isLeapYear,
     lastDayOfMonth,
 } from './date';
 import { ErrorType } from './error-type';
@@ -92,6 +93,31 @@ function compareCouponDate(left: ICouponDateParts, right: ICouponDateParts): num
     }
 
     return left.day - right.day;
+}
+
+export function getMaturityBondActualYearDays(issue: number, settlement: number, dateSystem: DateSystem): number {
+    const start = getCouponDateParts(issue, dateSystem);
+    const end = getCouponDateParts(settlement, dateSystem);
+    const yearCount = end.year - start.year + 1;
+    if (yearCount === 1) {
+        return isLeapYear(start.year) ? 366 : 365;
+    }
+    if (yearCount === 2 && compareCouponDate(end, { ...start, year: end.year }) <= 0) {
+        const leapYear = isLeapYear(start.year) ? start.year : end.year;
+        if (!isLeapYear(leapYear)) {
+            return 365;
+        }
+        const leapDay = getCouponDateSerial({ year: leapYear, month: 2, day: 29, monthEnd: true }, dateSystem);
+        return issue <= leapDay && leapDay <= settlement ? 366 : 365;
+    }
+
+    let leapDays = 0;
+    for (let year = start.year; year <= end.year; year++) {
+        if (isLeapYear(year)) {
+            leapDays++;
+        }
+    }
+    return 365 + leapDays / yearCount;
 }
 
 // Excel keeps the maturity day/month-end rule for every coupon period; it must not be inferred from an intermediate date.

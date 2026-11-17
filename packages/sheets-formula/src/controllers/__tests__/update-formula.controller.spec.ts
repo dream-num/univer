@@ -1234,6 +1234,10 @@ describe('UpdateFormulaController spill cache integration', () => {
                             8: { f: '=SUM(N(INDIRECT({"A1","A13"})))' },
                             9: { f: '=SUM(N(A1:A2))' },
                             10: { f: '=AMORDEGRC(2400,45157,45291,300,2,0.19,1)' },
+                            11: { f: '=SUM(PRICEMAT(DATE(2024,3,15),DATE(2024,11,15),DATE(2023,11,15),0.061,0.061,{0,1,2}+A1))' },
+                            12: { f: '=SUM(YIELDMAT(DATE(2024,3,15),DATE(2024,11,15),DATE(2023,11,15),0.0625,{98,99,100}+A1))' },
+                            13: { f: '=PRICEMAT(DATE(2024,3,15),DATE(2024,11,15),N22,0.061,0.061)' },
+                            14: { f: '=YIELDMAT(DATE(2024,3,15),O22,DATE(2023,11,15),0.0625,100.0123)' },
                         },
                     },
                 },
@@ -1283,6 +1287,14 @@ describe('UpdateFormulaController spill cache integration', () => {
             expect(sheet.getRange('U13:Y13').getValues()).toEqual([[input, '#REF!', '#VALUE!', 57, 3]]);
             expect(sheet.getRange('C20:E20').getValues()).toEqual([['#NAME?', null, null]]);
             expect(sheet.getRange('A21:K21').getValues()).toEqual([[[259, 518, 776][input - 1], 330, 158, 0, '#NUM!', '#VALUE!', 1894, input + 5, input + 5, input, 487]]);
+            if (input === 3) {
+                expect(sheet.getRange('L21').getValue()).toBe('#NUM!');
+            } else {
+                expect(sheet.getRange('L21').getValue()).toBeCloseTo([299.7596187969094, 299.75927781090263][input - 1], 9);
+            }
+            expect(sheet.getRange('M21').getValue()).toBeCloseTo([0.18397312839913993, 0.138528693708766, 0.09395765355598794][input - 1], 10);
+            expect(sheet.getRange('N21').getValue()).toBeCloseTo(70.39210708947269, 10);
+            expect(sheet.getRange('O21').getValue()).toBe('#NUM!');
             expect(sheet.getRange('S1:S2').getValues()).toEqual([['#REF!'], ['#REF!']]);
             const sum = input * (input + 1) / 2;
             expect(sheet.getRange('U1').getValue()).toBe(sum);

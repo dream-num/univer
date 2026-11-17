@@ -41,6 +41,17 @@ describe('Test value function', () => {
             const text2 = StringValueObject.create('($1,000)');
             const result2 = testFunction.calculate(text2);
             expect(getObjectValue(result2)).toStrictEqual(-1000);
+
+            const text3 = StringValueObject.create('(1,000)');
+            const result3 = testFunction.calculate(text3);
+            expect(getObjectValue(result3)).toStrictEqual(-1000);
+        });
+
+        it('Value is malformed parentheses', () => {
+            for (const input of ['(5', '5)', '(+5)', '( +5 )', '(1,00)']) {
+                const result = testFunction.calculate(StringValueObject.create(input));
+                expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+            }
         });
 
         it('Value is array', () => {

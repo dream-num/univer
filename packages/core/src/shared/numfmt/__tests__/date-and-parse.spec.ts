@@ -69,13 +69,15 @@ describe('numfmt dates and value parsing', () => {
     });
 
     it('parses parenthesised negatives through the common value filter', () => {
-        expect(getNumfmtParseValueFilter('(5)')).toEqual({ v: -5, z: '#,##0' });
-        expect(getNumfmtParseValueFilter('(12.34)')).toEqual({ v: -12.34, z: '#,##0.00' });
+        expect(getNumfmtParseValueFilter('(5)')).toEqual({ v: -5 });
+        expect(getNumfmtParseValueFilter('(12.34)')).toEqual({ v: -12.34 });
         expect(getNumfmtParseValueFilter('(1,000)')).toEqual({ v: -1000, z: '#,##0' });
         expect(getNumfmtParseValueFilter('($1,000)')).toEqual({ v: -1000, z: '$#,##0' });
         expect(getNumfmtParseValueFilter('($1,000.50)')).toEqual({ v: -1000.5, z: '$#,##0.00' });
         expect(getNumfmtParseValueFilter('(1,00)')).toBeNull();
         expect(getNumfmtParseValueFilter('($1,00)')).toBeNull();
+        expect(getNumfmtParseValueFilter('(+5)')).toBeNull();
+        expect(getNumfmtParseValueFilter('( +5 )')).toBeNull();
         expect(getNumfmtParseValueFilter('(5')).toBeNull();
         expect(getNumfmtParseValueFilter('((12.34))')).toBeNull();
     });

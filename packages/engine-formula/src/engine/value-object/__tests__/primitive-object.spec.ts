@@ -74,6 +74,26 @@ describe('StringValueObject', () => {
         ).toBe(43921);
     });
 
+    it('converts accounting negatives without inventing a number pattern', () => {
+        const plain = StringValueObject.create('(5)').convertToNumberObjectValue();
+
+        expect(plain.getValue()).toBe(-5);
+        expect(plain.getPattern()).toBe('');
+
+        const grouped = StringValueObject.create('(1,000)').convertToNumberObjectValue();
+
+        expect(grouped.getValue()).toBe(-1000);
+        expect(grouped.getPattern()).toBe('#,##0');
+
+        expect(StringValueObject.create('($1,000)').convertToNumberObjectValue().getPattern()).toBe('$#,##0');
+    });
+
+    it('keeps malformed parenthesised input as an error', () => {
+        expect(StringValueObject.create('(5').convertToNumberObjectValue().isError()).toBe(true);
+        expect(StringValueObject.create('(+5)').convertToNumberObjectValue().isError()).toBe(true);
+        expect(StringValueObject.create('(1,00)').convertToNumberObjectValue().isError()).toBe(true);
+    });
+
     it('does not reuse a hyperlink object as a plain string', () => {
         const hyperlink = StringValueObject.create('https://example.com/context-cache', {
             isHyperlink: true,

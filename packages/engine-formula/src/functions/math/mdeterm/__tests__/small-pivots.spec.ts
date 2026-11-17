@@ -17,6 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import { calculateMdeterm } from '../../../../basics/math';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Mdeterm } from '../index';
@@ -78,6 +79,50 @@ describe('Determinants with small nonzero pivots', () => {
         for (const matrix of matrices) {
             expect(calculateMdeterm(matrix)).toBe(0);
             expect(getObjectValue(fn.calculate(ArrayValueObject.createByArray(matrix)))).toBe(0);
+        }
+    });
+
+    it('returns positive zero for subnormal worksheet results', () => {
+        const matrices = [
+            [[1e-103, 0, 0], [0, 1e-103, 0], [0, 0, 1e-103]],
+            [[2 ** -511, 0], [0, 2 ** -512]],
+            [[Number.MIN_VALUE]],
+        ];
+        for (const matrix of matrices) {
+            for (const sign of [-1, 1]) {
+                const signed = matrix.map((row, index) => row.map((value) => index === 0 ? sign * value : value));
+                const rawResult = calculateMdeterm(signed);
+                expect(Math.abs(rawResult)).toBeGreaterThan(0);
+                expect(Math.abs(rawResult)).toBeLessThan(2 ** -1022);
+                expect(getObjectValue(fn.calculate(ArrayValueObject.createByArray(signed)))).toBe(0);
+            }
+        }
+    });
+
+    it('preserves normal results at the worksheet underflow boundary', () => {
+        const scale = 2 ** -511;
+        const spacing = 2 ** -563;
+        for (const offset of [-1, 0, 1]) {
+            const matrix = [[scale, 0, 0], [0, scale + offset * spacing, 0], [0, 0, 1]];
+            const expected = 2 ** -1022 + offset * Number.MIN_VALUE;
+            for (const sign of [-1, 1]) {
+                const signed = matrix.map((row, index) => row.map((value) => index === 0 ? sign * value : value));
+                expect(calculateMdeterm(signed)).toBe(sign * expected);
+                const result = getObjectValue(fn.calculate(ArrayValueObject.createByArray(signed)));
+                expect(result).toBe(offset < 0 ? 0 : sign * expected);
+            }
+        }
+    });
+
+    it('keeps subnormal intermediate products when the final result is normal', () => {
+        const matrix = [[2 ** -511, 0, 0], [0, 2 ** -512, 0], [0, 0, 2]];
+        expect(getObjectValue(fn.calculate(ArrayValueObject.createByArray(matrix)))).toBe(2 ** -1022);
+        expect(getObjectValue(fn.calculate(ArrayValueObject.createByArray([matrix[1], matrix[0], matrix[2]])))).toBe(-(2 ** -1022));
+    });
+
+    it('preserves scalar signed zeros', () => {
+        for (const value of [0, -0]) {
+            expect(getObjectValue(fn.calculate(NumberValueObject.create(value)))).toBe(value);
         }
     });
 });

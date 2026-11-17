@@ -27,6 +27,11 @@ describe('Test fisher function', () => {
     const testFunction = new Fisher(FUNCTION_NAMES_STATISTICAL.FISHER);
 
     describe('Fisher', () => {
+        it.each([1e-12, -1e-12, 1e-20, -1e-20])('Preserves small input %s', (value) => {
+            const result = testFunction.calculate(NumberValueObject.create(value));
+            expect(getObjectValue(result)).toBe(value);
+        });
+
         it('Value is normal', () => {
             const x = NumberValueObject.create(0.75);
             const result = testFunction.calculate(x);

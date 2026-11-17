@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -49,10 +49,24 @@ export class Frequency extends BaseFunction {
 
         for (let i = 0; i < dataArrayValues.length; i++) {
             const value = dataArrayValues[i];
+            let low = 0;
+            let high = newBinsArrayValues.length - 1;
 
-            const index = newBinsArrayValues.findIndex((item) => value > item.start && value <= item.end);
+            // Find the first upper bound that contains the value. Equal bins
+            // remain stable, so only the first duplicate receives a count.
+            while (low < high) {
+                const middle = Math.floor((low + high) / 2);
+                if (value <= newBinsArrayValues[middle].end) {
+                    high = middle;
+                } else {
+                    low = middle + 1;
+                }
+            }
 
-            result[index]++;
+            const bin = newBinsArrayValues[low];
+            if (value > bin.start && value <= bin.end) {
+                result[bin.index]++;
+            }
         }
 
         return ArrayValueObject.createByArray(result.map((item) => [item]));
@@ -109,29 +123,16 @@ export class Frequency extends BaseFunction {
             };
         }).sort((a, b) => a.value - b.value);
 
-        const newBinsArrayValues = [];
-
-        for (let i = 0; i < _binsArrayValues.length; i++) {
-            const index = _binsArrayValues[i].index;
-
-            if (i === 0) {
-                newBinsArrayValues[index] = {
-                    start: -Infinity,
-                    end: _binsArrayValues[i].value,
-                };
-
-                continue;
-            }
-
-            newBinsArrayValues[index] = {
-                start: _binsArrayValues[i - 1].value,
-                end: _binsArrayValues[i].value,
-            };
-        }
+        const newBinsArrayValues = _binsArrayValues.map((bin, i) => ({
+            start: i === 0 ? -Infinity : _binsArrayValues[i - 1].value,
+            end: bin.value,
+            index: bin.index,
+        }));
 
         newBinsArrayValues.push({
             start: _binsArrayValues[_binsArrayValues.length - 1].value,
             end: Infinity,
+            index: _binsArrayValues.length,
         });
 
         return newBinsArrayValues;

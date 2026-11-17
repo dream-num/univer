@@ -68,6 +68,20 @@ describe('numfmt dates and value parsing', () => {
         })).toEqual({ v: 44560, z: 'dd/mm/yyyy' });
     });
 
+    it('parses parenthesised negatives through the common value filter', () => {
+        expect(getNumfmtParseValueFilter('(5)')).toEqual({ v: -5 });
+        expect(getNumfmtParseValueFilter('(12.34)')).toEqual({ v: -12.34 });
+        expect(getNumfmtParseValueFilter('(1,000)')).toEqual({ v: -1000, z: '#,##0' });
+        expect(getNumfmtParseValueFilter('($1,000)')).toEqual({ v: -1000, z: '$#,##0' });
+        expect(getNumfmtParseValueFilter('($1,000.50)')).toEqual({ v: -1000.5, z: '$#,##0.00' });
+        expect(getNumfmtParseValueFilter('(1,00)')).toBeNull();
+        expect(getNumfmtParseValueFilter('($1,00)')).toBeNull();
+        expect(getNumfmtParseValueFilter('(+5)')).toBeNull();
+        expect(getNumfmtParseValueFilter('( +5 )')).toBeNull();
+        expect(getNumfmtParseValueFilter('(5')).toBeNull();
+        expect(getNumfmtParseValueFilter('((12.34))')).toBeNull();
+    });
+
     it('parses representative values', () => {
         expect(parseNumber('1,234.50')).toEqual({ v: 1234.5, z: '#,##0.00' });
         expect(parseDate('3/13/1989')).toEqual({ v: 32580, z: 'm/d/yyyy' });

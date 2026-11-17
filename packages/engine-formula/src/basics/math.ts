@@ -88,19 +88,24 @@ export function calculateMdeterm(matrix: number[][]): number {
         return 0; // Matrix is irreversible
     }
 
-    // A small elimination residual may be a rounded zero or a genuine pivot.
-    // Only an exact rank check may turn that uncertainty into a zero result.
-    if (uncertainPivotDetected && isExactlySingular(matrix)) {
-        return 0;
-    }
-
     let det = rowSwap ? 1 : -1;
 
     for (let i = 0; i < permutation.length; i++) {
         det *= luMatrix[i][i];
     }
 
-    return det === 0 ? 0 : det; // deal with -0 case
+    // Exact rank cannot change a zero product. Normalize -0 without that pass.
+    if (det === 0) {
+        return 0;
+    }
+
+    // A small elimination residual may be a rounded zero or a genuine pivot.
+    // Only an exact rank check may turn that uncertainty into a zero result.
+    if (uncertainPivotDetected && isExactlySingular(matrix)) {
+        return 0;
+    }
+
+    return det;
 }
 
 function decomposeBinary64Row(row: number[]) {

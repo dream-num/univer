@@ -309,6 +309,24 @@ describe('MDETERM cancellation residuals', () => {
         }
     });
 
+    it('preserves normal determinants after subnormal products with uncertain pivots', () => {
+        const scale = 2 ** -500;
+        const matrix = [[scale, scale, 0], [scale, scale * (1 + Number.EPSILON), 0], [0, 0, 2 ** 100]];
+        const expected = 2 ** -952;
+        expect(calculateMdeterm(matrix)).toBe(expected);
+        expect(determinant(matrix)).toBe(expected);
+        expect((determinant([matrix[1], matrix[0], matrix[2]]) as number) / expected).toBeCloseTo(-1, 14);
+    });
+
+    it('returns positive zero when a large Hilbert determinant underflows', () => {
+        const matrix = Array.from({ length: 100 }, (_, row) =>
+            Array.from({ length: 100 }, (_, column) => 1 / (row + column + 1)));
+        const snapshot = matrix.map((row) => [...row]);
+        expect(calculateMdeterm(matrix)).toBe(0);
+        expect(determinant(matrix)).toBe(0);
+        expect(matrix).toEqual(snapshot);
+    });
+
     it('recognizes exactly dependent integer rows across unrelated scales', () => {
         let seed = 82758258;
         const next = () => {

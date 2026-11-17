@@ -15,6 +15,20 @@
  */
 
 /**
+ * A code point in the surrogate block is half of a UTF-16 pair, not a character.
+ */
+export function isSurrogateCodePoint(codePoint: number) {
+    return codePoint >= 0xD800 && codePoint <= 0xDFFF;
+}
+
+/**
+ * U+FDD0-U+FDEF and the last two code points of every plane (xFFFE, xFFFF).
+ */
+export function isNonCharacterCodePoint(codePoint: number) {
+    return (codePoint >= 0xFDD0 && codePoint <= 0xFDEF) || (codePoint & 0xFFFF) >= 0xFFFE;
+}
+
+/**
  * excel logic is cofusing, so we use google sheet logic
  *
  * @param text

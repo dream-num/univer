@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { charLenByte } from '../../../engine/utils/char-kit';
+import { charLenByte, getCharIndexByByteNum } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -89,7 +89,8 @@ export class Findb extends BaseFunction {
 
         const startNumValue = Math.floor(+startNumObject.getValue());
 
-        if (withinText.isNull() || startNumValue <= 0 || startNumValue > withinTextValue.length) {
+        // start_num is a byte position, like the result: a double-byte character takes two.
+        if (withinText.isNull() || startNumValue <= 0 || startNumValue > charLenByte(withinTextValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -97,7 +98,7 @@ export class Findb extends BaseFunction {
             return NumberValueObject.create(startNumValue);
         }
 
-        const index = withinTextValue.indexOf(findTextValue, startNumValue - 1);
+        const index = withinTextValue.indexOf(findTextValue, getCharIndexByByteNum(withinTextValue, startNumValue));
 
         if (index === -1) {
             return ErrorValueObject.create(ErrorType.VALUE);

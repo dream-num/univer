@@ -41,12 +41,43 @@ describe('Test pduration function', () => {
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
-        it('Preserves small positive rates', () => {
+        it('Preserves numeric errors when the rate rounds away on addition to one', () => {
             const rate = NumberValueObject.create(1e-20);
             const present = NumberValueObject.create(1);
             const result = testFunction.calculate(rate, present, NumberValueObject.create(2));
-            expect(Number(result.getValue()) / 6.931471805599453e19).toBeCloseTo(1, 14);
-            expect(testFunction.calculate(rate, present, present).getValue()).toBe(0);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(testFunction.calculate(rate, present, present).getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Preserves Excel nonzero periods at a small positive rate', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(1e-13),
+                NumberValueObject.create(100),
+                NumberValueObject.create(200)
+            );
+            expect(result.getValue()).toBeCloseTo(6937016409072.96, 0);
+            expect(Number(result.getValue()) > 6.935e12).toBe(true);
+
+            const numericString = testFunction.calculate(
+                StringValueObject.create('1e-13'),
+                StringValueObject.create('100'),
+                StringValueObject.create('200')
+            );
+            expect(numericString.getValue()).toBe(result.getValue());
+        });
+
+        it('Preserves rounding and domain checks independently in an array', () => {
+            const rates = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1e-13, 1e-20, -0.5]]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(rates, NumberValueObject.create(100), NumberValueObject.create(200));
+            expect(getObjectValue(result)).toStrictEqual([[6937016409072.96, ErrorType.NUM, ErrorType.NUM]]);
         });
 
         it('Preserves zero periods when nearby large values have the same logarithm', () => {

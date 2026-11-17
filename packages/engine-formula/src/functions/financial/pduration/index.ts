@@ -65,9 +65,7 @@ export class Pduration extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            // Preserve Excel's zero periods when the separate logarithms coincide.
-            const logGrowth = Math.log(fvValue) - Math.log(pvValue);
-            const result = logGrowth / Math.log1p(rateValue);
+            const result = (Math.log(fvValue) - Math.log(pvValue)) / Math.log(1 + rateValue);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

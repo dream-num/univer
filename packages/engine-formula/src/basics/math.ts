@@ -68,7 +68,9 @@ export function calculateLcm(a: number, b: number): number {
         return 0;
     }
 
-    return Math.abs(a * b) / den;
+    // Reduce before multiplying so a safe integer LCM does not lose precision
+    // in a larger intermediate product.
+    return Math.abs((a / den) * b);
 }
 
 export function calculateMdeterm(matrix: number[][]): number {

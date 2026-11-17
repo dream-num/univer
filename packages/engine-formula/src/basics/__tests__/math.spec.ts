@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { calculateCombin, calculateFactorial } from '../math';
+import { calculateCombin, calculateFactorial, calculateGcd, calculateLcm } from '../math';
 
 describe('Test math', () => {
     it('Factorial test', () => {
@@ -30,5 +30,36 @@ describe('Test math', () => {
     it('Combin test', () => {
         expect(calculateCombin(8, 2)).toBe(28);
         expect(calculateCombin(1000000, 2000)).toBe(Infinity);
+    });
+
+    it('Gcd retains zero handling and integer truncation', () => {
+        expect(calculateGcd(0, 0)).toBe(0);
+        expect(calculateGcd(0, 12)).toBe(12);
+        expect(calculateGcd(12, 0)).toBe(12);
+        expect(calculateGcd(18.9, 24.8)).toBe(6);
+    });
+
+    it('Lcm retains zero and ordinary integer results', () => {
+        expect(calculateLcm(0, 0)).toBe(0);
+        expect(calculateLcm(0, 12)).toBe(0);
+        expect(calculateLcm(12, 0)).toBe(0);
+        expect(calculateLcm(18, 24)).toBe(72);
+    });
+
+    it('Lcm keeps safe integer results exact when the unreduced product is large', () => {
+        const pairs = [
+            [1999999874, 24999998425],
+            [2999999811, 50999996787],
+            [4503599627370495, 9007199254740990],
+            [Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
+        ];
+        const gcd = (a: bigint, b: bigint): bigint => b === 0n ? a : gcd(b, a % b);
+
+        for (const [a, b] of pairs) {
+            const exact = BigInt(a) / gcd(BigInt(a), BigInt(b)) * BigInt(b);
+            expect(exact <= BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+            expect(calculateLcm(a, b)).toBe(Number(exact));
+            expect(calculateLcm(b, a)).toBe(Number(exact));
+        }
     });
 });

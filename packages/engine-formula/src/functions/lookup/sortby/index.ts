@@ -178,7 +178,11 @@ export class Sortby extends BaseFunction {
                                 return result;
                             });
                         } else if (byArray1ColumnCount === 1) {
-                            arrayValue = indices.map((index) => arrayValue[index].slice());
+                            arrayValue = indices.map((index) => {
+                                const row = arrayValue[index].slice(0, arrayColumnCount);
+                                row.length = arrayColumnCount;
+                                return row;
+                            });
                         }
                     }
                 }
@@ -186,7 +190,7 @@ export class Sortby extends BaseFunction {
                 const result = ArrayValueObject.create({
                     calculateValueList: arrayValue,
                     rowCount: arrayValue.length,
-                    columnCount: arrayValue[0].length || 0,
+                    columnCount: arrayColumnCount,
                     unitId: this.unitId as string,
                     sheetId: this.subUnitId as string,
                     row: this.row,

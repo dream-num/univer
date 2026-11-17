@@ -371,6 +371,8 @@ describe('Sheets sort views', () => {
 
         await renderWithInjector(root, currentTestBed, <CustomSortPanel />);
 
+        expect(container.querySelectorAll('a')).toHaveLength(0);
+
         await act(async () => {
             getAddCondition(container!).click();
             await awaitTime(260);
@@ -382,12 +384,16 @@ describe('Sheets sort views', () => {
         });
 
         const removeLinks = Array.from(container.querySelectorAll('a'));
-        expect(removeLinks[1]).toBeTruthy();
+        expect(removeLinks).toHaveLength(2);
+        expect(removeLinks[0].getAttribute('aria-label')).toBe('Delete condition');
+        expect(removeLinks[1].getAttribute('aria-label')).toBe('Delete condition');
 
         await act(async () => {
             removeLinks[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
             await awaitTime(20);
         });
+
+        expect(container.querySelectorAll('a')).toHaveLength(0);
 
         expect(Array.from(container.querySelectorAll('[data-u-comp="radio"]'))
             .filter((item) => item.textContent === 'Descending')).toHaveLength(1);

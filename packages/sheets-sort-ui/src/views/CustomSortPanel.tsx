@@ -16,8 +16,6 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
-import type { LocaleKey } from '../locale/types';
-import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import {
     Button,
@@ -33,6 +31,8 @@ import { CheckMarkIcon, DeleteEmptyIcon, GripVerticalIcon, IncreaseIcon, MoreDow
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 export interface ICustomSortPanelProps {
@@ -309,15 +309,18 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <Radio value={SortType.ASC}>{localeService.t<LocaleKey>('sheets-sort-ui.general.sort-asc')}</Radio>
                     <Radio value={SortType.DESC}>{localeService.t<LocaleKey>('sheets-sort-ui.general.sort-desc')}</Radio>
                 </RadioGroup>
-                <a
-                    className={`
-                      univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-transition-colors
-                      hover:univer-text-red-500
-                    `}
-                    onClick={() => onChange(null, currentIndex)}
-                >
-                    {!showDelete && <DeleteEmptyIcon />}
-                </a>
+                {showDelete && (
+                    <a
+                        className={`
+                          univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-transition-colors
+                          hover:univer-text-red-500
+                        `}
+                        aria-label={localeService.t<LocaleKey>('sheets-sort-ui.dialog.delete-condition')}
+                        onClick={() => onChange(null, currentIndex)}
+                    >
+                        <DeleteEmptyIcon />
+                    </a>
+                )}
             </div>
         </div>
     );

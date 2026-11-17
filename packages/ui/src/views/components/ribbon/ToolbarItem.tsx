@@ -149,7 +149,6 @@ const toolbarSelectorRootVariants = cva(
       univer-toolbar-selector-root univer-animate-in univer-fade-in univer-relative univer-flex univer-h-7
       univer-cursor-pointer univer-items-center univer-gap-1 univer-whitespace-nowrap univer-rounded univer-px-1
       univer-transition-colors
-      focus-within:univer-ring-2 focus-within:univer-ring-inset focus-within:univer-ring-primary-600
       hover:univer-bg-gray-100
       focus-visible:univer-outline-none focus-visible:univer-ring-2 focus-visible:univer-ring-inset
       focus-visible:univer-ring-primary-600

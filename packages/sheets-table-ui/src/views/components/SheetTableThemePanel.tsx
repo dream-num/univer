@@ -16,7 +16,6 @@
 
 import type { IRangeThemeStyleItem, ISetRangeThemeMutationParams } from '@univerjs/sheets';
 import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSetConfig } from '@univerjs/sheets-table';
-import type { LocaleKey } from '../../locale/types';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
 import { CloseIcon, DownIcon, IncreaseIcon } from '@univerjs/icons';
@@ -30,6 +29,7 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import { useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
 import {
     TABLE_BORDER_DEFAULT,
     TABLE_BORDER_NONE,
@@ -238,9 +238,9 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 className={clsx(`
                                   univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-flex-col
                                   univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-1 univer-shadow-sm
-                                  univer-transition-all
+                                  univer-outline-none univer-transition-all
                                   hover:univer-border-gray-400 hover:univer-shadow-md
-                                  focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                  focus-visible:univer-ring-2 focus-visible:univer-ring-primary-200
                                   dark:!univer-bg-gray-800
                                 `, borderClassName, {
                                     '!univer-border-primary-500 univer-ring-2 univer-ring-primary-100': selected,
@@ -285,10 +285,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         className="
                           univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-items-center
                           univer-justify-center univer-rounded-lg univer-border univer-border-dashed
-                          univer-border-gray-300 univer-bg-gray-0 univer-p-0 univer-text-gray-500
+                          univer-border-gray-300 univer-bg-gray-0 univer-p-0 univer-text-gray-500 univer-outline-none
                           univer-transition-colors
                           hover:univer-border-primary-500 hover:univer-text-primary-600
-                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                          focus-visible:univer-ring-2 focus-visible:univer-ring-primary-200
                           dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-gray-300
                         "
                         onClick={handleAddCustomTheme}
@@ -317,9 +317,9 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     className={clsx(`
                                       univer-flex univer-size-full univer-cursor-pointer univer-flex-col
                                       univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-1
-                                      univer-shadow-sm univer-transition-all
+                                      univer-shadow-sm univer-outline-none univer-transition-all
                                       hover:univer-border-gray-400 hover:univer-shadow-md
-                                      focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                      focus-visible:univer-ring-2 focus-visible:univer-ring-primary-200
                                       dark:!univer-bg-gray-900
                                     `, borderClassName, {
                                         '!univer-border-primary-500 univer-ring-2 univer-ring-primary-100': selected,
@@ -346,10 +346,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                       univer-size-5 univer-cursor-pointer univer-items-center univer-justify-center
                                       univer-rounded-full univer-border univer-border-solid univer-border-gray-200
                                       univer-bg-gray-0 univer-p-0 univer-text-gray-500 univer-shadow-sm
-                                      univer-transition-all
+                                      univer-outline-none univer-transition-all
                                       hover:univer-border-red-200 hover:univer-bg-red-50 hover:univer-text-red-600
-                                      focus:univer-opacity-100 focus:univer-outline-none focus:univer-ring-2
-                                      focus:univer-ring-primary-200
+                                      focus:univer-opacity-100
+                                      focus-visible:univer-ring-2 focus-visible:univer-ring-primary-200
                                       rtl:univer-left-[-6px] rtl:univer-right-auto
                                       dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                                     `, {
@@ -406,9 +406,9 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         className={clsx(`
                                           univer-flex univer-h-10 univer-cursor-pointer univer-items-center univer-gap-2
                                           univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-gray-600
-                                          univer-transition-colors
+                                          univer-outline-none univer-transition-colors
                                           hover:univer-bg-gray-100
-                                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                          focus-visible:univer-ring-2 focus-visible:univer-ring-primary-200
                                           dark:!univer-bg-gray-900 dark:!univer-text-gray-300
                                         `, borderClassName)}
                                     >

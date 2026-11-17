@@ -118,7 +118,7 @@ export class Correl extends BaseFunction {
             array2DiffSum += array2Diff ** 2;
         }
 
-        const denominator = Math.sqrt(array1DiffSum * array2DiffSum);
+        const denominator = Math.sqrt(array1DiffSum) * Math.sqrt(array2DiffSum);
 
         if (denominator === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);

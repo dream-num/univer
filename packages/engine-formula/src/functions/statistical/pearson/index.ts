@@ -119,7 +119,7 @@ export class Pearson extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        const result = num / Math.sqrt(den1 * den2);
+        const result = num / (Math.sqrt(den1) * Math.sqrt(den2));
 
         return NumberValueObject.create(result);
     }

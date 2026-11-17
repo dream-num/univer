@@ -17,7 +17,7 @@
 import type { compareToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { DateSystem } from '@univerjs/core';
@@ -29,11 +29,68 @@ import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { BaseReferenceObject } from '../reference-object/base-reference-object';
+import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
+import { RangeReferenceObject } from '../reference-object/range-reference-object';
+import { copyReferenceContext } from '../utils/three-dimensional-reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
+
+class ReferenceIntersectionNode extends BaseAstNode {
+    override get nodeType() {
+        return NodeType.OPERATOR;
+    }
+
+    override execute(): void {
+        const [left, right] = this.getChildren().map((child) => child.getValue());
+        if (left?.isError() || right?.isError()) {
+            this.setValue((left?.isError() ? left : right)!);
+            return;
+        }
+        if (!(left instanceof BaseReferenceObject) || !(right instanceof BaseReferenceObject)) {
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+            return;
+        }
+
+        const areas = (reference: BaseReferenceObject) => reference instanceof MultiAreaReferenceObject
+            ? reference.getAreas().flat().filter((area): area is BaseReferenceObject => area instanceof BaseReferenceObject)
+            : [reference];
+        const rightAreas = areas(right);
+        const intersections: BaseReferenceObject[] = [];
+        for (const first of areas(left)) {
+            const a = first.getRangePosition();
+            for (const second of rightAreas) {
+                if (first.getUnitId() !== second.getUnitId() || first.getSheetId() !== second.getSheetId()) {
+                    continue;
+                }
+                const b = second.getRangePosition();
+                const range = {
+                    startRow: Math.max(a.startRow, b.startRow),
+                    endRow: Math.min(a.endRow, b.endRow),
+                    startColumn: Math.max(a.startColumn, b.startColumn),
+                    endColumn: Math.min(a.endColumn, b.endColumn),
+                };
+                if (range.startRow <= range.endRow && range.startColumn <= range.endColumn) {
+                    const result = new RangeReferenceObject(range, first.getSheetId(), first.getUnitId());
+                    copyReferenceContext(first, result);
+                    result.setForcedSheetName(first.getForcedSheetName());
+                    result.setRefOffset(0, 0);
+                    intersections.push(result);
+                }
+            }
+        }
+        if (intersections.length === 0) {
+            this.setValue(ErrorValueObject.create(ErrorType.NULL));
+        } else if (intersections.length === 1) {
+            this.setValue(intersections[0]);
+        } else {
+            this.setValue(new MultiAreaReferenceObject('', [intersections], MultiAreaArrayMode.STACK_AREAS));
+        }
+    }
+}
 
 export class OperatorNode extends BaseAstNode {
     constructor(
@@ -136,6 +193,9 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: string): BaseAstNode {
+        if (param === operatorToken.INTERSECTION) {
+            return new ReferenceIntersectionNode(param);
+        }
         let functionName = '';
         const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
@@ -165,6 +225,9 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
     override checkAndCreateNodeType(param: LexerNode | string) {
         if (param instanceof LexerNode) {
             return;
+        }
+        if (param === operatorToken.INTERSECTION) {
+            return this.create(param);
         }
         const tokenTrim = param.trim();
 

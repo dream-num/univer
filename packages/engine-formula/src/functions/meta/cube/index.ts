@@ -18,6 +18,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { CubeValueObject } from '../../../engine/value-object/cube-value-object';
 import { BaseFunction } from '../../base-function';
@@ -29,8 +30,14 @@ export class Cube extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: FunctionVariantType[]) {
-        // Preserve addresses for reference-form INDEX without changing the cube's value semantics.
-        const references = variants.every((variant) => variant.isReferenceObject()) ? variants as BaseReferenceObject[] : undefined;
+        if (variants.every((variant) => variant.isReferenceObject())) {
+            const areas = (variants as BaseReferenceObject[]).flatMap((reference) =>
+                reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()
+                    ? reference.getAreas().flat()
+                    : [reference]
+            );
+            return new MultiAreaReferenceObject('', [areas], MultiAreaArrayMode.STACK_AREAS);
+        }
         const values: ArrayValueObject[] = [];
 
         for (let i = 0; i < variants.length; i++) {
@@ -49,6 +56,6 @@ export class Cube extends BaseFunction {
             values.push(variant as ArrayValueObject);
         }
 
-        return CubeValueObject.create(values, references);
+        return CubeValueObject.create(values);
     }
 }

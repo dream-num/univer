@@ -235,6 +235,10 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
     const weekendArray = getWeekendArray(weekend);
 
     const _startDateSerialNumber = Math.floor(startDateSerialNumber);
+    const maxSerial = getDateSystemMaxSerial(dateSystem);
+    if (workingDays < -_startDateSerialNumber || workingDays > maxSerial - _startDateSerialNumber) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
     let targetDateSerialNumber = _startDateSerialNumber;
 
     let days = Math.abs(workingDays);
@@ -242,7 +246,7 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
     for (let i = 1; i <= days; i++) {
         const currentDateSerialNumber = workingDays < 0 ? _startDateSerialNumber - i : _startDateSerialNumber + i;
 
-        if (currentDateSerialNumber < 0) {
+        if (currentDateSerialNumber < 0 || currentDateSerialNumber > maxSerial) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

@@ -1142,6 +1142,62 @@ export class LexerTreeBuilder extends Disposable {
         return nodes;
     }
 
+    private _startReferenceUnion(current: number): boolean {
+        this._pushNodeToChildren(this._segment);
+        this._resetSegment();
+        const children = this._currentLexerNode.getChildren();
+        let depth = 0;
+        let opening = children.length - 1;
+        for (; opening >= 0; opening--) {
+            const child = children[opening];
+            if (child === matchToken.CLOSE_BRACKET) {
+                depth++;
+            } else if (child === matchToken.OPEN_BRACKET) {
+                if (depth === 0) {
+                    break;
+                }
+                depth--;
+            }
+        }
+        if (opening < 0 || opening === children.length - 1) {
+            return false;
+        }
+
+        const operand = new LexerNode();
+        operand.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+        const [, ...operandChildren] = children.splice(opening);
+        operand.setChildren(operandChildren);
+        for (const child of operandChildren) {
+            if (child instanceof LexerNode) {
+                child.setParent(operand);
+            }
+        }
+
+        const union = new LexerNode();
+        union.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
+        operand.changeToParent(union);
+        this._setCurrentLexerNode(union);
+        this._changeCurrentBracket(bracketType.FUNCTION);
+        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, current);
+        return true;
+    }
+
+    private _isReferenceIntersection(formula: string, current: number): boolean {
+        const right = formula.slice(current + 1).trimStart();
+        if (!/^(?:[$'\[]|[\p{L}_]|\d+:)/u.test(right)) {
+            return false;
+        }
+
+        const left = this._segment.trim();
+        if (left !== '') {
+            return /(?:^|!)\$?[\p{L}_][\p{L}\d_.$]*$/u.test(left) || (this.isColonOpen() && /^\$?\d+$/u.test(left));
+        }
+
+        const previous = this._getLastChildCurrent();
+        return previous === matchToken.CLOSE_BRACKET || (previous instanceof LexerNode &&
+            [DEFAULT_TOKEN_CUBE_FUNCTION_NAME, matchToken.COLON, 'INDEX', 'INDIRECT', 'OFFSET'].includes(previous.getToken().toUpperCase()));
+    }
+
     private _openSquareBracket() {
         this._squareBracketState += 1;
     }
@@ -1798,36 +1854,8 @@ export class LexerTreeBuilder extends Disposable {
                     }
 
                     this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
-                } else {
-                    /**
-                     * support cubeValueObject for =INDEX((A6:B6,C6:D7),1,1,2)
-                     */
-                    const cubeNode = new LexerNode();
-                    cubeNode.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
-                    const cubeParamNode = new LexerNode();
-                    cubeParamNode.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
-                    cubeParamNode.changeToParent(cubeNode);
-
-                    const colonNode = this._currentLexerNode.getParent();
-
-                    if (colonNode && colonNode.getToken() === matchToken.COLON) {
-                        const colonNodeParent = colonNode.getParent();
-                        if (!colonNodeParent) {
-                            return ErrorType.VALUE;
-                        }
-
-                        colonNode.changeToParent(cubeParamNode);
-                        colonNodeParent.setChildren([]);
-                        cubeNode.changeToParent(colonNodeParent);
-                    } else {
-                        return ErrorType.VALUE;
-                    }
-
-                    this._changeCurrentBracket(bracketType.FUNCTION);
-                    this._pushNodeToChildren(this._segment);
-                    this._resetSegment();
-                    this._currentLexerNode = cubeNode;
-                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+                } else if (!this._startReferenceUnion(cur)) {
+                    return ErrorType.VALUE;
                 }
             } else if (
                 currentString === matchToken.COLON &&
@@ -1956,6 +1984,17 @@ export class LexerTreeBuilder extends Disposable {
                 subLexerNode.setParent(this._currentLexerNode);
 
                 this._resetSegment();
+            } else if (
+                currentString === ' ' &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose() &&
+                this.isSquareBracketClose() &&
+                this.isBracesClose() &&
+                this._isReferenceIntersection(formulaString, cur)
+            ) {
+                this._pushNodeToChildren(this._segment);
+                this._resetSegment();
+                this._pushNodeToChildren(operatorToken.INTERSECTION);
             } else if (
                 OPERATOR_TOKEN_SET.has(currentString) &&
                 this.isSingleQuotationClose() &&

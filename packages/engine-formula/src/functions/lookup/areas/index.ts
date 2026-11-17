@@ -16,6 +16,7 @@
 
 import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -28,6 +29,9 @@ export class Areas extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(reference: FunctionVariantType) {
+        if (reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()) {
+            return NumberValueObject.create(reference.getAreas().reduce((count, areas) => count + areas.length, 0));
+        }
         if (reference.isReferenceObject()) {
             return NumberValueObject.create(1);
         }

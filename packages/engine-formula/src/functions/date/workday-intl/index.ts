@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { getDateSerialNumberByObject, getDateSerialNumberByWorkingDays, isValidWeekend } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,161 +29,111 @@ export class WorkdayIntl extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(startDate: BaseValueObject, days: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(startDateInput: FunctionVariantType, daysInput: FunctionVariantType, weekendInput?: FunctionVariantType, holidaysInput?: FunctionVariantType) {
+        const startDate = this._getArgument(startDateInput);
+        const days = this._getArgument(daysInput);
+        const weekend = weekendInput == null || (!weekendInput.isReferenceObject() && (weekendInput as BaseValueObject).isNull())
+            ? NumberValueObject.create(1)
+            : this._getArgument(weekendInput, true);
+        const holidays = holidaysInput?.isReferenceObject()
+            ? (holidaysInput as BaseReferenceObject).toArrayValueObject()
+            : holidaysInput as BaseValueObject | undefined;
+        const dates = this._getHolidayDates(holidays);
+        const inputs = [startDate, days, weekend];
+        const arrays = inputs.filter((input): input is ArrayValueObject => input.isArray());
+        if (arrays.length === 0) {
+            return this._calculateDate(startDate, days, weekend, dates);
+        }
+
+        const rows = Math.max(...arrays.map((input) => input.getRowCount()));
+        const columns = Math.max(...arrays.map((input) => input.getColumnCount()));
+        const missing = ErrorValueObject.create(ErrorType.NA);
+        const [startDates, dayCounts, weekends] = inputs.map((input) => expandArrayValueObject(rows, columns, input, missing));
+        return startDates.map((start, row, column) =>
+            this._calculateDate(start, dayCounts.get(row, column) ?? missing, weekends.get(row, column) ?? missing, dates)
+        );
+    }
+
+    private _getArgument(input: FunctionVariantType, allowRange = false): BaseValueObject {
+        if (!input.isReferenceObject()) {
+            return input as BaseValueObject;
+        }
+        const reference = input as BaseReferenceObject;
+        if (!reference.isMultiArea() && reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
+            return reference.getFirstCell();
+        }
+        return allowRange ? reference.toArrayValueObject() : ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    private _calculateDate(startDate: BaseValueObject, days: BaseValueObject, weekend: BaseValueObject, holidays: number[] | ErrorValueObject) {
         if (startDate.isError()) {
             return startDate;
         }
-
         if (days.isError()) {
             return days;
         }
-
-        if (weekend?.isError()) {
-            return weekend;
-        }
-
-        if (holidays?.isError()) {
-            return holidays;
-        }
-
-        if (weekend?.isArray()) {
-            return weekend.map((weekendItem) => this._handleSingleObject(startDate, days, weekendItem, holidays));
-        }
-
-        return this._handleSingleObject(startDate, days, weekend, holidays);
-    }
-
-    private _handleSingleObject(startDate: BaseValueObject, days: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
-        const _weekend = weekend ?? NumberValueObject.create(1);
-
-        const _startDate = this._checkArrayError(startDate);
-
-        if (_startDate.isError()) {
-            return _startDate;
-        }
-
-        const _days = this._checkArrayError(days);
-
-        if (_days.isError()) {
-            return _days;
-        }
-
-        if (_startDate.isBoolean() || _days.isBoolean()) {
+        if (startDate.isBoolean() || days.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate, this.getDateSystem());
-
-        if (typeof startDateSerialNumber !== 'number') {
-            return startDateSerialNumber;
+        const serial = getDateSerialNumberByObject(startDate, this.getDateSystem());
+        if (typeof serial !== 'number') {
+            return serial;
         }
-
-        const workingDays = +days.getValue();
-
+        const workingDays = Math.trunc(+days.getValue());
         if (Number.isNaN(workingDays)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        let weekendValue = _weekend.getValue() as number | string;
-
-        if (_weekend.isBoolean()) {
-            weekendValue = +weekendValue;
+        if (workingDays === 0) {
+            return NumberValueObject.create(Math.floor(serial));
         }
-
-        // 1111111 is an invalid string.
-        if (_weekend.isString() && (!isValidWeekend(weekendValue) || weekendValue === '1111111')) {
+        const value = weekend.getValue();
+        const weekendValue = typeof value === 'boolean' ? Number(value) : value as string | number;
+        if (weekend.isString() && (!isValidWeekend(weekendValue) || weekendValue === '1111111')) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        if (!isValidWeekend(weekendValue)) {
+        if (weekend.isError() || !isValidWeekend(weekendValue) || !Number.isFinite(workingDays)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
-
-        if (holidays) {
-            return this._getResultByHolidays(startDateSerialNumber, workingDays, weekendValue, holidays);
+        if (!Array.isArray(holidays)) {
+            return holidays;
         }
-
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue, undefined, this.getDateSystem());
-
-        if (typeof result !== 'number') {
-            return result;
-        }
-
-        return NumberValueObject.create(result);
+        const result = getDateSerialNumberByWorkingDays(serial, workingDays, weekendValue, holidays, this.getDateSystem());
+        return typeof result === 'number' ? NumberValueObject.create(result) : result;
     }
 
-    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
-        let _variant = variant;
-
-        if (_variant.isArray()) {
-            const rowCount = (_variant as ArrayValueObject).getRowCount();
-            const columnCount = (_variant as ArrayValueObject).getColumnCount();
-
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
+    private _getHolidayDates(holidays?: BaseValueObject): number[] | ErrorValueObject {
+        if (holidays == null || holidays.isNull()) {
+            return [];
+        }
+        if (holidays.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        if (!holidays.isArray()) {
+            const date = getDateSerialNumberByObject(holidays, this.getDateSystem());
+            return typeof date === 'number' ? [date] : date;
         }
 
-        if (_variant.isError()) {
-            return _variant;
-        }
-
-        return _variant;
-    }
-
-    private _getResultByHolidays(startDateSerialNumber: number, workingDays: number, weekendValue: number | string, holidays: BaseValueObject): BaseValueObject {
-        const holidaysValueArray = [];
-
-        if (holidays?.isArray()) {
-            const rowCount = (holidays as ArrayValueObject).getRowCount();
-            const columnCount = (holidays as ArrayValueObject).getColumnCount();
-
-            for (let r = 0; r < rowCount; r++) {
-                for (let c = 0; c < columnCount; c++) {
-                    const cell = (holidays as ArrayValueObject).get(r, c) as BaseValueObject;
-
-                    if (cell.isBoolean()) {
-                        return ErrorValueObject.create(ErrorType.VALUE);
-                    }
-
-                    if (cell.isNull()) {
-                        continue;
-                    }
-
-                    const holidaySerialNumber = getDateSerialNumberByObject(cell, this.getDateSystem());
-
-                    if (typeof holidaySerialNumber !== 'number') {
-                        if (cell.isString()) {
-                            continue;
-                        }
-                        return holidaySerialNumber;
-                    }
-
-                    holidaysValueArray.push(holidaySerialNumber);
+        const values = holidays as ArrayValueObject;
+        const dates: number[] = [];
+        for (let row = 0; row < values.getRowCount(); row++) {
+            for (let column = 0; column < values.getColumnCount(); column++) {
+                const value = values.get(row, column);
+                if (!value || value.isNull()) {
+                    continue;
+                }
+                if (value.isBoolean()) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+                const date = getDateSerialNumberByObject(value, this.getDateSystem());
+                if (typeof date === 'number') {
+                    dates.push(date);
+                } else if (!value.isString()) {
+                    return date;
                 }
             }
-        } else {
-            if (holidays.isBoolean()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const holidaySerialNumber = getDateSerialNumberByObject(holidays, this.getDateSystem());
-
-            if (typeof holidaySerialNumber !== 'number') {
-                return holidaySerialNumber;
-            }
-
-            holidaysValueArray.push(holidaySerialNumber);
         }
-
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue, holidaysValueArray, this.getDateSystem());
-
-        if (typeof result !== 'number') {
-            return result;
-        }
-
-        return NumberValueObject.create(result);
+        return dates;
     }
 }

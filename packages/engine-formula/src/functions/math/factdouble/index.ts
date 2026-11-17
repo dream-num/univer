@@ -47,6 +47,9 @@ export class Factdouble extends BaseFunction {
     }
 
     private _handleSingleObject(number: BaseValueObject): BaseValueObject {
+        if (number.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
         let _number = number;
 
         if (_number.isString()) {
@@ -58,6 +61,9 @@ export class Factdouble extends BaseFunction {
         }
 
         const numberValue = Math.floor(+_number.getValue());
+        if (numberValue === -1) {
+            return NumberValueObject.create(1);
+        }
 
         const result = calculateFactorial(numberValue, 2);
 

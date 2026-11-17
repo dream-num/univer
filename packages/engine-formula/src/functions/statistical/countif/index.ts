@@ -18,6 +18,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
 import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -32,7 +33,7 @@ export class Countif extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType): BaseValueObject {
-        if (!range.isReferenceObject()) {
+        if (!range.isReferenceObject() || (range instanceof MultiAreaReferenceObject && !range.isArrayOfReferences())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

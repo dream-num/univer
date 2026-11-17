@@ -1575,6 +1575,10 @@ describe('Grouped dynamic array formulas', () => {
             const workbook = facade.createWorkbook({
                 id: 'grouped-formula-com',
                 sheetOrder: ['sheet', 'source'],
+                resources: [{
+                    name: 'SHEET_DEFINED_NAME_PLUGIN',
+                    data: JSON.stringify({ previous: { id: 'previous', name: 'PreviousRow', localSheetId: 'source', formulaOrRefString: 'Source!$B1048576' } }),
+                }],
                 sheets: {
                     sheet: {
                         id: 'sheet',
@@ -1626,6 +1630,21 @@ describe('Grouped dynamic array formulas', () => {
                                 11: { f: '=SUM(OFFSET(INDIRECT({"Source!A1:A2"}),0,1))' },
                                 12: { f: '=ISREF(OFFSET(INDIRECT({"Source!A1"}),0,1))' },
                             },
+                            17: {
+                                0: { f: '=WORKDAY(45169,{1;2},Source!A1)' },
+                                1: { f: '=WORKDAY.INTL(45169,SEQUENCE(2),,Source!A1)' },
+                                3: { f: '=SUM((Source!B1:B2,Source!B1))' },
+                                4: { f: '=AREAS((Source!B1,Source!B2))' },
+                                5: { f: '=ISREF((Source!B1,Source!B2))' },
+                                6: { f: '=INDEX((Source!B1,Source!B2),1,1,2)' },
+                                7: { f: '=SUM((Source!B1:B2,Source!B2) Source!B2)' },
+                                8: { f: '=SUM(Source!B1 Source!B2)' },
+                                9: { f: '=ROWS((Source!B1,Source!B2))' },
+                            },
+                            19: {
+                                0: { f: '=CUBEVALUE("NoSuchConnection")' },
+                                1: { f: '=CUBEMEMBER("ThisWorkbookDataModel","[Product].[Bikes]")' },
+                            },
                         },
                     },
                     source: {
@@ -1633,7 +1652,11 @@ describe('Grouped dynamic array formulas', () => {
                         name: 'Source',
                         rowCount: 20,
                         columnCount: 22,
-                        cellData: { 0: { 1: { v: 19 } }, 1: { 1: { v: 23 } } },
+                        cellData: {
+                            0: { 0: { v: 45170 }, 1: { v: 19 } },
+                            1: { 1: { v: 23 }, 2: { f: '=PreviousRow', si: 'previous-shared' } },
+                            2: { 2: { si: 'previous-shared' } },
+                        },
                     },
                 },
             });
@@ -1713,6 +1736,21 @@ describe('Grouped dynamic array formulas', () => {
             expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 0]]);
             await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
             expect(sheet.getRange('F15:G15').getValues()).toEqual([[2, 1]]);
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(sheet.getRange('H18:J18').getValues()).toEqual([[46, '#NULL!', '#REF!']]);
+            expect(sheet.getRange('A20:B20').getValues()).toEqual([['#N/A', '#N/A']]);
+
+            const source = workbook.getSheetByName('Source')!;
+            expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
+            await calculate(() => source.getRange('A1:B1').setValues([[45173, 29]]));
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45170, 45170], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[81, 2, 1, 23]]);
+            expect(source.getRange('C2:C3').getValues()).toEqual([[29], [23]]);
+            await calculate(() => expect(commands.syncExecuteCommand(UndoCommand.id)).toBe(true));
+            expect(sheet.getRange('A18:B19').getValues()).toEqual([[45173, 45173], [45174, 45174]]);
+            expect(sheet.getRange('D18:G18').getValues()).toEqual([[61, 2, 1, 23]]);
+            expect(source.getRange('C2:C3').getValues()).toEqual([[19], [23]]);
         } finally {
             univer.dispose();
         }

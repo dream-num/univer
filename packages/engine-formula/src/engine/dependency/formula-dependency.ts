@@ -526,7 +526,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         return this._dependencyTreeCache.get(treeId);
     }
 
-    protected _getTreeNode(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column'>) {
+    protected _getTreeNode(tree: Pick<IFormulaDependencyTree, 'unitId' | 'subUnitId' | 'formula' | 'row' | 'column' | 'refOffsetX' | 'refOffsetY'>) {
         return generateAstNode(
             tree.unitId,
             tree.formula,
@@ -534,8 +534,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             this._astTreeBuilder,
             this._currentConfigService,
             tree.subUnitId,
-            tree.column,
-            tree.row
+            tree.column - tree.refOffsetX,
+            tree.row - tree.refOffsetY
         );
     }
 

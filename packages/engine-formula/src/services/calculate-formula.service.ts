@@ -661,8 +661,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     this._astTreeBuilder,
                     this._currentConfigService,
                     tree.subUnitId,
-                    tree.column,
-                    tree.row
+                    tree.column - tree.refOffsetX,
+                    tree.row - tree.refOffsetY
                 );
                 const nodeData = {
                     node,

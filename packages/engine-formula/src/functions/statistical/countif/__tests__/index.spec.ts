@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { ICellData, IWorkbookData } from '@univerjs/core';
+import { CellValueType, Injector, LocaleType, ObjectMatrix } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
-import { CellValueType, LocaleType } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
+import { FormulaCacheService } from '../../../../services/formula-cache.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Countif } from '../index';
@@ -316,5 +319,28 @@ describe('Test countif function', () => {
         it('Does not include same-lower-bound numeric buckets in pipe-delimited less-than criteria', async () => {
             expect(await calculate('=COUNTIF(H1:H4,"<25|New Hire (Last 12 Months)")')).toBe(2);
         });
+    });
+});
+
+describe('Large cached COUNTIF ranges', () => {
+    const count = 200000;
+
+    it('evaluates COUNTIF over a warmed 200,000-row zero range', () => {
+        const injector = new Injector([[FormulaCacheService]]);
+        const context = injector.get(FormulaCacheService).createCalculation()!;
+        const cellData = new ObjectMatrix<ICellData>();
+        for (let row = 0; row < count; row++) cellData.setValue(row, 0, { v: 0, t: CellValueType.NUMBER });
+        const range = new RangeReferenceObject({ startRow: 0, endRow: count - 1, startColumn: 0, endColumn: 0 }, 'sheet', 'unit');
+        range.setUnitData({ unit: { sheet: { rowCount: count, columnCount: 1, rowData: {}, columnData: {}, cellData } } });
+        range.setCalculationCache(context);
+        const fn = new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF);
+        try {
+            expect(getObjectValue(fn.calculate(range, NumberValueObject.create(1)))).toBe(0);
+            expect(context.invertedIndex.getCellValuePositions('unit', 'sheet', 0)?.get(0)?.size).toBe(count);
+            expect(getObjectValue(fn.calculate(range, NumberValueObject.create(0)))).toBe(count);
+        } finally {
+            range.dispose();
+            injector.dispose();
+        }
     });
 });

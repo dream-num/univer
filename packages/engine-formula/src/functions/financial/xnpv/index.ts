@@ -77,9 +77,12 @@ export class Xnpv extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result = 0;
         const d1 = _dates[0];
+        if (_dates.some((date) => date < d1)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
+        let result = 0;
         for (let i = 0; i < _dates.length; i++) {
             const di = _dates[i];
             const Pi = _values[i];

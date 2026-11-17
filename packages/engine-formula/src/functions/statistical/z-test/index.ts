@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { normalCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -134,7 +134,8 @@ export class ZTest extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal probabilities to positive zero.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 
     private _getArrayValues(array: BaseValueObject): number[] | ErrorValueObject {

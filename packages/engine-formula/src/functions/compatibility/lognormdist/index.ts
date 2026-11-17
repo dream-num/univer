@@ -99,6 +99,7 @@ export class Lognormdist extends BaseFunction {
 
         const result = lognormalCDF(xValue, meanValue, standardDevValue);
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal cumulative probabilities to positive zero.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

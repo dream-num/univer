@@ -154,6 +154,19 @@ describe('Test zTest function', () => {
             }
         });
 
+        it('flushes subnormal upper-tail results at the worksheet boundary', () => {
+            const array = ArrayValueObject.createByArray([[-1], [0], [1]]);
+            const x = ArrayValueObject.createByArray([[-37.5, -37.52, -38]]);
+            for (const fn of [testFunction, new ZTest(FUNCTION_NAMES_COMPATIBILITY.ZTEST)]) {
+                const actual = getObjectValue(fn.calculate(array, x, NumberValueObject.create(Math.sqrt(3)))) as number[][];
+                expect(Math.abs(actual[0][0] / 4.605353009581955e-308 - 1)).toBeLessThan(1e-12);
+                expect(actual[0].slice(1)).toEqual([0, 0]);
+
+                const estimated = fn.calculate(ArrayValueObject.createByArray([[37, 39]]), NumberValueObject.create(0));
+                expect(getObjectValue(estimated)).toBe(0);
+            }
+        });
+
         it('Sigma value test', () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

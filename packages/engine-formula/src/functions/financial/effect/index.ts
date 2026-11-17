@@ -46,6 +46,11 @@ export class Effect extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        // Preserve the zero result when the annual rate rounds away on addition to 1.
+        if (Number.isFinite(nperyValue) && 1 + nominalRateValue === 1) {
+            return NumberValueObject.create(0);
+        }
+
         // Return effective annual interest rate
         const result = nperyValue === 1
             ? nominalRateValue

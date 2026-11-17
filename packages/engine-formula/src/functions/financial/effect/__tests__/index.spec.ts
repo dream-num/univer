@@ -27,9 +27,33 @@ describe('Test effect function', () => {
     const testFunction = new Effect(FUNCTION_NAMES_FINANCIAL.EFFECT);
 
     describe('Effect', () => {
-        it.each([1, 2, 12, 365])('Preserves small rates with %i periods', (periods) => {
+        it.each([1, 2, 12, 365])('Preserves zero rounding for small rates with %i periods', (periods) => {
             const result = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(periods));
-            expect(result.getValue()).toBe(1e-20);
+            expect(result.getValue()).toBe(0);
+        });
+
+        it.each([1, 12])('Preserves the rounding boundary with %i periods', (periods) => {
+            const rounded = testFunction.calculate(NumberValueObject.create(Number.EPSILON / 2), NumberValueObject.create(periods));
+            expect(rounded.getValue()).toBe(0);
+
+            const nonzero = testFunction.calculate(NumberValueObject.create(Number.EPSILON), NumberValueObject.create(periods));
+            expect(nonzero.getValue()).toBeGreaterThan(0);
+        });
+
+        it.each([1, 12])('Preserves zero rounding for a numeric string with %i periods', (periods) => {
+            const result = testFunction.calculate(StringValueObject.create('1e-20'), NumberValueObject.create(periods));
+            expect(result.getValue()).toBe(0);
+        });
+
+        it('Validates arguments before rounding tiny rates', () => {
+            const negative = testFunction.calculate(NumberValueObject.create(-1e-20), NumberValueObject.create(1));
+            expect(negative.getValue()).toBe(ErrorType.NUM);
+
+            const noPeriods = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(0));
+            expect(noPeriods.getValue()).toBe(ErrorType.NUM);
+
+            const unboundedPeriods = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(Number.POSITIVE_INFINITY));
+            expect(unboundedPeriods.getValue()).toBeNaN();
         });
 
         it('Keeps large period counts and truncates fractional periods', () => {

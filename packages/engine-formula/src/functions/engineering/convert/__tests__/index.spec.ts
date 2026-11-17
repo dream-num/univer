@@ -27,6 +27,25 @@ describe('Test convert function', () => {
     const testFunction = new Convert(FUNCTION_NAMES_ENGINEERING.CONVERT);
 
     describe('Convert', () => {
+        it.each([
+            [72, 'Pica', 'in', 1],
+            [1, 'in2', 'cm2', 6.4516],
+            [1, 'km3', 'm3', 1e9],
+            [1, 'mK', 'K', 0.001],
+            [1, 'T', 'ga', 10000],
+            [1, 'kibyte', 'byte', 1024],
+            [1, 'kft', 'm', ErrorType.NA],
+            [1, 'kim', 'm', ErrorType.NA],
+            [1e300, 'm', 'ang', ErrorType.NUM],
+        ] as const)('matches Excel for CONVERT(%s, %s, %s)', (value, from, to, expected) => {
+            const result = testFunction.calculate(NumberValueObject.create(value), StringValueObject.create(from), StringValueObject.create(to));
+            if (typeof expected === 'number') {
+                expect(Number(result.getValue())).toBeCloseTo(expected, 12);
+            } else {
+                expect(result.getValue()).toBe(expected);
+            }
+        });
+
         it('Value is normal number', () => {
             const number = NumberValueObject.create(1);
             const fromUnit = StringValueObject.create('lbm');

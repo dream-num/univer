@@ -15,12 +15,12 @@
  */
 
 import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
-import { BooleanNumber, isRealNum } from '@univerjs/core';
 import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
@@ -659,7 +659,7 @@ export function lognormalCDF(x: number, mean: number, standardDev: number): numb
         return 0;
     }
 
-    return 0.5 + 0.5 * erf((Math.log(x) - mean) / Math.sqrt(2 * standardDev * standardDev));
+    return 0.5 + 0.5 * erf(standardizeNormalValue(Math.log(x), mean, standardDev) / Math.SQRT2);
 }
 
 export function lognormalPDF(x: number, mean: number, standardDev: number): number {
@@ -667,7 +667,8 @@ export function lognormalPDF(x: number, mean: number, standardDev: number): numb
         return 0;
     }
 
-    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - ((Math.log(x) - mean) ** 2) / (2 * standardDev * standardDev));
+    const z = standardizeNormalValue(Math.log(x), mean, standardDev);
+    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - z ** 2 / 2);
 }
 
 export function lognormalINV(probability: number, mean: number, standardDev: number): number {
@@ -696,12 +697,23 @@ export function negbinomialPDF(numberF: number, numberS: number, probabilityS: n
     return calculateCombin(numberF + numberS - 1, numberS - 1) * (probabilityS ** numberS) * ((1 - probabilityS) ** numberF);
 }
 
+function standardizeNormalValue(x: number, mean: number, standardDev: number): number {
+    const difference = x - mean;
+    // Opposite-sign finite locations can overflow before division by a large scale.
+    if (!Number.isFinite(difference) && Number.isFinite(x) && Number.isFinite(mean)) {
+        return x / standardDev - mean / standardDev;
+    }
+
+    return difference / standardDev;
+}
+
 export function normalCDF(x: number, mean: number, standardDev: number): number {
-    return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
+    return 0.5 * (1 + erf(standardizeNormalValue(x, mean, standardDev) / Math.SQRT2));
 }
 
 export function normalPDF(x: number, mean: number, standardDev: number): number {
-    return Math.exp(-0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - (x - mean) ** 2 / (2 * standardDev * standardDev));
+    const z = standardizeNormalValue(x, mean, standardDev);
+    return Math.exp(-0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - z ** 2 / 2);
 }
 
 export function normalINV(probability: number, mean: number, standardDev: number): number {

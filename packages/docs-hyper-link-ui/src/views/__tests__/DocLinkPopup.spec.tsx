@@ -32,7 +32,7 @@ import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutatio
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { BrowserClipboardService, IClipboardInterfaceService, IDialogService, IMessageService, RediContext } from '@univerjs/ui';
+import { BrowserClipboardService, DesktopLayoutService, IClipboardInterfaceService, IDialogService, ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
@@ -112,6 +112,7 @@ function createPopupTestBed(documentData = createDocData()) {
     injector.add([DocStateEmitService]);
     injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
     injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
     injector.add([IDialogService, {

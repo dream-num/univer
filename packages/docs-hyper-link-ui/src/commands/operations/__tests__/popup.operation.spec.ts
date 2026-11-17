@@ -19,7 +19,7 @@ import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceT
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { IDialogService } from '@univerjs/ui';
+import { DesktopLayoutService, IDialogService, ILayoutService } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
@@ -110,6 +110,7 @@ describe('doc hyperlink popup operations', () => {
         injector.add([DocSelectionManagerService]);
         injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
         injector.add([IDialogService, {
             useValue: {
                 close: () => {},
@@ -204,6 +205,10 @@ describe('doc hyperlink popup operations', () => {
     });
 
     it('moves the caret to an internal bookmark', async () => {
+        const input = document.createElement('textarea');
+        document.body.appendChild(input);
+        const layout = univer.__getInjector().get(ILayoutService);
+        const focus = layout.registerFocusHandler(UniverInstanceType.UNIVER_DOC, () => input.focus());
         const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
 
         const result = await commandService.executeCommand(ClickDocHyperLinkOperation.id, {
@@ -219,6 +224,9 @@ describe('doc hyperlink popup operations', () => {
             false,
             { preserveCaret: true }
         );
+        expect(document.activeElement).toBe(input);
+        focus.dispose();
+        input.remove();
     });
 
     it('moves the caret to the start of an internal heading', async () => {

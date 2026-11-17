@@ -19,6 +19,7 @@ import { CommandType, CustomRangeType, isSafeUrl, IUniverInstanceService, Univer
 import { DOC_SELECTION_OPTION_PRESERVE_CARET, DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
@@ -120,12 +121,15 @@ export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: stri
 
             const range = { startOffset: targetOffset, endOffset: targetOffset, collapsed: true };
             const selectionManager = accessor.get(DocSelectionManagerService);
-            const selectTarget = (): void => selectionManager.replaceDocRanges(
-                [range],
-                { unitId, subUnitId: unitId },
-                false,
-                { [DOC_SELECTION_OPTION_PRESERVE_CARET]: true }
-            );
+            const selectTarget = (): void => {
+                selectionManager.replaceDocRanges(
+                    [range],
+                    { unitId, subUnitId: unitId },
+                    false,
+                    { [DOC_SELECTION_OPTION_PRESERVE_CARET]: true }
+                );
+                accessor.get(ILayoutService).focus(unitId);
+            };
             const render = accessor.get(IRenderManagerService).getRenderUnitById(unitId);
             const renderInjector = render?.getInjector?.();
             const backScrollController = renderInjector?.has(DocBackScrollRenderController)

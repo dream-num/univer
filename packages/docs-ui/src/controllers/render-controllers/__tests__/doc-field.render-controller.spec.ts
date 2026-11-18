@@ -57,12 +57,16 @@ function createTestBed() {
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([DocLayoutExecutorService]);
     injector.add([DocSelectionManagerService]);
-    const text = 'Body\rSecond\r\n';
+    const text = '\u001FBody\u001E\rSecond\r\n';
     const paragraphs = generateParagraphs(text);
     paragraphs[1].paragraphStyle = { pageBreakBefore: 1 };
     const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
         id: 'field-chrome',
-        body: { dataStream: text, paragraphs },
+        body: {
+            dataStream: text,
+            paragraphs,
+            customRanges: [{ rangeId: 'body-field', startIndex: 0, endIndex: 5, rangeType: CustomRangeType.FIELD, properties: { fieldType: 'DATE', instruction: 'DATE' } }],
+        },
         documentStyle: { documentFlavor: 1, pageSize: { width: 300, height: 400 }, marginTop: 40, marginBottom: 40, marginLeft: 20, marginRight: 20, marginHeader: 10, defaultHeaderId: 'header' },
         headers: { header: { headerId: 'header', body: {
             dataStream: '\u001F1\u001E\r\n',
@@ -76,7 +80,7 @@ function createTestBed() {
     const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
     skeleton.calculate();
     skeleton.getViewModel().setEditArea(DocumentEditArea.HEADER);
-    const documents = new Documents('field-chrome-doc', skeleton);
+    const documents = injector.createInstance(Documents, 'field-chrome-doc', skeleton);
     render.mainComponent = documents;
     render.scene.addObject(documents);
     render.addRenderDependencies([[DocEventManagerService], [DocFieldRenderController]]);

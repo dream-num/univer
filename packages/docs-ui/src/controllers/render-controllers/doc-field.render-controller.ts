@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
 import type { Documents, IPageRenderConfig, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
+import { CustomRangeType, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { drawDocCustomRangeChrome } from '../../basics/doc-custom-range-chrome';

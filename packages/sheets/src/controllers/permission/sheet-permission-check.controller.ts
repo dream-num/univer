@@ -76,6 +76,8 @@ import type {
 } from '../../commands/commands/remove-row-col.command';
 import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
+import type { ICancelFrozenCommandParams, ISetFrozenCommandParams } from '../../commands/commands/set-frozen.command';
+import type { ISetGridlinesColorCommandParams } from '../../commands/commands/set-gridlines-color.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
 import type { ISetStyleCommandParams } from '../../commands/commands/set-style.command';
@@ -88,6 +90,7 @@ import type {
 } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
+import type { IToggleGridlinesCommandParams } from '../../commands/commands/toggle-gridlines.command';
 import type { LocaleKey } from '../../locale/types';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
@@ -109,6 +112,8 @@ import {
     SetSpecificColsVisibleCommand,
 } from '../../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.command';
+import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/set-frozen.command';
+import { SetGridlinesColorCommand } from '../../commands/commands/set-gridlines-color.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import {
     SetSelectedRowsVisibleCommand,
@@ -125,6 +130,7 @@ import {
 } from '../../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
 import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
+import { ToggleGridlinesCommand } from '../../commands/commands/toggle-gridlines.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
@@ -536,6 +542,52 @@ export class SheetPermissionCheckController extends Disposable {
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+
+            // freeze pane
+            case SetFrozenCommand.id:
+            case CancelFrozenCommand.id:
+                params = commandInfo.params as ISetFrozenCommandParams | ICancelFrozenCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // toggle gridlines
+            case ToggleGridlinesCommand.id:
+                params = commandInfo.params as IToggleGridlinesCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // set gridlines color
+            case SetGridlinesColorCommand.id:
+                params = commandInfo.params as ISetGridlinesColorCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
                 break;
 
             // insert/delete with move range

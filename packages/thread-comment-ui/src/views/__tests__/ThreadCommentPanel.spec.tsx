@@ -48,9 +48,11 @@ import {
     DeleteCommentCommand,
     DeleteCommentMutation,
     DeleteCommentTreeCommand,
+    IThreadCommentAuthzService,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    ThreadCommentAuthzService,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
     UpdateCommentCommand,
@@ -330,6 +332,10 @@ class TestUniverInstanceService {
         return new BehaviorSubject({ id: 'workbook' });
     }
 
+    getUnitType() {
+        return UniverInstanceType.UNIVER_SHEET;
+    }
+
     setCurrentUnitForType(): void {
     }
 }
@@ -370,6 +376,7 @@ function createPanelTestBed() {
         [IShortcutService, { useClass: TestShortcutService as never }],
         [ISidebarService, { useClass: TestSidebarService as never }],
         [IUniverInstanceService, { useClass: TestUniverInstanceService as never }],
+        [IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }],
         [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
         [LifecycleService],
         [UserManagerService],

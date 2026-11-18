@@ -21,9 +21,6 @@ const locale: typeof enUS = {
         panel: {
             title: '評論管理',
         },
-        permission: {
-            commentErr: '你沒有權限使用評論。',
-        },
         menu: {
             addComment: '新增評論',
             openComments: '開啟評論',

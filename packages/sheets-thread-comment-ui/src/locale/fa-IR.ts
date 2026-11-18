@@ -21,9 +21,6 @@ const locale: typeof enUS = {
         panel: {
             title: 'مدیریت نظر',
         },
-        permission: {
-            commentErr: 'شما مجوز استفاده از نظرات را ندارید.',
-        },
         menu: {
             addComment: 'افزودن نظر',
             openComments: 'باز کردن نظرات',

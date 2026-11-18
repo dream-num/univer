@@ -21,9 +21,6 @@ const locale: typeof enUS = {
         panel: {
             title: 'Gerenciamento de Comentários',
         },
-        permission: {
-            commentErr: 'Você não tem permissão para usar comentários.',
-        },
         menu: {
             addComment: 'Adicionar Comentário',
             openComments: 'Abrir comentários',

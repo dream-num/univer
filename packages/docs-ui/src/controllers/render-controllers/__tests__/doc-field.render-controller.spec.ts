@@ -91,9 +91,11 @@ function createTestBed() {
     injector.get(IUniverInstanceService).focusUnit(model.getUnitId());
     const pages = skeleton.getSkeletonData()!.pages;
     const fillRect = vi.fn();
-    const ctx = { save: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), rect: vi.fn(), clip: vi.fn(), fillRect, globalAlpha: 1 } as unknown as UniverRenderingContext;
+    const stroke = vi.fn();
+    const fill = vi.fn(() => ctx.fillStyle);
+    const ctx = { save: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), rect: vi.fn(), clip: vi.fn(), roundRect: vi.fn(), fill, fillRect, stroke, globalAlpha: 1 } as unknown as UniverRenderingContext;
     const paint = (pageIndex: number) => (documents as unknown as { _pageRender$: Subject<IPageRenderConfig> })._pageRender$.next({ page: pages[pageIndex], pageLeft: 0, pageTop: pageIndex * 420, ctx });
-    return { controller, events, selections, render, skeleton, pages, fillRect, paint };
+    return { controller, events, selections, render, skeleton, pages, fill, fillRect, paint, stroke };
 }
 
 describe('DocFieldRenderController', () => {
@@ -132,17 +134,33 @@ describe('DocFieldRenderController', () => {
         expect(fillRect).not.toHaveBeenCalled();
     });
 
-    it('leaves a focused traditional body field transparent while keeping its hover feedback', () => {
-        const { events, selections, render, skeleton, fillRect, paint } = createTestBed();
+    it('outlines a focused traditional body field without shading it', () => {
+        const { events, selections, render, skeleton, fill, fillRect, paint, stroke } = createTestBed();
         skeleton.getViewModel().setEditArea(DocumentEditArea.BODY);
         const rect = events.getCustomRangeBounds().find(({ customRange }) => customRange.rangeId === 'body-field')!.rects[0];
         render.scene.onPointerMove$.emitEvent({ buttons: 0, offsetX: (rect.left + rect.right) / 2, offsetY: (rect.top + rect.bottom) / 2 } as never);
         paint(0);
         expect(fillRect).toHaveBeenCalledTimes(1);
+        expect(stroke).not.toHaveBeenCalled();
         fillRect.mockClear();
 
         selections.__TEST_ONLY_add([{ startOffset: 2, endOffset: 2, collapsed: true, isActive: true, segmentId: '', segmentPage: 0 }]);
         paint(0);
+        expect(fillRect).not.toHaveBeenCalled();
+        expect(stroke).toHaveBeenCalledTimes(1);
+        expect(fill).toHaveReturnedWith('transparent');
+
+        stroke.mockClear();
+        selections.replaceSelectionInfoWithoutRefresh({
+            textRanges: [{ startOffset: 0, endOffset: 7, collapsed: false, isActive: true, segmentId: '', segmentPage: 0 }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: 0,
+            isEditing: true,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+        });
+        paint(0);
+        expect(stroke).not.toHaveBeenCalled();
         expect(fillRect).not.toHaveBeenCalled();
     });
 });

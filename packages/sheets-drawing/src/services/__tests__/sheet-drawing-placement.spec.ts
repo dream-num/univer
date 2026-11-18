@@ -45,6 +45,24 @@ describe('sheet drawing placement extents', () => {
     });
     afterEach(() => bed.univer.dispose());
 
+    it('keeps an explicit two-cell extent beyond the last row and column after refresh', () => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const { worksheet } = skeleton;
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(worksheet.getRowCount() - 1, worksheet.getColumnCount() - 1);
+        const bounds = { left: cell.startX, top: cell.startY, width: cell.endX - cell.startX + 54, height: cell.endY - cell.startY + 42 };
+        const anchors = transformToDrawingPosition(bounds, skeleton);
+        const drawing = applySheetDrawingPlacement({
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'beyond-sheet',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            sheetTransform: anchors,
+            axisAlignSheetTransform: anchors,
+        }, { kind: SheetDrawingAnchorType.Both, bounds }, skeleton);
+        expect(drawing.transform).toMatchObject(bounds);
+        expect(refreshSheetDrawingPlacement(drawing, skeleton).transform).toMatchObject(bounds);
+    });
+
     it.each([undefined, 0])('hydrates imported rotation over pixel angle %s and clamps oversized offsets without rewriting them', (angle) => {
         const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
         const from = { row: 3, column: 1, rowOffset: 144, columnOffset: 0 };

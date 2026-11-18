@@ -395,10 +395,21 @@ function resolveSheetDrawingPlacement(
 
 function projectCellMarker(position: ICellOverGridPosition, skeleton: SpreadsheetSkeleton): { left: number; top: number } {
     const cell = skeleton.getNoMergeCellWithCoordByIndex(position.row, position.column);
+    const { worksheet } = skeleton;
+    // Position-to-marker conversion stores any off-grid extent in the final cell.
+    const lastColumn = position.column === worksheet.getColumnCount() - 1;
+    const lastRow = position.row === worksheet.getRowCount() - 1;
     return {
-        left: precisionTo(cell.startX + (cell.startX === cell.endX ? 0 : Math.min(position.columnOffset, cell.endX - cell.startX)), 6),
-        top: precisionTo(cell.startY + (cell.startY === cell.endY ? 0 : Math.min(position.rowOffset, cell.endY - cell.startY)), 6),
+        left: precisionTo(cell.startX + projectCellOffset(position.columnOffset, cell.endX - cell.startX, lastColumn), 6),
+        top: precisionTo(cell.startY + projectCellOffset(position.rowOffset, cell.endY - cell.startY, lastRow), 6),
     };
+}
+
+function projectCellOffset(offset: number, extent: number, isLastCell: boolean): number {
+    if (extent === 0) {
+        return 0;
+    }
+    return isLastCell ? offset : Math.min(offset, extent);
 }
 
 /**

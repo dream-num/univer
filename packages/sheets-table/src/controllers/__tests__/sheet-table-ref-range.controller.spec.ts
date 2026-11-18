@@ -14,11 +14,65 @@
  * limitations under the License.
  */
 
-import { InsertRowMutation, RemoveColCommand } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import { Direction, ICommandService, IUniverInstanceService, LocaleService, LocaleType, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { InsertColCommand, InsertRowMutation, RemoveColCommand } from '@univerjs/sheets';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { AddSheetTableCommand } from '../../commands/commands/add-sheet-table.command';
+import enUS from '../../locale/en-US';
+import { TableManager } from '../../models/table-manager';
+import { UniverSheetsTablePlugin } from '../../plugin';
 import { SheetTableRefRangeController } from '../sheet-table-ref-range.controller';
 
 describe('SheetTableRefRangeController', () => {
+    it.each([
+        { command: InsertColCommand, start: 4 },
+        { command: RemoveColCommand, start: 2 },
+    ])('preserves table column identity when $command.id shifts the table', async ({ command, start }) => {
+        const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        onTestFinished(() => univer.dispose());
+        univer.registerPlugin(UniverSheetsTablePlugin);
+        const unitId = 'book';
+        const subUnitId = 'sheet';
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: unitId,
+            sheetOrder: [subUnitId],
+            sheets: {
+                [subUnitId]: { id: subUnitId, name: 'Sheet', rowCount: 20, columnCount: 20, cellData: {
+                    0: { 3: { v: 'Region' }, 4: { v: 'Sales' } },
+                } },
+            },
+        });
+        const injector = univer.__getInjector();
+        injector.get(LocaleService).setDirection('ltr');
+        injector.get(IUniverInstanceService).focusUnit(unitId);
+        const commands = injector.get(ICommandService);
+        const tables = injector.get(TableManager);
+        expect(await commands.executeCommand(AddSheetTableCommand.id, {
+            unitId,
+            subUnitId,
+            id: 'table',
+            name: 'Orders',
+            range: { startRow: 0, endRow: 3, startColumn: 3, endColumn: 4 },
+        })).toBe(true);
+        const table = () => tables.getTable(unitId, 'table')!.toJSON();
+        const columns = table().columns;
+        const expectTableAt = (startColumn: number) => {
+            expect(table()).toMatchObject({ range: { startColumn, endColumn: startColumn + 1 }, columns });
+        };
+
+        expect(await commands.executeCommand(command.id, {
+            unitId,
+            subUnitId,
+            direction: Direction.LEFT,
+            range: { startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expectTableAt(start);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expectTableAt(3);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expectTableAt(start);
+    });
+
     it('should return empty mutations for unsupported commands and update table range after row insertion', () => {
         let interceptCommandConfig: any;
         let commandExecutedListener: any;

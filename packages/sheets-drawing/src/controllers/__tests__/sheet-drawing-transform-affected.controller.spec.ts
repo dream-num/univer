@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     DesktopLogService,
     Direction,
     DrawingTypeEnum,
-    ICommandService,
-    ILogService,
     ImageSourceType,
-    Injector,
     IResourceLoaderService,
     IUniverInstanceService,
     RANGE_TYPE,
@@ -50,12 +47,12 @@ import {
     RemoveRowCommand,
     SetColHiddenCommand,
     SetColWidthCommand,
+    SetRangeValuesMutation,
     SetRowHeightCommand,
     SetRowHiddenCommand,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
     SetWorksheetRowAutoHeightMutation,
-    SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -63,11 +60,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
-import { drawingPositionToTransform } from '../../basics/transform-position';
+import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { SetSheetDrawingPlacementCommand } from '../../commands/commands/set-sheet-drawing-placement.command';
-import { DrawingApplyType, SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../../commands/operations/clear-drawing-transformer.operation';
+import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
+import { SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
 import {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
@@ -77,437 +74,6 @@ import { SheetDrawingTransformPlanService } from '../../services/sheet-drawing-t
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { SheetDrawingTransformAffectedController } from '../sheet-drawing-transform-affected.controller';
 import { SHEET_DRAWING_PLUGIN } from '../sheet-drawing.controller';
-
-const UNIT_ID = 'unit-1';
-const SUB_UNIT_ID = 'sheet-1';
-const injectors: Injector[] = [];
-
-afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
-
-function createSkeleton(options: { rowHeights?: number[]; colWidths?: number[] } = {}) {
-    const rowHeights = options.rowHeights ?? [];
-    const colWidths = options.colWidths ?? [];
-    const rowHeightAt = (row: number) => rowHeights[row] ?? 20;
-    const colWidthAt = (column: number) => colWidths[column] ?? 10;
-    const sumRows = (end: number) => Array.from({ length: Math.max(end, 0) }, (_, row) => rowHeightAt(row)).reduce((sum, height) => sum + height, 0);
-    const sumCols = (end: number) => Array.from({ length: Math.max(end, 0) }, (_, column) => colWidthAt(column)).reduce((sum, width) => sum + width, 0);
-
-    return {
-        rowHeaderWidth: 0,
-        columnHeaderHeight: 0,
-        rowTotalHeight: 2000,
-        columnTotalWidth: 1000,
-        makeDirty: vi.fn(),
-        calculate: vi.fn(),
-        getNoMergeCellWithCoordByIndex: vi.fn((row: number, column: number) => {
-            const startY = sumRows(row);
-            const startX = sumCols(column);
-            return {
-                startX,
-                endX: startX + colWidthAt(column),
-                startY,
-                endY: startY + rowHeightAt(row),
-            };
-        }),
-        getCellIndexAndOffsetByPosition: vi.fn((left: number, top: number) => {
-            let column = 0;
-            let colStart = 0;
-            while (left >= colStart + colWidthAt(column)) {
-                colStart += colWidthAt(column);
-                column++;
-            }
-
-            let row = 0;
-            let rowStart = 0;
-            while (top >= rowStart + rowHeightAt(row)) {
-                rowStart += rowHeightAt(row);
-                row++;
-            }
-
-            return {
-                column,
-                row,
-                columnOffset: left - colStart,
-                rowOffset: top - rowStart,
-            };
-        }),
-    };
-}
-
-function transformFromPosition(sheetTransform: any, skeleton: any) {
-    const fromCell = skeleton.getNoMergeCellWithCoordByIndex(sheetTransform.from.row, sheetTransform.from.column);
-    const toCell = skeleton.getNoMergeCellWithCoordByIndex(sheetTransform.to.row, sheetTransform.to.column);
-    const left = fromCell.startX + sheetTransform.from.columnOffset;
-    const top = fromCell.startY + sheetTransform.from.rowOffset;
-
-    return {
-        left,
-        top,
-        width: toCell.startX + sheetTransform.to.columnOffset - left,
-        height: toCell.startY + sheetTransform.to.rowOffset - top,
-    };
-}
-
-function createDrawing(overrides: Record<string, any> = {}, skeleton = createSkeleton()) {
-    const sheetTransform = overrides.sheetTransform ?? {
-        from: { row: 1, column: 1, rowOffset: 2, columnOffset: 2 },
-        to: { row: 3, column: 3, rowOffset: 6, columnOffset: 6 },
-    };
-    const transform = overrides.transform ?? transformFromPosition(sheetTransform, skeleton);
-
-    return {
-        unitId: UNIT_ID,
-        subUnitId: SUB_UNIT_ID,
-        drawingId: overrides.drawingId ?? 'drawing-1',
-        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-        anchorType: overrides.anchorType ?? SheetDrawingAnchorType.Both,
-        sheetTransform,
-        axisAlignSheetTransform: sheetTransform,
-        transform,
-        ...overrides,
-    };
-}
-
-function createController(options: { drawingData?: Record<string, any>; skeleton?: any } = {}) {
-    const skeleton = options.skeleton ?? createSkeleton();
-    const drawingData = options.drawingData ?? {};
-    const sheetSkeletonParam = { unitId: UNIT_ID, sheetId: SUB_UNIT_ID, skeleton };
-    const sheetDrawingService = {
-        getDrawingData: vi.fn(() => drawingData),
-        getBatchUpdateOp: vi.fn((drawings) => ({ undo: 'update-undo', redo: 'update-redo', objects: drawings })),
-        getBatchRemoveOp: vi.fn((drawings) => ({ undo: 'remove-undo', redo: 'remove-redo', objects: drawings })),
-        refreshTransform: vi.fn(),
-    };
-    const drawingManagerService = {
-        getDrawingData: vi.fn(() => drawingData),
-        refreshTransform: vi.fn(),
-    };
-    const injector = new Injector([
-        [SheetSkeletonService, { useValue: {
-            getSkeletonParam: vi.fn(() => sheetSkeletonParam),
-            getSkeleton: vi.fn(() => skeleton),
-        } }],
-        [ISheetDrawingService, { useValue: sheetDrawingService }],
-        [IDrawingManagerService, { useValue: drawingManagerService }],
-        [ICommandService, { useValue: {
-            syncExecuteCommand: vi.fn(),
-            onCommandExecuted: () => ({ dispose() {} }),
-        } }],
-        [SheetInterceptorService, { useValue: { interceptAfterCommand: () => ({ dispose() {} }) } }],
-        [SheetsSelectionsService, { useValue: {} }],
-        [IUniverInstanceService, { useValue: {} }],
-        [SheetDrawingTransformPlanService],
-        [ILogService, { useClass: DesktopLogService }],
-        [SheetDrawingTransformAffectedController],
-    ]);
-    injectors.push(injector);
-    vi.spyOn(injector.get(SheetDrawingTransformPlanService), 'transform');
-    const controller = injector.get(SheetDrawingTransformAffectedController) as any;
-
-    controller._getUnitIdAndSubUnitId = vi.fn(() => ({ unitId: UNIT_ID, subUnitId: SUB_UNIT_ID }));
-
-    return { controller, skeleton, sheetDrawingService, drawingManagerService };
-}
-
-describe('SheetDrawingTransformAffectedController', () => {
-    it('finalizes complete drawing candidates through extensions in mutation order', () => {
-        const skeleton = createSkeleton();
-        const drawing = createDrawing({ drawingId: 'extended' }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-        controller._transformPlanService.transform.mockImplementation((plan: any) => {
-            const candidate = plan.updates.get(drawing.drawingId);
-            expect(candidate).toMatchObject({
-                drawingId: drawing.drawingId,
-                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                anchorType: SheetDrawingAnchorType.Both,
-            });
-            plan.updates.set(drawing.drawingId, {
-                ...candidate,
-                transform: { ...candidate.transform, left: 77, top: 88 },
-            });
-            return {
-                preRedos: [{ id: 'feature.pre-redo', params: {} }],
-                redos: [{ id: 'feature.redo', params: {} }],
-                preUndos: [{ id: 'feature.pre-undo', params: {} }],
-                undos: [{ id: 'feature.undo', params: {} }],
-            };
-        });
-
-        const result = controller._moveColInterceptor({
-            range: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
-        }, 'insert');
-
-        expect(result.redos.map(({ id }: any) => id)).toEqual([
-            'feature.pre-redo',
-            SetDrawingApplyMutation.id,
-            'feature.redo',
-            ClearSheetDrawingTransformerOperation.id,
-        ]);
-        expect(result.undos.map(({ id }: any) => id)).toEqual([
-            'feature.pre-undo',
-            SetDrawingApplyMutation.id,
-            'feature.undo',
-            ClearSheetDrawingTransformerOperation.id,
-        ]);
-        expect(sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0].transform).toMatchObject({ left: 77, top: 88 });
-    });
-
-    it('removes drawings covered by deleted rows and shifts drawings below into undoable mutations', () => {
-        const skeleton = createSkeleton();
-        const deleted = createDrawing({
-            drawingId: 'deleted',
-            sheetTransform: {
-                from: { row: 2, column: 1, rowOffset: 0, columnOffset: 0 },
-                to: { row: 3, column: 2, rowOffset: 10, columnOffset: 5 },
-            },
-        }, skeleton);
-        const shifted = createDrawing({
-            drawingId: 'shifted',
-            sheetTransform: {
-                from: { row: 5, column: 1, rowOffset: 2, columnOffset: 2 },
-                to: { row: 6, column: 2, rowOffset: 6, columnOffset: 5 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { deleted, shifted },
-        });
-
-        const result = controller._moveRowInterceptor({
-            range: { startRow: 2, endRow: 3, startColumn: 0, endColumn: 9 },
-        }, 'remove');
-
-        expect(sheetDrawingService.getBatchUpdateOp).toHaveBeenCalledWith([
-            expect.objectContaining({
-                drawingId: 'shifted',
-                transform: expect.objectContaining({ top: 62, height: 24 }),
-                sheetTransform: expect.objectContaining({
-                    from: expect.objectContaining({ row: 3, rowOffset: 2 }),
-                    to: expect.objectContaining({ row: 4, rowOffset: 6 }),
-                }),
-            }),
-        ]);
-        expect(sheetDrawingService.getBatchRemoveOp).toHaveBeenCalledWith([
-            { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, drawingId: 'deleted' },
-        ]);
-        expect(result.redos).toEqual([
-            { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: sheetDrawingService.getBatchUpdateOp.mock.calls[0][0], type: DrawingApplyType.UPDATE } },
-            { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'remove-redo', objects: sheetDrawingService.getBatchRemoveOp.mock.calls[0][0], type: DrawingApplyType.REMOVE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
-        ]);
-        expect(result.undos[1].params.type).toBe(DrawingApplyType.INSERT);
-    });
-
-    it('moves drawings to the right when columns are inserted before them', () => {
-        const skeleton = createSkeleton();
-        const drawing = createDrawing({
-            drawingId: 'image-after-inserted-cols',
-            sheetTransform: {
-                from: { row: 1, column: 3, rowOffset: 2, columnOffset: 2 },
-                to: { row: 2, column: 4, rowOffset: 8, columnOffset: 5 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-
-        const result = controller._moveColInterceptor({
-            range: { startRow: 0, endRow: 9, startColumn: 1, endColumn: 2 },
-        }, 'insert');
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(updatedDrawing).toMatchObject({
-            drawingId: 'image-after-inserted-cols',
-            transform: { left: 52, top: 22, width: 13, height: 26 },
-            sheetTransform: {
-                from: { row: 1, column: 5, rowOffset: 2, columnOffset: 2 },
-                to: { row: 2, column: 6, rowOffset: 8, columnOffset: 5 },
-            },
-        });
-        expect(result.redos).toContainEqual({ id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] });
-    });
-
-    it('shrinks a both-anchored drawing when deleted rows cover its top anchor', () => {
-        const skeleton = createSkeleton();
-        const drawing = createDrawing({
-            drawingId: 'row-delete-top-anchor',
-            sheetTransform: {
-                from: { row: 2, column: 1, rowOffset: 5, columnOffset: 0 },
-                to: { row: 6, column: 2, rowOffset: 5, columnOffset: 5 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-
-        controller._moveRowInterceptor({
-            range: { startRow: 2, endRow: 4, startColumn: 0, endColumn: 9 },
-        }, 'remove');
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(updatedDrawing).toMatchObject({
-            transform: { top: 40, height: 25 },
-            sheetTransform: {
-                from: { row: 2, rowOffset: 0 },
-                to: { row: 3, rowOffset: 5 },
-            },
-        });
-    });
-
-    it('shrinks a both-anchored drawing when deleted columns cover its left anchor', () => {
-        const skeleton = createSkeleton();
-        const drawing = createDrawing({
-            drawingId: 'column-delete-left-anchor',
-            sheetTransform: {
-                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 5 },
-                to: { row: 2, column: 6, rowOffset: 5, columnOffset: 5 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-
-        controller._moveColInterceptor({
-            range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 4 },
-        }, 'remove');
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(updatedDrawing).toMatchObject({
-            transform: { left: 20, width: 15 },
-            sheetTransform: {
-                from: { column: 2, columnOffset: 0 },
-                to: { column: 3, columnOffset: 5 },
-            },
-        });
-    });
-
-    it('preserves both anchors when hidden rows cut through the drawing top edge', () => {
-        const skeleton = createSkeleton({ rowHeights: [20, 0, 0, 20, 20] });
-        const drawing = createDrawing({
-            drawingId: 'row-hidden-top-edge',
-            sheetTransform: {
-                from: { row: 1, column: 1, rowOffset: 5, columnOffset: 0 },
-                to: { row: 4, column: 3, rowOffset: 5, columnOffset: 0 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-
-        const result = controller._getDrawingUndoForRowAndColSize(UNIT_ID, SUB_UNIT_ID, [
-            { startRow: 1, endRow: 2, startColumn: 0, endColumn: 9 },
-        ]);
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(updatedDrawing).toMatchObject({
-            drawingId: 'row-hidden-top-edge',
-            transform: { left: 10, top: 20, width: 20, height: 25 },
-            sheetTransform: drawing.sheetTransform,
-        });
-        expect(result.redos).toEqual([
-            { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
-        ]);
-    });
-
-    it('recalculates drawing transforms after row height changes without changing anchors', () => {
-        const resizedSkeleton = createSkeleton({ rowHeights: [20, 20, 40, 20] });
-        const sheetTransform = {
-            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-            to: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
-        };
-        const drawing = createDrawing({
-            drawingId: 'resized-by-row-height',
-            sheetTransform,
-            transform: { left: 10, top: 20, width: 20, height: 40 },
-        }, resizedSkeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton: resizedSkeleton,
-            drawingData: { [drawing.drawingId]: drawing },
-        });
-
-        const result = controller._getDrawingUndoForRowAndColSize(UNIT_ID, SUB_UNIT_ID, [
-            { startRow: 2, endRow: 2, startColumn: 0, endColumn: 9 },
-        ]);
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(updatedDrawing).toMatchObject({
-            drawingId: 'resized-by-row-height',
-            sheetTransform,
-            transform: { left: 10, top: 20, width: 20, height: 60 },
-        });
-        expect(result.undos).toEqual([
-            { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-undo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
-        ]);
-    });
-
-    it('moves only fully contained both-anchored drawings when a range is moved', () => {
-        const skeleton = createSkeleton();
-        const contained = createDrawing({
-            drawingId: 'contained',
-            sheetTransform: {
-                from: { row: 1, column: 1, rowOffset: 2, columnOffset: 2 },
-                to: { row: 2, column: 2, rowOffset: 6, columnOffset: 6 },
-            },
-        }, skeleton);
-        const positionOnly = createDrawing({
-            drawingId: 'position-only',
-            anchorType: SheetDrawingAnchorType.Position,
-            sheetTransform: {
-                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-                to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
-            },
-        }, skeleton);
-        const partlyOutside = createDrawing({
-            drawingId: 'partly-outside',
-            sheetTransform: {
-                from: { row: 0, column: 0, rowOffset: 0, columnOffset: 0 },
-                to: { row: 3, column: 3, rowOffset: 0, columnOffset: 0 },
-            },
-        }, skeleton);
-        const { controller, sheetDrawingService } = createController({
-            skeleton,
-            drawingData: {
-                contained,
-                [positionOnly.drawingId]: positionOnly,
-                [partlyOutside.drawingId]: partlyOutside,
-            },
-        });
-
-        const result = controller._moveRangeInterceptor(
-            UNIT_ID,
-            SUB_UNIT_ID,
-            { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
-            { startRow: 3, endRow: 4, startColumn: 4, endColumn: 5 }
-        );
-        const updatedDrawing = sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0];
-
-        expect(sheetDrawingService.getBatchUpdateOp).toHaveBeenCalledTimes(1);
-        expect(sheetDrawingService.getBatchUpdateOp.mock.calls[0][0]).toHaveLength(1);
-        expect(updatedDrawing).toMatchObject({
-            unitId: UNIT_ID,
-            subUnitId: SUB_UNIT_ID,
-            drawingId: 'contained',
-            transform: { left: 42, top: 62, width: 14, height: 24 },
-            sheetTransform: {
-                from: { row: 3, column: 4, rowOffset: 2, columnOffset: 2 },
-                to: { row: 4, column: 5, rowOffset: 6, columnOffset: 6 },
-            },
-        });
-        expect(result.redos).toEqual([
-            { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
-        ]);
-    });
-});
 
 describe('explicit deletion targets', () => {
     it.each([
@@ -623,6 +189,154 @@ describe('sheet drawing transforms without UI plugins', () => {
         return service.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-1' })!;
     }
 
+    it('applies extension state around structural drawing updates and restores it through history', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const before = Tools.deepClone(getDrawing(service));
+        const worksheet = testBed.workbook.getSheetBySheetId('sheet1')!;
+        const cell = (value: string | null) => ({
+            id: SetRangeValuesMutation.id,
+            params: { unitId: 'test', subUnitId: 'sheet1', cellValue: { 0: { 0: value === null ? null : { v: value } } } },
+        });
+        const extension = testBed.get(SheetDrawingTransformPlanService).register({
+            transform: (plan) => {
+                if (plan.mode !== 'command' || plan.command.id !== InsertColCommand.id) return;
+                const candidate = plan.updates.get(before.drawingId)!;
+                plan.updates.set(before.drawingId, { ...candidate, selectable: false });
+                return {
+                    preRedos: [cell('before')],
+                    redos: [cell('after')],
+                    preUndos: [cell('before-undo')],
+                    undos: [cell(null)],
+                };
+            },
+        });
+        const observed: unknown[] = [];
+        const notification = service.update$.subscribe(() => observed.push(worksheet.getCell(0, 0)?.v));
+        try {
+            expect(await testBed.commandService.executeCommand(InsertColCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                direction: Direction.LEFT,
+                range: { startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 },
+            })).toBe(true);
+            const after = Tools.deepClone(getDrawing(service));
+            expect(after.selectable).toBe(false);
+            expect(after.transform!.left).toBe(before.transform!.left! + 88);
+            expect(worksheet.getCell(0, 0)?.v).toBe('after');
+            expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
+            expect(getDrawing(service)).toEqual(before);
+            expect(worksheet.getCell(0, 0)).toBeFalsy();
+            expect(await testBed.commandService.executeCommand(RedoCommandId)).toBe(true);
+            expect(getDrawing(service)).toEqual(after);
+            expect(worksheet.getCell(0, 0)?.v).toBe('after');
+            expect(observed).toEqual(['before', 'before-undo', 'before']);
+        } finally {
+            notification.unsubscribe();
+            extension.dispose();
+        }
+    });
+
+    it.each([30, 60, 90])('hydrates an imported two-cell drawing at %s degrees before rendering', (angle) => {
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const transform = { left: 200, top: 200, width: 160, height: 40, angle };
+        const drawing: ISheetDrawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'drawing-1',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            anchorType: SheetDrawingAnchorType.Both,
+            sheetTransform: transformToDrawingPosition(transform, skeleton),
+            axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+            transform: { left: 0, top: 0, width: 0, height: 0 },
+        };
+        expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
+        const current = getDrawing(testBed.get(ISheetDrawingService));
+        expect(current.transform).toMatchObject(transform);
+        expect(testBed.get(IDrawingManagerService).getDrawingByParam(drawing)).toEqual(current);
+    });
+
+    it('resizes a rotated drawing when the changed row is outside its unrotated rectangle', () => {
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const transform = { left: 200, top: 200, width: 160, height: 40, angle: 90 };
+        const drawing: ISheetDrawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'drawing-1',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            anchorType: SheetDrawingAnchorType.Both,
+            sheetTransform: transformToDrawingPosition(transform, skeleton),
+            axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+            transform,
+        };
+        expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
+        const row = drawing.axisAlignSheetTransform.to.row - 1;
+        expect(row).toBeGreaterThan(drawing.sheetTransform.to.row);
+        const rowHeight = testBed.workbook.getSheetBySheetId('sheet1')!.getRowHeight(row);
+        expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            value: rowHeight + 40,
+            ranges: [{ startRow: row, endRow: row, startColumn: 0, endColumn: 19 }],
+        })).toBe(true);
+        expect(getDrawing(testBed.get(ISheetDrawingService)).transform).toMatchObject({ left: 180, top: 220, width: 200, height: 40, angle: 90 });
+    });
+
+    it('preserves relative child transforms while resizing and persisting their group', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const base = Tools.deepClone(getDrawing(service));
+        const parent = { ...base, drawingId: 'group', drawingType: DrawingTypeEnum.DRAWING_GROUP, groupBaseBound: base.transform };
+        const child = {
+            ...base,
+            drawingId: 'child',
+            groupId: 'group',
+            transform: { left: 8, top: 12, width: 40, height: 20, angle: 30 },
+        };
+        expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [parent, child],
+        })).toBe(true);
+        const rowHeight = testBed.workbook.getSheetBySheetId('sheet1')!.getRowHeight(2);
+        expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            value: rowHeight + 40,
+            ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }],
+        })).toBe(true);
+        expect(service.getDrawingByParam(parent)!.transform!.height).toBe(base.transform!.height! + 40);
+        expect(service.getDrawingByParam(child)).toEqual(child);
+        const snapshot = testBed.get(IResourceLoaderService).saveUnit<IWorkbookData>('test')!;
+        const data = JSON.parse(snapshot.resources!.find(({ name }) => name === SHEET_DRAWING_PLUGIN)!.data);
+        expect(data.sheet1.data.child.transform).toEqual(child.transform);
+        expect(data.sheet1.data.group.transform.height).toBe(base.transform!.height! + 40);
+        expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+        expect(service.getDrawingByParam(parent)).toEqual(parent);
+        expect(service.getDrawingByParam(child)).toEqual(child);
+    });
+
+    it('preserves raw imported offsets during a metadata-only drawing edit', async () => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawings: [{ drawingId: 'drawing-1', placement: {
+                kind: SheetDrawingAnchorType.Both,
+                from: { row: 1, column: 1, rowOffset: 144, columnOffset: 0 },
+                to: { row: 8, column: 3, rowOffset: 0, columnOffset: 0 },
+            } }],
+        })).toBe(true);
+        const before = Tools.deepClone(getDrawing(service));
+        expect(testBed.commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [{ ...before, source: 'https://example.com/updated.png' }],
+        })).toBe(true);
+        expect(getDrawing(service)).toMatchObject({
+            source: 'https://example.com/updated.png',
+            sheetTransform: before.sheetTransform,
+            axisAlignSheetTransform: before.axisAlignSheetTransform,
+            transform: before.transform,
+        });
+    });
+
     it.each([DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id])('%s removes a legacy cell anchor and preserves an explicit absolute image', async (commandId) => {
         const service = await insertDrawing(undefined);
         const before = structuredClone(getDrawing(service));
@@ -665,7 +379,7 @@ describe('sheet drawing transforms without UI plugins', () => {
 
     it.each([true, false])('preserves fixed image dimensions after repeated deletion with rows=%s', async (rows) => {
         const service = await insertDrawing(SheetDrawingAnchorType.Position);
-        const original = getDrawing(service);
+        const original = Tools.deepClone(getDrawing(service));
         const legacy = {
             ...original,
             sheetTransform: { ...original.sheetTransform, to: { ...original.sheetTransform.to, row: -2, column: -2 } },
@@ -676,6 +390,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         })).toBe(true);
         const read = () => Tools.deepClone(service.getDrawingByParam({ ...legacy, drawingId: 'legacy-position' })!);
         const before = read();
+        expect(before.sheetTransform.to).toEqual(original.sheetTransform.to);
         const commandId = rows ? RemoveRowCommand.id : RemoveColCommand.id;
         for (let i = 0; i < 2; i++) {
             expect(await testBed.commandService.executeCommand(commandId, {
@@ -1092,20 +807,122 @@ describe('sheet drawing transforms without UI plugins', () => {
     it('resizes both-anchored drawings when row height changes', async () => {
         const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));
+        const manager = testBed.get(IDrawingManagerService);
+        const observed: Array<{ sheet: ISheetDrawing; drawing: unknown }> = [];
+        const capture = () => observed.push({
+            sheet: Tools.deepClone(getDrawing(service)),
+            drawing: Tools.deepClone(manager.getDrawingByParam(before)),
+        });
+        const subscriptions = [service.refreshTransform$.subscribe(capture), manager.refreshTransform$.subscribe(capture)];
 
-        expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
+        try {
+            expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }],
+                value: 40,
+            })).toBe(true);
+            const after = structuredClone(getDrawing(service));
+            expect(after.transform?.height).toBeGreaterThan(before.transform?.height ?? 0);
+
+            expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+            expect(getDrawing(service)).toEqual(before);
+            expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+            expect(getDrawing(service)).toEqual(after);
+        } finally {
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
+        }
+        expect(observed.length).toBeGreaterThan(0);
+        for (const state of observed) {
+            expect(state.drawing).toEqual(state.sheet);
+        }
+    });
+
+    it.each(['fromCollab', 'fromChangeset'])('keeps local layout on %s resize followed by a drawing-only move', async (source) => {
+        const service = await insertDrawing(SheetDrawingAnchorType.Both);
+        const peer = createSheetsDrawingTestBed();
+        const mutations: ICommandInfo[] = [];
+        const subscription = peer.commandService.onCommandExecuted((command) => {
+            if (command.id.startsWith('sheet.mutation.')) {
+                mutations.push(Tools.deepClone(command));
+            }
+        });
+        const range = (row: number) => [{ startRow: row, endRow: row, startColumn: 0, endColumn: 19 }];
+        const resize = (bed: typeof testBed, row: number, value: number) => bed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
             unitId: 'test',
             subUnitId: 'sheet1',
-            ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 }],
-            value: 40,
-        })).toBe(true);
-        const after = structuredClone(getDrawing(service));
-        expect(after.transform?.height).toBeGreaterThan(before.transform?.height ?? 0);
+            value,
+            ranges: range(row),
+        });
+        const replay = () => {
+            for (const mutation of mutations.splice(0)) {
+                expect(testBed.commandService.syncExecuteCommand(mutation.id, mutation.params, { [source]: true })).toBe(true);
+            }
+        };
+        try {
+            expect(peer.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+                unitId: 'test',
+                drawings: [Tools.deepClone(getDrawing(service))],
+            })).toBe(true);
+            mutations.length = 0;
+            const before = Tools.deepClone(getDrawing(service));
+            const originalHeight = testBed.workbook.getSheetBySheetId('sheet1')!.getRowHeight(0);
+            expect(resize(testBed, 0, originalHeight + 50)).toBe(true);
+            expect(resize(peer, 0, originalHeight + 30)).toBe(true);
+            expect(mutations.some(({ id }) => id === SetDrawingApplyMutation.id)).toBe(false);
+            // A local read-only layout stays different from the shared row height.
+            // Use another row for the remote edit, leaving A's local row 0 intact.
+            mutations.length = 0;
+            expect(resize(peer, 2, originalHeight + 30)).toBe(true);
+            replay();
+            expect(getDrawing(service).transform?.top).toBe(before.transform!.top! + 50);
+            expect(getDrawing(service).transform?.height).toBe(before.transform!.height! + 30);
 
-        expect(testBed.commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
-        expect(getDrawing(service)).toEqual(before);
-        expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
-        expect(getDrawing(service)).toEqual(after);
+            const peerDrawing = peer.get(ISheetDrawingService).getDrawingByParam(before)!;
+            expect(peer.commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                drawings: [{ drawingId: before.drawingId, placement: {
+                    kind: SheetDrawingAnchorType.Both,
+                    from: { ...peerDrawing.sheetTransform.from, row: 5 },
+                    to: { ...peerDrawing.sheetTransform.to, row: 8 },
+                } }],
+            })).toBe(true);
+            const moved = peer.get(ISheetDrawingService).getDrawingByParam(before)!;
+            const previous = Tools.deepClone(getDrawing(service));
+            const notifiedPositions: number[] = [];
+            const manager = testBed.get(IDrawingManagerService);
+            const visibleStates: Array<{ sheet: ISheetDrawing; drawing: unknown }> = [];
+            const recordState = () => visibleStates.push({
+                sheet: Tools.deepClone(getDrawing(service)),
+                drawing: Tools.deepClone(manager.getDrawingByParam(before)),
+            });
+            const refresh = service.refreshTransform$.subscribe(recordState);
+            const notification = manager.update$.subscribe((objects) => {
+                if (objects.some(({ drawingId }) => drawingId === before.drawingId)) {
+                    notifiedPositions.push(getDrawing(service).transform!.top!);
+                    recordState();
+                    // Renderers need the state before the remote edit to restore
+                    // removed metadata such as selectable, not the peer's pixel cache.
+                    expect(testBed.get(IDrawingManagerService).getOldDrawingByParam(before)).toEqual(previous);
+                }
+            });
+            try {
+                replay();
+            } finally {
+                refresh.unsubscribe();
+                notification.unsubscribe();
+            }
+            expect(notifiedPositions).toEqual([moved.transform!.top! + 20]);
+            for (const state of visibleStates) {
+                expect(state).toEqual({ sheet: getDrawing(service), drawing: getDrawing(service) });
+            }
+            expect(getDrawing(service).transform?.top).toBe(moved.transform!.top! + 20);
+            expect(testBed.get(IDrawingManagerService).getDrawingByParam(before)).toEqual(getDrawing(service));
+        } finally {
+            subscription.dispose();
+            peer.univer.dispose();
+        }
     });
 
     it('updates placement through a command and round-trips through undo and redo', async () => {
@@ -1504,7 +1321,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         }
     });
 
-    it.each(['controller', 'unit'] as const)('cancels a queued drawing refresh when the %s is disposed', async (owner) => {
+    it.each(['controller', 'unit'] as const)('stops drawing refresh after the %s is disposed', async (owner) => {
         const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = Tools.deepClone(getDrawing(service));
         const plans: string[] = [];
@@ -1512,15 +1329,17 @@ describe('sheet drawing transforms without UI plugins', () => {
             transform: (plan) => { plans.push(plan.mode); },
         });
         try {
-            expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                rowsAutoHeightInfo: [{ row: 2, autoHeight: 60 }],
-            })).toBe(true);
             if (owner === 'controller') {
                 testBed.get(SheetDrawingTransformAffectedController).dispose();
             } else {
                 testBed.get(IUniverInstanceService).disposeUnit('test');
+            }
+            if (owner === 'controller') {
+                expect(testBed.commandService.syncExecuteCommand(SetWorksheetRowAutoHeightMutation.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    rowsAutoHeightInfo: [{ row: 2, autoHeight: 60 }],
+                })).toBe(true);
             }
             await Promise.resolve();
             expect(plans).toEqual([]);

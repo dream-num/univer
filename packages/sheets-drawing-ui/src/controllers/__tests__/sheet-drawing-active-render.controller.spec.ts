@@ -229,6 +229,7 @@ describe('SheetDrawingActiveRenderController', () => {
                     drawingId: 'invalid',
                     transform: { ...base.transform, width: -1 },
                     sheetTransform: { ...base.sheetTransform, to: { ...base.sheetTransform.from, columnOffset: -2 } },
+                    axisAlignSheetTransform: { ...base.axisAlignSheetTransform, to: { ...base.axisAlignSheetTransform.from, columnOffset: -2 } },
                 };
                 const secondInvalid = { ...invalid, drawingId: 'second-invalid' };
                 const last = { ...valid, drawingId: 'after' };
@@ -406,8 +407,10 @@ describe('SheetDrawingActiveRenderController', () => {
         const bed = createTestBed();
         try {
             const from = { row: 3, column: 3, rowOffset: 0, columnOffset: 0 };
-            const sheetTransform = { from, to: { ...from, rowOffset: height, columnOffset: width } };
             const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
+            const cell = skeleton!.skeleton.getNoMergeCellWithCoordByIndex(from.row, from.column);
+            const to = skeleton!.skeleton.getCellIndexAndOffsetByPosition(cell.startX + width, cell.startY + height, 1, 1, { x: 0, y: 0 });
+            const sheetTransform = { from, to };
             const drawing: ISheetDrawing = {
                 unitId: bed.unitId,
                 subUnitId: bed.subUnitId,

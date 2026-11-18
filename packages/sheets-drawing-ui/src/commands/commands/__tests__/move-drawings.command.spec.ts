@@ -15,6 +15,7 @@
  */
 
 import { Direction, DrawingTypeEnum, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { getTransformBoundingBox } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
@@ -110,6 +111,37 @@ describe('MoveDrawingsCommand', () => {
             testBed.univer.dispose();
         }
     });
+
+    it.each([30, 60, 90, 270, -90].flatMap((angle) => [Direction.LEFT, Direction.UP].map((direction) => ({ angle, direction }))))(
+        'keeps the rendered $angle-degree edge reachable by keyboard direction $direction',
+        async ({ angle, direction }) => {
+            const bed = createSheetsDrawingUiTestBed();
+            bed.commandService.registerCommand(MoveDrawingsCommand);
+            try {
+                const skeleton = bed.get(SheetSkeletonService).getSkeleton(bed.unitId, bed.subUnitId)!;
+                const origin = createSheetDrawing('rotated-edge', 200, 160);
+                origin.transform = { ...origin.transform, angle, width: 160, height: 40 };
+                origin.sheetTransform.angle = angle;
+                const box = getTransformBoundingBox(origin.transform);
+                const left = origin.transform.left! + skeleton.rowHeaderWidthAndMarginLeft - box.left;
+                const top = origin.transform.top! + skeleton.columnHeaderHeightAndMarginTop - box.top;
+                const drawing = applySheetDrawingPlacement(origin, {
+                    kind: SheetDrawingAnchorType.Position,
+                    bounds: { left, top, width: 160, height: 40 },
+                }, skeleton);
+                await insertDrawings(bed, [drawing]);
+                bed.get(ISheetDrawingService).focusDrawing([drawing]);
+                expect(await bed.commandService.executeCommand(MoveDrawingsCommand.id, { direction })).toBe(false);
+                const actual = bed.get(ISheetDrawingService).getDrawingByParam(drawing)!;
+                const bounds = getTransformBoundingBox(actual.transform!);
+                expect(bounds.left).toBeCloseTo(skeleton.rowHeaderWidthAndMarginLeft);
+                expect(bounds.top).toBeCloseTo(skeleton.columnHeaderHeightAndMarginTop);
+                expect(actual.transform).toMatchObject({ width: 160, height: 40, angle });
+            } finally {
+                bed.univer.dispose();
+            }
+        }
+    );
 
     it('keeps drawing positions unchanged when move is triggered without a focused drawing', async () => {
         const testBed = createSheetsDrawingUiTestBed();

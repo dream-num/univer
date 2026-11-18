@@ -17,10 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -30,6 +30,7 @@ import { SetWorksheetBackgroundImageCommand } from '../commands/commands/set-wor
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { SetWorksheetBackgroundImageMutation } from '../commands/mutations/set-worksheet-background-image.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { getSheetDrawingTransformWithOrientation } from '../services/sheet-drawing-placement';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
@@ -121,6 +122,20 @@ export class SheetsDrawingLoadController extends Disposable {
                 onLoad: (unitId, value) => {
                     this._sheetDrawingService.registerDrawingData(unitId, value);
                     this._drawingManagerService.registerDrawingData(unitId, value);
+                    // Normalize persisted orientation before any local command can
+                    // create JSON1 inserts for fields another replica has projected.
+                    const updates: ISheetDrawing[] = [];
+                    for (const sheet of Object.values(value)) {
+                        for (const drawing of Object.values(sheet.data)) {
+                            const transform = getSheetDrawingTransformWithOrientation(drawing);
+                            if ((['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const)
+                                .some((key) => transform[key] !== drawing.transform?.[key])) {
+                                updates.push({ ...drawing, transform });
+                            }
+                        }
+                    }
+                    this._sheetDrawingService.refreshTransform(updates, false);
+                    this._drawingManagerService.refreshTransform(updates, false);
                 },
             })
         );

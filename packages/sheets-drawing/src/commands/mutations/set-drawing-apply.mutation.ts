@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IMutation } from '@univerjs/core';
+import type { IAccessor, IDrawingSearch, IExecutionOptions, IMutation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam } from '@univerjs/drawing';
-import { CommandType } from '@univerjs/core';
+import { CommandType, ILogService, Quantity } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
+import { transformSheetDrawingReference } from '../../basics/drawing-reference';
+import { tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 
 export enum DrawingApplyType {
     INSERT,
@@ -31,19 +35,100 @@ export enum DrawingApplyType {
 
 export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
     type: DrawingApplyType;
+    /** Structural intent for rebasing cell anchors, independent of cached pixels. */
+    reference?: {
+        axis: 'row' | 'column';
+        action: 'insert' | 'remove';
+        start: number;
+        end: number;
+        limit: number;
+        boundaryOffset: number;
+    };
+    /** Reproject a rebased history mutation before notifying render consumers. */
+    recalculate?: boolean;
+}
+
+function needsPlacementHydration(drawing: ISheetDrawing): boolean {
+    const oneCell = (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position;
+    const invalidEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
+    return (drawing.anchorType === SheetDrawingAnchorType.Both && !drawing.transform?.width && !drawing.transform?.height)
+        || (drawing.sheetTransform?.angle !== undefined && drawing.transform?.angle !== drawing.sheetTransform.angle)
+        || Boolean(invalidEndpoint);
+}
+
+function refreshReceivedDrawings(accessor: IAccessor, params: ISetDrawingApplyMutationParams, hydrateOnly: boolean): void {
+    if (params.type === DrawingApplyType.REMOVE || params.type === DrawingApplyType.ARRANGE || !Array.isArray(params.objects) || !params.objects.length) {
+        return;
+    }
+    const skeleton = accessor.get(SheetSkeletonService, Quantity.OPTIONAL)?.ensureSkeleton(params.unitId, params.subUnitId);
+    if (!skeleton) {
+        return;
+    }
+    const dimensionsChanged = skeleton.rowHeightAccumulation.length !== skeleton.worksheet.getRowCount()
+        || skeleton.columnWidthAccumulation.length !== skeleton.worksheet.getColumnCount();
+    // The originating command already calculated layout. Received structural
+    // edits and history still need fresh dimensions before projecting anchors.
+    if (params.recalculate || (params.reference && dimensionsChanged)) skeleton.makeDirty(true);
+    skeleton.calculate();
+    const service = accessor.get(ISheetDrawingService);
+    const drawings = [];
+    const objects = params.type === DrawingApplyType.GROUP || params.type === DrawingApplyType.UNGROUP
+        ? (params.objects as IDrawingGroupUpdateParam[]).flatMap(({ parent, children }) => [parent, ...children])
+        : params.objects as IDrawingSearch[];
+    for (const object of objects) {
+        const drawing = service.getDrawingByParam(object);
+        if (!drawing || drawing.groupId || drawing.anchorType === SheetDrawingAnchorType.None) {
+            continue;
+        }
+        if (hydrateOnly && !needsPlacementHydration(drawing)) {
+            continue;
+        }
+        try {
+            const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+            if (result.ok) {
+                drawings.push(result.drawing);
+            } else {
+                accessor.get(ILogService).warn('[SetDrawingApplyMutation]', 'Skipping invalid drawing placement', object, result);
+            }
+        } catch (error) {
+            accessor.get(ILogService).error('[SetDrawingApplyMutation]', 'Drawing placement refresh failed', object, error);
+        }
+    }
+    if (drawings.length) {
+        // Apply the projection to both stores before either notifies consumers.
+        // This local cache update is not another collaborative mutation.
+        service.refreshTransform(drawings, false);
+        accessor.get(IDrawingManagerService).refreshTransform(drawings, false);
+    }
 }
 
 export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> = {
     id: 'sheet.mutation.set-drawing-apply',
     type: CommandType.MUTATION,
-    handler: (accessor, params) => {
+    handler: (accessor, params, options?: IExecutionOptions) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
         const { op, unitId, subUnitId, type, objects } = params;
 
+        if (params.reference !== undefined) {
+            transformSheetDrawingReference({ row: 0, column: 0, rowOffset: 0, columnOffset: 0 }, params.reference);
+        }
+        if (params.recalculate !== undefined && typeof params.recalculate !== 'boolean') {
+            throw new Error('Invalid drawing reference change.');
+        }
+
         drawingManagerService.applyJson1(unitId, subUnitId, op);
         sheetDrawingService.applyJson1(unitId, subUnitId, op);
+
+        const importedOrientation = type === DrawingApplyType.INSERT && (objects as IDrawingSearch[]).some((object) => {
+            const drawing = sheetDrawingService.getDrawingByParam(object);
+            return drawing && !drawing.groupId && drawing.anchorType !== SheetDrawingAnchorType.None && needsPlacementHydration(drawing);
+        });
+        const received = Boolean(options?.fromCollab || options?.fromChangeset || params.reference || params.recalculate);
+        if (received || importedOrientation) {
+            refreshReceivedDrawings(accessor, params, !received);
+        }
 
         switch (type) {
             case DrawingApplyType.INSERT:

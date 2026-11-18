@@ -40,7 +40,7 @@ import type {
     ISetWorksheetRowIsAutoHeightMutationParams,
     ISheetSkeletonManagerParam,
 } from '@univerjs/sheets';
-import { Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, JSON1, Rectangle } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
@@ -76,11 +76,13 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
 } from '@univerjs/sheets';
+import type { ISetDrawingApplyMutationParams } from '../commands/mutations/set-drawing-apply.mutation';
 import type {
     ISheetDrawingTransformExtensionResult,
     ISheetDrawingTransformPlan,
 } from '../services/sheet-drawing-transform-plan.service';
 import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
+import { transformSheetDrawingReference } from '../basics/drawing-reference';
 import {
     drawingPositionToTransform,
     transformToAxisAlignPosition,
@@ -166,8 +168,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
                     this._currentCommand = commandInfo;
 
-                    if (id === InsertRowCommand.id) {
-                        return this._moveRowInterceptor(params as IInsertRowCommandParams, 'insert');
+                    if ([InsertRowCommand.id, InsertColCommand.id, RemoveRowCommand.id, RemoveColCommand.id].includes(id)) {
+                        return this._moveRowOrColInterceptor(params as IInsertRowCommandParams | IInsertColCommandParams | IRemoveRowColCommandParams, commandInfo);
                     } else if ([MoveColsCommand.id, MoveRowsCommand.id, MoveRangeCommand.id].includes(id)) {
                         let target;
                         if (id === MoveRangeCommand.id) {
@@ -194,12 +196,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         const { fromRange, toRange } = params as IMoveRangeCommandParams | IMoveRowsCommandParams | IMoveColsCommandParams;
 
                         return this._moveRangeInterceptor(unitId, subUnitId, fromRange, toRange);
-                    } else if (id === InsertColCommand.id) {
-                        return this._moveColInterceptor(params as IInsertColCommandParams, 'insert');
-                    } else if (id === RemoveRowCommand.id) {
-                        return this._moveRowInterceptor(params as IRemoveRowColCommandParams, 'remove');
-                    } else if (id === RemoveColCommand.id) {
-                        return this._moveColInterceptor(params as IRemoveRowColCommandParams, 'remove');
                     } else if (id === DeleteRangeMoveLeftCommand.id) {
                         const { range } = params as IDeleteRangeMoveLeftCommandParams;
                         return this._getRangeMoveUndo(range, RangeMoveUndoType.deleteLeft);
@@ -229,7 +225,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             | ISetSpecificColsVisibleCommandParams
                             | ISetWorksheetRowHeightMutationParams
                             | ISetWorksheetColWidthMutationParams;
-                        return this._getDrawingUndoForRowAndColSize(unitId, subUnitId, ranges);
+                        return this._refreshDrawingForRowAndColSize(unitId, subUnitId, ranges);
                     }
 
                     return { redos: [], undos: [] };
@@ -268,21 +264,33 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             if (!patch.drawingId) return;
             const original = originals.get(patch.drawingId);
             if (!original) return;
-            plan.updates.set(patch.drawingId, {
+            const candidate = {
                 ...original,
                 ...patch,
                 transform: { ...original.transform, ...patch.transform },
-                sheetTransform: patch.sheetTransform ?? original.sheetTransform,
-                axisAlignSheetTransform: patch.axisAlignSheetTransform ?? original.axisAlignSheetTransform,
-            });
+                sheetTransform: { ...(patch.sheetTransform ?? original.sheetTransform) },
+                axisAlignSheetTransform: { ...(patch.axisAlignSheetTransform ?? original.axisAlignSheetTransform) },
+            };
+            // Layout changes cannot author orientation or insert optional default
+            // fields another replica may concurrently insert through JSON1.
+            for (const field of ['transform', 'sheetTransform', 'axisAlignSheetTransform'] as const) {
+                for (const key of ['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const) {
+                    const value = original[field]?.[key];
+                    if (value === undefined) delete candidate[field][key];
+                    else Object.assign(candidate[field], { [key]: value });
+                }
+            }
+            plan.updates.set(patch.drawingId, candidate);
         });
 
         const feature = this._transformPlanService.transform(plan);
         if (mode === 'refresh') {
             const changed = [...plan.updates.values()].filter((drawing) => JSON.stringify(originals.get(drawing.drawingId)) !== JSON.stringify(drawing));
             if (changed.length) {
-                this._sheetDrawingService.refreshTransform(changed);
-                this._drawingManagerService.refreshTransform(changed);
+                this._sheetDrawingService.refreshTransform(changed, false);
+                this._drawingManagerService.refreshTransform(changed, false);
+                this._sheetDrawingService.refreshTransformNotification(changed);
+                this._drawingManagerService.refreshTransformNotification(changed);
                 this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
             }
             return { redos: [], undos: [] };
@@ -304,11 +312,40 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const redos: IMutationInfo[] = [...feature.preRedos];
         const undos: IMutationInfo[] = [...feature.preUndos];
         const updates = [...plan.updates.values()].filter(({ drawingId }) => !plan.deletes.has(drawingId));
+        const reference = this._getStructuralReference(plan.command, plan.skeleton);
 
-        if (updates.length) {
-            const { undo, redo, objects } = this._sheetDrawingService.getBatchUpdateOp(updates) as IDrawingJsonUndo1;
-            redos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } });
-            undos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } });
+        if (updates.length || reference) {
+            const batch = updates.length
+                ? this._sheetDrawingService.getBatchUpdateOp(updates) as IDrawingJsonUndo1
+                : { undo: null, redo: null, objects: [] };
+            let { undo, redo } = batch;
+            const { objects } = batch;
+            if (reference) {
+                // Retain marker origins even when the numeric index stays the
+                // same: offset-only edits inside a deleted boundary need them.
+                for (const drawing of updates) {
+                    const original = plan.originals.get(drawing.drawingId);
+                    for (const field of ['sheetTransform', 'axisAlignSheetTransform'] as const) {
+                        for (const endpoint of ['from', 'to'] as const) {
+                            const before = original?.[field]?.[endpoint]?.[reference.axis];
+                            const after = drawing[field]?.[endpoint]?.[reference.axis];
+                            if (before === undefined || after === undefined) continue;
+                            const path = [unitId, subUnitId, 'data', drawing.drawingId, field, endpoint, reference.axis];
+                            redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
+                            undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
+                        }
+                    }
+                }
+            }
+            const inverseReference = reference
+                ? {
+                    ...reference,
+                    action: reference.action === 'insert' ? 'remove' as const : 'insert' as const,
+                    limit: reference.limit + (reference.action === 'insert' ? -1 : 1) * (reference.end - reference.start + 1),
+                }
+                : undefined;
+            redos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE, ...(reference ? { reference } : {}) } });
+            undos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE, ...(inverseReference ? { reference: inverseReference } : {}) } });
         }
 
         if (plan.deletes.size) {
@@ -320,12 +357,60 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         redos.push(...feature.redos);
         undos.push(...feature.undos);
-        if (redos.length || undos.length) {
+        if (updates.length || plan.deletes.size || feature.preRedos.length || feature.redos.length || feature.preUndos.length || feature.undos.length) {
             redos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
             undos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
         }
 
         return { redos, undos };
+    }
+
+    private _getStructuralReference(command: ICommandInfo, skeleton: SpreadsheetSkeleton): ISetDrawingApplyMutationParams['reference'] {
+        const { id, params } = command;
+        const row = id === InsertRowCommand.id || id === RemoveRowCommand.id;
+        if (!row && id !== InsertColCommand.id && id !== RemoveColCommand.id) {
+            return;
+        }
+        const { range } = params as IInsertRowCommandParams;
+        const limit = row ? skeleton.worksheet.getRowCount() : skeleton.worksheet.getColumnCount();
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(row ? limit - 1 : 0, row ? 0 : limit - 1);
+        return {
+            axis: row ? 'row' : 'column',
+            action: id === InsertRowCommand.id || id === InsertColCommand.id ? 'insert' : 'remove',
+            start: row ? range.startRow : range.startColumn,
+            end: row ? range.endRow : range.endColumn,
+            limit,
+            boundaryOffset: row ? cell.endY - cell.startY : cell.endX - cell.startX,
+        };
+    }
+
+    private _transformDrawingReference(drawing: ISheetDrawing, reference: NonNullable<ISetDrawingApplyMutationParams['reference']>, skeleton: SpreadsheetSkeleton) {
+        if (validateSheetDrawingPlacement(drawing)) {
+            this._logService.warn('[SheetDrawingTransformAffectedController]', 'Skipping invalid structural drawing anchor', { drawingId: drawing.drawingId });
+            return;
+        }
+        const both = drawing.anchorType === SheetDrawingAnchorType.Both;
+        const anchor = both ? drawing.axisAlignSheetTransform ?? drawing.sheetTransform : drawing.sheetTransform;
+        const validEndpoint = both || !validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
+        if (validEndpoint && anchor.to[reference.axis] < reference.start) return;
+        if (both && reference.action === 'remove' && anchor.from[reference.axis] >= reference.start && anchor.to[reference.axis] <= reference.end) {
+            return null;
+        }
+        const sheetTransform = {
+            ...drawing.sheetTransform,
+            from: transformSheetDrawingReference(drawing.sheetTransform.from, reference),
+            to: both ? transformSheetDrawingReference(drawing.sheetTransform.to, reference) : drawing.sheetTransform.to,
+        };
+        const axisAlignSheetTransform = both
+            ? {
+                ...anchor,
+                from: transformSheetDrawingReference(anchor.from, reference),
+                to: transformSheetDrawingReference(anchor.to, reference),
+            }
+            : drawing.axisAlignSheetTransform;
+        const result = tryRefreshSheetDrawingPlacement({ ...drawing, sheetTransform, axisAlignSheetTransform }, skeleton);
+        if (result.ok) return { ...result.drawing, anchorType: drawing.anchorType };
+        this._logService.warn('[SheetDrawingTransformAffectedController]', 'Skipping invalid structural drawing placement', { drawingId: drawing.drawingId, result });
     }
 
     private _getRangeMoveUndo(range: IRange, type: RangeMoveUndoType) {
@@ -439,11 +524,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return { updateDrawings, deleteDrawings };
     }
 
-    private _createUndoAndRedoMutation(unitId: string, subUnitId: string, updateDrawings: ISheetDrawing[]) {
-        return this._finalizePlan(unitId, subUnitId, updateDrawings);
-    }
-
-    private _getDrawingUndoForRowAndColSize(unitId: string, subUnitId: string, ranges: IRange[]) {
+    private _refreshDrawingForRowAndColSize(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
         if (!sheetSkeletonParam) {
             return { redos: [], undos: [] };
@@ -455,7 +536,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+            if (drawing?.anchorType === SheetDrawingAnchorType.None || drawing?.groupId) {
                 return;
             }
             const refreshed = this._tryRefreshDrawingPlacement(drawing, skeleton, this._currentCommand.id, ({ to }) =>
@@ -469,19 +550,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        return this._createUndoAndRedoMutation(unitId, subUnitId, updateDrawings);
-    }
-
-    private _getUnitIdAndSubUnitId(params: IInsertRowCommandParams | IRemoveRowColCommandParams) {
-        const target = getSheetCommandTarget(this._univerInstanceService, params);
-
-        if (!target) {
-            return;
-        }
-
-        const { unitId, subUnitId } = target;
-
-        return { unitId, subUnitId };
+        // Row/column mutations already describe the edit. Pixel coordinates are
+        // replica-local projections and must not introduce a second OT write.
+        return this._finalizePlan(unitId, subUnitId, updateDrawings, [], 'refresh');
     }
 
     private _moveRangeInterceptor(unitId: string, subUnitId: string, fromRange: IRange, toRange: IRange) {
@@ -548,150 +619,23 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return this._finalizePlan(unitId, subUnitId, updateDrawings);
     }
 
-    private _moveRowInterceptor(params: IInsertRowCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params);
-        if (!target) {
-            return { redos: [], undos: [] };
-        }
-
+    private _moveRowOrColInterceptor(params: IInsertRowCommandParams | IInsertColCommandParams | IRemoveRowColCommandParams, command: ICommandInfo) {
+        const target = getSheetCommandTarget(this._univerInstanceService, params);
+        if (!target) return { redos: [], undos: [] };
         const { unitId, subUnitId } = target;
-        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
-        if (!sheetSkeletonParam) {
-            return { redos: [], undos: [] };
+        const skeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
+        if (!skeletonParam) return { redos: [], undos: [] };
+        const reference = this._getStructuralReference(command, skeletonParam.skeleton);
+        if (!reference) return { redos: [], undos: [] };
+        const updates: Partial<ISheetDrawing>[] = [];
+        const deletes: Partial<ISheetDrawing>[] = [];
+        for (const drawing of Object.values(this._sheetDrawingService.getDrawingData(unitId, subUnitId))) {
+            if (drawing.anchorType === SheetDrawingAnchorType.None || drawing.groupId || !drawing.sheetTransform || !drawing.transform) continue;
+            const result = this._transformDrawingReference(drawing, reference, skeletonParam.skeleton);
+            if (result === null) deletes.push({ unitId, subUnitId, drawingId: drawing.drawingId });
+            else if (result) updates.push(result);
         }
-
-        const { range } = params;
-        const rowStartIndex = range.startRow;
-        const rowEndIndex = range.endRow;
-
-        const data = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
-        const updateDrawings: Partial<ISheetDrawing>[] = [];
-        const deleteDrawings: Partial<ISheetDrawing>[] = [];
-
-        Object.keys(data).forEach((drawingId) => {
-            const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-            if (!sheetTransform || !transform) {
-                return;
-            }
-
-            let newSheetTransform: Nullable<ISheetDrawingPosition>;
-            let newTransform: Nullable<ITransformState>;
-            let axisAlignSheetTransform: ISheetDrawingPosition | undefined;
-
-            if (type === 'insert') {
-                const param = this._expandRow(rowStartIndex, rowEndIndex, {
-                    sheetSkeletonParam,
-                    sheetTransform,
-                    transform,
-                    anchorType,
-                });
-                newSheetTransform = param?.newSheetTransform;
-                newTransform = param?.newTransform;
-                axisAlignSheetTransform = param?.axisAlignSheetTransform ?? undefined;
-            } else {
-                const { from, to } = sheetTransform;
-                const { row: fromRow } = from;
-                const { row: toRow } = to;
-
-                if (anchorType === SheetDrawingAnchorType.Both && fromRow >= rowStartIndex && toRow <= rowEndIndex) {
-                    // delete drawing
-                    deleteDrawings.push({ unitId, subUnitId, drawingId });
-                } else {
-                    const param = this._shrinkRow(rowStartIndex, rowEndIndex, {
-                        sheetSkeletonParam,
-                        sheetTransform,
-                        transform,
-                        anchorType,
-                    });
-                    newSheetTransform = param?.newSheetTransform;
-                    newTransform = param?.newTransform;
-                    axisAlignSheetTransform = param?.axisAlignSheetTransform ?? undefined;
-                }
-            }
-
-            if (!newSheetTransform || !newTransform) {
-                return;
-            }
-
-            const params = { unitId, subUnitId, drawingId, transform: newTransform, sheetTransform: newSheetTransform, axisAlignSheetTransform };
-            updateDrawings.push(params);
-        });
-
-        return this._finalizePlan(unitId, subUnitId, updateDrawings, deleteDrawings);
-    }
-
-    private _moveColInterceptor(params: IInsertColCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
-        const target = this._getUnitIdAndSubUnitId(params);
-        if (!target) {
-            return { redos: [], undos: [] };
-        }
-
-        const { unitId, subUnitId } = target;
-        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
-        if (!sheetSkeletonParam) {
-            return { redos: [], undos: [] };
-        }
-
-        const { range } = params;
-        const colStartIndex = range.startColumn;
-        const colEndIndex = range.endColumn;
-
-        const data = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
-        const updateDrawings: Partial<ISheetDrawing>[] = [];
-        const deleteDrawings: Partial<ISheetDrawing>[] = [];
-
-        Object.keys(data).forEach((drawingId) => {
-            const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-
-            if (!sheetTransform || !transform) {
-                return;
-            }
-
-            let newSheetTransform: Nullable<ISheetDrawingPosition>;
-            let newTransform: Nullable<ITransformState>;
-            let axisAlignSheetTransform: ISheetDrawingPosition | undefined;
-
-            if (type === 'insert') {
-                const param = this._expandCol(colStartIndex, colEndIndex, {
-                    sheetSkeletonParam,
-                    sheetTransform,
-                    transform,
-                    anchorType,
-                });
-                newSheetTransform = param?.newSheetTransform;
-                newTransform = param?.newTransform;
-                axisAlignSheetTransform = param?.axisAlignSheetTransform ?? undefined;
-            } else {
-                const { from, to } = sheetTransform;
-                const { column: fromColumn } = from;
-                const { column: toColumn } = to;
-                if (anchorType === SheetDrawingAnchorType.Both && fromColumn >= colStartIndex && toColumn <= colEndIndex) {
-                    // delete drawing
-                    deleteDrawings.push({ unitId, subUnitId, drawingId });
-                } else {
-                    const param = this._shrinkCol(colStartIndex, colEndIndex, {
-                        sheetSkeletonParam,
-                        sheetTransform,
-                        transform,
-                        anchorType,
-                    });
-                    newSheetTransform = param?.newSheetTransform;
-                    newTransform = param?.newTransform;
-                    axisAlignSheetTransform = param?.axisAlignSheetTransform ?? undefined;
-                }
-            }
-
-            if (!newSheetTransform || !newTransform) {
-                return;
-            }
-
-            const params = { unitId, subUnitId, drawingId, transform: newTransform, sheetTransform: newSheetTransform, axisAlignSheetTransform };
-            updateDrawings.push(params);
-        });
-
-        return this._finalizePlan(unitId, subUnitId, updateDrawings, deleteDrawings);
+        return this._finalizePlan(unitId, subUnitId, updates, deletes, 'command', command);
     }
 
     private _expandCol(
@@ -1054,10 +998,21 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 this._logSkippedDrawingRefresh(drawing, commandId, failure);
                 return;
             }
-            if (shouldRefresh && !shouldRefresh(drawing.sheetTransform)) {
+            const oneCell = (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position;
+            const rebuildEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
+            const rebuilt = rebuildEndpoint ? tryRefreshSheetDrawingPlacement(drawing, skeleton) : undefined;
+            if (rebuilt && !rebuilt.ok) {
+                this._logSkippedDrawingRefresh(drawing, commandId, rebuilt);
                 return;
             }
-            const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+            const candidate = rebuilt?.ok ? rebuilt.drawing : drawing;
+            const anchor = candidate.anchorType === SheetDrawingAnchorType.Both
+                ? candidate.axisAlignSheetTransform ?? candidate.sheetTransform
+                : candidate.sheetTransform;
+            if (shouldRefresh && !shouldRefresh(anchor)) {
+                return rebuilt?.ok ? rebuilt.drawing : undefined;
+            }
+            const result = rebuilt ?? tryRefreshSheetDrawingPlacement(candidate, skeleton);
             if (result.ok) {
                 return result.drawing;
             }
@@ -1086,48 +1041,46 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     return;
                 }
 
-                queueMicrotask(() => {
-                    if (this._disposed) {
+                if (this._disposed) {
+                    return;
+                }
+                try {
+                    const params = command.params as
+                    | ISetRowVisibleMutationParams
+                    | ISetRowHiddenMutationParams
+                    | ISetColVisibleMutationParams
+                    | ISetColHiddenMutationParams
+                    | ISetWorksheetRowHeightMutationParams
+                    | ISetWorksheetRowAutoHeightMutationParams
+                    | ISetWorksheetRowIsAutoHeightMutationParams
+                    | ISetWorksheetColWidthMutationParams;
+                    const target = getSheetCommandTarget(this._univerInstanceService, params);
+                    if (!target) {
                         return;
                     }
-                    try {
-                        const params = command.params as
-                        | ISetRowVisibleMutationParams
-                        | ISetRowHiddenMutationParams
-                        | ISetColVisibleMutationParams
-                        | ISetColHiddenMutationParams
-                        | ISetWorksheetRowHeightMutationParams
-                        | ISetWorksheetRowAutoHeightMutationParams
-                        | ISetWorksheetRowIsAutoHeightMutationParams
-                        | ISetWorksheetColWidthMutationParams;
-                        const target = getSheetCommandTarget(this._univerInstanceService, params);
-                        if (!target) {
-                            return;
-                        }
 
-                        const { unitId, subUnitId, worksheet } = target;
+                    const { unitId, subUnitId, worksheet } = target;
 
-                        let ranges: IRange[] = [];
-                        if ('ranges' in params) {
-                            ranges = params.ranges;
-                        } else if ('rowsAutoHeightInfo' in params) {
-                            ranges = params.rowsAutoHeightInfo.map((info) => ({
-                                startRow: info.row,
-                                endRow: info.row,
-                                startColumn: 0,
-                                endColumn: worksheet.getColumnCount() - 1,
-                            }));
-                        }
-
-                        this._refreshDrawingTransform(command, unitId, subUnitId, ranges);
-                    } catch (error) {
-                        this._logService.error('[SheetDrawingTransformAffectedController]', 'Drawing layout refresh failed', {
-                            commandId: command.id,
-                            params: command.params,
-                            error,
-                        });
+                    let ranges: IRange[] = [];
+                    if ('ranges' in params) {
+                        ranges = params.ranges;
+                    } else if ('rowsAutoHeightInfo' in params) {
+                        ranges = params.rowsAutoHeightInfo.map((info) => ({
+                            startRow: info.row,
+                            endRow: info.row,
+                            startColumn: 0,
+                            endColumn: worksheet.getColumnCount() - 1,
+                        }));
                     }
-                });
+
+                    this._refreshDrawingTransform(command, unitId, subUnitId, ranges);
+                } catch (error) {
+                    this._logService.error('[SheetDrawingTransformAffectedController]', 'Drawing layout refresh failed', {
+                        commandId: command.id,
+                        params: command.params,
+                        error,
+                    });
+                }
             })
         );
     }
@@ -1143,7 +1096,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            if (drawing?.anchorType === SheetDrawingAnchorType.None) {
+            if (drawing?.anchorType === SheetDrawingAnchorType.None || drawing?.groupId) {
                 return;
             }
 

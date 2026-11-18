@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { transformSheetDrawingReference } from './basics/drawing-reference';
 export {
     drawingPositionToTransform,
     transformToAxisAlignPosition,

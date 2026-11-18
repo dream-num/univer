@@ -75,7 +75,8 @@ export interface IUnitNormalDrawingService<T extends IDrawingParam> {
 
     readonly featurePluginUpdate$: Observable<T[]>;
 
-    refreshTransform(updateParams: T[]): void;
+    /** Suppress the refresh event when a mutation notifies after refreshing all drawing stores. */
+    refreshTransform(updateParams: T[], notify?: boolean): void;
 
     removeNotification(removeParams: IDrawingSearch[]): void;
     addNotification(insertParams: IDrawingSearch[]): void;

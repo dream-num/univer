@@ -295,7 +295,7 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
         this._visible$.next(visibleParams);
     }
 
-    refreshTransform(updateParams: T[]) {
+    refreshTransform(updateParams: T[], notify = true) {
         updateParams.forEach((updateParam) => {
             const param = this._getCurrentBySearch(updateParam);
             if (param == null) {
@@ -325,7 +325,9 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
             }
         });
 
-        this.refreshTransformNotification(updateParams);
+        if (notify) {
+            this.refreshTransformNotification(updateParams);
+        }
     }
 
     getDrawingDataForUnit(unitId: string) {

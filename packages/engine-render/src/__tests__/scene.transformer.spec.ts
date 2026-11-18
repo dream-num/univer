@@ -501,6 +501,40 @@ describe('Transformer', () => {
         }
     });
 
+    it.each([30, 60, 90, 270, -90].flatMap((angle) => [0.5, 1, 2].map((scale) => ({ angle, scale }))))(
+        'keeps rotated corners inside content bounds at $angle degrees and zoom $scale',
+        ({ angle, scale }) => {
+            const { engine, scene, rect } = createTransformerFixture();
+            scene.scale(scale, scale);
+            rect.transformByState({ left: 200, top: 160, width: 160, height: 40, angle });
+            const transformer = new Transformer(scene, { zeroLeft: 46, zeroTop: 20 });
+            const bounds = () => rect.transform.makeBoundingBoxFromPoints([
+                new Vector2(0, 0),
+                new Vector2(rect.width, 0),
+                new Vector2(rect.width, rect.height),
+                new Vector2(0, rect.height),
+            ]);
+            try {
+                transformer.attachTo(rect);
+                rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 280 * scale, 180 * scale));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', -1000, -1000));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', -1000, -1000));
+                expect(bounds().left).toBeCloseTo(46);
+                expect(bounds().top).toBeCloseTo(20);
+                rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', (rect.left + rect.width / 2) * scale, (rect.top + rect.height / 2) * scale));
+                scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 2000, 2000));
+                scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 2000, 2000));
+                expect(bounds().left! + bounds().width!).toBeCloseTo(scene.width);
+                expect(bounds().top! + bounds().height!).toBeCloseTo(scene.height);
+                expect(rect.getState()).toMatchObject({ width: 160, height: 40, angle });
+            } finally {
+                transformer.dispose();
+                scene.dispose();
+                engine.dispose();
+            }
+        }
+    );
+
     it('keeps an oversized object reachable without resizing it', () => {
         const { engine, scene, rect } = createTransformerFixture();
         rect.transformByState({ left: 46, top: 20, width: 800, height: 600 });

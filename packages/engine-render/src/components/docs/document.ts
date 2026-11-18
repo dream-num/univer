@@ -1152,29 +1152,31 @@ export class Documents extends DocComponent {
                 drawLiquid.translate(0, rowTop);
 
                 for (const cell of cells) {
-                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
-                        continue;
-                    }
-
                     const { left: cellLeft } = cell;
                     drawLiquid.translateSave();
                     drawLiquid.translate(cellLeft, 0);
 
-                    this._drawTableCell(
-                        ctx,
-                        page,
-                        cell,
-                        extensions,
-                        backgroundExtension,
-                        preTextBackgroundExtensions,
-                        glyphExtensionsExcludeBackground,
-                        alignOffsetNoAngle,
-                        centerAngle,
-                        vertexAngle,
-                        renderConfig,
-                        parentScale,
-                        fieldContext
-                    );
+                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                        // A covered cell paints no content of its own, but a page break can cut the merge
+                        // it belongs to; the side borders then have to be painted from this page.
+                        this._drawTableCellBordersAndBg(ctx, page, cell, false);
+                    } else {
+                        this._drawTableCell(
+                            ctx,
+                            page,
+                            cell,
+                            extensions,
+                            backgroundExtension,
+                            preTextBackgroundExtensions,
+                            glyphExtensionsExcludeBackground,
+                            alignOffsetNoAngle,
+                            centerAngle,
+                            vertexAngle,
+                            renderConfig,
+                            parentScale,
+                            fieldContext
+                        );
+                    }
 
                     drawLiquid.translateRestore();
                 }
@@ -1764,7 +1766,7 @@ export class Documents extends DocComponent {
         const rowIndexInTable = tableSke?.rows.indexOf(rowSke);
         const rowIndex = rowIndexInTable == null || rowIndexInTable < 0 ? rowSke.index ?? 0 : rowIndexInTable;
 
-        if (!cellSource || cellSource.rowSpan === 0 || cellSource.columnSpan === 0) {
+        if (!cellSource || cellSource.columnSpan === 0) {
             return;
         }
 
@@ -1776,6 +1778,23 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
+        const position = {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        };
+
+        if (cellSource.rowSpan === 0) {
+            this._drawSplitMergedCellBorders(ctx, rowSke, tableSke, index, position, drawBackground, {
+                x,
+                y,
+                pageWidth,
+                pageHeight,
+            });
+            return;
+        }
+
         // Draw cell bg.
         if (drawBackground && cellSource.backgroundColor?.rgb) {
             ctx.save();
@@ -1784,26 +1803,25 @@ export class Documents extends DocComponent {
             ctx.restore();
         }
 
-        const position = {
-            startX: x,
-            startY: y,
-            endX: x + pageWidth,
-            endY: y + pageHeight,
-        };
-
         const rightCellSource = this._getTableCellSource(rowSke, index + 1);
+        const rowSourceIndex = rowSke.index ?? 0;
+        const sourceRows = tableSke?.tableSource?.tableRows;
         const bottomCellSource = tableSke ? this._getTableCellSource(tableSke.rows[rowIndex + 1], index) : undefined;
+        // A table split across pages leaves the row that owns a shared horizontal edge on the other
+        // page, which would drop the border on the two fragment edges. Fall back to the source table.
+        const adjacentCellSource = bottomCellSource ?? sourceRows?.[rowSourceIndex + 1]?.tableCells[index];
         const bottom = cellSource.borderBottom;
         const bottomBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL && rowIndex === (tableSke?.rows.length ?? 1) - 1
             ? bottom?.tableBottomBorder ?? bottom
             : bottom;
         this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(bottomBorder, bottomCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(bottomBorder, adjacentCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
 
         if (rowIndex <= 0) {
             const top = cellSource.borderTop;
             const border = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL ? top?.tableTopBorder ?? top : top;
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(border), BORDER_TYPE.TOP, position);
+            const previousCellSource = rowSourceIndex > 0 ? sourceRows?.[rowSourceIndex - 1]?.tableCells[index] : undefined;
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(border, previousCellSource?.borderBottom), BORDER_TYPE.TOP, position);
         } else if (tableSke) {
             // The preceding row owns shared horizontal edges, but omitted grid
             // columns can leave part of this cell's top without an owner.
@@ -1840,6 +1858,97 @@ export class Documents extends DocComponent {
 
     private _getTableCellSource(row: Nullable<IDocumentSkeletonRow>, column: number): Nullable<ITableCell> {
         return row?.rowSource.tableCells[column] ?? null;
+    }
+
+    /**
+     * A vertically merged cell is painted once, by the cell that starts the merge. A page break can
+     * cut that cell in two, and then the start cell only covers the first page: the covered cells on
+     * the following pages have to paint the merge's side borders (and its closing edge) themselves.
+     */
+    private _drawSplitMergedCellBorders(
+        ctx: UniverRenderingContext,
+        rowSke: IDocumentSkeletonRow,
+        tableSke: IDocumentSkeletonTable | undefined,
+        column: number,
+        position: { startX: number; startY: number; endX: number; endY: number },
+        drawBackground: boolean,
+        bounds: { x: number; y: number; pageWidth: number; pageHeight: number }
+    ) {
+        const tableRows = tableSke?.tableSource?.tableRows;
+        const cellSource = rowSke.rowSource.tableCells[column];
+        if (!tableRows || !cellSource) {
+            return;
+        }
+
+        const rowSourceIndex = rowSke.index ?? 0;
+        let startRowIndex = rowSourceIndex - 1;
+        while (startRowIndex >= 0 && tableRows[startRowIndex]?.tableCells[column]?.rowSpan === 0) {
+            startRowIndex -= 1;
+        }
+
+        const startCell = startRowIndex >= 0 ? tableRows[startRowIndex]?.tableCells[column] : undefined;
+        const rowSpan = startCell?.rowSpan ?? 0;
+        if (!startCell || rowSpan <= 1) {
+            return;
+        }
+
+        // The page that owns the merge start already paints the whole merged cell box. Repeated
+        // header rows are copied from row 0, so compare against the first body row of this page.
+        const pageRows = tableSke?.rows ?? [];
+        const firstBodyRow = pageRows.find((pageRow) => !pageRow.isRepeatRow) ?? pageRows[0];
+        const firstRowInPage = firstBodyRow?.index ?? 0;
+        if (startRowIndex >= firstRowInPage) {
+            return;
+        }
+
+        const { x, y, pageWidth, pageHeight } = bounds;
+
+        if (drawBackground && startCell.backgroundColor?.rgb) {
+            ctx.save();
+            ctx.fillStyle = startCell.backgroundColor.rgb;
+            fillRectByPrecisionBounds(ctx, x, y, pageWidth, pageHeight);
+            ctx.restore();
+        }
+
+        const nextCellSource = rowSke.rowSource.tableCells[column + 1];
+
+        // Word closes the fragment with the row edge at the page split, including across a merged
+        // cell that continues from the previous page, so the top line does not break off there.
+        if (rowSourceIndex === firstRowInPage) {
+            const top = cellSource.borderTop;
+            const topBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL
+                ? top?.tableTopBorder ?? top
+                : top;
+            const previousRowCellSource = tableRows[rowSourceIndex - 1]?.tableCells[column];
+            this._drawTableCellBorder(
+                ctx,
+                this._resolveTableCellBorder(topBorder, previousRowCellSource?.borderBottom),
+                BORDER_TYPE.TOP,
+                position
+            );
+        }
+
+        this._drawTableCellBorder(
+            ctx,
+            this._resolveTableCellBorder(startCell.borderRight, nextCellSource?.borderLeft),
+            BORDER_TYPE.RIGHT,
+            position
+        );
+
+        if (rowSourceIndex === startRowIndex + rowSpan - 1) {
+            const nextRowCellSource = tableRows[rowSourceIndex + 1]?.tableCells[column];
+            this._drawTableCellBorder(
+                ctx,
+                this._resolveTableCellBorder(startCell.borderBottom, nextRowCellSource?.borderTop),
+                BORDER_TYPE.BOTTOM,
+                position
+            );
+        }
+
+        // Interior vertical edges are owned by the preceding cell's right border.
+        if (column <= 0) {
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(startCell.borderLeft), BORDER_TYPE.LEFT, position);
+        }
     }
 
     private _resolveTableCellBorder(primary?: ITableCellBorder, secondary?: ITableCellBorder): Nullable<ITableCellBorder> {

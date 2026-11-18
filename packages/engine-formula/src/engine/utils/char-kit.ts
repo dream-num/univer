@@ -29,10 +29,15 @@ export function isNonCharacterCodePoint(codePoint: number) {
 }
 
 /**
- * excel logic is cofusing, so we use google sheet logic
+ * Excel logic is confusing, so we use google sheet logic
  *
- * @param text
- * @returns number
+ * Each UTF-16 code unit above U+00FF counts as two bytes here, so a character outside
+ * the BMP counts as four. That length feeds LENB, LEFTB, RIGHTB, MIDB, REPLACEB,
+ * SEARCHB and FINDB. Excel 2021 (16.0, zh-CN, DBCS default language, checked 2026-11-18)
+ * contradicts itself on the same text: LENB("😊") is 2, but LEFTB("😊ab", 2) is "😊a",
+ * as if 😊 were one byte, and LEFTB("😊ab", 1) returns the whole pair; MIDB("😊ab", 1, 1)
+ * returns half a surrogate pair, while MIDB("中ab", 2, 1) returns a space standing for
+ * the second byte of a double-byte character.
  */
 export function charLenByte(text: string): number {
     let byteCount = 0;

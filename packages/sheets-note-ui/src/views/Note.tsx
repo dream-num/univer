@@ -17,14 +17,15 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
 import type { IPopup } from '@univerjs/ui';
-import type { IUniverSheetsNoteUIConfig } from '../config/config';
-import type { LocaleKey } from '../locale/types';
 import { generateRandomId, ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Textarea } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
+import { SheetPermissionCheckController } from '@univerjs/sheets';
+import { SHEET_NOTE_EDIT_PERMISSIONS, SheetsNoteModel, SheetUpdateNoteCommand } from '@univerjs/sheets-note';
 import { useConfigValue, useDebounceFn, useDependency } from '@univerjs/ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { IUniverSheetsNoteUIConfig } from '../config/config';
+import type { LocaleKey } from '../locale/types';
 import { SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { SheetsNotePopupService } from '../services/sheets-note-popup.service';
 
@@ -49,7 +50,16 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const notePopupService = useDependency(SheetsNotePopupService);
+    const permissionCheckController = useDependency(SheetPermissionCheckController);
     const config = useConfigValue<IUniverSheetsNoteUIConfig>(SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY);
+
+    const { col, row, subUnitId, unitId } = activePopup;
+    const editable = useMemo(() => permissionCheckController.permissionCheckWithRanges(
+        SHEET_NOTE_EDIT_PERMISSIONS,
+        [{ startRow: row, startColumn: col, endRow: row, endColumn: col }],
+        unitId,
+        subUnitId
+    ), [col, permissionCheckController, row, subUnitId, unitId]);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const initialWidthRef = useRef<number | null>(null);
@@ -75,6 +85,12 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
         const height = note?.height ?? config?.defaultNoteSize?.height ?? 72;
 
         if (!note) {
+            // Without edit permission the popup must not create the empty note a
+            // fresh note popup would normally start from.
+            if (!editable) {
+                return;
+            }
+
             const initNote: Partial<ISheetNote> = {
                 id: generateRandomId(6),
                 width,
@@ -93,10 +109,10 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
             textareaRef.current.style.height = `${height}px`;
             textareaRef.current.style.transform = '';
         }
-    }, [activePopup, textareaRef]);
+    }, [activePopup, editable, textareaRef]);
 
     useEffect(() => {
-        if (!activePopup || activePopup.temp || !activePopup.trigger) return;
+        if (!activePopup || activePopup.temp || !activePopup.trigger || !editable) return;
         if (!textareaRef.current) return;
 
         const focusId = requestAnimationFrame(() => {
@@ -104,7 +120,7 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
         });
 
         return () => cancelAnimationFrame(focusId);
-    }, [activePopup]);
+    }, [activePopup, editable]);
 
     const commandService = useDependency(ICommandService);
     const updateNote = useDebounceFn((newNote: Partial<ISheetNote>) => {
@@ -134,23 +150,23 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
     });
 
     const handleNoteChange = useCallback((value: string) => {
-        if (!note) return;
+        if (!editable || !note) return;
         if (value === note.note) return;
 
         const newNote = { ...note, note: value };
         setNote(newNote);
         updateNote(newNote);
-    }, [note]);
+    }, [editable, note]);
 
     const handleResize = useCallback((width: number, height: number) => {
-        if (!note) return;
+        if (!editable || !note) return;
         applyResizeOffset(width);
         if (width === note.width && height === note.height) return;
 
         const newNote = { ...note, width, height };
         setNote(newNote);
         updateNote(newNote);
-    }, [applyResizeOffset, note]);
+    }, [applyResizeOffset, editable, note]);
 
     return (
         <Textarea
@@ -161,8 +177,10 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
               dark:!univer-bg-gray-800
             `)}
             value={note?.note}
-            placeholder={localeService.t<LocaleKey>('sheets-note-ui.note.placeholder')}
-            onResize={handleResize}
+            readOnly={!editable}
+            style={editable ? undefined : { resize: 'none' }}
+            placeholder={editable ? localeService.t<LocaleKey>('sheets-note-ui.note.placeholder') : undefined}
+            onResize={editable ? handleResize : undefined}
             onValueChange={handleNoteChange}
             onWheel={(e) => {
                 if (document.activeElement !== textareaRef.current) {

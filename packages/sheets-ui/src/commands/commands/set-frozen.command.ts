@@ -128,7 +128,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
             });
             return true;
         }
-        return true;
+        return false;
     },
 };
 

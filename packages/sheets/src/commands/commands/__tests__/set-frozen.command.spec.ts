@@ -16,9 +16,9 @@
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';
-import { SetFrozenCommand } from '../set-frozen.command';
+import { CancelFrozenCommand, SetFrozenCommand } from '../set-frozen.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -96,6 +96,7 @@ describe('Test set frozen commands', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(SetFrozenCommand);
+        commandService.registerCommand(CancelFrozenCommand);
         commandService.registerCommand(SetFrozenMutation);
     });
 
@@ -172,6 +173,36 @@ describe('Test set frozen commands', () => {
                 expect(await commandService.executeCommand(SetFrozenCommand.id, params)).toBeFalsy();
                 expect(worksheet.getFreeze()).toEqual(originFreeze);
             });
+        });
+    });
+
+    describe('cancel frozen', () => {
+        it('cancels the current freeze', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet()!;
+            await commandService.executeCommand(SetFrozenCommand.id, {
+                startRow: 1,
+                startColumn: 1,
+                xSplit: 1,
+                ySplit: 1,
+            });
+
+            expect(await commandService.executeCommand(CancelFrozenCommand.id)).toBe(true);
+            expect(worksheet.getFreeze()).toEqual({
+                startRow: -1,
+                startColumn: -1,
+                xSplit: 0,
+                ySplit: 0,
+            });
+        });
+
+        it('returns false when the mutation is rejected', async () => {
+            const mutation = vi.spyOn(SetFrozenMutation, 'handler').mockReturnValue(false);
+
+            expect(await commandService.executeCommand(CancelFrozenCommand.id)).toBe(false);
+            expect(mutation).toHaveBeenCalledTimes(1);
+
+            mutation.mockRestore();
         });
     });
 });

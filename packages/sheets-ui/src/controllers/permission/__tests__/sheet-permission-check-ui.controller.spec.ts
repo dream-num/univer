@@ -35,11 +35,18 @@ import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitS
 import { EditorService, IEditorService, IMEInputCommand } from '@univerjs/docs-ui';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Spreadsheet, Viewport } from '@univerjs/engine-render';
 import { UnitObject } from '@univerjs/protocol';
-import { EditStateEnum, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetPermissionCheckController, SheetsSelectionsService, UniverSheetsPlugin, ViewStateEnum } from '@univerjs/sheets';
+import { EditStateEnum, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetPermissionCheckController, SheetsSelectionsService, UniverSheetsPlugin, ViewStateEnum, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { IDialogService, IPlatformService, IShortcutService, IUIRuntimeScopeService, KeyCode, PlatformService, ShortcutService, UIRuntimeScopeService } from '@univerjs/ui';
 import { EMPTY } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../../commands/commands/clipboard.command';
+import {
+    SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../../../commands/commands/set-frozen.command';
 import { MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -172,6 +179,38 @@ describe('SheetPermissionCheckUIController', () => {
         executeBefore({ id });
 
         expect(permissionCheckWithRanges).not.toHaveBeenCalled();
+        expect(blockExecuteWithoutPermission).not.toHaveBeenCalled();
+        injector.dispose();
+    });
+
+    it.each([
+        SetSelectionFrozenCommand.id,
+        SetRowFrozenCommand.id,
+        SetColumnFrozenCommand.id,
+        SetFirstRowFrozenCommand.id,
+        SetFirstColumnFrozenCommand.id,
+    ])('blocks %s when the workbook and worksheet cannot be edited', (id) => {
+        const { injector, executeBefore, permissionCheckWithoutRange, blockExecuteWithoutPermission } = createControllerTestBed();
+        injector.get(SheetPermissionCheckUIController);
+
+        executeBefore({ id });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledWith({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        });
+        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('translated:sheets-ui.permission.dialog.editErr');
+        injector.dispose();
+    });
+
+    it('allows freezing when the workbook and worksheet can be edited', () => {
+        const { injector, executeBefore, permissionCheckWithoutRange, blockExecuteWithoutPermission } = createControllerTestBed();
+        permissionCheckWithoutRange.mockReturnValue(true);
+        injector.get(SheetPermissionCheckUIController);
+
+        executeBefore({ id: SetSelectionFrozenCommand.id });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledOnce();
         expect(blockExecuteWithoutPermission).not.toHaveBeenCalled();
         injector.dispose();
     });

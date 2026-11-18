@@ -17,8 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IIMEInputCommandParams } from '@univerjs/docs-ui';
-import type { LocaleKey } from '../../locale/types';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     Disposable,
     DisposableCollection,
@@ -43,7 +41,16 @@ import {
     WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
+import {
+    SetColumnFrozenCommand,
+    SetFirstColumnFrozenCommand,
+    SetFirstRowFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../../commands/commands/set-frozen.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import {
     UNIVER_SHEET_PERMISSION_ALERT_DIALOG,
@@ -148,6 +155,17 @@ export class SheetPermissionCheckUIController extends Disposable {
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.commonErr');
+                break;
+            case SetSelectionFrozenCommand.id:
+            case SetRowFrozenCommand.id:
+            case SetColumnFrozenCommand.id:
+            case SetFirstRowFrozenCommand.id:
+            case SetFirstColumnFrozenCommand.id:
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission],
+                    worksheetTypes: [WorksheetEditPermission],
+                });
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.editErr');
                 break;
             default:
                 break;

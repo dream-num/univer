@@ -15,7 +15,6 @@
  */
 
 import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -25,8 +24,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CancelFrozenCommand, getPrimaryForRange, SetFrozenMutation, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IScrollStateWithSearchParam } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     SetColumnFrozenCommand,
@@ -132,6 +132,16 @@ describe('Test commands used for change selections', () => {
 
             const config = getFreeze();
             expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
+        });
+
+        it('returns false when the freeze mutation is rejected', async () => {
+            select(2, 2, 2, 2, 2, 2, false, false);
+            const mutation = vi.spyOn(SetFrozenMutation, 'handler').mockReturnValue(false);
+
+            expect(await commandService.executeCommand(SetSelectionFrozenCommand.id)).toBe(false);
+            expect(mutation).toHaveBeenCalledTimes(1);
+
+            mutation.mockRestore();
         });
 
         it.each(['D12', '$D$12', 'D12:F15'])('freezes a parsed reference %s and supports undo and redo', async (reference) => {

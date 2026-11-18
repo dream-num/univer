@@ -19,6 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { roundHalfEven } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -84,24 +85,6 @@ export class Roundbank extends BaseFunction {
             return 0;
         }
 
-        // logic is:
-        // If the digit to be rounded is 4 or less than, it is discarded.
-        // If the digit to be rounded is 6 or greater, it rounds up.
-        // If the digit to be rounded is exactly 5:
-        // If there are any digits following the 5, it rounded up.
-        // If there are no digits following the 5, If the preceding digit is odd, it rounds up. If the preceding digit is even, it is discarded.
-        const EPSILON = 1e-8;
-        const multiplier = 10 ** numDigits;
-        const adjustedNum = +(number * multiplier).toFixed(8);
-        const integerPart = Math.floor(adjustedNum);
-        const decimalPart = adjustedNum - integerPart;
-
-        let result = Math.round(adjustedNum);
-
-        if (decimalPart > 0.5 - EPSILON && decimalPart < 0.5 + EPSILON) {
-            result = integerPart % 2 === 0 ? integerPart : integerPart + 1;
-        }
-
-        return numDigits ? result / multiplier : result;
+        return roundHalfEven(number, numDigits);
     }
 }

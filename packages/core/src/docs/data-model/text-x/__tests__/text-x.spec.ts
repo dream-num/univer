@@ -169,6 +169,22 @@ describe('test TextX methods and branches', () => {
         expect(applied.dataStream).toBe(original.dataStream);
     });
 
+    it('keeps the retain before a losing scalar insertion finite when the winning edit ends earlier', () => {
+        const insert: IInsertAction = { t: TextXActionType.INSERT, len: 3, body: { dataStream: 'Old' }, valueRangeId: 'scalar' };
+        const remove = { t: TextXActionType.DELETE as const, len: 3, valueRangeId: 'scalar' };
+        const first = new TextX().push(insert).retain(1).push(remove).serialize();
+        const second = new TextX().retain(1).push(remove).retain(1).push(insert).serialize();
+        for (const [winner, loser, expected] of [[first, second, 'OldLR\r\n'], [second, first, 'LROld\r\n']] as const) {
+            const original = { dataStream: 'LOldR\r\n' };
+            const transformed = TextX.transform(winner, loser, 'left');
+            expect(transformed.every(({ len }) => Number.isFinite(len))).toBe(true);
+            const afterWinner = TextX.apply(TextX.apply(Tools.deepClone(original), winner), TextX.transform(loser, winner, 'right'));
+            const afterLoser = TextX.apply(TextX.apply(Tools.deepClone(original), loser), transformed);
+            expect(afterWinner.dataStream).toBe(expected);
+            expect(afterLoser).toEqual(afterWinner);
+        }
+    });
+
     it('rejects malformed scalar identities before any text is applied', () => {
         for (const valueRangeId of ['', null, 1, [], {}]) {
             const original = { dataStream: 'Old\r\n' };

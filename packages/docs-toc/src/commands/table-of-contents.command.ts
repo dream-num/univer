@@ -509,10 +509,7 @@ export function buildTableOfContentsBody(
     options = { ...options, availableWidth: options?.availableWidth ?? getDocumentTextWidth(body, toc.startIndex, options?.documentStyle) };
     const instruction = String(toc.properties?.instruction ?? '');
     const hyperlinks = instruction.replace(/"[^"]*"/g, '').split(/\s+/).some((token) => token.toLowerCase() === '\\h');
-    const hyperlinkFont = hyperlinks && options.resetEntryParagraphFormatting &&
-        options.documentStyle?.documentFlavor !== DocumentFlavor.MODERN
-        ? resolveEntryHyperlinkFont(options.styles)
-        : undefined;
+    const hyperlinkFont = resolveEntryHyperlinkFont(hyperlinks, options);
     if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
@@ -577,7 +574,7 @@ export function buildTableOfContentsBody(
     }
 
     for (const [index, entry] of headings.entries()) {
-        const heading = hyperlinkFont ? { ...entry, textRuns: applyEntryHyperlinkFont(entry, hyperlinkFont) } : entry;
+        const heading = applyEntryHyperlinkFont(entry, hyperlinkFont);
         const showEntryPageNumber = showPageNumbers && heading.showPageNumber !== false;
         const pageNumber = showEntryPageNumber ? heading.pageNumber ?? resolvePageNumber(heading.startOffset) : undefined;
         if (showEntryPageNumber && pageNumber == null) {
@@ -736,7 +733,11 @@ function parseOutlineLevelRange(instruction: string): [number, number] {
     return [min, max];
 }
 
-function resolveEntryHyperlinkFont(styles: IDocStyles | undefined): ITextStyle | undefined {
+function resolveEntryHyperlinkFont(hyperlinks: boolean, options: ITableOfContentsBuildOptions): ITextStyle | undefined {
+    if (!hyperlinks || !options.resetEntryParagraphFormatting || options.documentStyle?.documentFlavor === DocumentFlavor.MODERN) {
+        return;
+    }
+    const { styles } = options;
     const styleId = Object.entries(styles ?? {}).find(([id, style]) =>
         style.type === DocStyleType.character && (style.name ?? id).toLowerCase() === 'hyperlink'
     )?.[0];
@@ -747,7 +748,10 @@ function resolveEntryHyperlinkFont(styles: IDocStyles | undefined): ITextStyle |
     return Object.keys(font).length ? font : undefined;
 }
 
-function applyEntryHyperlinkFont(entry: ITableOfContentsHeading, font: ITextStyle): ITextRun[] {
+function applyEntryHyperlinkFont(entry: ITableOfContentsHeading, font: ITextStyle | undefined): ITableOfContentsHeading {
+    if (!font) {
+        return entry;
+    }
     const runs: ITextRun[] = [];
     let start = 0;
     for (const run of entry.textRuns ?? []) {
@@ -760,7 +764,7 @@ function applyEntryHyperlinkFont(entry: ITableOfContentsHeading, font: ITextStyl
     if (start < entry.text.length) {
         runs.push({ st: start, ed: entry.text.length, ts: font });
     }
-    return runs;
+    return { ...entry, textRuns: runs };
 }
 
 function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {

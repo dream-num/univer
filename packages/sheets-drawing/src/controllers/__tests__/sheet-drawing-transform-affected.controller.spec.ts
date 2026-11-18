@@ -718,8 +718,11 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getDrawing(service)).toEqual(after);
     });
 
-    it('moves a position-anchored drawing with its source row through reorder undo and redo', async () => {
-        const service = await insertDrawing(SheetDrawingAnchorType.Position);
+    it.each([
+        { anchorType: SheetDrawingAnchorType.Position, description: 'position-anchored' },
+        { anchorType: SheetDrawingAnchorType.Both, description: 'position-and-size-anchored' },
+    ])('moves a $description drawing with its source row through reorder undo and redo', async ({ anchorType }) => {
+        const service = await insertDrawing(anchorType);
         const before = structuredClone(getDrawing(service));
 
         expect(await testBed.commandService.executeCommand(ReorderRangeCommand.id, {

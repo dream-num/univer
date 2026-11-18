@@ -16,16 +16,20 @@
 
 import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/core';
 import {
+    BaselineOffset,
     BooleanNumber,
     ColumnSeparatorType,
     createDocumentModelWithStyle,
+    createIdentifier,
     CustomRangeType,
     DashStyleType,
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
     HorizontalAlign,
+    Injector,
     LocaleService,
+    LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     TableAlignmentType,
@@ -39,6 +43,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { IExtensionConfig } from '../../extension';
+import type { IDocumentRenderBounds } from '../doc-component';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
 import {
@@ -59,10 +64,12 @@ import { Rect } from '../../../shape/rect';
 import { Viewport } from '../../../viewport';
 import { SheetCellDocumentViewModel } from '../../sheets/sheet-cell-document-view-model';
 import { DocBackground } from '../doc-background';
-import { DOCS_EXTENSION_TYPE } from '../doc-extension';
+import { docExtension, DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
+import { registerDocumentLayoutPresentation } from '../document-layout-presentation';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
+import { FontCache } from '../layout/shaping-engine/font-cache';
 import { Liquid } from '../liquid';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
@@ -3245,4 +3252,268 @@ describe('documents render', () => {
         expect(numericLineReads).toBeLessThan(160);
         documents.dispose();
     });
+});
+
+describe('document background extension painting', () => {
+    it.each([undefined, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL].flatMap((flavor) =>
+        [false, true].map((deferred) => ({ flavor, deferred }))))(
+        'preserves background order and glyph coordinates for $flavor with deferred painting=$deferred',
+        ({ flavor, deferred }) => {
+            const { restore } = setupRenderTestEnv();
+            class GlyphBackground extends docExtension {
+                override uKey = 'TestGlyphBackground';
+                override type = DOCS_EXTENSION_TYPE.BACKGROUND;
+
+                override draw(ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                    const { spanStartPoint } = this.extensionOffset;
+                    if (spanStartPoint && glyph.content !== '\r') {
+                        ctx.fillStyle = '#ddeeff';
+                        ctx.fillRect(spanStartPoint.x, spanStartPoint.y, glyph.width, 1);
+                    }
+                }
+            }
+            const injector = new Injector([
+                [LocaleService],
+                [DocumentDataModel, { useFactory: function createDataModel(container: Injector) {
+                    return container.createInstance(DocumentDataModel, {
+                        id: 'background-paint-order',
+                        body: {
+                            dataStream: 'A中\r\n',
+                            paragraphs: [{ startIndex: 2, paragraphId: 'text' }],
+                            textRuns: [{ st: 0, ed: 2, ts: { fs: 12, ff: 'Arial', bg: { rgb: '#ffeecc' }, ul: { s: BooleanNumber.TRUE } } }],
+                        },
+                        documentStyle: {
+                            documentFlavor: flavor,
+                            pageSize: { width: 300, height: 200 },
+                            marginLeft: 0,
+                            marginRight: 0,
+                            marginTop: 0,
+                            marginBottom: 0,
+                        },
+                    });
+                }, deps: [Injector] }],
+                [DocumentViewModel, { useFactory: function createViewModel(container: Injector) {
+                    return container.createInstance(DocumentViewModel, container.get(DocumentDataModel));
+                }, deps: [Injector] }],
+                [DocumentSkeleton, { useFactory: DocumentSkeleton.create, deps: [DocumentViewModel, LocaleService] }],
+                [Documents, { useFactory: function createDocuments(container: Injector) {
+                    return container.createInstance(Documents, 'background-paint', container.get(DocumentSkeleton), {
+                        pageMarginLeft: 0,
+                        pageMarginTop: 0,
+                    });
+                }, deps: [Injector] }],
+                [CanvasRenderingContext2D, { useValue: document.createElement('canvas').getContext('2d')! }],
+                [UniverRenderingContext, { useFactory: function createContext(container: Injector) {
+                    return container.createInstance(UniverRenderingContext, container.get(CanvasRenderingContext2D));
+                }, deps: [Injector] }],
+                [GlyphBackground],
+            ]);
+            try {
+                injector.get(LocaleService).setLocale(LocaleType.EN_US);
+                const documents = injector.get(Documents);
+                const skeleton = injector.get(DocumentSkeleton);
+                const native = injector.get(CanvasRenderingContext2D);
+                const context = injector.get(UniverRenderingContext);
+                skeleton.calculate();
+                const text = vi.spyOn(native, 'fillText');
+                const rectangles = vi.spyOn(native, 'fillRect');
+                const draw = () => {
+                    if (deferred) {
+                        documents.setGlyphPaintSink(() => {});
+                    }
+                    documents.draw(context);
+                    if (deferred) {
+                        for (const paint of documents.getGlyphPaints()) {
+                            context.save();
+                            context.setTransform(...paint.transform);
+                            paint.draw(context);
+                            context.restore();
+                        }
+                    }
+                };
+                draw();
+                const original = text.mock.calls.map((args) => [...args]);
+                expect(original.map(([content]) => content).join('').trim()).toBe('A中');
+                expect(rectangles.mock.calls.length).toBeGreaterThan(0);
+                text.mockClear();
+                rectangles.mockClear();
+                if (deferred) {
+                    const firstPaint = documents.getGlyphPaints()[0];
+                    context.save();
+                    context.setTransform(...firstPaint.transform);
+                    firstPaint.draw(context);
+                    context.restore();
+                    expect(text).not.toHaveBeenCalled();
+                    expect(rectangles).not.toHaveBeenCalled();
+                }
+                const registration = documents.register(injector.get(GlyphBackground));
+                draw();
+                expect(text.mock.calls).toEqual(original);
+                expect(rectangles.mock.calls.length).toBeGreaterThan(2);
+                expect(rectangles.mock.invocationCallOrder[0]).toBeLessThan(text.mock.invocationCallOrder[0]);
+                registration.dispose();
+                text.mockClear();
+                draw();
+                expect(text.mock.calls).toEqual(original);
+            } finally {
+                injector.dispose();
+                vi.restoreAllMocks();
+                restore();
+            }
+        }
+    );
+});
+
+describe('host document glyph clipping', () => {
+    const nativeMetricsToken = createIdentifier<CanvasRenderingContext2D>('test.native-font-measurement-context');
+    it.each(['ordinary', 'inherited text state', 'compositing', 'inactive decorations', 'subscript', 'superscript', 'background', 'underline', 'shadow', 'text offsets', 'font render scale', 'custom extension', 'deferred', 'rotated context', 'scaled context', 'negative context', 'custom glyph renderer', 'outline'])(
+        'culls only ordinary invisible text, retaining the %s fallback and paint order',
+        (kind) => {
+            const environment = setupRenderTestEnv();
+            const style = {
+                ff: 'Arial',
+                fs: 12,
+                cl: { rgb: '#123456' },
+                ...(kind === 'background' ? { bg: { rgb: '#ffeedd' } } : {}),
+                ...(kind === 'inactive decorations' ? { ul: { s: BooleanNumber.FALSE }, st: { s: BooleanNumber.FALSE }, ol: { s: BooleanNumber.FALSE }, va: BaselineOffset.NORMAL } : {}),
+                ...(kind === 'subscript' ? { va: BaselineOffset.SUBSCRIPT } : {}),
+                ...(kind === 'superscript' ? { va: BaselineOffset.SUPERSCRIPT } : {}),
+                ...(kind === 'underline' ? { ul: { s: BooleanNumber.TRUE } } : {}),
+                ...(kind === 'shadow' ? { outerShadow: { color: '#000000', blurRadius: 4, distance: 3, direction: 90 } } : {}),
+                ...(kind === 'outline' ? { textOutline: { color: '#123456', width: 4 } } : {}),
+            };
+            const text = 'AB中文 '.repeat(100);
+            class HostGlyphExtension extends docExtension {
+                override uKey = 'HostGlyphExtension';
+
+                override draw() {}
+            }
+            const injector = new Injector([
+                [nativeMetricsToken, { useFactory: () => {
+                    FontCache.getMeasureText('', '16px Arial');
+                    return Reflect.get(FontCache, '_context') as CanvasRenderingContext2D;
+                } }],
+                [LocaleService],
+                [DocumentDataModel, { useFactory: (container: Injector) => container.createInstance(DocumentDataModel, {
+                    id: 'host-glyph-clipping',
+                    body: { dataStream: `${text}\r\n`, paragraphs: [{ startIndex: text.length, paragraphId: 'host-paragraph' }], sectionBreaks: [{ startIndex: text.length + 1, sectionId: 'host-section' }], textRuns: [{ st: 0, ed: text.length, ts: style }] },
+                    documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 3000 }, marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 0 },
+                }), deps: [Injector] }],
+                [DocumentViewModel, { useFactory: (container: Injector) => {
+                    const model = container.get(DocumentDataModel);
+                    model.disposeWithMe(registerDocumentLayoutPresentation(model, {
+                        getSnapshot: (snapshot) => ({
+                            ...snapshot,
+                            documentStyle: {
+                                ...snapshot.documentStyle,
+                                renderConfig: {
+                                    ...snapshot.documentStyle.renderConfig,
+                                    ...(kind === 'custom glyph renderer' ? { useCustomGlyphRenderer: BooleanNumber.TRUE } : {}),
+                                },
+                            },
+                            body: {
+                                ...snapshot.body!,
+                                textRuns: snapshot.body!.textRuns!.map((run) => ({ ...run, ts: {
+                                    ...run.ts,
+                                    ...(kind === 'text offsets' ? { textPaintOffsets: [{ x: 0, y: 200 }] } : {}),
+                                    ...(kind === 'font render scale' ? { fontRenderScale: 2 } : {}),
+                                } })),
+                            },
+                        }),
+                        captureState: () => undefined,
+                        applyActions: () => {},
+                        restoreState: () => {},
+                    }));
+                    return container.createInstance(DocumentViewModel, model);
+                }, deps: [Injector] }],
+                [DocumentSkeleton, { useFactory: DocumentSkeleton.create, deps: [DocumentViewModel, LocaleService] }],
+                [Documents, { useFactory: (container: Injector) => container.createInstance(Documents, 'host-glyph-clipping', container.get(DocumentSkeleton), { pageMarginLeft: 0, pageMarginTop: 0 }), deps: [Injector] }],
+                [CanvasRenderingContext2D, { useValue: document.createElement('canvas').getContext('2d')! }],
+                [UniverRenderingContext, { useFactory: (container: Injector) => container.createInstance(UniverRenderingContext, container.get(CanvasRenderingContext2D)), deps: [Injector] }],
+                [HostGlyphExtension],
+            ]);
+            try {
+                injector.get(LocaleService).setLocale(LocaleType.EN_US);
+                // The unit environment has no native text metrics; replace only that platform boundary.
+                vi.spyOn(injector.get<CanvasRenderingContext2D>(nativeMetricsToken), 'measureText').mockImplementation(function (this: CanvasRenderingContext2D, content) {
+                    const scale = Number(this.font.match(/([\d.]+)px/)?.[1] ?? 16) / 16;
+                    return {
+                        width: content.length * 8 * scale,
+                        fontBoundingBoxAscent: 16 * scale,
+                        fontBoundingBoxDescent: 4 * scale,
+                        actualBoundingBoxAscent: 14 * scale,
+                        actualBoundingBoxDescent: 2 * scale,
+                        actualBoundingBoxLeft: 0,
+                        actualBoundingBoxRight: content.length * 8 * scale,
+                    } as TextMetrics;
+                });
+                FontCache.invalidateMetrics(() => true);
+                const skeleton = injector.get(DocumentSkeleton);
+                skeleton.calculate();
+                if (kind === 'inherited text state') {
+                    const lines = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines;
+                    for (const line of lines.slice(1)) {
+                        for (const divide of line.divides) {
+                            for (const glyph of divide.glyphGroup) glyph.ts = undefined;
+                        }
+                    }
+                }
+                const documents = injector.get(Documents);
+                const context = injector.get(UniverRenderingContext);
+                const native = injector.get(CanvasRenderingContext2D);
+                if (kind === 'custom extension') documents.register(injector.get(HostGlyphExtension));
+                if (kind === 'deferred') documents.setGlyphPaintSink(() => {});
+                if (kind === 'rotated context') vi.spyOn(native, 'getTransform').mockReturnValue({ a: 1, b: 0.2, c: -0.2, d: 1, e: 0, f: 0 } as DOMMatrix);
+                if (kind === 'scaled context') context.setTransform(2.68, 0, 0, 2.68, 0.37, -173.52);
+                if (kind === 'negative context') context.setTransform(-1, 0, 0, 1, 300, 0);
+                if (kind === 'compositing') context.globalCompositeOperation = 'destination-in';
+                const textStates: Array<{ text: string; x: number; y: number; font: string; color: string | CanvasGradient | CanvasPattern }> = [];
+                const nativeFill = vi.isMockFunction(native.fillText) ? vi.mocked(native.fillText).getMockImplementation() : native.fillText;
+                const fill = vi.spyOn(native, 'fillText').mockImplementation(function (this: CanvasRenderingContext2D, ...args) {
+                    textStates.push({ text: args[0], x: args[1], y: args[2], font: this.font, color: this.fillStyle });
+                    if (nativeFill) Reflect.apply(nativeFill, this, args);
+                });
+                const rectangles = vi.spyOn(native, 'fillRect');
+                const draw = (clipped: boolean) => {
+                    context.font = '5px serif';
+                    context.fillStyle = '#aa0000';
+                    documents.draw(context, {
+                        viewBound: { left: 0, top: 0, right: 10000, bottom: 10000 },
+                        ...(clipped ? { glyphClipBound: { left: 0, top: 200, right: 1000, bottom: 280 } } : {}),
+                    } as IDocumentRenderBounds);
+                    if (kind === 'deferred') {
+                        for (const paint of documents.getGlyphPaints()) paint.draw(context);
+                    }
+                };
+                draw(false);
+                const original = fill.mock.calls.map((args) => [...args]);
+                const originalBackgrounds = rectangles.mock.calls.map((args) => [...args]);
+                const originalStates = textStates.splice(0);
+                expect(original.length).toBeGreaterThan(100);
+                fill.mockClear();
+                rectangles.mockClear();
+                draw(true);
+                if (kind === 'ordinary' || kind === 'inactive decorations' || kind === 'background' || kind === 'scaled context') {
+                    expect(fill.mock.calls.length).toBeGreaterThan(0);
+                    expect(fill.mock.calls.length).toBeLessThan(original.length / 2);
+                    const matrix = native.getTransform();
+                    const visible = original.filter(([, , y]) => typeof y === 'number' && y * matrix.d + matrix.f >= 198 && y * matrix.d + matrix.f <= 282);
+                    expect(visible.length).toBeGreaterThan(0);
+                    for (const args of visible) expect(fill.mock.calls).toContainEqual(args);
+                    expect(rectangles.mock.calls).toEqual(originalBackgrounds);
+                } else if (kind === 'inherited text state') {
+                    const visible = (state: (typeof textStates)[number]) => state.y >= 198 && state.y <= 282;
+                    expect(textStates.filter(visible).length).toBeGreaterThan(0);
+                    expect(textStates.filter(visible)).toEqual(originalStates.filter(visible));
+                } else {
+                    expect(fill.mock.calls).toEqual(original);
+                }
+            } finally {
+                injector.dispose();
+                vi.restoreAllMocks();
+                environment.restore();
+                FontCache.invalidateMetrics(() => true);
+            }
+        }
+    );
 });

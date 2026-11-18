@@ -17,7 +17,7 @@
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantErrorIsArray, checkVariantsErrorIsArray, checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { round } from '../../../engine/utils/math-kit';
+import { round, roundHalfEven } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -50,6 +50,12 @@ const EURO_CURRENCIES: Record<string, IEuroCurrency> = {
 const EURO = 'EUR';
 
 const MIN_TRIANGULATION_PRECISION = 3;
+
+// VBA's Integer upper bound: Excel converts the argument with CInt, so a larger value overflows.
+const MAX_TRIANGULATION_PRECISION = 32767;
+
+// Excel never rounds the intermediate euro value to more than 15 decimals.
+const MAX_EURO_DECIMALS = 15;
 
 // Rounds half away from zero, as Excel's ROUND does.
 const roundHalfAwayFromZero = (value: number, decimals: number) => (value < 0 ? -round(-value, decimals) : round(value, decimals));
@@ -156,12 +162,23 @@ export class Euroconvert extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        const decimals = Math.floor(+(variants as BaseValueObject[])[0].getValue());
+        const precision = +(variants as BaseValueObject[])[0].getValue();
 
-        if (Number.isNaN(decimals) || decimals < MIN_TRIANGULATION_PRECISION) {
+        if (Number.isNaN(precision)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return decimals;
+        // Excel converts the argument with VBA's CInt: 3.5 becomes 4 and 2.5 becomes 2.
+        const decimals = roundHalfEven(precision, 0);
+
+        if (decimals > MAX_TRIANGULATION_PRECISION) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (decimals < MIN_TRIANGULATION_PRECISION) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return Math.min(decimals, MAX_EURO_DECIMALS);
     }
 }

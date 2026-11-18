@@ -147,9 +147,19 @@ describe('Test euroconvert function', () => {
             expect(euroconvert(1, 'FRF', 'DEM', true, 'test')).toStrictEqual(ErrorType.VALUE);
             // An invalid precision is an error even when no triangulation takes place.
             expect(euroconvert(1, 'EUR', 'DEM', true, 2)).toStrictEqual(ErrorType.VALUE);
-            // A fractional precision is truncated.
-            expect(euroconvert(1, 'FRF', 'EUR', true, 3.9)).toStrictEqual(0.152);
+            // Excel converts a fractional precision with VBA's CInt, which rounds halves to even.
+            expect(euroconvert(1, 'FRF', 'EUR', true, 3.1)).toStrictEqual(0.152);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 3.4)).toStrictEqual(0.152);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 3.5)).toStrictEqual(0.1524);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 3.9)).toStrictEqual(0.1524);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 2.5)).toStrictEqual(ErrorType.VALUE);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 2.9)).toStrictEqual(0.152);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 4.5)).toStrictEqual(0.1524);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 5.5)).toStrictEqual(0.152449);
+            expect(euroconvert(1, 'FRF', 'EUR', true, '3.9')).toStrictEqual(0.1524);
             expect(euroconvert(1, 'FRF', 'EUR', true, '4')).toStrictEqual(0.1524);
+            // Values above the VBA Integer limit overflow to #NUM!.
+            expect(euroconvert(1, 'FRF', 'EUR', true, 32768)).toStrictEqual(ErrorType.NUM);
         });
 
         it('Value is array', () => {

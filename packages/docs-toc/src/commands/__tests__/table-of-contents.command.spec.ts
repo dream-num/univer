@@ -397,6 +397,38 @@ describe('table of contents body builder', () => {
         expect(right).toEqual(pageTab);
     });
 
+    it('uses the imported hyperlink font on linked titles while preserving explicit text runs', () => {
+        const { body, toc } = createBody();
+        toc.properties = { ...toc.properties, instruction: 'TOC \\o "1-1" \\h' };
+        const result = buildTableOfContentsBody(body, toc, () => 5, () => 'entry', {
+            resetEntryParagraphFormatting: true,
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            styles: {
+                LinkedFont: { name: 'Linked Font', type: DocStyleType.character, textStyle: { ff: 'Times New Roman' } },
+                CustomLink: {
+                    name: 'Hyperlink',
+                    basedOn: 'LinkedFont',
+                    type: DocStyleType.character,
+                    textStyle: { cl: { rgb: '#0000FF' }, ul: { s: BooleanNumber.TRUE } },
+                },
+            },
+            entries: [{
+                text: 'Alpha Beta',
+                textRuns: [{ st: 6, ed: 10, ts: { ff: 'Georgia' } }],
+                level: 1,
+                headingId: 'heading',
+                startOffset: 24,
+                paragraph: body.paragraphs![1],
+            }],
+        })!;
+
+        const start = result.dataStream.indexOf('Alpha');
+        expect(result.textRuns).toEqual([
+            { st: start, ed: start + 6, ts: { ff: 'Times New Roman' } },
+            { st: start + 6, ed: start + 10, ts: { ff: 'Georgia' } },
+        ]);
+    });
+
     it('keeps numbered entry tabs with their targets when a directory removes and reorders rows', () => {
         const cached = '\u001FIntroduction\t1\rChapter 1 : One\t2\rChapter 2 : Two\t3\r\u001E';
         const dataStream = `${cached}One\rTwo\r\n`;

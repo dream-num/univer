@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IDocumentStyle, ILists, IParagraph, ISpecialCharacterCustomRange, ITables, ITextRange, ITextRun } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, ICustomRange, IDocStyles, IDocumentBody, IDocumentStyle, ILists, IParagraph, ISpecialCharacterCustomRange, ITables, ITextRange, ITextRun, ITextStyle } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
     binSearchFirstGreaterThanTarget,
@@ -39,6 +39,7 @@ import {
     PRESET_LIST_TYPE,
     resolveDocumentParagraphBullet,
     resolveDocumentParagraphStyle,
+    resolveDocumentTextStyle,
     SliceBodyType,
     SpecialCharacterKind,
     TabStopAlignment,
@@ -508,6 +509,10 @@ export function buildTableOfContentsBody(
     options = { ...options, availableWidth: options?.availableWidth ?? getDocumentTextWidth(body, toc.startIndex, options?.documentStyle) };
     const instruction = String(toc.properties?.instruction ?? '');
     const hyperlinks = instruction.replace(/"[^"]*"/g, '').split(/\s+/).some((token) => token.toLowerCase() === '\\h');
+    const hyperlinkFont = hyperlinks && options.resetEntryParagraphFormatting &&
+        options.documentStyle?.documentFlavor !== DocumentFlavor.MODERN
+        ? resolveEntryHyperlinkFont(options.styles)
+        : undefined;
     if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
@@ -571,7 +576,8 @@ export function buildTableOfContentsBody(
         }, usedParagraphIds));
     }
 
-    for (const [index, heading] of headings.entries()) {
+    for (const [index, entry] of headings.entries()) {
+        const heading = hyperlinkFont ? { ...entry, textRuns: applyEntryHyperlinkFont(entry, hyperlinkFont) } : entry;
         const showEntryPageNumber = showPageNumbers && heading.showPageNumber !== false;
         const pageNumber = showEntryPageNumber ? heading.pageNumber ?? resolvePageNumber(heading.startOffset) : undefined;
         if (showEntryPageNumber && pageNumber == null) {
@@ -728,6 +734,33 @@ function parseOutlineLevelRange(instruction: string): [number, number] {
     const min = Math.max(1, Number(match?.[1] ?? 1));
     const max = Math.min(9, Math.max(min, Number(match?.[2] ?? 3)));
     return [min, max];
+}
+
+function resolveEntryHyperlinkFont(styles: IDocStyles | undefined): ITextStyle | undefined {
+    const styleId = Object.entries(styles ?? {}).find(([id, style]) =>
+        style.type === DocStyleType.character && (style.name ?? id).toLowerCase() === 'hyperlink'
+    )?.[0];
+    const style = resolveDocumentTextStyle(styles, styleId);
+    // Word uses a customized hyperlink font for the entry without its color or underline.
+    const keys = ['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'fontHint'] as const;
+    const font = Object.fromEntries(keys.filter((key) => style[key] !== undefined).map((key) => [key, style[key]]));
+    return Object.keys(font).length ? font : undefined;
+}
+
+function applyEntryHyperlinkFont(entry: ITableOfContentsHeading, font: ITextStyle): ITextRun[] {
+    const runs: ITextRun[] = [];
+    let start = 0;
+    for (const run of entry.textRuns ?? []) {
+        if (start < run.st) {
+            runs.push({ st: start, ed: run.st, ts: font });
+        }
+        runs.push({ ...run, ts: { ...font, ...run.ts } });
+        start = run.ed;
+    }
+    if (start < entry.text.length) {
+        runs.push({ st: start, ed: entry.text.length, ts: font });
+    }
+    return runs;
 }
 
 function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {

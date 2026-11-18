@@ -50,9 +50,11 @@ import {
     AddCommentMutation,
     DeleteCommentMutation,
     DeleteCommentTreeCommand,
+    IThreadCommentAuthzService,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    ThreadCommentAuthzService,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
 } from '@univerjs/thread-comment';
@@ -483,6 +485,7 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     const get = injector.get.bind(injector) as Injector['get'];
 
     injector.add([ComponentManager]);
+    injector.add([IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }]);
     injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
     injector.add([ThreadCommentModel]);
     injector.add([SheetsThreadCommentModel]);

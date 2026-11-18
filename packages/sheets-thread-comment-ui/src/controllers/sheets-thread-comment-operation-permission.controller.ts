@@ -15,9 +15,17 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SheetPermissionCheckController } from '@univerjs/sheets';
 import { IThreadCommentAuthzService } from '@univerjs/thread-comment';
+import type { LocaleKey } from '../locale/types';
 import {
     AddSheetDrawingCommentOperation,
     ShowAddSheetCommentModalOperation,
@@ -72,7 +80,7 @@ export class SheetsThreadCommentOperationPermissionController extends Disposable
 
     private _block() {
         this._sheetPermissionCheckController.blockExecuteWithoutPermission(
-            this._localeService.t('sheets-thread-comment.permission.commentErr')
+            this._localeService.t<LocaleKey>('sheets-thread-comment-ui.permission.commentErr')
         );
     }
 }

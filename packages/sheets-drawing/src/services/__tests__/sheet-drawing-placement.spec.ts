@@ -30,6 +30,7 @@ import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawin
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
 import {
     applySheetDrawingPlacement,
+    getSheetDrawingTransformWithOrientation,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,
     transformDrawingsToChartSheet,
@@ -100,6 +101,39 @@ describe('sheet drawing placement extents', () => {
             : { left: 200, top: 200, width: 160, height: 80, angle });
         expect(result.axisAlignSheetTransform).toEqual(drawing.axisAlignSheetTransform);
         expect(refreshSheetDrawingPlacement(result, skeleton)).toEqual(result);
+    });
+
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both].flatMap((anchorType) =>
+        [30, 90].map((angle) => ({ anchorType, angle }))))('projects the raw XLSX marker box for anchor $anchorType at $angle°', ({ anchorType, angle }) => {
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const bounds = { left: 200, top: 200, width: 160, height: 40, angle, flipX: true };
+        const sheetTransform = transformToAxisAlignPosition(bounds, skeleton);
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'xlsx-image',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            anchorType,
+            sheetTransform,
+            transform: { left: 0, top: 0, width: 0, height: 0 },
+        } as ISheetDrawing;
+        const result = refreshSheetDrawingPlacement(drawing, skeleton);
+        expect(result.anchorType).toBe(anchorType);
+        expect(result.transform).toMatchObject(bounds);
+        expect(result.axisAlignSheetTransform).toEqual(sheetTransform);
+        expect(refreshSheetDrawingPlacement(result, skeleton).transform).toMatchObject(bounds);
+        expect(drawing.transform).toEqual({ left: 0, top: 0, width: 0, height: 0 });
+    });
+
+    it('uses stored orientation for an absolute image and fills missing orientation from XLSX', () => {
+        const drawing = {
+            anchorType: SheetDrawingAnchorType.None,
+            transform: { left: 12, top: 40, width: 160, height: 50 },
+            sheetTransform: { angle: 90, flipX: true },
+        } as ISheetDrawing;
+        expect(getSheetDrawingTransformWithOrientation(drawing)).toEqual({ ...drawing.transform, angle: 90, flipX: true });
+        const authored = { ...drawing, transform: { ...drawing.transform, angle: 0, flipX: false } };
+        expect(getSheetDrawingTransformWithOrientation(authored)).toEqual(authored.transform);
     });
 
     it.each([undefined, null, { row: -2, column: -2, rowOffset: 0, columnOffset: 0 }])('rebuilds a one-cell derived endpoint %j from its anchor and fixed extent', (to) => {

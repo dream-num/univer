@@ -573,7 +573,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawings).forEach((drawingId) => {
             const drawing = drawings[drawingId];
-            if (drawing.anchorType !== SheetDrawingAnchorType.Both) {
+            if (drawing.anchorType !== SheetDrawingAnchorType.Both || drawing.groupId) {
                 return;
             }
 
@@ -598,22 +598,20 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const rowOffset = toRange.startRow - fromRange.startRow;
         const colOffset = toRange.startColumn - fromRange.startColumn;
 
-        const updateDrawings = containedDrawings.map((drawing) => {
-            const oldSheetTransform = drawing.sheetTransform;
-            const sheetTransform = {
-                to: { ...oldSheetTransform.to, row: oldSheetTransform.to.row + rowOffset, column: oldSheetTransform.to.column + colOffset },
-                from: { ...oldSheetTransform.from, row: oldSheetTransform.from.row + rowOffset, column: oldSheetTransform.from.column + colOffset },
-            };
-            const transform = drawingPositionToTransform(sheetTransform, sheetSkeletonParam);
-            const params = {
-                unitId,
-                subUnitId,
-                drawingId: drawing.drawingId,
-                transform,
-                sheetTransform,
-            };
-
-            return params;
+        const movePosition = (position: ISheetDrawingPosition): ISheetDrawingPosition => ({
+            ...position,
+            from: { ...position.from, row: position.from.row + rowOffset, column: position.from.column + colOffset },
+            to: { ...position.to, row: position.to.row + rowOffset, column: position.to.column + colOffset },
+        });
+        const updateDrawings = containedDrawings.flatMap((drawing) => {
+            const result = tryRefreshSheetDrawingPlacement({
+                ...drawing,
+                sheetTransform: movePosition(drawing.sheetTransform),
+                axisAlignSheetTransform: drawing.axisAlignSheetTransform && movePosition(drawing.axisAlignSheetTransform),
+            }, skeleton);
+            if (result.ok) return [result.drawing];
+            this._logSkippedDrawingRefresh(drawing, this._currentCommand.id, result);
+            return [];
         });
 
         return this._finalizePlan(unitId, subUnitId, updateDrawings);

@@ -51,7 +51,7 @@ export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
 function needsPlacementHydration(drawing: ISheetDrawing): boolean {
     const oneCell = (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position;
     const invalidEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
-    return (drawing.anchorType === SheetDrawingAnchorType.Both && !drawing.transform?.width && !drawing.transform?.height)
+    return (!drawing.transform?.width && !drawing.transform?.height)
         || (drawing.sheetTransform?.angle !== undefined && drawing.transform?.angle !== drawing.sheetTransform.angle)
         || Boolean(invalidEndpoint);
 }

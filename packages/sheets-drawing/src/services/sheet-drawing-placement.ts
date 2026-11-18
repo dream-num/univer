@@ -238,7 +238,8 @@ export function validateSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDra
 
 /** Expected snapshot errors are results; unexpected calculation failures are caught by the task owner. */
 export function tryRefreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): SheetDrawingPlacementRefreshResult {
-    const failure = validateSheetDrawingPlacement(drawing);
+    const deriveFixedExtent = drawing && (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position && isUnprojectedImage(drawing);
+    const failure = validateSheetDrawingPlacement(deriveFixedExtent ? { ...drawing, anchorType: SheetDrawingAnchorType.Both } : drawing);
     if (failure) {
         return failure;
     }
@@ -246,10 +247,12 @@ export function tryRefreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton
         return { ok: true, drawing };
     }
 
-    const placement = getSheetDrawingPlacement(drawing);
+    const placement = deriveFixedExtent
+        ? { kind: SheetDrawingAnchorType.Both as const, from: drawing.sheetTransform.from, to: drawing.sheetTransform.to }
+        : getSheetDrawingPlacement(drawing);
     const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton, true);
     // A valid two-cell drawing can temporarily collapse when its cells are hidden.
-    const extentFailure = validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresDrawingArea(drawing), true);
+    const extentFailure = validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresDrawingArea(drawing), !deriveFixedExtent);
     if (extentFailure) {
         return extentFailure;
     }
@@ -268,13 +271,24 @@ function requiresDrawingArea(drawing: ISheetDrawing): boolean {
     return drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE || drawing.drawingType === DrawingTypeEnum.DRAWING_DOM;
 }
 
+// XLSX can store the initial rectangle solely as two markers, even with
+// editAs="oneCell". An all-zero pixel cache and no axis box identify that form.
+function isUnprojectedImage(drawing: ISheetDrawing): boolean {
+    const { transform, axisAlignSheetTransform, drawingType } = drawing;
+    return drawingType === DrawingTypeEnum.DRAWING_IMAGE && !axisAlignSheetTransform
+        && transform?.left === 0 && transform.top === 0 && transform.width === 0 && transform.height === 0;
+}
+
 /** Preserve cell orientation when an imported pixel cache is incomplete. */
 export function getSheetDrawingTransformWithOrientation(drawing: ISheetDrawing): ITransformState {
     const transform: ITransformState = { ...drawing.transform };
-    if (drawing.anchorType === SheetDrawingAnchorType.None || drawing.groupId) {
+    if (drawing.groupId) {
         return transform;
     }
     for (const key of ['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const) {
+        if (drawing.anchorType === SheetDrawingAnchorType.None && transform[key] !== undefined) {
+            continue;
+        }
         if (drawing.sheetTransform?.[key] !== undefined && (drawing.sheetTransform[key] || transform[key] !== undefined)) {
             Object.assign(transform, { [key]: drawing.sheetTransform[key] });
         }
@@ -335,7 +349,9 @@ function resolveSheetDrawingPlacement(
     });
     // Excel's two-cell anchor follows the nearest major axis of a rotated
     // drawing. Refresh that rectangle, then recover the unrotated render box.
-    const axisAnchor = refresh ? drawing.axisAlignSheetTransform : undefined;
+    const axisAnchor = refresh
+        ? drawing.axisAlignSheetTransform ?? (isUnprojectedImage(drawing) ? drawing.sheetTransform : undefined)
+        : undefined;
     const from = projectCellMarker(axisAnchor?.from ?? placement.from, skeleton);
     const to = projectCellMarker(axisAnchor?.to ?? placement.to, skeleton);
     // Keep sub-pixel anchor precision. Rounding the axis box to tenths before

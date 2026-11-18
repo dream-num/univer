@@ -269,6 +269,10 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
             return;
         }
 
+        if ((width === undefined || width === documentStyle.pageSize.width) &&
+            (height === undefined || height === documentStyle.pageSize.height)) {
+            return;
+        }
         if (width !== undefined) {
             documentStyle.pageSize.width = width;
         }

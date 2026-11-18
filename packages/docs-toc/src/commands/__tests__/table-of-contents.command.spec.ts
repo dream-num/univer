@@ -335,6 +335,26 @@ describe('table of contents body builder', () => {
         expect(body).toEqual(before);
     });
 
+    it('uses an inherited hanging indent for the number tab before the page tab', () => {
+        const { body, toc } = createBody();
+        const pageTab = { offset: 672, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT };
+        const indent = 138.53333333333333;
+        const result = buildTableOfContentsBody(body, toc, () => 5, () => 'entry', {
+            availableWidth: 672,
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            styles: {
+                TOC1: { name: 'TOC 1', type: DocStyleType.paragraph, basedOn: 'Directory', paragraphStyle: { tabStops: [pageTab] } },
+                Directory: { name: 'Directory', type: DocStyleType.paragraph, paragraphStyle: { indentStart: { v: indent }, hanging: { v: 58.733333333333334 } } },
+            },
+            entries: [{ text: '3.2.1\tLong heading', numberingText: '3.2.1', level: 1, headingId: 'heading', startOffset: 24, paragraph: body.paragraphs![1] }],
+        })!;
+
+        expect(result.paragraphs![0].paragraphStyle?.tabStops).toEqual([
+            { offset: indent, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE },
+            pageTab,
+        ]);
+    });
+
     it('keeps numbered entry tabs with their targets when a directory removes and reorders rows', () => {
         const cached = '\u001FIntroduction\t1\rChapter 1 : One\t2\rChapter 2 : Two\t3\r\u001E';
         const dataStream = `${cached}One\rTwo\r\n`;

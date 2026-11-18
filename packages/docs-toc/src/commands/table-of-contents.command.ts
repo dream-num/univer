@@ -745,18 +745,24 @@ function formatNumberedEntry(paragraph: IParagraph, heading: ITableOfContentsHea
     });
     const characterWidth = font.originFontSize * 4 / 3;
     const first = getNumberUnitValue(style.indentFirstLine, characterWidth);
-    const start = getNumberUnitValue(style.indentStart, characterWidth) + (first > 0 ? first : -getNumberUnitValue(style.hanging, characterWidth));
+    const indentStart = getNumberUnitValue(style.indentStart, characterWidth);
+    const hanging = first > 0 ? 0 : getNumberUnitValue(style.hanging, characterWidth);
+    const numberEnd = indentStart + Math.max(first, 0) - hanging + width;
     const tabs = style.tabStops ?? [];
-    const nextTab = tabs.filter((tab) => !tab.clear && tab.offset > start + width).sort((left, right) => left.offset - right.offset)[0];
+    const nextTab = tabs.filter((tab) => !tab.clear && tab.offset > numberEnd).sort((left, right) => left.offset - right.offset)[0];
     if (nextTab && (nextTab.alignment === TabStopAlignment.START || nextTab.alignment === TabStopAlignment.TAB_STOP_ALIGNMENT_UNSPECIFIED) && (options?.availableWidth == null || nextTab.offset < options.availableWidth)) {
         if (paragraph.paragraphStyle?.tabStops) {
             paragraph.paragraphStyle = { ...paragraph.paragraphStyle, tabStops: [...paragraph.paragraphStyle.tabStops].sort((left, right) => left.offset - right.offset) };
         }
         return;
     }
-    // Word leaves an extra 11-point grid interval after the numbered label.
+    // A hanging indent is a Word tab stop before falling back to the numbering grid.
+    const useHangingStop = hanging > 0 &&
+        options?.documentStyle?.compatibilityFlags?.noTabHangInd !== BooleanNumber.TRUE &&
+        indentStart > numberEnd &&
+        indentStart < Math.min(nextTab?.offset ?? Infinity, options?.availableWidth ?? Infinity);
     const interval = 11 * 4 / 3;
-    const offset = (Math.floor((start + width) / interval + 1e-6) + 2) * 11 * 4 / 3;
+    const offset = useHangingStop ? indentStart : (Math.floor(numberEnd / interval + 1e-6) + 2) * 11 * 4 / 3;
     paragraph.paragraphStyle = {
         ...paragraph.paragraphStyle,
         tabStops: [...tabs, { offset, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE }].sort((left, right) => left.offset - right.offset),

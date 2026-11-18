@@ -522,6 +522,13 @@ describe('table filter utilities', () => {
         expect(textStartWith('Table Sales', 'Table')).toBe(true);
         expect(textEndWith('Table Sales', 'Sales')).toBe(true);
 
+        // Without `*` or `?` the text is compared as written, tildes included.
+        expect(textEqual('a~~b', 'a~~b')).toBe(true);
+        expect(textEqual('a~b', 'a~~b')).toBe(false);
+        expect(textNotEqual('a~b', 'a~~b')).toBe(true);
+        // "Contains" adds the wildcards, so `~~` reads as one tilde.
+        expect(textContain('a~b', 'a~~b')).toBe(true);
+
         expect(getTextFilterExecuteFunc({
             conditionType: TableConditionTypeEnum.String,
             compareType: TableStringCompareTypeEnum.Contains,

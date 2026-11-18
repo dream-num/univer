@@ -136,5 +136,14 @@ describe('Test custom filter functions', () => {
             expect(notEquals.fn('fy06?', 'fy06~?')).toBeFalsy();
             expect(notEquals.fn('fy06x', 'fy06~?')).toBeTruthy();
         });
+
+        it('should compare a text without wild cards as written, "~" included', () => {
+            expect(textMatch.fn('a~~b', 'a~~b')).toBeTruthy();
+            expect(textMatch.fn('a~b', 'a~~b')).toBeFalsy();
+            expect(textMatch.fn('a~b', '*a~~b*')).toBeTruthy();
+
+            expect(notEquals.fn('a~~b', 'a~~b')).toBeFalsy();
+            expect(notEquals.fn('a~b', 'a~~b')).toBeTruthy();
+        });
     });
 });

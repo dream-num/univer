@@ -41,12 +41,21 @@ describe('regexp utilities', () => {
         expect(star.test('5*3 = 15')).toBe(true);
         expect(star.test('513')).toBe(false);
 
-        const tilde = regexp.createFromWildcard('a~~b');
-        expect(tilde.test('a~b')).toBe(true);
-        expect(tilde.test('a~~b')).toBe(false);
+        // `~~` is one tilde where the pattern has a wildcard for tildes to escape.
+        expect(regexp.createFromWildcard('*a~~b*').test('a~b')).toBe(true);
 
         // A tilde before any other character stays literal.
+        expect(regexp.createFromWildcard('*a~b*').test('a~b')).toBe(true);
+    });
+
+    it('matches a pattern without * or ? as written, tildes included', () => {
+        const tildes = regexp.createFromWildcard('a~~b');
+        expect(tildes.test('a~~b')).toBe(true);
+        expect(tildes.test('A~~B')).toBe(true);
+        expect(tildes.test('a~b')).toBe(false);
+
         expect(regexp.createFromWildcard('a~b').test('a~b')).toBe(true);
+        expect(regexp.createFromWildcard('a.b').test('axb')).toBe(false);
     });
 
     it('builds literal regexes from text containing regex syntax', () => {

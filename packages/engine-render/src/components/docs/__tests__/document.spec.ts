@@ -1868,6 +1868,199 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it.each(['top', 'bottom'] as const)('keeps the shared row border on the %s edge of a split table fragment', (edge) => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-border-split', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+
+        const visibleBorder = { color: { rgb: '#ff0000' }, width: { v: 5 } };
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        const sourceIndex = 4;
+        const neighbourIndex = edge === 'top' ? sourceIndex - 1 : sourceIndex + 1;
+        const neighbourEdge = edge === 'top' ? 'borderBottom' : 'borderTop';
+        const transparentCell = () => ({ borderTop: noBorder, borderBottom: noBorder, borderLeft: noBorder, borderRight: noBorder });
+        const sourceRows = Array.from({ length: 7 }, (_value, index) => ({
+            tableCells: [index === neighbourIndex ? { ...transparentCell(), [neighbourEdge]: visibleBorder } : transparentCell()],
+        }));
+
+        const row = {
+            index: sourceIndex,
+            cells: [cell],
+            rowSource: { tableCells: [{ borderTop: noBorder, borderBottom: noBorder, borderLeft: noBorder, borderRight: noBorder }] },
+        } as any;
+        cell.parent = row;
+        // The fragment holds one row, so it is both its first and its last row.
+        row.parent = { rows: [row], tableSource: { tableRows: sourceRows } };
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
+
+        const lineWidths: number[] = [];
+        const ctx = {
+            getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            strokeStyle: '',
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(lineWidths).toEqual([5]);
+        documents.dispose();
+    });
+
+    it.each([
+        { name: 'paints them when the merge starts on a previous page', split: true, expected: [4, 4, 4] },
+        { name: 'leaves them to the merge start cell on the same page', split: false, expected: [] },
+    ])('draws the merged cell side borders across a page break: $name', ({ split, expected }) => {
+        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
+        const documents = new Documents('docs-merged-border', skeleton, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        cell.marginLeft = 0;
+        cell.marginTop = 0;
+        cell.pageWidth = 120;
+        cell.pageHeight = 60;
+
+        const visible = { color: { rgb: '#ff0000' }, width: { v: 4 } };
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+        // Rows 4..9 are one vertical merge that starts on the previous page.
+        const startCell = {
+            rowSpan: 6,
+            borderTop: visible,
+            borderBottom: visible,
+            borderLeft: visible,
+            borderRight: visible,
+        };
+        const coveredCell = { rowSpan: 0, borderTop: noBorder, borderBottom: noBorder, borderLeft: noBorder, borderRight: noBorder };
+        const tableRows = Array.from({ length: 10 }, (_value, index) => ({
+            tableCells: [index === 4 ? startCell : index >= 5 && index <= 9 ? coveredCell : { ...noBorder }],
+        }));
+
+        const row = {
+            index: 5,
+            cells: [cell],
+            rowSource: { tableCells: [coveredCell] },
+        } as any;
+        cell.parent = row;
+        const startRow = { index: 4, cells: [], rowSource: { tableCells: [startCell] } } as any;
+        row.parent = { rows: split ? [row] : [startRow, row], tableSource: { tableRows } };
+        (documents as any)._drawLiquid = { x: 0, y: 0 };
+        vi.spyOn(documents as any, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
+
+        const lineWidths: number[] = [];
+        const ctx = {
+            getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            save: vi.fn(),
+            restore: vi.fn(),
+            fillRectByPrecision: vi.fn(),
+            setLineWidthByPrecision: vi.fn((width: number) => lineWidths.push(width)),
+            beginPath: vi.fn(),
+            moveToByPrecision: vi.fn(),
+            lineToByPrecision: vi.fn(),
+            setLineDash: vi.fn(),
+            stroke: vi.fn(),
+            closePathByEnv: vi.fn(),
+            strokeStyle: '',
+        } as any;
+
+        (documents as any)._drawTableCellBordersAndBg(ctx, { marginLeft: 0, marginTop: 0 }, cell);
+
+        expect(lineWidths).toEqual(expected);
+        documents.dispose();
+    });
+
+    it('still paints borders for covered merged cells so a page split keeps its side edges', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 0;
+        bodyPage.marginTop = 0;
+        const noBorder = { color: { rgb: 'transparent' }, width: { v: 0 } };
+
+        const coveredCell = createPage(DocumentSkeletonPageType.CELL, 'covered-cell');
+        coveredCell.marginLeft = 0;
+        coveredCell.marginTop = 0;
+        coveredCell.pageWidth = 120;
+        coveredCell.pageHeight = 60;
+        coveredCell.left = 0;
+        Object.assign(coveredCell, { isMergedCellCovered: true });
+
+        const coveredSource = { rowSpan: 0, borderTop: noBorder, borderBottom: noBorder, borderLeft: noBorder, borderRight: noBorder };
+        const row = {
+            cells: [coveredCell],
+            index: 5,
+            height: 60,
+            top: 0,
+            rowSource: { tableCells: [coveredSource] },
+        } as any;
+        coveredCell.parent = row;
+
+        const table = {
+            rows: [row],
+            width: 120,
+            height: 60,
+            top: 0,
+            left: 0,
+            tableId: 'table-covered-merge',
+            tableSource: { tableRows: Array.from({ length: 7 }, () => ({ tableCells: [coveredSource] })) },
+            parent: bodyPage,
+        } as any;
+        row.parent = table;
+        bodyPage.skeTables.set('table-covered-merge', table);
+
+        const documents = new Documents('docs-covered-merge', {
+            getSkeletonData: () => ({ pages: [bodyPage] }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        (documents as any)._drawLiquid = { x: 0, y: 0, translateSave: () => {}, translate: () => {}, translateRestore: () => {} };
+        const borderSpy = vi.spyOn(documents as any, '_drawTableCellBordersAndBg').mockImplementation(() => {});
+        const cellSpy = vi.spyOn(documents as any, '_drawTableCell').mockImplementation(() => {});
+
+        (documents as any)._drawTable(
+            {} as any,
+            bodyPage,
+            bodyPage.skeTables,
+            [],
+            null,
+            [],
+            [],
+            {} as any,
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        // Skipping the covered cell here is what dropped the merged cell's borders on the next page.
+        expect(borderSpy).toHaveBeenCalledWith({} as any, bodyPage, coveredCell, false);
+        expect(cellSpy).not.toHaveBeenCalled();
+        documents.dispose();
+    });
+
     it('draws column group child pages at their column offsets', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         bodyPage.sections[0].columns[0].lines = [];

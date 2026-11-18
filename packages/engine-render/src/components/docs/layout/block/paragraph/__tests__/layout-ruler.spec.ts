@@ -1103,6 +1103,47 @@ describe('layout-ruler', () => {
         expect(divide.left + divide.paddingLeft + lastGlyph.left + lastGlyph.width).toBeCloseTo(lines[0].parent!.width);
     });
 
+    it('pulls a centered tab left when its field would pass the right edge', () => {
+        const field = 'B'.repeat(8);
+        const content = `A\t${field}`;
+        const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 553.7333333333332, height: 800 }, marginLeft: 0, marginRight: 0 },
+            body: {
+                paragraphs: [{ startIndex: content.length, paragraphStyle: {
+                    tabStops: [{ offset: 540, alignment: TabStopAlignment.CENTER }],
+                } }],
+            },
+        });
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+
+        // The whole centered field stays on the line; without the clamp the last glyphs overflow and wrap.
+        expect(lines).toHaveLength(1);
+        const divide = lines[0].divides[0];
+        const glyphs = divide.glyphGroup.filter((glyph) => glyph.width > 0 && glyph.content !== '\r');
+        const lastGlyph = glyphs[glyphs.length - 1];
+        expect(lastGlyph.content).toBe('B');
+        expect(divide.left + divide.paddingLeft + lastGlyph.left + lastGlyph.width).toBeCloseTo(lines[0].parent!.width);
+    });
+
+    it('leaves a centered tab alone while its field fits inside the line', () => {
+        const tab = createGlyph(DataStreamTreeTokenType.TAB, 36);
+        tab.glyphType = GlyphType.TAB;
+        tab.left = 100;
+        tab.width = 36;
+        tab.bBox.width = 36;
+        const field = Array.from({ length: 4 }, () => createGlyph('中', 24));
+        const divide = { glyphGroup: [tab], width: 553.7333333333332, left: 0, paddingLeft: 0 } as IDocumentSkeletonDivide;
+        const paragraphConfig = {
+            paragraphStyle: { tabStops: [{ offset: 200, alignment: TabStopAlignment.CENTER }] },
+        } as IParagraphConfig;
+
+        __testing.adjustExplicitTabStop(divide, field, paragraphConfig);
+
+        expect(tab.width).toBeCloseTo(200 - 100 - 48);
+    });
+
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('wraps fitting URLs as words only in traditional layout (%s)', (documentFlavor) => {
         const prefix = '说明文字'.repeat(4);
         const url = 'http://www.example.com';

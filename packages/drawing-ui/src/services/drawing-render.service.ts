@@ -36,6 +36,7 @@ import {
 import { DRAWING_OBJECT_LAYER_INDEX, Image, Rect } from '@univerjs/engine-render';
 import { IGalleryService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
+import { syncDrawingKeepRatio } from '../utils/drawing-keep-ratio';
 import { OleObject } from '../views/ole/ole-object';
 import { DrawingImageClipService } from './drawing-image-clip.service';
 import { OleUIService } from './ole-ui.service';
@@ -139,6 +140,7 @@ export class DrawingRenderService {
             const imageShape = scene.getObject(imageShapeKey);
             if (imageShape != null) {
                 imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                syncDrawingKeepRatio(imageShape, imageParam);
                 if (drawingType === DrawingTypeEnum.DRAWING_OLE) {
                     imageShape.transformerConfig = { ...imageShape.transformerConfig, rotateEnabled: false };
                 }
@@ -204,6 +206,7 @@ export class DrawingRenderService {
             const image = drawingType === DrawingTypeEnum.DRAWING_OLE
                 ? new OleObject(imageShapeKey, imageConfig)
                 : new Image(imageShapeKey, imageConfig);
+            syncDrawingKeepRatio(image, imageParam);
             image.setClipService(this._drawingImageClipService);
             if (shouldBeCache) {
                 this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());

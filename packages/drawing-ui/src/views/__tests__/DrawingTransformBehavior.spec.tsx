@@ -214,7 +214,7 @@ describe('DrawingTransform behavior', () => {
             getLockRatioInput(container!).click();
         });
 
-        expect(renderManagerService.transformer.keepRatio).toBe(false);
+        expect(renderManagerService.transformer.keepRatio).toBe(true);
         expect(updates).toEqual([[
             {
                 unitId,
@@ -246,7 +246,7 @@ describe('DrawingTransform behavior', () => {
         expect(renderManagerService.transformer.notificationCount).toBe(1);
     });
 
-    it('restores the persisted aspect ratio lock and keeps Delete shortcuts out of panel editors', () => {
+    it('restores the persisted aspect ratio lock without changing the shared transformer', () => {
         const drawing = {
             ...createDrawing('image-1'),
             locks: {
@@ -261,7 +261,7 @@ describe('DrawingTransform behavior', () => {
         container = rendered.container;
 
         expect(getLockRatioInput(container).checked).toBe(false);
-        expect(renderManagerService.transformer.keepRatio).toBe(false);
+        expect(renderManagerService.transformer.keepRatio).toBe(true);
 
         act(() => {
             getNumberInput(container!, 0).focus();
@@ -288,7 +288,7 @@ describe('DrawingTransform behavior', () => {
         expect(univer.__getInjector().get(IContextService).getContextValue(FOCUSING_PANEL_EDITOR)).toBe(false);
     });
 
-    it('applies collaborative aspect ratio lock updates to the active transformer', () => {
+    it('applies collaborative aspect ratio lock updates to the panel without changing the shared transformer', () => {
         const drawing = {
             ...createDrawing('image-1'),
             locks: {
@@ -306,6 +306,7 @@ describe('DrawingTransform behavior', () => {
         const rendered = renderWithRediContext(univer.__getInjector(), drawing);
         root = rendered.root;
         container = rendered.container;
+        renderManagerService.transformer.keepRatio = false;
 
         const update = drawingManagerService.getBatchUpdateOp([{
             ...drawing,
@@ -319,7 +320,7 @@ describe('DrawingTransform behavior', () => {
         });
 
         expect(getLockRatioInput(container).checked).toBe(true);
-        expect(renderManagerService.transformer.keepRatio).toBe(true);
+        expect(renderManagerService.transformer.keepRatio).toBe(false);
     });
 
     it('emits the requested rotation for the focused drawing', () => {

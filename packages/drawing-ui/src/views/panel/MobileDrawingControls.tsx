@@ -28,9 +28,9 @@ import type { LocaleKey } from '../../locale/types';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
+import { getDrawingKeepRatio } from '../../utils/drawing-keep-ratio';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
-import { getDrawingKeepRatio, setDrawingTransformerKeepRatio } from './drawing-keep-ratio';
 import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotationDisabled } from './drawing-transform-rotation';
 
 const INPUT_DEBOUNCE_TIME = 300;
@@ -113,11 +113,7 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
     const [xPosition, setXPosition] = useState(originX);
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
-    const [lockRatio, setLockRatio] = useState(() => {
-        const keepRatio = getDrawingKeepRatio(drawingParam);
-        setDrawingTransformerKeepRatio(transformer, keepRatio);
-        return keepRatio;
-    });
+    const [lockRatio, setLockRatio] = useState(() => getDrawingKeepRatio(drawingParam));
     const rotateEnabled = resolveDrawingUIRotateEnabled(drawingParam, {
         getChildren: (drawing) => drawingManagerService.getDrawingsByGroup(drawing),
     });
@@ -185,7 +181,6 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
                 if (drawing != null) {
                     const nextLockRatio = getDrawingKeepRatio(drawing);
                     setLockRatio(nextLockRatio);
-                    setDrawingTransformerKeepRatio(transformer, nextLockRatio);
                     syncTransform(drawing);
                 }
             }),
@@ -207,7 +202,6 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
             if (drawing) {
                 const nextLockRatio = getDrawingKeepRatio(drawing);
                 setLockRatio(nextLockRatio);
-                setDrawingTransformerKeepRatio(transformer, nextLockRatio);
             }
         });
 
@@ -298,7 +292,6 @@ function MobileDrawingTransformContent(props: IMobileDrawingTransformProps) {
             return;
         }
         setLockRatio(value);
-        setDrawingTransformerKeepRatio(transformer, value);
         const currentDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) ?? drawingParam;
         drawingManagerService.featurePluginUpdateNotification([{
             unitId,

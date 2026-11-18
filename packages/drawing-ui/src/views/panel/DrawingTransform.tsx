@@ -17,17 +17,17 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import type { FocusEvent } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { debounce, FOCUSING_PANEL_EDITOR, IContextService, LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
+import { getDrawingKeepRatio } from '../../utils/drawing-keep-ratio';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
-import { getDrawingKeepRatio, setDrawingTransformerKeepRatio } from './drawing-keep-ratio';
 import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotationDisabled } from './drawing-transform-rotation';
 
 export interface IDrawingTransformProps {
@@ -82,11 +82,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     const [xPosition, setXPosition] = useState(originX);
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
-    const [lockRatio, setLockRatio] = useState(() => {
-        const keepRatio = getDrawingKeepRatio(drawingParam);
-        setDrawingTransformerKeepRatio(transformer, keepRatio);
-        return keepRatio;
-    });
+    const [lockRatio, setLockRatio] = useState(() => getDrawingKeepRatio(drawingParam));
     const rotateEnabled = resolveDrawingUIRotateEnabled(drawingParam, {
         getChildren: (drawing) => drawingManagerService.getDrawingsByGroup(drawing),
     });
@@ -210,7 +206,6 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
 
                 const nextLockRatio = getDrawingKeepRatio(drawingParam);
                 setLockRatio(nextLockRatio);
-                setDrawingTransformerKeepRatio(transformer, nextLockRatio);
 
                 const transform = drawingParam.transform;
 
@@ -266,7 +261,6 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             if (drawing) {
                 const nextLockRatio = getDrawingKeepRatio(drawing);
                 setLockRatio(nextLockRatio);
-                setDrawingTransformerKeepRatio(transformer, nextLockRatio);
             }
         });
 
@@ -382,7 +376,6 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             return;
         }
         setLockRatio(val);
-        setDrawingTransformerKeepRatio(transformer, val);
         const currentDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) ?? drawingParam;
         drawingManagerService.featurePluginUpdateNotification([{
             unitId,

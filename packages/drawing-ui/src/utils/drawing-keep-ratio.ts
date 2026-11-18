@@ -15,20 +15,18 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
+import type { BaseObject } from '@univerjs/engine-render';
 
+// Historical drawings omit this field, matching the Transformer default that preserves the aspect ratio.
 const DEFAULT_DRAWING_KEEP_RATIO = true;
-
-interface IDrawingKeepRatioTransformer {
-    keepRatio: boolean;
-}
 
 export function getDrawingKeepRatio(drawing: IDrawingParam): boolean {
     return drawing.locks?.noChangeAspect ?? DEFAULT_DRAWING_KEEP_RATIO;
 }
 
-export function setDrawingTransformerKeepRatio(
-    transformer: IDrawingKeepRatioTransformer,
-    keepRatio: boolean
-): void {
-    transformer.keepRatio = keepRatio;
+export function syncDrawingKeepRatio(drawingObject: BaseObject, drawing: IDrawingParam): void {
+    drawingObject.transformerConfig = {
+        ...drawingObject.transformerConfig,
+        keepRatio: getDrawingKeepRatio(drawing),
+    };
 }

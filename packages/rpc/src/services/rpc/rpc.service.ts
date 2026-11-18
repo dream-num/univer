@@ -340,6 +340,11 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
                     return;
                 }
 
+                // The server may not send a terminal response for a cancelled
+                // subscription, so the pending handler must be released here to
+                // avoid leaking it in `_pendingRequests`.
+                this._pendingRequests.delete(sequence);
+
                 const cancelSubscriptionRequest: IRPCRequest = {
                     type: RequestType.UNSUBSCRIBE,
                     seq: sequence,
@@ -460,21 +465,32 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
                 throw new Error(`[ChannelServer]: Channel ${channelName} not found!`);
             }
 
+            let settled = false;
             const observable = channel.subscribe(request.method, request.args);
             const subscription = observable.subscribe({
                 next: (data) => {
                     this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_NEXT, data });
                 },
                 error: (err) => {
+                    settled = true;
+                    this._subscriptions.delete(seq);
                     this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });
                     this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
                 },
                 complete: () => {
+                    settled = true;
+                    this._subscriptions.delete(seq);
                     this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
                 },
             });
 
-            this._subscriptions.set(request.seq, subscription);
+            // If the observable has already completed/errored synchronously, the
+            // subscription is already closed; avoid tracking it and leaking the slot.
+            if (settled) {
+                subscription.unsubscribe();
+            } else {
+                this._subscriptions.set(request.seq, subscription);
+            }
         } catch (err: unknown) {
             if (err instanceof Error) {
                 this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });

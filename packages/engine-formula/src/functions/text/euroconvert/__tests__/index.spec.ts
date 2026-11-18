@@ -97,11 +97,15 @@ describe('Test euroconvert function', () => {
             expect(euroconvert(100, 'DEM', 'FRF', true, 3)).toBeCloseTo(335.38425453, 8);
             expect(euroconvert(100, 'DEM', 'FRF', false, 3)).toStrictEqual(335.38);
             expect(euroconvert(1, 'FRF', 'DEM', false, 3)).toStrictEqual(0.3);
+            // The escudo and the drachma have no calculation decimals, so the euro value rounds there too.
+            expect(euroconvert(100, 'ATS', 'PTE')).toStrictEqual(1457);
         });
 
         it('Returns the number unchanged when source and target are the same currency', () => {
             expect(euroconvert(1.23456, 'DEM', 'DEM')).toStrictEqual(1.23456);
             expect(euroconvert(1.23456, 'EUR', 'EUR', false, 3)).toStrictEqual(1.23456);
+            // An invalid precision is still an error when no triangulation takes place.
+            expect(euroconvert(1, 'DEM', 'DEM', true, 2)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Accepts ISO codes in any letter case', () => {
@@ -110,6 +114,8 @@ describe('Test euroconvert function', () => {
 
         it('Number value test', () => {
             expect(euroconvert('1.2', 'DEM', 'EUR')).toStrictEqual(0.61);
+            // Excel's add-in receives a VBA Boolean, where TRUE is -1, so Excel returns -1.95583
+            // here; Univer keeps its own boolean coercion instead.
             expect(euroconvert(true, 'EUR', 'DEM', true)).toStrictEqual(1.95583);
             expect(euroconvert(null, 'EUR', 'DEM')).toStrictEqual(0);
             expect(euroconvert('test', 'DEM', 'EUR')).toStrictEqual(ErrorType.VALUE);
@@ -158,6 +164,9 @@ describe('Test euroconvert function', () => {
             expect(euroconvert(1, 'FRF', 'EUR', true, 5.5)).toStrictEqual(0.152449);
             expect(euroconvert(1, 'FRF', 'EUR', true, '3.9')).toStrictEqual(0.1524);
             expect(euroconvert(1, 'FRF', 'EUR', true, '4')).toStrictEqual(0.1524);
+            // Excel never rounds the intermediate euro value to more than 15 decimals.
+            expect(euroconvert(1, 'FRF', 'EUR', true, 20)).toStrictEqual(0.15244901723741);
+            expect(euroconvert(1, 'FRF', 'EUR', true, 32767)).toStrictEqual(0.15244901723741);
             // Values above the VBA Integer limit overflow to #NUM!.
             expect(euroconvert(1, 'FRF', 'EUR', true, 32768)).toStrictEqual(ErrorType.NUM);
         });

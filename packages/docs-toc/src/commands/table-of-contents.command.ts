@@ -34,6 +34,8 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     JSONX,
+    LocaleService,
+    LocaleType,
     NamedStyleType,
     NumberUnitType,
     PRESET_LIST_TYPE,
@@ -49,7 +51,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getFontStyleString, getNumberUnitValue, IRenderManagerService, measureDocumentNoWrapTextWidth, resolveDocumentParagraphNumbering } from '@univerjs/engine-render';
+import { getFontStyleString, getNumberUnitValue, IRenderManagerService, measureDocumentNoWrapTextWidth, resolveDocumentDefaultFont, resolveDocumentParagraphNumbering } from '@univerjs/engine-render';
 import { filter, firstValueFrom, take, timeout } from 'rxjs';
 
 const FIELD_START = '\u001F';
@@ -135,6 +137,7 @@ interface ITableOfContentsBuildOptions {
     showPageNumbers?: boolean;
     styles?: IDocStyles;
     documentStyle?: IDocumentStyle;
+    locale?: LocaleType;
     lists?: ILists;
     tableSource?: ITables;
     preserveLeadingParagraph?: boolean;
@@ -191,6 +194,7 @@ async function updateTableOfContents(
             ? buildPageNumberOnlyTableOfContentsBody(currentBody, currentToc, resolvePageNumber)
             : buildTableOfContentsBody(currentBody, currentToc, resolvePageNumber, undefined, {
                 documentStyle: doc.getDocumentStyle(),
+                locale: accessor.get(LocaleService).getCurrentLocale(),
                 styles: doc.getSnapshot().styles,
                 lists: doc.getSnapshot().lists,
                 tableSource: doc.getSnapshot().tableSource,
@@ -305,6 +309,7 @@ export const InsertTableOfContentsCommand: ICommand<IInsertTableOfContentsComman
             tabStopOffset: Math.max(72, availableWidth ?? 594.3),
             availableWidth,
             documentStyle: doc.getDocumentStyle(),
+            locale: accessor.get(LocaleService).getCurrentLocale(),
             styles: doc.getSnapshot().styles,
             lists: doc.getSnapshot().lists,
             tableSource: doc.getSnapshot().tableSource,
@@ -796,13 +801,16 @@ function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading,
     }
     const style = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles: options?.styles, paragraphStyleId: paragraph.styleId });
     const numberStyle = heading.textRuns?.find((run) => run.st === 0 && run.ed >= prefix.length)?.ts;
-    const textStyle = { ...style.textStyle, ...numberStyle };
+    const textStyle = resolveDocumentDefaultFont({ ...style.textStyle, ...numberStyle }, options?.documentStyle, options?.locale ?? LocaleType.EN_US);
     const font = getFontStyleString(textStyle, options?.documentStyle?.fontFamilyFallbacks, options?.documentStyle?.fontFamilyClasses);
     const width = measureDocumentNoWrapTextWidth({
         id: rangeId,
         documentStyle: { ...options?.documentStyle, textStyle },
-        body: { dataStream: prefix },
-    });
+        body: {
+            dataStream: prefix,
+            textRuns: heading.textRuns?.filter((run) => run.st < prefix.length),
+        },
+    }, titleTabOffsets.length > 0);
     const characterWidth = font.originFontSize * 4 / 3;
     const first = getNumberUnitValue(style.indentFirstLine, characterWidth);
     const indentStart = getNumberUnitValue(style.indentStart, characterWidth);
@@ -821,12 +829,12 @@ function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading,
         options?.documentStyle?.compatibilityFlags?.noTabHangInd !== BooleanNumber.TRUE &&
         indentStart > numberEnd &&
         indentStart < Math.min(nextTab?.offset ?? Infinity, options?.availableWidth ?? Infinity);
-    // A generated title tab follows the number plus one em on the TOC styles' indent grid.
+    // Word allows room for the generated 11pt tab before the title.
+    const interval = 11 * 4 / 3;
     const styleStop = titleTabOffsets.find((offset) =>
-        offset >= numberEnd + characterWidth - 1e-6 &&
+        offset >= numberEnd + interval - 1e-6 &&
         offset < Math.min(nextTab?.offset ?? Infinity, options?.availableWidth ?? Infinity)
     );
-    const interval = 11 * 4 / 3;
     const offset = useHangingStop ? indentStart : styleStop ?? (Math.floor(numberEnd / interval + 1e-6) + 2) * 11 * 4 / 3;
     paragraph.paragraphStyle = {
         ...paragraph.paragraphStyle,
@@ -887,8 +895,15 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
         if (label && !/\\w(?:\s|$)/i.test(String(toc?.properties?.instruction ?? ''))) {
             text = text.replace(/\t/g, ' ');
         }
-        const markStyle = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId }).paragraphMarkTextStyle;
-        const numberFont = Object.fromEntries(Object.entries(markStyle ?? {}).filter(([key]) => ['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'complexScriptFontFamily', 'fontHint', 'bl', 'it'].includes(key)));
+        const sourceStyle = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId });
+        const listMarker = !preset && bullet ? definition?.nestingLevel[bullet.nestingLevel]?.textStyle : undefined;
+        const markerStyle: Readonly<Record<string, unknown>> = { ...sourceStyle.paragraphMarkTextStyle, ...bullet?.textStyle, ...listMarker };
+        const inheritedStyle = sourceStyle.textStyle as typeof markerStyle | undefined;
+        const numberFont = Object.fromEntries(
+            (['ff', 'eastAsiaFontFamily', 'eastAsiaFontTheme', 'complexScriptFontFamily', 'fontHint', 'bl', 'it'] as const)
+                .filter((key) => markerStyle[key] !== undefined && (key === 'bl' || key === 'it' || markerStyle[key] !== inheritedStyle?.[key]))
+                .map((key) => [key, markerStyle[key]])
+        );
         return [{
             bookmarkId: bookmark?.properties?.bookmarkId,
             headingId,

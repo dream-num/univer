@@ -41,7 +41,7 @@ export {
 } from './basics/drawing-effect';
 export type { IResolvedDrawingShadow } from './basics/drawing-effect';
 export { getOffsetRectForDom } from './basics/position';
-export { getFontStyleString } from './basics/tools';
+export { getFontStyleString, resolveDocumentDefaultFont } from './basics/tools';
 export * from './canvas';
 export * from './components/component';
 export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';

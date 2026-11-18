@@ -96,7 +96,8 @@ function measureDocumentNoWrapRunsWidth(
     fallbackTextStyle: ITextStyle | undefined,
     policy: IDocumentCompatibilityPolicy,
     spaceWidthEastAsian: boolean,
-    fontPolicy?: IDocumentData['documentStyle']
+    fontPolicy?: IDocumentData['documentStyle'],
+    includeTrailingWhitespace = false
 ): number {
     let currentLineWidth = 0;
     let maxLineWidth = 0;
@@ -142,7 +143,7 @@ function measureDocumentNoWrapRunsWidth(
     };
 
     const finishLine = () => {
-        maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
+        maxLineWidth = Math.max(maxLineWidth, currentLineWidth + (includeTrailingWhitespace ? pendingTrailingWhitespaceWidth : 0));
         currentLineWidth = 0;
         pendingTrailingWhitespaceWidth = 0;
         previous.char = '';
@@ -199,7 +200,8 @@ function measureDocumentNoWrapRunsWidth(
         appendRange(dataStream.slice(cursor), fallbackTextStyle);
     }
 
-    return Math.max(maxLineWidth, currentLineWidth);
+    finishLine();
+    return maxLineWidth;
 }
 
 export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData, start: number, end: number): number {
@@ -245,7 +247,7 @@ export function measureDocumentNoWrapTextRangeWidth(documentData: IDocumentData,
  * width adjustments here so feature packages do not duplicate paragraph shaping
  * details such as CJK-Latin spacing.
  */
-export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | null | undefined): number {
+export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | null | undefined, includeTrailingWhitespace = false): number {
     const body = documentData?.body;
     const dataStream = body?.dataStream ?? '';
     const textRuns = body?.textRuns;
@@ -256,7 +258,8 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
         documentData?.documentStyle?.textStyle,
         getDocumentCompatibilityPolicy(documentData?.documentStyle?.documentFlavor),
         documentData?.documentStyle?.spaceWidthEastAsian !== BooleanNumber.FALSE,
-        documentData?.documentStyle
+        documentData?.documentStyle,
+        includeTrailingWhitespace
     );
 }
 

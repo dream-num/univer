@@ -399,27 +399,33 @@ describe('table of contents body builder', () => {
     });
 
     it.each([
-        { indent: 16, offset: 48 },
-        { indent: 68 / 3, offset: 68 },
-    ])('uses the TOC style indents to place a regenerated title tab ($indent)', ({ indent, offset }) => {
+        { indent: 16, prefix: '1.1', offset: 48 },
+        { indent: 68 / 3, prefix: '1.1', offset: 68 },
+        { indent: 16, prefix: '1.1 ', offset: 64 },
+    ])('uses the TOC style indents and prefix width to place a regenerated title tab ($indent, "$prefix")', ({ indent, prefix, offset }) => {
         const { body, toc } = createBody();
         const styles = Object.fromEntries(Array.from({ length: 9 }, (_, index) => [`TOC${index + 1}`, {
             name: `toc ${index + 1}`,
             type: DocStyleType.paragraph,
             paragraphStyle: { indentStart: { v: index * indent } },
-            textStyle: { ff: 'Calibri', fs: 10 },
+            textStyle: { fs: 10 },
         }]));
-        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({ width: 16.8 } as never);
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) =>
+            ({ width: text === ' ' ? 3.3 : 16.8 }) as never);
         try {
             const result = buildTableOfContentsBody(body, toc, () => 5, () => 'entry', {
                 resetEntryParagraphFormatting: true,
                 availableWidth: 414,
                 tabStopOffset: 414,
-                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    defaultFontTheme: 'minor',
+                    latinFontScheme: { minor: 'Calibri' },
+                },
                 styles,
                 entries: [{
-                    text: '1.1\tHeading',
-                    numberingText: '1.1',
+                    text: `${prefix}\tHeading`,
+                    numberingText: prefix.endsWith(' ') ? undefined : prefix,
                     level: 2,
                     headingId: 'heading',
                     startOffset: 24,
@@ -431,6 +437,7 @@ describe('table of contents body builder', () => {
                 { offset, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE },
                 { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT },
             ]);
+            expect(measure.mock.calls.some(([, font]) => font.includes('Calibri'))).toBe(true);
         } finally {
             measure.mockRestore();
         }

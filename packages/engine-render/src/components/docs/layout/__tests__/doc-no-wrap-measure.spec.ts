@@ -198,6 +198,8 @@ describe('measureDocumentNoWrapTextWidth', () => {
         }) as never);
 
         expect(measureDocumentNoWrapTextWidth(createDocument('A  \r\nBBBB\r\n'))).toBe(40);
+        expect(measureDocumentNoWrapTextWidth(createDocument('A    \r\nBBBB\r\n'), true)).toBe(50);
+        expect(measureDocumentNoWrapTextWidth(createDocument('A  '), true)).toBe(30);
 
         measureSpy.mockRestore();
     });

@@ -26,6 +26,8 @@ const EXTENSION_CAN_VIEW_Z_INDEX = 25;
 const EXTENSION_CAN_NOT_VIEW_Z_INDEX = 80;
 
 export class WorksheetProtectionRenderExtension extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === WorksheetProtectionRenderExtension;
+
     override uKey = worksheetProtectionKey;
 
     override Z_INDEX = EXTENSION_CAN_VIEW_Z_INDEX;
@@ -39,6 +41,10 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none'
     ) {
         super();
+        this._img.onload = () => {
+            this._img.onload = null;
+            this.parent?.makeDirty(true);
+        };
         this._img.src = base64;
         if (shadowStrategy) {
             this._shadowStrategy = shadowStrategy;
@@ -107,6 +113,12 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         }
 
         ctx.restore();
+    }
+
+    override dispose(): void {
+        this._img.onload = null;
+        this._pattern = null;
+        super.dispose();
     }
 
     /**

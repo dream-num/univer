@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'D\'acord',
         },
         GradientColorPicker: {
+            add: 'Afegeix una parada de degradat',
             linear: 'Lineal',
             radial: 'Radial',
             angular: 'Angular',

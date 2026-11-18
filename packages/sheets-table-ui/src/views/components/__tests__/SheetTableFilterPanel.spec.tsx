@@ -240,6 +240,12 @@ class TestEditor {
     readonly focus$ = new Subject<void>();
     readonly selectionChange$ = new Subject<void>();
     readonly render = new TestEditorRender();
+    readonly docSelectionRenderService = {
+        isFocusing: false,
+        getAllTextRanges: () => [],
+        getAllRectRanges: () => [],
+    };
+
     private readonly _model: TestEditorModel;
 
     constructor(
@@ -884,29 +890,38 @@ describe('sheet table view components', () => {
         expect(confirmed).toHaveLength(0);
     });
 
-    it('keeps the range selector editor stable when its delayed resize runs', async () => {
+    it('confirms the selected table range after the editor delayed resize runs', async () => {
         vi.useFakeTimers();
         testBed = createTestBed();
         const unitId = testBed.workbook.getUnitId();
+        const confirmed: unknown[] = [];
         const rendered = renderWithRediContext(
             testBed,
             <SheetTableSelector
                 unitId={unitId}
                 subUnitId="sheet1"
                 range={{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 1 }}
-                onConfirm={() => {}}
+                onConfirm={(info) => {
+                    confirmed.push(info);
+                }}
                 onCancel={() => {}}
             />
         );
         root = rendered.root;
         container = rendered.container;
 
+        await selectRangeThroughDialog(container, 'A10:B12');
         await act(async () => {
             vi.advanceTimersByTime(500);
             await Promise.resolve();
         });
 
-        expect(container.querySelector('svg')).not.toBeNull();
+        clickButtonByText(container, 'Confirm');
+        expect(confirmed).toEqual([{
+            unitId,
+            subUnitId: 'sheet1',
+            range: expect.objectContaining({ startRow: 9, endRow: 11, startColumn: 0, endColumn: 1 }),
+        }]);
     });
 
     it('cancels table range selection without submitting a range update', async () => {

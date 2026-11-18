@@ -612,8 +612,8 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
     const { boundsOfViewArea: specBoundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
     const boundsOfViewArea = {
-        top: skipBoundsOfViewArea ? 0 : columnHeaderHeight,
-        left: skipBoundsOfViewArea ? 0 : rowHeaderWidth,
+        top: skipBoundsOfViewArea ? 0 : columnHeaderHeight * scaleY,
+        left: skipBoundsOfViewArea ? 0 : rowHeaderWidth * scaleX,
     };
     if (specBoundsOfViewArea) {
         if (Tools.isDefine(boundsOfViewArea.top)) {
@@ -1445,6 +1445,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         domId,
                         componentKey: floatDomParam.componentKey,
                         eventPassThrough: shouldPassThroughFloatDomRuntimeEvents(floatDomParam, 'inactive'),
+                        preventBrowserZoom: true,
                         preserveOnFocusChange: shouldPreserveFloatDomOnFocusChange(floatDomParam),
                         onPointerDown: (evt) => {
                             if (shouldForwardSheetHostedEmbedFloatDomEvent(floatDomParam, evt)) {
@@ -2142,20 +2143,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             }
             const disposableCollection = new DisposableCollection();
 
-            const viewMain = scene.getMainViewport();
-            const { rowHeaderWidth, columnHeaderHeight } = skeletonParam.skeleton;
-
-            const boundsOfViewArea: IBoundRectNoAngle = {
-                top: columnHeaderHeight,
-                left: rowHeaderWidth,
-                bottom: viewMain.bottom,
-                right: viewMain.right,
-            };
-
             const floatDomInfo = {
                 dispose: disposableCollection,
                 rect: domRect,
-                boundsOfViewArea,
                 domAnchor,
                 unitId,
                 subUnitId,
@@ -2171,6 +2161,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
+                preventBrowserZoom: true,
                 componentKey: floatDomParam.componentKey,
                 onPointerDown: () => { },
                 onPointerMove: () => { },
@@ -2414,6 +2405,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
+                preventBrowserZoom: true,
                 componentKey: floatDomParam.componentKey,
                 onPointerDown: () => { },
                 onPointerMove: () => { },

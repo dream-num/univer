@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IInsertColMutationParams } from '../../../basics/interfaces/mutation-interface';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../commands/commands/insert-row-col.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../../commands/commands/move-rows-cols.command';
@@ -26,7 +27,6 @@ import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-r
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
 import type { IRangeProtectionRule } from '../../../models/range-protection-rule.model';
 import type { EffectRefRangeParams } from '../../ref-range/type';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../../../commands/commands/remove-row-col.command';
@@ -149,7 +149,7 @@ export class RangeProtectionRefRangeService extends Disposable {
     private _getRefRangeMutationsByDeleteCols(params: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return Rectangle.intersects(range, params.range);
+                return !this._coversAllColumns(range) && Rectangle.intersects(range, params.range);
             });
         });
 
@@ -160,6 +160,10 @@ export class RangeProtectionRefRangeService extends Disposable {
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {
+                    if (this._coversAllColumns(c)) {
+                        p.push(c);
+                        return p;
+                    }
                     if (Rectangle.intersects(c, removeRange)) {
                         const cloneRange = Tools.deepClone(c);
                         const { startColumn, endColumn } = removeRange;
@@ -197,7 +201,7 @@ export class RangeProtectionRefRangeService extends Disposable {
     private _getRefRangeMutationsByDeleteRows(params: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return Rectangle.intersects(range, params.range);
+                return !this._coversAllRows(range) && Rectangle.intersects(range, params.range);
             });
         });
 
@@ -208,6 +212,10 @@ export class RangeProtectionRefRangeService extends Disposable {
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {
+                    if (this._coversAllRows(c)) {
+                        p.push(c);
+                        return p;
+                    }
                     if (Rectangle.intersects(c, removeRange)) {
                         const cloneRange = Tools.deepClone(c);
                         const { startRow, endRow } = removeRange;
@@ -243,7 +251,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return insertStart > range.startColumn && insertStart <= range.endColumn;
+                return !this._coversAllColumns(range) && insertStart > range.startColumn && insertStart <= range.endColumn;
             });
         });
 
@@ -254,7 +262,7 @@ export class RangeProtectionRefRangeService extends Disposable {
                 const cloneRule = Tools.deepClone(rule);
                 let hasLap = false;
                 cloneRule.ranges.forEach((range) => {
-                    if (insertStart > range.startColumn && insertStart <= range.endColumn) {
+                    if (!this._coversAllColumns(range) && insertStart > range.startColumn && insertStart <= range.endColumn) {
                         range.endColumn += insertLength;
                         hasLap = true;
                     }
@@ -276,7 +284,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return insertStart > range.startRow && insertStart <= range.endRow;
+                return !this._coversAllRows(range) && insertStart > range.startRow && insertStart <= range.endRow;
             });
         });
 
@@ -287,7 +295,7 @@ export class RangeProtectionRefRangeService extends Disposable {
                 const cloneRule = Tools.deepClone(rule);
                 let hasLap = false;
                 cloneRule.ranges.forEach((range) => {
-                    if (insertStart > range.startRow && insertStart <= range.endRow) {
+                    if (!this._coversAllRows(range) && insertStart > range.startRow && insertStart <= range.endRow) {
                         range.endRow += insertLength;
                         hasLap = true;
                     }
@@ -310,7 +318,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return moveToStartRow > range.startRow && moveToStartRow <= range.endRow;
+                return !this._coversAllRows(range) && moveToStartRow > range.startRow && moveToStartRow <= range.endRow;
             });
         });
 
@@ -323,7 +331,7 @@ export class RangeProtectionRefRangeService extends Disposable {
                 const moveFromStartRow = fromRange.startRow;
                 let hasLap = false;
                 cloneRule.ranges.forEach((range) => {
-                    if (moveToStartRow > range.startRow && moveToStartRow <= range.endRow) {
+                    if (!this._coversAllRows(range) && moveToStartRow > range.startRow && moveToStartRow <= range.endRow) {
                         if (moveFromStartRow < range.startRow) {
                             range.startRow = range.startRow - moveLength;
                             range.endRow = range.endRow - moveLength;
@@ -351,7 +359,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const permissionRangeLapRules = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
             return rule.ranges.some((range) => {
-                return moveToStartCol > range.startColumn && moveToStartCol <= range.endColumn;
+                return !this._coversAllColumns(range) && moveToStartCol > range.startColumn && moveToStartCol <= range.endColumn;
             });
         });
 
@@ -364,7 +372,7 @@ export class RangeProtectionRefRangeService extends Disposable {
                 const moveFromStartCol = fromRange.startColumn;
                 let hasLap = false;
                 cloneRule.ranges.forEach((range) => {
-                    if (moveToStartCol > range.startColumn && moveToStartCol <= range.endColumn) {
+                    if (!this._coversAllColumns(range) && moveToStartCol > range.startColumn && moveToStartCol <= range.endColumn) {
                         if (moveFromStartCol < range.startColumn) {
                             range.startColumn = range.startColumn - moveLength;
                             range.endColumn = range.endColumn - moveLength;
@@ -405,6 +413,11 @@ export class RangeProtectionRefRangeService extends Disposable {
                 permissionListRule.forEach((rule) => {
                     const ranges = rule.ranges;
                     ranges.forEach((range) => {
+                        // moving cells along an axis a whole range already covers keeps it unchanged
+                        if ((isRowMove && this._coversAllRows(range)) || (!isRowMove && this._coversAllColumns(range))) {
+                            return;
+                        }
+
                         let { startRow, endRow, startColumn, endColumn } = range;
 
                         if (!Rectangle.intersects(range, sourceRange)) {
@@ -476,6 +489,12 @@ export class RangeProtectionRefRangeService extends Disposable {
                 permissionListRule.forEach((rule) => {
                     const ranges = rule.ranges;
                     ranges.forEach((range) => {
+                        // a whole column/row protection range always covers that axis, so structural
+                        // edits there only move its end instead of shifting it
+                        if (this._adjustWholeRangeForStructuralChange(range, isRowOperation, isAddOperation, operationStart, operationEnd, operationCount)) {
+                            return;
+                        }
+
                         let { startRow, endRow, startColumn, endColumn } = range;
 
                         if (isAddOperation) {
@@ -534,6 +553,48 @@ export class RangeProtectionRefRangeService extends Disposable {
 
     private _checkIsRightRange(range: IRange) {
         return range.startRow <= range.endRow && range.startColumn <= range.endColumn;
+    }
+
+    private _coversAllRows(range: IRange) {
+        return range.rangeType === RANGE_TYPE.COLUMN || range.rangeType === RANGE_TYPE.ALL;
+    }
+
+    private _coversAllColumns(range: IRange) {
+        return range.rangeType === RANGE_TYPE.ROW || range.rangeType === RANGE_TYPE.ALL;
+    }
+
+    /**
+     * A whole column/row/sheet protection range always covers that axis, so inserting or removing
+     * rows/columns there only moves its end instead of shifting it.
+     *
+     * @returns `true` when the range was adjusted as a whole range
+     */
+    private _adjustWholeRangeForStructuralChange(
+        range: IRange,
+        isRowOperation: boolean,
+        isAddOperation: boolean,
+        operationStart: number,
+        operationEnd: number,
+        operationCount: number
+    ) {
+        const coversAll = isRowOperation ? this._coversAllRows(range) : this._coversAllColumns(range);
+        if (!coversAll) {
+            return false;
+        }
+
+        const startKey = isRowOperation ? 'startRow' : 'startColumn';
+        const endKey = isRowOperation ? 'endRow' : 'endColumn';
+
+        if (isAddOperation) {
+            range[startKey] = 0;
+            range[endKey] += operationCount;
+            return true;
+        }
+
+        const removed = Math.min(operationEnd, range[endKey]) - Math.max(operationStart, 0) + 1;
+        range[startKey] = 0;
+        range[endKey] = Math.max(0, range[endKey] - Math.max(0, removed));
+        return true;
     }
 
     private _initReBuildCache() {

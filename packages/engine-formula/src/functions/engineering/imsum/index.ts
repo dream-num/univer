@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { isRealNum } from '@univerjs/core';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -86,7 +86,7 @@ export class Imsum extends BaseFunction {
         const value = `${variant.getValue()}`;
 
         if (typeof result !== 'number' && !result) {
-            const complex = new Complex(value);
+            const complex = new Complex(value, this.getDateSystem());
 
             if (complex.isError()) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -94,8 +94,8 @@ export class Imsum extends BaseFunction {
 
             _result = complex.toString();
         } else {
-            const complex1: Complex = new Complex(result);
-            const complex2 = new Complex(value);
+            const complex1: Complex = new Complex(result, this.getDateSystem());
+            const complex2 = new Complex(value, this.getDateSystem());
 
             if (complex1.isError() || complex2.isError()) {
                 return ErrorValueObject.create(ErrorType.NUM);

@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, ObjectMatrix, Univer, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ICellData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, CellValueType, HorizontalAlign, Injector, LocaleType, ObjectMatrix, Univer, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Documents } from '../../../docs/document';
 import { setupRenderTestEnv } from '../../../../__tests__/render-test-utils';
 import { VERTICAL_ROTATE_ANGLE } from '../../../../basics/text-rotation';
 import { UniverRenderingContext2D } from '../../../../context';
+import { Rect } from '../../../../shape/rect';
 import { Text } from '../../../../shape/text';
 import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
+import { Spreadsheet } from '../../spreadsheet';
 import { Font } from '../font';
+
+let injector: Injector;
 
 function createCtx() {
     return {
@@ -118,12 +123,41 @@ function createSpreadsheetSkeleton() {
 
 describe('font extension', () => {
     beforeEach(() => {
+        injector = new Injector([[Font]]);
         vi.restoreAllMocks();
         vi.stubGlobal('Image', class {
             complete = true;
             naturalWidth = 1;
             src = '';
         });
+    });
+
+    afterEach(() => injector.dispose());
+
+    it.each([false, true])('invalidates loaded fallback image pixels and disconnects after disposal (loaded: %s)', (loaded) => {
+        const image = document.createElement('img');
+        vi.stubGlobal('Image', vi.fn(function () {
+            return image;
+        }));
+        const extension = injector.get(Font);
+        const parent = injector.createChild([[Rect, { useFactory: function createTestInstance() {
+            return injector.createInstance(Rect, 'fallback-image-parent', {});
+        } }]]).get(Rect);
+        const dirty = vi.spyOn(parent, 'makeDirty');
+        extension.parent = parent;
+        try {
+            if (loaded) {
+                image.dispatchEvent(new Event('load'));
+                expect(dirty).toHaveBeenCalledExactlyOnceWith(true);
+            }
+            extension.dispose();
+            expect(image.onload).toBeNull();
+            image.dispatchEvent(new Event('load'));
+            expect(dirty).toHaveBeenCalledTimes(Number(loaded));
+        } finally {
+            extension.dispose();
+            parent.dispose();
+        }
     });
 
     it.each([
@@ -171,7 +205,13 @@ describe('font extension', () => {
             },
         });
         const worksheet = workbook.getActiveSheet()!;
-        const skeleton = univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+        const testInjector = univer.__getInjector();
+        testInjector.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return testInjector.createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles());
+            },
+        }]);
+        const skeleton = testInjector.get(SpreadsheetSkeleton);
         const context = document.createElement('canvas').getContext('2d')!;
         const fillText = vi.spyOn(context, 'fillText');
         try {
@@ -186,7 +226,9 @@ describe('font extension', () => {
                 const cell = worksheet.getCellRaw(index, index)!;
                 skeleton._setFontStylesCache(index, index, cell, worksheet.getComposedCellStyleByCellData(index, index, cell));
             }
-            new Font().draw(new UniverRenderingContext2D(context), { scaleX: 1, scaleY: 1 }, skeleton, [], {
+            injector.get(Font).draw(injector.createChild([[UniverRenderingContext2D, { useFactory: function createTestInstance() {
+                return injector.createInstance(UniverRenderingContext2D, context);
+            } }]]).get(UniverRenderingContext2D), { scaleX: 1, scaleY: 1 }, skeleton, [], {
                 viewRanges: [{ startRow: 0, endRow: 4, startColumn: 0, endColumn: 4 }],
                 viewportKey: 'viewMain',
             });
@@ -200,7 +242,7 @@ describe('font extension', () => {
     });
 
     it('covers fallback image draw branches', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -219,7 +261,7 @@ describe('font extension', () => {
     });
 
     it('covers clip bounds for overflow/offset align branches', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const clipOverflowSpy = vi.spyOn(font, '_clipRectangleForOverflow').mockImplementation(() => undefined);
         const skeleton = createSpreadsheetSkeleton();
@@ -293,7 +335,7 @@ describe('font extension', () => {
     it('covers text render alignment and wrap branches', () => {
         const drawWithSpy = vi.spyOn(Text as any, 'drawWith').mockImplementation((..._args: any[]) => undefined);
         const drawPlainSpy = vi.spyOn(Text as any, 'drawPlainWith').mockImplementation((..._args: any[]) => undefined);
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
 
         const renderFontCtx = {
@@ -363,7 +405,7 @@ describe('font extension', () => {
     });
 
     it('covers documents render branches and missing documents error', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const overflow = new ObjectMatrix<any>();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
@@ -439,7 +481,7 @@ describe('font extension', () => {
     });
 
     it('uses the natural content width for a non-wrapped document without cell overflow', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const overflow = new ObjectMatrix<any>();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
@@ -544,7 +586,7 @@ describe('font extension', () => {
     it.each([HorizontalAlign.JUSTIFIED, HorizontalAlign.DISTRIBUTED])(
         'keeps the cell width while rendering full-width alignment %s',
         (horizontalAlign) => {
-            const font = new Font() as any;
+            const font = injector.get(Font) as any;
             const ctx = createCtx();
             const overflow = new ObjectMatrix<any>();
             const spreadsheetSkeleton = createSpreadsheetSkeleton();
@@ -590,7 +632,7 @@ describe('font extension', () => {
     );
 
     it('covers image rendering fallback branches', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const fallbackSpy = vi.spyOn(font, '_drawFallbackImage').mockImplementation(() => undefined);
 
@@ -643,7 +685,7 @@ describe('font extension', () => {
     });
 
     it('renders cell images from cell alignment, independent of document layout offsets', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const image = { complete: true, getAttribute: vi.fn(() => 'false') };
 
         const createImageFontCache = (aLeft: number, wrapStrategy: WrapStrategy) => createFontCache({
@@ -691,7 +733,7 @@ describe('font extension', () => {
     });
 
     it('renders cell images inside the cell padding box', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const image = { complete: true, getAttribute: vi.fn(() => 'false') };
         const fontCache = createFontCache({
@@ -734,7 +776,7 @@ describe('font extension', () => {
     });
 
     it('covers draw and render-each-cell early/normal branches', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -857,7 +899,7 @@ describe('font extension', () => {
     });
 
     it('does not read live cell data for plain cached font cells', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -884,7 +926,7 @@ describe('font extension', () => {
     });
 
     it('draws fitting plain text without clipping', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -925,7 +967,7 @@ describe('font extension', () => {
     });
 
     it('checks live cell data for cached font render extensions', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -956,7 +998,7 @@ describe('font extension', () => {
     });
 
     it('skips coordinate calculation for cells without font cache', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -977,8 +1019,77 @@ describe('font extension', () => {
         expect(renderCellSpy).toHaveBeenCalledOnce();
     });
 
+    it.each([undefined, 0, 19])('preserves native overflow glyph output for damage clip %s', (clipTop) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const testInjector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'native-overflow-text',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 3,
+                    columnCount: 3,
+                    defaultRowHeight: 20,
+                    defaultColumnWidth: 40,
+                    rowHeader: { width: 46, hidden: BooleanNumber.TRUE },
+                    columnHeader: { height: 20, hidden: BooleanNumber.TRUE },
+                    cellData: { 0: { 0: { v: 'overflow text beyond the cell'.repeat(4), s: { tb: WrapStrategy.OVERFLOW } } } },
+                },
+            },
+        });
+        testInjector.add([Font]);
+        testInjector.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return testInjector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles());
+            },
+        }]);
+        testInjector.add([UniverRenderingContext2D, {
+            useFactory: function createContext() {
+                return testInjector.createInstance(UniverRenderingContext2D, document.createElement('canvas').getContext('2d')!);
+            },
+        }]);
+        const font = testInjector.get(Font);
+        const ctx = testInjector.get(UniverRenderingContext2D);
+        const skeleton = testInjector.get(SpreadsheetSkeleton);
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+        const clip = clipTop === undefined ? undefined : { left: 0, top: clipTop, right: 120, bottom: 60 };
+        const text = [vi.spyOn(ctx._context, 'fillText')];
+        const getContext = vi.isMockFunction(HTMLCanvasElement.prototype.getContext)
+            ? vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!
+            : HTMLCanvasElement.prototype.getContext;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement, ...args) {
+            const native = Reflect.apply(getContext, this, args);
+            if (native && 'fillText' in native) {
+                text.push(vi.spyOn(native, 'fillText'));
+            }
+            return native;
+        });
+        try {
+            skeleton.calculate();
+            const worksheet = workbook.getActiveSheet()!;
+            const cell = worksheet.getCellRaw(0, 0)!;
+            skeleton._setFontStylesCache(0, 0, cell, worksheet.getComposedCellStyle(0, 0));
+            expect(skeleton.stylesCache.fontMatrix.getValue(0, 0)?.textFitsCurrentCell).toBe(false);
+            font.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [range], {
+                viewRanges: [range],
+                viewportKey: 'viewMain',
+                textClipBound: clip,
+            });
+            expect(text.flatMap((paint) => paint.mock.calls)).toContainEqual([
+                'overflow text beyond the cell'.repeat(4),
+                expect.any(Number),
+                expect.any(Number),
+            ]);
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
     it('skips font work for rows that are too short to display text on screen', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -1016,7 +1127,7 @@ describe('font extension', () => {
     });
 
     it('skips merge lookup work when the sheet has no merged cells', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -1040,7 +1151,7 @@ describe('font extension', () => {
     });
 
     it('does not mutate shared view ranges when expanding text overflow bounds', () => {
-        const font = new Font() as any;
+        const font = injector.get(Font) as any;
         const ctx = createCtx();
         const spreadsheetSkeleton = createSpreadsheetSkeleton();
         const fontMatrix = new ObjectMatrix<any>();
@@ -1059,5 +1170,142 @@ describe('font extension', () => {
         } as any);
 
         expect(viewRanges).toEqual([{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
+    });
+});
+
+describe('rich text outside a frozen viewport', () => {
+    it.each([
+        { name: 'wrapped text outside the clip', hidden: false },
+        { name: 'unknown viewport bounds', hidden: true, unknownBound: true },
+        { name: 'printing', hidden: true, printing: true },
+        { name: 'overflowing text', hidden: true, style: { tb: WrapStrategy.OVERFLOW } },
+        { name: 'rotated text', hidden: true, style: { tr: { a: 45, v: BooleanNumber.FALSE } } },
+        { name: 'custom render bounds', hidden: true, customBounds: true },
+        { name: 'pending drawing resources', hidden: true, drawings: true },
+        { name: 'physical edge halo', hidden: true, edge: true },
+        { name: 'merged anchor outside the viewport', hidden: false, merged: true },
+    ])('preserves visible glyphs for $name', (test) => {
+        const environment = setupRenderTestEnv();
+        const rootInjector = new Injector([[Univer, {
+            useFactory: function createUniver(container: Injector) {
+                return container.createInstance(Univer, { locale: LocaleType.EN_US });
+            },
+            deps: [Injector],
+        }]]);
+        const univer = rootInjector.get(Univer);
+        const container = univer.__getInjector();
+        let targetColumn = 4;
+        if (test.merged) {
+            targetColumn = 6;
+        } else if (test.edge) {
+            targetColumn = 1;
+        }
+        const richCell = (glyph: string, style: IStyleData = {}): ICellData => ({
+            p: {
+                id: `rich-${glyph}`,
+                documentStyle: {},
+                ...(test.drawings && glyph === 'H' ? { drawingsOrder: ['pending-image'] } : {}),
+                body: {
+                    dataStream: `${glyph}\r\n`,
+                    paragraphs: [{ startIndex: 1, paragraphId: `paragraph-${glyph}` }],
+                    textRuns: [{ st: 0, ed: 1, ts: { bl: BooleanNumber.TRUE } }],
+                },
+            },
+            s: { tb: WrapStrategy.WRAP, ...style },
+        });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'frozen-rich-text',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 4,
+                    columnCount: 8,
+                    defaultRowHeight: 40,
+                    defaultColumnWidth: 40,
+                    rowHeader: { width: 46 },
+                    columnHeader: { height: 20 },
+                    mergeData: test.merged ? [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 4 }] : [],
+                    cellData: { 0: {
+                        0: richCell('V'),
+                        [targetColumn]: {
+                            ...richCell('H', test.style),
+                            ...(test.customBounds ? { fontRenderExtension: { rightOffset: -20 } } : {}),
+                        },
+                    } },
+                },
+            },
+        });
+        container.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return container.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles());
+            },
+        }]);
+        container.add([Spreadsheet, {
+            useFactory: function createSpreadsheet() {
+                return container.createInstance(Spreadsheet, 'frozen-rich-sheet', container.get(SpreadsheetSkeleton));
+            },
+        }]);
+        container.add([Font, { useFactory: function getFont() {
+            return container.get(Spreadsheet).fontExtension;
+        } }]);
+        container.add([CanvasRenderingContext2D, { useValue: document.createElement('canvas').getContext('2d')! }]);
+        container.add([UniverRenderingContext2D, {
+            useFactory: function createContext(resolver: Injector, native: CanvasRenderingContext2D) {
+                return resolver.createInstance(UniverRenderingContext2D, native);
+            },
+            deps: [Injector, CanvasRenderingContext2D],
+        }]);
+        try {
+            const skeleton = container.get(SpreadsheetSkeleton);
+            const font = container.get(Font);
+            const ctx = container.get(UniverRenderingContext2D);
+            ctx.canvas.width = 1000;
+            ctx.canvas.height = 1000;
+            if (test.printing) ctx.__mode = 'printing';
+            skeleton.calculate();
+            const worksheet = workbook.getActiveSheet()!;
+            for (const column of [0, targetColumn]) {
+                const cell = worksheet.getCellRaw(0, column)!;
+                skeleton._setFontStylesCache(0, column, cell, worksheet.getComposedCellStyleByCellData(0, column, cell));
+                expect(skeleton.stylesCache.fontMatrix.getValue(0, column)?.documentSkeleton).toBeTruthy();
+            }
+            const paints = [vi.spyOn(ctx._context, 'fillText')];
+            const getContext = vi.isMockFunction(HTMLCanvasElement.prototype.getContext)
+                ? vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!
+                : HTMLCanvasElement.prototype.getContext;
+            vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement, ...args) {
+                const native = Reflect.apply(getContext, this, args);
+                if (native && 'fillText' in native) paints.push(vi.spyOn(native, 'fillText'));
+                return native;
+            });
+            const documentPaint = vi.spyOn(font.getDocuments()! as Documents, 'render');
+            const viewColumn = test.merged ? 3 : 0;
+            font.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+                viewRanges: [{ startRow: 0, endRow: 0, startColumn: viewColumn, endColumn: viewColumn }],
+                viewportKey: 'viewMainLeft',
+                viewBound: test.unknownBound
+                    ? undefined
+                    : {
+                        left: skeleton.rowHeaderWidthAndMarginLeft + viewColumn * 40,
+                        right: skeleton.rowHeaderWidthAndMarginLeft + (viewColumn + 1) * 40 - (test.edge ? 1 : 0),
+                        top: skeleton.columnHeaderHeightAndMarginTop,
+                        bottom: skeleton.columnHeaderHeightAndMarginTop + 40,
+                    },
+            });
+            const texts = paints.flatMap((paint) => paint.mock.calls.map(([text]) => text));
+            expect(texts).toContain('V');
+            expect(texts.includes('H')).toBe(test.hidden);
+            const clips = documentPaint.mock.calls.flatMap(([, bounds]) => bounds?.glyphClipBound ? [bounds.glyphClipBound] : []);
+            if (test.name === 'wrapped text outside the clip') expect(clips.length).toBeGreaterThan(0);
+            for (const clip of clips) {
+                expect(clip.top).toBeGreaterThanOrEqual(0);
+                expect(clip.bottom).toBeLessThanOrEqual(40);
+            }
+        } finally {
+            rootInjector.dispose();
+            vi.restoreAllMocks();
+            environment.restore();
+        }
     });
 });

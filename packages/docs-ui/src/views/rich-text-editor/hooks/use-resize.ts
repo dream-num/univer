@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { Editor } from '../../../services/editor/editor';
 import { debounce } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { ScrollBar } from '@univerjs/engine-render';
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
+import type { Editor } from '../../../services/editor/editor';
 import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../../basics/docs-view-key';
 
 interface IUseResizeReturn {
@@ -37,6 +37,11 @@ export function resizeEditor(
     if (editor.render.isDisposed()) {
         return;
     }
+    const selection = editor.docSelectionRenderService;
+    // Stored logical ranges outlive the visible caret when another editor takes focus.
+    const restoreSelection = selection.isFocusing ||
+        selection.getAllTextRanges().length > 0 ||
+        selection.getAllRectRanges().length > 0;
     const { scene, mainComponent } = editor.render;
     const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
     const { width, height } = layoutSize ?? editor.getBoundingClientRect();
@@ -63,7 +68,7 @@ export function resizeEditor(
     editor.render.components.get(DOCS_VIEW_KEY.BACKGROUND)?.translate(0, 0);
 
     const selectionRanges = editor.getSelectionRanges();
-    if (selectionRanges.length > 0) {
+    if (restoreSelection && selectionRanges.length > 0) {
         editor.setSelectionRanges(selectionRanges, false);
     }
 }

@@ -49,10 +49,12 @@ import {
     setDocsTableRenderViewportProvider,
 } from '@univerjs/engine-render';
 import {
+    ContextMenuHostService,
     DesktopDialogService,
     DesktopGalleryService,
     DesktopMessageService,
     DesktopNotificationService,
+    IContextMenuHostService,
     IDialogService,
     IGalleryService,
     IMessageService,
@@ -128,6 +130,7 @@ async function createRepeatedImageTestBed(unitId: string) {
     } }]);
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([IGalleryService, { useClass: DesktopGalleryService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     injector.add([IMessageService, { useClass: DesktopMessageService }]);
     injector.add([INotificationService, { useClass: DesktopNotificationService }]);

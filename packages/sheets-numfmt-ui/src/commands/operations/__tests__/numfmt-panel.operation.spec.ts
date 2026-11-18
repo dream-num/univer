@@ -20,7 +20,13 @@ import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-re
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { ComponentManager, DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    ContextMenuHostService,
+    DesktopSidebarService,
+    IContextMenuHostService,
+    ISidebarService,
+} from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../../controllers/__tests__/test.util';
 import { SheetNumfmtUIController } from '../../../controllers/ui.controller';
@@ -56,6 +62,7 @@ describe('number format panel operation', () => {
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
             [ComponentManager],
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ISidebarService, { useClass: DesktopSidebarService }],
             [SheetsNumfmtCellContentController],
             [SheetNumfmtUIController],

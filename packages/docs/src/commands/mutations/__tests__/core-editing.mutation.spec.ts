@@ -15,18 +15,20 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '../core-editing.mutation';
 import {
     CustomRangeType,
     DocumentFlavor,
     getRichTextEditPath,
     ICommandService,
+    IUniverInstanceService,
     JSONX,
     TextX,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
+import type { IRichTextEditingMutationParams } from '../core-editing.mutation';
 import { createDocumentData, createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { DocSelectionManagerService } from '../../../services/doc-selection-manager.service';
 import { InsertTextCommand } from '../../commands/core-editing.command';
@@ -88,6 +90,64 @@ describe('transformDocumentTextRanges', () => {
 });
 
 describe('RichTextEditingMutation selection scheduling', () => {
+    it.each(['before', 'after'])('keeps an inactive comment draft without restoring its caret when updated %s switching editors', async (timing) => {
+        const bed = createTestBed(createDocumentData('comment-sidebar', { dataStream: 'Draft\r\n' }));
+        const selectionManager = bed.get(DocSelectionManagerService);
+        const instances = bed.get(IUniverInstanceService);
+        bed.univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocumentData('comment-popup', { dataStream: 'Reply\r\n' }));
+        const sidebar = { unitId: 'comment-sidebar', subUnitId: 'comment-sidebar' };
+        const popup = { unitId: 'comment-popup', subUnitId: 'comment-popup' };
+        for (const target of [sidebar, popup]) {
+            selectionManager.replaceSelectionInfoWithoutRefresh({
+                textRanges: [{ startOffset: 2, endOffset: 2, collapsed: true, isActive: true }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: 0,
+                isEditing: true,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            }, target);
+        }
+        instances.setCurrentUnitForType(sidebar.unitId);
+        const refreshedUnits: string[] = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshedUnits.push(event.unitId);
+            }
+        });
+        try {
+            if (timing === 'after') {
+                instances.setCurrentUnitForType(popup.unitId);
+            }
+            bed.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, {
+                unitId: sidebar.unitId,
+                actions: JSONX.getInstance().editOp(new TextX().insert(1, { dataStream: 'X' }).serialize(), ['body']),
+                textRanges: [{ startOffset: 3, endOffset: 3 }],
+                trigger: 'test.comment-draft-update',
+            });
+            instances.setCurrentUnitForType(popup.unitId);
+            await Promise.resolve();
+
+            expect(refreshedUnits).toEqual([]);
+            expect(bed.doc.getBody()?.dataStream).toBe('XDraft\r\n');
+            expect(selectionManager.getSelectionInfo(sidebar)?.textRanges).toMatchObject([{ startOffset: 3, endOffset: 3 }]);
+            expect(selectionManager.getActiveTextRange()).toMatchObject({ startOffset: 2, endOffset: 2 });
+
+            instances.setCurrentUnitForType(sidebar.unitId);
+            bed.get(ICommandService).syncExecuteCommand(InsertTextCommand.id, {
+                unitId: sidebar.unitId,
+                range: selectionManager.getActiveTextRange()!,
+                body: { dataStream: 'Y' },
+            });
+            await Promise.resolve();
+            expect(refreshedUnits).toEqual([sidebar.unitId]);
+            expect(bed.doc.getBody()?.dataStream).toBe('XDrYaft\r\n');
+            expect(selectionManager.getActiveTextRange()).toMatchObject({ startOffset: 4, endOffset: 4 });
+        } finally {
+            subscription.unsubscribe();
+            bed.univer.dispose();
+        }
+    });
+
     it.each(['', 'header', 'footer'])('replays formatting and history consistently in initialized segment %j', (segmentId) => {
         const plainBody = (): IDocumentBody => ({
             dataStream: 'Plain text\r\n',
@@ -298,7 +358,12 @@ describe('RichTextEditingMutation selection scheduling', () => {
     it('does not refresh selection for metadata changes without ranges', async () => {
         const testBed = createTestBed();
         const selectionManager = testBed.get(DocSelectionManagerService);
-        const refreshSelection = vi.spyOn(selectionManager, 'refreshSelection');
+        const refreshedUnits: string[] = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => {
+            if (event) {
+                refreshedUnits.push(event.unitId);
+            }
+        });
         const documentStyle = testBed.doc.getDocumentStyle();
         const previousMargin = documentStyle.marginTop;
         const actions = JSONX.getInstance().replaceOp(
@@ -315,7 +380,9 @@ describe('RichTextEditingMutation selection scheduling', () => {
         });
         await Promise.resolve();
 
-        expect(refreshSelection).not.toHaveBeenCalled();
+        expect(refreshedUnits).toEqual([]);
+        expect(testBed.doc.getDocumentStyle().marginTop).toBe((previousMargin ?? 0) + 1);
+        subscription.unsubscribe();
         testBed.univer.dispose();
     });
 });

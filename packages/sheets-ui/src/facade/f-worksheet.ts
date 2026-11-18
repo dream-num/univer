@@ -207,6 +207,10 @@ export interface IFWorksheetUIMixin {
 
     /**
      * Sets the width of all columns starting at the given column position to fit their contents.
+     *
+     * To resize multiple consecutive columns, pass the full `numColumns` in one call
+     * instead of repeatedly calling this method with the default count of one.
+     *
      * @param {number} startColumn - The position of the first column to resize. index starts at 0.
      * @param {number} [numColumns] - The number of columns to auto-resize. Default is 1.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
@@ -224,6 +228,10 @@ export interface IFWorksheetUIMixin {
 
     /**
      * Sets the height of all rows starting at the given row position to fit their contents.
+     *
+     * To resize multiple consecutive rows, pass the full `numRows` in one call
+     * instead of repeatedly calling this method with the default count of one.
+     *
      * @param {number} startRow - The position of the first row to resize. index starts at 0.
      * @param {number} [numRows] - The number of rows to auto-resize. Default is 1.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.

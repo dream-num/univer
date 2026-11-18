@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'موافق',
         },
         GradientColorPicker: {
+            add: 'إضافة نقطة تدرج',
             linear: 'خطي',
             radial: 'شعاعي',
             angular: 'زاوي',

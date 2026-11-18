@@ -155,10 +155,8 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
               univer-box-border univer-bg-gray-0 univer-shadow-[0_1px_0_rgba(0,0,0,0.06)]
               dark:!univer-bg-gray-800
             `, className)}
-            onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            }}
+            onPointerDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.preventDefault()}
         >
             {!colorsVisible
                 ? (

@@ -15,10 +15,10 @@
  */
 
 import type { IScale } from '@univerjs/core';
+import { numberToABC } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { numberToABC } from '@univerjs/core';
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
@@ -53,6 +53,8 @@ const DEFAULT_PRINTING_COLUMN_STYLE = {
  * Column Header Bar, include a lot of columns header
  */
 export class ColumnHeaderLayout extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === ColumnHeaderLayout;
+
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
     // The workbook columns configuration and header style

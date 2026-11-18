@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { ICellData, IWorkbookData, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     BorderStyleTypes,
@@ -22,6 +22,7 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     IConfigService,
+    Injector,
     LocaleService,
     LocaleType,
     RANGE_TYPE,
@@ -32,13 +33,139 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IViewportInfo } from '../../../basics/vector2';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { BORDER_TYPE } from '../../../basics/const';
 import { DocSimpleSkeleton } from '../../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../../docs/layout/doc-skeleton';
 import { FontCache } from '../../docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../../docs/view-model/document-view-model';
+import { Font } from '../extensions/font';
 import { getCustomNumberDisplayText, getDocsSkeletonPageSize, getGeneralNumberDisplayText, SpreadsheetSkeleton } from '../sheet.render-skeleton';
+
+describe('Scroll cache history', () => {
+    it.each([false, true])('keeps unstyled empty cells sparse after a disjoint 10,000-row scan (stored empty cells: %s)', (stored) => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'empty-scroll-cache',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: 10_000,
+                columnCount: 20,
+                defaultRowHeight: 20,
+                defaultColumnWidth: 100,
+                cellData: stored ? Object.fromEntries(Array.from({ length: 10_000 }, (_, row) => [row, { 0: {} }])) : {},
+            } },
+        });
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+        }]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        const prepare = (row: number) => {
+            const bound = {
+                left: skeleton.rowHeaderWidthAndMarginLeft,
+                right: skeleton.rowHeaderWidthAndMarginLeft + 2000,
+                top: skeleton.columnHeaderHeightAndMarginTop + row * 20,
+                bottom: skeleton.columnHeaderHeightAndMarginTop + (row + 20) * 20,
+            };
+            skeleton.setStylesCache({
+                viewBound: bound,
+                cacheBound: bound,
+                viewportKey: 'viewMain',
+                isDirty: 0,
+                isForceDirty: false,
+                shouldCacheUpdate: 1,
+                diffX: 0,
+                diffY: 400,
+                diffBounds: [bound],
+                diffCacheBounds: [bound],
+            } as IViewportInfo, { scaleY: 1 });
+        };
+        const expectSparse = () => {
+            for (const key of ['_handleBgMatrix', '_handleBorderMatrix', '_emptyFontCache']) {
+                const matrix: ObjectMatrix<unknown> = Reflect.get(skeleton, key);
+                let entries = 0;
+                matrix.forValue(() => {
+                    entries++;
+                });
+                expect(entries, key).toBe(0);
+            }
+        };
+        try {
+            skeleton.calculate();
+            for (let row = 0; row < 10_000; row += 20) {
+                prepare(row);
+            }
+            expectSparse();
+            prepare(0);
+            expectSparse();
+            skeleton.resetRangeCache([{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
+            expectSparse();
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+
+    it('finds native clip candidates without scanning retained plain text and invalidates them with the font cache', () => {
+        const environment = setupRenderTestEnv();
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const injector = univer.__getInjector();
+        const cells: Record<number, Record<number, ICellData>> = Object.fromEntries(
+            Array.from({ length: 10_000 }, (_, row) => [row, { 0: { v: `row ${row}` } }])
+        );
+        cells[0][1] = { v: 'merged rotation', s: { tr: { a: 45 } } };
+        cells[5000][1] = { v: 'stacked', s: { tr: { a: 0, v: BooleanNumber.TRUE } } };
+        cells[9999][1] = { v: 'shrink this long text to fit'.repeat(20), s: { stf: BooleanNumber.TRUE } };
+        const merge = { startRow: 0, endRow: 40, startColumn: 1, endColumn: 2 };
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'native-clip-history',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: 10_000,
+                columnCount: 3,
+                defaultRowHeight: 20,
+                defaultColumnWidth: 40,
+                cellData: cells,
+                mergeData: [merge],
+            } },
+        });
+        injector.add([SpreadsheetSkeleton, {
+            useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()),
+        }]);
+        injector.add([Font]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        const font = injector.get(Font);
+        try {
+            skeleton.calculate();
+            for (let row = 0; row < 10_000; row++) {
+                for (const column of Object.keys(cells[row]).map(Number)) {
+                    skeleton._setFontStylesCache(row, column, cells[row][column], skeleton.worksheet.getComposedCellStyle(row, column));
+                }
+            }
+            const history = vi.spyOn(skeleton.stylesCache.fontMatrix, 'forValue');
+            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([
+                merge,
+                { startRow: 5000, endRow: 5000, startColumn: 1, endColumn: 1 },
+                { startRow: 9999, endRow: 9999, startColumn: 1, endColumn: 2 },
+            ]);
+            expect(history).not.toHaveBeenCalled();
+            skeleton.resetRangeCache([merge]);
+            expect(font.getNativeTextClipRepairRanges(skeleton)).toHaveLength(2);
+            skeleton.resetCache();
+            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([]);
+            skeleton.dispose();
+            expect(font.getNativeTextClipRepairRanges(skeleton)).toEqual([]);
+        } finally {
+            univer.dispose();
+            environment.restore();
+        }
+    });
+});
 
 describe('Rich-text render snapshot isolation', () => {
     it.each(['font cache', 'row height', 'column width'])(
@@ -618,6 +745,53 @@ describe('Configured cell text line gap', () => {
             baseline.dispose();
             spaced.dispose();
             univer.dispose();
+            environment.restore();
+        }
+    });
+});
+
+describe('initial wrapped rich-text layout', () => {
+    it.each([false, true])('uses the final cell width before calculating (merged: %s)', (merged) => {
+        const environment = setupRenderTestEnv();
+        const root = new Injector([[Univer]]);
+        const univer = root.get(Univer);
+        const text = 'Wrapped 中文 text '.repeat(30);
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'initial-wrapped-rich-layout',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: {
+                id: 'sheet',
+                rowCount: 10,
+                columnCount: 5,
+                defaultColumnWidth: 100,
+                defaultRowHeight: 200,
+                mergeData: merged ? [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }] : [],
+                cellData: { 0: { 0: { s: { tb: WrapStrategy.WRAP }, p: {
+                    id: 'wrapped-rich-cell',
+                    body: { dataStream: `${text}\r\n`, paragraphs: [{ startIndex: text.length, paragraphId: 'wrapped-rich-paragraph' }], textRuns: [{ st: 0, ed: text.length, ts: { ff: 'Arial', fs: 12 } }] },
+                    documentStyle: { pageSize: { width: 700, height: 1000 } },
+                } } } },
+            } },
+        });
+        const injector = univer.__getInjector();
+        injector.add([SpreadsheetSkeleton, { useFactory: () => injector.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles()) }]);
+        const skeleton = injector.get(SpreadsheetSkeleton);
+        try {
+            skeleton.calculate();
+            const before = Tools.deepClone(workbook.getSnapshot());
+            const cell = skeleton.worksheet.getCellRaw(0, 0)!;
+            skeleton._setFontStylesCache(0, 0, cell, skeleton.worksheet.getComposedCellStyle(0, 0), true);
+            const document = skeleton.stylesCache.fontMatrix.getValue(0, 0)!.documentSkeleton!;
+            const model = document.getViewModel().getDataModel();
+            expect(model.documentStyle.pageSize!.width).toBe(merged ? 200 : 100);
+            expect(document.getSkeletonData()!.pages[0].sections[0].columns[0].lines.length).toBeGreaterThan(1);
+            const data = document.getSkeletonData();
+            model.updateDocumentDataPageSize(merged ? 200 : 100);
+            document.calculate();
+            expect(document.getSkeletonData()).toBe(data);
+            expect(workbook.getSnapshot()).toEqual(before);
+        } finally {
+            root.dispose();
             environment.restore();
         }
     });

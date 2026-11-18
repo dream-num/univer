@@ -6,7 +6,7 @@
 
 <p align="center">从开源的 Sheets 和 Docs 开始，再连接你自己的应用或 Agent。</p>
 
-<p align="center"><a href="#quick-start">🚀 快速开始</a> · <a href="https://docs.univer.ai/">📚 开发文档</a> · <a href="https://univer.ai/compare/">⚖️ 功能对比</a> · <a href="https://univer.ai/">🌐 官网</a> · <a href="https://docs.univer.ai/showcase">🎮 示例</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 参考</a> · <a href="https://docs.univer.ai/blog">📝 博客</a></p>
+<p align="center"><a href="#quick-start">🚀 快速开始</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 开发文档</a> · <a href="https://univer.ai/compare/">⚖️ 功能对比</a> · <a href="https://univer.ai/">🌐 官网</a> · <a href="https://docs.univer.ai/showcase">🎮 示例</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API 参考</a> · <a href="https://docs.univer.ai/blog">📝 博客</a></p>
 
 <p align="center"><a href="../../README.md">English</a> · <a href="../../docs/readme/fr-FR.md">Français</a> · <a href="../../docs/readme/de-DE.md">Deutsch</a> · <a href="../../docs/readme/es-ES.md">Español</a> · <strong>简体中文</strong> · <a href="../../docs/readme/zh-TW.md">繁體中文</a> · <a href="../../docs/readme/ja-JP.md">日本語</a> · <a href="../../docs/readme/ko-KR.md">한국어</a></p>
 
@@ -68,6 +68,8 @@
 <p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer** 是一套 Office SDK，用于在你自己的产品中构建办公应用。它基于你的数据和权限，为用户和现有 Agent 提供办公编辑、计算、协作及文件处理能力。产品系列覆盖电子表格、文档、演示文稿、关联表格、画布和 PDF。
+
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace：基于 Univer Office SDK 构建，开源、开箱即用、可扩展。欢迎在 GitHub 上点 Star。" width="720" /></a></p>
 
 Univer Office SDK 由三部分组成：
 

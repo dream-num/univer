@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverUIConfig } from './config/config';
 import {
     DependentOn,
     generateRandomId,
@@ -31,6 +30,7 @@ import {
     touchDependencies,
 } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { IUniverUIConfig } from './config/config';
 import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';

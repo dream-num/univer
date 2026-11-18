@@ -18,7 +18,6 @@ import type { DocumentDataModel, ICommandInfo, IDocumentBody, IDocumentStyle, ID
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellEditorState } from '../../services/editor-bridge.service';
 import {
     BooleanNumber,
     createParagraphId,
@@ -43,6 +42,7 @@ import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
+import type { ICellEditorState } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
@@ -67,6 +67,12 @@ const formulaEditorStyle: IDocumentStyle = {
         isRenderStyle: BooleanNumber.FALSE,
     },
 };
+
+/**
+ * Cell properties an editor works on. `s` (cell style) is rendered by the editor but never owned by it,
+ * so a style-only write must not invalidate an open draft.
+ */
+const CELL_CONTENT_KEYS = new Set(['v', 't', 'f', 'si', 'p']);
 
 /**
  * sync data between cell editor and formula editor
@@ -181,35 +187,83 @@ export class EditorDataSyncController extends Disposable {
 
                 const editCellState = this._editorBridgeService.getEditLocation();
 
-                if (editCellState == null) {
+                if (editCellState == null || !this._shouldRefreshCurrentEditCell(command, editCellState)) {
                     return;
                 }
 
-                const { row, column } = editCellState;
+                /**
+                 * While the cell editor is open its document holds an uncommitted draft, so an external update
+                 * must not rebuild it. When such an update replaces the edited cell's content, the draft no
+                 * longer describes the cell and is committed when editing ends.
+                 */
+                if (this._editorBridgeService.isVisible().visible) {
+                    if (this._writesCellContent(command, editCellState)) {
+                        this._editorBridgeService.changeEditorDirty(true);
+                    }
 
-                if (this._shouldRefreshCurrentEditCell(command, row, column)) {
-                    /**
-                     * Refresh the current edit-cell snapshot so both the hidden cell editor and
-                     * the formula bar stay aligned with external cell mutations.
-                     */
-                    this._editorBridgeService.refreshEditCellState();
+                    return;
                 }
+
+                /**
+                 * Refresh the current edit-cell snapshot so both the hidden cell editor and
+                 * the formula bar stay aligned with external cell mutations.
+                 */
+                this._editorBridgeService.refreshEditCellState();
             })
         );
     }
 
-    private _shouldRefreshCurrentEditCell(command: ICommandInfo, row: number, column: number): boolean {
+    private _shouldRefreshCurrentEditCell(command: ICommandInfo, editCell: ICellEditorState): boolean {
+        const { row, column } = editCell;
+
         if (command.id === SetRangeValuesMutation.id && command.params) {
             const params = command.params as ISetRangeValuesMutationParams;
-            return this._hasMatrixCell(params.cellValue, row, column);
+            return this._isEditedUnit(editCell, params.unitId, params.subUnitId)
+                && this._hasMatrixCell(params.cellValue, row, column);
         }
 
         if (command.id === MoveRangeMutation.id && command.params) {
             const params = command.params as IMoveRangeMutationParams;
-            return this._hasMatrixCell(params.from.value, row, column) || this._hasMatrixCell(params.to.value, row, column);
+            return (this._isEditedUnit(editCell, params.unitId, params.from.subUnitId)
+                    && this._hasMatrixCell(params.from.value, row, column))
+                || (this._isEditedUnit(editCell, params.unitId, params.to.subUnitId)
+                    && this._hasMatrixCell(params.to.value, row, column));
         }
 
         return false;
+    }
+
+    /**
+     * Whether a matched mutation replaces the edited cell's content. Moving cells into or out of the edited
+     * cell does; a style-only write does not, because the editor does not own the cell style it renders with.
+     */
+    private _writesCellContent(command: ICommandInfo, editCell: ICellEditorState): boolean {
+        // MoveRange only reaches this point when it writes or clears the edited cell's coordinates.
+        if (command.id === MoveRangeMutation.id) {
+            return true;
+        }
+
+        if (command.id !== SetRangeValuesMutation.id || !command.params) {
+            return false;
+        }
+
+        const params = command.params as ISetRangeValuesMutationParams;
+        const cell = params.cellValue?.[editCell.row]?.[editCell.column];
+
+        // Clearing the cell changes its content just like writing a value does.
+        if (cell == null) {
+            return true;
+        }
+
+        return Object.keys(cell).some((key) => CELL_CONTENT_KEYS.has(key));
+    }
+
+    /**
+     * A row/column pair is only meaningful inside the workbook and worksheet it belongs to, so a mutation
+     * on another sheet or another workbook must not be treated as an update of the edit cell.
+     */
+    private _isEditedUnit(editCell: ICellEditorState, unitId: string, subUnitId: string): boolean {
+        return editCell.unitId === unitId && editCell.sheetId === subUnitId;
     }
 
     private _hasMatrixCell(

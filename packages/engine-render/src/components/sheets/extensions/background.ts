@@ -19,7 +19,6 @@ import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
-import { Range } from '@univerjs/core';
 import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -33,10 +32,66 @@ const UNIQUE_KEY = 'DefaultBackgroundExtension';
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;
 
-function getRangeCellCount(ranges: IRange[]) {
-    return ranges.reduce((sum, range) => {
-        return sum + Math.max(range.endRow - range.startRow + 1, 0) * Math.max(range.endColumn - range.startColumn + 1, 0);
-    }, 0);
+// ObjectMatrix size counts rows; choose work within each damaged row instead of scanning every cached cell.
+function forEachCachedBackground(
+    matrix: ObjectMatrix<string>,
+    ranges: IRange[],
+    visit: (row: number, col: number, value: string) => void
+): void {
+    let cachedRows: number[] | undefined;
+    for (const range of ranges) {
+        const visitRow = (row: number) => {
+            const values = matrix.getRow(row);
+            if (!values) {
+                return;
+            }
+            const visitColumn = (col: number) => {
+                const value = values[col];
+                if (value) {
+                    visit(row, col, value);
+                }
+            };
+            const width = range.endColumn - range.startColumn + 1;
+            if (width <= 32) {
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    visitColumn(col);
+                }
+            } else {
+                const columns = Object.keys(values);
+                if (width < columns.length) {
+                    for (let col = range.startColumn; col <= range.endColumn; col++) {
+                        visitColumn(col);
+                    }
+                } else {
+                    for (const column of columns) {
+                        const col = Number(column);
+                        if (col >= range.startColumn && col <= range.endColumn) {
+                            visitColumn(col);
+                        }
+                    }
+                }
+            }
+        };
+        const height = range.endRow - range.startRow + 1;
+        if (height <= 32) {
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                visitRow(row);
+            }
+        } else {
+            cachedRows ??= Object.keys(matrix.getMatrix()).map(Number);
+            if (height < cachedRows.length) {
+                for (let row = range.startRow; row <= range.endRow; row++) {
+                    visitRow(row);
+                }
+            } else {
+                for (const row of cachedRows) {
+                    if (row >= range.startRow && row <= range.endRow) {
+                        visitRow(row);
+                    }
+                }
+            }
+        }
+    }
 }
 
 interface IRenderBGContext {
@@ -54,6 +109,8 @@ interface IRenderBGContext {
 }
 
 export class Background extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === Background;
+
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
@@ -131,21 +188,9 @@ export class Background extends SheetExtension {
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
 
-            const matrixSize = bgColorMatrix.getSizeOf();
-            const cellCountInRanges = getRangeCellCount(renderRanges);
-            // if number of cells in range is over than bg config in matrix, renderBackground by matrix.
-            // otherwise, renderBackground by cells in render range.
-            if (cellCountInRanges < matrixSize) {
-                // Currently, renderRanges has only one range in normal scrolling.
-                renderBGContext.skipRenderRangeCheck = true;
-                renderRanges.forEach((range) => {
-                    Range.foreach(range, rangeForEachFn);
-                });
-                renderBGContext.skipRenderRangeCheck = false;
-            } else {
-                renderBGContext.skipRenderRangeCheck = false;
-                bgColorMatrix.forValue(rangeForEachFn);
-            }
+            renderBGContext.skipRenderRangeCheck = true;
+            forEachCachedBackground(bgColorMatrix, renderRanges, rangeForEachFn);
+            renderBGContext.skipRenderRangeCheck = false;
             ctx.fill(backgroundPaths);
             ctx.closePath();
         };

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-hyper-link` | `UniverDocsHyperLink` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/docs-hyper-link` | `UniverDocsHyperLink` | No | No | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/docs-hyper-link
 npm install @univerjs/docs-hyper-link
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';

@@ -418,7 +418,7 @@ describe('ContextMenuPanel', () => {
         expect(TestState.selectedOptions).toEqual([{
             id: 'callout',
             label: 'callout',
-            commandId: undefined,
+            commandId: 'callout',
             params: { block: 'callout' },
             value: undefined,
         }]);
@@ -582,7 +582,7 @@ describe('ContextMenuPanel', () => {
         expect(trigger.getAttribute('aria-expanded')).toBe('false');
     });
 
-    it('selects an option from a selector submenu with the selector command id', () => {
+    it('keeps selector button and submenu option commands separate', () => {
         renderWithDependencies(
             <ContextMenuPanel
                 menuType="format-menu"
@@ -633,6 +633,15 @@ describe('ContextMenuPanel', () => {
             value: '#ff0000',
         }]);
         expect(document.querySelectorAll(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}="true"]`)).toHaveLength(0);
+
+        fireEvent.click(colorButton);
+        expect(TestState.selectedOptions[1]).toEqual({
+            id: 'text-color',
+            label: 'color',
+            commandId: 'text-color',
+            params: undefined,
+            value: undefined,
+        });
     });
 
     it('keeps a custom submenu component interactive without selecting its parent option', async () => {

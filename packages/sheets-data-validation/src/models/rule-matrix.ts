@@ -86,6 +86,7 @@ export class RuleMatrix {
         }
 
         const ranges = Rectangle.mergeRanges(_ranges.map((range) => Range.transformRange(range, this._worksheet!)));
+        const ruleRanges = this._withInputRangeType(ranges, _ranges);
 
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);
@@ -97,7 +98,7 @@ export class RuleMatrix {
         });
 
         this._dirty = true;
-        this._map.set(ruleId, ranges);
+        this._map.set(ruleId, ruleRanges);
         this._debonceBuildTree();
     }
 
@@ -141,6 +142,38 @@ export class RuleMatrix {
         this._addRule(ruleId, _newRanges);
     }
 
+    /**
+     * The matrix stores concrete coordinates, while the rule keeps its semantic range type (a whole
+     * column/row). `Range.transformRange` and `Rectangle.mergeRanges` rebuild ranges from bounds only,
+     * so the type of the ranges handed to the matrix has to be carried over explicitly.
+     */
+    private _withInputRangeType(ranges: IRange[], inputRanges: IRange[]): IRange[] {
+        const rangeType = inputRanges[0]?.rangeType;
+        if (!rangeType || !inputRanges.every((range) => range.rangeType === rangeType)) {
+            return ranges;
+        }
+
+        return ranges.map((range) => ({ ...range, rangeType }));
+    }
+
+    /**
+     * A rule range that the matrix rebuilt from coordinates keeps its type when the rebuilt range
+     * still covers exactly the same cells as the rule's own range. This is what makes an auto fill
+     * or a paste that only rewrites cells inside the rule a no-op instead of a downgrade: the
+     * intermediate subtract/add steps drop the type, but the net coverage is unchanged.
+     */
+    private _keepRuleRangeType(ranges: IRange[], ruleRanges: IRange[]): IRange[] {
+        return ranges.map((range) => {
+            const source = ruleRanges.find((item) => item.rangeType
+                && item.startRow === range.startRow
+                && item.endRow === range.endRow
+                && item.startColumn === range.startColumn
+                && item.endColumn === range.endColumn);
+
+            return source ? { ...range, rangeType: source.rangeType } : range;
+        });
+    }
+
     addRangeRules(rules: { id: string; ranges: IRange[] }[]) {
         rules.forEach(({ id: ruleId, ranges }) => {
             if (!ranges.length) {
@@ -176,7 +209,7 @@ export class RuleMatrix {
         const mutations: RangeMutation[] = [];
         let deleteIndex = 0;
         rules.forEach((rule, index) => {
-            const newRanges = this._map.get(rule.uid) ?? [];
+            const newRanges = this._keepRuleRangeType(this._map.get(rule.uid) ?? [], rule.ranges);
             const oldRanges = rule.ranges;
 
             if (newRanges.length !== 0 && (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i])))) {
@@ -206,7 +239,7 @@ export class RuleMatrix {
         const mutations: RangeMutation[] = [];
         let deleteIndex = 0;
         rules.forEach((rule, index) => {
-            const newRanges = this._map.get(rule.uid) ?? [];
+            const newRanges = this._keepRuleRangeType(this._map.get(rule.uid) ?? [], rule.ranges);
             const oldRanges = rule.ranges;
 
             if (newRanges.length !== 0 && (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i])))) {
@@ -230,7 +263,7 @@ export class RuleMatrix {
         });
 
         Array.from(additionRules).forEach((rule) => {
-            const newRanges = this._map.get(rule.uid) ?? [];
+            const newRanges = this._keepRuleRangeType(this._map.get(rule.uid) ?? [], rule.ranges);
             mutations.push({
                 type: 'add',
                 rule: {

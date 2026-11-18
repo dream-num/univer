@@ -173,6 +173,23 @@ describe('Test clipboard', () => {
                 sheetId: 'sheet1',
             });
         });
+        it('pastes Excel overflow without merging cells or shifting later columns', async () => {
+            const worksheet = get(IUniverInstanceService)
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
+                .getSheetBySheetId('sheet1')!;
+            const html = `
+                <table>
+                    <tr><td colspan="2" style="mso-ignore:colspan">Long label</td><td>Next</td></tr>
+                    <tr><td>First</td><td>Second</td><td>Third</td></tr>
+                </table>
+            `;
+
+            await expect(sheetClipboardService.legacyPaste(html)).resolves.toBe(true);
+            expect(worksheet.getMergeData()).toEqual([]);
+            expect(getValues(1, 1, 1, 3)?.[0]?.map((cell) => cell?.v)).toEqual(['Long label', undefined, 'Next']);
+            expect(getValues(2, 1, 2, 3)?.[0]?.map((cell) => cell?.v)).toEqual(['First', 'Second', 'Third']);
+        });
+
         it('test style with paste cell style', async () => {
             const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;

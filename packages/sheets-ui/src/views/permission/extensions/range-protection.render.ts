@@ -43,6 +43,10 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
         shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none'
     ) {
         super();
+        this._img.onload = () => {
+            this._img.onload = null;
+            this.parent?.makeDirty(true);
+        };
         this._img.src = base64;
         if (shadowStrategy) {
             this._shadowStrategy = shadowStrategy;
@@ -51,6 +55,13 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
 
     override clearCache(): void {
         this.renderCache.clear();
+    }
+
+    override dispose(): void {
+        this._img.onload = null;
+        this._pattern = null;
+        this.renderCache.clear();
+        super.dispose();
     }
 
     /**
@@ -125,6 +136,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
 }
 
 export class RangeProtectionCanViewRenderExtension extends RangeProtectionRenderExtension {
+    override readonly viewportCacheReusable = this.constructor === RangeProtectionCanViewRenderExtension;
+
     override uKey = RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_VIEW_Z_INDEX;
 
@@ -147,6 +160,8 @@ export class RangeProtectionCanViewRenderExtension extends RangeProtectionRender
 }
 
 export class RangeProtectionCanNotViewRenderExtension extends RangeProtectionRenderExtension {
+    override readonly viewportCacheReusable = this.constructor === RangeProtectionCanNotViewRenderExtension;
+
     override uKey = RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY;
     override Z_INDEX = EXTENSION_CAN_NOT_VIEW_Z_INDEX;
 

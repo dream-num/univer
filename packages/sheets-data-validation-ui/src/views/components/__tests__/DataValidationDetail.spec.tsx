@@ -79,7 +79,9 @@ import {
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import {
     ComponentManager,
+    ContextMenuHostService,
     DesktopSidebarService,
+    IContextMenuHostService,
     IDialogService,
     ILayoutService,
     IPlatformService,
@@ -419,6 +421,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [SheetsDataValidationValidatorService],
                 [SheetDataValidationModel],
                 [IMarkSelectionService, { useClass: TestMarkSelectionService as never }],
+                [IContextMenuHostService, { useClass: ContextMenuHostService }],
                 [ISidebarService, { useClass: DesktopSidebarService }],
                 [DataValidationPanelService],
             ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));

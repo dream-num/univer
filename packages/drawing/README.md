@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/drawing` | `UniverDrawing` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/drawing` | `UniverDrawing` | No | No | No | No |
 
 ## Installation
 
@@ -20,21 +20,15 @@ pnpm add @univerjs/drawing
 npm install @univerjs/drawing
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 
 univer.registerPlugin(UniverDrawingPlugin);
 ```
-
-## OLE online references
-
-An OLE drawing retains its `oleAttachmentId`, which identifies the original attachment's resource record. After explicit online conversion, `oleOnlineUnit` stores only the new Unit's `unitId` and `type`; it does not store a URL or embed the converted Unit's snapshot.
-
-Configure `ole.getLink(unitId, type)` on `UniverDrawingPlugin` to resolve the application's current URL on each explicit Open action. There is no default application route. The existing Pro `UniverExchangeClientPlugin` supplies conversion callbacks without adding a separate OLE plugin or owning navigation. Legacy stored `url` fields remain unchanged and are ignored when opening. See the [OLE integration guide](./docs/ole-attachments.md) for configuration and transport boundaries.
 
 ## Resources
 

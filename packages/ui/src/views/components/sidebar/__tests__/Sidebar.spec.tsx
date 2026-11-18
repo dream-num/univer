@@ -21,6 +21,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
@@ -30,6 +34,7 @@ import { Sidebar } from '../Sidebar';
 
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([LocaleService]);
@@ -155,11 +160,21 @@ describe('Sidebar', () => {
             });
         });
 
-        fireEvent.mouseDown(screen.getByRole('separator', { name: 'Resize sidebar' }));
-        fireEvent.mouseMove(document, { clientX: -960 });
-        fireEvent.mouseUp(document);
+        const handle = screen.getByRole('separator', { name: 'Resize sidebar' });
+        handle.setPointerCapture = () => undefined;
+        handle.hasPointerCapture = () => false;
+        const down = new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 1, clientX: 0 });
+        Object.defineProperty(down, 'isPrimary', { value: true });
+        fireEvent(handle, down);
+        fireEvent.pointerMove(handle, { pointerId: 1, buttons: 1, clientX: -960 });
+        fireEvent.pointerUp(handle, { pointerId: 1, clientX: -960 });
 
         expect(sidebarService.width).toBe(800);
+        fireEvent.keyDown(handle, { key: 'ArrowRight' });
+        expect(sidebarService.width).toBe(780);
+        expect(handle.getAttribute('aria-valuenow')).toBe('780');
+        fireEvent.keyDown(handle, { key: 'Home' });
+        expect(sidebarService.width).toBe(280);
         rendered.dispose();
     });
 });

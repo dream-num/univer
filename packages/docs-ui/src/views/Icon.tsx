@@ -19,14 +19,13 @@ import { ThemeService } from '@univerjs/core';
 import { TextColorSwatchDoubleIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { map } from 'rxjs';
-
 import { getHighlightBackgroundColor } from './paragraph-menu/theme-color';
 
 type ColorSwatchIconProps = IIconProps & {
     color: string;
 };
 
-export function BackgroundColorSwatchIcon({ className, style, onClick, color }: ColorSwatchIconProps) {
+export function BackgroundColorSwatchIcon({ className, style, onClick, color, preserveStrokeWidth }: ColorSwatchIconProps) {
     return (
         <svg
             className={className}
@@ -47,12 +46,14 @@ export function BackgroundColorSwatchIcon({ className, style, onClick, color }: 
                 fill={color}
                 stroke="currentColor"
                 strokeOpacity={0.12}
+                strokeWidth={preserveStrokeWidth ? 16 / 24 : 1}
+                vectorEffect={preserveStrokeWidth ? 'non-scaling-stroke' : undefined}
             />
         </svg>
     );
 }
 
-export function HeaderTextColorIcon({ className, style, onClick, extend }: IIconProps) {
+export function HeaderTextColorIcon({ className, style, onClick, extend, preserveStrokeWidth }: IIconProps) {
     const color = extend?.colorChannel1 ?? 'currentColor';
 
     return (
@@ -60,18 +61,20 @@ export function HeaderTextColorIcon({ className, style, onClick, extend }: IIcon
             className={className}
             style={style}
             onClick={onClick}
+            preserveStrokeWidth={preserveStrokeWidth}
             extend={{ colorChannel1: color }}
             aria-hidden="true"
         />
     );
 }
 
-export function DefaultTextColorIcon({ className, style, onClick }: IIconProps) {
+export function DefaultTextColorIcon({ className, style, onClick, preserveStrokeWidth }: IIconProps) {
     return (
         <TextColorSwatchDoubleIcon
             className={className}
             style={style}
             onClick={onClick}
+            preserveStrokeWidth={preserveStrokeWidth}
             extend={{ colorChannel1: '#000000' }}
             aria-hidden="true"
         />

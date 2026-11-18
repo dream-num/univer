@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-note",
-    "version": "1.4.0",
+    "version": "1.5.2",
     "private": false,
     "description": "Cell note model and commands for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -87,7 +87,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "rxjs": "7.8.2",
-        "tsrs": "0.20.1-ts7.1.0-beta",
-        "vitest": "^5.0.5"
+        "tsrs": "0.23.0-ts7.1.0-beta",
+        "vitest": "^5.1.0"
     }
 }

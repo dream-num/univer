@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/rpc-node` | `UniverRpcNode` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/rpc-node` | `UniverRpcNode` | No | No | No | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/rpc-node
 npm install @univerjs/rpc-node
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { fileURLToPath } from 'node:url';
@@ -36,7 +36,7 @@ Main-thread plugin classes:
 
 - `UniverRPCNodeMainPlugin`
 
-## Worker usage
+### Worker usage
 
 On the main thread, import `UniverRPCNodeMainPlugin` from `@univerjs/rpc-node`. Set `workerSrc` to the worker module path.
 

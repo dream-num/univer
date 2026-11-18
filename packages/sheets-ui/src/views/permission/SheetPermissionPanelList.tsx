@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { ActionRow, Avatar, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
+import { ActionRow, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -40,7 +40,7 @@ import {
     WorkbookCreateProtectPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable, UserInfo } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged, from, merge, startWith, switchMap } from 'rxjs';
 import type { LocaleKey } from '../../locale/types';
@@ -48,7 +48,6 @@ import type { IPermissionPanelRule } from '../../services/permission/sheet-permi
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { useHighlightRange } from '../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { panelListEmptyBase64 } from './panel-list/constant';
 
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 
@@ -335,9 +334,14 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                     <div>
                                         <div className="univer-flex univer-items-center">
 
-                                            <Tooltip title={item.creator?.name ?? ''}>
+                                            <Tooltip title={<UserInfo part="name" user={{ userId: item.creator?.userID, name: item.creator?.name }} context={{ scene: 'permission-creator', unitId, objectId: item.objectID }} />}>
                                                 <div>
-                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
+                                                    <UserInfo
+                                                        part="avatar"
+                                                        user={{ userId: item.creator?.userID, name: item.creator?.name, avatar: item.creator?.avatar }}
+                                                        context={{ scene: 'permission-creator', unitId, objectId: item.objectID }}
+                                                        className="univer-mr-1.5"
+                                                    />
                                                 </div>
                                             </Tooltip>
                                             <span
@@ -396,10 +400,30 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                 )
                 : (
                     <div
-                        className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
+                        role="status"
+                        className={`
+                          univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center
+                          univer-gap-2 univer-px-6 univer-text-center
+                        `}
                     >
-                        <img width={240} height={120} src={panelListEmptyBase64} alt="" draggable={false} />
-                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}</p>
+                        <p
+                            className={`
+                              univer-m-0 univer-text-sm univer-font-medium univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            `}
+                        >
+                            {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}
+                        </p>
+                        {hasSetProtectPermission && (
+                            <p
+                                className={`
+                                  univer-m-0 univer-max-w-60 univer-text-sm univer-leading-relaxed univer-text-gray-500
+                                  dark:!univer-text-gray-200
+                                `}
+                            >
+                                {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmptyDescription')}
+                            </p>
+                        )}
                     </div>
                 )}
 

@@ -56,6 +56,7 @@ import {
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
     SetScrollOperation,
+    SetScrollRelativeCommand,
     SetZoomRatioOperation,
     SHEET_VIEW_KEY,
     SheetCanvasPopManagerService,
@@ -168,6 +169,16 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             .pipe(filter(([command]) => {
                 if (command.id.startsWith('doc.') || SELECTION_ONLY_COMMANDS.has(command.id)) {
                     return false;
+                }
+
+                if (command.id === SetScrollRelativeCommand.id || command.id === SetScrollOperation.id) {
+                    const worksheet = this._context.unit.getActiveSheet();
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+                    this._closeFloatingControls();
+                    if (worksheet && skeleton && !this._shape.hasItems() && !this._topGapBaseBySkeleton.has(skeleton) &&
+                        this._tableManager.getTablesBySubunitId(this._context.unit.getUnitId(), worksheet.getSheetId()).length === 0) {
+                        return false;
+                    }
                 }
 
                 if (command.type === CommandType.OPERATION && TABLE_RENDER_REFRESH_COMMANDS.has(command.id)) {

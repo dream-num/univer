@@ -15,9 +15,9 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
+import { Range, sortRules } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
-import { Range, sortRules } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
@@ -31,6 +31,8 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class Custom extends SheetExtension {
+    override viewportCacheReusable = this.constructor === Custom;
+
     protected override Z_INDEX = Z_INDEX;
 
     override uKey: string = UNIQUE_KEY;
@@ -95,6 +97,10 @@ export class Custom extends SheetExtension {
                     unitId: worksheet.unitId,
                 };
 
+                if (cellData.customRender.length > 0) {
+                    // User painters can depend on time or external state without dirtying the sheet.
+                    this.viewportCacheReusable = false;
+                }
                 const customRender = cellData.customRender.sort(sortRules);
 
                 ctx.save();

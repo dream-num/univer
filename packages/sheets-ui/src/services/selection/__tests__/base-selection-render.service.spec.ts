@@ -339,6 +339,20 @@ describe('BaseSelectionRenderService', () => {
         expect(service.inRefSelectionMode()).toBe(false);
     });
 
+    it('returns no selection data once the sheet skeleton has been disposed', () => {
+        const { service } = createSelectionRenderService();
+        const { skeleton } = service.changeRuntimeForTest();
+        service.resetSelectionsByModelData([selections[0]]);
+
+        const worksheet = skeleton.worksheet;
+        (skeleton as unknown as { worksheet: unknown }).worksheet = null;
+        try {
+            expect(service.getSelectionDataWithStyle()).toEqual([]);
+        } finally {
+            (skeleton as unknown as { worksheet: unknown }).worksheet = worksheet;
+        }
+    });
+
     it.each([undefined, true, false])('keeps selection updates working with enableFillHandle=%s', (enableFillHandle) => {
         const { injector, service } = createSelectionRenderService();
         injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { enableFillHandle });

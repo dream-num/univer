@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { DeleteIcon } from '@univerjs/icons';
+import { DeleteIcon, IncreaseIcon } from '@univerjs/icons';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ColorPicker } from '../color-picker/ColorPicker';
@@ -44,6 +45,9 @@ export interface IGradientColorPickerProps {
     size?: 'small' | 'large';
     value?: IGradientValue;
     onChange?: (value: IGradientValue) => void;
+    /** Bound a continuous stop drag, including cancellation and unmount. */
+    onDragStart?: () => void;
+    onDragEnd?: () => void;
     types?: readonly GradientType[];
 }
 
@@ -103,7 +107,7 @@ function getCssLinearGradientAngle(value: IGradientValue): number {
 }
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
-    const { className, compact = false, size = 'small', value = DEFAULT_VALUE, onChange } = props;
+    const { className, compact = false, size = 'small', value = DEFAULT_VALUE, onChange, onDragStart, onDragEnd } = props;
     const { locale } = useContext(ConfigContext);
     const [draftValue, setDraftValue] = useState<IGradientValue>(value);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -175,22 +179,12 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         emitChange({ ...valueRef.current, stops: newStops });
     };
 
-    // const handleFlip = () => {
-    //     const newStops = value.stops.map((stop) => ({
-    //         ...stop,
-    //         offset: 100 - stop.offset,
-    //     }));
-    //     onChange?.({ ...value, stops: newStops });
-    // };
-
     const handleAddStop = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!barRef.current) return;
         const rect = barRef.current.getBoundingClientRect();
         const offset = Math.round(((e.clientX - rect.left) / rect.width) * 100);
 
-        // Find color at this offset (simple linear interpolation)
         const leftStop = [...stops].reverse().find((s) => s.offset <= offset) || stops[0];
-        // const rightStop = stops.find((s) => s.offset >= offset) || stops[stops.length - 1];
 
         const newStop = { color: leftStop.color, offset, opacity: getStopOpacity(leftStop) };
         const newStops = [...valueRef.current.stops, newStop];
@@ -274,6 +268,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         {locale?.GradientColorPicker.angle}
                     </span>
                     <InputNumber
+                        aria-label={locale?.GradientColorPicker.angle}
                         size={size}
                         controls={size !== 'large'}
                         className="univer-w-24"
@@ -309,7 +304,29 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     onClick={handleAddStop}
                 />
                 {draftValue.stops.map((stop, index) => (
-                    <div
+                    <button
+                        type="button"
+                        role="slider"
+                        aria-label={locale?.GradientColorPicker.offset}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={stop.offset}
+                        onFocus={() => setSelectedIndex(index)}
+                        onKeyDown={(event) => {
+                            if (!['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+                                return;
+                            }
+                            event.preventDefault();
+                            let offset = stop.offset;
+                            if (event.key === 'Home') {
+                                offset = 0;
+                            } else if (event.key === 'End') {
+                                offset = 100;
+                            } else {
+                                offset += (event.key === 'ArrowLeft' || event.key === 'ArrowDown') ? -1 : 1;
+                            }
+                            handleStopOffsetChange(clamp(offset, 0, 100));
+                        }}
                         key={index}
                         data-u-comp="gradient-color-picker-stop"
                         data-selected={selectedIndex === index}
@@ -317,8 +334,9 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             `
                               univer-absolute univer-top-1/2 univer-size-4 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
-                              univer-border-gray-0 univer-shadow-md
+                              univer-border-gray-0 univer-p-0 univer-shadow-md
                             `,
+                            focusClassName,
                             selectedIndex === index ? 'univer-z-10 univer-ring-2 univer-ring-primary-500' : 'univer-z-0'
                         )}
                         style={{
@@ -332,6 +350,9 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                         onPointerDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            cleanupRef.current?.();
+                            e.currentTarget.focus();
+                            onDragStart?.();
                             const startX = e.clientX;
                             const startOffset = stop.offset;
                             setSelectedIndex(index);
@@ -352,12 +373,17 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             const handlePointerUp = () => {
                                 window.removeEventListener('pointermove', handlePointerMove);
                                 window.removeEventListener('pointerup', handlePointerUp);
+                                window.removeEventListener('pointercancel', handlePointerUp);
+                                window.removeEventListener('blur', handlePointerUp);
                                 cleanupRef.current = null;
+                                onDragEnd?.();
                             };
 
                             cleanupRef.current = handlePointerUp;
                             window.addEventListener('pointermove', handlePointerMove);
                             window.addEventListener('pointerup', handlePointerUp);
+                            window.addEventListener('pointercancel', handlePointerUp);
+                            window.addEventListener('blur', handlePointerUp);
                         }}
                     />
                 ))}
@@ -376,6 +402,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     <InputNumber
                         size={size}
                         controls={size !== 'large'}
+                        aria-label={locale?.GradientColorPicker.offset}
                         value={draftValue.stops[selectedIndex]?.offset}
                         min={0}
                         max={100}
@@ -394,6 +421,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     <InputNumber
                         size={size}
                         controls={size !== 'large'}
+                        aria-label={locale?.GradientColorPicker.transparency}
                         value={Math.round((1 - getStopOpacity(draftValue.stops[selectedIndex])) * 100)}
                         min={0}
                         max={100}
@@ -404,9 +432,24 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     />
                 </div>
                 <div className="univer-flex univer-gap-1">
+                    <Button
+                        type="button"
+                        size={size === 'large' ? 'extra-large' : 'middle'}
+                        aria-label={locale?.GradientColorPicker.add}
+                        onClick={() => {
+                            const stop = valueRef.current.stops[selectedIndex];
+                            const nextOffset = stops.find((item) => item.offset > stop.offset)?.offset ?? 100;
+                            const newStops = [...valueRef.current.stops, { ...stop, offset: Math.round((stop.offset + nextOffset) / 2) }];
+                            emitChange({ ...valueRef.current, stops: newStops });
+                            setSelectedIndex(newStops.length - 1);
+                        }}
+                    >
+                        <IncreaseIcon />
+                    </Button>
                     <Tooltip title={locale?.GradientColorPicker.delete}>
                         <Button
                             size={size === 'large' ? 'extra-large' : 'middle'}
+                            aria-label={locale?.GradientColorPicker.delete}
                             data-u-comp="gradient-color-picker-delete"
                             variant="danger"
                             onClick={handleRemoveStop}

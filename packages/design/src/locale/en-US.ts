@@ -68,6 +68,7 @@ const locale = {
             confirm: 'ok',
         },
         GradientColorPicker: {
+            add: 'Add gradient stop',
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Angular',

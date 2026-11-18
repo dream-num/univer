@@ -19,7 +19,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
-import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue, isLiteralTextMatch, isWildcard } from '../../../engine/utils/compare';
 import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -268,6 +268,7 @@ export class Xlookup extends BaseFunction {
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
                 false,
+                true,
                 true
             );
         }
@@ -308,6 +309,11 @@ export class Xlookup extends BaseFunction {
             candidate.isBoolean() !== value.isBoolean()
         ) {
             return false;
+        }
+
+        // Match mode 0 is an exact match: ? and * are ordinary characters. Only match mode 2 reads them as wildcards.
+        if (value.isString() && isWildcard(String(value.getValue()))) {
+            return isLiteralTextMatch(String(candidate.getValue()), String(value.getValue()));
         }
 
         return candidate.isEqual(value).getValue() === true;

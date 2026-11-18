@@ -699,6 +699,23 @@ describe('EditingRenderController business methods', () => {
         expect(controller._editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(1);
     });
 
+    it('commits the draft when a pointer click closes the editor', async () => {
+        const { controller } = createController();
+
+        await controller._handleEditorInvisible({
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetRangeValuesCommand.id, expect.objectContaining({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            range: { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 },
+            value: expect.objectContaining({ v: 'new value' }),
+        }));
+    });
+
     it('moves the cursor inside the editor and resets editor state on exit', () => {
         const { controller, formulaBarEditor } = createController();
 

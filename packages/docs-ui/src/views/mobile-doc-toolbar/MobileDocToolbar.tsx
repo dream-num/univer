@@ -16,9 +16,7 @@
 
 import type { IMenuSchema, IValueOption, MobileDrawerSnap } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { clsx, resetButtonClassName } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -44,11 +42,14 @@ import {
     useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { map, startWith } from 'rxjs';
+import { map, of, startWith } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { MobileDocSelectionRenderService } from '../../services/mobile/doc-selection-render.service';
 import {
     DOC_PARAGRAPH_T_ALIGN_MENU_ID,
     DOC_PARAGRAPH_T_EDIT_MENU_ID,
 } from '../../menu/paragraph-menu';
+import { IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -193,6 +194,7 @@ function useMobileDocEditState() {
         selectionService?.isMobileEditMode ?? false
     );
     return {
+        unitId,
         isEditing,
         isReadOnly: unitId ? editorService.getEditor(unitId)?.isReadOnly() === true : true,
         selectionService,
@@ -231,7 +233,17 @@ export function MobileDocToolbar() {
     const menuManagerService = useDependency(IMenuManagerService);
     const workbenchService = useDependency(IWorkbenchService);
     const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
-    const { isEditing, isReadOnly, selectionService } = useMobileDocEditState();
+    const { unitId, isEditing, isReadOnly, selectionService } = useMobileDocEditState();
+    const injector = useDependency(Injector);
+    const focusCoordinator = injector.has(IDocEmbedRuntimeFocusCoordinator)
+        ? injector.get(IDocEmbedRuntimeFocusCoordinator)
+        : undefined;
+    const embeddedDocActive = useObservable(
+        () => focusCoordinator?.runtimeSessionChanged$.pipe(startWith(undefined), map(() => focusCoordinator.isChildUnitInActiveSession(unitId))) ?? of(false),
+        focusCoordinator?.isChildUnitInActiveSession(unitId) ?? false,
+        false,
+        [focusCoordinator, unitId]
+    );
     const keyboardState = useObservable(
         selectionService?.mobileKeyboardState$,
         { visible: false, inset: 0 }
@@ -265,7 +277,7 @@ export function MobileDocToolbar() {
     }, [selectionService, closeDrawer]);
     const drawerSchemas = useMemo(() => drawer ? menuSchemas[drawer] : [], [drawer, menuSchemas]);
 
-    if (rootUnitType !== UniverInstanceType.UNIVER_DOC) {
+    if (rootUnitType !== UniverInstanceType.UNIVER_DOC && !embeddedDocActive) {
         return null;
     }
 
@@ -279,7 +291,7 @@ export function MobileDocToolbar() {
                 type="button"
                 aria-label={localeService.t<LocaleKey>('docs-ui.mobile.edit')}
                 className={clsx(resetButtonClassName, `
-                  univer-pointer-events-auto univer-absolute univer-bottom-4 univer-z-30 univer-flex univer-size-14
+                  univer-pointer-events-auto univer-absolute univer-bottom-4 univer-z-50 univer-flex univer-size-14
                   univer-items-center univer-justify-center univer-rounded-full univer-bg-primary-600 univer-text-2xl
                   univer-text-white univer-shadow-lg
                   active:univer-scale-95 active:univer-bg-primary-700
@@ -356,7 +368,7 @@ export function MobileDocToolbar() {
             {keyboardVisible && quickMenu && (
                 <div
                     className="
-                      univer-pointer-events-auto univer-absolute univer-inset-x-3 univer-z-30 univer-overflow-hidden
+                      univer-pointer-events-auto univer-absolute univer-inset-x-3 univer-z-50 univer-overflow-hidden
                     "
                     style={{ bottom: `${keyboardState.inset + 48}px` }}
                 >
@@ -371,7 +383,7 @@ export function MobileDocToolbar() {
             {keyboardVisible && !drawer && (
                 <div
                     className="
-                      univer-pointer-events-auto univer-absolute univer-inset-x-0 univer-z-30 univer-box-border
+                      univer-pointer-events-auto univer-absolute univer-inset-x-0 univer-z-50 univer-box-border
                       univer-flex univer-h-12 univer-items-center univer-gap-0.5 univer-border-0 univer-border-t
                       univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-px-1
                       dark:!univer-border-gray-700 dark:!univer-bg-gray-800

@@ -15,14 +15,20 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { ComponentExtension } from './extension';
-import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 import { BaseObject } from '../base-object';
 
 export class RenderComponent<T, U, V> extends BaseObject {
     private _extensions = new Map<string, ComponentExtension<T, U, V>>();
+
+    override canReuseViewportCache(): boolean {
+        return super.canReuseViewportCache() && this.getExtensionsByOrder().every((extension) =>
+            typeof extension.canReuseViewportCache === 'function' && extension.canReuseViewportCache() === true
+        );
+    }
 
     get extensions() {
         return this._extensions;
@@ -33,10 +39,14 @@ export class RenderComponent<T, U, V> extends BaseObject {
         for (const extension of extensions) {
             extension.parent = this;
             this._extensions.set(extension.uKey, extension);
+            this.makeForceDirty(true);
+            this.makeDirtyNoDebounce(true);
 
             disposableCollection.add(
                 toDisposable(() => {
                     this._extensions.delete(extension.uKey);
+                    this.makeForceDirty(true);
+                    this.makeDirtyNoDebounce(true);
                     extension.parent = null;
                 })
             );
@@ -63,9 +73,10 @@ export class RenderComponent<T, U, V> extends BaseObject {
     }
 
     override dispose(): void {
+        const extensions = [...this._extensions.values()];
         super.dispose();
 
-        for (const extension of this._extensions.values()) {
+        for (const extension of extensions) {
             extension.dispose();
         }
 

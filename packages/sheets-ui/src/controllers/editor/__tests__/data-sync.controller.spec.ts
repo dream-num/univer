@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo, IDocumentBody, IDocumentData, IDrawings, Nullable } from '@univerjs/core';
-import type { ICellEditorState } from '../../../services/editor-bridge.service';
 import {
     BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -36,9 +35,11 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject, EMPTY } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { ICellEditorState } from '../../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
+import { createChartRenderTestBed } from '../../render-controllers/__tests__/chart-render-test-bed';
 import { EditorDataSyncController } from '../data-sync.controller';
 import { FormulaEditorController } from '../formula-editor.controller';
 
@@ -83,11 +84,15 @@ describe('EditorDataSyncController', () => {
         eventType?: DeviceInputEventType;
         formulaBarPosition?: { width: number; height: number } | null;
         documentDataModel?: DocumentDataModel;
+        editUnitId?: string;
+        editSheetId?: string;
     } = {}) {
         const commandService = new TestCommandService();
         const editorBridgeService = {
             currentEditCellState$: new BehaviorSubject<Nullable<ICellEditorState>>(null),
             getEditLocation: vi.fn(() => ({
+                unitId: options.editUnitId ?? 'test-unit',
+                sheetId: options.editSheetId ?? 'sheet1',
                 row: 1,
                 column: 2,
                 isInArrayFormulaRange: options.isInArrayFormulaRange ?? false,
@@ -97,6 +102,7 @@ describe('EditorDataSyncController', () => {
                 eventType: options.eventType ?? DeviceInputEventType.Dblclick,
             })),
             refreshEditCellState: vi.fn(),
+            changeEditorDirty: vi.fn(),
             isForceKeepVisible: vi.fn(() => false),
         };
         const contextService = {
@@ -280,6 +286,8 @@ describe('EditorDataSyncController', () => {
         commandService.emit({
             id: SetRangeValuesMutation.id,
             params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet1',
                 cellValue: {
                     1: {
                         2: { v: 'updated' },
@@ -297,6 +305,8 @@ describe('EditorDataSyncController', () => {
         commandService.emit({
             id: SetRangeValuesMutation.id,
             params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet1',
                 cellValue: {
                     1: {
                         2: null,
@@ -314,6 +324,7 @@ describe('EditorDataSyncController', () => {
         commandService.emit({
             id: MoveRangeMutation.id,
             params: {
+                unitId: 'test-unit',
                 from: {
                     subUnitId: 'sheet1',
                     value: {
@@ -330,6 +341,268 @@ describe('EditorDataSyncController', () => {
         } as ICommandInfo);
 
         expect(editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(1);
+    });
+
+    it('refreshes the current edit cell when move-range writes into it', () => {
+        const { commandService, editorBridgeService } = createController();
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet2',
+                    value: {
+                        1: {
+                            2: null,
+                        },
+                    },
+                },
+                to: {
+                    subUnitId: 'sheet1',
+                    value: {
+                        1: {
+                            2: { v: 'moved' },
+                        },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.refreshEditCellState).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores set-values on the same coordinates of another sheet', () => {
+        const { commandService, editorBridgeService } = createController();
+
+        commandService.emit({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet2',
+                cellValue: {
+                    1: {
+                        2: { v: 'recalculated' },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('ignores set-values on the same coordinates of another workbook', () => {
+        const { commandService, editorBridgeService } = createController();
+
+        commandService.emit({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId: 'other-unit',
+                subUnitId: 'sheet1',
+                cellValue: {
+                    1: {
+                        2: { v: 'updated' },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('ignores move-range on the same coordinates of another sheet', () => {
+        const { commandService, editorBridgeService } = createController();
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet2',
+                    value: {
+                        1: {
+                            2: { v: 'moved' },
+                        },
+                    },
+                },
+                to: {
+                    subUnitId: 'sheet3',
+                    value: {},
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('marks the open editor dirty when an external update replaces the edited cell content', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet1',
+                cellValue: {
+                    1: {
+                        2: { f: '=SUM(A1:A2)' },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).toHaveBeenCalledWith(true);
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('marks the open editor dirty when the edited cell is cleared externally', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet1',
+                cellValue: {
+                    1: {
+                        2: null,
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).toHaveBeenCalledWith(true);
+    });
+
+    it('leaves the open editor untouched when an external update only changes cell style', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId: 'test-unit',
+                subUnitId: 'sheet1',
+                cellValue: {
+                    1: {
+                        2: { s: { bg: { rgb: '#ff0000' }, bl: 1 } },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('marks the open editor dirty when move-range writes the edited cell', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet1',
+                    value: {
+                        1: {
+                            2: null,
+                        },
+                    },
+                },
+                to: {
+                    subUnitId: 'sheet1',
+                    value: {},
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).toHaveBeenCalledWith(true);
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('marks the open editor dirty when move-range moves cells into the edited cell', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet2',
+                    value: {},
+                },
+                to: {
+                    subUnitId: 'sheet1',
+                    value: {
+                        1: {
+                            2: { v: 'moved' },
+                        },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).toHaveBeenCalledWith(true);
+    });
+
+    it('leaves the open editor untouched when move-range does not involve the edited cell', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet1',
+                    value: {
+                        5: {
+                            7: null,
+                        },
+                    },
+                },
+                to: {
+                    subUnitId: 'sheet1',
+                    value: {
+                        6: {
+                            8: { v: 'moved' },
+                        },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
+    });
+
+    it('leaves the open editor untouched when move-range writes the edited coordinates on another sheet', () => {
+        const { commandService, editorBridgeService } = createController({ isEditorVisible: true });
+
+        commandService.emit({
+            id: MoveRangeMutation.id,
+            params: {
+                unitId: 'test-unit',
+                from: {
+                    subUnitId: 'sheet2',
+                    value: {
+                        1: {
+                            2: null,
+                        },
+                    },
+                },
+                to: {
+                    subUnitId: 'sheet2',
+                    value: {
+                        1: {
+                            2: { v: 'moved' },
+                        },
+                    },
+                },
+            },
+        } as ICommandInfo);
+
+        expect(editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
+        expect(editorBridgeService.refreshEditCellState).not.toHaveBeenCalled();
     });
 
     it('renders formula reference styles in the cell editor when the cell editor is focused', () => {
@@ -422,5 +695,96 @@ describe('EditorDataSyncController', () => {
 
         expect(cellEditorSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.FALSE);
         expect(formulaBarSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.TRUE);
+    });
+});
+
+describe('EditorDataSyncController cell refresh with real sheet providers', () => {
+    function createRealController() {
+        const { injector, workbook, render, manager, commands } = createChartRenderTestBed();
+        const worksheet = workbook.getSheetBySheetId('grid')!;
+
+        // The formula bar has its own unit and render stack; keep it out of this bed so the assertions
+        // observe the cell editor snapshot only.
+        injector.add([FormulaEditorController, { useValue: { autoScroll: vi.fn() } as never }]);
+        injector.add([IFormulaEditorManagerService, { useValue: { getPosition: () => null } as never }]);
+        injector.add([RangeProtectionRuleModel, { useValue: { getRangeRuleInitState: () => true } as never }]);
+        injector.add([WorksheetProtectionRuleModel, { useValue: { getSheetRuleInitState: () => true } as never }]);
+        injector.add([EditorDataSyncController]);
+
+        commands.registerCommand(SetRangeValuesMutation);
+        manager.setCurrent({ sheetId: 'grid' });
+        worksheet.getCellMatrix().setValue(0, 0, { v: 'old' });
+
+        const controller = injector.get(EditorDataSyncController);
+        onTestFinished(() => controller.dispose());
+
+        const bridge = injector.get(IEditorBridgeService);
+        bridge.setEditCell({
+            unitId: workbook.getUnitId(),
+            sheetId: 'grid',
+            scene: render.scene,
+            engine: render.engine,
+            primary: worksheet.getCellInfoInMergeData(0, 0),
+        });
+        // A closed editor is what #6715 (and the formula bar) relies on: the snapshot follows the model.
+        bridge.changeVisible({
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            unitId: workbook.getUnitId(),
+        });
+
+        return {
+            bridge,
+            commands,
+            worksheet,
+            unitId: workbook.getUnitId(),
+            editedDocumentModel: () => bridge.getEditCellState()?.documentLayoutObject.documentModel,
+            editedBody: () => bridge.getEditCellState()?.documentLayoutObject.documentModel?.getBody()?.dataStream,
+            writeCell: (value: string) => commands.syncExecuteCommand(SetRangeValuesMutation.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: 'grid',
+                cellValue: { 0: { 0: { v: value } } },
+            }),
+        };
+    }
+
+    it('keeps a closed cell editor snapshot aligned with an external write to the edited cell (#6715)', () => {
+        const { bridge, worksheet, writeCell, editedBody } = createRealController();
+        expect(bridge.isVisible().visible).toBe(false);
+        expect(editedBody()).toBe('old\r\n');
+
+        writeCell('Hello World');
+
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('Hello World');
+        // #6715: opening the editor afterwards must show the written value, not the pre-write snapshot.
+        expect(editedBody()).toBe('Hello World\r\n');
+    });
+
+    it('keeps the open draft and marks it for submission when an external write hits the edited cell', () => {
+        const { bridge, worksheet, unitId, writeCell, editedBody, editedDocumentModel } = createRealController();
+        const draftDocumentModel = editedDocumentModel();
+
+        bridge.changeVisible({ visible: true, eventType: DeviceInputEventType.Keyboard, unitId });
+        expect(bridge.getEditorDirty()).toBe(false);
+        writeCell('remote value');
+
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('remote value');
+        // The draft is left alone, so the editor keeps showing it and submits it when editing ends.
+        expect(editedDocumentModel()).toBe(draftDocumentModel);
+        expect(editedBody()).toBe('old\r\n');
+        expect(bridge.getEditorDirty()).toBe(true);
+    });
+
+    it('keeps the open draft clean when an external write only changes cell style', () => {
+        const { bridge, unitId, commands } = createRealController();
+        bridge.changeVisible({ visible: true, eventType: DeviceInputEventType.Keyboard, unitId });
+
+        commands.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId,
+            subUnitId: 'grid',
+            cellValue: { 0: { 0: { s: { bg: { rgb: '#ff0000' } } } } },
+        });
+
+        expect(bridge.getEditorDirty()).toBe(false);
     });
 });

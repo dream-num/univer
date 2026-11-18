@@ -48,6 +48,8 @@ export interface IFloatDom {
      * forwarding by default; interactive embed runtimes can opt out.
      */
     eventPassThrough?: boolean;
+    /** Cancel browser pinch/modified-wheel zoom while this host forwards events. */
+    preventBrowserZoom?: boolean;
     /** Native listener options per event. Omitted events retain React forwarding. */
     eventOptions?: Partial<Record<'wheel' | 'pointerdown' | 'pointermove' | 'pointerup', Pick<AddEventListenerOptions, 'passive' | 'capture'>>>;
     /**

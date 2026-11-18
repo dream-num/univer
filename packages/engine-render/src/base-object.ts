@@ -407,6 +407,15 @@ export abstract class BaseObject extends Disposable {
         return this._zIndex;
     }
 
+    /** Opt in only when pixels depend on invalidated render state, not animation or external callbacks. */
+    viewportCacheReusable = false;
+
+    canReuseViewportCache(): boolean {
+        return this.viewportCacheReusable;
+    }
+
+    onViewportCacheReuse(_viewportInfo: IViewportInfo): void {}
+
     makeDirty(state: boolean = true) {
         this._dirty = state;
 
@@ -420,6 +429,10 @@ export abstract class BaseObject extends Disposable {
         }
 
         return this;
+    }
+
+    isForceDirty(): boolean {
+        return this._forceDirty;
     }
 
     makeForceDirty(state: boolean = true) {

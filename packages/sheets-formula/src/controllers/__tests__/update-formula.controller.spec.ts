@@ -33,6 +33,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { UniverSheetsFormulaPlugin } from '../../plugin';
+import { UpdateDefinedNameController } from '../update-defined-name.controller';
 import { UpdateFormulaController } from '../update-formula.controller';
 import '@univerjs/sheets/facade';
 import '../../facade/index';
@@ -371,6 +372,59 @@ describe('UpdateFormulaController', () => {
                 }),
             }),
         ]));
+    });
+
+    it('should remove a sheet that references itself without leaving dangling formulas behind', async () => {
+        commandService.registerCommand(RemoveSheetCommand);
+        testBed.injector.add([UpdateDefinedNameController]);
+        testBed.injector.get(UpdateDefinedNameController);
+
+        const univerInstanceService = testBed.injector.get(IUniverInstanceService);
+        const sheetInterceptorService = testBed.injector.get(SheetInterceptorService);
+        const getWorkbook = () => univerInstanceService.getUnit<Workbook>('test');
+        const getDefinedNameRef = () => definedNamesService.getValueById('test', 'range-name')?.formulaOrRefString;
+        const getSheet2Formula = () => getWorkbook()?.getSheetBySheetId('sheet2')?.getRange(0, 0, 0, 0).getValue()?.f;
+
+        // A formula on the sheet that is about to be removed, qualified with that sheet's own name.
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 10: { 1: { f: '=SUM(Sheet1!A1:B2)' } } },
+        })).toBe(true);
+
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: RemoveSheetCommand.id,
+            params: { unitId: 'test', subUnitId: 'sheet1' },
+        });
+
+        // A rewrite aimed at the removed sheet can never be applied and would abort RemoveSheetCommand halfway.
+        expect(intercepted.redos).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                id: SetRangeValuesMutation.id,
+                params: expect.objectContaining({ subUnitId: 'sheet1' }),
+            }),
+        ]));
+        expect(intercepted.redos).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                id: SetRangeValuesMutation.id,
+                params: expect.objectContaining({ subUnitId: 'sheet2' }),
+            }),
+        ]));
+
+        expect(commandService.syncExecuteCommand(RemoveSheetCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        expect(getWorkbook()?.getSheetBySheetId('sheet1')).toBeFalsy();
+        expect(getSheet2Formula()).toBe('=#REF!');
+        expect(getDefinedNameRef()).toBe('#REF!');
+
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+
+        expect(getWorkbook()?.getSheetBySheetId('sheet1')).toBeTruthy();
+        expect(getSheet2Formula()).toBe('=Sheet1!A1:B2');
+        expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$2');
     });
 
     it('should sync defined-name formulas when a defined name is renamed, undone, and redone', async () => {

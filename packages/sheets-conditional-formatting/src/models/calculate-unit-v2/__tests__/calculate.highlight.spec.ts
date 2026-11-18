@@ -715,6 +715,45 @@ describe('Test conditional formatting highlight', () => {
             expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
         });
 
+        it.each([
+            { isBottom: true, value: 10 },
+            { isBottom: false, value: 10 },
+            { isBottom: true, value: 5 },
+        ])('highlights every number when $value exceeds or equals the count (isBottom $isBottom)', ({ isBottom, value }) => {
+            const matrix = (testBed.workbook as Workbook).getSheetBySheetId(testBed.subUnitId)!.getCellMatrix();
+            [1, 2, 3, 4, 5].forEach((v, column) => matrix.setValue(0, column, { v, t: CellValueType.NUMBER }));
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, {
+                ranges: [{ startRow: 0, startColumn: 0, endRow: 0, endColumn: 4 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: { style: { bl: 1 }, type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isBottom, isPercent: false, value },
+            } as IConditionFormattingRule<IRankHighlightCell>);
+            const service = testBed.getConditionalFormattingService();
+            for (let column = 0; column < 5; column++) {
+                service.composeStyle(testBed.unitId, testBed.subUnitId, 0, column);
+                expect(service.composeStyle(testBed.unitId, testBed.subUnitId, 0, column)).toEqual({ style: { bl: 1 } });
+            }
+        });
+
+        it.each([
+            { subType: CFSubRuleType.duplicateValues, matches: [true, true, false] },
+            { subType: CFSubRuleType.uniqueValues, matches: [false, false, true] },
+        ] as const)('compares text case-insensitively for $subType', ({ subType, matches }) => {
+            const matrix = (testBed.workbook as Workbook).getSheetBySheetId(testBed.subUnitId)!.getCellMatrix();
+            ['Apple', 'apple', 'Pear'].forEach((v, column) => matrix.setValue(0, column, { v, t: CellValueType.STRING }));
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, {
+                ranges: [{ startRow: 0, startColumn: 0, endRow: 0, endColumn: 2 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: { style: { bl: 1 }, type: CFRuleType.highlightCell, subType },
+            } as IConditionFormattingRule);
+            const service = testBed.getConditionalFormattingService();
+            for (const [column, matched] of matches.entries()) {
+                service.composeStyle(testBed.unitId, testBed.subUnitId, 0, column);
+                expect(service.composeStyle(testBed.unitId, testBed.subUnitId, 0, column)).toEqual({ style: matched ? { bl: 1 } : {} });
+            }
+        });
+
         it('is bottom 22%', () => {
             const params: IConditionFormattingRule<IRankHighlightCell> = {
                 ranges: [{ startRow: 0, startColumn: 0, endRow: 0, endColumn: 8 }],

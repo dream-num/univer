@@ -14,29 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
-
-export const localeCurrencySymbolMap = new Map<LocaleType, string>([
-    [LocaleType.EN_US, '$'],
-    [LocaleType.RU_RU, '₽'],
-    [LocaleType.VI_VN, '₫'],
-    [LocaleType.ZH_CN, '¥'],
-    [LocaleType.ZH_TW, 'NT$'],
-    [LocaleType.ZH_HK, 'HK$'],
-    [LocaleType.FR_FR, '€'],
-    [LocaleType.FA_IR, '﷼'],
-    [LocaleType.KO_KR, '₩'],
-    [LocaleType.ES_ES, '€'],
-    [LocaleType.CA_ES, '€'],
-    [LocaleType.SK_SK, '€'],
-    [LocaleType.JA_JP, '¥'],
-    [LocaleType.PT_BR, 'R$'],
-    [LocaleType.DE_DE, '€'],
-    [LocaleType.IT_IT, '€'],
-    [LocaleType.ID_ID, 'Rp'],
-    [LocaleType.PL_PL, 'zł'],
-    [LocaleType.AR_SA, '﷼'],
-]);
+import { getCurrencySymbolByLocale, LocaleType } from '@univerjs/core';
 
 /**
  * Get the currency symbol icon based on the locale.
@@ -51,51 +29,51 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
         case LocaleType.SK_SK:
             return {
                 icon: 'EuroIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '€',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.RU_RU:
             return {
                 icon: 'RoubleIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '₽',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.JA_JP:
         case LocaleType.ZH_CN:
             return {
                 icon: 'RmbIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '¥',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.VI_VN:
             return {
                 icon: 'DongIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '₫',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.AR_SA:
         case LocaleType.FA_IR:
             return {
                 icon: 'RialIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '﷼',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.KO_KR:
             return {
                 icon: 'WonIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '₩',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.ID_ID:
             return {
                 icon: 'RupiahIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || 'Rp',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.PL_PL:
             return {
                 icon: 'ZlotyIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || 'zł',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
         case LocaleType.EN_US:
@@ -105,17 +83,10 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
         default:
             return {
                 icon: 'DollarIcon',
-                symbol: localeCurrencySymbolMap.get(locale) || '$',
+                symbol: getCurrencySymbolByLocale(locale),
                 locale,
             };
     }
-}
-
-/**
- * Get the currency symbol by locale.
- */
-export function getCurrencySymbolByLocale(locale: LocaleType): string {
-    return localeCurrencySymbolMap.get(locale) || '$';
 }
 
 /**

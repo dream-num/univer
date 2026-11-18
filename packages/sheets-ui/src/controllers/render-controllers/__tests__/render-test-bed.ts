@@ -206,6 +206,7 @@ export interface IFakeScene {
     makeDirtyForScrolling(): void;
     isDirty(): boolean;
     isScrollRenderPending(): boolean;
+    isViewportCacheReusePending(): boolean;
     getLayers(): Array<{ getObjectsByOrder(): Array<{ isDirty(): boolean }> }>;
     getViewport(key: unknown): IFakeViewport | null;
     getMainViewport(): IFakeViewport;
@@ -266,6 +267,7 @@ export function createFakeScene(
         makeDirtyForScrolling: () => { },
         isDirty: () => false,
         isScrollRenderPending: () => false,
+        isViewportCacheReusePending: () => false,
         getLayers: () => Array.from(layers.values()) as Array<{ getObjectsByOrder(): Array<{ isDirty(): boolean }> }>,
         getViewport: (key) => viewportMap.get(key) ?? null,
         getMainViewport: () => viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)!,

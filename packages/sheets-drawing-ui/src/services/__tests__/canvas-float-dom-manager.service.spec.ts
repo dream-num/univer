@@ -1032,6 +1032,38 @@ describe('SheetCanvasFloatDomManagerService', () => {
         });
     });
 
+    it.each([0.5, 1, 2])('clips float DOM content to scaled sheet headers at zoom %s', (scale) => {
+        const fixture = setup();
+        disposables.push(fixture);
+        vi.spyOn(fixture.scene, 'getAncestorScale').mockReturnValue({ scaleX: scale, scaleY: scale });
+
+        const bounds = { left: 12, right: 230, top: 10, bottom: 180 };
+        expect(transformBound2DOMBound(bounds, fixture.scene, fixture.skeleton, fixture.worksheet)).toEqual({
+            left: 46 * scale,
+            right: 200 * scale,
+            top: 28 * scale,
+            bottom: 162 * scale,
+            absolute: { left: false, top: false },
+        });
+    });
+
+    it('updates drawing header clipping after zoom changes without recreating the drawing', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        fixture.manager.addFloatDomToRange({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, {
+            componentKey: 'RangeCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            allowTransform: true,
+        }, { width: 160, height: 100 }, 'zoom-card');
+        const info = fixture.manager.getFloatDomInfo('zoom-card')!;
+        vi.spyOn(fixture.scene, 'getAncestorScale').mockReturnValue({ scaleX: 0.5, scaleY: 0.5 });
+
+        const layout = calcSheetFloatDomPosition(info.rect, fixture.scene, fixture.skeleton, fixture.worksheet, info);
+
+        expect(layout.startX).toBe(23);
+        expect(layout.startY).toBe(14);
+    });
+
     it('keeps float dom bounds stable when the main viewport is unavailable', () => {
         const fixture = setup();
         disposables.push(fixture);
@@ -1140,6 +1172,7 @@ describe('SheetCanvasFloatDomManagerService', () => {
             fixture.manager.addFloatDomToColumnHeader(1, options, { width: 100, height: 40 }, 'wheel-card');
         }
         const layer = findFloatDom(fixture.get(CanvasFloatDomService), 'wheel-card')!;
+        expect(layer.preventBrowserZoom).toBe(true);
         const unconsumed = new WheelEvent('wheel', { deltaY: 1.25, cancelable: true });
         layer.onWheel(unconsumed);
         expect(unconsumed.defaultPrevented).toBe(false);

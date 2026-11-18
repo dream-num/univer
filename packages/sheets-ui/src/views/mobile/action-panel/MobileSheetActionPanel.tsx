@@ -26,11 +26,13 @@ import {
     IContextService,
     Injector,
     IPermissionService,
+    IUniverInstanceService,
     LocaleService,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { clsx, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
+import { Button, clsx, resetButtonClassName, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { KeyboardIcon, MenuIcon, MoreLeftIcon } from '@univerjs/icons';
 import {
     checkRangesEditablePermission,
@@ -54,7 +56,7 @@ import {
     useObservable,
 } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { map, merge, startWith } from 'rxjs';
+import { map, merge, of, startWith } from 'rxjs';
 import type { IUniverSheetsUIConfig } from '../../../config/config';
 import type { LocaleKey } from '../../../locale/types';
 import type { IMobileStyleCommand, MobileStyleView } from './MobileStylePanel';
@@ -67,6 +69,7 @@ import {
     MOBILE_KEYBOARD_VISIBLE,
 } from '../../../consts/mobile-context';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { ISheetEmbedRuntimeFocusCoordinator } from '../../../services/sheet-embed-integration.service';
 import { useActiveWorkbook } from '../../hook';
 import { MobileStylePanel } from './MobileStylePanel';
 
@@ -150,6 +153,22 @@ export function getMobileMenuCommand(params: IValueOption | IMobileStyleCommand)
 }
 
 export function MobileSheetActionPanel() {
+    const instances = useDependency(IUniverInstanceService);
+    const injector = useDependency(Injector);
+    const localeService = useDependency(LocaleService);
+    const focusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
+        ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
+        : undefined;
+    const resolveChildOwnsTools = () => {
+        const scope = focusCoordinator?.resolveActiveChildSessionRuntimeScope();
+        return scope != null && scope.hostUnitId === instances.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)?.getUnitId() && scope.childType !== UniverInstanceType.UNIVER_SHEET;
+    };
+    const childOwnsTools = useObservable(
+        () => focusCoordinator?.runtimeSessionChanged$.pipe(startWith(undefined), map(resolveChildOwnsTools)) ?? of(false),
+        resolveChildOwnsTools(),
+        false,
+        [focusCoordinator, instances]
+    );
     const contextService = useDependency(IContextService);
     const focusingDrawing = useObservable(
         () => contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(map(Boolean)),
@@ -158,8 +177,37 @@ export function MobileSheetActionPanel() {
         [contextService]
     );
 
-    if (focusingDrawing) {
+    function exitDrawingSelection() {
+        const workbook = instances.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET);
+        const transformer = workbook
+            ? injector.get(IRenderManagerService).getRenderUnitById(workbook.getUnitId())?.scene.getTransformer()
+            : undefined;
+        transformer?.finishTransform();
+        transformer?.clearSelectedObjects();
+        contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+    }
+
+    if (childOwnsTools) {
         return null;
+    }
+
+    if (focusingDrawing) {
+        return (
+            <Button
+                type="button"
+                variant="primary"
+                size="large"
+                className="
+                  univer-pointer-events-auto univer-absolute univer-bottom-14 univer-right-4 univer-z-50 univer-h-12
+                  univer-rounded-full univer-px-4 univer-shadow-lg
+                "
+                style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
+                onClick={exitDrawingSelection}
+            >
+                <MoreLeftIcon />
+                {localeService.t<LocaleKey>('sheets-ui.mobile.back')}
+            </Button>
+        );
     }
 
     return <MobileSheetActionPanelContent />;

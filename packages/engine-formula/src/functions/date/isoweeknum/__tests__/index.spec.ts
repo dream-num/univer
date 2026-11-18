@@ -43,6 +43,34 @@ describe('Test isoweeknum function', () => {
             expect(result.getValue()).toStrictEqual(52);
         });
 
+        it('follows ISO 8601 at year boundaries', () => {
+            // The last days of December that belong to week 1 of the next year.
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2025-12-29')).getValue()).toBe(1);
+            // Week 1 starts in the last days of the previous year when 1 January is Friday or Saturday.
+            expect(testFunction.calculate(StringValueObject.create('2021-1-4')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2015-12-31')).getValue()).toBe(53);
+            // 1 January 2016 was a Friday, so week 1 started on 4 January and the rest of the year follows it.
+            expect(testFunction.calculate(StringValueObject.create('2016-1-4')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2016-1-11')).getValue()).toBe(2);
+            expect(testFunction.calculate(StringValueObject.create('2021-2-1')).getValue()).toBe(5);
+        });
+
+        it('follows ISO 8601 at year boundaries in the 1904 date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1904);
+
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2021-1-4')).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('ignores the time fraction of a date serial', () => {
+            expect(testFunction.calculate(NumberValueObject.create(43471.5)).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2019-01-06 12:00')).getValue()).toBe(1);
+            expect(testFunction.calculate(StringValueObject.create('2024-12-30 23:30')).getValue()).toBe(1);
+        });
+
         it('uses the 1904 epoch when serial is zero', () => {
             testFunction.setDateSystem(DateSystem.Date1900);
             expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBe(52);

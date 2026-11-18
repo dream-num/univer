@@ -14,93 +14,10 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
-import { Button, FormLayout, Input } from '@univerjs/design';
-import { KeyCode, useDependency } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { useDocHyperLinkEdit } from './hyper-link-edit/use-doc-hyper-link-edit';
-import { isBlankInput } from './hyper-link-edit/utils';
+import { DocHyperLinkEdit } from './DocHyperLinkEdit';
 
 export function MobileDocHyperLinkEdit() {
-    const localeService = useDependency(LocaleService);
-    const {
-        doc,
-        editing,
-        handleCancel,
-        handleConfirm,
-        isLegal,
-        label,
-        link,
-        setLabel,
-        setLink,
-        showError,
-    } = useDocHyperLinkEdit();
-
-    if (!doc) {
-        return;
-    }
-
-    return (
-        <div
-            className="
-              univer-box-border univer-w-full univer-bg-gray-0 univer-py-2
-              dark:!univer-bg-gray-900
-            "
-        >
-            <div>
-                {editing
-                    ? (
-                        <FormLayout
-                            label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.label')}
-                            error={showError && isBlankInput(label) ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.labelError') : ''}
-                        >
-                            <Input
-                                value={label}
-                                onChange={setLabel}
-                                autoFocus
-                                onKeyDown={(event) => {
-                                    if (event.keyCode === KeyCode.ENTER) {
-                                        handleConfirm();
-                                    }
-                                }}
-                                size="small"
-                            />
-                        </FormLayout>
-                    )
-                    : null}
-                <FormLayout
-                    label={localeService.t<LocaleKey>('docs-hyper-link-ui.edit.address')}
-                    error={showError && !isLegal ? localeService.t<LocaleKey>('docs-hyper-link-ui.edit.addressError') : ''}
-                >
-                    <Input
-                        value={link}
-                        onChange={setLink}
-                        autoFocus={!editing}
-                        onKeyDown={(event) => {
-                            if (event.keyCode === KeyCode.ENTER) {
-                                handleConfirm();
-                            }
-                        }}
-                        size="small"
-                    />
-                </FormLayout>
-            </div>
-            <div className="univer-mt-5 univer-flex univer-gap-3">
-                <Button className="univer-flex-1" onClick={handleCancel} size="middle">
-                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
-                </Button>
-                <Button
-                    variant="primary"
-                    className="univer-flex-1"
-                    disabled={isBlankInput(link)}
-                    onClick={handleConfirm}
-                    size="middle"
-                >
-                    {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.confirm')}
-                </Button>
-            </div>
-        </div>
-    );
+    return <DocHyperLinkEdit mobile />;
 }
 
 MobileDocHyperLinkEdit.componentKey = 'univer.doc.mobile-hyper-link-edit';

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-toc",
-    "version": "1.4.0",
+    "version": "1.5.2",
     "private": false,
     "description": "Table of contents commands for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -74,7 +74,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "7.8.2",
-        "tsrs": "0.20.1-ts7.1.0-beta",
-        "vitest": "^5.0.5"
+        "tsrs": "0.23.0-ts7.1.0-beta",
+        "vitest": "^5.1.0"
     }
 }

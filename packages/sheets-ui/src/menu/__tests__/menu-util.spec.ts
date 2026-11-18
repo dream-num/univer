@@ -31,11 +31,17 @@
  */
 
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { IUniverInstanceService } from '@univerjs/core';
-import { IExclusiveRangeService, SheetsSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
-import { getCurrentExclusiveRangeInterest$ } from '../menu-util';
+import { IContextService, IPermissionService, IUniverInstanceService, UserManagerService } from '@univerjs/core';
+import {
+    IExclusiveRangeService,
+    RangeProtectionRuleModel,
+    SheetsSelectionsService,
+    WorksheetEditPermission,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '../menu-util';
 
 describe('getCurrentExclusiveRangeInterest$', () => {
     it('uses the current sheet selections when the active sheet changes', () => {
@@ -74,6 +80,49 @@ describe('getCurrentExclusiveRangeInterest$', () => {
         activeSheet$.next(worksheets.regular);
 
         expect(states[states.length - 1]).toBe(false);
+        subscription.unsubscribe();
+    });
+});
+
+describe('getCurrentRangeDisable$', () => {
+    it('drops a removed active worksheet instead of composing permissions for it', () => {
+        const worksheet = { getSheetId: () => 'sheet-1', getConfig: () => ({}) };
+        const workbook = {
+            getUnitId: () => 'unit-1',
+            activeSheet$: new BehaviorSubject(worksheet),
+            sheetDisposed$: new Subject(),
+            // The worksheet is no longer part of the workbook: its permission points were deleted on disposal.
+            getSheetBySheetId: () => undefined,
+        };
+        const permissionService = {
+            permissionPointUpdate$: new Subject(),
+            composePermission$: vi.fn(() => {
+                throw new Error('composePermission$ must not run for a removed worksheet');
+            }),
+        };
+        const services = new Map<unknown, unknown>([
+            [IUniverInstanceService, { getCurrentTypeOfUnit$: () => new BehaviorSubject(workbook) }],
+            [UserManagerService, { currentUser$: new BehaviorSubject(null) }],
+            [IContextService, { subscribeContextValue$: () => new BehaviorSubject(false) }],
+            [RangeProtectionRuleModel, { getSubunitRuleList: () => [] }],
+            [WorksheetProtectionRuleModel, { getRule: () => null }],
+            [SheetsSelectionsService, {
+                selectionChanged$: new BehaviorSubject([]),
+                getWorkbookSelections: () => ({ getSelectionsOfWorksheet: () => [] }),
+            }],
+            [IPermissionService, permissionService],
+        ]);
+        const accessor = {
+            get: (token: unknown) => services.get(token),
+            has: (token: unknown) => services.has(token),
+        } as never;
+
+        const states: boolean[] = [];
+        const subscription = getCurrentRangeDisable$(accessor, { worksheetTypes: [WorksheetEditPermission] })
+            .subscribe((state) => states.push(state));
+
+        expect(states[states.length - 1]).toBe(true);
+        expect(permissionService.composePermission$).not.toHaveBeenCalled();
         subscription.unsubscribe();
     });
 });

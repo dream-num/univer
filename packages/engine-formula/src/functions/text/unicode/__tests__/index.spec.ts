@@ -32,6 +32,26 @@ describe('Test unicode function', () => {
             expect(getObjectValue(result)).toStrictEqual(65);
         });
 
+        it('Value starts with a character above U+FFFF', () => {
+            // Excel and Google Sheets (executed 2026-08-29) both read the full code point.
+            const text = StringValueObject.create('\u{1F600}a');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(128512);
+        });
+
+        it('Value is empty', () => {
+            // Excel documents #VALUE! for empty text.
+            const text = StringValueObject.create('');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Value starts with a partial surrogate', () => {
+            // Excel documents #VALUE! for partial surrogates.
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('\uD83D')))).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('\uDE00')))).toStrictEqual(ErrorType.VALUE);
+        });
+
         it('Value is array', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

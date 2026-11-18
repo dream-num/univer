@@ -15,12 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
-import type { IDialogService } from './dialog.service';
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+import type { IDialogService } from './dialog.service';
 import { connectInjector } from '../../utils/di';
 import { DialogPart } from '../../views/components/dialog-part/DialogPart';
+import { IContextMenuHostService } from '../contextmenu/contextmenu-host.service';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopDialogService extends Disposable implements IDialogService {
@@ -29,7 +30,8 @@ export class DesktopDialogService extends Disposable implements IDialogService {
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
-        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IContextMenuHostService private readonly _menuHostService: IContextMenuHostService
     ) {
         super();
 
@@ -44,7 +46,12 @@ export class DesktopDialogService extends Disposable implements IDialogService {
     }
 
     open(option: IDialogPartMethodOptions): IDisposable {
-        if (this._dialogOptions.find((item) => item.id === option.id)) {
+        const existingDialog = this._dialogOptions.find((item) => item.id === option.id);
+        if (!existingDialog?.open) {
+            this._menuHostService.closeAll();
+        }
+
+        if (existingDialog) {
             this._dialogOptions = this._dialogOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
                 open: item.id === option.id ? true : item.open,

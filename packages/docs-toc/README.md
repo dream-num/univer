@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-toc` | `UniverDocsToc` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/docs-toc` | `UniverDocsToc` | No | No | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/docs-toc
 npm install @univerjs/docs-toc
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverDocsTocPlugin } from '@univerjs/docs-toc';

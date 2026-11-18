@@ -15,19 +15,22 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ContextMenuHostService, IContextMenuHostService } from '../contextmenu-host.service';
 
+const injectors: Injector[] = [];
+
+function createService() {
+    const injector = new Injector([[IContextMenuHostService, { useClass: ContextMenuHostService }]]);
+    injectors.push(injector);
+    return injector.get(IContextMenuHostService);
+}
+
+afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
+
 describe('ContextMenuHostService', () => {
-    let service: IContextMenuHostService;
-
-    beforeEach(() => {
-        const injector = new Injector();
-        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
-        service = injector.get(IContextMenuHostService);
-    });
-
     it('hides the previously active menu when another menu becomes active', () => {
+        const service = createService();
         const hideMainMenu = vi.fn();
         const hideFooterMenu = vi.fn();
         service.registerMenu('main', hideMainMenu);
@@ -42,6 +45,7 @@ describe('ContextMenuHostService', () => {
     });
 
     it('clears active menu state when a registered menu is disposed', () => {
+        const service = createService();
         const disposable = service.registerMenu('main', vi.fn());
         service.activateMenu('main');
 
@@ -51,6 +55,7 @@ describe('ContextMenuHostService', () => {
     });
 
     it('publishes active menu changes', () => {
+        const service = createService();
         const activeMenuIds: Array<string | null> = [];
         service.registerMenu('main', vi.fn());
         const subscription = service.activeMenuId$.subscribe((menuId) => activeMenuIds.push(menuId));
@@ -60,5 +65,41 @@ describe('ContextMenuHostService', () => {
 
         expect(activeMenuIds).toEqual([null, 'main', null]);
         subscription.unsubscribe();
+    });
+
+    it('closes registered menus and blocks reopening until all host suspension owners release', () => {
+        const host = createService();
+        const other = createService();
+        const closeContextMenu = vi.fn();
+        const closeDropdown = vi.fn();
+        host.registerMenu('context', closeContextMenu);
+        host.registerMenu(Symbol('dropdown'), closeDropdown);
+        host.activateMenu('context');
+
+        const history = host.suspend();
+        const preview = host.suspend();
+        expect(closeContextMenu).toHaveBeenCalledWith(false);
+        expect(closeDropdown).toHaveBeenCalledWith(false);
+        other.activateMenu('other');
+        expect(other.activeMenuId).toBe('other');
+
+        history.dispose();
+        history.dispose();
+        host.activateMenu('context');
+        expect(host.activeMenuId).toBeNull();
+        preview.dispose();
+        host.activateMenu('context');
+        expect(host.activeMenuId).toBe('context');
+    });
+
+    it('releases a suspension if a registered menu fails to close', () => {
+        const host = createService();
+        const registration = host.registerMenu('custom', () => {
+            throw new Error('Cannot close');
+        });
+        expect(() => host.suspend()).toThrow('Cannot close');
+        registration.dispose();
+        host.activateMenu('context');
+        expect(host.activeMenuId).toBe('context');
     });
 });

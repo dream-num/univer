@@ -87,7 +87,7 @@ export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ 
                         {`${stop.offset}%`}
                     </Button>
                 ))}
-                <Button className="" aria-label={locale?.Accessibility.increment} onClick={addStop} size="icon"><IncreaseIcon /></Button>
+                <Button className="" aria-label={locale?.GradientColorPicker.add} onClick={addStop} size="icon"><IncreaseIcon /></Button>
                 <Button
                     className=""
                     aria-label={locale?.GradientColorPicker.delete}

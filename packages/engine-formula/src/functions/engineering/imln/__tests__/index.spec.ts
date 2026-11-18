@@ -32,6 +32,18 @@ describe('Test imln function', () => {
             expect(result.getValue()).toBe('2.56494935746154+1.17600520709514i');
         });
 
+        it('Value has a negative imaginary part', () => {
+            const inumber = StringValueObject.create('5-12i');
+            const result = testFunction.calculate(inumber);
+            expect(result.getValue()).toBe('2.56494935746154-1.17600520709514i');
+        });
+
+        it('Value has a tiny real part', () => {
+            const inumber = StringValueObject.create('0.0000001-i');
+            const result = testFunction.calculate(inumber);
+            expect(result.getValue()).toBe('4.88498130835068E-15-1.5707962267949i');
+        });
+
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);

@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: '確定',
         },
         GradientColorPicker: {
+            add: '新增漸層色標',
             linear: '線性',
             radial: '徑向',
             angular: '角向',

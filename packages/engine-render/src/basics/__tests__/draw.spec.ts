@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes } from '@univerjs/core';
+import { BorderStyleTypes, createIdentifier, Injector } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BORDER_TYPE, ORIENTATION_TYPE } from '../const';
 import {
@@ -150,5 +150,49 @@ describe('draw extra', () => {
             left: expect.any(Number),
             top: expect.any(Number),
         });
+    });
+});
+
+describe('solid line transitions', () => {
+    it.each([BorderStyleTypes.THIN, BorderStyleTypes.MEDIUM, BorderStyleTypes.THICK, BorderStyleTypes.DOUBLE])('clears the preceding dash pattern for solid style %s', (style) => {
+        const ctx = createCtxMock();
+        setLineType(ctx, BorderStyleTypes.DASHED);
+        expect(ctx.setLineDash).toHaveBeenLastCalledWith([3]);
+        setLineType(ctx, style);
+        expect(ctx.setLineDash).toHaveBeenLastCalledWith([]);
+    });
+});
+
+const ICalculateRectRotate = createIdentifier<typeof calculateRectRotate>('render.test.calculate-rect-rotate');
+
+describe('rectangle rotation value ownership', () => {
+    let injector: Injector;
+
+    beforeEach(() => {
+        injector = new Injector([[ICalculateRectRotate, { useValue: calculateRectRotate }]]);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it.each(['start', 'center', 'separate'])('preserves inputs and independent results when the offset aliases %s', (alias) => {
+        const rotate = injector.get(ICalculateRectRotate);
+        const start = Vector2.create(10, 0);
+        const center = Vector2.create(5, 5);
+        let offset = Vector2.create(2, 3);
+        if (alias === 'start') offset = start;
+        if (alias === 'center') offset = center;
+        const inputs = [start, center, offset].map((point) => [point.x, point.y]);
+        const result = rotate(start, center, Math.PI / 6, Math.PI / 4, offset);
+        const coordinates = [result.x, result.y];
+
+        expect(result).not.toBe(start);
+        expect(result).not.toBe(center);
+        expect(result).not.toBe(offset);
+        expect([start, center, offset].map((point) => [point.x, point.y])).toEqual(inputs);
+        result.x += 100;
+        result.y -= 100;
+        const next = rotate(start, center, Math.PI / 6, Math.PI / 4, offset);
+        expect([next.x, next.y]).toEqual(coordinates);
+        expect([start, center, offset].map((point) => [point.x, point.y])).toEqual(inputs);
     });
 });

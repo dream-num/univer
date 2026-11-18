@@ -70,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'Xác nhận',
         },
         GradientColorPicker: {
+            add: 'Thêm điểm chuyển màu',
             linear: 'Tuyến tính',
             radial: 'Tỏa ra',
             angular: 'Góc',

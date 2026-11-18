@@ -57,10 +57,32 @@ interface IActive {
     worksheet: Worksheet;
 }
 
+/**
+ * Emits the active worksheet only while it is still part of the workbook.
+ *
+ * `Workbook.removeSheet` clears neither the active sheet nor its permission points; the next active sheet is set by
+ * a separate operation, and `deletePermissionPoint` does not notify subscribers. Menu permission chains therefore
+ * have to observe sheet disposal themselves and drop a worksheet that has been removed instead of querying
+ * permissions for it.
+ */
+function getAliveActiveSheet$(workbook: Workbook): Observable<Nullable<Worksheet>> {
+    return merge(
+        workbook.activeSheet$,
+        workbook.sheetDisposed$.pipe(map(() => workbook.getActiveSheet(true)))
+    ).pipe(
+        map((worksheet) => {
+            if (!worksheet || !workbook.getSheetBySheetId(worksheet.getSheetId())) {
+                return null;
+            }
+            return worksheet;
+        })
+    );
+}
+
 function getActiveSheet$(univerInstanceService: IUniverInstanceService): Observable<Nullable<IActive>> {
     return univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(switchMap((workbook) =>
         workbook
-            ? workbook.activeSheet$.pipe(map((worksheet) => {
+            ? getAliveActiveSheet$(workbook).pipe(map((worksheet) => {
                 if (!worksheet) {
                     return null;
                 }
@@ -172,7 +194,7 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
                 return of(true);
             }
 
-            return workbook.activeSheet$.pipe(
+            return getAliveActiveSheet$(workbook).pipe(
                 switchMap((worksheet) => {
                     if (!worksheet || (worksheet.getConfig().type === SheetTypes.CHART &&
                         !(supportShapeText && focusingShapeTextEditor && editorActivated))) {
@@ -262,13 +284,12 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
         getActiveSheet$(univerInstanceService),
         merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
     ]).pipe(
-        map(() => {
+        map(([active]) => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
-            if (!range) return true;
+            if (!active || !range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            const { workbook, worksheet } = active;
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -299,13 +320,12 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
         getActiveSheet$(univerInstanceService),
         merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
     ]).pipe(
-        map(() => {
+        map(([active]) => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
-            if (!range) return true;
+            if (!active || !range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            const { workbook, worksheet } = active;
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -344,13 +364,12 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
         getActiveSheet$(univerInstanceService),
         merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
     ]).pipe(
-        map(() => {
+        map(([active]) => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
-            if (!range) return true;
+            if (!active || !range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            const { workbook, worksheet } = active;
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -390,13 +409,12 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
         getActiveSheet$(univerInstanceService),
         merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
     ]).pipe(
-        map(() => {
+        map(([active]) => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
-            if (!range) return true;
+            if (!active || !range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            const { workbook, worksheet } = active;
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 
@@ -438,13 +456,12 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
         getActiveSheet$(univerInstanceService),
         merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(startWith(null)),
     ]).pipe(
-        map(() => {
+        map(([active]) => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
-            if (!range) return true;
+            if (!active || !range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const worksheet = workbook?.getActiveSheet();
-            if (!workbook || !worksheet || worksheet.getConfig().type === SheetTypes.CHART) {
+            const { workbook, worksheet } = active;
+            if (worksheet.getConfig().type === SheetTypes.CHART) {
                 return true;
             }
 

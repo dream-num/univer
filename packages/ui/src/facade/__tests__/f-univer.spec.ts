@@ -32,6 +32,7 @@ import type { IMenuSchema } from '../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../common/component-manager';
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CopyCommand, PasteCommand } from '../../services/clipboard/clipboard.command';
+import { ContextMenuHostService, IContextMenuHostService } from '../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../services/dialog/dialog.service';
 import { FontCategory, FontService, IFontService } from '../../services/font.service';
@@ -89,6 +90,7 @@ describe('ui facade', () => {
         const injector = univer.__getInjector();
 
         injector.add([ComponentManager]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.add([IFontService, { useClass: FontService }]);
         injector.add([IMenuManagerService, { useClass: MenuManagerService }]);

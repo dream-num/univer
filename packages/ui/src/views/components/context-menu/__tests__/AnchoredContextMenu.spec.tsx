@@ -14,95 +14,90 @@
  * limitations under the License.
  */
 
-import type { PropsWithChildren } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { useState } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PropsWithChildren, ReactElement } from 'react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    UniverInstanceService,
+} from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
+import { RediContext } from '@wendellhu/redi/react-bindings';
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ICustomComponentProps } from '../../../../services/menu/menu';
+import { ComponentManager } from '../../../../common/component-manager';
+import { IconManager } from '../../../../common/icon-manager';
+import enUS from '../../../../locale/en-US';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
+import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
+import { MenuItemType } from '../../../../services/menu/menu';
+import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { AnchoredContextMenu } from '../AnchoredContextMenu';
 
-const hostService = {
-    activateMenu: vi.fn(),
-    deactivateMenu: vi.fn(),
-    registerMenu: vi.fn(() => ({ dispose: vi.fn() })),
-};
-const panelProps = vi.fn();
+const injectors: Injector[] = [];
 
-vi.mock('@univerjs/design', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/design')>();
+function MenuInput({ value, onChange }: ICustomComponentProps<string>) {
+    return <input aria-label="Menu value" value={value} onChange={(event) => onChange(event.target.value)} />;
+}
 
-    return {
-        ...actual,
-        Popup: ({ children }: PropsWithChildren) => <>{children}</>,
-    };
-});
-
-vi.mock('../../../../utils/di', () => ({
-    useDependency: () => hostService,
-}));
-
-vi.mock('../ContextMenuPanel', () => ({
-    CONTEXT_MENU_SUBMENU_PORTAL_ATTR: 'data-u-context-menu-submenu',
-    ContextMenuPanel: (props: {
-        autoFocus?: boolean;
-        onCancel?: () => void;
-        onOptionSelect?: (option: { label: string; value: string }) => void;
-    }) => {
-        const [value, setValue] = useState('2');
-        panelProps(props);
+function renderWithDependencies(element: ReactElement, options?: Parameters<typeof render>[1]) {
+    const injector = new Injector([
+        [IConfigService, { useClass: ConfigService }],
+        [IContextService, { useClass: ContextService }],
+        [ILogService, { useClass: DesktopLogService }],
+        [IUniverInstanceService, { useClass: UniverInstanceService }],
+        [IMenuManagerService, { useClass: MenuManagerService }],
+        [ILayoutService, { useClass: DesktopLayoutService }],
+        [IContextMenuHostService, { useClass: ContextMenuHostService }],
+        [LocaleService],
+        [ComponentManager],
+        [IconManager],
+    ]);
+    injectors.push(injector);
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: enUS });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    injector.get(ComponentManager).register('menu-input', MenuInput);
+    injector.get(IMenuManagerService).appendRootMenu({ drawing: {
+        'test.command.menu-value': { menuItemFactory: () => ({
+            id: 'test.command.menu-value',
+            type: MenuItemType.BUTTON,
+            title: 'Context menu item',
+            label: 'menu-input',
+            value$: new BehaviorSubject('2'),
+        }) },
+    } });
+    const mountContainer = options?.container?.ownerDocument.body ?? document.body;
+    injector.get(ILayoutService).registerRootContainerElement(mountContainer);
+    const contextValue = { injector };
+    function Wrapper({ children }: PropsWithChildren) {
         return (
-            <div
-                tabIndex={-1}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') {
-                        event.stopPropagation();
-                        props.onCancel?.();
-                    }
-                }}
-            >
-                <button
-                    type="button"
-                    aria-label="Context menu item"
-                    onClick={() => props.onOptionSelect?.({ label: 'test.command.menu-value', value })}
-                >
-                    <input
-                        aria-label="Menu value"
-                        value={value}
-                        onChange={(event) => setValue(event.target.value)}
-                    />
-                </button>
-            </div>
+            <RediContext.Provider value={contextValue}>
+                <ConfigProvider mountContainer={mountContainer}>{children}</ConfigProvider>
+            </RediContext.Provider>
         );
-    },
-}));
+    }
+    return { ...render(element, { ...options, baseElement: mountContainer, wrapper: Wrapper }), injector };
+}
 
 describe('AnchoredContextMenu', () => {
-    beforeEach(() => {
-        panelProps.mockClear();
-    });
-
-    afterEach(cleanup);
-
-    it('passes its close callback to the context menu panel', () => {
-        const close = vi.fn();
-        render(
-            <AnchoredContextMenu
-                hostId="desktop"
-                visible
-                anchorRect={{ left: 0, top: 0, bottom: 0 }}
-                menuType="drawing"
-                onRequestClose={close}
-            />
-        );
-
-        fireEvent.keyDown(screen.getByRole('button', { name: 'Context menu item' }), {
-            key: 'Escape',
-        });
-
-        expect(close).toHaveBeenCalledOnce();
+    afterEach(() => {
+        cleanup();
+        injectors.splice(0).forEach((injector) => injector.dispose());
     });
 
     it('restores the element focused before the menu opened', () => {
-        const { rerender } = render(
+        const { rerender } = renderWithDependencies(
             <>
                 <button type="button">Editor canvas</button>
                 <AnchoredContextMenu
@@ -129,7 +124,7 @@ describe('AnchoredContextMenu', () => {
                 />
             </>
         );
-        screen.getByRole('button', { name: 'Context menu item' }).focus();
+        screen.getByRole('button', { name: /Context menu item/ }).focus();
 
         rerender(
             <>
@@ -157,7 +152,7 @@ describe('AnchoredContextMenu', () => {
 
         const container = iframeDocument.createElement('div');
         iframeDocument.body.appendChild(container);
-        const rendered = render(
+        const rendered = renderWithDependencies(
             <>
                 <button type="button">Embedded editor canvas</button>
                 <AnchoredContextMenu
@@ -185,7 +180,7 @@ describe('AnchoredContextMenu', () => {
                 />
             </>
         );
-        rendered.getByRole('button', { name: 'Context menu item' }).focus();
+        rendered.getByRole('button', { name: /Context menu item/ }).focus();
 
         rendered.rerender(
             <>
@@ -205,19 +200,41 @@ describe('AnchoredContextMenu', () => {
         iframe.remove();
     });
 
-    it('forwards keyboard autofocus to the context menu panel', () => {
-        render(
+    it('focuses the first action when opened from the keyboard', async () => {
+        renderWithDependencies(
             <AnchoredContextMenu
                 hostId="desktop"
                 visible
+                autoFocus
                 anchorRect={{ left: 0, top: 0, bottom: 0 }}
                 menuType="drawing"
-                autoFocus
                 onRequestClose={vi.fn()}
             />
         );
+        await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: /Context menu item/ })));
+    });
 
-        expect(panelProps).toHaveBeenCalledWith(expect.objectContaining({ autoFocus: true }));
+    it('closes on view takeover without returning focus to the editor', () => {
+        const close = vi.fn();
+        const editor = document.createElement('button');
+        document.body.appendChild(editor);
+        editor.focus();
+        const renderMenu = (visible: boolean) => (
+            <AnchoredContextMenu
+                hostId="desktop"
+                visible={visible}
+                anchorRect={{ left: 0, top: 0, bottom: 0 }}
+                menuType="drawing"
+                onRequestClose={close}
+            />
+        );
+        const { injector, rerender } = renderWithDependencies(renderMenu(true));
+        screen.getByRole('textbox', { name: 'Menu value' }).focus();
+        act(() => injector.get(IContextMenuHostService).suspend());
+        expect(close).toHaveBeenCalledOnce();
+        rerender(renderMenu(false));
+        expect(document.activeElement).not.toBe(editor);
+        editor.remove();
     });
 
     it('keeps a draft during anchor movement but resets it when the menu reopens', () => {
@@ -232,7 +249,7 @@ describe('AnchoredContextMenu', () => {
                 onOptionSelect={(option) => selections.push(option as { label: string; value: string })}
             />
         );
-        const view = render(renderMenu(true, 10));
+        const view = renderWithDependencies(renderMenu(true, 10));
         const input = screen.getByRole('textbox', { name: 'Menu value' }) as HTMLInputElement;
         input.focus();
         fireEvent.change(input, { target: { value: '3' } });
@@ -249,7 +266,7 @@ describe('AnchoredContextMenu', () => {
         const reopenedInput = screen.getByRole('textbox', { name: 'Menu value' }) as HTMLInputElement;
         expect(reopenedInput.value).toBe('2');
         fireEvent.click(reopenedInput.closest('button')!);
-        expect(selections).toEqual([{ label: 'test.command.menu-value', value: '2' }]);
+        expect(selections).toEqual([expect.objectContaining({ label: 'test.command.menu-value', value: '2' })]);
     });
 
     it.each(['container', 'button', 'input'] as const)(
@@ -257,7 +274,7 @@ describe('AnchoredContextMenu', () => {
         (targetKind) => {
             const close = vi.fn();
             const selection = vi.fn();
-            const view = render(
+            const view = renderWithDependencies(
                 <AnchoredContextMenu
                     hostId="desktop"
                     visible

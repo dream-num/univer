@@ -1481,7 +1481,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 if (canExecuteItem) {
                                     const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
                                     onOptionSelect?.({
-                                        commandId: item.commandId,
+                                        commandId: item.commandId ?? item.id,
                                         params: item.params,
                                         value: inputValue,
                                         id: item.id,
@@ -1501,7 +1501,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
                             const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
                             onOptionSelect?.({
-                                commandId: item.commandId,
+                                commandId: item.commandId ?? item.id,
                                 params: item.params,
                                 value: inputValue,
                                 id: item.id,

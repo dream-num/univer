@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IObjectPermissionButtonProps } from '../ObjectPermissionButton';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
     CommandType,
@@ -31,7 +30,12 @@ import {
 } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, expect, it, vi } from 'vitest';
+import type { IObjectPermissionButtonProps } from '../ObjectPermissionButton';
 import enUS from '../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../services/contextmenu/contextmenu-host.service';
 import { DesktopSidebarService } from '../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../utils/di';
@@ -59,6 +63,7 @@ it('does not enumerate collapsed scopes or rescan them on editing commands, and 
     const rules = injector.get(TestRuleModel);
     injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, [UnitObject.Document, UnitObject.DocumentSection]);
     injector.get(ObjectPermissionService).registerRuleModel(UnitObject.Document, rules, 'test.mutation.permission');
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     let enumerated = 0;
     function* getTargets(): Iterable<IObjectPermissionButtonProps> {

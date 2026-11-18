@@ -1,20 +1,18 @@
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types.ts';
 import { defineConfig } from 'tsdown';
+import type { IEntryConfig } from '../types.ts';
 import { createCssNoopInputOptions } from '../plugins/css-noop.ts';
 import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
-import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator.ts';
 
 export type TModuleFormat = 'cjs' | 'esm';
 
 export interface ICreateModuleConfigOptions {
     baseConfig: Partial<UserConfig>;
-    enableObfuscation: boolean;
     entries: IEntryConfig[];
     externalPackages: string[];
     facadeExternalPackages: string[];
     format: TModuleFormat;
-    obfuscatorIgnorePatterns?: RegExp[];
+    minify: boolean;
     outDir: string;
     packageDir: string;
     plugins: any[];
@@ -24,7 +22,7 @@ export interface ICreateModuleConfigOptions {
  * Creates the common ESM/CJS bundle config for a single package entry.
  */
 export function createModuleConfig(options: ICreateModuleConfigOptions): UserConfig {
-    const { baseConfig, enableObfuscation, entries, externalPackages, facadeExternalPackages, format, obfuscatorIgnorePatterns, outDir, packageDir, plugins } = options;
+    const { baseConfig, entries, externalPackages, facadeExternalPackages, format, minify, outDir, packageDir, plugins } = options;
     const hasFacadeEntry = entries.some((entry) => entry.type === 'facade');
     const hasIndexEntry = entries.some((entry) => entry.type === 'index');
     const neverBundle = hasFacadeEntry ? facadeExternalPackages : externalPackages;
@@ -43,12 +41,11 @@ export function createModuleConfig(options: ICreateModuleConfigOptions): UserCon
         inputOptions: keepRootIndexCss ? baseConfig.inputOptions : createCssNoopInputOptions(baseConfig.inputOptions),
         outputOptions: {
             codeSplitting: true,
-            minify: enableObfuscation,
+            minify,
         },
         outDir,
         plugins: [
             ...plugins,
-            ...(enableObfuscation ? [createOutputObfuscatorPlugin(obfuscatorIgnorePatterns)] : []),
             createOutputAliasPlugin({
                 copyToRoot,
                 keepRootIndexCss,

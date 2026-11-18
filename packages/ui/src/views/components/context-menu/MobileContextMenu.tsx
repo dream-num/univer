@@ -15,12 +15,12 @@
  */
 
 import type { ComponentProps } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { ConfigContext } from '@univerjs/design';
 import { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { LocaleKey } from '../../../locale/types';
+import type { ContextMenuEvent, IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
@@ -78,6 +78,7 @@ export function MobileContextMenu() {
         nextMenuType: string,
         context?: IContextMenuTriggerContext
     ) => {
+        if (contextMenuHostService.suspended) return;
         contextMenuHostService.activateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         setMenuType(nextMenuType);
         setMenuContext(context);

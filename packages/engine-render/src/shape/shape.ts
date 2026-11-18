@@ -477,6 +477,10 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
             return;
         }
 
+        // Canvas truncates physical dimensions. Keep division/multiplication roundoff from losing a pixel.
+        const allocationWidth = width * (1 + 2 * Number.EPSILON);
+        const allocationHeight = height * (1 + 2 * Number.EPSILON);
+
         const cacheBoundsChanged =
             this._renderCacheBounds?.left !== bounds.left ||
             this._renderCacheBounds?.top !== bounds.top ||
@@ -490,12 +494,12 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         if (!this._renderCacheCanvas) {
             this._renderCacheCanvas = new Canvas({
                 colorService: this.getEngine()?.canvasColorService,
-                width,
-                height,
+                width: allocationWidth,
+                height: allocationHeight,
                 pixelRatio,
             });
         } else if (cacheSizeChanged) {
-            this._renderCacheCanvas.setSize(width, height, pixelRatio);
+            this._renderCacheCanvas.setSize(allocationWidth, allocationHeight, pixelRatio);
         }
 
         if (this.isDirty() || cacheBoundsChanged || cacheSizeChanged) {

@@ -276,7 +276,8 @@ export class TextX {
 
                 // handle this-retain + other-retain case.
                 if (thisAction.body == null || otherAction.body == null) {
-                    textX.push(otherAction);
+                    // An exhausted iterator represents the remaining source with an unbounded retain.
+                    textX.push({ ...otherAction, len: length });
                 } else {
                     const { coverType, body } = transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left');
                     textX.push({

@@ -55,6 +55,12 @@ export function round(base: number, precision: number): number {
  */
 export function roundHalfEven(base: number, precision: number): number {
     const factor = 10 ** Math.trunc(precision);
+    // logic is:
+    // If the digit to be rounded is 4 or less than, it is discarded.
+    // If the digit to be rounded is 6 or greater, it rounds up.
+    // If the digit to be rounded is exactly 5:
+    // If there are any digits following the 5, it rounded up.
+    // If there are no digits following the 5, If the preceding digit is odd, it rounds up. If the preceding digit is even, it is discarded.
     // 2.345 * 100 is 234.49999999999997, which still stands for an exact half in decimal terms.
     const scaled = +multiply(base, factor).toFixed(8);
     const lower = Math.floor(scaled);

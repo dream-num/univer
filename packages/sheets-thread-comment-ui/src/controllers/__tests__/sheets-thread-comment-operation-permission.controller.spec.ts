@@ -15,17 +15,29 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import {
+    ICommandService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    toDisposable,
+} from '@univerjs/core';
 import { SheetPermissionCheckController } from '@univerjs/sheets';
 import { IThreadCommentAuthzService } from '@univerjs/thread-comment';
 import { describe, expect, it, vi } from 'vitest';
-import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../../commands/operations/comment.operation';
+import {
+    AddSheetDrawingCommentOperation,
+    ShowAddSheetCommentModalOperation,
+    ToggleSheetCommentPanelOperation,
+} from '../../commands/operations/comment.operation';
+import enUS from '../../locale/en-US';
 import { SheetsThreadCommentOperationPermissionController } from '../sheets-thread-comment-operation-permission.controller';
 
 type BeforeCommandHandler = (command: ICommandInfo) => void;
 
 function createTestBed(allowed = true) {
-    let beforeCommandHandler: BeforeCommandHandler | undefined;
+    let beforeCommandHandler: BeforeCommandHandler;
     const authzService = {
         canRead: vi.fn(() => allowed),
         canWrite: vi.fn(() => allowed),
@@ -41,7 +53,7 @@ function createTestBed(allowed = true) {
                 return toDisposable(() => undefined);
             }),
         } as never }],
-        [LocaleService, { useValue: { t: (key: string) => key } as never }],
+        [LocaleService],
         [SheetPermissionCheckController, { useValue: permissionCheck as never }],
         [IThreadCommentAuthzService, { useValue: authzService as never }],
         [IUniverInstanceService, { useValue: {
@@ -53,12 +65,15 @@ function createTestBed(allowed = true) {
         [SheetsThreadCommentOperationPermissionController],
     ]);
 
-    const controller = injector.get(SheetsThreadCommentOperationPermissionController);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: enUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     return {
         authzService,
-        client: () => beforeCommandHandler,
-        controller,
+        execute: (command: ICommandInfo) => beforeCommandHandler(command),
+        injector,
         permissionCheck,
     };
 }
@@ -66,8 +81,9 @@ function createTestBed(allowed = true) {
 describe('SheetsThreadCommentOperationPermissionController', () => {
     it('blocks opening the add-comment modal without write permission', () => {
         const bed = createTestBed(false);
+        const controller = bed.injector.get(SheetsThreadCommentOperationPermissionController);
 
-        bed.client()?.({ id: ShowAddSheetCommentModalOperation.id } as ICommandInfo);
+        bed.execute({ id: ShowAddSheetCommentModalOperation.id });
 
         expect(bed.authzService.canWrite).toHaveBeenCalledWith('add', {
             unitId: 'unit-1',
@@ -75,27 +91,29 @@ describe('SheetsThreadCommentOperationPermissionController', () => {
             ref: '',
         });
         expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledWith(
-            'sheets-thread-comment.permission.commentErr'
+            enUS['sheets-thread-comment-ui'].permission.commentErr
         );
 
-        bed.controller.dispose();
+        controller.dispose();
     });
 
     it('blocks adding a drawing comment without write permission', () => {
         const bed = createTestBed(false);
+        const controller = bed.injector.get(SheetsThreadCommentOperationPermissionController);
 
-        bed.client()?.({ id: AddSheetDrawingCommentOperation.id } as ICommandInfo);
+        bed.execute({ id: AddSheetDrawingCommentOperation.id });
 
         expect(bed.authzService.canWrite).toHaveBeenCalledWith('add', expect.objectContaining({ ref: '' }));
         expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(1);
 
-        bed.controller.dispose();
+        controller.dispose();
     });
 
     it('blocks opening the comment panel without read permission', () => {
         const bed = createTestBed(false);
+        const controller = bed.injector.get(SheetsThreadCommentOperationPermissionController);
 
-        bed.client()?.({ id: ToggleSheetCommentPanelOperation.id } as ICommandInfo);
+        bed.execute({ id: ToggleSheetCommentPanelOperation.id });
 
         expect(bed.authzService.canRead).toHaveBeenCalledWith({
             unitId: 'unit-1',
@@ -104,17 +122,18 @@ describe('SheetsThreadCommentOperationPermissionController', () => {
         });
         expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(1);
 
-        bed.controller.dispose();
+        controller.dispose();
     });
 
     it('does not block the entry points when the authz service allows them', () => {
         const bed = createTestBed(true);
+        const controller = bed.injector.get(SheetsThreadCommentOperationPermissionController);
 
-        bed.client()?.({ id: ShowAddSheetCommentModalOperation.id } as ICommandInfo);
-        bed.client()?.({ id: ToggleSheetCommentPanelOperation.id } as ICommandInfo);
+        bed.execute({ id: ShowAddSheetCommentModalOperation.id });
+        bed.execute({ id: ToggleSheetCommentPanelOperation.id });
 
         expect(bed.permissionCheck.blockExecuteWithoutPermission).not.toHaveBeenCalled();
 
-        bed.controller.dispose();
+        controller.dispose();
     });
 });

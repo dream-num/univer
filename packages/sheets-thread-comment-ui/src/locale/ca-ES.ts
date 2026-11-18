@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         panel: {
             title: 'Gestió de comentaris',
         },
+        permission: {
+            commentErr: 'No teniu permís per utilitzar comentaris.',
+        },
         menu: {
             addComment: 'Afegeix un comentari',
             openComments: 'Obre els comentaris',

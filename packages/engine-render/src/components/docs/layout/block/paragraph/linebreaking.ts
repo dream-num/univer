@@ -15,7 +15,7 @@
  */
 
 import type { IBullet, IDocDrawingBase, IDocStyles, IDocumentBody, IDocumentData, IDocumentStyle, IDrawings, ILists, IParagraph, IParagraphStyle, LocaleService, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeNodeType, DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DocumentBlockRangeType, DocxBreakType, ListGlyphType, PositionedObjectLayoutType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeNodeType, DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DocumentBlockRangeType, DocxBreakType, GridType, ListGlyphType, PositionedObjectLayoutType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonColumn, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../../document-compatibility';
@@ -31,7 +31,7 @@ import { parseDataStreamToTree } from '../../../view-model/document-view-model';
 import { BreakPointType } from '../../line-breaker/break';
 import { createSkeletonPage, getNextSkeletonPageNumber } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { getFontCreateConfig, getLastNotFullColumnInfo, getLastSection, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
+import { getFontCreateConfig, getLastNotFullColumnInfo, getLastSection, getLineHeightConfig, getNumberUnitValue, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
 import { dealWithBullet, generateOrderedListSymbol } from './bullet';
 import { isNonFlowFloatingAnchor, layoutParagraph } from './layout-ruler';
 
@@ -1672,6 +1672,19 @@ export function lineBreaking(
         nextParagraphNode
     );
     const traditionalPagination = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
+    if (traditionalPagination && paragraphInlineSkeDrawingsByBlockId.size > 0) {
+        const { gridType, lineSpacing, spacingRule, snapToGrid } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
+        const usesLineGrid = snapToGrid === BooleanNumber.TRUE && (gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS);
+        if (spacingRule === SpacingRule.AUTO && lineSpacing > 1 && !usesLineGrid) {
+            // A wrapped inline picture can occupy a whole line before its paragraph mark.
+            paragraphConfig.paragraphMarkNormalLineHeight = shapedTextList
+                .findLast(({ text }) => text.includes(DataStreamTreeTokenType.PARAGRAPH))
+                ?.glyphs
+                .findLast(({ streamType }) => streamType === DataStreamTreeTokenType.PARAGRAPH)
+                ?.bBox
+                .normalLineHeight;
+        }
+    }
     const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList, viewModel, paragraphNode.contentStartIndex, traditionalPagination);
     const forcePageBreakBefore =
         traditionalPagination &&

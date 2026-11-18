@@ -146,6 +146,7 @@ export interface IParagraphConfig {
     isInsideTable?: boolean;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     useWordStyleLineHeight?: boolean;
+    paragraphMarkNormalLineHeight?: number;
     usePptxFontSizeLineHeight?: boolean;
     usePptxNominalFontLineHeight?: boolean;
     usePptxCompatibleLineSpacing?: boolean;

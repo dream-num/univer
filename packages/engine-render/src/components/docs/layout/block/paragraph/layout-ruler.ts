@@ -945,7 +945,9 @@ function _getExpandedLineMetrics(
         && [lineGlyphs, glyphGroup].some((group) => group.some((glyph) => glyph.glyphType === GlyphType.LIST));
     const includeInlineParagraphLeading = hasInlineCustomBlock &&
         (spacingRule === SpacingRule.AUTO || !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy));
-    let normalLineHeight = includeInlineParagraphLeading ? maxBox.normalLineHeight : visibleNormalLineHeight;
+    let normalLineHeight = includeInlineParagraphLeading
+        ? maxBox.normalLineHeight || paragraphConfig.paragraphMarkNormalLineHeight || 0
+        : visibleNormalLineHeight;
     if (hasListGlyph) {
         normalLineHeight = getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, lineGlyphs, glyphGroup);
     }
@@ -1505,7 +1507,7 @@ function _getParagraphContentMetrics(
     const normalLineHeight = Math.max(
         defaultSpanMetrics?.normalLineHeight ?? 0,
         hasListGlyph ? getListTextLineHeight(paragraphConfig.documentCompatibilityPolicy, glyphGroup) : fontLineHeight
-    ) || undefined;
+    ) || (hasInlineCustomBlock ? paragraphConfig.paragraphMarkNormalLineHeight : undefined);
     const snapMultilineParagraphToWholeGrid = snapToGrid === BooleanNumber.TRUE &&
         !isParagraphFirstShapedText &&
         !hasInlineCustomBlock &&

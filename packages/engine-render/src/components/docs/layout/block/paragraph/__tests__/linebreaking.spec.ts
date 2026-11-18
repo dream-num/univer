@@ -2843,6 +2843,57 @@ describe('linebreaking', () => {
     });
 
     it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, lineSpacing: 1, extraLeading: 0 },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, lineSpacing: 1.5, extraLeading: 0.5 },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, lineSpacing: 2, extraLeading: 1 },
+        { documentFlavor: DocumentFlavor.MODERN, lineSpacing: 1.5, extraLeading: 0 },
+    ])('lays out a wrapped inline drawing with $lineSpacing line spacing in $documentFlavor', ({ documentFlavor, lineSpacing, extraLeading }) => {
+        const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}Caption`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor,
+                pageSize: { width: 400, height: 600 },
+                marginLeft: 20,
+                marginRight: 20,
+            },
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'caption',
+                    paragraphStyle: { lineSpacing, spacingRule: SpacingRule.AUTO, snapToGrid: BooleanNumber.FALSE },
+                }],
+                customBlocks: [{ startIndex: 0, blockId: 'picture' }],
+            },
+            drawings: {
+                picture: {
+                    drawingId: 'picture',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: 0,
+                        positionH: {},
+                        positionV: {},
+                        size: { width: 360, height: 96 },
+                    },
+                },
+            },
+        });
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const paragraphMark = shaped.flatMap((run) => run.glyphs).find((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH);
+        const nominalHeight = paragraphMark?.bBox.normalLineHeight ?? 0;
+        if (extraLeading) {
+            expect(nominalHeight).toBeGreaterThan(0);
+        }
+
+        const [page] = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = paragraphLines(page, paragraphNode.endIndex);
+        expect(lines).toHaveLength(2);
+        const [picture, caption] = lines;
+        expect(picture.contentHeight).toBeCloseTo(96);
+        expect(picture.paddingTop).toBeCloseTo(0);
+        expect(caption.top - picture.top).toBeCloseTo(96 + extraLeading * nominalHeight);
+    });
+
+    it.each([
         PositionedObjectLayoutType.WRAP_SQUARE,
         PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
     ])('starts flow text after a positioned-only anchor line for layout %s', (layoutType) => {

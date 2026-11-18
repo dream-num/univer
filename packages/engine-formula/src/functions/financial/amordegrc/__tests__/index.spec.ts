@@ -1,0 +1,157 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../util';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Amordegrc } from '../index';
+
+describe('Test amordegrc function', () => {
+    const testFunction = new Amordegrc(FUNCTION_NAMES_FINANCIAL.AMORDEGRC);
+
+    const amordegrc = (overrides: {
+        cost?: number | string;
+        datePurchased?: string;
+        firstPeriod?: string;
+        salvage?: number;
+        period?: number;
+        rate?: number;
+        basis?: number;
+    } = {}) => {
+        const { cost = 2400, datePurchased = '2008/8/19', firstPeriod = '2008/12/31', salvage = 300, period = 1, rate = 0.15, basis = 1 } = overrides;
+
+        return getObjectValue(testFunction.calculate(
+            typeof cost === 'number' ? NumberValueObject.create(cost) : StringValueObject.create(cost),
+            StringValueObject.create(datePurchased),
+            StringValueObject.create(firstPeriod),
+            NumberValueObject.create(salvage),
+            NumberValueObject.create(period),
+            NumberValueObject.create(rate),
+            NumberValueObject.create(basis)
+        ));
+    };
+
+    describe('Amordegrc', () => {
+        it('Value is normal', () => {
+            // The example of the Excel documentation.
+            expect(amordegrc()).toBe(776);
+        });
+
+        it('Basis is omitted', () => {
+            const result = testFunction.calculate(
+                NumberValueObject.create(2400),
+                StringValueObject.create('2008/8/19'),
+                StringValueObject.create('2008/12/31'),
+                NumberValueObject.create(300),
+                NumberValueObject.create(1),
+                NumberValueObject.create(0.15)
+            );
+            expect(getObjectValue(result)).toBe(776);
+        });
+
+        it('Depreciates period by period until the salvage value is reached', () => {
+            // Period 0 is prorated from the purchase date, the period that would pass the
+            // salvage value takes half of the book value, and the following ones take nothing.
+            const periods = [0, 1, 2, 3, 4, 5, 6, 7];
+            expect(periods.map((period) => amordegrc({ period }))).toStrictEqual([330, 776, 485, 303, 190, 158, 0, 0]);
+        });
+
+        it('Picks the coefficient from the life of the asset', () => {
+            // 1 / rate is the life: under 3 years 1, under 5 years 1.5, up to 6 years 2, and 2.5 beyond.
+            expect(amordegrc({ rate: 0.5 })).toBe(981);
+            expect(amordegrc({ rate: 0.3 })).toBe(902);
+            expect(amordegrc({ rate: 0.25 })).toBe(776);
+            expect(amordegrc({ rate: 0.2 })).toBe(820);
+            expect(amordegrc({ rate: 0.1 })).toBe(545);
+        });
+
+        it('Purchased on the first period date', () => {
+            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 0 })).toBe(0);
+            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 1 })).toBe(900);
+        });
+
+        it('Rounds halves away from zero', () => {
+            // With a rate above 100% the book value turns negative after the first period.
+            expect(amordegrc({ cost: 10000, datePurchased: '2023/1/1', firstPeriod: '2023/12/31', salvage: 0, rate: 1.5 })).toBe(-7439);
+        });
+
+        it('Cost is normal string', () => {
+            expect(amordegrc({ cost: 'test' })).toBe(ErrorType.VALUE);
+            expect(amordegrc({ datePurchased: 'test' })).toBe(ErrorType.VALUE);
+            expect(amordegrc({ firstPeriod: 'test' })).toBe(ErrorType.VALUE);
+        });
+
+        it('Cost <= 0 or salvage < 0 or cost < salvage', () => {
+            expect(amordegrc({ cost: 0 })).toBe(ErrorType.NUM);
+            expect(amordegrc({ salvage: -1 })).toBe(ErrorType.NUM);
+            expect(amordegrc({ cost: 100, salvage: 200 })).toBe(ErrorType.NUM);
+        });
+
+        it('DatePurchased > firstPeriod', () => {
+            expect(amordegrc({ datePurchased: '2008/12/31', firstPeriod: '2008/8/19' })).toBe(ErrorType.NUM);
+        });
+
+        it('Period < 0 or period is not an integer', () => {
+            expect(amordegrc({ period: -1 })).toBe(ErrorType.NUM);
+
+            // The same rounding as AMORLINC: up to 1, a fraction counts as period 1; above 1 it is truncated.
+            expect(amordegrc({ period: 0.5 })).toBe(776);
+            expect(amordegrc({ period: 1.9 })).toBe(776);
+            expect(amordegrc({ period: 2.9 })).toBe(485);
+        });
+
+        it('Rate <= 0', () => {
+            expect(amordegrc({ rate: 0 })).toBe(ErrorType.NUM);
+            expect(amordegrc({ rate: -0.15 })).toBe(ErrorType.NUM);
+        });
+
+        it('Basis value is 0|1|3|4', () => {
+            expect(amordegrc({ period: 0, basis: 2 })).toBe(ErrorType.NUM);
+            expect(amordegrc({ period: 0, basis: 0 })).toBe(330);
+            expect(amordegrc({ period: 0, basis: 1 })).toBe(330);
+            expect(amordegrc({ period: 0, basis: 3 })).toBe(330);
+            expect(amordegrc({ period: 0, basis: 4 })).toBe(327);
+            expect(amordegrc({ period: 1, basis: 4 })).toBe(777);
+        });
+
+        it('Value is array', () => {
+            const cost = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['2012-3-29', 'test', true, false, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(
+                cost,
+                StringValueObject.create('2008/8/19'),
+                StringValueObject.create('2008/12/31'),
+                NumberValueObject.create(300),
+                NumberValueObject.create(1),
+                NumberValueObject.create(0.15),
+                NumberValueObject.create(1)
+            );
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+    });
+});

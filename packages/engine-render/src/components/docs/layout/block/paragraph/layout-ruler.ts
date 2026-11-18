@@ -1087,7 +1087,7 @@ function _adjustIncomingTabStops(
             // Resolve before fitting: a provisional default-width tab can create a false line break.
             if (stop) {
                 const followingWidth = glyph.tabAlignedTextWidth ?? 0;
-                const width = getExplicitTabOffset(divide, paragraphConfig, divide.left + divide.paddingLeft, stop, followingWidth) - position;
+                const width = getExplicitTabOffset(divide, paragraphConfig, divide.left + divide.paddingLeft, position, stop, followingWidth) - position;
                 if (width > 0) {
                     glyph.width = width;
                     glyph.tabLeader = stop.leader;
@@ -1121,15 +1121,16 @@ function getPositionedTabWidth(divide: IDocumentSkeletonDivide, tabGlyph: IDocum
     return target - divide.left - divide.paddingLeft - offset;
 }
 
-function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig: IParagraphConfig, origin: number, stop: ITabStop): number {
+function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig: IParagraphConfig, origin: number, tabStart: number, stop: ITabStop): number {
     const boundary = origin + divide.width;
     const line = divide.parent;
     const columnWidth = line?.parent?.width;
     const rightIndent = line?.paragraphPaddingRight ?? 0;
-    // Word honors authored tabs beyond the right indent, including a one-twip roundoff at the column edge.
+    // A tab can extend past the right indent only if it starts inside the paragraph.
     if (isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
         paragraphConfig.paragraphStyle?.fixedTabStops !== BooleanNumber.TRUE &&
         rightIndent > 0 &&
+        tabStart <= boundary + 1e-6 &&
         stop.offset > boundary &&
         columnWidth != null && stop.offset <= columnWidth + 1 / 15 + 1e-6 &&
         Math.abs(boundary - (columnWidth - rightIndent)) < 1e-6) {
@@ -1142,10 +1143,11 @@ function getExplicitTabOffset(
     divide: IDocumentSkeletonDivide,
     paragraphConfig: IParagraphConfig,
     origin: number,
+    tabStart: number,
     stop: ITabStop,
     followingWidth: number
 ): number {
-    const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, stop);
+    const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop);
     const target = Math.min(stop.offset, boundary);
     if (stop.alignment === TabStopAlignment.END) {
         return target - followingWidth;
@@ -1189,7 +1191,7 @@ function getExplicitTabFitWidth(
     if (stop == null) {
         return divide.width;
     }
-    return Math.max(divide.width, getExplicitTabBoundary(divide, paragraphConfig, origin, stop) - origin);
+    return Math.max(divide.width, getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop) - origin);
 }
 
 function _adjustExplicitTabStop(
@@ -1240,7 +1242,7 @@ function _adjustExplicitTabStop(
     const followingWidth = tabGlyph.tabAlignedTextWidth
         ?? followingGlyphs.reduce((width, glyph) => width + glyph.width, 0);
 
-    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabStop, followingWidth) - tabLeft;
+    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabLeft, tabStop, followingWidth) - tabLeft;
     if (width <= 0) {
         if (usesFixedTabStops) {
             tabGlyph.width = 0;

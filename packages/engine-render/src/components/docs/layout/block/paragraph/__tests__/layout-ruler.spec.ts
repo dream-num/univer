@@ -4478,6 +4478,42 @@ describe('layout-ruler', () => {
         expect(divide.left + divide.paddingLeft + last.left + last.width).toBeCloseTo(600);
     });
 
+    it.each([false, true])(
+        'fits an authored page tab that starts inside the right indent (outside: %s)',
+        (startsOutside) => {
+            const title = 'Heading.';
+            const content = `${title}\t76`;
+            const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    pageSize: { width: 300, height: 400 },
+                    marginLeft: 50,
+                    marginRight: 50,
+                    textStyle: { ff: 'Times New Roman', fs: 9 },
+                },
+                body: {
+                    paragraphs: [{
+                        startIndex: content.length,
+                        paragraphStyle: {
+                            indentEnd: { v: 0 },
+                            hangingPunctuation: BooleanNumber.TRUE,
+                            snapToGrid: BooleanNumber.FALSE,
+                            tabStops: [{ offset: 200 + 1 / 15, alignment: TabStopAlignment.END }],
+                        },
+                    }],
+                },
+            });
+            const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+            const titleGlyphs = shaped.flatMap((part) => part.glyphs).slice(0, title.length);
+            const tabPosition = titleGlyphs.reduce((width, glyph) => width + glyph.width, 0);
+            ctx.dataModel.getBody()!.paragraphs![0].paragraphStyle!.indentEnd = { v: 200 - tabPosition + (startsOutside ? 0.25 : -0.25) };
+            const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+            const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+            const lineText = lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.content).join('').trimEnd());
+            expect(lineText).toEqual(startsOutside ? [title, '\t76'] : [content]);
+        }
+    );
+
     it.each([TabStopAlignment.START, TabStopAlignment.CENTER].flatMap((alignment) =>
         [0, 48, 100].flatMap((indentEnd) => [false, true].map((field) => ({ alignment, indentEnd, field })))
     ))('keeps a page label at an authored tab beyond the right indent ($alignment, $indentEnd, field: $field)', ({ alignment, indentEnd, field }) => {

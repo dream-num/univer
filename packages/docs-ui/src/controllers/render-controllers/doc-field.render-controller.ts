@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { Documents, IPageRenderConfig, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
+import { CustomRangeType, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
@@ -97,13 +97,23 @@ export class DocFieldRenderController extends Disposable implements IRenderModul
 
     private _getActiveFields(): Set<string> {
         const active = new Set(this._hovered);
+        const unit = this._context.unit;
+        const isTraditional = unit.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL;
         const selections = this._selections.getTextRanges({ unitId: this._context.unitId, subUnitId: this._context.unitId }) ?? [];
         for (const selection of selections) {
             const segmentId = selection.segmentId ?? '';
-            const fields = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
+            const clearShading = isTraditional && !segmentId;
+            const endOffset = selection.endOffset + (clearShading && selection.collapsed ? 1 : 0);
+            const fields = unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
             for (const field of fields) {
-                if (field.rangeType === CustomRangeType.FIELD && selection.startOffset <= field.endIndex && selection.endOffset > field.startIndex) {
-                    active.add(`${segmentId}:${segmentId ? selection.segmentPage : -1}:${field.rangeId}`);
+                if (field.rangeType !== CustomRangeType.FIELD || selection.startOffset > field.endIndex || endOffset <= field.startIndex) {
+                    continue;
+                }
+                const key = `${segmentId}:${segmentId ? selection.segmentPage : -1}:${field.rangeId}`;
+                if (clearShading) {
+                    active.delete(key);
+                } else {
+                    active.add(key);
                 }
             }
         }

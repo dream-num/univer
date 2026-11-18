@@ -4457,12 +4457,14 @@ describe('layout-ruler', () => {
         }
     });
 
-    it.each([0, 40, 100].flatMap((indentEnd) => [false, true].map((field) => ({ indentEnd, field }))))('honors a right tab beyond the paragraph right indent ($indentEnd, field: $field)', ({ indentEnd, field }) => {
+    it.each([0, 40, 100].flatMap((indentEnd) =>
+        [false, true].flatMap((field) => [0, 1 / 15].map((roundoff) => ({ indentEnd, field, roundoff })))
+    ))('honors a right tab beyond the paragraph right indent ($indentEnd, field: $field, roundoff: $roundoff)', ({ indentEnd, field, roundoff }) => {
         const content = `Heading\t${field ? '\u001F44\u001E' : '44'}`;
         const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 800, height: 1000 }, marginLeft: 100, marginRight: 100 },
             body: {
-                paragraphs: [{ startIndex: content.length, paragraphStyle: { indentEnd: { v: indentEnd }, snapToGrid: BooleanNumber.FALSE, tabStops: [{ offset: 600, alignment: TabStopAlignment.END }] } }],
+                paragraphs: [{ startIndex: content.length, paragraphStyle: { indentEnd: { v: indentEnd }, snapToGrid: BooleanNumber.FALSE, tabStops: [{ offset: 600 + roundoff, alignment: TabStopAlignment.END }] } }],
             },
         });
         const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

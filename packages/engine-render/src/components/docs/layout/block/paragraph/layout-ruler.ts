@@ -1126,12 +1126,12 @@ function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig
     const line = divide.parent;
     const columnWidth = line?.parent?.width;
     const rightIndent = line?.paragraphPaddingRight ?? 0;
-    // Word honors authored tabs beyond a paragraph's right indent, within its column.
+    // Word honors authored tabs beyond the right indent, including a one-twip roundoff at the column edge.
     if (isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
         paragraphConfig.paragraphStyle?.fixedTabStops !== BooleanNumber.TRUE &&
         rightIndent > 0 &&
         stop.offset > boundary &&
-        columnWidth != null && stop.offset <= columnWidth &&
+        columnWidth != null && stop.offset <= columnWidth + 1 / 15 + 1e-6 &&
         Math.abs(boundary - (columnWidth - rightIndent)) < 1e-6) {
         return columnWidth;
     }

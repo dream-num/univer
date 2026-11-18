@@ -662,7 +662,7 @@ export function buildTableOfContentsBody(
                 paragraph.paragraphStyle = { ...paragraph.paragraphStyle, tabStops: tabs.map((tab) => tab.offset < pageTab.offset ? { ...tab, clear: true } : tab) };
             }
         }
-        formatNumberedEntry(paragraph, heading, toc.rangeId, options);
+        formatEntryTab(paragraph, heading, toc.rangeId, options);
         result.paragraphs!.push(paragraph);
     }
 
@@ -730,18 +730,25 @@ function parseOutlineLevelRange(instruction: string): [number, number] {
     return [min, max];
 }
 
-function formatNumberedEntry(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {
-    if (!heading.numberingText || options?.documentStyle?.documentFlavor === DocumentFlavor.MODERN) {
+function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {
+    const tabIndex = heading.text.indexOf('\t');
+    const prefix = heading.numberingText ?? (options?.resetEntryParagraphFormatting && tabIndex > 0 ? heading.text.slice(0, tabIndex) : undefined);
+    if (!prefix || options?.documentStyle?.documentFlavor === DocumentFlavor.MODERN) {
         return;
     }
+    if (heading.numberingText && options?.resetEntryParagraphFormatting && paragraph.paragraphStyle?.tabStops) {
+        // An imported cached numbered row can have a stop generated from an earlier heading width.
+        paragraph.paragraphStyle.tabStops = paragraph.paragraphStyle.tabStops.filter((tab) =>
+            !tab.clear && tab.alignment === TabStopAlignment.END);
+    }
     const style = resolveDocumentParagraphStyle(options?.documentStyle, paragraph.paragraphStyle, { styles: options?.styles, paragraphStyleId: paragraph.styleId });
-    const numberStyle = heading.textRuns?.find((run) => run.st === 0 && run.ed >= heading.numberingText!.length)?.ts;
+    const numberStyle = heading.textRuns?.find((run) => run.st === 0 && run.ed >= prefix.length)?.ts;
     const textStyle = { ...style.textStyle, ...numberStyle };
     const font = getFontStyleString(textStyle, options?.documentStyle?.fontFamilyFallbacks, options?.documentStyle?.fontFamilyClasses);
     const width = measureDocumentNoWrapTextWidth({
         id: rangeId,
         documentStyle: { ...options?.documentStyle, textStyle },
-        body: { dataStream: heading.numberingText },
+        body: { dataStream: prefix },
     });
     const characterWidth = font.originFontSize * 4 / 3;
     const first = getNumberUnitValue(style.indentFirstLine, characterWidth);
@@ -756,7 +763,7 @@ function formatNumberedEntry(paragraph: IParagraph, heading: ITableOfContentsHea
         }
         return;
     }
-    // A hanging indent is a Word tab stop before falling back to the numbering grid.
+    // Word lays out a tab inside the entry before its right-aligned page tab.
     const useHangingStop = hanging > 0 &&
         options?.documentStyle?.compatibilityFlags?.noTabHangInd !== BooleanNumber.TRUE &&
         indentStart > numberEnd &&

@@ -355,6 +355,48 @@ describe('table of contents body builder', () => {
         ]);
     });
 
+    it.each([
+        { numberingText: undefined, previousOffset: undefined, inheritedOffset: undefined },
+        { numberingText: 'A.', previousOffset: 110, inheritedOffset: undefined },
+        { numberingText: 'A.', previousOffset: 110, inheritedOffset: 72 },
+    ])('lays out the title before the page tab on an imported refresh ($numberingText, $inheritedOffset)', ({ numberingText, previousOffset, inheritedOffset }) => {
+        const { body, toc } = createBody();
+        const pageTab = { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT };
+        const inherited = inheritedOffset == null ? [] : [{ offset: inheritedOffset, alignment: TabStopAlignment.START }];
+        const styles = { TOC1: { name: 'TOC 1', type: DocStyleType.paragraph, paragraphStyle: { tabStops: [...inherited, pageTab] } } };
+        body.paragraphs![0].styleId = 'TOC1';
+        body.paragraphs![0].paragraphStyle = {
+            tabStops: [
+                ...inherited.map((tab) => ({ ...tab, clear: true })),
+                ...(previousOffset == null ? [] : [{ offset: previousOffset, alignment: TabStopAlignment.START }]),
+                pageTab,
+            ],
+        };
+        const result = buildTableOfContentsBody(body, toc, () => 5, () => 'entry', {
+            resetEntryParagraphFormatting: true,
+            availableWidth: 414,
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            styles,
+            entries: [{
+                text: 'A.\tProject description',
+                numberingText,
+                level: 1,
+                headingId: 'heading',
+                startOffset: 24,
+                paragraph: body.paragraphs![1],
+            }],
+        })!;
+
+        const paragraph = result.paragraphs![0];
+        const [left, right] = resolveDocumentParagraphStyle(undefined, paragraph.paragraphStyle, { styles, paragraphStyleId: paragraph.styleId }).tabStops!;
+        expect(left.alignment).toBe(TabStopAlignment.START);
+        expect(left.offset).toBeLessThan(100);
+        if (inheritedOffset != null) {
+            expect(left.offset).toBe(inheritedOffset);
+        }
+        expect(right).toEqual(pageTab);
+    });
+
     it('keeps numbered entry tabs with their targets when a directory removes and reorders rows', () => {
         const cached = '\u001FIntroduction\t1\rChapter 1 : One\t2\rChapter 2 : Two\t3\r\u001E';
         const dataStream = `${cached}One\rTwo\r\n`;

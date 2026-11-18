@@ -4478,14 +4478,20 @@ describe('layout-ruler', () => {
         expect(divide.left + divide.paddingLeft + last.left + last.width).toBeCloseTo(600);
     });
 
-    it.each([false, true])(
-        'fits an authored page tab that starts inside the right indent (outside: %s)',
-        (startsOutside) => {
+    it.each([
+        { mode: '14', startsOutside: false, beyondColumn: true, wraps: false },
+        { mode: '14', startsOutside: true, beyondColumn: true, wraps: true },
+        { mode: '15', startsOutside: false, beyondColumn: false, wraps: false },
+        { mode: '15', startsOutside: false, beyondColumn: true, wraps: true },
+    ])(
+        'fits an authored page tab at the column edge (Word $mode, outside right indent: $startsOutside, beyond column: $beyondColumn)',
+        ({ mode, startsOutside, beyondColumn, wraps }) => {
             const title = 'Heading.';
             const content = `${title}\t76`;
             const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
                 documentStyle: {
                     documentFlavor: DocumentFlavor.TRADITIONAL,
+                    compatibilitySettings: { compatibilityMode: mode },
                     pageSize: { width: 300, height: 400 },
                     marginLeft: 50,
                     marginRight: 50,
@@ -4498,7 +4504,7 @@ describe('layout-ruler', () => {
                             indentEnd: { v: 0 },
                             hangingPunctuation: BooleanNumber.TRUE,
                             snapToGrid: BooleanNumber.FALSE,
-                            tabStops: [{ offset: 200 + 1 / 15, alignment: TabStopAlignment.END }],
+                            tabStops: [{ offset: 200 + (beyondColumn ? 1 / 15 : 0), alignment: TabStopAlignment.END }],
                         },
                     }],
                 },
@@ -4510,7 +4516,7 @@ describe('layout-ruler', () => {
             const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
             const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
             const lineText = lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.content).join('').trimEnd());
-            expect(lineText).toEqual(startsOutside ? [title, '\t76'] : [content]);
+            expect(lineText).toEqual(wraps ? [title, '\t76'] : [content]);
         }
     );
 

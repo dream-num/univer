@@ -482,12 +482,15 @@ function _fitGlyphsToDivide(
         preserveLineStartPunctuationSpace(glyphGroup[0]);
     }
     const tabStops = getParagraphTabStops(ctx, sectionBreakConfig, paragraphConfig);
-    _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops);
+    const wordCompatibilityMode = Number(ctx.dataModel.documentStyle.compatibilitySettings?.compatibilityMode);
+    // Word 2013 compatibility uses the exact column edge for authored tab stops.
+    const columnTabTolerance = wordCompatibilityMode >= 15 ? 0 : 1 / 15;
+    _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops, columnTabTolerance);
     const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
     const lastWidth = lastGlyph?.width || 0;
     const lastLeft = lastGlyph?.left || 0;
     const preOffsetLeft = lastWidth + lastLeft;
-    _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops);
+    _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops, columnTabTolerance);
     const fitOffsetLeft = preOffsetLeft + getGlyphPairKerningAdjustment(lastGlyph, glyphGroup[0]) -
         (lastGlyph?.kerningAdjustment ?? 0);
     const drawingML = sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml';
@@ -505,7 +508,6 @@ function _fitGlyphsToDivide(
             || horizontalAlign === HorizontalAlign.JUSTIFIED || horizontalAlign === HorizontalAlign.BOTH)
         && preOffsetLeft + __getGlyphGroupWidth(glyphGroup) > divide.width
         && westernLine;
-    const wordCompatibilityMode = Number(ctx.dataModel.documentStyle.compatibilitySettings?.compatibilityMode);
     const justifyWordSpacing = preserveWordSpacing
         // Word 2003–2010 wrap before a word that would require tighter spaces.
         && wordCompatibilityMode >= 15
@@ -520,7 +522,7 @@ function _fitGlyphsToDivide(
     const beyondWidth = isGlyphGroupBeyondDivideWidth(
         glyphGroup,
         fitOffsetLeft,
-        getExplicitTabFitWidth(divide, glyphGroup, preOffsetLeft, paragraphConfig, tabStops),
+        getExplicitTabFitWidth(divide, glyphGroup, preOffsetLeft, paragraphConfig, tabStops, columnTabTolerance),
         hangingPunctuation,
         allowLineCompression || justifyWordSpacing ? divide.glyphGroup : undefined,
         preserveWordSpacing,
@@ -1062,7 +1064,8 @@ function _adjustIncomingTabStops(
     offsetLeft: number,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    tabStops = paragraphConfig.paragraphStyle?.tabStops
+    tabStops: ITabStop[] | undefined,
+    columnTabTolerance: number
 ): void {
     if (!isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) ||
         !glyphs.some((glyph) => glyph.glyphType === GlyphType.TAB)) {
@@ -1087,7 +1090,8 @@ function _adjustIncomingTabStops(
             // Resolve before fitting: a provisional default-width tab can create a false line break.
             if (stop) {
                 const followingWidth = glyph.tabAlignedTextWidth ?? 0;
-                const width = getExplicitTabOffset(divide, paragraphConfig, divide.left + divide.paddingLeft, position, stop, followingWidth) - position;
+                const origin = divide.left + divide.paddingLeft;
+                const width = getExplicitTabOffset(divide, paragraphConfig, origin, position, stop, followingWidth, columnTabTolerance) - position;
                 if (width > 0) {
                     glyph.width = width;
                     glyph.tabLeader = stop.leader;
@@ -1121,7 +1125,7 @@ function getPositionedTabWidth(divide: IDocumentSkeletonDivide, tabGlyph: IDocum
     return target - divide.left - divide.paddingLeft - offset;
 }
 
-function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig: IParagraphConfig, origin: number, tabStart: number, stop: ITabStop): number {
+function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig: IParagraphConfig, origin: number, tabStart: number, stop: ITabStop, columnTabTolerance: number): number {
     const boundary = origin + divide.width;
     const line = divide.parent;
     const columnWidth = line?.parent?.width;
@@ -1132,7 +1136,7 @@ function getExplicitTabBoundary(divide: IDocumentSkeletonDivide, paragraphConfig
         rightIndent > 0 &&
         tabStart <= boundary + 1e-6 &&
         stop.offset > boundary &&
-        columnWidth != null && stop.offset <= columnWidth + 1 / 15 + 1e-6 &&
+        columnWidth != null && stop.offset <= columnWidth + columnTabTolerance + 1e-6 &&
         Math.abs(boundary - (columnWidth - rightIndent)) < 1e-6) {
         return columnWidth;
     }
@@ -1145,9 +1149,10 @@ function getExplicitTabOffset(
     origin: number,
     tabStart: number,
     stop: ITabStop,
-    followingWidth: number
+    followingWidth: number,
+    columnTabTolerance: number
 ): number {
-    const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop);
+    const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop, columnTabTolerance);
     const target = Math.min(stop.offset, boundary);
     if (stop.alignment === TabStopAlignment.END) {
         return target - followingWidth;
@@ -1163,7 +1168,8 @@ function getExplicitTabFitWidth(
     glyphs: IDocumentSkeletonGlyph[],
     offsetLeft: number,
     paragraphConfig: IParagraphConfig,
-    tabStops: ITabStop[] | undefined
+    tabStops: ITabStop[] | undefined,
+    columnTabTolerance: number
 ): number {
     if (!isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
         return divide.width;
@@ -1191,14 +1197,15 @@ function getExplicitTabFitWidth(
     if (stop == null) {
         return divide.width;
     }
-    return Math.max(divide.width, getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop) - origin);
+    return Math.max(divide.width, getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop, columnTabTolerance) - origin);
 }
 
 function _adjustExplicitTabStop(
     divide: IDocumentSkeletonDivide,
     followingGlyphs: IDocumentSkeletonGlyph[],
     paragraphConfig: IParagraphConfig,
-    tabStops = paragraphConfig.paragraphStyle?.tabStops
+    tabStops = paragraphConfig.paragraphStyle?.tabStops,
+    columnTabTolerance = 1 / 15
 ): void {
     let tabIndex = divide.glyphGroup.length - 1;
     while (tabIndex >= 0 && isCustomRangeMarker(divide.glyphGroup[tabIndex])) {
@@ -1242,7 +1249,7 @@ function _adjustExplicitTabStop(
     const followingWidth = tabGlyph.tabAlignedTextWidth
         ?? followingGlyphs.reduce((width, glyph) => width + glyph.width, 0);
 
-    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabLeft, tabStop, followingWidth) - tabLeft;
+    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabLeft, tabStop, followingWidth, columnTabTolerance) - tabLeft;
     if (width <= 0) {
         if (usesFixedTabStops) {
             tabGlyph.width = 0;

@@ -15,10 +15,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IMessageProtocol } from '../rpc.service';
 import { awaitTime } from '@univerjs/core';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { IMessageProtocol } from '../rpc.service';
 import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
 
 async function wait() {
@@ -65,10 +66,45 @@ describe('test ChannelClient & ChannelServer', () => {
         serverProtocol = new TestMessageProtocolForServer();
 
         client = new ChannelClient(clientProtocol);
+    });
+
+    it('does not start a subscription cancelled before the server is ready', async () => {
+        const signal$ = new Subject<number>();
+        const channel = client.getChannel('test');
+        channel.subscribe('signal$').subscribe().unsubscribe();
+
         server = new ChannelServer(serverProtocol);
+        server.registerChannel('test', fromModule({
+            signal$: () => signal$,
+            ready: () => true,
+        }));
+        await channel.call('ready');
+
+        expect(signal$.observed).toBe(false);
+    });
+
+    it('releases the source when the client cancels during a synchronous emission', async () => {
+        const signal$ = new BehaviorSubject(1);
+        const values: number[] = [];
+        const channel = client.getChannel('test');
+        channel.subscribe<number>('signal$').pipe(take(1)).subscribe((value) => values.push(value));
+
+        server = new ChannelServer(serverProtocol);
+        server.registerChannel('test', fromModule({
+            signal$: () => signal$,
+            ready: () => true,
+        }));
+        await channel.call('ready');
+
+        expect(values).toEqual([1]);
+        expect(signal$.observed).toBe(false);
     });
 
     describe('test fromModule and toModule', () => {
+        beforeEach(() => {
+            server = new ChannelServer(serverProtocol);
+        });
+
         it('should remote call work', async () => {
             interface INameService {
                 getName(): Promise<string>;

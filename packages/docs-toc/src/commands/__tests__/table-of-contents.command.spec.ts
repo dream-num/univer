@@ -35,7 +35,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { describe, expect, it } from 'vitest';
+import { FontCache } from '@univerjs/engine-render';
+import { describe, expect, it, vi } from 'vitest';
 import {
     buildPageNumberOnlyTableOfContentsBody,
     buildTableOfContentsBody,
@@ -395,6 +396,44 @@ describe('table of contents body builder', () => {
             expect(left.offset).toBe(inheritedOffset);
         }
         expect(right).toEqual(pageTab);
+    });
+
+    it.each([
+        { indent: 16, offset: 48 },
+        { indent: 68 / 3, offset: 68 },
+    ])('uses the TOC style indents to place a regenerated title tab ($indent)', ({ indent, offset }) => {
+        const { body, toc } = createBody();
+        const styles = Object.fromEntries(Array.from({ length: 9 }, (_, index) => [`TOC${index + 1}`, {
+            name: `toc ${index + 1}`,
+            type: DocStyleType.paragraph,
+            paragraphStyle: { indentStart: { v: index * indent } },
+            textStyle: { ff: 'Calibri', fs: 10 },
+        }]));
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({ width: 16.8 } as never);
+        try {
+            const result = buildTableOfContentsBody(body, toc, () => 5, () => 'entry', {
+                resetEntryParagraphFormatting: true,
+                availableWidth: 414,
+                tabStopOffset: 414,
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+                styles,
+                entries: [{
+                    text: '1.1\tHeading',
+                    numberingText: '1.1',
+                    level: 2,
+                    headingId: 'heading',
+                    startOffset: 24,
+                    paragraph: body.paragraphs![2],
+                }],
+            })!;
+
+            expect(result.paragraphs![0].paragraphStyle?.tabStops).toEqual([
+                { offset, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE },
+                { offset: 414, alignment: TabStopAlignment.END, leader: TabStopLeader.DOT },
+            ]);
+        } finally {
+            measure.mockRestore();
+        }
     });
 
     it('uses the imported hyperlink font on linked titles while preserving explicit text runs', () => {

@@ -510,6 +510,7 @@ export function buildTableOfContentsBody(
     const instruction = String(toc.properties?.instruction ?? '');
     const hyperlinks = instruction.replace(/"[^"]*"/g, '').split(/\s+/).some((token) => token.toLowerCase() === '\\h');
     const hyperlinkFont = resolveEntryHyperlinkFont(hyperlinks, options);
+    const titleTabOffsets = getTocTitleTabOffsets(options);
     if (/\\c\s+/i.test(instruction) && !options?.entries) {
         return null;
     }
@@ -665,7 +666,7 @@ export function buildTableOfContentsBody(
                 paragraph.paragraphStyle = { ...paragraph.paragraphStyle, tabStops: tabs.map((tab) => tab.offset < pageTab.offset ? { ...tab, clear: true } : tab) };
             }
         }
-        formatEntryTab(paragraph, heading, toc.rangeId, options);
+        formatEntryTab(paragraph, heading, toc.rangeId, titleTabOffsets, options);
         result.paragraphs!.push(paragraph);
     }
 
@@ -767,7 +768,22 @@ function applyEntryHyperlinkFont(entry: ITableOfContentsHeading, font: ITextStyl
     return { ...entry, textRuns: runs };
 }
 
-function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, options?: ITableOfContentsBuildOptions): void {
+function getTocTitleTabOffsets(options?: ITableOfContentsBuildOptions): number[] {
+    if (!options?.resetEntryParagraphFormatting || !options.styles) {
+        return [];
+    }
+    const { styles, documentStyle } = options;
+    return Object.entries(styles)
+        .filter(([id, style]) => style.type === DocStyleType.paragraph && /^toc[1-9]$/.test((style.name ?? id).replace(/\s+/g, '').toLowerCase()))
+        .map(([paragraphStyleId]) => getNumberUnitValue(
+            resolveDocumentParagraphStyle(documentStyle, undefined, { styles, paragraphStyleId }).indentStart,
+            0
+        ))
+        .filter((offset) => offset > 0)
+        .sort((left, right) => left - right);
+}
+
+function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading, rangeId: string, titleTabOffsets: number[], options?: ITableOfContentsBuildOptions): void {
     const tabIndex = heading.text.indexOf('\t');
     const prefix = heading.numberingText ?? (options?.resetEntryParagraphFormatting && tabIndex > 0 ? heading.text.slice(0, tabIndex) : undefined);
     if (!prefix || options?.documentStyle?.documentFlavor === DocumentFlavor.MODERN) {
@@ -805,8 +821,13 @@ function formatEntryTab(paragraph: IParagraph, heading: ITableOfContentsHeading,
         options?.documentStyle?.compatibilityFlags?.noTabHangInd !== BooleanNumber.TRUE &&
         indentStart > numberEnd &&
         indentStart < Math.min(nextTab?.offset ?? Infinity, options?.availableWidth ?? Infinity);
+    // A generated title tab follows the number plus one em on the TOC styles' indent grid.
+    const styleStop = titleTabOffsets.find((offset) =>
+        offset >= numberEnd + characterWidth - 1e-6 &&
+        offset < Math.min(nextTab?.offset ?? Infinity, options?.availableWidth ?? Infinity)
+    );
     const interval = 11 * 4 / 3;
-    const offset = useHangingStop ? indentStart : (Math.floor(numberEnd / interval + 1e-6) + 2) * 11 * 4 / 3;
+    const offset = useHangingStop ? indentStart : styleStop ?? (Math.floor(numberEnd / interval + 1e-6) + 2) * 11 * 4 / 3;
     paragraph.paragraphStyle = {
         ...paragraph.paragraphStyle,
         tabStops: [...tabs, { offset, alignment: TabStopAlignment.START, leader: TabStopLeader.NONE }].sort((left, right) => left.offset - right.offset),

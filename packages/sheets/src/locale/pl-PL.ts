@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'Zakres jest chroniony i nie masz uprawnień do wstawiania wierszy i kolumn. Aby wstawić wiersze i kolumny, skontaktuj się z twórcą.',
                 moveRangeErr: 'Zakres jest chroniony i nie masz uprawnień do przenoszenia zaznaczenia. Aby przenieść zaznaczenie, skontaktuj się z twórcą.',
                 moveRowColErr: 'Zakres jest chroniony i nie masz uprawnień do przenoszenia wierszy i kolumn. Aby przenieść wiersze i kolumny, skontaktuj się z twórcą.',
-                operatorSheetErr: 'Arkusz jest chroniony i nie masz uprawnień do operowania na arkuszu. Aby operować na arkuszu, skontaktuj się z twórcą.',
+                operatorSheetErr: 'Nie masz uprawnień do operowania na arkuszu. Aby operować na arkuszu, skontaktuj się z twórcą.',
                 removeRowColErr: 'Zakres jest chroniony i nie masz uprawnień do usuwania wierszy i kolumn. Aby usunąć wiersze i kolumny, skontaktuj się z twórcą.',
                 setRowColStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów wierszy i kolumn. Aby ustawić style wierszy i kolumn, skontaktuj się z twórcą.',
                 setStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów. Aby ustawić style, skontaktuj się z twórcą.',

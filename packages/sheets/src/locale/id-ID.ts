@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk menyisipkan baris dan kolom. Untuk menyisipkan baris dan kolom, silakan hubungi pembuatnya.',
                 moveRangeErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk memindahkan pilihan. Untuk memindahkan pilihan, silakan hubungi pembuatnya.',
                 moveRowColErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk memindahkan baris dan kolom. Untuk memindahkan baris dan kolom, silakan hubungi pembuatnya.',
-                operatorSheetErr: 'Lembar kerja dilindungi, dan Anda tidak memiliki izin untuk mengoperasikan lembar kerja. Untuk mengoperasikan lembar kerja, silakan hubungi pembuatnya.',
+                operatorSheetErr: 'Anda tidak memiliki izin untuk mengoperasikan lembar kerja. Untuk mengoperasikan lembar kerja, silakan hubungi pembuatnya.',
                 removeRowColErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk menghapus baris dan kolom. Untuk menghapus baris dan kolom, silakan hubungi pembuatnya.',
                 setRowColStyleErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya baris dan kolom. Untuk mengatur gaya baris dan kolom, silakan hubungi pembuatnya.',
                 setStyleErr: 'Rentang dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',

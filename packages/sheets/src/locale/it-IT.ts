@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per inserire righe e colonne. Per inserire righe e colonne, contattare il creatore.',
                 moveRangeErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per spostare la selezione. Per spostare la selezione, contattare il creatore.',
                 moveRowColErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per spostare righe e colonne. Per spostare righe e colonne, contattare il creatore.',
-                operatorSheetErr: 'Il foglio di lavoro è protetto e non si dispone dell\'autorizzazione per operare sul foglio di lavoro. Per operare sul foglio di lavoro, contattare il creatore.',
+                operatorSheetErr: 'Non si dispone dell\'autorizzazione per operare sul foglio di lavoro. Per operare sul foglio di lavoro, contattare il creatore.',
                 removeRowColErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per eliminare righe e colonne. Per eliminare righe e colonne, contattare il creatore.',
                 setRowColStyleErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per impostare gli stili di riga e colonna. Per impostare gli stili di riga e colonna, contattare il creatore.',
                 setStyleErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione per impostare gli stili. Per impostare gli stili, contattare il creatore.',

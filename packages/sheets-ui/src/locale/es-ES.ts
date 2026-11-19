@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Prueba con otro nombre o borra la búsqueda.',
                 commonErr: 'El rango está protegido y no tienes permiso para esta operación. Para editar, contacta al creador.',
                 editErr: 'El rango está protegido y no tienes permiso de edición. Para editar, contacta al creador.',
+                operatorSheetErr: 'No tienes permiso para operar en la hoja de cálculo. Para operar en la hoja de cálculo, contacta al creador.',
                 pasteErr: 'El rango está protegido y no tienes permiso para pegar. Para pegar, contacta al creador.',
                 setStyleErr: 'El rango está protegido y no tienes permiso para establecer estilos. Para establecer estilos, contacta al creador.',
                 copyErr: 'El rango está protegido y no tienes permiso para copiar. Para copiar, contacta al creador.',

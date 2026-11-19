@@ -107,6 +107,12 @@ describe('Test amordegrc function', () => {
             expect(amordegrc({ datePurchased: '2024/2/29', firstPeriod: '2024/12/31', basis: 1 })).toBe(617);
         });
 
+        it('Counts the end of February as day 30 under basis 0', () => {
+            const endOfFebruary = { cost: 100, datePurchased: '1998/2/28', firstPeriod: '1999/2/28', salvage: 10, basis: 0 };
+            expect(amordegrc({ ...endOfFebruary, period: 0 })).toBe(38);
+            expect(amordegrc({ ...endOfFebruary, period: 1 })).toBe(23);
+        });
+
         it('Rounds at Excel\'s 15 significant digits', () => {
             expect(amordegrc({ rate: 0.333333333333333 })).toBe(980);
         });

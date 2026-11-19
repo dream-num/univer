@@ -64,6 +64,27 @@ describe('ColorKit', () => {
         expect(ColorKit.getContrastRatio('#000000', '#ffffff')).toBe(21);
     });
 
+    it('should resolve named colors to their CSS values', () => {
+        const named: [string, string][] = [
+            ['blanchedalmond', '#ffebcd'],
+            ['darkgoldenrod', '#b8860b'],
+            ['floralwhite', '#fffaf0'],
+            ['midnightblue', '#191970'],
+            ['plum', '#dda0dd'],
+            ['slategray', '#708090'],
+            ['slategrey', '#708090'],
+            ['snow', '#fffafa'],
+            ['yellowgreen', '#9acd32'],
+        ];
+
+        named.forEach(([name, hex]) => {
+            const color = new ColorKit(name);
+
+            expect(color.isValid).toBe(true);
+            expect(color.toHexString()).toBe(hex);
+        });
+    });
+
     it('should mark invalid colors and throw on malformed known formats', () => {
         const invalid = new ColorKit('not-a-color');
 

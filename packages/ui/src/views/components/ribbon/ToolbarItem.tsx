@@ -230,7 +230,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         iconSize,
         iconColor,
         fullWidth,
-        preserveStrokeWidth,
+        preserveStrokeWidth = true,
         dropdownComponent,
         dropdownMenuComponent,
     } = props;
@@ -422,6 +422,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                     >
                                         <CustomLabel
                                             ariaLabel={selectorAriaLabel}
+                                            preserveStrokeWidth={preserveStrokeWidth}
                                             title={titleToDisplay}
                                             value={value}
                                             label={label}
@@ -477,7 +478,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 ? localeService.t(title)
                 : undefined;
         const buttonClassName = clsx(grid && !large && `
-          univer-min-w-7
+          univer-h-full univer-min-w-7
           [&>svg]:univer-size-4
         `, grid && large
             ? `

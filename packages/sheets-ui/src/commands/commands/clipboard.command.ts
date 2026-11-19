@@ -16,8 +16,6 @@
 
 import type { IAccessor, ICommand, IMultiCommand, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { CommandType, ICommandService, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import {
     getSheetCommandTarget,
@@ -33,6 +31,8 @@ import {
     WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
+import type { LocaleKey } from '../../locale/types';
+import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
 
@@ -282,6 +282,33 @@ export const SheetOptionalPasteCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, { type }: { type: IPasteHookKeyType }) => {
         const clipboardService = accessor.get(ISheetClipboardService);
+        const cache = clipboardService.getPasteOptionsCache();
+
+        if (!cache) {
+            return false;
+        }
+
+        const { unitId, subUnitId, pastedRange } = cache.target;
+        const { rows, cols } = pastedRange;
+
+        if (!rows.length || !cols.length) {
+            return false;
+        }
+
+        // Replaying a floating paste option bypasses SheetPasteCommand, so check the cached target here.
+        checkSheetClipboardPermission(accessor, PasteCommand.id, {
+            value: PREDEFINED_HOOK_NAME_PASTE[type],
+            target: {
+                unitId,
+                subUnitId,
+                range: {
+                    startRow: rows[0],
+                    endRow: rows[rows.length - 1],
+                    startColumn: cols[0],
+                    endColumn: cols[cols.length - 1],
+                },
+            },
+        });
 
         return clipboardService.rePasteWithPasteType(type);
     },

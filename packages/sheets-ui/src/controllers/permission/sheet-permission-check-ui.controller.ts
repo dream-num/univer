@@ -42,8 +42,10 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import type { LocaleKey } from '../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -55,6 +57,7 @@ import {
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
@@ -161,6 +164,15 @@ export class SheetPermissionCheckUIController extends Disposable {
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.commonErr');
+                break;
+            case SetWorksheetColAutoWidthCommand.id:
+                params = commandInfo.params as ISetWorksheetColIsAutoWidthCommandParams | undefined;
+
+                // Column width follows the column style permission only, so read-only workbooks can still fit columns.
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    worksheetTypes: [WorksheetSetColumnStylePermission],
+                }, params?.unitId, params?.subUnitId);
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.setRowColStyleErr');
                 break;
             case RemoveSheetConfirmCommand.id:
                 params = commandInfo.params as { subUnitId?: string } | undefined;

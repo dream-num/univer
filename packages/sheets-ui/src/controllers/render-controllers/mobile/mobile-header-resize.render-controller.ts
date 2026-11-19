@@ -23,7 +23,6 @@ import {
     ICommandService,
     IContextService,
     Inject,
-    Injector,
     IPermissionService,
     RANGE_TYPE,
     toDisposable,
@@ -31,10 +30,8 @@ import {
 import { Rect } from '@univerjs/engine-render';
 import {
     attachSelectionWithCoord,
-    checkRangesEditablePermission,
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
-    RangeProtectionRuleModel,
     SheetsSelectionsService,
     WorksheetSetColumnStylePermission,
     WorksheetSetRowStylePermission,
@@ -82,9 +79,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
         this._init();
@@ -116,7 +111,6 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         this.disposeWithMe(
             merge(
                 this._permissionService.permissionPointUpdate$,
-                this._rangeProtectionRuleModel.ruleChange$,
                 this._context.unit.activeSheet$
             ).subscribe(() => {
                 this._cancelResize();
@@ -418,13 +412,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         const permission = type === 'row'
             ? new WorksheetSetRowStylePermission(unitId, subUnitId)
             : new WorksheetSetColumnStylePermission(unitId, subUnitId);
-        return this._permissionService.getPermissionPoint(permission.id)?.value === true
-            && checkRangesEditablePermission(
-                this._injector,
-                unitId,
-                subUnitId,
-                this._selectionManagerService.getCurrentSelections().map((selection) => selection.range)
-            );
+        return this._permissionService.getPermissionPoint(permission.id)?.value === true;
     }
 
     private _bindResizeListeners(

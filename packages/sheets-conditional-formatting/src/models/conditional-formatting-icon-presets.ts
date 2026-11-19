@@ -16,12 +16,14 @@
 
 import type { CanvasIconName } from '@univerjs/icons-svg';
 
+const progressColors = { black: '#7A7A7A', '#E5E5E5': 'transparent' };
+
 export const conditionalFormattingIconPresets = {
-    progress0: { name: 'progress-0-double-icon', colors: { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' } },
-    progress25: { name: 'progress-25-double-icon', colors: { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' } },
-    progress50: { name: 'progress-50-double-icon', colors: { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' } },
-    progress75: { name: 'progress-75-double-icon', colors: { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' } },
-    progress100: { name: 'progress-100-double-icon', colors: { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' } },
+    progress0: { name: 'progress-0-double-icon', colors: progressColors },
+    progress25: { name: 'progress-25-double-icon', colors: progressColors },
+    progress50: { name: 'progress-50-double-icon', colors: progressColors },
+    progress75: { name: 'progress-75-double-icon', colors: progressColors },
+    progress100: { name: 'progress-100-double-icon', colors: progressColors },
     starEmpty: { name: 'star-empty-double-icon', colors: { black: '#FFBD37' } },
     starIncomplete: { name: 'star-incomplete-double-icon', colors: { black: '#FFBD37' } },
     starFull: { name: 'star-full-double-icon', colors: { black: '#FFBD37' } },

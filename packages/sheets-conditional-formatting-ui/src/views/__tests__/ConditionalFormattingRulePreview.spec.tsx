@@ -124,6 +124,31 @@ describe('ConditionalFormattingRulePreview', () => {
         expect(icons[1].classList.contains('univerjs-icon-arrow-up-icon')).toBe(true);
     });
 
+    it('keeps the unfilled portion of each progress icon clear in the rule preview', () => {
+        const container = document.createElement('div');
+        container.innerHTML = renderToStaticMarkup(
+            <ConditionalFormattingRulePreview
+                rule={{
+                    type: CFRuleType.iconSet,
+                    isShowValue: true,
+                    config: [100, 75, 50, 25, 0].map((value, index) => ({
+                        iconType: IIconSetType.fiveQuarters,
+                        iconId: String(index),
+                        operator: CFNumberOperator.greaterThanOrEqual,
+                        value: { type: CFValueType.num, value },
+                    })),
+                }}
+            />
+        );
+
+        const icons = Array.from(container.querySelectorAll('svg'));
+        expect(icons.map((icon) => icon.querySelector('circle')?.getAttribute('fill')))
+            .toEqual(['currentColor', 'transparent', 'transparent', 'transparent', 'transparent']);
+        const sectors = icons.slice(1, 4).map((icon) => icon.querySelector('path[fill="currentColor"]')?.getAttribute('d'));
+        expect(sectors.every(Boolean)).toBe(true);
+        expect(new Set(sectors).size).toBe(3);
+    });
+
     it('renders nothing while no rule is selected', () => {
         expect(renderToStaticMarkup(<ConditionalFormattingRulePreview />)).toBe('');
     });

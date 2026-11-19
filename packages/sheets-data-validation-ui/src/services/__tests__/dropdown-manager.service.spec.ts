@@ -288,6 +288,27 @@ describe('DataValidationDropdownManagerService', () => {
         expect((testBed.get(ISheetCellDropdownManagerService) as unknown as TestCellDropdownManagerService).hideCount).toBe(1);
     });
 
+    it('maps a stored value that differs only in case back to the option label', () => {
+        testBed = createTestBed();
+        testBed.workbook.getActiveSheet()!.getCellMatrix().setValue(1, 2, { v: 'open' });
+        setRule(testBed, {
+            uid: 'rule-list-case',
+            type: 'list',
+            renderMode: DataValidationRenderMode.CUSTOM,
+        }, {
+            dropdownType: DataValidatorDropdownType.LIST,
+            getListWithColor: () => [
+                { label: 'Open', color: '#00aa00' },
+                { label: 'Closed' },
+            ],
+        });
+
+        showDropdown(testBed, 1);
+
+        // Otherwise the dropdown would open with no option highlighted.
+        expect(getDropdown(testBed).props).toMatchObject({ defaultValue: 'Open' });
+    });
+
     it('keeps a multiple-list dropdown open after serializing selected values', async () => {
         testBed = createTestBed();
         (testBed.get(IEditorBridgeService) as unknown as TestEditorBridgeService).visible = false;

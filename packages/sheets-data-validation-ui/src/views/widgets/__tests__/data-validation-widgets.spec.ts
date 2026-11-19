@@ -100,6 +100,13 @@ class TestListValidator {
             Hold: '#ffcc00',
         };
     }
+
+    getOptionColor(_rule: unknown, value: unknown): string | undefined {
+        const valueStr = `${value ?? ''}`;
+        const colorMap = this.getListWithColorMap();
+        const matched = Object.keys(colorMap).find((label) => label.toLowerCase() === valueStr.toLowerCase());
+        return matched ? colorMap[matched] : undefined;
+    }
 }
 
 class TestListMultipleValidator extends TestListValidator {

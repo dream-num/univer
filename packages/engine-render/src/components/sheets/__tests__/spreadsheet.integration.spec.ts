@@ -2707,6 +2707,69 @@ describe('spreadsheet integration', () => {
     });
 
     it.each([
+        { dpr: 1, reuse: true },
+        { dpr: 2, reuse: true },
+        { dpr: 3, reuse: false },
+    ])('handles diagonal repair across staggered merges at unit scale and DPR $dpr', ({ dpr, reuse }) => {
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1']!;
+        sheet.rowData = {};
+        sheet.columnData = {};
+        sheet.cellData = {
+            1: { 4: { v: 'First merge', s: 'style-bg-border' } },
+            5: { 3: { v: 'Staggered merge', s: 'style-bg-border' } },
+        };
+        sheet.mergeData = [
+            { startRow: 1, endRow: 2, startColumn: 4, endColumn: 5 },
+            { startRow: 5, endRow: 6, startColumn: 3, endColumn: 4 },
+        ];
+        const extra = createFixture(data);
+        try {
+            const { spreadsheet, skeleton, viewport, scene, mainCanvas } = extra;
+            const canvas = viewport.canvas!;
+            canvas.setSize(700, 420, dpr);
+            const ctx = mainCanvas.getContext();
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const initial = createViewportInfo(scene, canvas, { cacheBound: createBound(0, 0, 400, 280) });
+            skeleton.setStylesCache(initial);
+            spreadsheet.renderByViewports(ctx, initial, skeleton);
+            spreadsheet.makeDirty(false);
+            spreadsheet.makeForceDirty(false);
+
+            const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+            const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+            const strips = [createBound(412, 20, 420, 300), createBound(20, 222, 414, 300)];
+            const next = createViewportInfo(scene, canvas, {
+                cacheBound: createBound(20, 20, 420, 300),
+                diffBounds: strips,
+                diffCacheBounds: strips,
+                diffX: -20,
+                diffY: -20,
+                isDirty: 0,
+            });
+            skeleton.setStylesCache(next);
+            ctx.setTransform(dpr, 0, 0, dpr, -20 * dpr, -20 * dpr);
+            spreadsheet.renderByViewports(ctx, next, skeleton);
+
+            if (!reuse) {
+                expect(refresh).toHaveBeenCalledOnce();
+                expect(paint).not.toHaveBeenCalled();
+                return;
+            }
+            expect(refresh).not.toHaveBeenCalled();
+            expect(paint).toHaveBeenCalledOnce();
+            const repairs = paint.mock.calls[0][3]!;
+            const mergeLeft = skeleton.columnWidthAccumulation[2] + skeleton.rowHeaderWidthAndMarginLeft;
+            expect(repairs.map(({ bound }) => bound)).toEqual([
+                createBound(mergeLeft, 20, 420, 300),
+                createBound(20, 220, 420, 300),
+            ]);
+        } finally {
+            disposeFixture(extra);
+        }
+    });
+
+    it.each([
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32.16, full: true },
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32, full: false },
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN, width: 32.16, full: false },

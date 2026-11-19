@@ -15,6 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
+import { RANGE_TYPE } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { RuleMatrix } from '../rule-matrix';
 
@@ -52,6 +53,35 @@ describe('RuleMatrix', () => {
         expect(matrix.getValue(1, 1)).toBe('rule-2');
         expect(matrix.getValue(2, 2)).toBe('rule-2');
         expect(matrix.getValue(5, 5)).toBeUndefined();
+    });
+
+    it('keeps a whole column range type when an already covered range is added', () => {
+        const wholeColumn = { startRow: 0, endRow: 19, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN };
+        const rule = createRule('rule-1', [wholeColumn]);
+        const matrix = createMatrix(new Map([['rule-1', [wholeColumn]]]));
+
+        // auto fill or copy/paste adds a range that the rule already covers
+        matrix.addRangeRules([{ id: 'rule-1', ranges: [{ startRow: 0, endRow: 4, startColumn: 0, endColumn: 0 }] }]);
+
+        expect(matrix.diff([rule])).toEqual([]);
+    });
+
+    it('drops the whole column type when the added range extends the rule', () => {
+        const wholeColumn = { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN };
+        const rule = createRule('rule-1', [wholeColumn]);
+        const matrix = createMatrix(new Map([['rule-1', [wholeColumn]]]));
+
+        matrix.addRangeRules([{ id: 'rule-1', ranges: [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 }] }]);
+
+        expect(matrix.diff([rule])).toEqual([
+            {
+                type: 'update',
+                ruleId: 'rule-1',
+                oldRanges: [wholeColumn],
+                newRanges: [{ startRow: 0, endRow: 19, startColumn: 0, endColumn: 0 }],
+                rule,
+            },
+        ]);
     });
 
     it('updates, removes, and merges rule ranges correctly', () => {

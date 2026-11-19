@@ -83,6 +83,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
 
             disposeSet.add(mainComponent.onPointerLeave$.subscribeEvent(() => {
                 this._active = false;
+                this._hoverManagerService.triggerMouseLeave();
             }));
 
             const rowHeader = components.get(SHEET_VIEW_KEY.ROW);

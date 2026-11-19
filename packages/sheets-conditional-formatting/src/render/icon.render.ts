@@ -16,12 +16,19 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
-import { iconMap, IIconSetType } from '../models/icon-map';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
+import type { IConditionalFormattingIcon } from '../models/icon-map';
+import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
+import { conditionalFormattingIcons } from '../models/icon-map';
+import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
+import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
+const canvasIcons = new Map<string, IConditionalFormattingIcon>(Object.entries(conditionalFormattingIcons).flatMap(([type, icons]) =>
+    icons.map((icon, index) => [`${type}_${index}`, icon] as const)));
+
 const EXTENSION_Z_INDEX = 35;
 export const DEFAULT_WIDTH = 15;
 export const DEFAULT_PADDING = 2;
@@ -32,20 +39,18 @@ const stringifyRange = (range: IRange) => {
 };
 
 export class ConditionalFormattingIcon extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === ConditionalFormattingIcon;
+
     private _paddingRightAndLeft = DEFAULT_PADDING;
 
     private _width = DEFAULT_WIDTH;
 
-    private _imageMap: Map<string, HTMLImageElement> = new Map();
+    private readonly _rasterCache = new ConditionalFormattingRasterCache();
     private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
     _radius = 1;
-    constructor() {
-        super();
-        this._init();
-    }
 
     setRenderRangeResolver(resolver: IConditionalFormattingRenderRangeResolver | null) {
         this._renderRangeResolver = resolver;
@@ -63,9 +68,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         }
         const mergeCellRendered = new Set<string>();
         const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
-        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
-            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
-            : sourceRanges;
+        const renderRanges = resolveRenderRanges(worksheet, sourceRanges, this._renderRangeResolver);
         if (!renderRanges.length) {
             return;
         }
@@ -90,15 +93,6 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 }
 
                 const { iconType, iconId } = cellData.iconSet;
-                if (iconType === IIconSetType.empty) {
-                    return;
-                }
-
-                const icon = this._imageMap.get(this._createKey(iconType, iconId));
-                if (!icon) {
-                    return;
-                }
-
                 if (!this.isRenderDiffRangesByCell(mergeInfo, diffRanges)) {
                     return;
                 }
@@ -121,33 +115,30 @@ export class ConditionalFormattingIcon extends SheetExtension {
 
                 // Highly centered processing
                 const y = (borderHeight - this._width) / 2 + startY;
-                ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
+                this._drawIcon(ctx, `${iconType}_${iconId}`, startX + this._paddingRightAndLeft, y);
             });
         });
         ctx.restore();
     }
 
     override dispose(): void {
+        this._rasterCache.dispose();
         this._renderRangeResolver = null;
         super.dispose();
     }
 
-    private _init() {
-        for (const type in iconMap) {
-            const list = iconMap[type as IIconSetType];
-            list.forEach((base64, index) => {
-                const key = this._createKey(type as IIconSetType, String(index));
-                const image = new Image();
-                image.onload = () => {
-                    this._imageMap.set(key, image);
-                };
-                image.src = base64;
-            });
+    private _drawIcon(ctx: UniverRenderingContext, key: string, x: number, y: number): void {
+        const icon = canvasIcons.get(key);
+        if (!icon) {
+            return;
         }
-    }
-
-    private _createKey(iconType: IIconSetType, iconIndex: string) {
-        return `${iconType}_${iconIndex}`;
+        if (ctx.__mode === 'printing' || ctx.getSystemType() !== 'Linux') {
+            drawCanvasIcon(ctx._context, icon.name, x, y, this._width, icon.colors);
+            return;
+        }
+        this._rasterCache.draw(ctx, x, y, this._width, this._width, key, (paint, left, top) => {
+            drawCanvasIcon(paint._context, icon.name, left, top, this._width, icon.colors);
+        });
     }
 }
 

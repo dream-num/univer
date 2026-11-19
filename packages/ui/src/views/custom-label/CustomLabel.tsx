@@ -16,16 +16,17 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService } from '@univerjs/core';
 import { useMemo } from 'react';
 import { isObservable } from 'rxjs';
+import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ComponentManager } from '../../common/component-manager';
 import { IconManager } from '../../common/icon-manager';
 import { useDependency, useObservable } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
     className?: string;
+    ariaLabel?: string;
 
     iconSize?: number;
 

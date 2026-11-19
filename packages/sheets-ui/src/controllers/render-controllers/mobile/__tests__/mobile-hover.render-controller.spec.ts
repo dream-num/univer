@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import { EventSubject, IContextService, LocaleType } from '@univerjs/core';
 import { DeviceType, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IHoverCellPosition } from '../../../../services/hover-manager.service';
 import {
     MOBILE_EXPANDING_SELECTION,
     MOBILE_PINCH_ZOOMING,
@@ -153,6 +154,21 @@ describe('MobileHoverRenderController', () => {
         testBeds.splice(0).forEach((bed) => bed.univer.dispose());
         vi.runOnlyPendingTimers();
         vi.useRealTimers();
+    });
+
+    it('clears cell hover on leave and restores it when returning to the same cell', () => {
+        const { hoverManagerService, onPointerMove$, onPointerLeave$ } = createController();
+        const cells: Array<Nullable<IHoverCellPosition>> = [];
+        const subscription = hoverManagerService.currentCell$.subscribe((cell) => cells.push(cell));
+
+        onPointerMove$.emitEvent(pointer(20, 20));
+        expect(cells.at(-1)?.location).toMatchObject({ row: 0, col: 0 });
+        onPointerLeave$.emitEvent(pointer(20, 20));
+        expect(cells.at(-1)).toBeNull();
+        onPointerMove$.emitEvent(pointer(20, 20));
+        expect(cells.at(-1)?.location).toMatchObject({ row: 0, col: 0 });
+
+        subscription.unsubscribe();
     });
 
     it('allows small finger movements and a wider gap between two taps', () => {

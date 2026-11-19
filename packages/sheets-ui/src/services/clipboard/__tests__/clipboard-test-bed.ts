@@ -20,33 +20,15 @@ import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs
 import {
     DisposableCollection,
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    CalculateFormulaService,
-    DefinedNamesService,
-    FormulaCurrentConfigService,
-    FormulaDataModel,
-    FormulaRuntimeService,
-    FunctionService,
-    HyperlinkEngineFormulaService,
-    ICalculateFormulaService,
-    IDefinedNamesService,
-    IFormulaCurrentConfigService,
-    IFormulaRuntimeService,
-    IFunctionService,
-    IHyperlinkEngineFormulaService,
-    LexerTreeBuilder,
-} from '@univerjs/engine-formula';
+import { CalculateFormulaService, FormulaCurrentConfigService, FormulaResultService, FormulaRuntimeService, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AutoFillService,
@@ -570,18 +552,12 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     /**
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([IUIPartsService, { useClass: UIPartsService }]);
             injector.add([SheetsSelectionsService]);
@@ -610,26 +586,24 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([SheetSkeletonService]);
 
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             const localeService = injector.get(LocaleService);
             localeService.load({});
 
             injector.get(IUIPartsService);
         }
+
+        override onReady(): void {}
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(
         UniverInstanceType.UNIVER_SHEET,
         Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO)

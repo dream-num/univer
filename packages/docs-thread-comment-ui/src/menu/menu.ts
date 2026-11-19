@@ -18,13 +18,14 @@ import { IPermissionService, IUniverInstanceService, SHEET_EDITOR_UNITS, UniverI
 import { DocSelectionManagerService, DocSkeletonManagerService, getDocumentPermissionValue } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, debounceTime, map, startWith } from 'rxjs';
+import { getMenuHiddenObservable, ISidebarService, MenuItemType } from '@univerjs/ui';
+import { combineLatest, debounceTime, defer, distinctUntilChanged, map, startWith } from 'rxjs';
 import {
     AddDocDrawingCommentOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
+import { DOCS_THREAD_COMMENT_PANEL } from '../common/const';
 
 type MenuAccessor = Parameters<typeof getMenuHiddenObservable>[0];
 
@@ -110,7 +111,14 @@ export function AddDocCommentMenuItemFactory(accessor: MenuAccessor) {
 }
 
 export function ToolbarDocCommentMenuItemFactory(accessor: MenuAccessor) {
+    const sidebarService = accessor.get(ISidebarService);
+
     return {
+        activated$: defer(() => sidebarService.sidebarOptions$.pipe(
+            startWith(sidebarService.options),
+            map((options) => options.visible === true && options.children?.label === DOCS_THREAD_COMMENT_PANEL),
+            distinctUntilChanged()
+        )),
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',

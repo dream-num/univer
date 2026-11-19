@@ -17,6 +17,7 @@
 import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { FunctionService, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FormulaCacheService } from '../../formula-cache.service';
 import { DescriptionService, IDescriptionService } from '../description.service';
 import { IRegisterFunctionService, RegisterFunctionService } from '../register-function.service';
 
@@ -31,6 +32,7 @@ describe('RegisterFunctionService', () => {
             [LocaleType.ZH_CN]: {},
             [LocaleType.EN_US]: {},
         });
+        injector.add([FormulaCacheService]);
         injector.add([IFunctionService, { useClass: FunctionService }]);
         injector.add([IDescriptionService, { useClass: DescriptionService }]);
     });

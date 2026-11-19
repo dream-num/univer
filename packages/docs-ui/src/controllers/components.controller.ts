@@ -140,14 +140,7 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
-    }
-
-    private _registerParts(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions));
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 
     private _registerIcons(): void {
@@ -260,5 +253,9 @@ export class ComponentsController extends Disposable {
                 this._componentManager.register(key, comp)
             );
         });
+
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, DocPasteOptions));
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 }

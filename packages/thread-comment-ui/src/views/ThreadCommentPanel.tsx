@@ -48,6 +48,8 @@ export interface IThreadCommentPanelProps {
     onAfterDeleteComment?: IThreadCommentTreeProps['onAfterDeleteComment'];
     showComments?: string[];
     formatRef?: (comment: IThreadComment) => string;
+    /** Hides threads the current user is not allowed to read, such as comments in a protected range. */
+    filterComment?: (comment: IThreadComment) => boolean;
     onTempCommentClose?: () => void;
     autoFocusActiveComment?: boolean;
 }
@@ -74,6 +76,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         onAfterDeleteComment,
         showComments,
         formatRef,
+        filterComment,
         onTempCommentClose,
         autoFocusActiveComment = false,
     } = props;
@@ -105,7 +108,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             : unitComments.filter((i) => i.subUnitId === subUnitId);
 
         const sort = sortComments ?? ((a) => a);
-        const res: IThreadCommentWithUsers[] = allComments.map((i) => ({ ...i.root, children: i.children ?? [], users: i.relativeUsers }));
+        const visibleComments = filterComment ? allComments.filter((i) => filterComment(i.root)) : allComments;
+        const res: IThreadCommentWithUsers[] = visibleComments.map((i) => ({ ...i.root, children: i.children ?? [], users: i.relativeUsers }));
 
         if (showComments) {
             const map = new Map<string, IThreadCommentWithUsers>();
@@ -117,7 +121,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         } else {
             return sort(res) as IThreadCommentWithUsers[];
         }
-    }, [showComments, unit, unitComments, sortComments, subUnitId, type]);
+    }, [showComments, unit, unitComments, sortComments, subUnitId, type, filterComment]);
 
     const commentsSorted = useMemo(() => [
         ...comments.filter((comment) => !comment.resolved),
@@ -272,7 +276,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     );
 
     return (
-        <div className="univer-flex univer-min-h-full univer-flex-col univer-pb-3">
+        <div className="univer-box-border univer-flex univer-min-h-full univer-flex-col univer-pb-3">
             <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
                 {type === UniverInstanceType.UNIVER_SHEET
                     ? (

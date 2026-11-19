@@ -17,6 +17,7 @@
 import type { ReactNode } from 'react';
 import { DownIcon } from '@univerjs/icons';
 import { useState } from 'react';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 interface IAccordionItem {
@@ -57,15 +58,14 @@ export function Accordion(props: IAccordionProps) {
             {items.map((item, index) => (
                 <div key={item.id ?? index}>
                     <button
-                        className={`
+                        className={clsx(focusClassName, `
                           univer-box-border univer-flex univer-w-full univer-cursor-pointer univer-items-center
                           univer-gap-1.5 univer-border-none univer-bg-transparent univer-p-4 univer-text-left
                           univer-text-gray-700
                           hover:univer-text-gray-900
-                          focus:univer-outline-none
                           dark:!univer-text-gray-200
                           dark:hover:!univer-text-gray-0
-                        `}
+                        `)}
                         type="button"
                         onClick={() => toggleItem(index)}
                     >

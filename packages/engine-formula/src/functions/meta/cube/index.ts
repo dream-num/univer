@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -22,15 +23,20 @@ import { CubeValueObject } from '../../../engine/value-object/cube-value-object'
 import { BaseFunction } from '../../base-function';
 
 export class Cube extends BaseFunction {
+    override needsReferenceObject = true;
     override minParams = 1;
 
     override maxParams = 255;
 
-    override calculate(...variants: BaseValueObject[]) {
+    override calculate(...variants: FunctionVariantType[]) {
+        // Preserve addresses for reference-form INDEX without changing the cube's value semantics.
+        const references = variants.every((variant) => variant.isReferenceObject()) ? variants as BaseReferenceObject[] : undefined;
         const values: ArrayValueObject[] = [];
 
         for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
+            const variant = variants[i].isReferenceObject()
+                ? (variants[i] as BaseReferenceObject).toArrayValueObject()
+                : variants[i] as BaseValueObject;
 
             if (variant.isError()) {
                 return variant;
@@ -43,6 +49,6 @@ export class Cube extends BaseFunction {
             values.push(variant as ArrayValueObject);
         }
 
-        return CubeValueObject.create(values);
+        return CubeValueObject.create(values, references);
     }
 }

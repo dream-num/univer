@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'إعدادات المقطع',
             },
             paragraphSetting: {
+                wordWrap: 'السماح بالتفاف النص اللاتيني في وسط الكلمة',
                 alignment: 'محاذاة',
                 indentation: 'إزاحة',
                 left: 'يسار',

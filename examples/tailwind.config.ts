@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
+import preset, { createTailwindContent } from '@univerjs-infra/shared/tailwind';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import preset, { createTailwindContent } from '@univerjs-infra/shared/tailwind';
 import animate from 'tailwindcss-animate';
 
 const configs = {
@@ -23,9 +23,6 @@ const configs = {
         '../presets/packages/preset-sheets-sort/tailwind.config.ts',
         '../presets/packages/preset-sheets-table/tailwind.config.ts',
         '../presets/packages/preset-sheets-thread-comment/tailwind.config.ts',
-    ],
-    slides: [
-        '../packages/slides-ui/tailwind.config.ts',
     ],
 } as const;
 

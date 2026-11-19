@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, IUnitRange, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable } from '@univerjs/core';
 import type {
     IDirtyUnitDefinedNameMap,
     IDirtyUnitFeatureMap,
@@ -22,13 +23,13 @@ import type {
     IDirtyUnitSheetNameMap,
     IDirtyUnitSuperTableMap,
 } from '../basics/common';
-import { createIdentifier, Disposable } from '@univerjs/core';
 
 export interface IDirtyConversionManagerParams {
     commandId: string;
     shouldTrigger?: (command: ICommandInfo, options?: IExecutionOptions) => boolean;
     getDirtyData: (command: ICommandInfo) => {
         dirtyIterationUnits?: string[];
+        dirtyReferenceUnits?: string[];
         forceCalculation?: boolean;
         dirtyRanges?: IUnitRange[];
         dirtyNameMap?: IDirtyUnitSheetNameMap;

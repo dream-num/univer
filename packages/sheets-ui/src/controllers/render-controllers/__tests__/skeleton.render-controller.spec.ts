@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { BooleanNumber } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { SheetSkeletonRenderController } from '../skeleton.render-controller';
-import { createRenderTestBed } from './render-test-bed';
+import { createChartRenderTestBed } from './chart-render-test-bed';
 
 describe('SheetSkeletonRenderController', () => {
-    it('syncs scene size and main viewport margins from skeleton margins', () => {
-        const testBed = createRenderTestBed();
-        const { context, injector, skeleton, sheetSkeletonManagerService, scene, viewportMap } = testBed;
-
-        skeleton.rowHeaderWidth = 46;
-        skeleton.columnHeaderHeight = 20;
-        skeleton.columnTotalWidth = 1000;
-        skeleton.rowTotalHeight = 800;
-        skeleton.rowHeaderWidthAndMarginLeft = 86;
-        skeleton.columnHeaderHeightAndMarginTop = 60;
-
-        injector.createInstance(SheetSkeletonRenderController, context as any);
-        sheetSkeletonManagerService.emitCurrentSkeleton({ skeleton });
-
-        expect(scene.width).toBe(1086);
-        expect(scene.height).toBe(860);
-        expect(viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)?.marginLeft).toBe(86);
-        expect(viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)?.marginTop).toBe(60);
-
-        testBed.univer.dispose();
+    it('updates real Grid bounds for leading gaps without replacing Chart page extent from stale Grid data', () => {
+        const { render, manager, activate } = createChartRenderTestBed([[SheetSkeletonRenderController]], false, {
+            defaultRowHeight: 20,
+            defaultColumnWidth: 100,
+            rowHeader: { width: 46, hidden: BooleanNumber.FALSE },
+            columnHeader: { height: 20, hidden: BooleanNumber.FALSE },
+        });
+        expect([render.scene.width, render.scene.height]).toEqual([2046, 1020]);
+        const skeleton = manager.getCurrentSkeleton()!;
+        skeleton.setGapConfig({ rowGaps: { 0: { size: 40 } }, colGaps: { 0: { size: 40 } } });
+        manager.setCurrent({ sheetId: 'grid' });
+        expect([render.scene.width, render.scene.height]).toEqual([2086, 1060]);
+        activate('chart');
+        render.scene.transformByState({ width: 1200, height: 900 });
+        manager.setCurrent({ sheetId: 'grid' });
+        expect([render.scene.width, render.scene.height]).toEqual([1200, 900]);
+        activate('grid');
+        expect([render.scene.width, render.scene.height]).toEqual([2086, 1060]);
     });
 });

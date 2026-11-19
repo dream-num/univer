@@ -15,14 +15,14 @@
  */
 
 import type { IOrderRule } from '@univerjs/sheets-sort';
-import type { LocaleKey } from '../../locale/types';
-import type { ISheetSortLocation } from '../../services/sheets-sort-ui.service';
 import { LocaleService } from '@univerjs/core';
 import { Button, Checkbox, MobileSelect } from '@univerjs/design';
 import { DeleteEmptyIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { ISheetSortLocation } from '../../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../../services/sheets-sort-ui.service';
 
 export function MobileCustomSortPanel() {
@@ -82,7 +82,7 @@ function MobileCustomSortPanelContent({ location }: { location: ISheetSortLocati
                 <Checkbox checked={hasTitle} onChange={(value) => setTitle(Boolean(value))}>
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.first-row-check')}
                 </Checkbox>
-                <Button variant="text" disabled={!canAddCondition} onClick={addCondition}>
+                <Button variant="text" disabled={!canAddCondition} onClick={addCondition} size="middle">
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.add-condition')}
                 </Button>
             </div>
@@ -108,6 +108,7 @@ function MobileCustomSortPanelContent({ location }: { location: ISheetSortLocati
                                         value: `${title.index}`,
                                     }))}
                                     onChange={(value) => updateRule(index, { colIndex: Number(value) })}
+                                    size="small"
                                 />
                                 {orderRules.length > 1 && (
                                     <Button
@@ -134,6 +135,7 @@ function MobileCustomSortPanelContent({ location }: { location: ISheetSortLocati
                                     },
                                 ]}
                                 onChange={(value) => updateRule(index, { type: value as SortType })}
+                                size="small"
                             />
                         </div>
                     );
@@ -145,10 +147,10 @@ function MobileCustomSortPanelContent({ location }: { location: ISheetSortLocati
                   dark:!univer-bg-gray-900
                 "
             >
-                <Button size="large" onClick={() => sheetsSortUIService.closeCustomSortPanel()}>
+                <Button size="middle" onClick={() => sheetsSortUIService.closeCustomSortPanel()}>
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.cancel')}
                 </Button>
-                <Button size="large" variant="primary" onClick={apply}>
+                <Button size="middle" variant="primary" onClick={apply}>
                     {localeService.t<LocaleKey>('sheets-sort-ui.dialog.confirm')}
                 </Button>
             </div>

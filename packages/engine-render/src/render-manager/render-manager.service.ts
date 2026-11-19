@@ -23,11 +23,6 @@ import type {
     UnitModel,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { BaseObject } from '../base-object';
-import type { DocComponent } from '../components/docs/doc-component';
-import type { SheetComponent } from '../components/sheets/sheet-component';
-import type { Slide } from '../components/slides/slide';
-import type { IRender } from './render-unit';
 import {
     createIdentifier,
     Disposable,
@@ -40,11 +35,15 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { merge, Subject } from 'rxjs';
+import type { BaseObject } from '../base-object';
+import type { DocComponent } from '../components/docs/doc-component';
+import type { SheetComponent } from '../components/sheets/sheet-component';
+import type { IRender } from './render-unit';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
 import { RenderUnit } from './render-unit';
 
-export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
+export type RenderComponentType = SheetComponent | DocComponent | BaseObject;
 
 export interface IRenderManagerService extends IDisposable {
     addRender(unitId: string, renderer: IRender): void;
@@ -378,8 +377,7 @@ function getRenderDependencyIdentifierKey(identifier: DependencyIdentifier<unkno
 export const IRenderManagerService = createIdentifier<IRenderManagerService>('engine-render.render-manager.service');
 
 export function isDisposable(thing: unknown): thing is IDisposable {
-    // eslint-disable-next-line ts/no-explicit-any
-    return !!thing && typeof (thing as any).dispose === 'function';
+    return !!thing && typeof (thing as Partial<IDisposable>).dispose === 'function';
 }
 
 export function getCurrentTypeOfRenderer(

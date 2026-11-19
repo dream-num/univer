@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IMobileKeyboardViewport } from '../../config-provider/ConfigProvider';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IMobileKeyboardViewport } from '../../config-provider/ConfigProvider';
 import enUS from '../../../locale/en-US';
 import zhCN from '../../../locale/zh-CN';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
@@ -125,9 +125,11 @@ describe('MobileDialog', () => {
     it('keeps Escape disabled without disabling the close control', () => {
         const onClose = vi.fn();
         const { getByRole } = render(
-            <MobileDialog open keyboard={false} onClose={onClose}>
-                <input aria-label="Dialog draft" />
-            </MobileDialog>
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDialog open keyboard={false} onClose={onClose}>
+                    <input aria-label="Dialog draft" />
+                </MobileDialog>
+            </ConfigProvider>
         );
         const input = getByRole('textbox');
         input.focus();

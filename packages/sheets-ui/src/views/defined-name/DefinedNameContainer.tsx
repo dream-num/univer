@@ -243,7 +243,7 @@ export const DefinedNameContainer = ({
         <div
             data-u-comp="defined-name-container"
             className="
-              univer-relative univer-box-border univer-flex univer-h-full univer-w-full univer-flex-col
+              univer-relative univer-box-border univer-flex univer-h-0 univer-min-h-full univer-w-full univer-flex-col
               univer-overflow-hidden
             "
         >
@@ -278,7 +278,7 @@ export const DefinedNameContainer = ({
                 className={clsx('univer-min-h-0 univer-flex-1 univer-overflow-y-auto', scrollbarClassName)}
                 {...virtualActions.containerProps}
             >
-                <div style={virtualActions.wrapperStyle}>
+                <div className="univer-box-content univer-pb-4" style={virtualActions.wrapperStyle}>
                     {virtualDefinedNames.map(({ data: definedName, index }) => {
                         return (
                             <div
@@ -291,9 +291,9 @@ export const DefinedNameContainer = ({
                             >
                                 <div
                                     className={clsx(`
-                                      univer-group univer-relative univer-flex univer-w-full univer-cursor-default
-                                      univer-select-none univer-items-center univer-justify-between univer-rounded-md
-                                      univer-p-2
+                                      univer-group univer-relative univer-box-border univer-flex univer-w-full
+                                      univer-cursor-default univer-select-none univer-items-center
+                                      univer-justify-between univer-rounded-md univer-p-2
                                       hover:univer-bg-gray-50
                                       dark:hover:!univer-bg-gray-700
                                     `, {

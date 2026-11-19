@@ -1,4 +1,6 @@
 import type { IDropdownMenuProps } from '@univerjs/design';
+import { Button, ConfigProvider, DropdownMenu, render, unmount } from '@univerjs/design';
+import { MoreDownIcon } from '@univerjs/icons';
 import type {
     IWorkbenchSettings,
     WorkbenchDevice,
@@ -10,9 +12,6 @@ import type {
     WorkbenchUIChromeMode,
     WorkbenchZoomRatio,
 } from './workbench-settings';
-import { Button, ConfigProvider, DropdownMenu, render, unmount } from '@univerjs/design';
-
-import { MoreDownIcon } from '@univerjs/icons';
 import {
     WORKBENCH_DEVICES,
     WORKBENCH_DIRECTIONS,
@@ -97,7 +96,6 @@ const UI_CHROME_LABELS = {
 
 interface IWorkbenchSettingsControlProps {
     settings: IWorkbenchSettings;
-    supportsMobile: boolean;
     onDeviceChange: (device: WorkbenchDevice) => Promise<void>;
     onLocaleChange: (locale: WorkbenchLocale) => Promise<void>;
     onRegionChange: (region: WorkbenchRegion) => Promise<void>;
@@ -113,7 +111,6 @@ interface IWorkbenchSettingsControlProps {
 function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
     const {
         settings,
-        supportsMobile,
         onDarkModeChange,
         onDeviceChange,
         onDirectionChange,
@@ -138,16 +135,15 @@ function WorkbenchSettingsControl(props: IWorkbenchSettingsControlProps) {
     const items: IDropdownMenuProps['items'] = [
         {
             type: 'item',
-            children: renderSettingLabel('Device', supportsMobile ? 'Restarts example' : 'Desktop only'),
+            children: renderSettingLabel('Device', 'Restarts example'),
             disabled: true,
         },
         {
             type: 'radio',
-            value: supportsMobile ? settings.device : 'desktop',
+            value: settings.device,
             options: WORKBENCH_DEVICES.map((value) => ({
                 value,
                 label: DEVICE_LABELS[value],
-                disabled: !supportsMobile,
             })),
             onSelect: (value) => onDeviceChange(value as WorkbenchDevice),
         },

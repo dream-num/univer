@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                        | CSS | Locales | Facade entry |
-| ------------------------------ | :-: | :-----: | :----------: |
-| `@univerjs/preset-sheets-core` | Yes |   Yes   |     Yes      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-sheets-core` | — | Yes | Yes | No | Yes |
 
 ## Installation
 
@@ -20,8 +20,6 @@ pnpm add @univerjs/preset-sheets-core
 npm install @univerjs/preset-sheets-core
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
 
 ```ts
@@ -29,6 +27,19 @@ import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core';
 
 // Use with createUniver:
 // createUniver({ presets: [UniverSheetsCorePreset()] });
+```
+
+### Worker usage
+
+On the main thread, import `UniverSheetsCorePreset` from `@univerjs/preset-sheets-core`. Set `workerURL` to the worker URL or instance.
+
+In the worker entry, import `UniverSheetsCoreWorkerPreset` from `@univerjs/preset-sheets-core/worker`:
+
+```ts
+import { UniverSheetsCoreWorkerPreset } from '@univerjs/preset-sheets-core/worker';
+import { createUniver } from '@univerjs/presets';
+
+createUniver({ presets: [UniverSheetsCoreWorkerPreset()] });
 ```
 
 ## Resources

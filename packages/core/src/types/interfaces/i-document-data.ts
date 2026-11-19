@@ -1063,22 +1063,7 @@ export interface IDocDrawingPosition {
     flipX?: boolean;
     /** Vertical flip persisted with the document drawing transform. */
     flipY?: boolean;
-    // Union field properties can be only one of the following:
-    // shapeProperties?: IShapeProperties;
-    // chartProperties?: IChartProperties;
-    // imageProperties?: IImageProperties;
 }
-
-/**
- * ChartProperties
- */
-export interface IChartProperties {}
-
-// export enum BulletType {
-//     NONE,
-//     ORDERED_LIST,
-//     UNORDERED_LIST,
-// }
 
 /**
  * Properties of text style
@@ -1265,7 +1250,8 @@ export interface IParagraphProperties extends IIndentStart {
      * OOXML: 17.3.1.23 `pageBreakBefore`.
      */
     pageBreakBefore?: BooleanNumber;
-    wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
+    /** Allow words to split across lines. Absent inherits; DOCX w:wordWrap uses the inverse value. */
+    wordWrap?: BooleanNumber;
     /**
      * Avoids leaving a single measured first or last line on a separate page
      * when the paragraph can be adjusted without violating stronger keep rules.

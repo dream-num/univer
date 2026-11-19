@@ -1,10 +1,10 @@
-import type { TModuleFormat } from './configs/module.ts';
-import type { IBuildContext, IBuildOptions } from './types.ts';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
+import type { TModuleFormat } from './configs/module.ts';
+import type { IBuildContext, IBuildOptions } from './types.ts';
 import { createModuleConfig } from './configs/module.ts';
 import { createUmdConfig } from './configs/umd.ts';
 import { BUILD_OUTPUT_DIRECTORIES, BUILD_OUTPUT_ROOT, CLEANUP_DIRECTORIES } from './constants.ts';
@@ -39,8 +39,9 @@ function createBuildContext(packageDir: string, options: IBuildOptions): IBuildC
  * Expands the package context into all required tsdown configs.
  */
 function createModuleEntryGroups(entries: IBuildContext['entries']) {
-    const primaryEntries = entries.filter((entry) => entry.type === 'index' || entry.type === 'locale');
-    const isolatedEntries = entries.filter((entry) => entry.type !== 'index' && entry.type !== 'locale');
+    // Share class definitions across public entries to preserve DI token identity.
+    const primaryEntries = entries.filter((entry) => entry.type !== 'facade');
+    const isolatedEntries = entries.filter((entry) => entry.type === 'facade');
 
     return [
         ...(primaryEntries.length > 0 ? [primaryEntries] : []),
@@ -51,17 +52,16 @@ function createModuleEntryGroups(entries: IBuildContext['entries']) {
 export function createConfigs(context: IBuildContext, options: IBuildOptions) {
     const baseConfig = createBaseConfig(context);
     const moduleFormats: TModuleFormat[] = ['esm', 'cjs'];
-    const enableObfuscation = context.packageJson.name.startsWith('@univerjs-pro/');
+    const minify = context.packageJson.name.startsWith('@univerjs-pro/');
 
     const moduleConfigs = createModuleEntryGroups(context.entries).flatMap((entries) => {
         return moduleFormats.map((format) => createModuleConfig({
             baseConfig,
-            enableObfuscation,
             entries,
             externalPackages: context.externalPackages,
             facadeExternalPackages: context.facadeExternalPackages,
             format,
-            obfuscatorIgnorePatterns: options.obfuscatorIgnorePatterns,
+            minify,
             outDir: BUILD_OUTPUT_DIRECTORIES[format],
             packageDir: context.packageDir,
             plugins: context.plugins,
@@ -72,11 +72,10 @@ export function createConfigs(context: IBuildContext, options: IBuildOptions) {
         return moduleConfigs;
     }
 
-    const umdConfigs = context.entries.map((entry) => createUmdConfig({
+    // Worker entry points are published as ESM/CJS; UMD cannot share their internal modules.
+    const umdConfigs = context.entries.filter((entry) => entry.type !== 'worker').map((entry) => createUmdConfig({
         baseConfig,
-        enableObfuscation,
         entry,
-        obfuscatorIgnorePatterns: options.obfuscatorIgnorePatterns,
         outDir: BUILD_OUTPUT_DIRECTORIES.umd,
         packageDir: context.packageDir,
         packageName: context.packageJson.name,
@@ -106,23 +105,6 @@ export async function build(options: IBuildOptions = {}) {
     }
 
     removeCssArtifacts(path.join(packageDir, BUILD_OUTPUT_ROOT));
-
-    /**
-     * If we specifically have a tsdown config path provided, we will use that and ignore any default configs. However, if no specific config is provided, we will look for default configs in the package root (tsdown.config.mjs, tsdown.config.ts, tsdown.config.js) and merge any found obfuscatorIgnorePatterns into the build context. This allows users to specify obfuscation ignore patterns without needing to provide a full custom config.
-     */
-    if (!options.tsdownConfigPath) {
-        const configExtensions = ['.mjs', '.ts', '.js'];
-        for (const ext of configExtensions) {
-            const defaultConfigPath = path.resolve(packageDir, `tsdown.config${ext}`);
-            if (existsSync(defaultConfigPath)) {
-                const { default: userConfigModule } = await import(pathToFileURL(defaultConfigPath).href);
-                if (userConfigModule.obfuscatorIgnorePatterns) {
-                    options.obfuscatorIgnorePatterns = userConfigModule.obfuscatorIgnorePatterns;
-                }
-                break;
-            }
-        }
-    }
 
     const context = createBuildContext(packageDir, options);
     let configs = createConfigs(context, options);

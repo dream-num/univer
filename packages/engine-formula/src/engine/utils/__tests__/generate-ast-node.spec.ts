@@ -14,12 +14,63 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import { FORMULA_AST_CACHE, generateAstNode } from '../generate-ast-node';
+import type { BaseReferenceObject } from '../../reference-object/base-reference-object';
+import { Injector, ObjectMatrix } from '@univerjs/core';
+import { afterEach, describe, expect, it } from 'vitest';
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { FormulaCacheService } from '../../../services/formula-cache.service';
+import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
+import { Lexer } from '../../analysis/lexer';
+import { AstTreeBuilder } from '../../analysis/parser';
+import { Interpreter } from '../../interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../ast-node-tool';
+import { generateAstNode } from '../generate-ast-node';
 
 describe('generateAstNode defined name cache invalidation', () => {
-    beforeEach(() => {
-        FORMULA_AST_CACHE.clear();
+    const injectors: Injector[] = [];
+    afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
+
+    it('keeps cached references bound to their own engine when document IDs match', () => {
+        const clients = [createCommandTestBed(), createCommandTestBed()];
+        try {
+            const nodes = clients.map((client, index) => {
+                const config = client.get(IFormulaCurrentConfigService);
+                config.registerUnitData({
+                    [client.unitId]: {
+                        [client.sheetId]: {
+                            ...client.sheetData[client.sheetId],
+                            cellData: new ObjectMatrix({ 0: { 0: { v: index + 1 } } }),
+                        },
+                    },
+                });
+                client.get(IFormulaRuntimeService).setCurrent(0, 1, 1, 1, client.sheetId, client.unitId);
+                return generateAstNode(
+                    client.unitId,
+                    '=A1',
+                    client.get(Lexer),
+                    client.get(AstTreeBuilder),
+                    config,
+                    client.sheetId
+                );
+            });
+
+            expect(nodes[0]).not.toBe(nodes[1]);
+            clients.forEach((client, index) => {
+                const value = client.get(Interpreter).execute(generateExecuteAstNodeData(nodes[index]));
+                expect((value as BaseReferenceObject).getCellByPosition().getValue()).toBe(index + 1);
+                expect(generateAstNode(
+                    client.unitId,
+                    '=A1',
+                    client.get(Lexer),
+                    client.get(AstTreeBuilder),
+                    client.get(IFormulaCurrentConfigService),
+                    client.sheetId
+                )).toBe(nodes[index]);
+            });
+        } finally {
+            clients.forEach((client) => client.univer.dispose());
+        }
     });
 
     function createHarness(
@@ -36,7 +87,10 @@ describe('generateAstNode defined name cache invalidation', () => {
         const lexer = {
             treeBuilder: (formula: string) => formula,
         };
+        const injector = new Injector([[FormulaCacheService]]);
+        injectors.push(injector);
         const astTreeBuilder = {
+            cacheService: injector.get(FormulaCacheService),
             parse: () => {
                 parseCount++;
                 return node;

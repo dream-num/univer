@@ -15,10 +15,11 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
-import type { ISidebarService } from './sidebar.service';
 import { Disposable, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/Sidebar';
+import type { ISidebarService } from './sidebar.service';
+import { IContextMenuHostService } from '../contextmenu/contextmenu-host.service';
 
 export class DesktopSidebarService extends Disposable implements ISidebarService {
     private _sidebarOptions: ISidebarMethodOptions = {};
@@ -29,6 +30,10 @@ export class DesktopSidebarService extends Disposable implements ISidebarService
     private _container?: HTMLElement;
     private _openAnimationFrameId: number | null = null;
     private _width?: number;
+
+    constructor(@IContextMenuHostService private readonly _menuHostService: IContextMenuHostService) {
+        super();
+    }
 
     get visible(): boolean {
         return this._sidebarOptions.visible || false;
@@ -61,6 +66,7 @@ export class DesktopSidebarService extends Disposable implements ISidebarService
     }
 
     open(params: ISidebarMethodOptions): IDisposable {
+        this._menuHostService.closeAll();
         this._sidebarOptions = {
             ...params,
             id: params.id,

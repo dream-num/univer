@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment",
-    "version": "1.2.0",
+    "version": "1.5.2",
     "private": false,
     "description": "Thread comment integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -27,6 +27,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts",
         "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
@@ -45,6 +46,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
             },
             "./facade": {
                 "import": "./lib/es/facade.js",
@@ -69,9 +75,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -86,7 +92,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "7.8.2",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.4"
+        "tsrs": "7.1.0-beta.tsrs2",
+        "vitest": "^5.1.1"
     }
 }

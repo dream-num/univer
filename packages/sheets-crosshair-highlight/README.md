@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-crosshair-highlight` | `UniverSheetsCrosshairHighlight` | Yes | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-crosshair-highlight` | `UniverSheetsCrosshairHighlight` | Yes | Yes | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-crosshair-highlight
 npm install @univerjs/sheets-crosshair-highlight
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/sheets-crosshair-highlight/lib/index.css';
@@ -33,6 +33,10 @@ univer.registerPlugin(UniverSheetsCrosshairHighlightPlugin);
 
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
+
+## Integration Notes
+
+- Import `@univerjs/sheets-crosshair-highlight/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

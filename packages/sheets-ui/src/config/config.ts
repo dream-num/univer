@@ -36,10 +36,24 @@ export interface IUniverSheetsUIConfig {
     allowArrowKeyWrapOnSheetBoundary?: boolean;
 
     /**
+     * Whether to animate the selection outline when clicking between cells on desktop.
+     * The system preference for reduced motion takes precedence.
+     * @default true
+     */
+    selectionAnimation?: boolean;
+
+    /**
      * The maximum count of rows triggering auto height. This is used to avoid performance issue.
      * @default 1000
      */
     maxAutoHeightCount?: number;
+
+    /**
+     * Whether to show the desktop fill handle for dragging and double-click filling.
+     * Does not affect fill commands or Facade APIs.
+     * @default true
+     */
+    enableFillHandle?: boolean;
 
     /**
      * Whether to show the formula bar.
@@ -101,6 +115,13 @@ export interface IUniverSheetsUIConfig {
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
+
+    /**
+     * Whether to ask for confirmation before a dragged range overwrites existing cell content.
+     * Disabling the warning does not bypass move validation or undo/redo.
+     * @default true
+     */
+    warnBeforeDragOverwrite?: boolean;
 
     /** The config of the scroll bar. */
     scrollConfig?: IScrollBarProps;

@@ -16,12 +16,12 @@
 
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
-import type { IObjectListPanelBaseProps, IObjectListPanelItem } from '../ObjectListPanelBase';
 import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IObjectListPanelBaseProps, IObjectListPanelItem } from '../ObjectListPanelBase';
 import enUS from '../../../locale/en-US';
 import { MobileObjectListPanel } from '../MobileObjectListPanel';
 import { ObjectListPanelBase } from '../ObjectListPanelBase';
@@ -90,6 +90,31 @@ describe.each([
         );
     }
 
+    it('selects an object without focusing a name editor and renames it through details', async () => {
+        const onSelect = vi.fn();
+        const onCommitName = vi.fn();
+        const item = { id: 'a', name: 'Offscreen shape', visible: true };
+        const view = await render(panel([item], { onSelect, onCommitName }));
+        const button = getButton(item.name);
+        await act(async () => {
+            button.focus();
+            button.click();
+        });
+        expect(onSelect).toHaveBeenCalledExactlyOnceWith('a', false);
+        expect(document.activeElement).toBe(button);
+        expect(container.querySelector('input[aria-label="Object name"]')).toBeNull();
+
+        await view.rerender(panel([item], { onSelect, onCommitName, selectedIds: ['a'] }));
+        const input = container.querySelector<HTMLInputElement>('input[aria-label="Object name"]')!;
+        await act(async () => {
+            input.focus();
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'Recovered shape');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        await act(async () => input.blur());
+        expect(onCommitName).toHaveBeenCalledExactlyOnceWith('a', 'Recovered shape');
+    });
+
     it('switches both bulk actions from current model state, including external updates', async () => {
         const original = [{ id: 'a', name: 'A', visible: true }, { id: 'b', name: 'B', visible: true }];
         const view = await render(panel(original));
@@ -156,6 +181,6 @@ describe.each([
         await act(async () => description.blur());
         expect(onCommitDescription).toHaveBeenCalledExactlyOnceWith('a', 'New description');
         await view.rerender(panel([{ ...item, description: 'External update' }], props));
-        expect(description.value).toBe('External update');
+        expect(container.querySelector('textarea')!.value).toBe('External update');
     });
 });

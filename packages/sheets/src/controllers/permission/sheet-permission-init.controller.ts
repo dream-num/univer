@@ -14,23 +14,43 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IMutationCommonParams, Workbook } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
+import {
+    Disposable,
+    IAuthzIoService,
+    ICommandService,
+    Inject,
+    IPermissionService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    RedoCommandId,
+    UndoCommandId,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
+import { UnitObject } from '@univerjs/protocol';
+import { skip } from 'rxjs';
 import type { IAddRangeProtectionMutationParams } from '../../commands/mutations/add-range-protection.mutation';
 import type { IAddWorksheetProtectionParams } from '../../commands/mutations/add-worksheet-protection.mutation';
 import type { ISetWorksheetPermissionPointsMutationParams } from '../../commands/mutations/set-worksheet-permission-points.mutation';
-import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { UnitObject } from '@univerjs/protocol';
-import { skip } from 'rxjs';
 import { AddRangeProtectionMutation } from '../../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetProtectionMutation } from '../../commands/mutations/add-worksheet-protection.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../../commands/mutations/set-worksheet-permission-points.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
-import { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../../services/permission';
 import { baseProtectionActions, getAllRangePermissionPoint } from '../../services/permission/range-permission/util';
-import { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '../../services/permission/workbook-permission';
+import {
+    defaultWorkbookPermissionPoints,
+    getAllWorkbookPermissionPoint,
+} from '../../services/permission/workbook-permission/util';
 import { WorkbookPermissionService } from '../../services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
+import {
+    defaultWorksheetPermissionPoint,
+    getAllWorksheetPermissionPoint,
+    getAllWorksheetPermissionPointByPointPanel,
+} from '../../services/permission/worksheet-permission/utils';
+import { WorksheetProtectionPointModel } from '../../services/permission/worksheet-permission/worksheet-permission-point.model';
+import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission/worksheet-permission-rule.model';
 
 export class SheetPermissionInitController extends Disposable {
     constructor(
@@ -46,6 +66,7 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
+        this._clearHistoryOnProtectionApplied();
     }
 
     public initPermission() {
@@ -56,7 +77,6 @@ export class SheetPermissionInitController extends Disposable {
         this._initWorksheetPermissionPointsChange();
         this._initWorkbookPermissionFromSnapshot();
         this._initUserChange();
-        this._refreshPermissionByCollaCreate();
     }
 
     public refreshRangeProtectPermission() {
@@ -490,19 +510,31 @@ export class SheetPermissionInitController extends Disposable {
         }
     }
 
-    private _refreshPermissionByCollaCreate() {
+    private _clearHistoryOnProtectionApplied() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command, options) => {
-                if (options?.fromCollab) {
-                    if (
-                        command.id === AddRangeProtectionMutation.id
-                        || command.id === AddWorksheetProtectionMutation.id
-                        || command.id === SetWorksheetPermissionPointsMutation.id
-                    ) {
-                        const params = command.params as IAddRangeProtectionMutationParams | IAddWorksheetProtectionParams | ISetWorksheetPermissionPointsMutationParams;
-                        this._undoRedoService.clearUndoRedo(params.unitId);
-                    }
+                if (
+                    command.id !== AddRangeProtectionMutation.id
+                    && command.id !== AddWorksheetProtectionMutation.id
+                    && command.id !== SetWorksheetPermissionPointsMutation.id
+                ) {
+                    return;
                 }
+
+                const params = command.params as (
+                    IAddRangeProtectionMutationParams
+                    | IAddWorksheetProtectionParams
+                    | ISetWorksheetPermissionPointsMutationParams
+                ) & IMutationCommonParams;
+                // Structural undo/redo can restore existing protection ranges along with rows or columns.
+                if (!options?.fromCollab && (params.trigger === UndoCommandId || params.trigger === RedoCommandId)) {
+                    return;
+                }
+                if (command.id === AddRangeProtectionMutation.id && !(params as IAddRangeProtectionMutationParams).rules.length) {
+                    return;
+                }
+
+                this._undoRedoService.clearUndoRedo(params.unitId);
             })
         );
     }

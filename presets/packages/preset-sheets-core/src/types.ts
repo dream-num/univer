@@ -40,12 +40,15 @@ export interface IUniverSheetsPresetConfig extends
     Pick<
         IUniverSheetsUIConfig,
         'maxAutoHeightCount'
+        | 'enableFillHandle'
         | 'clipboardConfig'
+        | 'warnBeforeDragOverwrite'
         | 'scrollConfig'
         | 'protectedRangeShadow'
         | 'protectedRangeUserSelector'
         | 'disableForceStringAlert'
         | 'disableForceStringMark'
         | 'allowArrowKeyWrapOnSheetBoundary'
+        | 'selectionAnimation'
     > {
 }

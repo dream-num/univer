@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { RefObject } from 'react';
+import type { DependencyList, RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 
 export {
     connectDependencies,
@@ -27,12 +27,18 @@ export {
     RediProvider,
     useDependency,
     useInjector,
-    useObservable,
     useUpdateBinder,
     WithDependency,
 } from '@wendellhu/redi/react-bindings';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
+
+interface IObservableState<T> {
+    dependencies: DependencyList;
+    source: Observable<T> | null;
+    value: T | undefined;
+    hasSyncValue: boolean;
+}
 
 function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
     if (typeof o === 'function') {
@@ -42,13 +48,49 @@ function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
     return o;
 }
 
-declare module '@univerjs/ui' {
-    export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
-    export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
-    export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: undefined): T | undefined;
-    export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T, shouldHaveSyncValue?: boolean, deps?: any[]): T;
-    export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: undefined, shouldHaveSyncValue: true, deps?: any[]): T;
-    export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: any[]): T | undefined;
+export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T, shouldHaveSyncValue?: boolean, deps?: DependencyList): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: undefined, shouldHaveSyncValue: true, deps?: DependencyList): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: DependencyList): T | undefined;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: DependencyList): T | undefined {
+    if (typeof observable === 'function' && !deps) {
+        throw new Error('Expected deps to be provided when observable is a function!');
+    }
+
+    const dependencies = deps ?? [observable];
+    const stateRef = useRef<IObservableState<T> | undefined>(undefined);
+    const previous = stateRef.current;
+    if (!previous || dependencies.length !== previous.dependencies.length || dependencies.some((value, index) => !Object.is(value, previous.dependencies[index]))) {
+        const state: IObservableState<T> = {
+            dependencies: [...dependencies],
+            source: observable ? unwrap(observable) : null,
+            value: observable && previous ? previous.value : defaultValue,
+            hasSyncValue: false,
+        };
+        // Read synchronous state without retaining a subscription from an abandoned render.
+        const subscription = state.source?.subscribe((value) => {
+            state.value = value;
+            state.hasSyncValue = true;
+        });
+        subscription?.unsubscribe();
+        stateRef.current = state;
+    }
+    const state = stateRef.current!;
+    const [, refresh] = useReducer((revision: number) => revision + 1, 0);
+
+    useLayoutEffect(() => {
+        const subscription = state.source?.subscribe((value) => {
+            state.value = value;
+            refresh();
+        });
+        return () => subscription?.unsubscribe();
+    }, [state]);
+
+    if (shouldHaveSyncValue && !state.hasSyncValue) {
+        throw new Error('Expected a synchronous value from the observable.');
+    }
+
+    return state.value;
 }
 
 export function useObservableRef<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T): RefObject<Nullable<T>> {

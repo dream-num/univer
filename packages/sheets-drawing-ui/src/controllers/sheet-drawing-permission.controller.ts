@@ -15,13 +15,13 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
 import type {
     IInsertSheetDrawingCommandParams,
     IRemoveSheetDrawingCommandParams,
     ISetDrawingArrangeCommandParams,
     ISetDrawingCommandParams,
 } from '@univerjs/sheets-drawing';
-import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
     ICommandService,
@@ -29,6 +29,7 @@ import {
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
+    SheetTypes,
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
@@ -49,6 +50,11 @@ import {
     SetSheetDrawingPlacementCommand,
 } from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
+import type { IFlipSheetDrawingCommandParams } from '../commands/commands/flip-drawings.command';
+import type { LocaleKey } from '../locale/types';
+import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 const drawingObjectTypes = [
     ObjectType.IMAGE, // floating image
@@ -74,6 +80,7 @@ export class SheetDrawingPermissionController extends Disposable {
         this._initViewPermissionChange();
         this._initEditPermissionChange();
         this._initCommandPermissionCheck();
+        this._initChartSheetCommandPermissionCheck();
     }
 
     private _initDrawingVisible() {
@@ -430,6 +437,40 @@ export class SheetDrawingPermissionController extends Disposable {
                     },
                 })
         );
+    }
+
+    private _initChartSheetCommandPermissionCheck(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id === GroupSheetDrawingCommand.id || command.id === UngroupSheetDrawingCommand.id) {
+                for (const group of (command.params as IDrawingGroupUpdateParam[] | undefined) ?? []) {
+                    this._checkChartSheetEditPermission(group.parent.unitId, group.parent.subUnitId);
+                    for (const child of group.children) {
+                        this._checkChartSheetEditPermission(child.unitId, child.subUnitId);
+                    }
+                }
+                return;
+            }
+            if (command.id === FlipSheetDrawingCommand.id) {
+                const params = command.params as IFlipSheetDrawingCommandParams | undefined;
+                for (const drawing of params?.drawings ?? []) {
+                    this._checkChartSheetEditPermission(drawing.unitId, drawing.subUnitId);
+                }
+            }
+        }));
+    }
+
+    private _checkChartSheetEditPermission(unitId: string, subUnitId: string): void {
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        if (worksheet?.getConfig().type !== SheetTypes.CHART) {
+            return;
+        }
+        if (!this._sheetPermissionCheckController.permissionCheckWithoutRange({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission],
+        }, unitId, subUnitId)) {
+            this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
+        }
     }
 
     private _initCommandPermissionCheck() {

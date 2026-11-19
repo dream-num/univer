@@ -15,9 +15,10 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
+import type { FormulaCalculationCache } from '../../services/formula-cache.service';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { CellValueType } from '@univerjs/core';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
@@ -331,8 +332,49 @@ function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
     return keys;
 }
 
-function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array<[number, number]>> {
-    const index = new Map<string | number, Array<[number, number]>>();
+type EqualityIndex = Map<string | number, Array<[number, number]>>;
+
+/**
+ * Equality indexes keyed by the calculation pass they were built for.
+ *
+ * Range arrays are cached per calculation pass and are not mutated while the pass is
+ * running, so one index can serve every formula that reads the same range. Keying the
+ * outer map by the pass cache makes the whole entry disappear together with the pass,
+ * which is also why no change tracking is needed.
+ */
+const passEqualityIndexes = new WeakMap<FormulaCalculationCache, Map<ArrayValueObject, EqualityIndex>>();
+
+function getOrBuildEqualityIndex(
+    range: ArrayValueObject,
+    localIndexes: Map<ArrayValueObject, EqualityIndex>
+): EqualityIndex {
+    const calculationCache = range.getCalculationCache();
+    if (calculationCache == null || calculationCache.closed) {
+        let index = localIndexes.get(range);
+        if (index === undefined) {
+            index = buildEqualityIndex(range);
+            localIndexes.set(range, index);
+        }
+        return index;
+    }
+
+    let indexes = passEqualityIndexes.get(calculationCache);
+    if (indexes === undefined) {
+        indexes = new Map();
+        passEqualityIndexes.set(calculationCache, indexes);
+    }
+
+    let index = indexes.get(range);
+    if (index === undefined) {
+        index = buildEqualityIndex(range);
+        indexes.set(range, index);
+    }
+
+    return index;
+}
+
+function buildEqualityIndex(range: ArrayValueObject): EqualityIndex {
+    const index: EqualityIndex = new Map();
     range.iterator((value, row, column) => {
         if (!value) {
             return;
@@ -351,7 +393,7 @@ function buildEqualityIndex(range: ArrayValueObject): Map<string | number, Array
 }
 
 function getIndexedPositions(
-    index: Map<string | number, Array<[number, number]>>,
+    index: EqualityIndex,
     keys: Array<string | number>,
     range: ArrayValueObject
 ): Array<[number, number]> | undefined {
@@ -400,31 +442,69 @@ function getExactCriteriaKeys(criteria: Nullable<BaseValueObject>): Array<string
     return keys.length > 0 ? keys : undefined;
 }
 
-function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string | number | undefined {
-    if (criteria.length === 0 || criteria.some((value) => getExactCriteriaKeys(value) === undefined)) {
-        return undefined;
+/**
+ * Upper bound of the repeated-criteria cache. Repeated criteria are few in practice
+ * (blank cells, a handful of keys); the bound guards against a criteria array that is
+ * entirely made of distinct values.
+ */
+const MAX_REPEATED_CRITERIA_RESULTS = 4096;
+
+/**
+ * Build a cache key for one tuple of criteria values.
+ *
+ * Every value kind gets its own tagged key instead of requiring an exact equality
+ * match, so repeated criteria — typically the trailing blank cells of a whole-column
+ * criteria reference — reuse a single evaluation instead of rescanning the range once
+ * per cell.
+ */
+function getCriteriaCacheKey(criteria: Array<Nullable<BaseValueObject>>): string {
+    let key = '';
+    for (const value of criteria) {
+        const segment = getCriteriaKeySegment(value);
+        // Length-prefix every segment: criteria text may contain the separator, and an
+        // ambiguous join would let two different tuples share one cache entry.
+        key += `${segment.length}:${segment}`;
     }
-    const values = criteria.map((value) => value!.getValue());
-    return values.length === 1 ? values[0] as string | number : JSON.stringify(values);
+    return key;
+}
+
+function getCriteriaKeySegment(value: Nullable<BaseValueObject>): string {
+    if (value == null || value.isNull()) {
+        return 'n';
+    }
+    if (value.isBoolean()) {
+        return `b:${value.getValue()}`;
+    }
+    if (value.isNumber()) {
+        const pattern = value.getPattern();
+        // Keep the exact double. Every comparison is a function of it, but two values
+        // that `stripErrorMargin` folds together can still compare differently: date
+        // comparisons round the serial at 1e-8 before comparing, so 45000.00000000499
+        // and 45000.000000005006 land on different dates.
+        const serial = String(value.getValue());
+        // A date-formatted serial also compares differently from a plain number of the
+        // same value, so the pattern is part of the key.
+        return pattern ? `#:${pattern}:${serial}` : `#:${serial}`;
+    }
+    if (value.isError()) {
+        return `e:${value.getValue()}`;
+    }
+    // Text criteria may be parsed as dates, which depends on the date system.
+    return `s:${value.getDateSystem()}:${value.getValue()}`;
 }
 
 function getCriteriaPositions(
     pairs: Array<{ range: ArrayValueObject; criteriaArray: ArrayValueObject }>,
-    indexes: Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>,
     row: number,
-    column: number
+    column: number,
+    localIndexes: Map<ArrayValueObject, EqualityIndex>
 ): Array<[number, number]> | undefined {
     for (const { range, criteriaArray } of pairs) {
         const keys = getExactCriteriaKeys(criteriaArray.get(row, column));
         if (!keys) {
             continue;
         }
-        let index = indexes.get(range);
-        if (!index) {
-            index = buildEqualityIndex(range);
-            indexes.set(range, index);
-        }
-        const positions = getIndexedPositions(index, keys, range);
+        const positions = getIndexedPositions(getOrBuildEqualityIndex(range, localIndexes), keys, range);
         // ponytail: stop at the first selective index; compare all criteria on its candidates.
         if (positions !== undefined) {
             return positions;
@@ -434,20 +514,13 @@ function getCriteriaPositions(
 
 function getConditionalAggregateResult(
     formulaName: string,
-    comparison: ArrayValueObject,
-    targetRange?: ArrayValueObject
+    matchedCount: number,
+    picked?: ArrayValueObject
 ): BaseValueObject | undefined {
     if (formulaName === 'COUNTIFS') {
-        let count = 0;
-        comparison.iterator((value) => {
-            if (value?.isBoolean() && value.getValue() === true) {
-                count++;
-            }
-        });
-        return NumberValueObject.create(count);
+        return NumberValueObject.create(matchedCount);
     }
 
-    const picked = targetRange?.pick(comparison);
     switch (formulaName) {
         case 'SUMIFS':
             return picked!.sum();
@@ -507,9 +580,12 @@ export function getPairedRangeAndCriteriaResult(
         return criteria.isArray() &&
             (criteria as ArrayValueObject).getRowCount() * (criteria as ArrayValueObject).getColumnCount() > 1;
     });
-    const useEqualityIndex = isNumberSensitive && maxRowLength * maxColumnLength > 1 && arrayPairs.length > 0;
-    const repeatedResults = new Map<string | number, BaseValueObject>();
-    const equalityIndexes = new Map<ArrayValueObject, Map<string | number, Array<[number, number]>>>();
+    const hasArrayResult = maxRowLength * maxColumnLength > 1;
+    const useEqualityIndex = isNumberSensitive && hasArrayResult && arrayPairs.length > 0;
+    // A single cell result is evaluated once, so caching repeated criteria only pays off for arrays.
+    const useRepeatedCriteria = hasArrayResult && arrayPairs.length > 0;
+    const repeatedResults = new Map<string, BaseValueObject>();
+    const localIndexes = new Map<ArrayValueObject, EqualityIndex>();
 
     /**
      * Iterate through all criteria values for each dimension, calculate the comparison result with the corresponding range, and then calculate the Boolean intersection of all comparison results as the final result for that dimension criteria value.
@@ -521,18 +597,18 @@ export function getPairedRangeAndCriteriaResult(
     firstPair.criteriaArray.iterator((_, rowIndex, columnIndex) => {
         let finalCompareResult: ArrayValueObject | undefined;
         let positions: Array<[number, number]> | undefined;
-        const cacheKey = useEqualityIndex
+        const cacheKey = useRepeatedCriteria
             ? getCriteriaCacheKey(arrayPairs.map(({ criteriaArray }) => criteriaArray.get(rowIndex, columnIndex)))
             : undefined;
         const cached = cacheKey === undefined ? undefined : repeatedResults.get(cacheKey);
-        if (cached) {
+        if (cached !== undefined) {
             results[rowIndex] ??= [];
             results[rowIndex][columnIndex] = cached;
             return;
         }
 
         if (useEqualityIndex) {
-            positions = getCriteriaPositions(arrayPairs, equalityIndexes, rowIndex, columnIndex);
+            positions = getCriteriaPositions(arrayPairs, rowIndex, columnIndex, localIndexes);
             if (positions?.length === 0) {
                 results[rowIndex] ??= [];
                 results[rowIndex][columnIndex] = formulaName === 'AVERAGEIFS'
@@ -540,6 +616,21 @@ export function getPairedRangeAndCriteriaResult(
                     : NumberValueObject.create(0);
                 return;
             }
+        }
+
+        /**
+         * Indexed positions already are the match set, so a single pair can be aggregated
+         * without materializing the comparison mask or picking through it.
+         */
+        if (positions !== undefined && rangeAndCriteriaArrays.length === 1) {
+            const picked = targetRange ? pickRangePositions(targetRange, positions) : undefined;
+            const result = getConditionalAggregateResult(formulaName, positions.length, picked);
+            results[rowIndex] ??= [];
+            results[rowIndex][columnIndex] = result as BaseValueObject;
+            if (cacheKey !== undefined && result && repeatedResults.size < MAX_REPEATED_CRITERIA_RESULTS) {
+                repeatedResults.set(cacheKey, result);
+            }
+            return;
         }
 
         rangeAndCriteriaArrays.forEach(({ range: sourceRange, criteriaArray }) => {
@@ -568,14 +659,25 @@ export function getPairedRangeAndCriteriaResult(
         });
 
         const aggregateRange = positions === undefined || !targetRange ? targetRange : pickRangePositions(targetRange, positions);
-        const result = getConditionalAggregateResult(formulaName, finalCompareResult as ArrayValueObject, aggregateRange);
+        let matchedCount = 0;
+        if (formulaName === 'COUNTIFS') {
+            (finalCompareResult as ArrayValueObject).iterator((value) => {
+                if (value?.isBoolean() && value.getValue() === true) {
+                    matchedCount++;
+                }
+            });
+        }
+        const picked = formulaName === 'COUNTIFS' || aggregateRange === undefined
+            ? undefined
+            : aggregateRange.pick(finalCompareResult as ArrayValueObject);
+        const result = getConditionalAggregateResult(formulaName, matchedCount, picked);
 
         if (!results[rowIndex]) {
             results[rowIndex] = [];
         }
 
         results[rowIndex][columnIndex] = result as BaseValueObject;
-        if (cacheKey !== undefined && result) {
+        if (cacheKey !== undefined && result && repeatedResults.size < MAX_REPEATED_CRITERIA_RESULTS) {
             repeatedResults.set(cacheKey, result);
         }
     });

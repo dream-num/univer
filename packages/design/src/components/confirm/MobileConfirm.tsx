@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IConfirmProps } from './Confirm';
 import { useContext } from 'react';
+import type { IConfirmProps } from './Confirm';
 import { MobileActionRowGroup } from '../action-row/MobileActionRowGroup';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -43,8 +43,8 @@ export function MobileConfirm(props: IMobileConfirmProps) {
             maskClosable={false}
             footer={(
                 <MobileActionRowGroup>
-                    {closable && <Button onClick={onClose}>{cancelText ?? locale?.Confirm.cancel}</Button>}
-                    <Button variant="primary" onClick={onConfirm}>
+                    {closable && <Button onClick={onClose} size="middle">{cancelText ?? locale?.Confirm.cancel}</Button>}
+                    <Button variant="primary" onClick={onConfirm} size="middle">
                         {confirmText ?? locale?.Confirm.confirm}
                     </Button>
                 </MobileActionRowGroup>

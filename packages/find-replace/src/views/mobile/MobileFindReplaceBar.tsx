@@ -15,12 +15,12 @@
  */
 
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Input, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import {
     CloseFindDialogOperation,
@@ -188,7 +188,7 @@ function MobileFindReplaceBarContent() {
                     />
                     <Input
                         ref={inputRef}
-                        size="middle"
+                        size="small"
                         allowClear
                         value={findValue}
                         placeholder={localeService.t<LocaleKey>('find-replace.dialog.find-placeholder')}
@@ -234,7 +234,7 @@ function MobileFindReplaceBarContent() {
             {state.replaceRevealed && (
                 <div className="univer-flex univer-gap-1 univer-pl-9">
                     <Input
-                        size="middle"
+                        size="small"
                         className="univer-min-w-0 univer-flex-1"
                         value={state.replaceString}
                         placeholder={localeService.t<LocaleKey>('find-replace.dialog.replace-placeholder')}
@@ -273,7 +273,7 @@ function IconButton(props: IIconButtonProps) {
             disabled={props.disabled}
             variant="text"
             size="icon"
-            className="univer-size-9 univer-flex-none univer-rounded-full"
+            className="univer-flex-none univer-rounded-full"
             onClick={props.onClick}
         >
             {props.children}
@@ -293,7 +293,7 @@ function ActionButton(props: IActionButtonProps) {
             type="button"
             disabled={props.disabled}
             variant="primary"
-            size="large"
+            size="middle"
             className="univer-flex-none"
             onClick={props.onClick}
         >

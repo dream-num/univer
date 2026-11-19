@@ -40,6 +40,16 @@ describe('Test imreal function', () => {
             expect(result3.getValue()).toBe(0);
         });
 
+        it('Value is complex string with a sign inside the imaginary part', () => {
+            const inumber = StringValueObject.create('1+2-3i');
+            const result = testFunction.calculate(inumber);
+            expect(result.getValue()).toBe(1);
+
+            const inumber2 = StringValueObject.create('1-2+3i');
+            const result2 = testFunction.calculate(inumber2);
+            expect(result2.getValue()).toBe(ErrorType.NUM);
+        });
+
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);

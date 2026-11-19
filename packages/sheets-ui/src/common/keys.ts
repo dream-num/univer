@@ -26,6 +26,7 @@ export const EMBEDDING_CELL_EDITOR_COMPONENT_KEY = 'EMBEDDING_CELL_EDITOR_COMPON
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
+    CHART_PAGE = '__ChartSheetPage__',
     ROW = '__SpreadsheetRowHeader__',
     COLUMN = '__SpreadsheetColumnHeader__',
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',

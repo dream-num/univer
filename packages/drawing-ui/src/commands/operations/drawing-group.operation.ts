@@ -39,8 +39,11 @@ export const SetDrawingGroupOperation: IOperation<IDrawingGroupOperationParams> 
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
-        const drawings = params.drawings || drawingManagerService.getFocusDrawings();
+        const drawings = params?.drawings || drawingManagerService.getFocusDrawings();
 
+        if (!drawingManagerService.canExecuteCommand({ id: SetDrawingGroupOperation.id, params: { ...params, drawings } })) {
+            return false;
+        }
         if (drawings.length < 2) return false;
         if (!drawings.every((drawing) => isGroupableDrawingType(drawing.drawingType))) return false;
 

@@ -63,23 +63,30 @@ import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.c
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
 import type { IClearSelectionFormatCommandParams } from '../../commands/commands/clear-selection-format.command';
+import type { ICopySheetCommandParams } from '../../commands/commands/copy-worksheet.command';
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
 import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
 import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import type { IInsertSheetCommandParams } from '../../commands/commands/insert-sheet.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type {
     IRemoveColByRangeCommandParams,
     IRemoveRowByRangeCommandParams,
 } from '../../commands/commands/remove-row-col.command';
+import type { IRemoveSheetCommandParams } from '../../commands/commands/remove-sheet.command';
 import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
 import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
+import type { ICancelFrozenCommandParams, ISetFrozenCommandParams } from '../../commands/commands/set-frozen.command';
+import type { ISetGridlinesColorCommandParams } from '../../commands/commands/set-gridlines-color.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
 import type { ISetStyleCommandParams } from '../../commands/commands/set-style.command';
+import type { ISetTabColorCommandParams } from '../../commands/commands/set-tab-color.command';
 import type { ISetColWidthCommandParams } from '../../commands/commands/set-worksheet-col-width.command';
+import type { ISetWorksheetHiddenCommandParams } from '../../commands/commands/set-worksheet-hide.command';
 import type { ISetWorksheetNameCommandParams } from '../../commands/commands/set-worksheet-name.command';
 import type { ISetWorksheetOrderCommandParams } from '../../commands/commands/set-worksheet-order.command';
 import type {
@@ -88,34 +95,42 @@ import type {
 } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
+import type { IToggleGridlinesCommandParams } from '../../commands/commands/toggle-gridlines.command';
 import type { LocaleKey } from '../../locale/types';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../../commands/commands/clear-selection-format.command';
+import { CopySheetCommand } from '../../commands/commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertDefinedNameCommand } from '../../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../../commands/commands/insert-row-col.command';
+import { InsertSheetCommand } from '../../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveDefinedNameCommand } from '../../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
+import { RemoveSheetCommand } from '../../commands/commands/remove-sheet.command';
 import { SetBorderCommand } from '../../commands/commands/set-border.command';
 import {
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.command';
+import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/set-frozen.command';
+import { SetGridlinesColorCommand } from '../../commands/commands/set-gridlines-color.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import {
     SetSelectedRowsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '../../commands/commands/set-row-visible.command';
 import { SetStyleCommand } from '../../commands/commands/set-style.command';
+import { SetTabColorCommand } from '../../commands/commands/set-tab-color.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetHideCommand } from '../../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../../commands/commands/set-worksheet-order.command';
 import {
@@ -125,6 +140,7 @@ import {
 } from '../../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
 import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
+import { ToggleGridlinesCommand } from '../../commands/commands/toggle-gridlines.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
@@ -132,8 +148,11 @@ import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import { RangeProtectionPermissionEditPoint } from '../../services/permission/permission-point/range/edit';
 import { RangeProtectionPermissionViewPoint } from '../../services/permission/permission-point/range/view';
+import { WorkbookCopySheetPermission } from '../../services/permission/permission-point/workbook/copy-sheet';
+import { WorkbookCreateSheetPermission } from '../../services/permission/permission-point/workbook/create-sheet';
 import { WorkbookDeleteColumnPermission } from '../../services/permission/permission-point/workbook/delete-column';
 import { WorkbookDeleteRowPermission } from '../../services/permission/permission-point/workbook/delete-row';
+import { WorkbookDeleteSheetPermission } from '../../services/permission/permission-point/workbook/delete-sheet';
 import { WorkbookEditablePermission } from '../../services/permission/permission-point/workbook/editable';
 import { WorkbookHideSheetPermission } from '../../services/permission/permission-point/workbook/hide-sheet';
 import { WorkbookInsertColumnPermission } from '../../services/permission/permission-point/workbook/insert-column';
@@ -484,9 +503,34 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
                 break;
             case SetWorksheetShowCommand.id:
-                params = commandInfo.params as ISetWorksheetShowCommandParams;
+            case SetWorksheetHideCommand.id:
+                params = commandInfo.params as ISetWorksheetShowCommandParams | ISetWorksheetHiddenCommandParams;
 
                 permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookHideSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case SetTabColorCommand.id:
+                params = commandInfo.params as ISetTabColorCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case InsertSheetCommand.id:
+                params = commandInfo.params as IInsertSheetCommandParams | undefined;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookCreateSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case RemoveSheetCommand.id:
+                params = commandInfo.params as IRemoveSheetCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookDeleteSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case CopySheetCommand.id:
+                params = commandInfo.params as ICopySheetCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookCopySheetPermission], params);
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
                 break;
 
@@ -536,6 +580,52 @@ export class SheetPermissionCheckController extends Disposable {
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+
+            // freeze pane
+            case SetFrozenCommand.id:
+            case CancelFrozenCommand.id:
+                params = commandInfo.params as ISetFrozenCommandParams | ICancelFrozenCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // toggle gridlines
+            case ToggleGridlinesCommand.id:
+                params = commandInfo.params as IToggleGridlinesCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // set gridlines color
+            case SetGridlinesColorCommand.id:
+                params = commandInfo.params as ISetGridlinesColorCommandParams | undefined;
+
+                permission = this.permissionCheckWithoutRange(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission],
+                    },
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
                 break;
 
             // insert/delete with move range
@@ -1051,7 +1141,10 @@ export class SheetPermissionCheckController extends Disposable {
         return this.permissionCheckWithRanges(permissionTypes, [_range], unitId, subUnitId);
     }
 
-    private _permissionCheckByWorksheetCommand(workbookPermissionTypes: WorkbookPermissionPointConstructor[], params: ISetWorksheetOrderCommandParams | ISetWorksheetNameCommandParams | ISetWorksheetShowCommandParams) {
+    private _permissionCheckByWorksheetCommand(
+        workbookPermissionTypes: WorkbookPermissionPointConstructor[],
+        params?: { unitId?: string; subUnitId?: string }
+    ) {
         const target = getSheetCommandTarget(this._univerInstanceService, params);
         if (!target) {
             this._worksheetProtectionRuleModel.resetOrder();

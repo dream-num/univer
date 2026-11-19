@@ -21,10 +21,6 @@ import type {
     ITableFilterItem,
 } from '@univerjs/sheets-table';
 import type { MobileDrawerSnap } from '@univerjs/ui';
-import type { ITableFilterPanelInfo } from '../../controllers/sheet-table-component.controller';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableFilterColorList } from '../../types';
-import type { IConditionInfo } from './type';
 import { generateRandomId, ICommandService, IPermissionService, IUndoRedoService, LocaleService } from '@univerjs/core';
 import { Button, MobileActionRow, MobileActionRowGroup, resetButtonClassName } from '@univerjs/design';
 import {
@@ -50,6 +46,10 @@ import {
 import { MobileDrawer, useDependency } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import type { ITableFilterPanelInfo } from '../../controllers/sheet-table-component.controller';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableFilterColorList } from '../../types';
+import type { IConditionInfo } from './type';
 import { SheetsTableMobileComponentController } from '../../controllers/mobile/sheet-table-component.controller';
 import { SheetsTableUiService } from '../../services/sheets-table-ui.service';
 import { FilterByEnum } from '../../types';
@@ -303,10 +303,10 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
                             "
                         >
                             <MobileActionRowGroup>
-                                <Button onClick={closeDetail}>
+                                <Button onClick={closeDetail} size="middle">
                                     {localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}
                                 </Button>
-                                <Button variant="primary" onClick={() => applyFilter().catch(() => undefined)}>
+                                <Button variant="primary" onClick={() => applyFilter().catch(() => undefined)} size="middle">
                                     {localeService.t<LocaleKey>('sheets-table-ui.filter.confirm')}
                                 </Button>
                             </MobileActionRowGroup>

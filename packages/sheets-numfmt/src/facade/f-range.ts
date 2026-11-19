@@ -26,6 +26,11 @@ export interface IFRangeSheetsNumfmtMixin {
 
     /**
      * Set the number format of the range.
+     *
+     * For the same format across multiple cells, call this method once on the entire target range.
+     * For different formats per cell, prefer {@link FRange.setNumberFormats} with a two-dimensional array
+     * matching the range dimensions instead of calling this method for each cell.
+     *
      * @param {string} pattern - The number format pattern.
      * @returns {FRange} The FRange instance for chaining.
      * @example
@@ -68,6 +73,10 @@ export interface IFRangeSheetsNumfmtMixin {
 
     /**
      * Get the number formatting of the top-left cell of the given range. Returns an empty string when no number format is set, even if the cell contains a value.
+     *
+     * For multiple cells, call {@link FRange.getNumberFormats} once on the full target range
+     * instead of calling this method for each cell.
+     *
      * @returns {string} The number format of the top-left cell of the range.
      * @example
      * ```ts

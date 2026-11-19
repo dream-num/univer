@@ -15,9 +15,9 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import type { ISuperTable } from '../../basics/common';
-import type { ISuperTableOptionParam } from '../../services/super-table.service';
 import { CommandType } from '@univerjs/core';
+import type { ISuperTable, ISuperTableData } from '../../basics/common';
+import type { ISuperTableOptionParam } from '../../services/super-table.service';
 import { ISuperTableService } from '../../services/super-table.service';
 
 export interface ISetSuperTableMutationSearchParam {
@@ -31,7 +31,8 @@ export interface IRemoveSuperTableMutationParam extends ISetSuperTableMutationSe
 
 export interface ISetSuperTableMutationParam extends ISetSuperTableMutationSearchParam {
     oldTableName?: string;
-    reference: ISuperTable;
+    /** Plain column data for RPC; Map remains accepted for existing local callers. */
+    reference: ISuperTableData | ISuperTable;
 }
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.

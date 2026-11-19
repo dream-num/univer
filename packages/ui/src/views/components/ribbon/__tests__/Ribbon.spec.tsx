@@ -19,14 +19,15 @@
  */
 
 import type { ComponentType } from 'react';
-import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, render } from '@testing-library/react';
 import { ICommandService, Injector, LocaleService } from '@univerjs/core';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { ContextMenuHostService, IContextMenuHostService } from '../../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { RibbonPosition } from '../../../../services/menu/types';
@@ -57,6 +58,7 @@ describe('Ribbon override chrome', () => {
 
     it('renders a title-only placeholder without the empty toolbar row', () => {
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, { useValue: createEmptyRibbonService() }],
@@ -96,6 +98,7 @@ describe('Ribbon override chrome', () => {
             children: [],
         }];
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
             [LocaleService, { useValue: { t: (key: string) => key } }],
             [IRibbonService, { useValue: createRibbonService(ribbon, RibbonPosition.INSERT) }],
@@ -184,6 +187,7 @@ describe('Ribbon override chrome', () => {
             setFakeToolbarVisible: (visible: boolean) => fakeToolbarVisible$.next(visible),
         };
         const injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ComponentManager],
             [IconManager, { useValue: { get: () => null } }],
             [ICommandService, { useValue: { executeCommand: () => {} } }],

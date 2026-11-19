@@ -19,6 +19,7 @@
  */
 
 import { CommandType, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { AddImageIcon, ChartIcon } from '@univerjs/icons';
 import { IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -32,6 +33,35 @@ const cleanups: Array<() => void> = [];
 afterEach(async () => {
     cleanups.splice(0).reverse().forEach((dispose) => dispose());
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+});
+
+it.each([
+    { icon: 'ChartIcon', expectedIcon: 'chart-icon' },
+    { icon: 'AddImageIcon', expectedIcon: 'add-image-icon' },
+    { icon: undefined, expectedIcon: 'autofill-double-icon' },
+])('renders the supplied icon or defaults to $expectedIcon', async ({ icon, expectedIcon }) => {
+    const univer = new Univer();
+    cleanups.push(() => univer.dispose());
+    const injector = univer.__getInjector();
+    injector.add([IconManager]);
+    injector.get(IconManager).register({ ChartIcon, AddImageIcon });
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: {} });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    cleanups.push(() => container.remove());
+    const root = createRoot(container);
+    cleanups.push(() => act(() => root.unmount()));
+
+    await act(async () => root.render(
+        <RediContext.Provider value={{ injector }}>
+            <ImagePopupMenu popup={{ extraProps: { menuItems: [], icon } }} />
+        </RediContext.Provider>
+    ));
+
+    expect(container.querySelector(`svg.univerjs-icon-${expectedIcon}`)).not.toBeNull();
 });
 
 it('dismisses the chart type tooltip while the dropdown is open and routes the selected type', async () => {

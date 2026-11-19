@@ -35,9 +35,6 @@ type FocusHandlerFn = (unitId: string) => void;
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
 const givingBackFocusElements = [
     'app-layout',
-    // 'univer-toolbar-btn',
-    // 'univer-menu-item',
-    'button',
     'sheet-bar-append-button',
     'render-canvas',
     'workbench-layout',

@@ -169,6 +169,7 @@ export class MobileHoverRenderController extends Disposable implements IRenderMo
         disposeSet.add(mainComponent.onPointerLeave$.subscribeEvent(() => {
             this._active = false;
             this._tapState = null;
+            this._hoverManagerService.triggerMouseLeave();
         }));
     }
 

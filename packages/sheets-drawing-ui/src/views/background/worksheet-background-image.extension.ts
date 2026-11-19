@@ -22,6 +22,8 @@ import { SHEET_EXTENSION_TYPE, SheetExtension } from '@univerjs/engine-render';
 export const WORKSHEET_BACKGROUND_IMAGE_EXTENSION_KEY = 'WorksheetBackgroundImageExtension';
 
 export class WorksheetBackgroundImageExtension extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === WorksheetBackgroundImageExtension;
+
     override uKey = WORKSHEET_BACKGROUND_IMAGE_EXTENSION_KEY;
     override type = SHEET_EXTENSION_TYPE.BACKGROUND;
 

@@ -45,6 +45,7 @@ export {
     getSheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,
+    transformDrawingsToChartSheet,
 } from './services/sheet-drawing-placement';
 export type {
     ISheetDrawingAbsolutePlacement,

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange } from '../types/type';
 import { generateRandomId } from '@univerjs/core';
+import type { ITableColumnJson, ITableFilterItem, ITableInfo, ITableJson, ITableOptions, ITableRange, TableMetaType } from '../types/type';
 import { tableThemeConfig } from '../controllers/table-theme.factory';
 import { TableColumn } from './table-column';
+import { isImportedTableWithoutTheme } from './table-dxf';
 import { TableFilters } from './table-filter';
 
 export class Table {
@@ -33,7 +34,7 @@ export class Table {
     private _range: ITableRange;
     private _columns: Map<string, TableColumn> = new Map();
     private _columnOrder: string[] = [];
-    tableMeta: Record<string, any>;
+    tableMeta: TableMetaType;
     private _tableFilters: TableFilters;
 
     private _subUnitId: string;
@@ -141,7 +142,7 @@ export class Table {
         this._columnOrder.splice(index, 1);
     }
 
-    setTableMeta(meta: Record<string, any>) {
+    setTableMeta(meta: TableMetaType) {
         this.tableMeta = meta;
     }
 
@@ -198,6 +199,9 @@ export class Table {
     }
 
     getTableStyleId() {
+        if (!this._tableStyleId && isImportedTableWithoutTheme(this)) {
+            return '';
+        }
         return this._tableStyleId ?? tableThemeConfig[0].name;
     }
 

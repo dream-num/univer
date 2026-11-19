@@ -15,8 +15,6 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISheetData } from '../../../basics/common';
-
 import {
     CellValueType,
     ILogService,
@@ -30,6 +28,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { ISheetData } from '../../../basics/common';
 import { FormulaDataModel } from '../../../models/formula-data.model';
 import { CalculateFormulaService, ICalculateFormulaService } from '../../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
@@ -43,6 +42,8 @@ import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,
 } from '../../../services/feature-calculation-manager.service';
+import { FormulaCacheService } from '../../../services/formula-cache.service';
+import { FormulaResultService } from '../../../services/formula-result.service';
 import { FunctionService, IFunctionService } from '../../../services/function.service';
 import {
     HyperlinkEngineFormulaService,
@@ -300,8 +301,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 }
 
 function registerFormulaDependencies(injector: Injector) {
+    injector.add([FormulaResultService, { useValue: { applyResult: async () => {}, applyTreeResult: async () => {} } } as never]);
     injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
     injector.add([Lexer]);
+    injector.add([FormulaCacheService]);
     injector.add([LexerTreeBuilder]);
 
     injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

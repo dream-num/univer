@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector } from '@univerjs/core';
+import { Injector, RANGE_TYPE } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ConditionalFormattingRangeTransformService } from '../conditional-formatting-range-transform.service';
 
@@ -89,5 +89,51 @@ describe('ConditionalFormattingRangeTransformService', () => {
             { startRow: 0, startColumn: 2, endRow: 0, endColumn: 2 },
             { startRow: 1, startColumn: 0, endRow: 1, endColumn: 1 },
         ]));
+    });
+
+    it('keeps a whole column type when a delta only rewrites cells inside the range', () => {
+        const service = createService();
+
+        const ranges = service.applyRangeDelta(
+            [{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }],
+            [{ startRow: 0, endRow: 16, startColumn: 0, endColumn: 0 }],
+            [{ startRow: 0, endRow: 16, startColumn: 0, endColumn: 0 }]
+        );
+
+        expect(ranges).toEqual([{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }]);
+    });
+
+    it('keeps a whole column range whole when the added range is already covered', () => {
+        const service = createService();
+
+        const ranges = service.addRanges(
+            [{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }],
+            [{ startRow: 10, endRow: 20, startColumn: 0, endColumn: 0 }]
+        );
+
+        expect(ranges).toEqual([{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }]);
+    });
+
+    it('does not keep a whole column type once only part of the range is left', () => {
+        const service = createService();
+
+        const ranges = service.subtractRanges(
+            [{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }],
+            [{ startRow: 0, endRow: 49, startColumn: 0, endColumn: 0 }]
+        );
+
+        expect(ranges).toEqual([{ startRow: 50, endRow: 99, startColumn: 0, endColumn: 0 }]);
+    });
+
+    it('does not keep a whole column type on a projected copy', () => {
+        const service = createService();
+
+        const ranges = service.copyIntersectingRanges(
+            [{ startRow: 0, endRow: 99, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN }],
+            { startRow: 0, endRow: 99, startColumn: 0, endColumn: 0 },
+            { row: 0, col: 1 }
+        );
+
+        expect(ranges).toEqual([{ startRow: 0, endRow: 99, startColumn: 1, endColumn: 1 }]);
     });
 });

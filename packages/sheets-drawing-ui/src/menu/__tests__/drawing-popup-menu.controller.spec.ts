@@ -21,20 +21,31 @@ import {
     IContextService,
     IImageIoService,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
+    SheetTypes,
     toDisposable,
 } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { OleUIService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
-function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
+function createControllerHarness(
+    initialDrawingType: DrawingTypeEnum,
+    icon?: string,
+    sheetType = SheetTypes.GRID
+) {
     const injector = new Injector();
+    injector.add([IPermissionService, { useValue: { getPermissionPoint: () => undefined } as never }]);
+    injector.add([OleUIService, { useValue: { registerHost: () => toDisposable(() => undefined) } as never }]);
     const createControl$ = new Subject<void>();
     const clearControl$ = new Subject<void>();
     const changing$ = new Subject<void>();
@@ -47,6 +58,7 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
         dispose: vi.fn(),
         canDispose: () => true,
     };
+    const renderedPosition$ = new Subject<never>();
     let drawingType = initialDrawingType;
     let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
     const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
@@ -73,10 +85,12 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
             }),
         } as never,
     }]);
+    const getFeatureMenuIcon = vi.fn(() => icon);
     injector.add([SheetCanvasPopManagerService, {
         useValue: {
             attachPopupToObject,
             getFeatureMenu: () => undefined,
+            getFeatureMenuIcon,
         } as never,
     }]);
     injector.add([IRenderManagerService, {
@@ -97,9 +111,17 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
     }]);
     injector.add([IUniverInstanceService, {
         useValue: {
+            getUnit: () => ({
+                getSheetBySheetId: () => ({ getConfig: () => ({ type: sheetType }) }),
+            }),
             getCurrentTypeOfUnit$: () => currentWorkbook$,
             getTypeOfUnitDisposed$: () => disposedWorkbook$,
             getAllUnitsForType: () => [{ getUnitId: () => 'unit-1' }],
+        } as never,
+    }]);
+    injector.add([SheetCanvasFloatDomManagerService, {
+        useValue: {
+            getFloatDomInfo: () => ({ position$: renderedPosition$ }),
         } as never,
     }]);
     injector.add([IMessageService, { useValue: { show: () => toDisposable(() => {}) } as never }]);
@@ -116,7 +138,7 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
             }],
         } as never,
     }]);
-    injector.add([IContextService, { useValue: new ContextService() }]);
+    injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
     injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
     injector.add([DrawingPopupMenuController]);
@@ -126,8 +148,10 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
         createControl$,
         drawingObject,
         getAttachedPopup: () => attachedPopup,
+        getFeatureMenuIcon,
         injector,
         popupDisposable,
+        renderedPosition$,
         setDrawingType: (nextDrawingType: DrawingTypeEnum) => {
             drawingType = nextDrawingType;
         },
@@ -136,20 +160,37 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
 
 describe('DrawingPopupMenuController', () => {
     it.each([
-        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
-        { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
-    ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
-        const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
-        injector.get(LocaleService).setDirection('rtl');
+        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image', icon: 'AddImageIcon' },
+        { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM', icon: undefined },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart', icon: 'CustomChartIcon' },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart without an icon', icon: undefined },
+        { drawingType: DrawingTypeEnum.DRAWING_CHART, label: 'chart sheet chart', icon: undefined, sheetType: SheetTypes.CHART },
+    ])('passes the $label popup icon and constrains its placement in RTL', ({ drawingType, icon, sheetType }) => {
+        const {
+            attachPopupToObject,
+            createControl$,
+            drawingObject,
+            getAttachedPopup,
+            getFeatureMenuIcon,
+            injector,
+            renderedPosition$,
+        } = createControllerHarness(drawingType, icon, sheetType);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('rtl');
         const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
+        expect(getFeatureMenuIcon).toHaveBeenCalledWith(drawingType);
         expect(attachPopupToObject).toHaveBeenCalledWith(
             drawingObject,
             expect.objectContaining({
                 constrainToCanvas: true,
                 direction: 'left',
-            })
+                extraProps: expect.objectContaining({ icon }),
+            }),
+            sheetType === SheetTypes.CHART ? renderedPosition$ : undefined
         );
         expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([
             expect.objectContaining({
@@ -170,6 +211,10 @@ describe('DrawingPopupMenuController', () => {
             popupDisposable,
             setDrawingType,
         } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART);
+        const locale = injector.get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
         const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 

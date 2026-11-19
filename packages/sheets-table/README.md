@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-table` | `UniverSheetsTable` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-table` | `UniverSheetsTable` | No | Yes | Yes | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-table
 npm install @univerjs/sheets-table
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -39,9 +39,22 @@ const univer = new Univer({
 univer.registerPlugin(UniverSheetsTablePlugin);
 ```
 
+### Worker usage
+
+On the main thread, import `UniverSheetsTablePlugin` from `@univerjs/sheets-table`.
+
+In the worker entry, import `UniverSheetsTablePlugin` from `@univerjs/sheets-table/worker`:
+
+```ts
+import { UniverSheetsTablePlugin } from '@univerjs/sheets-table/worker';
+
+univer.registerPlugin(UniverSheetsTablePlugin);
+```
+
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-table-ui` when users need table controls in the sheet UI.
+- Import `@univerjs/sheets-table/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

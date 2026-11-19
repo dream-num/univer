@@ -16,11 +16,11 @@
 
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import { Disposable, IConfigService, Inject, IPermissionService } from '@univerjs/core';
+import { Disposable, IConfigService, Inject, IPermissionService, ThemeService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { merge, throttleTime } from 'rxjs';
+import { merge, skip, throttleTime } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -47,7 +47,8 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IPermissionService private _permissionService: IPermissionService,
-        @IConfigService private _configService: IConfigService
+        @IConfigService private _configService: IConfigService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -57,8 +58,8 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         const shadowStrategy = convertToShadowStrategy(config?.protectedRangeShadow);
 
         // Create render extensions with the shadow strategy
-        this._rangeProtectionCanViewRenderExtension = new RangeProtectionCanViewRenderExtension(shadowStrategy);
-        this._rangeProtectionCanNotViewRenderExtension = new RangeProtectionCanNotViewRenderExtension(shadowStrategy);
+        this._rangeProtectionCanViewRenderExtension = new RangeProtectionCanViewRenderExtension(this._themeService, shadowStrategy);
+        this._rangeProtectionCanNotViewRenderExtension = new RangeProtectionCanNotViewRenderExtension(this._themeService, shadowStrategy);
 
         this._initSkeleton();
         this._initRender();
@@ -94,7 +95,8 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         this.disposeWithMe(merge(
             this._permissionService.permissionPointUpdate$.pipe(throttleTime(300, undefined, { trailing: true })),
             this._rangeProtectionRuleModel.rangeRuleInitStateChange$,
-            this._rangeProtectionRuleModel.ruleChange$
+            this._rangeProtectionRuleModel.ruleChange$,
+            this._themeService.darkMode$.pipe(skip(1))
         ).pipe().subscribe(markDirtySkeleton));
     }
 }
@@ -107,7 +109,8 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
-        @Inject(IConfigService) private _configService: IConfigService
+        @Inject(IConfigService) private _configService: IConfigService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -117,7 +120,7 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         const shadowStrategy = convertToShadowStrategy(config?.protectedRangeShadow);
 
         // Create render extension with the shadow strategy
-        this._worksheetProtectionRenderExtension = new WorksheetProtectionRenderExtension(shadowStrategy);
+        this._worksheetProtectionRenderExtension = new WorksheetProtectionRenderExtension(this._themeService, shadowStrategy);
 
         this._initSkeleton();
         if (shadowStrategy === 'none') {
@@ -145,7 +148,8 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         };
 
         this.disposeWithMe(merge(
-            this._worksheetProtectionRuleModel.worksheetRuleInitStateChange$
+            this._worksheetProtectionRuleModel.worksheetRuleInitStateChange$,
+            this._themeService.darkMode$.pipe(skip(1))
         ).pipe().subscribe(markDirtySkeleton));
     }
 }

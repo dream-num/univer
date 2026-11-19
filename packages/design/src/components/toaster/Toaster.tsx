@@ -16,27 +16,25 @@
 
 import type { ComponentProps } from 'react';
 import { Toaster as Sonner, toast } from 'sonner';
+import { notificationClassName } from '../../helper/class-utilities';
+import { clsx } from '../../helper/clsx';
 
 export type IToasterProps = ComponentProps<typeof Sonner>;
 
 function Toaster({ visibleToasts, ...props }: IToasterProps) {
     return (
         <Sonner
-            className={`
-              [&_[data-description]]:univer-text-sm [&_[data-description]]:univer-text-gray-600
-              dark:[&_[data-description]]:!univer-text-gray-200
+            className={clsx(notificationClassName, `
               [&_[data-icon]>svg]:univer-relative [&_[data-icon]>svg]:univer-top-1
               [&_[data-icon]]:univer-self-baseline
-              [&_[data-sonner-toast]]:univer-shadow-md
-              [&_[data-title]]:univer-text-sm [&_[data-title]]:univer-text-gray-900
-            `}
+            `)}
             toastOptions={{
                 classNames: {
                     content: 'univer-leading-normal',
-                    success: '[&_[data-icon]]:univer-text-green-500',
-                    info: '[&_[data-icon]]:univer-text-primary-600',
-                    error: '[&_[data-icon]]:univer-text-red-500',
-                    warning: '[&_[data-icon]]:univer-text-yellow-500',
+                    success: '[&_[data-icon]]:univer-text-green-600 dark:[&_[data-icon]]:!univer-text-green-400',
+                    info: '[&_[data-icon]]:univer-text-primary-600 dark:[&_[data-icon]]:!univer-text-primary-300',
+                    error: '[&_[data-icon]]:univer-text-red-600 dark:[&_[data-icon]]:!univer-text-red-400',
+                    warning: '[&_[data-icon]]:univer-text-yellow-600 dark:[&_[data-icon]]:!univer-text-yellow-400',
                 },
             }}
             visibleToasts={visibleToasts ?? 5}

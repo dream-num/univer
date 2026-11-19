@@ -14,34 +14,18 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
-    Plugin,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import {
-    CalculateFormulaService,
-    DefinedNamesService,
-    FormulaCurrentConfigService,
-    FormulaDataModel,
-    FormulaRuntimeService,
-    HyperlinkEngineFormulaService,
-    ICalculateFormulaService,
-    IDefinedNamesService,
-    IFormulaCurrentConfigService,
-    IFormulaRuntimeService,
-    IHyperlinkEngineFormulaService,
-    LexerTreeBuilder,
-} from '@univerjs/engine-formula';
+import { CalculateFormulaService, FormulaCurrentConfigService, FormulaDataModel, FormulaResultService, FormulaRuntimeService, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     DefinedNameDataController,
@@ -114,20 +98,14 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const get = injector.get.bind(injector);
     const has = injector.has.bind(injector);
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
@@ -137,13 +115,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonService]);
+            injector.add([FormulaResultService]);
             injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
             injector.add([DocSelectionManagerService]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([DefinedNameDataController]);
-            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             const hasSheetSkeletonManagerService = dependencies?.some((dependency) =>
@@ -157,7 +132,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([IRefSelectionsService, { useClass: SheetsSelectionsService }]);
 
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             this._injector.get(SheetInterceptorService);
             this._injector.get(WorkbookPermissionService);
@@ -170,7 +145,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = injector.get(IUniverInstanceService);

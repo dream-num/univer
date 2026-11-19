@@ -29,6 +29,7 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
+import { FormulaCacheService } from '../../services/formula-cache.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { RegisterOtherFormulaService } from '../../services/register-other-formula.service';
 import { FormulaController } from '../formula.controller';
@@ -47,6 +48,7 @@ function createController(dataSyncPrimaryController?: FormulaDataSyncController)
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([FormulaCacheService]);
     injector.add([IFunctionService, { useClass: FunctionService }]);
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([LifecycleService]);

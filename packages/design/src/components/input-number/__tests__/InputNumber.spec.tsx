@@ -76,6 +76,13 @@ afterEach(() => {
 });
 
 describe('InputNumber', () => {
+    it('forwards the accessible name and native input attributes to the editable control', () => {
+        const { getByRole } = render(<InputNumber aria-label="Font size" name="fontSize" required defaultValue={12} />);
+        const input = getByRole('textbox', { name: 'Font size' });
+        expect(input).toHaveAttribute('name', 'fontSize');
+        expect(input).toBeRequired();
+    });
+
     const onChange = vi.fn();
 
     it('should render with default value', () => {
@@ -189,6 +196,22 @@ describe('InputNumber', () => {
 
         fireEvent.keyDown(input, { key: 'Enter' });
         expect(onPressEnter).toHaveBeenCalled();
+    });
+
+    it('keeps numeric editing and bounds when a compact input hides its stepper controls', () => {
+        const onChange = vi.fn();
+        const { getByRole, queryByRole } = render(
+            <InputNumber size="small" controls={false} defaultValue={12} min={0} max={19} onChange={onChange} />
+        );
+        const input = getByRole('textbox');
+        expect(queryByRole('button')).toBeNull();
+        fireEvent.change(input, { target: { value: '18' } });
+        fireEvent.keyDown(input, { key: 'ArrowUp' });
+        expect(input).toHaveValue('19');
+        fireEvent.keyDown(input, { key: 'ArrowUp' });
+        expect(input).toHaveValue('19');
+        fireEvent.keyDown(input, { key: 'ArrowDown' });
+        expect(onChange).toHaveBeenLastCalledWith(18);
     });
 
     it('should hide controls when controls is false and keep input disabled', () => {

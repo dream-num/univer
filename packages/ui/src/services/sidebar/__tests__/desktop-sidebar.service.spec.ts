@@ -16,17 +16,23 @@
 
 import { Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ContextMenuHostService, IContextMenuHostService } from '../../contextmenu/contextmenu-host.service';
 import { DesktopSidebarService } from '../desktop-sidebar.service';
 import { ISidebarService } from '../sidebar.service';
 
-function createService(): ISidebarService {
+const injectors: Injector[] = [];
+
+function createInjector(): Injector {
     const injector = new Injector();
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
-    return injector.get(ISidebarService);
+    injectors.push(injector);
+    return injector;
 }
 
 describe('DesktopSidebarService', () => {
     afterEach(() => {
+        injectors.splice(0).forEach((injector) => injector.dispose());
         vi.unstubAllGlobals();
     });
 
@@ -36,7 +42,8 @@ describe('DesktopSidebarService', () => {
             return 1;
         });
         vi.stubGlobal('cancelAnimationFrame', vi.fn());
-        const service = createService();
+        const injector = createInjector();
+        const service = injector.get(ISidebarService);
         const snapshots: unknown[] = [];
         const opened: string[] = [];
         const closed: string[] = [];
@@ -52,13 +59,36 @@ describe('DesktopSidebarService', () => {
         sub.unsubscribe();
     });
 
+    it('dismisses menus before publishing an opened panel, but preserves them when the panel closes', () => {
+        vi.stubGlobal('requestAnimationFrame', vi.fn(() => 1));
+        vi.stubGlobal('cancelAnimationFrame', vi.fn());
+        const injector = createInjector();
+        const service = injector.get(ISidebarService);
+        const menuHost = injector.get(IContextMenuHostService);
+        const hide = vi.fn();
+        menuHost.registerMenu('format', hide);
+        const activeMenus: Array<string | null> = [];
+        service.sidebarOptions$.subscribe(() => activeMenus.push(menuHost.activeMenuId));
+
+        menuHost.activateMenu('format');
+        service.open({ id: 'format-panel' });
+        expect(hide).toHaveBeenCalledExactlyOnceWith(false);
+        expect(activeMenus).toEqual([null]);
+
+        menuHost.activateMenu('format');
+        service.close();
+        expect(hide).toHaveBeenCalledTimes(1);
+        expect(menuHost.activeMenuId).toBe('format');
+    });
+
     it('ignores close requests for a different sidebar id', () => {
         vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
             callback(1);
             return 1;
         });
         vi.stubGlobal('cancelAnimationFrame', vi.fn());
-        const service = createService();
+        const injector = createInjector();
+        const service = injector.get(ISidebarService);
 
         service.open({ id: 'inspector' });
         service.close('other');

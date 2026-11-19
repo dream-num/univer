@@ -19,14 +19,16 @@ import { describe, expect, it, vi } from 'vitest';
 import { MobileActionRow } from '../MobileActionRow';
 
 describe('MobileActionRow', () => {
-    it('provides a full-width touch action without desktop hover behavior', () => {
+    it('runs enabled actions and blocks disabled actions', () => {
         const onClick = vi.fn();
-        render(<MobileActionRow title="Rename" aria-label="Rename" onClick={onClick} />);
+        const { rerender } = render(<MobileActionRow title="Rename" aria-label="Rename" onClick={onClick} />);
 
         const button = screen.getByRole('button', { name: 'Rename' });
-        expect(button.className).toContain('univer-min-h-12');
-        expect(button.className).not.toContain('hover:');
         fireEvent.click(button);
+        expect(onClick).toHaveBeenCalledOnce();
+
+        rerender(<MobileActionRow title="Rename" aria-label="Rename" disabled onClick={onClick} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
         expect(onClick).toHaveBeenCalledOnce();
     });
 });

@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { ActionRow, Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
+import { ActionRow, borderClassName, Button, clsx, Segmented, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -40,7 +40,7 @@ import {
     WorkbookCreateProtectPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable, UserInfo } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { distinctUntilChanged, from, merge, startWith, switchMap } from 'rxjs';
 import type { LocaleKey } from '../../locale/types';
@@ -48,7 +48,6 @@ import type { IPermissionPanelRule } from '../../services/permission/sheet-permi
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { useHighlightRange } from '../../hooks/use-highlight-range';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { panelListEmptyBase64 } from './panel-list/constant';
 
 type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 
@@ -206,27 +205,19 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
         sidebarService.open(sidebarProps);
     };
 
-    const handleChangeHeaderType = (isCurrentSheet: boolean) => {
-        setIsCurrentSheet(isCurrentSheet);
-    };
-
     const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value;
 
     return (
         <div className="univer-mt-2 univer-flex univer-h-[calc(100%-8px)] univer-flex-col">
-            <div className="univer-flex univer-h-[30px] univer-py-2">
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(true)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': isCurrentSheet })}>
-                        {' '}
-                        {localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet')}
-                    </div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': isCurrentSheet })} />
-                </div>
-                <div className="univer-mr-5 univer-flex univer-cursor-pointer univer-flex-col univer-items-center" onClick={() => handleChangeHeaderType(false)}>
-                    <div className={clsx('univer-h-6 univer-text-base univer-font-medium univer-leading-6', { 'univer-text-blue-500': !isCurrentSheet })}>{localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet')}</div>
-                    <div className={clsx('univer-mt-1 univer-h-0.5 univer-w-6', { 'univer-bg-blue-500': !isCurrentSheet })} />
-                </div>
-            </div>
+            <Segmented
+                className="univer-my-2 univer-w-full univer-shrink-0"
+                items={[
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.currentSheet'), value: 'current' },
+                    { label: localeService.t<LocaleKey>('sheets-ui.permission.panel.allSheet'), value: 'all' },
+                ]}
+                value={isCurrentSheet ? 'current' : 'all'}
+                onChange={(value) => setIsCurrentSheet(value === 'current')}
+            />
 
             {ruleList?.length > 0
                 ? (
@@ -343,9 +334,14 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                                     <div>
                                         <div className="univer-flex univer-items-center">
 
-                                            <Tooltip title={item.creator?.name ?? ''}>
+                                            <Tooltip title={<UserInfo part="name" user={{ userId: item.creator?.userID, name: item.creator?.name }} context={{ scene: 'permission-creator', unitId, objectId: item.objectID }} />}>
                                                 <div>
-                                                    <Avatar src={item.creator?.avatar} className="univer-mr-1.5" size={24} />
+                                                    <UserInfo
+                                                        part="avatar"
+                                                        user={{ userId: item.creator?.userID, name: item.creator?.name, avatar: item.creator?.avatar }}
+                                                        context={{ scene: 'permission-creator', unitId, objectId: item.objectID }}
+                                                        className="univer-mr-1.5"
+                                                    />
                                                 </div>
                                             </Tooltip>
                                             <span
@@ -404,10 +400,30 @@ function SheetPermissionPanelListContent({ ActionRowComponent }: Required<ISheet
                 )
                 : (
                     <div
-                        className="univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center"
+                        role="status"
+                        className={`
+                          univer-flex univer-flex-1 univer-flex-col univer-items-center univer-justify-center
+                          univer-gap-2 univer-px-6 univer-text-center
+                        `}
                     >
-                        <img width={240} height={120} src={panelListEmptyBase64} alt="" draggable={false} />
-                        <p className="univer-w-60 univer-break-words univer-text-sm univer-text-gray-400">{localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}</p>
+                        <p
+                            className={`
+                              univer-m-0 univer-text-sm univer-font-medium univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            `}
+                        >
+                            {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmpty')}
+                        </p>
+                        {hasSetProtectPermission && (
+                            <p
+                                className={`
+                                  univer-m-0 univer-max-w-60 univer-text-sm univer-leading-relaxed univer-text-gray-500
+                                  dark:!univer-text-gray-200
+                                `}
+                            >
+                                {localeService.t<LocaleKey>('sheets-ui.permission.dialog.listEmptyDescription')}
+                            </p>
+                        )}
                     </div>
                 )}
 

@@ -1,10 +1,9 @@
-import type { IPackageJson } from '../types.ts';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import sortKeys from 'sort-keys';
-
 import * as ts from 'typescript';
+import type { IPackageJson } from '../types.ts';
 import { peerDepsMap } from '../data/peer-deps.ts';
 
 type StringMap = Record<string, string>;
@@ -360,6 +359,7 @@ function deriveDependencyGroups(packageDir: string, packageJson: IPackageJson): 
 function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
     const hasLocales = fs.existsSync(path.resolve(packageDir, 'src/locale'));
     const hasFacade = fs.existsSync(path.resolve(packageDir, 'src/facade/index.ts'));
+    const hasWorker = fs.existsSync(path.resolve(packageDir, 'src/worker.ts'));
 
     pkg.publishConfig = {
         access: 'public',
@@ -380,6 +380,15 @@ function applyPublishManifest(pkg: CleanupPackageJson, packageDir: string) {
     };
 
     pkg.exports ||= {};
+
+    if (hasWorker) {
+        pkg.exports['./worker'] = './src/worker.ts';
+        pkg.publishConfig.exports['./worker'] = {
+            import: './lib/es/worker.js',
+            require: './lib/cjs/worker.js',
+            types: './lib/types/worker.d.ts',
+        };
+    }
 
     if (hasLocales) {
         pkg.exports['./locale/*'] = './src/locale/*.ts';

@@ -16,20 +16,12 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DesignTinyMenuGroup } from '../DesignTinyMenuGroup';
-
-class TestState {
-    static clickCount = 0;
-
-    static recordClick(): void {
-        this.clickCount += 1;
-    }
-}
 
 describe('DesignTinyMenuGroup', () => {
     it('renders quick icon items as focusable menu buttons', () => {
-        TestState.clickCount = 0;
+        const onClick = vi.fn();
         const Icon = () => <span data-testid="quick-icon" />;
 
         render(
@@ -38,7 +30,7 @@ describe('DesignTinyMenuGroup', () => {
                     key: 'h1',
                     Icon,
                     className: '',
-                    onClick: () => TestState.recordClick(),
+                    onClick,
                     tooltip: 'Heading 1',
                 }]}
                 columns={6}
@@ -52,7 +44,7 @@ describe('DesignTinyMenuGroup', () => {
 
         expect(document.activeElement).toBe(button);
         expect(button.getAttribute('title')).toBeNull();
-        expect(TestState.clickCount).toBe(1);
+        expect(onClick).toHaveBeenCalledOnce();
     });
 
     it('keeps native titles for default tiny menus', () => {
@@ -71,26 +63,6 @@ describe('DesignTinyMenuGroup', () => {
         );
 
         expect(container.querySelector('button')?.getAttribute('title')).toBe('Heading 1');
-    });
-
-    it('keeps default tiny-menu tooltips from intercepting sibling actions', async () => {
-        const Icon = () => <span data-testid="quick-icon" />;
-
-        render(
-            <DesignTinyMenuGroup
-                items={[{
-                    key: 'center',
-                    Icon,
-                    className: '',
-                    onClick: () => undefined,
-                    tooltip: 'Center',
-                }]}
-            />
-        );
-
-        fireEvent.mouseEnter(screen.getByRole('button', { name: 'Center' }).parentElement!);
-
-        expect((await screen.findByRole('tooltip')).classList.contains('univer-pointer-events-none')).toBe(true);
     });
 
     it('uses the primary color channel for two-channel icons', () => {

@@ -112,7 +112,8 @@ function QuickTileMenuItem(props: IUIQuickTileMenuItemProps) {
         return null;
     }
 
-    const Icon = menuItem.icon ? iconManager.get(menuItem.icon as string) : null;
+    const { icon } = menuItem;
+    const Icon = icon ? iconManager.get(icon as string) : null;
     const active = resolveMenuItemActiveState(menuItem.id, activated, activeItemIds);
 
     return (
@@ -177,7 +178,8 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
 
     const items = visibleChildren
         .map((child) => {
-            const Icon = child.item?.icon ? iconManager.get(child.item.icon as string) : undefined;
+            const { icon } = child.item ?? {};
+            const Icon = icon ? iconManager.get(icon as string) : undefined;
 
             if (!Icon) {
                 return null;
@@ -196,7 +198,7 @@ export function UITinyMenuGroup(props: IUIQuickMenuGroupProps) {
                     });
                 },
                 className: '',
-                iconClassName: child.item?.icon === 'TextTypeIcon'
+                iconClassName: icon === 'TextTypeIcon'
                     ? (sizeVariant === 'paragraph-t' ? '!univer-size-4' : '!univer-size-3.5')
                     : undefined,
                 Icon,

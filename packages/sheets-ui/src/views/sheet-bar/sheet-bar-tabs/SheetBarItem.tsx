@@ -61,21 +61,21 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             onKeyDown={onKeyDown}
             onClick={onClick}
             className={clsx(`
-              univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer univer-select-none
-              univer-flex-row univer-items-center univer-rounded univer-text-xs univer-transition-[colors,box-shadow]
+              univer-relative univer-mx-1 univer-box-border univer-flex univer-flex-grow univer-cursor-pointer
+              univer-select-none univer-flex-row univer-items-center univer-justify-center univer-rounded univer-text-xs
+              univer-font-medium univer-transition-[colors,box-shadow]
               focus-visible:univer-ring-2 focus-visible:univer-ring-primary-500
             `, {
                 'dark:!univer-text-gray-0': !color || (color && !textColor),
-                'univer-justify-center univer-bg-gray-0 univer-font-bold univer-text-primary-700 univer-shadow': currentSelected,
+                'univer-bg-gray-0 univer-text-primary-700 univer-shadow': currentSelected,
                 'dark:!univer-bg-gray-700': currentSelected && !color,
-                'univer-font-medium univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
+                'univer-text-gray-900 hover:univer-bg-gray-100': !currentSelected,
                 'dark:hover:!univer-bg-gray-700': !currentSelected && !color,
             }, className)}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
                 color: !currentSelected && color ? textColor : '',
-                boxShadow:
-                    currentSelected && color ? `0px 0px 8px rgba(0, 0, 0, 0.08), inset 0px -2px 0px 0px ${color}` : '',
+                boxShadow: currentSelected && color ? '0px 0px 8px rgba(0, 0, 0, 0.08)' : '',
             }}
         >
             <div
@@ -87,6 +87,13 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             >
                 {label}
             </div>
+            {currentSelected && color && (
+                <div
+                    aria-hidden
+                    className="univer-pointer-events-none univer-absolute univer-inset-x-2 univer-bottom-0 univer-h-0.5"
+                    style={{ backgroundColor: color }}
+                />
+            )}
         </div>
     );
 }

@@ -15,14 +15,14 @@
  */
 
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../../locale/types';
-import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
-import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
-import type { IDialogPartMethodOptions } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { Button, ConfigContext, MobileActionRowGroup } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useContext, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
+import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
+import type { IDialogPartMethodOptions } from './interface';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
@@ -69,8 +69,8 @@ export function MobileDialogPart() {
     const footer = options.footer ?? (options.showOk || options.showCancel
         ? (
             <>
-                {options.showCancel && <Button onClick={options.onCancel}>{locale?.Confirm.cancel}</Button>}
-                {options.showOk && <Button variant="primary" onClick={options.onOk}>{locale?.Confirm.confirm}</Button>}
+                {options.showCancel && <Button onClick={options.onCancel} size="middle">{locale?.Confirm.cancel}</Button>}
+                {options.showOk && <Button variant="primary" onClick={options.onOk} size="middle">{locale?.Confirm.confirm}</Button>}
             </>
         )
         : null);
@@ -118,6 +118,7 @@ export function MobileDialogPart() {
             <MobileDrawer
                 layerRef={layerRef}
                 layout={options.layout}
+                autoHeight={options.layout !== 'canvas'}
                 componentName="mobile-dialog-drawer"
                 snap={snapOverride?.id === options.id ? snapOverride.snap : defaultSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.sidebar.resize')}

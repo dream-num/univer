@@ -22,6 +22,7 @@ import {
     measureDocumentNoWrapTextRangeWidth,
     measureDocumentNoWrapTextWidth,
     measureDocumentUnbreakableTextWidth,
+    measureDocumentWrappedTextWidth,
 } from '../doc-no-wrap-measure';
 import { FontCache } from '../shaping-engine/font-cache';
 
@@ -204,6 +205,43 @@ describe('measureDocumentNoWrapTextWidth', () => {
 });
 
 describe('measureDocumentUnbreakableTextWidth', () => {
+    it.each([
+        { flavor: DocumentFlavor.MODERN, wordWidth: 30, wrappedWidth: 30 },
+        { flavor: DocumentFlavor.TRADITIONAL, wordWidth: 30, wrappedWidth: 30 },
+        { flavor: DocumentFlavor.UNSPECIFIED, wordWidth: 10, wrappedWidth: 50 },
+        { flavor: DocumentFlavor.DRAWINGML, wordWidth: 30, wrappedWidth: 30 },
+        { flavor: undefined, wordWidth: 10, wrappedWidth: 50 },
+    ])('measures Korean wrapping with the host policy: $flavor', ({ flavor, wordWidth, wrappedWidth }) => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({ width: text.length * 10 }) as never);
+        try {
+            const document = createDocument('오늘 전략을\r\n');
+            document.documentStyle.documentFlavor = flavor;
+            expect(measureDocumentUnbreakableTextWidth(document)).toBe(wordWidth);
+            expect(measureDocumentWrappedTextWidth(document, 50)).toBe(wrappedWidth);
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
+    it('resolves each paragraph before measuring wrapping and minimum width', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({ width: text.length * 10 }) as never);
+        try {
+            const document = createDocument('오늘 전략을\r오늘 전략을\r');
+            document.documentStyle.documentFlavor = DocumentFlavor.MODERN;
+            document.documentStyle.defaultParagraphStyle = { wordWrap: BooleanNumber.TRUE };
+            document.body!.paragraphs = [
+                { startIndex: 6, paragraphId: 'first', paragraphStyle: { wordWrap: BooleanNumber.FALSE } },
+                { startIndex: 13, paragraphId: 'second' },
+            ];
+            expect(measureDocumentUnbreakableTextWidth(document)).toBe(30);
+            expect(measureDocumentWrappedTextWidth(document, 50)).toBe(50);
+            document.documentStyle.defaultParagraphStyle.wordWrap = BooleanNumber.FALSE;
+            expect(measureDocumentWrappedTextWidth(document, 50)).toBe(30);
+        } finally {
+            measureSpy.mockRestore();
+        }
+    });
+
     it('uses the docs line-break policy for words, spaces, and CJK text', () => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: Array.from(text).reduce((total, char) => total + (/[⺀-鿿豈-﫿]/u.test(char) ? 20 : 10), 0),

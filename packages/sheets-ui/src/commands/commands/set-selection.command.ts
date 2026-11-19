@@ -16,7 +16,6 @@
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { IUniverSheetsUIConfig } from '../../config/config';
 import {
     CommandType,
     Direction,
@@ -37,8 +36,10 @@ import {
     SelectionMoveType,
     SetSelectionsOperation,
     SheetInterceptorService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from '../../config/config';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SelectAllService } from '../../services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -198,7 +199,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         const { direction, keycode } = params;
         const isReverse = direction === Direction.LEFT || direction === Direction.UP;
 
-        const selections = selectionsService.getCurrentSelections().concat();
+        let selections = selectionsService.getCurrentSelections().concat();
         const currentSelectionIndex = selections.findIndex((s) => s.primary);
         const selection = selections[currentSelectionIndex];
         if (!selection) {
@@ -332,6 +333,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         if (isLastCell) {
             selections[currentSelectionIndex].primary = null;
             selections[nextSelectionIndex] = resultRange;
+            // Keep the active range last for editing and permissions without changing the navigation cycle.
+            selections = selections.slice(nextSelectionIndex + 1).concat(selections.slice(0, nextSelectionIndex + 1));
             selectionsService.setSelections(unitId, sheetId, [], SelectionMoveType.MOVE_END);
         } else {
             selections[currentSelectionIndex] = resultRange;
@@ -411,8 +414,12 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             }
 
             // When in formula editor, try to use the last primary cell in ref selections as the primary cell for calculation.
+            // Ref selections are rebuilt from the formula text after every step, so they usually carry no primary cell.
+            // The sheet selection still holds the cell the reference started from, and that cell is the anchor the
+            // reference should be extended from.
             if (!primary) {
-                const lastSelectionPrimary = selectionsService.getCurrentLastSelectionPrimaryCell();
+                const lastSelectionPrimary = selectionsService.getCurrentLastSelectionPrimaryCell() ??
+                    accessor.get(SheetsSelectionsService).getCurrentLastSelectionPrimaryCell();
                 if (lastSelectionPrimary && Rectangle.contains(startRange, lastSelectionPrimary)) {
                     primary = lastSelectionPrimary;
                 }

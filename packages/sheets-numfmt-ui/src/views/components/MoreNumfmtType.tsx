@@ -15,12 +15,10 @@
  */
 
 import type { FormatType } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import { ICommandService, LocaleService, Range, RegionService } from '@univerjs/core';
+import { getCurrencySymbolByLocale, ICommandService, LocaleService, Range, RegionService } from '@univerjs/core';
 import { Separator } from '@univerjs/design';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import {
-    getCurrencySymbolByLocale,
     getPatternPreview,
     getPatternType,
     SetNumfmtCommand,
@@ -28,6 +26,7 @@ import {
 } from '@univerjs/sheets-numfmt';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { MENU_OPTIONS } from '../../menu/number-format-options';
 

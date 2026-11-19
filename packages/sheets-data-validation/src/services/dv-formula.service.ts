@@ -16,12 +16,19 @@
 
 import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/engine-formula';
-import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    DataValidationType,
+    Disposable,
+    Inject,
+    isFormulaString,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { OtherFormulaBizType, RegisterOtherFormulaService } from '@univerjs/engine-formula';
+import { Subject } from 'rxjs';
 import { shouldOffsetFormulaByRange } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
-import { DataValidationListCacheService } from './dv-list-cache.service';
 
 type RuleId = string;
 type UnitId = string;
@@ -29,16 +36,19 @@ type SubUnitId = string;
 
 export class DataValidationFormulaService extends Disposable {
     private _formulaRuleMap: Map<UnitId, Map<SubUnitId, Map<RuleId, [IFormulaInfo | undefined, IFormulaInfo | undefined]>>> = new Map();
+    private readonly _ruleFormulaResultChanged$ = new Subject<{ unitId: string; subUnitId: string; ruleId: string }>();
+
+    readonly ruleFormulaResultChanged$ = this._ruleFormulaResultChanged$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService,
-        @Inject(DataValidationListCacheService) private readonly _listCacheService: DataValidationListCacheService
+        @Inject(DataValidatorRegistryService) private readonly _validatorRegistryService: DataValidatorRegistryService
     ) {
         super();
+        this.disposeWithMe(() => this._ruleFormulaResultChanged$.complete());
         this._initFormulaResultHandler();
     }
 
@@ -58,8 +68,7 @@ export class DataValidationFormulaService extends Disposable {
                         if (ruleId && formulaMap.get(ruleId)) {
                             const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
                             if (rule) {
-                                 // Mark list cache dirty when formula result changes
-                                this._listCacheService.markRuleDirty(unitId, subUnitId, ruleId);
+                                this._ruleFormulaResultChanged$.next({ unitId, subUnitId, ruleId });
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }
                         }

@@ -24,8 +24,7 @@ export function MobileActionRowGroup({ className, ...props }: IMobileActionRowGr
         <div
             className={clsx(className, `
               univer-flex univer-w-full univer-justify-stretch univer-gap-3
-              [&>button]:!univer-m-0 [&>button]:!univer-h-12 [&>button]:!univer-min-w-0 [&>button]:!univer-flex-1
-              [&>button]:!univer-rounded-xl
+              [&>button]:!univer-m-0 [&>button]:!univer-min-w-0 [&>button]:!univer-flex-1 [&>button]:!univer-rounded-xl
             `)}
             {...props}
         />

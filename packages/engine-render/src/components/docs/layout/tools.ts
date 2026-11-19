@@ -27,6 +27,32 @@ import type {
     Nullable,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BooleanNumber,
+    ColumnSeparatorType,
+    DataStreamTreeTokenType,
+    DEFAULT_STYLES,
+    DocumentFlavor,
+    GridType,
+    HorizontalAlign,
+    mergeWith,
+    MODERN_DOCUMENT_DEFAULT_MARGIN,
+    MODERN_DOCUMENT_WIDTH,
+    ModernDocumentWidthMode,
+    NAMED_STYLE_MAP,
+    NumberUnitType,
+    ObjectMatrix,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PageOrientType,
+    resolveSectionHeaderFooterReferences,
+    SectionType,
+    SpacingRule,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -58,32 +84,6 @@ import type { DocumentFootnoteLayout } from './footnote-layout';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import type { INoteReferenceLayout } from './note-numbering';
-import {
-    AlignTypeH,
-    AlignTypeV,
-    BooleanNumber,
-    ColumnSeparatorType,
-    DataStreamTreeTokenType,
-    DEFAULT_STYLES,
-    DocumentFlavor,
-    GridType,
-    HorizontalAlign,
-    mergeWith,
-    MODERN_DOCUMENT_DEFAULT_MARGIN,
-    MODERN_DOCUMENT_WIDTH,
-    ModernDocumentWidthMode,
-    NAMED_STYLE_MAP,
-    NumberUnitType,
-    ObjectMatrix,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PageOrientType,
-    resolveSectionHeaderFooterReferences,
-    SectionType,
-    SpacingRule,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
@@ -1681,6 +1681,7 @@ export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide, excludeTrail
 }
 
 interface IFontCreateConfig {
+    stackedText?: boolean;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
@@ -1718,6 +1719,7 @@ export function getFontConfigFromLastGlyph(
 
     const result = {
         documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
+        stackedText: sectionBreakConfig.renderConfig?.stackedText,
         fontStyle: fontStyle!,
         textStyle: ts!,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
@@ -1816,6 +1818,7 @@ export function getFontCreateConfig(
 
     const result = {
         fontStyle,
+        stackedText: renderConfig.stackedText,
         textStyle: mixTextStyle,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
@@ -2232,7 +2235,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionType,
         sectionTypeNext,
         textDirection,
-        renderConfig,
+        renderConfig: viewModel.getLayoutRenderConfig(renderConfig),
 
         autoHyphenation,
         spaceWidthEastAsian,

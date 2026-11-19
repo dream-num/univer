@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: '该范围已被保护，目前无插入行列权限。如需插入行列，请联系创建者。',
                 moveRangeErr: '该范围已被保护，目前无移动选区权限。如需移动选区，请联系创建者。',
                 moveRowColErr: '该范围已被保护，目前无移动行列权限。如需移动行列，请联系创建者。',
-                operatorSheetErr: '该工作表已被保护，目前无操作工作表权限。如需操作工作表，请联系创建者。',
+                operatorSheetErr: '目前无操作工作表权限。如需操作工作表，请联系创建者。',
                 removeRowColErr: '该范围已被保护，目前无删除行列权限。如需删除行列，请联系创建者。',
                 setRowColStyleErr: '该范围已被保护，目前无设置行列样式权限。如需设置行列样式，请联系创建者。',
                 setStyleErr: '该范围已被保护，目前无设置样式权限。如需设置样式，请联系创建者。',

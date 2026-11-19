@@ -15,13 +15,13 @@
  */
 
 import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
+import { BooleanNumber, resolveDocumentParagraphStyle } from '@univerjs/core';
 import type { IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
-import { BooleanNumber } from '@univerjs/core';
 import { getFirstGrapheme, getFontStyleString, getTextWithCaps } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy, getSmallCapsFontStyle } from '../document-compatibility';
-import { LineBreaker } from './line-breaker';
 import { BreakPointType } from './line-breaker/break';
+import { createDocumentLineBreaker } from './line-breaker/document-line-breaker';
 import { getPairKerningAdjustment, measureTextWithCharacterSpacing } from './model/glyph';
 import { FontCache } from './shaping-engine/font-cache';
 
@@ -257,6 +257,26 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
     );
 }
 
+function* documentBreakPoints(document: IDocumentData) {
+    const dataStream = document.body?.dataStream ?? '';
+    const paragraphs = document.body?.paragraphs ?? [];
+    let start = 0;
+    for (const paragraph of [...paragraphs, undefined]) {
+        const end = paragraph ? paragraph.startIndex + 1 : dataStream.length;
+        const style = resolveDocumentParagraphStyle(document.documentStyle, paragraph?.paragraphStyle, {
+            styles: document.styles,
+            paragraphStyleId: paragraph?.styleId,
+        });
+        const breaker = createDocumentLineBreaker(document, style, dataStream.slice(start, end), start);
+        let point = breaker.nextBreakPoint();
+        while (point) {
+            yield { position: start + point.position, type: point.type };
+            point = breaker.nextBreakPoint();
+        }
+        start = end;
+    }
+}
+
 /**
  * Measures the widest line after applying the docs Unicode break policy
  * within a fixed-width host.
@@ -270,11 +290,11 @@ export function measureDocumentWrappedTextWidth(
         return 0;
     }
 
-    const breaker = new LineBreaker(dataStream);
+    const breaker = documentBreakPoints(documentData);
     let lineStart = 0;
     let lastFittingEnd = 0;
     let widestLine = 0;
-    let breakPoint = breaker.nextBreakPoint();
+    let breakPoint = breaker.next().value;
 
     while (breakPoint) {
         const candidateEnd = breakPoint.position;
@@ -287,7 +307,7 @@ export function measureDocumentWrappedTextWidth(
                 lineStart = candidateEnd;
                 lastFittingEnd = candidateEnd;
             }
-            breakPoint = breaker.nextBreakPoint();
+            breakPoint = breaker.next().value;
             continue;
         }
 
@@ -303,7 +323,7 @@ export function measureDocumentWrappedTextWidth(
         widestLine = Math.max(widestLine, maxLineWidth);
         lineStart = candidateEnd;
         lastFittingEnd = candidateEnd;
-        breakPoint = breaker.nextBreakPoint();
+        breakPoint = breaker.next().value;
     }
 
     if (lineStart < dataStream.length) {
@@ -327,15 +347,15 @@ export function measureDocumentUnbreakableTextWidth(documentData: IDocumentData 
         return 0;
     }
 
-    const breaker = new LineBreaker(dataStream);
+    const breaker = documentBreakPoints(documentData);
     let start = 0;
     let maxWidth = 0;
-    let breakPoint = breaker.nextBreakPoint();
+    let breakPoint = breaker.next().value;
 
     while (breakPoint) {
         maxWidth = Math.max(maxWidth, measureDocumentNoWrapTextRangeWidth(documentData, start, breakPoint.position));
         start = breakPoint.position;
-        breakPoint = breaker.nextBreakPoint();
+        breakPoint = breaker.next().value;
     }
 
     return maxWidth;

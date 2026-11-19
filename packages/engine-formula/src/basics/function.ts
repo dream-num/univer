@@ -28,9 +28,9 @@ import type { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import type { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
 import type { FUNCTION_NAMES_META } from '../functions/meta/function-names';
 import type { FUNCTION_NAMES_STATISTICAL } from '../functions/statistical/function-names';
-import type { FUNCTION_NAMES_TEXT } from '../functions/text/function-names';
 import type { FUNCTION_NAMES_UNIVER } from '../functions/univer/function-names';
 import type { FUNCTION_NAMES_WEB } from '../functions/web/function-names';
+import { FUNCTION_NAMES_TEXT } from '../functions/text/function-names';
 
 /**
  * Function type, refer to https://support.microsoft.com/en-us/office/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb
@@ -210,3 +210,17 @@ export type IFunctionNames =
     | FUNCTION_NAMES_TEXT
     | FUNCTION_NAMES_UNIVER
     | FUNCTION_NAMES_WEB;
+
+export function normalizeFunctionToken(token: string): string {
+    if (token === 'REGEXTEST' || token === '_XLFN.REGEXTEST') {
+        return FUNCTION_NAMES_TEXT.REGEXMATCH;
+    }
+
+    for (const prefix of ['_XLFN.', '_XLWS.', '_XLETA.']) {
+        if (token.startsWith(prefix)) {
+            return token.slice(prefix.length);
+        }
+    }
+
+    return token;
+}

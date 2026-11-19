@@ -43,6 +43,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../common/component-manager';
 import { IconManager } from '../../../common/icon-manager';
 import enUS from '../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../services/contextmenu/contextmenu-host.service';
 import { DesktopDialogService } from '../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
@@ -92,6 +96,7 @@ function setup(options: { capable?: boolean; manage?: boolean; delete?: boolean;
     univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'doc', title: 'Document', body: { dataStream: '\r\n' } });
     const injector = univer.__getInjector();
     injector.add([TestRuleModel]);
+    injector.add([ComponentManager]);
     const rules = injector.get(TestRuleModel);
     injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, options.capable === false ? [] : [UnitObject.Document, UnitObject.DocumentEntity]);
     injector.get(ObjectPermissionService).registerRuleModel(UnitObject.Document, rules, 'test.mutation.permission');
@@ -311,9 +316,9 @@ describe('workbench object permission dialog', () => {
         const context = setup();
         context.view.unmount();
         const { injector, target } = context;
-        injector.add([ComponentManager]);
         injector.add([IconManager]);
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([IDialogService, { useClass: DesktopDialogService }]);
         injector.get(ComponentManager).register(OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog);
         const openDialog = () => {

@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
-import type { HeaderFooterContentCover } from '../../views/header-footer/content-cover';
 import {
     BooleanNumber,
     DocumentFlavor,
@@ -48,8 +47,16 @@ import {
     RenderManagerService,
     Vector2,
 } from '@univerjs/engine-render';
-import { DesktopLayoutService, DesktopSidebarService, ILayoutService, ISidebarService } from '@univerjs/ui';
+import {
+    ContextMenuHostService,
+    DesktopLayoutService,
+    DesktopSidebarService,
+    IContextMenuHostService,
+    ILayoutService,
+    ISidebarService,
+} from '@univerjs/ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { HeaderFooterContentCover } from '../../views/header-footer/content-cover';
 import { CloseHeaderFooterCommand } from '../../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../../commands/operations/doc-header-footer-panel.operation';
 import enUS from '../../locale/en-US';
@@ -72,6 +79,7 @@ function createTestBed(documentFlavor = DocumentFlavor.TRADITIONAL, overrides: P
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     injector.add([IEditorService, { useClass: EditorService }]);
     injector.add([DocLayoutExecutorService]);

@@ -18,24 +18,16 @@ import type { Injector } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService, IConfigService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import {
-    ActiveDirtyManagerService,
-    DescriptionService,
     FormulaCalculationSessionController,
     FormulaCalculationSessionService,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
-    IActiveDirtyManagerService,
-    IDescriptionService,
     IFunctionService,
     IRegisterFunctionService,
-    ISuperTableService,
-    RegisterFunctionService,
-    RegisterOtherFormulaService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetTriggerFormulaCalculationStartMutation,
-    SuperTableService,
 } from '@univerjs/engine-formula';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -59,13 +51,6 @@ describe('sheets-formula facade mixins', () => {
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();
-        testBed.injector.add([IDescriptionService, { useClass: DescriptionService }]);
-        testBed.injector.add([ISuperTableService, { useClass: SuperTableService }]);
-        testBed.injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-        testBed.injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
-        testBed.injector.add([RegisterOtherFormulaService]);
-        testBed.injector.add([FormulaCalculationSessionService]);
-        testBed.injector.add([FormulaCalculationSessionController]);
         testBed.injector.add([SheetFormulaCalculationResultApplyController]);
         testBed.injector.get(FormulaCalculationSessionService);
         testBed.injector.get(FormulaCalculationSessionController);

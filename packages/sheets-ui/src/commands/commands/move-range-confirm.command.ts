@@ -16,10 +16,10 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
 import {
     CommandType,
     ICommandService,
+    IConfigService,
     IConfirmService,
     IUniverInstanceService,
     LocaleService,
@@ -31,6 +31,9 @@ import {
     MoveRangeCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 export const MoveRangeConfirmCommand: ICommand<IMoveRangeCommandParams> = {
     type: CommandType.COMMAND,
@@ -49,6 +52,10 @@ export const MoveRangeConfirmCommand: ICommand<IMoveRangeCommandParams> = {
         }
 
         const commandService = accessor.get(ICommandService);
+        if (accessor.get(IConfigService).getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.warnBeforeDragOverwrite === false) {
+            return commandService.executeCommand(MoveRangeCommand.id, params);
+        }
+
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sourceTarget = getSheetCommandTarget(univerInstanceService, {
             unitId: params.fromUnitId,

@@ -963,8 +963,8 @@ export class Worksheet {
     }
 
     /**
-     * Returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
-     * @returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
+     * Get the worksheet right-to-left view flag.
+     * @returns {BooleanNumber} `BooleanNumber.TRUE` when the flag is enabled, otherwise `BooleanNumber.FALSE`.
      */
     isRightToLeft(): BooleanNumber {
         const { _snapshot: _config } = this;

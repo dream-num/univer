@@ -28,9 +28,7 @@ type ValueTypeWithSymbol = ValueType | symbol;
 // empty cell, empty string and null value share the same inverted index cache key
 export const DEFAULT_EMPTY_CELL_KEY = Symbol('EMPTY_CELL');
 
-const normalizedValueMap: Map<ValueTypeWithNullUndefined, ValueTypeWithSymbol> = new Map();
-
-function normalizeValue(value: ValueTypeWithNullUndefined): ValueTypeWithSymbol {
+function normalizeValue(value: ValueTypeWithNullUndefined, normalizedValueMap: Map<ValueTypeWithNullUndefined, ValueTypeWithSymbol>): ValueTypeWithSymbol {
     if (normalizedValueMap.has(value)) {
         return normalizedValueMap.get(value) as ValueTypeWithSymbol;
     }
@@ -54,6 +52,8 @@ function normalizeValue(value: ValueTypeWithNullUndefined): ValueTypeWithSymbol 
 }
 
 export class InvertedIndexCache {
+    private readonly _normalizedValueMap = new Map<ValueTypeWithNullUndefined, ValueTypeWithSymbol>();
+
     /**
      * {
      *    unitId:{
@@ -136,7 +136,7 @@ export class InvertedIndexCache {
             }
         }
 
-        const _value = normalizeValue(value);
+        const _value = normalizeValue(value, this._normalizedValueMap);
 
         let cellList = columnMap.get(_value);
         if (cellList == null) {
@@ -168,7 +168,7 @@ export class InvertedIndexCache {
             matchingRows: [],
         };
 
-        const _value = normalizeValue(value);
+        const _value = normalizeValue(value, this._normalizedValueMap);
 
         if (ERROR_TYPE_SET.has(_value as ErrorType)) {
             result.errorType = _value as ErrorType;
@@ -303,10 +303,16 @@ export class InvertedIndexCache {
         };
     }
 
+    deleteUnit(unitId: string): void {
+        this._cache.delete(unitId);
+        this._continueBuildingCache.delete(unitId);
+        this._normalizedValueMap.clear();
+    }
+
     clear() {
         this._cache.clear();
         this._continueBuildingCache.clear();
-        normalizedValueMap.clear();
+        this._normalizedValueMap.clear();
     }
 
     private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {
@@ -339,5 +345,3 @@ export class InvertedIndexCache {
         columnMap.insert([min, max]);
     }
 }
-
-export const CELL_INVERTED_INDEX_CACHE = new InvertedIndexCache();

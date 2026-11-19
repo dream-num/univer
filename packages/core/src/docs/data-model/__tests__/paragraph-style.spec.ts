@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocStyles, IDocumentStyle } from '../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { BooleanNumber } from '../../../types/enum';
-import { DocStyleType, DocumentFlavor } from '../../../types/interfaces';
-import { resolveDocumentParagraphStyle } from '../paragraph-style';
+import type { IDocStyles, IDocumentData, IDocumentStyle, IParagraph } from '../../../types/interfaces/i-document-data';
+import { BooleanNumber } from '../../../types/enum/text-style';
+import { DocStyleType, DocumentFlavor } from '../../../types/interfaces/i-document-data';
+import { resolveDocumentParagraphStyle, resolveDocumentParagraphWordWrap } from '../paragraph-style';
 
 describe('resolveDocumentParagraphStyle pagination', () => {
     const traditionalDocumentStyle: IDocumentStyle = {
@@ -116,5 +116,28 @@ describe('resolveDocumentParagraphStyle pagination', () => {
             keepNext: BooleanNumber.FALSE,
             keepLines: BooleanNumber.TRUE,
         });
+    });
+});
+
+describe('resolveDocumentParagraphWordWrap', () => {
+    it('resolves direct overrides, named style chains, document defaults and product defaults without changing source data', () => {
+        const document: IDocumentData = {
+            id: 'wrapping',
+            documentStyle: { documentFlavor: DocumentFlavor.DRAWINGML, defaultParagraphStyle: { wordWrap: BooleanNumber.TRUE } },
+            styles: {
+                base: { type: DocStyleType.paragraph, name: 'Base', paragraphStyle: { wordWrap: BooleanNumber.FALSE } },
+                derived: { type: DocStyleType.paragraph, name: 'Derived', basedOn: 'base' },
+            },
+        };
+        const paragraph: IParagraph = { startIndex: 4, paragraphId: 'word-wrap', styleId: 'derived', paragraphStyle: { wordWrap: BooleanNumber.TRUE } };
+        expect(resolveDocumentParagraphWordWrap(document, paragraph)).toBe(BooleanNumber.TRUE);
+        delete paragraph.paragraphStyle!.wordWrap;
+        expect(resolveDocumentParagraphWordWrap(document, paragraph)).toBe(BooleanNumber.FALSE);
+        delete paragraph.styleId;
+        expect(resolveDocumentParagraphWordWrap(document, paragraph)).toBe(BooleanNumber.TRUE);
+        delete document.documentStyle.defaultParagraphStyle!.wordWrap;
+        const snapshot = JSON.stringify({ document, paragraph });
+        expect(resolveDocumentParagraphWordWrap(document, paragraph)).toBe(BooleanNumber.FALSE);
+        expect(JSON.stringify({ document, paragraph })).toBe(snapshot);
     });
 });

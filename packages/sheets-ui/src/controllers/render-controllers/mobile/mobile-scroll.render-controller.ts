@@ -17,8 +17,7 @@
 import type { IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import type { Subscription } from 'rxjs';
 import {
     Direction,
     Disposable,
@@ -29,9 +28,12 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import { DeviceType, IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { DeviceType, DrawingGroupObject, IRenderManagerService, ObjectType, Scene, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { MobileZoomIndicator } from '@univerjs/ui';
+import { take } from 'rxjs';
+import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
+import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
@@ -40,7 +42,14 @@ import { SheetScrollManagerService } from '../../../services/scroll-manager.serv
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../../utils/component-tools';
 
+const TOUCH_CROSS_AXIS_LOCK_RATIO = 2;
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
+const SHEET_DRAWING_OBJECT_TYPES = [ObjectType.IMAGE, ObjectType.SHAPE, ObjectType.CHART, ObjectType.DRAWING_DOM];
+
+interface IMobileTouchEvent {
+    touches: ArrayLike<Pick<Touch, 'clientX' | 'clientY'>>;
+    preventDefault(): void;
+}
 
 /**
  * This controller handles scroll logic in sheet interaction.
@@ -318,7 +327,11 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const scene = sheetObject.scene;
         const spreadsheet = sheetObject.spreadsheet;
         const transformer = scene.getTransformerByCreate();
+        const moveOnlyWhenSelected = transformer.moveOnlyWhenSelected;
+        transformer.resetProps({ moveOnlyWhenSelected: true });
+        this.disposeWithMe(toDisposable(() => transformer.resetProps({ moveOnlyWhenSelected })));
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const engine = scene.getEngine();
         const lastTouchPos: IPoint = { x: 0, y: 0 };
         let _touchScrolling: boolean = false;
         let _drawingTransforming: boolean = false;
@@ -326,6 +339,16 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         // Velocity tracking for smooth inertia (iOS-like)
         const velocity = { x: 0, y: 0 };
         let scrollInertiaAnimationID: null | number = null;
+        let inertiaFrameSubscription: Subscription | null = null;
+        let inertiaMotion: {
+            startTime: number;
+            duration: number;
+            sheetId: string;
+            velocityX: number;
+            velocityY: number;
+            distanceX: number;
+            distanceY: number;
+        } | null = null;
 
         // Track velocity history for smoother calculation (like iOS)
         const VELOCITY_HISTORY_SIZE = 5;
@@ -336,14 +359,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         let swipeStartTime = 0;
         let swipeTotalDisplacement = { x: 0, y: 0 };
 
-        // Direction locking - prevent simultaneous X/Y scrolling
-        let lockedDirection: 'x' | 'y' | null = null;
-        const DIRECTION_LOCK_THRESHOLD = 8; // px - minimum movement to lock direction
-
         // iOS-like physics constants (tuned for smoother feel)
         const BASE_DECELERATION_RATE = 0.992; // Per millisecond deceleration (lower = stops faster)
         const BASE_MIN_VELOCITY_THRESHOLD = 0.22; // Minimum velocity to continue animation
         const BASE_MAX_VELOCITY = 12; // Cap maximum velocity for stability
+        // Keep the established 60Hz fling distance while integrating independently of frame intervals.
+        const INERTIA_DISTANCE_SCALE = BASE_DECELERATION_RATE ** (1000 / 60);
 
         // Flick detection thresholds
         const FLICK_TIME_THRESHOLD = 240; // ms - swipes faster than this are considered "flicks"
@@ -441,20 +462,27 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         /**
          * iOS-like inertia animation with time-based deceleration
          */
-        let lastFrameTime = 0;
         let _pinchZooming = false;
         let initialPinchDistance = 0;
         let initialZoomRatio = 1;
         let pinchCenter: IPoint = { x: 0, y: 0 };
         const cancelInertiaAnimation = () => {
+            inertiaFrameSubscription?.unsubscribe();
+            inertiaFrameSubscription = null;
+            inertiaMotion = null;
             if (scrollInertiaAnimationID !== null) {
                 cancelAnimationFrame(scrollInertiaAnimationID);
                 scrollInertiaAnimationID = null;
             }
-            lastFrameTime = 0;
             velocity.x = 0;
             velocity.y = 0;
         };
+
+        this.disposeWithMe(toDisposable(this._context.activated$.subscribe((active) => {
+            if (!active) {
+                cancelInertiaAnimation();
+            }
+        })));
 
         this.disposeWithMe(toDisposable(transformer.changeStart$.subscribe(() => {
             _drawingTransforming = true;
@@ -466,52 +494,67 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             _drawingTransforming = false;
         })));
 
-        const scrollInertia = (currentTime: number) => {
-            if (!viewportMain) return;
+        const scrollInertia = async (currentTime: number) => {
+            const motion = inertiaMotion;
+            if (!motion || !viewportMain) {
+                return;
+            }
 
-            // Stop inertia if pinch zooming has started
-            if (_pinchZooming) {
+            if (_pinchZooming || this._context.unit.getActiveSheet()?.getSheetId() !== motion.sheetId) {
                 cancelInertiaAnimation();
                 return;
             }
-
-            if (lastFrameTime === 0) {
-                lastFrameTime = currentTime;
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
-                return;
-            }
-
-            const deltaTime = currentTime - lastFrameTime;
-            lastFrameTime = currentTime;
-
-            const { decelerationRate, minVelocityThreshold } = getZoomAdjustedParams();
-
-            // Apply time-based exponential deceleration (iOS-like)
-            const decelerationFactor = decelerationRate ** deltaTime;
-            velocity.x *= decelerationFactor;
-            velocity.y *= decelerationFactor;
-
-            // Calculate displacement for this frame
-            // Using integral of velocity over time for smoother motion
+            const elapsed = Math.min(motion.duration, Math.max(0, currentTime - motion.startTime));
+            const { decelerationRate } = getZoomAdjustedParams();
             const dampingFactor = -Math.log(decelerationRate);
-            const offsetX = velocity.x * (1 - decelerationFactor) / dampingFactor;
-            const offsetY = velocity.y * (1 - decelerationFactor) / dampingFactor;
+            const distanceFactor = (1 - decelerationRate ** elapsed) / dampingFactor * INERTIA_DISTANCE_SCALE;
+            const distanceX = motion.velocityX * distanceFactor;
+            const distanceY = motion.velocityY * distanceFactor;
+            const offsetX = distanceX - motion.distanceX;
+            const offsetY = distanceY - motion.distanceY;
+            const previousX = viewportMain.viewportScrollX;
+            const previousY = viewportMain.viewportScrollY;
 
-            if (Math.abs(offsetX) > 0.01 || Math.abs(offsetY) > 0.01) {
-                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX });
+            if (offsetX !== 0 || offsetY !== 0) {
+                try {
+                    await this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX }, { fromMobileInertia: true });
+                } catch (error) {
+                    if (inertiaMotion === motion) {
+                        cancelInertiaAnimation();
+                    }
+                    throw error;
+                }
+                if (inertiaMotion !== motion) {
+                    return;
+                }
+                if (viewportMain.viewportScrollX === previousX && viewportMain.viewportScrollY === previousY &&
+                    !viewportMain.isDirty && !viewportMain.isForceDirty) {
+                    cancelInertiaAnimation();
+                    return;
+                }
             }
-
-            // Continue animation if velocity is above threshold
-            const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-            if (speed > minVelocityThreshold) {
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
+            motion.distanceX = distanceX;
+            motion.distanceY = distanceY;
+            if (elapsed < motion.duration) {
+                queueInertiaFrame();
             } else {
-                scrollInertiaAnimationID = null;
-                lastFrameTime = 0;
+                cancelInertiaAnimation();
             }
         };
+        function queueInertiaFrame() {
+            if (engine?.beginFrame$) {
+                inertiaFrameSubscription = engine.beginFrame$.pipe(take(1)).subscribe(() => {
+                    inertiaFrameSubscription = null;
+                    return scrollInertia(performance.now());
+                });
+            } else {
+                scrollInertiaAnimationID = requestAnimationFrame((time) => {
+                    scrollInertiaAnimationID = null;
+                    return scrollInertia(time);
+                });
+            }
+        }
         // Get the canvas element for native touch events
-        const engine = scene.getEngine();
         const canvasElement = engine?.getCanvasElement();
         if (!canvasElement) return;
 
@@ -539,7 +582,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         /**
          * Convert touch event to offset coordinates relative to canvas
          */
-        const getTouchOffset = (touch: Touch): { offsetX: number; offsetY: number } => {
+        const getTouchOffset = (touch: Pick<Touch, 'clientX' | 'clientY'>): { offsetX: number; offsetY: number } => {
             const rect = canvasElement.getBoundingClientRect();
             return {
                 offsetX: touch.clientX - rect.left,
@@ -550,7 +593,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         /**
          * Calculate distance between two touch points
          */
-        const getTouchDistance = (touch1: Touch, touch2: Touch): number => {
+        const getTouchDistance = (touch1: Pick<Touch, 'clientX' | 'clientY'>, touch2: Pick<Touch, 'clientX' | 'clientY'>): number => {
             const dx = touch1.clientX - touch2.clientX;
             const dy = touch1.clientY - touch2.clientY;
             return Math.sqrt(dx * dx + dy * dy);
@@ -559,7 +602,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         /**
          * Get center point between two touches (in canvas coordinates)
          */
-        const getPinchCenter = (touch1: Touch, touch2: Touch): IPoint => {
+        const getPinchCenter = (touch1: Pick<Touch, 'clientX' | 'clientY'>, touch2: Pick<Touch, 'clientX' | 'clientY'>): IPoint => {
             const offset1 = getTouchOffset(touch1);
             const offset2 = getTouchOffset(touch2);
             return {
@@ -699,7 +742,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         });
 
         // Helper function to initialize pinch zoom state
-        const initializePinchZoom = (touch1: Touch, touch2: Touch) => {
+        const initializePinchZoom = (touch1: Pick<Touch, 'clientX' | 'clientY'>, touch2: Pick<Touch, 'clientX' | 'clientY'>) => {
             _pinchZooming = true;
             this._contextService.setContextValue(MOBILE_PINCH_ZOOMING, true);
             initialPinchDistance = getTouchDistance(touch1, touch2);
@@ -729,7 +772,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         // Native touch event handlers for better mobile scrolling experience
-        const handleTouchStart = (e: TouchEvent) => {
+        const handleTouchStart = (e: IMobileTouchEvent) => {
             // Handle pinch-to-zoom (two fingers)
             cancelInertiaAnimation();
             if (_drawingTransforming || scene.objectsEvented === false) {
@@ -776,18 +819,24 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // Only start scrolling if touch is on spreadsheet area
             if (!isTouchOnSpreadsheet(offsetX, offsetY)) return;
 
-            // A drawing, selection handle, or another canvas overlay owns this gesture.
-            // Native touch listeners bypass the render event propagation chain, so the
-            // sheet scroller must explicitly yield to the picked overlay object.
+            // Unselected drawings allow sheet navigation; selected drawings and controls own the gesture.
             const pickedObject = scene.pick(Vector2.FromArray([offsetX, offsetY]), DeviceType.Touch);
-            if (pickedObject && pickedObject !== spreadsheet) return;
+            if (pickedObject && pickedObject !== spreadsheet) {
+                if (pickedObject instanceof Scene) {
+                    return;
+                }
+                const drawing = pickedObject.ancestorGroup ?? pickedObject;
+                const isDrawing = drawing instanceof DrawingGroupObject || SHEET_DRAWING_OBJECT_TYPES.includes(pickedObject.objectType);
+                if (!isDrawing || transformer.getSelectedObjectMap().has(drawing.oKey)) {
+                    return;
+                }
+            }
 
             lastTouchPos.x = offsetX;
             lastTouchPos.y = offsetY;
             lastMoveTime = performance.now();
             swipeStartTime = lastMoveTime;
             swipeTotalDisplacement = { x: 0, y: 0 };
-            lockedDirection = null; // Reset direction lock on new touch
             velocityHistory.length = 0;
             _touchScrolling = true;
 
@@ -796,7 +845,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         // eslint-disable-next-line max-lines-per-function
-        const handleTouchMove = (e: TouchEvent) => {
+        const handleTouchMove = (e: IMobileTouchEvent) => {
             if (_drawingTransforming || scene.objectsEvented === false) {
                 _touchScrolling = false;
                 velocityHistory.length = 0;
@@ -864,24 +913,19 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // When zoomed in, divide by larger ratio = less scroll (less sensitive)
             // When zoomed out, divide by smaller ratio = more scroll (more responsive)
             const zoomRatio = getCurrentZoomRatio();
-            const deltaX = rawDeltaX / zoomRatio;
-            const deltaY = rawDeltaY / zoomRatio;
+            let deltaX = rawDeltaX / zoomRatio;
+            let deltaY = rawDeltaY / zoomRatio;
+            // Match wheel filtering without locking the gesture: deliberate diagonals and turns remain available.
+            if (Math.abs(rawDeltaY) >= Math.abs(rawDeltaX) * TOUCH_CROSS_AXIS_LOCK_RATIO) {
+                deltaX = 0;
+            } else if (Math.abs(rawDeltaX) >= Math.abs(rawDeltaY) * TOUCH_CROSS_AXIS_LOCK_RATIO) {
+                deltaY = 0;
+            }
 
-            // Track total displacement for flick detection and direction locking (used for inertia only)
+            // Track total displacement for flick detection.
             // Use raw values for gesture detection to maintain consistent flick recognition
             swipeTotalDisplacement.x += Math.abs(rawDeltaX);
             swipeTotalDisplacement.y += Math.abs(rawDeltaY);
-
-            // Direction locking logic - lock to primary axis once threshold is reached
-            // Note: This only affects inertia scrolling, not the actual touchmove scroll
-            if (lockedDirection === null) {
-                const totalX = swipeTotalDisplacement.x;
-                const totalY = swipeTotalDisplacement.y;
-                if (totalX > DIRECTION_LOCK_THRESHOLD || totalY > DIRECTION_LOCK_THRESHOLD) {
-                    // Lock to the axis with more displacement (for inertia only)
-                    lockedDirection = totalX > totalY ? 'x' : 'y';
-                }
-            }
 
             // Calculate instantaneous velocity (pixels per millisecond)
             // Track both directions for velocity history
@@ -913,7 +957,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             e.preventDefault();
         };
 
-        const handleTouchEnd = (e: TouchEvent) => {
+        const handleTouchEnd = (e: IMobileTouchEvent) => {
             if (e.touches.length === 0) {
                 _drawingTransforming = false;
             }
@@ -962,16 +1006,24 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             const cappedVelX = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.x * dynamicMultiplier));
             const cappedVelY = Math.max(-maxVelocity, Math.min(maxVelocity, avgVelocity.y * dynamicMultiplier));
 
-            // Apply direction lock for inertia - only scroll in the primary direction
-            // This makes inertia feel more controlled while touchmove allows free movement
-            velocity.x = lockedDirection === 'y' ? 0 : cappedVelX;
-            velocity.y = lockedDirection === 'x' ? 0 : cappedVelY;
+            // Use recent weighted motion so release jitter cannot turn a fling onto the other axis.
+            const horizontal = Math.abs(avgVelocity.x) > Math.abs(avgVelocity.y);
+            velocity.x = horizontal ? cappedVelX : 0;
+            velocity.y = horizontal ? 0 : cappedVelY;
 
             // Only start inertia if velocity is significant
             const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
             if (speed > minVelocityThreshold * 2) {
-                lastFrameTime = 0;
-                scrollInertiaAnimationID = requestAnimationFrame(scrollInertia);
+                inertiaMotion = {
+                    startTime: performance.now(),
+                    duration: Math.log(speed / minVelocityThreshold) / -Math.log(BASE_DECELERATION_RATE),
+                    sheetId: this._context.unit.getActiveSheet().getSheetId(),
+                    velocityX: velocity.x,
+                    velocityY: velocity.y,
+                    distanceX: 0,
+                    distanceY: 0,
+                };
+                queueInertiaFrame();
             }
 
             velocityHistory.length = 0;
@@ -996,6 +1048,61 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         // Add native touch event listeners with passive: false to allow preventDefault
+        // DOM drawings forward pointer events to the canvas, but their native touches stay on the DOM.
+        const forwardedTouches = new Map<number, PointerEvent>();
+        let domOwnsForwardedPan = false;
+        const finishForwardedPointer = (event: PointerEvent) => {
+            if (event.pointerType !== 'touch' || !forwardedTouches.delete(event.pointerId)) {
+                return;
+            }
+            if (event.type === 'pointercancel') {
+                handleTouchCancel();
+            } else {
+                handleTouchEnd({ touches: Array.from(forwardedTouches.values()), preventDefault: () => event.preventDefault() });
+            }
+        };
+        const handleForwardedPointer = (event: PointerEvent) => {
+            if (event.pointerType !== 'touch') {
+                return;
+            }
+            if (event.type === 'pointerdown' && event.isPrimary && forwardedTouches.size) {
+                // A new primary touch cannot coexist with pointers left over from an interrupted gesture.
+                forwardedTouches.clear();
+                handleTouchCancel();
+            }
+            if (event.type === 'pointerup' || event.type === 'pointercancel') {
+                finishForwardedPointer(event);
+                return;
+            }
+            if (event.isTrusted) {
+                return;
+            }
+            if (event.type === 'pointerdown') {
+                forwardedTouches.set(event.pointerId, event);
+                if (forwardedTouches.size === 1) {
+                    const { offsetX, offsetY } = getTouchOffset(event);
+                    const picked = scene.pick(Vector2.FromArray([offsetX, offsetY]), DeviceType.Touch);
+                    // DOM blocks route their native touch pan to the host; chart DOM only forwards pointers.
+                    domOwnsForwardedPan = !(picked instanceof Scene) && picked?.objectType === ObjectType.DRAWING_DOM;
+                }
+                if (!domOwnsForwardedPan || forwardedTouches.size > 1) {
+                    handleTouchStart({ touches: Array.from(forwardedTouches.values()), preventDefault: () => event.preventDefault() });
+                }
+            } else if (forwardedTouches.has(event.pointerId)) {
+                if (event.type === 'pointermove') {
+                    forwardedTouches.set(event.pointerId, event);
+                    if (!domOwnsForwardedPan || forwardedTouches.size > 1) {
+                        handleTouchMove({ touches: Array.from(forwardedTouches.values()), preventDefault: () => event.preventDefault() });
+                    }
+                }
+            }
+        };
+        // Pointer capture can end a DOM gesture on the canvas or outside its original layer.
+        document.addEventListener('pointerup', finishForwardedPointer, true);
+        document.addEventListener('pointercancel', finishForwardedPointer, true);
+        const forwardedPointerEvents = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'] as const;
+        forwardedPointerEvents.forEach((type) => canvasElement.addEventListener(type, handleForwardedPointer));
+
         canvasElement.addEventListener('touchstart', handleTouchStart, { passive: false });
         canvasElement.addEventListener('touchmove', handleTouchMove, { passive: false });
         canvasElement.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -1007,6 +1114,11 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             canvasElement.removeEventListener('touchmove', handleTouchMove);
             canvasElement.removeEventListener('touchend', handleTouchEnd);
             canvasElement.removeEventListener('touchcancel', handleTouchCancel);
+            forwardedPointerEvents.forEach((type) => canvasElement.removeEventListener(type, handleForwardedPointer));
+            document.removeEventListener('pointerup', finishForwardedPointer, true);
+            document.removeEventListener('pointercancel', finishForwardedPointer, true);
+            handleTouchCancel();
+            forwardedTouches.clear();
             zoomIndicator.dispose();
         }));
 

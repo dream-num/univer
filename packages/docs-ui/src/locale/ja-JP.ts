@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'セクション設定',
             },
             paragraphSetting: {
+                wordWrap: '英単語の途中で改行する',
                 alignment: '配置',
                 indentation: 'インデント',
                 left: '左',

@@ -511,11 +511,12 @@ describe('DocDrawingUpdateRenderController', () => {
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
     });
 
-    it('removes read-only drawings from picking and transformer interaction, then restores both', async () => {
+    it.each([DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_OLE])('keeps read-only drawings unmodifiable while preserving OLE browsing (%s)', async (drawingType) => {
         const { getShape, permissionService, scene, transformer } = createController({
             drawings: {
                 'body-drawing': {
                     drawingId: 'body-drawing',
+                    drawingType,
                     isMultiTransform: BooleanNumber.FALSE,
                 },
             },
@@ -523,7 +524,7 @@ describe('DocDrawingUpdateRenderController', () => {
 
         setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
 
-        expect(getShape('body-drawing').evented).toBe(false);
+        expect(getShape('body-drawing').evented).toBe(drawingType === DrawingTypeEnum.DRAWING_OLE);
         expect(transformer.clearControlByIds).toHaveBeenCalledWith(['doc-1#-#doc-1#-#body-drawing']);
         expect(getShape('body-drawing').transformerConfig).toMatchObject({
             moveEnabled: false,

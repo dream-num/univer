@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { IRibbonGridLayout } from './menu-manager.service';
 
 export type OneOrMany<T> = T | T[];
@@ -93,6 +92,7 @@ export interface IValueOption<TLocaleKey extends string = string, TValue = undef
 export interface ICustomComponentProps<T> {
     value: T;
     onChange: (v: T) => void;
+    ariaLabel?: string;
 }
 
 export interface IMenuSelectorItem<

@@ -15,12 +15,13 @@
  */
 
 import type { ReactNode } from 'react';
-import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { MoreDownIcon } from '@univerjs/icons';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
 import { clsx } from '../../helper/clsx';
 import { Badge } from '../badge/Badge';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
+import { FormLayoutContext } from '../form-layout/FormLayout';
 import { selectClassName } from './Select';
 
 interface IOption {
@@ -31,6 +32,7 @@ interface IOption {
 
 export interface IMultipleSelectProps {
     className?: string;
+    size?: 'small' | 'large';
 
     /**
      * The value of select
@@ -64,6 +66,7 @@ export interface IMultipleSelectProps {
 export function MultipleSelect(props: IMultipleSelectProps) {
     const {
         className,
+        size = 'small',
         value = [],
         disabled = false,
         options = [],
@@ -72,6 +75,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
     } = props;
 
     const [open, setOpen] = useState(false);
+    const invalid = useContext(FormLayoutContext);
 
     function handleOpenChange(open: boolean) {
         setOpen(open);
@@ -95,24 +99,23 @@ export function MultipleSelect(props: IMultipleSelectProps) {
     }, [onChange, options, value]);
 
     function handleClose(item: string) {
+        if (disabled) return;
         const newValue = value.filter((v) => v !== item);
         onChange(newValue);
     }
 
-    const displayValue = useMemo(() => {
-        return options
-            .filter((option) => value.includes(option.value!))
-            .map((option, index) => (
-                <Badge
-                    key={index}
-                    className="univer-max-w-32"
-                    closable
-                    onClose={() => handleClose(option.value!)}
-                >
-                    {option.label}
-                </Badge>
-            ));
-    }, [options, value]);
+    const displayValue = options
+        .filter((option) => value.includes(option.value!))
+        .map((option) => (
+            <Badge
+                key={option.value}
+                className="univer-max-w-32"
+                closable={!disabled && !option.disabled}
+                onClose={() => handleClose(option.value!)}
+            >
+                {option.label}
+            </Badge>
+        ));
 
     return (
         <DropdownMenu
@@ -125,10 +128,13 @@ export function MultipleSelect(props: IMultipleSelectProps) {
         >
             <div
                 data-u-comp="multiple-select"
-                className={clsx(selectClassName, {
-                    'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
+                aria-invalid={invalid || undefined}
+                className={clsx(selectClassName, size === 'large'
+                    ? 'univer-h-auto univer-min-h-12 univer-text-base'
+                    : 'univer-text-sm', {
+                    '!univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-border-primary-300 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent hover:univer-border-transparent': borderless,
-                    'univer-cursor-not-allowed': disabled,
+                    'univer-cursor-not-allowed univer-opacity-50': disabled,
                     'hover:univer-border-primary-600': !disabled && !borderless,
                     'univer-cursor-pointer': !disabled && !open,
                 }, className)}

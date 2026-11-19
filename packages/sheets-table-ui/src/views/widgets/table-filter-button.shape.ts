@@ -15,12 +15,12 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
 import { ICommandService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
+import type { IOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
 import { OpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
-import { filterPartial } from './icons';
 
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
@@ -48,7 +48,6 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
     private _hoverIconColor = '#202124';
 
     private _hovered = false;
-    private _filteredIconPath: Path2D | null = null;
 
     constructor(
         key: string,
@@ -126,30 +125,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         const hasFilter = buttonState === SheetsTableButtonStateEnum.FilteredSortNone
             || buttonState === SheetsTableButtonStateEnum.FilteredSortAsc
             || buttonState === SheetsTableButtonStateEnum.FilteredSortDesc;
-        if (hasFilter) {
-            this._filteredIconPath ??= new Path2D(filterPartial[0]);
-            ctx.fillStyle = iconColor;
-            ctx.fill(this._filteredIconPath);
-        } else {
-            this._drawChevron(ctx, iconColor);
-        }
-        ctx.restore();
-    }
-
-    private _drawChevron(ctx: UniverRenderingContext2D, color: string): void {
-        const centerX = FILTER_ICON_SIZE / 2;
-        const centerY = FILTER_ICON_SIZE / 2;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.8;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.moveTo(centerX - 4.5, centerY - 2.5);
-        ctx.lineTo(centerX, centerY + 2);
-        ctx.lineTo(centerX + 4.5, centerY - 2.5);
-        ctx.stroke();
+        drawCanvasIcon(ctx, hasFilter ? 'filter-applied-icon' : 'more-down-icon', 0, 0, FILTER_ICON_SIZE, iconColor);
         ctx.restore();
     }
 

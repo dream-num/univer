@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -30,6 +31,51 @@ describe('Test imaginary function', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
             expect(result.getValue()).toBe(12);
+        });
+
+        it('Value is complex string with a sign inside the imaginary part', () => {
+            const inumber = StringValueObject.create('1+2-3i');
+            const result = testFunction.calculate(inumber);
+            // `2-3` is February 3 of the current year, as in Excel.
+            const februaryThird = excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 1, 3)));
+            expect(result.getValue()).toBe(februaryThird);
+
+            const inumber2 = StringValueObject.create('1-2+3i');
+            const result2 = testFunction.calculate(inumber2);
+            expect(result2.getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Value is complex string with a sign inside the imaginary part on a 1904 workbook', () => {
+            const dateSystem1904 = new Imaginary(FUNCTION_NAMES_ENGINEERING.IMAGINARY);
+            dateSystem1904.setDateSystem(DateSystem.Date1904);
+
+            const inumber = StringValueObject.create('1+2-3i');
+            const result = dateSystem1904.calculate(inumber);
+            // The same February 3, written as a serial in the 1904 date system.
+            const februaryThird = excelDateSerial(new Date(Date.UTC(new Date().getUTCFullYear(), 1, 3)), DateSystem.Date1904);
+            expect(result.getValue()).toBe(februaryThird);
+        });
+
+        it('Value is complex string with a part written like cell text', () => {
+            const percent = StringValueObject.create('1+50%i');
+            expect(testFunction.calculate(percent).getValue()).toBe(0.5);
+
+            const currency = StringValueObject.create('1+$2i');
+            expect(testFunction.calculate(currency).getValue()).toBe(2);
+
+            const grouped = StringValueObject.create('1+1,234i');
+            expect(testFunction.calculate(grouped).getValue()).toBe(1234);
+
+            const spaced = StringValueObject.create(' 1+2i ');
+            expect(testFunction.calculate(spaced).getValue()).toBe(2);
+        });
+
+        it('Value is complex string with a part that is not a number', () => {
+            const hex = StringValueObject.create('1+0x10i');
+            expect(testFunction.calculate(hex).getValue()).toBe(ErrorType.NUM);
+
+            const infinity = StringValueObject.create('1+Infinity i');
+            expect(testFunction.calculate(infinity).getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is large numbers', () => {

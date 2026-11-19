@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
-import { Injector, RANGE_TYPE, ThemeService } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { IShortcutService } from '@univerjs/ui';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IPointerEvent } from '@univerjs/engine-render';
+import {
+    IContextService,
+    Injector,
+    IUniverInstanceService,
+    RANGE_TYPE,
+    ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import {
+    SelectionMoveType,
+    SELECTIONS_ENABLED,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
+import { SetScrollOperation } from '../../../commands/operations/scroll.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { MOBILE_EXPANDING_SELECTION } from '../../../consts/mobile-context';
+import { createChartRenderTestBed } from '../../../controllers/render-controllers/__tests__/chart-render-test-bed';
 import {
     createFakeScene,
     createFakeSkeleton,
@@ -28,7 +46,9 @@ import {
     createRenderTestBed,
     createTestEvent,
 } from '../../../controllers/render-controllers/__tests__/render-test-bed';
+import { MobileSheetsScrollRenderController } from '../../../controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetScrollManagerService } from '../../scroll-manager.service';
+import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { MobileSheetsSelectionRenderService } from '../mobile-selection-render.service';
 import { MobileSelectionControl } from '../mobile-selection-shape';
 
@@ -155,13 +175,6 @@ function installCellLookupForMobileSelection(skeleton: ReturnType<typeof createF
 }
 
 describe('MobileSheetsSelectionRenderService', () => {
-    beforeAll(() => {
-        globalThis.window = {
-            cancelAnimationFrame: () => { },
-            requestAnimationFrame: () => 1,
-        } as unknown as Window & typeof globalThis;
-    });
-
     it('restores a keyboard-moved selection when cell editing ends', () => {
         const testBed = createRenderTestBed({
             dependencies: [
@@ -565,5 +578,172 @@ describe('MobileSheetsSelectionRenderService', () => {
 
         service.dispose();
         testBed.univer.dispose();
+    });
+});
+
+describe('Mobile Chart selection lifecycle with real providers', () => {
+    it('starts without a cell runtime and restores Grid header selection', () => {
+        const { render, activate, manager } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [MobileSheetsSelectionRenderService],
+        ], true);
+        const service = render.with(MobileSheetsSelectionRenderService);
+        const event = { offsetX: 20, offsetY: 100, button: 0, buttons: 1 } as IPointerEvent;
+        render.components.get(SHEET_VIEW_KEY.ROW)!.onPointerDown$.emitEvent(event);
+        expect(service.getSelectionControls()).toHaveLength(0);
+        activate('grid');
+        expect(manager.getCurrentSkeleton()).toBeDefined();
+        render.components.get(SHEET_VIEW_KEY.ROW)!.onPointerDown$.emitEvent(event);
+        expect(service.getSelectionDataWithStyle()[0].rangeWithCoord.rangeType).toBe(RANGE_TYPE.ROW);
+        activate('chart');
+        expect(service.getSelectionControls()).toHaveLength(0);
+        render.components.get(SHEET_VIEW_KEY.ROW)!.onPointerDown$.emitEvent(event);
+        expect(service.getSelectionControls()).toHaveLength(0);
+    });
+});
+
+describe('Mobile expansion shortcut lifecycle with real providers', () => {
+    it.each(['pointer-up', 'chart', 'null', 'dispose', 'unrelated-dispose'])('restores shortcut dispatch and context after expansion ends through %s', async (ending) => {
+        const { render, activate, injector, manager, workbook, commands } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [MobileSheetsSelectionRenderService],
+            [MobileSheetsScrollRenderController],
+        ]);
+        commands.registerCommand(SetScrollRelativeCommand);
+        commands.registerCommand(SetScrollOperation);
+        const renderManager = injector.get(IRenderManagerService);
+        const instances = injector.get(IUniverInstanceService);
+        const createNextRender = () => {
+            const nextWorkbook = instances.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                id: 'next-mobile',
+                sheetOrder: ['next-grid'],
+                sheets: { 'next-grid': { id: 'next-grid', rowCount: 100, columnCount: 20 } },
+            }, { skipAutoRender: true });
+            const nextRender = renderManager.createRender(nextWorkbook.getUnitId());
+            nextRender.engine.resizeBySize(800, 600);
+            return nextRender;
+        };
+        const unrelatedRender = ending === 'unrelated-dispose' ? createNextRender() : null;
+        instances.setCurrentUnitForType(workbook.getUnitId());
+        const shortcuts = injector.get(IShortcutService);
+        const registration = shortcuts.registerShortcut({ id: SetSelectionsOperation.id, binding: KeyCode.F9 });
+        onTestFinished(() => registration.dispose());
+        const keyboard = new KeyboardEvent('keydown', { key: 'F9', code: 'F9', keyCode: KeyCode.F9 });
+        expect(shortcuts.dispatch(keyboard)?.id).toBe(SetSelectionsOperation.id);
+        const service = render.with(MobileSheetsSelectionRenderService);
+        const control = service.getActiveSelectionControl<MobileSelectionControl>()!;
+        const event = { offsetX: 100, offsetY: 100, button: 0, buttons: 1 } as IPointerEvent;
+        control.expandControlBottomRight!.onPointerDown$.emitEvent(event);
+        expect(shortcuts.dispatch(keyboard)).toBeUndefined();
+        if (unrelatedRender) {
+            renderManager.removeRender(unrelatedRender.unitId);
+            expect(injector.get(IContextService).getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(true);
+            expect(shortcuts.dispatch(keyboard)).toBeUndefined();
+        }
+        if (ending === 'chart') {
+            activate('chart');
+        } else if (ending === 'null') {
+            manager.setCurrent({ sheetId: 'chart' });
+        } else if (ending === 'dispose') {
+            injector.get(IRenderManagerService).removeRender(workbook.getUnitId());
+        } else {
+            render.scene.onPointerUp$.emitEvent(event);
+        }
+        expect(injector.get(IContextService).getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(false);
+        expect(shortcuts.dispatch(keyboard)?.id).toBe(SetSelectionsOperation.id);
+        const scrollingRender = ending === 'dispose' ? createNextRender() : render;
+        if (ending === 'chart') {
+            activate('grid');
+        } else if (ending === 'null') {
+            manager.setCurrent({ sheetId: 'grid' });
+        }
+        const viewport = scrollingRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        const before = viewport.viewportScrollY;
+        const canvas = scrollingRender.engine.getCanvasElement();
+        const start = new Event('touchstart', { cancelable: true });
+        Object.defineProperty(start, 'touches', { value: [{ clientX: 400, clientY: 400 }] });
+        canvas.dispatchEvent(start);
+        expect(start.defaultPrevented).toBe(true);
+        await vi.advanceTimersByTimeAsync(16);
+        const move = new Event('touchmove', { cancelable: true });
+        Object.defineProperty(move, 'touches', { value: [{ clientX: 400, clientY: 300 }] });
+        canvas.dispatchEvent(move);
+        await Promise.resolve();
+        expect(viewport.viewportScrollY).toBeGreaterThan(before);
+        expect(scrollingRender.with(SheetSkeletonManagerService).getCurrentSkeleton()).toBeDefined();
+        const cancel = new Event('touchcancel');
+        Object.defineProperty(cancel, 'touches', { value: [] });
+        canvas.dispatchEvent(cancel);
+    });
+});
+
+describe('Mobile expansion ownership across current Workbooks', () => {
+    it('keeps B expansion and touch scrolling exclusive after an expanded A is removed', async () => {
+        const { render, injector, workbook, commands } = createChartRenderTestBed([
+            [SheetScrollManagerService],
+            [MobileSheetsSelectionRenderService],
+            [MobileSheetsScrollRenderController],
+        ]);
+        commands.registerCommand(SetScrollRelativeCommand);
+        commands.registerCommand(SetScrollOperation);
+        const instances = injector.get(IUniverInstanceService);
+        const renders = injector.get(IRenderManagerService);
+        const context = injector.get(IContextService);
+        const shortcuts = injector.get(IShortcutService);
+        const registration = shortcuts.registerShortcut({ id: SetSelectionsOperation.id, binding: KeyCode.F9 });
+        onTestFinished(() => registration.dispose());
+        const keyboard = new KeyboardEvent('keydown', { key: 'F9', code: 'F9', keyCode: KeyCode.F9 });
+        const pointer = { offsetX: 100, offsetY: 100, button: 0, buttons: 1 } as IPointerEvent;
+        const selectionA = render.with(MobileSheetsSelectionRenderService);
+        instances.focusUnit(workbook.getUnitId());
+        const controlA = selectionA.getActiveSelectionControl<MobileSelectionControl>()!;
+        controlA.expandControlBottomRight!.onPointerDown$.emitEvent(pointer);
+        const workbookB = instances.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'mobile-b',
+            sheetOrder: ['grid-b'],
+            sheets: { 'grid-b': { id: 'grid-b', rowCount: 100, columnCount: 20 } },
+        }, { skipAutoRender: true });
+        const renderB = renders.createRender(workbookB.getUnitId());
+        renderB.engine.resizeBySize(800, 600);
+        instances.focusUnit(workbookB.getUnitId());
+
+        // Returning to A does not emit a new skeleton; its real Grid runtime must survive deactivation.
+        instances.focusUnit(workbook.getUnitId());
+        render.components.get(SHEET_VIEW_KEY.ROW)!.onPointerDown$.emitEvent(pointer);
+        expect(selectionA.getSelectionDataWithStyle()[0].rangeWithCoord.rangeType).toBe(RANGE_TYPE.ROW);
+        expect(render.with(SheetSkeletonManagerService).getCurrentSkeleton()).toBeDefined();
+        const reactivatedControlA = selectionA.getActiveSelectionControl<MobileSelectionControl>()!;
+        reactivatedControlA.expandControlBottomRight!.onPointerDown$.emitEvent(pointer);
+        instances.focusUnit(workbookB.getUnitId());
+        const selectionB = renderB.with(MobileSheetsSelectionRenderService);
+        const controlB = selectionB.getActiveSelectionControl<MobileSelectionControl>()!;
+        controlB.expandControlBottomRight!.onPointerDown$.emitEvent(pointer);
+        renders.removeRender(workbook.getUnitId());
+        expect(context.getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(true);
+        expect(shortcuts.dispatch(keyboard)).toBeUndefined();
+
+        const viewport = renderB.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        const canvas = renderB.engine.getCanvasElement();
+        const gesture = async () => {
+            const start = new Event('touchstart', { cancelable: true });
+            Object.defineProperty(start, 'touches', { value: [{ clientX: 400, clientY: 400 }] });
+            canvas.dispatchEvent(start);
+            await vi.advanceTimersByTimeAsync(16);
+            const move = new Event('touchmove', { cancelable: true });
+            Object.defineProperty(move, 'touches', { value: [{ clientX: 400, clientY: 300 }] });
+            canvas.dispatchEvent(move);
+            await Promise.resolve();
+            const cancel = new Event('touchcancel');
+            Object.defineProperty(cancel, 'touches', { value: [] });
+            canvas.dispatchEvent(cancel);
+        };
+        const before = viewport.viewportScrollY;
+        await gesture();
+        expect(viewport.viewportScrollY).toBe(before);
+        renderB.scene.onPointerUp$.emitEvent(pointer);
+        expect(context.getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(false);
+        expect(shortcuts.dispatch(keyboard)?.id).toBe(SetSelectionsOperation.id);
+        await gesture();
+        expect(viewport.viewportScrollY).toBeGreaterThan(before);
     });
 });

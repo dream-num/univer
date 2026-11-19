@@ -1,6 +1,6 @@
-import type { IEntryConfig } from '../types.ts';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
+import type { IEntryConfig } from '../types.ts';
 import { DEFAULT_ENTRY_FILE, FACADE_ENTRY_FILE, LOCALE_DIRECTORY } from '../constants.ts';
 
 /**
@@ -19,6 +19,15 @@ export function getEntries(packageDir: string): IEntryConfig[] {
             key: 'facade',
             path: facadeEntry,
             type: 'facade',
+        });
+    }
+
+    const workerEntry = path.join(packageDir, 'src/worker.ts');
+    if (existsSync(workerEntry)) {
+        entries.push({
+            key: 'worker',
+            path: workerEntry,
+            type: 'worker',
         });
     }
 

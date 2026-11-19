@@ -139,7 +139,10 @@ describe('Test indirect', () => {
             },
         });
         formulaCurrentConfigService.registerSheetNameMap({
-            [testBed.unitId]: { Sheet1: testBed.sheetId },
+            [testBed.unitId]: {
+                ...Object.fromEntries(testBed.sheet.getSheets().map((sheet) => [sheet.getName(), sheet.getSheetId()])),
+                Sheet1: testBed.sheetId,
+            },
             'sales-source': { Data: 'source-sheet' },
             'base-source': { Records: 'base-table-sheet' },
         });
@@ -638,6 +641,18 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('does not reuse a valid range cache for an unresolved sheet, or poison the valid range', () => {
+            for (const [formula, expected] of [
+                ['=SUM(A1:A2)', 4],
+                ['=SUM(Missing!A1:A2)', ErrorType.REF],
+                ['=SUM(A1:A2)', 4],
+            ] as const) {
+                const node = astTreeBuilder.parse(lexer.treeBuilder(formula) as LexerNode)!;
+                const result = interpreter.execute(generateExecuteAstNodeData(node));
+                expect((result as BaseValueObject).getValue()).toBe(expected);
+            }
         });
 
         it('Reference column', async () => {

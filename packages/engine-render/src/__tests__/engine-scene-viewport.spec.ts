@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
+import { Injector, Tools } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURSOR_TYPE } from '../basics/const';
 import { DeviceType, PointerInput } from '../basics/i-events';
@@ -22,12 +22,13 @@ import { Vector2 } from '../basics/vector2';
 import { Engine } from '../engine';
 import { Group } from '../group';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../scene';
-import { Transformer } from '../scene.transformer';
-import { Line } from '../shape/line';
+import { DumbCanvasColorService, ICanvasColorService } from '../services/canvas-color.service';
 import { Rect } from '../shape/rect';
 import { ScrollBar } from '../shape/scroll-bar';
 import { Viewport } from '../viewport';
 import { setupRenderTestEnv } from './render-test-utils';
+
+let injector: Injector;
 
 interface IFixture {
     engine: Engine;
@@ -67,10 +68,12 @@ function createFixture(): IFixture {
     container.style.border = '1px solid transparent';
     document.body.appendChild(container);
 
-    const engine = new Engine('unit-a', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+    const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+        return injector.createInstance(Engine, 'unit-a', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+    } }]]).get(Engine);
     engine.mount(container, false);
 
-    const scene = new Scene('scene-a', engine);
+    const scene = injector.createInstance(Scene, 'scene-a', engine);
     scene.transformByState({
         width: 700,
         height: 500,
@@ -78,7 +81,7 @@ function createFixture(): IFixture {
         scaleY: 1,
     });
 
-    const viewport = new Viewport(MAIN_VIEW_PORT_KEY, scene, {
+    const viewport = injector.createInstance(Viewport, MAIN_VIEW_PORT_KEY, scene, {
         left: 0,
         top: 0,
         width: 300,
@@ -89,13 +92,13 @@ function createFixture(): IFixture {
         bufferEdgeY: 6,
     });
 
-    new ScrollBar(viewport, {
+    injector.createInstance(ScrollBar, viewport, {
         mainScene: scene,
         barSize: 12,
         thumbMargin: 2,
     });
 
-    const rect = new Rect('rect-main', {
+    const rect = injector.createInstance(Rect, 'rect-main', {
         left: 10,
         top: 10,
         width: 100,
@@ -107,7 +110,7 @@ function createFixture(): IFixture {
     rect.zIndex = 1;
     scene.addObject(rect, 1);
 
-    const child = new Rect('rect-child', {
+    const child = injector.createInstance(Rect, 'rect-child', {
         left: 120,
         top: 40,
         width: 60,
@@ -116,7 +119,7 @@ function createFixture(): IFixture {
         stroke: '#111111',
         strokeWidth: 1,
     });
-    const group = new Group('group-main', child);
+    const group = injector.createInstance(Group, 'group-main', child);
     group.transformByState({ left: 40, top: 20 });
     scene.addObject(group, 2);
 
@@ -128,15 +131,46 @@ function createFixture(): IFixture {
     };
 }
 
+function createViewportCacheFixture(bottom = 40, dpr = 1) {
+    const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+        return injector.createInstance(Engine, 'viewport-cache-engine', { elementWidth: 320, elementHeight: 180, dpr });
+    } }]]).get(Engine);
+    const scene = injector.createInstance(Scene, 'viewport-cache-scene', engine);
+    scene.transformByState({ width: 700, height: 500, scaleX: 1, scaleY: 1 });
+    const top = injector.createInstance(Viewport, 'viewMainTop', scene, { left: 0, top: 0, width: 300, height: bottom, active: true, allowCache: true });
+    const main = injector.createInstance(Viewport, MAIN_VIEW_PORT_KEY, scene, { left: 0, top: bottom, width: 300, height: 180 - bottom, active: true, allowCache: true });
+    const object = injector.createInstance(Rect, 'viewport-cache-rect', { left: 5, top: 5, width: 40, height: 20, fill: '#44aa66' });
+    object.viewportCacheReusable = true;
+    scene.addObject(object, 1);
+    scene.enableLayerCache(1);
+    scene.setViewportCacheReuseKey(MAIN_VIEW_PORT_KEY);
+    engine.resizeBySize(320, 180);
+    scene.render();
+    const retained = vi.spyOn(top, 'reuseCachedRender');
+    const painted = vi.spyOn(top, 'render');
+    const rootClear = vi.spyOn(engine, 'clearCanvas');
+    const scroll = (x = 0, y = 20) => {
+        main.viewportScrollX += x;
+        main.viewportScrollY += y;
+        scene.makeDirtyForViewportScroll(main);
+    };
+    const dispose = () => {
+        scene.dispose();
+    };
+    return { engine, scene, top, main, object, retained, painted, rootClear, scroll, dispose };
+}
+
 describe('engine scene viewport extra', () => {
     let env: ReturnType<typeof setupRenderTestEnv>;
 
     beforeEach(() => {
+        injector = new Injector([[ICanvasColorService, { useClass: DumbCanvasColorService }]]);
         env = setupRenderTestEnv();
         vi.useFakeTimers();
     });
 
     afterEach(() => {
+        injector.dispose();
         vi.runOnlyPendingTimers();
         vi.useRealTimers();
         env.restore();
@@ -144,15 +178,134 @@ describe('engine scene viewport extra', () => {
         document.body.innerHTML = '';
     });
 
+    it('retains the frozen cache band across consecutive vertical scrolls and still clears the root', () => {
+        const fixture = createViewportCacheFixture();
+        const bookkeeping = vi.spyOn(fixture.object, 'onViewportCacheReuse');
+        try {
+            fixture.scroll();
+            fixture.scroll();
+            expect(fixture.scene.isViewportCacheReusePending()).toBe(true);
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledOnce();
+            expect(fixture.painted).not.toHaveBeenCalled();
+            expect(bookkeeping).toHaveBeenCalledOnce();
+            expect(fixture.rootClear).toHaveBeenCalledOnce();
+            expect(fixture.top.isDirty).toBe(false);
+            expect(fixture.top.isForceDirty).toBe(false);
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledTimes(2);
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it.each(['scene', 'unknown-command', 'object', 'hide', 'remove', 'clear', 'viewport', 'force-viewport', 'resize', 'horizontal', 'unsupported'] as const)(
+        'falls back when %s invalidates a pending frozen cache',
+        (reason) => {
+            const fixture = createViewportCacheFixture();
+            try {
+                fixture.scroll();
+                expect(fixture.scene.isViewportCacheReusePending()).toBe(true);
+                switch (reason) {
+                    case 'scene':
+                        fixture.scene.makeDirty(true);
+                        break;
+                    case 'unknown-command':
+                        fixture.scene.invalidateViewportCacheReuse();
+                        break;
+                    case 'object':
+                        fixture.object.makeDirty(true);
+                        break;
+                    case 'hide':
+                        fixture.object.hide();
+                        break;
+                    case 'remove':
+                        fixture.scene.removeObject(fixture.object);
+                        break;
+                    case 'clear':
+                        fixture.scene.getLayer(1).clear();
+                        break;
+                    case 'viewport':
+                        fixture.top.markDirty(true);
+                        break;
+                    case 'force-viewport':
+                        fixture.top.markForceDirty(true);
+                        break;
+                    case 'resize':
+                        fixture.engine.resizeBySize(330, 180);
+                        break;
+                    case 'horizontal':
+                        fixture.main.viewportScrollX = 1;
+                        break;
+                    case 'unsupported':
+                        fixture.object.viewportCacheReusable = false;
+                        break;
+                }
+                fixture.scene.render();
+                expect(fixture.retained).not.toHaveBeenCalled();
+                expect(fixture.painted).toHaveBeenCalledOnce();
+            } finally {
+                fixture.dispose();
+            }
+        }
+    );
+
+    it('does not resurrect invalidated intent when another relative scroll arrives before paint', () => {
+        const fixture = createViewportCacheFixture();
+        try {
+            fixture.scroll();
+            fixture.scene.invalidateViewportCacheReuse();
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).toHaveBeenCalledOnce();
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it.each([20.5, 21])('rejects fractional cache pixels at boundary %s', (bottom) => {
+        Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1.25 });
+        const fixture = createViewportCacheFixture(bottom, 2);
+        try {
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            expect(fixture.painted).toHaveBeenCalledOnce();
+        } finally {
+            fixture.dispose();
+            Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1 });
+        }
+    });
+
+    it('keeps before-render subscribers on the full rendering path', () => {
+        const fixture = createViewportCacheFixture();
+        const subscription = fixture.scene.beforeRender$.subscribe(() => {});
+        try {
+            fixture.scroll();
+            fixture.scene.render();
+            expect(fixture.retained).not.toHaveBeenCalled();
+            expect(fixture.painted).toHaveBeenCalledOnce();
+        } finally {
+            subscription.unsubscribe();
+            fixture.dispose();
+        }
+    });
+
     it('keeps wheel scrolling visually consistent when the scene is scaled', () => {
         const getViewportWheelDelta = (scale: number) => {
             const container = document.createElement('div');
             document.body.appendChild(container);
 
-            const engine = new Engine('unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+                return injector.createInstance(Engine, 'unit-wheel', { elementWidth: 320, elementHeight: 180, dpr: 1 });
+            } }]]).get(Engine);
             engine.mount(container, false);
 
-            const scene = new Scene('scene-wheel', engine);
+            const scene = injector.createInstance(Scene, 'scene-wheel', engine);
             scene.transformByState({
                 width: 700,
                 height: 500,
@@ -160,7 +313,7 @@ describe('engine scene viewport extra', () => {
                 scaleY: 1,
             });
 
-            const viewport = new Viewport('doc-like-vp', scene, {
+            const viewport = injector.createInstance(Viewport, 'doc-like-vp', scene, {
                 left: 0,
                 top: 0,
                 right: 0,
@@ -168,7 +321,7 @@ describe('engine scene viewport extra', () => {
                 active: true,
             });
 
-            new ScrollBar(viewport);
+            injector.createInstance(ScrollBar, viewport);
             scene.scale(scale, scale);
             viewport.resetCanvasSizeAndUpdateScroll();
 
@@ -179,7 +332,6 @@ describe('engine scene viewport extra', () => {
 
             const delta = viewport.viewportScrollY;
             scene.dispose();
-            engine.dispose();
             container.remove();
 
             return delta;
@@ -189,6 +341,30 @@ describe('engine scene viewport extra', () => {
         const doubleScaleDelta = getViewportWheelDelta(2);
 
         expect(doubleScaleDelta * 2).toBeCloseTo(normalScaleDelta, 3);
+    });
+
+    it('keeps clamped scroll notifications without repainting an unchanged clean viewport', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: 0 });
+        viewport.markDirty(false);
+        viewport.markForceDirty(false);
+        const dirty = vi.spyOn(viewport.getScrollBar()!, 'makeDirty');
+        const notified = vi.fn();
+        const subscription = viewport.onScrollAfter$.subscribeEvent(notified);
+
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: -20 });
+        expect(viewport.viewportScrollY).toBe(0);
+        expect(dirty).not.toHaveBeenCalled();
+        expect(notified).toHaveBeenCalledTimes(1);
+
+        viewport.markForceDirty(true);
+        viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: -20 });
+        expect(dirty).toHaveBeenCalledExactlyOnceWith(true, true);
+        expect(notified).toHaveBeenCalledTimes(2);
+
+        subscription.unsubscribe();
+        scene.dispose();
+        container.remove();
     });
 
     it('locks out minor cross-axis wheel jitter in viewport scrolling', () => {
@@ -209,7 +385,6 @@ describe('engine scene viewport extra', () => {
         expect(viewport.viewportScrollX).toBeGreaterThan(20);
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -233,7 +408,6 @@ describe('engine scene viewport extra', () => {
         expect(viewport.viewportScrollY).toBeGreaterThan(20);
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -306,7 +480,6 @@ describe('engine scene viewport extra', () => {
         expect(engine.getCanvasElement().parentElement).toBe(container);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('preserves engine and layer caches only for a pending scroll render', () => {
@@ -330,13 +503,12 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, undefined);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
-        const rowHeaderViewport = new Viewport('viewRowBottom', scene, {
+        const rowHeaderViewport = injector.createInstance(Viewport, 'viewRowBottom', scene, {
             left: 0,
             top: 20,
             width: 47,
@@ -344,7 +516,7 @@ describe('engine scene viewport extra', () => {
             active: true,
             allowCache: true,
         });
-        new Viewport('viewColumnRight', scene, {
+        injector.createInstance(Viewport, 'viewColumnRight', scene, {
             left: 46,
             top: 0,
             width: 260,
@@ -377,7 +549,6 @@ describe('engine scene viewport extra', () => {
         expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('uses a full render after an after-render observer mutates the engine canvas', () => {
@@ -421,7 +592,6 @@ describe('engine scene viewport extra', () => {
 
         subscription.unsubscribe();
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps cheap content live during a large scrollbar seek', () => {
@@ -467,7 +637,6 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(2);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps content live while its render cost stays within the seek budget', () => {
@@ -496,7 +665,6 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(2);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('keeps expensive content stable until a large scrollbar seek settles', () => {
@@ -529,13 +697,12 @@ describe('engine scene viewport extra', () => {
         expect(renderSpy).toHaveBeenCalledTimes(1);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('scrolls independent viewport regions for a frozen sheet render', () => {
         const { engine, scene, viewport, container } = createFixture();
         viewport.setViewportSize({ left: 100, width: 200 });
-        const frozenViewport = new Viewport('viewMainLeft', scene, {
+        const frozenViewport = injector.createInstance(Viewport, 'viewMainLeft', scene, {
             left: 0,
             top: 0,
             width: 100,
@@ -565,7 +732,6 @@ describe('engine scene viewport extra', () => {
         expect(clearCanvasSpy).not.toHaveBeenCalled();
 
         scene.dispose();
-        engine.dispose();
         container.remove();
     });
 
@@ -654,7 +820,6 @@ describe('engine scene viewport extra', () => {
 
         scene.detachControl();
         scene.dispose();
-        engine.dispose();
     });
 
     it('uses canvas-relative client coordinates to pick touch targets', () => {
@@ -685,11 +850,12 @@ describe('engine scene viewport extra', () => {
         expect(pick).toHaveBeenCalledWith(expect.objectContaining({ x: 18, y: 20 }), DeviceType.Touch);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('throws when subscribing clientRect$ without mounting container', () => {
-        const engine = new Engine('unit-b', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+            return injector.createInstance(Engine, 'unit-b', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        } }]]).get(Engine);
         const onError = vi.fn();
         engine.clientRect$.subscribe({
             error: onError,
@@ -699,11 +865,12 @@ describe('engine scene viewport extra', () => {
                 message: '[Engine]: cannot subscribe to rect changes when container is not set!',
             })
         );
-        engine.dispose();
     });
 
     it('estimates the display frame interval without following isolated long frames', () => {
-        const engine = new Engine('unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        const engine = injector.createChild([[Engine, { useFactory: function createTestInstance() {
+            return injector.createInstance(Engine, 'unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        } }]]).get(Engine);
         let timestamp = 0;
         engine._endFrame(timestamp);
         for (const interval of [8, 8, 8, 16]) {
@@ -712,515 +879,6 @@ describe('engine scene viewport extra', () => {
         }
 
         expect(engine.getEstimatedFrameInterval()).toBe(8);
-        engine.dispose();
-    });
-
-    it('covers transformer geometry and state helper branches', () => {
-        const sceneMock = {
-            ancestorScaleX: 2,
-            ancestorScaleY: 4,
-            ancestorLeft: 6,
-            ancestorTop: 8,
-            getEngine: () => ({ activeScene: null }),
-        } as any;
-
-        const transformer = new Transformer(sceneMock, {
-            anchorSize: 12,
-            borderSpacing: 2,
-            rotateAnchorOffset: 20,
-            rotateSize: 10,
-        });
-
-        const changingSpy = vi.fn();
-        transformer.changing$.subscribe(changingSpy);
-        (transformer as any)._selectedObjectMap.set('s1', { oKey: 's1', dispose: vi.fn() });
-        transformer.changeNotification();
-        expect(changingSpy).toHaveBeenCalled();
-
-        transformer.updateZeroPoint(1, 2);
-        expect(transformer.zeroLeft).toBe(1);
-        expect(transformer.zeroTop).toBe(2);
-
-        const moveBoundary = (transformer as any)._checkMoveBoundary(
-            { left: 5, top: 5, width: 20, height: 10 },
-            -100,
-            -100,
-            0,
-            0,
-            200,
-            100
-        );
-        expect(moveBoundary.moveLeft).toBeLessThanOrEqual(0);
-        expect(moveBoundary.moveTop).toBeLessThanOrEqual(0);
-
-        const freeMoveTransformer = new Transformer(sceneMock, {
-            moveBoundaryEnabled: false,
-        } as any);
-        const freeMoveBoundary = (freeMoveTransformer as any)._checkMoveBoundary(
-            {
-                left: 820,
-                top: -28,
-                width: 520,
-                height: 520,
-            },
-            0,
-            40,
-            0,
-            0,
-            1280,
-            720
-        );
-        expect(freeMoveBoundary.moveLeft).toBe(0);
-        expect(freeMoveBoundary.moveTop).toBe(40);
-
-        (transformer as any)._startOffsetX = 10;
-        (transformer as any)._startOffsetY = 10;
-        expect((transformer as any)._moveBufferBlocker(11, 11)).toBe(true);
-        expect((transformer as any)._moveBufferBlocker(30, 30)).toBe(false);
-
-        const movePoint = (transformer as any)._getMovePoint(40, 60, {
-            left: 10,
-            top: 20,
-            width: 80,
-            height: 40,
-            angle: 30,
-        });
-        expect(Number.isFinite(movePoint.moveLeft)).toBe(true);
-        expect(Number.isFinite(movePoint.moveTop)).toBe(true);
-
-        const rotateFixed = (transformer as any)._applyRotationForResult(
-            { left: 10, top: 20, width: 50, height: 30 },
-            { left: 0, top: 0, width: 40, height: 20 },
-            25
-        );
-        expect(rotateFixed.width).toBeGreaterThan(0);
-        expect(rotateFixed.height).toBeGreaterThan(0);
-
-        const noRotate = (transformer as any)._applyRotationForResult(
-            { left: 1, top: 2, width: 3, height: 4 },
-            { left: 0, top: 0, width: 0, height: 0 },
-            0
-        );
-        expect(noRotate).toEqual({ left: 1, top: 2, width: 3, height: 4 });
-
-        const ltState = (transformer as any)._updateCloseKeepRatioState('__SpreadsheetTransformerResizeLT__', 10, 10, 60, 40, 55, 30);
-        const rbState = (transformer as any)._updateCloseKeepRatioState('__SpreadsheetTransformerResizeRB__', 10, 10, 60, 40, -100, -100);
-        expect(ltState.width).toBeGreaterThanOrEqual(20);
-        expect(rbState.height).toBeGreaterThanOrEqual(20);
-
-        const limited = (transformer as any)._getLimitedSize(120, 60);
-        expect(limited.limitWidth).toBeGreaterThan(20);
-        expect(limited.limitHeight).toBe(20);
-
-        const ltFix = (transformer as any)._fixMoveLtRb(10, 2, 100, 50, 2);
-        const lbFix = (transformer as any)._fixMoveLbRt(10, 2, 100, 50, 2);
-        expect(Number.isFinite(ltFix.moveLeft)).toBe(true);
-        expect(Number.isFinite(lbFix.moveTop)).toBe(true);
-
-        const moveObject = {
-            left: 10,
-            top: 20,
-            width: 100,
-            height: 60,
-            getState: () => ({ left: 10, top: 20, width: 100, height: 60 }),
-        } as any;
-        expect((transformer as any)._resizeLeftTop(moveObject, 5, 3, { width: 100, height: 60 }).width).toBeGreaterThan(0);
-        expect((transformer as any)._resizeRightTop(moveObject, 5, 3, { width: 100, height: 60 }).height).toBeGreaterThan(0);
-        expect((transformer as any)._resizeLeftBottom(moveObject, 5, 3, { width: 100, height: 60 }).width).toBeGreaterThan(0);
-        expect((transformer as any)._resizeRightBottom(moveObject, 5, 3, { width: 100, height: 60 }).height).toBeGreaterThan(0);
-
-        const recoveryTarget = {
-            left: -4,
-            top: -3,
-            width: 20,
-            height: 10,
-            transformByState: vi.fn(),
-        };
-        (transformer as any)._recoverySizeBoundary([recoveryTarget], 0, 0, 100, 80);
-        expect(recoveryTarget.transformByState).toHaveBeenCalled();
-        recoveryTarget.transformByState.mockClear();
-        (freeMoveTransformer as any)._recoverySizeBoundary([recoveryTarget], 0, 0, 100, 80);
-        expect(recoveryTarget.transformByState).not.toHaveBeenCalled();
-
-        expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeLM__')).toBe(CURSOR_TYPE.WEST_RESIZE);
-        expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerResizeCB__')).toBe(CURSOR_TYPE.SOUTH_RESIZE);
-        expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerRotate__')).toBe(CURSOR_TYPE.MOVE);
-        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, { transformerConfig: {} })).toEqual({
-            left: 45,
-            top: 64,
-        });
-        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, {
-            transformerConfig: {
-                rotateAnchorPosition: 'bottom',
-                rotateSize: 16,
-            },
-        })).toEqual({
-            left: 42,
-            top: 64,
-        });
-        expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotateLine__', 40, 100, {
-            transformerConfig: {
-                rotateAnchorPosition: 'bottom',
-            },
-        })).toEqual({
-            left: 50,
-            top: 43,
-        });
-        expect((transformer as any)._checkTransformerType('__SpreadsheetTransformerResizeRT__123')).toBe('__SpreadsheetTransformerResizeRT__');
-        expect((transformer as any)._getNorthEastPoints(10, 4)[0]).toHaveLength(6);
-        expect((transformer as any)._getNorthWestPoints(10, 4)[0]).toHaveLength(6);
-        expect((transformer as any)._getSouthEastPoints(10, 4)[0]).toHaveLength(7);
-        expect((transformer as any)._getSouthWestPoints(10, 4)[0]).toHaveLength(7);
-        expect((transformer as any)._smoothAccuracy(1.23456)).toBe(1.2);
-        expect((transformer as any)._smoothAccuracy(1.23456, true)).toBe(1.235);
-
-        transformer.dispose();
-    });
-
-    it('positions transformer controls symmetrically around object bounds', () => {
-        const transformer = new Transformer({
-            getEngine: () => ({ activeScene: null }),
-        } as any, {
-            anchorSize: 8,
-            anchorStyle: 'canva',
-            borderSpacing: 2,
-            borderStrokeWidth: 1,
-        });
-
-        const outline = new Rect('outline', {
-            ...(transformer as any)._getOutlinePosition(100, 50, 2, 1),
-            strokeWidth: 1,
-        });
-        expect(outline.getState()).toEqual(expect.objectContaining({
-            left: -3.5,
-            top: -3.5,
-            width: 106,
-            height: 56,
-        }));
-        const outlineMatrix = outline.transform.getMatrix();
-        expect([
-            outlineMatrix[4],
-            outlineMatrix[5],
-            outlineMatrix[4] + outline.width,
-            outlineMatrix[5] + outline.height,
-        ]).toEqual([-3, -3, 103, 53]);
-
-        const applyObject = {
-            getState: () => ({ width: 100, height: 50 }),
-            transformerConfig: {
-                anchorSize: 8,
-                anchorStyle: 'canva',
-                borderSpacing: 2,
-                borderStrokeWidth: 1,
-            },
-        };
-        const anchorTypes = [
-            '__SpreadsheetTransformerResizeLT__',
-            '__SpreadsheetTransformerResizeCT__',
-            '__SpreadsheetTransformerResizeRT__',
-            '__SpreadsheetTransformerResizeLM__',
-            '__SpreadsheetTransformerResizeRM__',
-            '__SpreadsheetTransformerResizeLB__',
-            '__SpreadsheetTransformerResizeCB__',
-            '__SpreadsheetTransformerResizeRB__',
-        ];
-        const anchorCenters = anchorTypes.map((type) => {
-            const anchor = (transformer as any)._createResizeAnchor(type, applyObject, 1) as Rect;
-            const matrix = anchor.transform.getMatrix();
-            return [matrix[4] + anchor.width / 2, matrix[5] + anchor.height / 2];
-        });
-
-        expect(anchorCenters).toEqual([
-            [-3, -3],
-            [50, -3],
-            [103, -3],
-            [-3, 25],
-            [103, 25],
-            [-3, 53],
-            [50, 53],
-            [103, 53],
-        ]);
-
-        transformer.dispose();
-    });
-
-    it('supports bottom rotate control without a connector line', () => {
-        const { engine, scene } = createFixture();
-        engine.setActiveScene(scene.sceneKey);
-
-        const rect = scene.getObject('rect-main') as Rect;
-        rect.transformerConfig = {
-            rotateAnchorPosition: 'bottom',
-            rotateLineEnabled: false,
-            rotateIconEnabled: true,
-        };
-        const transformer = new Transformer(scene, {
-            rotateEnabled: true,
-            resizeEnabled: true,
-            borderEnabled: true,
-        });
-
-        transformer.setSelectedControl(rect);
-        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
-        const controlObjects = control.getObjects();
-
-        expect(controlObjects.some((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__'))).toBe(false);
-        expect(controlObjects.some((o) => o.oKey.includes('_ICON_'))).toBe(true);
-
-        transformer.dispose();
-        scene.dispose();
-        engine.dispose();
-    });
-
-    it('renders controls from resolved display geometry without changing the selected object', () => {
-        const { engine, scene } = createFixture();
-        engine.setActiveScene(scene.sceneKey);
-
-        const rect = scene.getObject('rect-main');
-        if (!(rect instanceof Rect)) {
-            throw new TypeError('Fixture should contain the main rectangle');
-        }
-        rect.transformerConfig = {
-            keepRatio: false,
-            controlStateResolver: (object) => ({
-                ...object.getState(),
-                left: object.left - 8,
-                top: object.top - 6,
-                width: object.width + 24,
-                height: object.height + 18,
-            }),
-        };
-        const transformer = new Transformer(scene);
-
-        transformer.setSelectedControl(rect);
-        const control = scene.getObject(`__SpreadsheetTransformer___${rect.oKey}`);
-        if (!(control instanceof Group)) {
-            throw new TypeError('Transformer should create a control group');
-        }
-
-        expect(control.getState()).toEqual(expect.objectContaining({
-            left: 2,
-            top: 4,
-            width: 124,
-            height: 78,
-        }));
-        expect(rect.getState()).toEqual(expect.objectContaining({
-            left: 10,
-            top: 10,
-            width: 100,
-            height: 60,
-        }));
-
-        rect.translate(30, 40);
-        transformer.updateControl();
-        expect(control.getState()).toEqual(expect.objectContaining({
-            left: 22,
-            top: 34,
-            width: 124,
-            height: 78,
-        }));
-
-        const resizeAnchor = control.getObjects().find((object) => object.oKey.includes('__SpreadsheetTransformerResizeRB__'));
-        if (!resizeAnchor) {
-            throw new TypeError('Transformer should create a bottom-right resize anchor');
-        }
-        resizeAnchor.triggerPointerDown(createInputEvent('pointerdown', { offsetX: 146, offsetY: 112 }));
-        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 186, offsetY: 137 }));
-        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 186, offsetY: 137 }));
-        expect(rect.getState()).toEqual(expect.objectContaining({
-            width: 140,
-            height: 85,
-        }));
-
-        transformer.dispose();
-        scene.dispose();
-        engine.dispose();
-    });
-
-    it('insets the icon inside a small rotate control and matches the connector to its border', () => {
-        const { engine, scene } = createFixture();
-        engine.setActiveScene(scene.sceneKey);
-
-        const rect = scene.getObject('rect-main') as Rect;
-        rect.transformerConfig = {
-            rotateAnchorPosition: 'bottom',
-            rotateAnchorOffset: 20,
-            rotateLineEnabled: true,
-            rotateSize: 14,
-            rotateCornerRadius: 4,
-            rotateStroke: '#d1d5db',
-            rotateIconEnabled: true,
-        };
-        const transformer = new Transformer(scene, {
-            rotateEnabled: true,
-            resizeEnabled: true,
-            borderEnabled: true,
-        });
-
-        transformer.setSelectedControl(rect);
-        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
-        const controlObjects = control.getObjects();
-        const rotateLine = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__'));
-        const rotate = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerRotate__') && !o.oKey.includes('_ICON_')) as Rect;
-        const rotateIcon = controlObjects.find((o) => o.oKey.includes('_ICON_')) as Rect;
-
-        expect(rotateLine).toBeInstanceOf(Line);
-        if (!(rotateLine instanceof Line)) {
-            throw new TypeError('Rotate line should use the Line render primitive');
-        }
-
-        expect(rotateLine.stroke).toBe('#d1d5db');
-        expect(rotateLine.startX).toBe(rotateLine.endX);
-        expect(rotateLine.endY - rotateLine.startY).toBe(20);
-        expect(rotateLine.startX).toBe(rotate.left + rotate.width / 2);
-        expect(rotate.radius).toBe(4);
-        expect(rotateIcon.width).toBe(10);
-        expect(rotateIcon.height).toBe(10);
-
-        transformer.dispose();
-        scene.dispose();
-        engine.dispose();
-    });
-
-    it('expands transformer outline symmetrically when border spacing is configured', () => {
-        const { engine, scene } = createFixture();
-        const rect = scene.getObject('rect-main') as Rect;
-        rect.transformerConfig = {
-            borderSpacing: 6,
-            borderStrokeWidth: 1,
-            anchorStyle: 'canva',
-            anchorSize: 8,
-        };
-        const transformer = new Transformer(scene);
-
-        expect((transformer as any)._getOutlinePosition(100, 40, 6, 1)).toEqual({
-            left: -7.5,
-            top: -7.5,
-            width: 114,
-            height: 54,
-        });
-
-        transformer.setSelectedControl(rect);
-        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
-        const controlObjects = control.getObjects();
-        const outline = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerOutline__')) as Rect;
-        const leftMiddle = controlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerResizeLM__')) as Rect;
-
-        const outlineMatrix = outline.transform.getMatrix();
-        const leftMiddleMatrix = leftMiddle.transform.getMatrix();
-        expect(outlineMatrix[4]).toBe(-7);
-        expect(leftMiddleMatrix[4] + leftMiddle.width / 2).toBe(outlineMatrix[4]);
-
-        transformer.dispose();
-        scene.dispose();
-        engine.dispose();
-    });
-
-    it('rotates around the scene center when the scene is scaled', () => {
-        const sceneMock = {
-            ancestorScaleX: 2,
-            ancestorScaleY: 2,
-        } as any;
-        const transformer = new Transformer(sceneMock);
-        const transformByState = vi.fn();
-
-        (transformer as any)._selectedObjectMap.set('s1', {
-            oKey: 's1',
-            transformByState,
-            dispose: vi.fn(),
-        });
-        (transformer as any)._moveBufferSkip = true;
-        (transformer as any)._viewportScrollX = 0;
-        (transformer as any)._viewportScrollY = 0;
-        (transformer as any)._startOffsetX = 200;
-        (transformer as any)._startOffsetY = 240;
-
-        (transformer as any)._rotateMoving(240, 200, 100, 100, 0);
-
-        expect(transformByState).toHaveBeenCalledWith({ angle: 270 });
-        transformer.dispose();
-    });
-
-    it('covers transformer attach, controls, resize and rotate flows', () => {
-        const { engine, scene } = createFixture();
-        engine.setActiveScene(scene.sceneKey);
-
-        const rect = scene.getObject('rect-main') as Rect;
-        const transformer = new Transformer(scene, {
-            rotateEnabled: true,
-            resizeEnabled: true,
-            enabledAnchors: [1, 1, 1, 1, 1, 1, 1, 1],
-            borderEnabled: true,
-        });
-
-        const startSpy = vi.fn();
-        const changingSpy = vi.fn();
-        const endSpy = vi.fn();
-        transformer.changeStart$.subscribe(startSpy);
-        transformer.changing$.subscribe(changingSpy);
-        transformer.changeEnd$.subscribe(endSpy);
-
-        transformer.attachTo(rect);
-        (rect.onPointerDown$ as any).emitEvent(
-            createInputEvent('pointerdown', { offsetX: 20, offsetY: 20 }),
-            { stopPropagation: vi.fn() }
-        );
-        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 80, offsetY: 60 }));
-        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 80, offsetY: 60 }));
-        expect(startSpy).toHaveBeenCalled();
-        expect(changingSpy).toHaveBeenCalled();
-        expect(endSpy).toHaveBeenCalled();
-
-        transformer.setSelectedControl(rect);
-        const control = (transformer as any)._transformerControlMap.get(rect.oKey) as Group;
-        expect(control).toBeTruthy();
-        const allControlObjects = control.getObjects();
-
-        const resizeAnchor = allControlObjects.find((o) => o.oKey.includes('__SpreadsheetTransformerResizeRB__')) as Rect;
-        (resizeAnchor.onPointerDown$ as any).emitEvent(
-            createInputEvent('pointerdown', { offsetX: 26, offsetY: 26 }),
-            { stopPropagation: vi.fn() }
-        );
-        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 96, offsetY: 92 }));
-        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 96, offsetY: 92 }));
-
-        const rotateAnchor = allControlObjects.find(
-            (o) => o.oKey.includes('__SpreadsheetTransformerRotate__') && !o.oKey.includes('LINE')
-        ) as Rect | undefined;
-        if (rotateAnchor) {
-            (rotateAnchor.onPointerDown$ as any).emitEvent(
-                createInputEvent('pointerdown', { offsetX: 30, offsetY: 8 }),
-                { stopPropagation: vi.fn() }
-            );
-            scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 120, offsetY: 90 }));
-            scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 120, offsetY: 90 }));
-        } else {
-            (transformer as any)._moveBufferSkip = true;
-            (transformer as any)._startOffsetX = 30;
-            (transformer as any)._startOffsetY = 8;
-            (transformer as any)._viewportScrollX = 0;
-            (transformer as any)._viewportScrollY = 0;
-            (transformer as any)._rotateMoving(120, 90, 60, 40, 0);
-        }
-
-        expect(rect.width).toBeGreaterThan(0);
-        expect(rect.height).toBeGreaterThan(0);
-        expect(rect.angle).toBeGreaterThanOrEqual(0);
-
-        transformer.clearControlByIds([rect.oKey]);
-        rect.transformerConfig = {
-            isCropper: true,
-            resizeEnabled: true,
-            enabledAnchors: [1, 1, 1, 1, 1, 1, 1, 1],
-        } as any;
-        transformer.createControlForCopper(rect);
-        expect((transformer as any)._copperControl).toBeTruthy();
-        transformer.clearCopperControl();
-
-        transformer.clearSelectedObjects();
-        transformer.dispose();
-        scene.dispose();
-        engine.dispose();
     });
 
     it('covers scene/viewport utility and early-return branches', () => {
@@ -1239,7 +897,7 @@ describe('engine scene viewport extra', () => {
         expect(scene.getLayerMaxZIndex()).toBeGreaterThanOrEqual(1);
         expect(scene.findLayerByZIndex(999)).toBeUndefined();
 
-        const extraRect = new Rect('rect-extra', {
+        const extraRect = injector.createInstance(Rect, 'rect-extra', {
             left: 1,
             top: 1,
             width: 5,
@@ -1256,13 +914,13 @@ describe('engine scene viewport extra', () => {
         expect(scene.removeObject('rect-extra')).toBe(scene);
         expect(scene.removeObjects(['rect-main'] as any)).toBe(scene);
 
-        const orphan = new Rect('orphan', { left: 0, top: 0, width: 2, height: 2 });
+        const orphan = injector.createInstance(Rect, 'orphan', { left: 0, top: 0, width: 2, height: 2 });
         const emitSpy = vi.spyOn(orphan.onIsAddedToParent$, 'emitEvent');
         scene.setObjectBehavior(orphan);
         expect(orphan.parent).toBe(scene);
         expect(emitSpy).toHaveBeenCalled();
 
-        const tempViewport = new Viewport('temp-vp', scene, {
+        const tempViewport = injector.createInstance(Viewport, 'temp-vp', scene, {
             left: 1,
             top: 1,
             width: 20,
@@ -1317,7 +975,7 @@ describe('engine scene viewport extra', () => {
         expect(viewport.scrollByViewportDeltaVal({ viewportScrollX: 1, viewportScrollY: 1 })).toBeUndefined();
         viewport.enable();
 
-        const viewportNoScrollBar = new Viewport('temp-vp-2', scene, {
+        const viewportNoScrollBar = injector.createInstance(Viewport, 'temp-vp-2', scene, {
             left: 0,
             top: 0,
             width: 20,
@@ -1339,7 +997,6 @@ describe('engine scene viewport extra', () => {
         viewportNoScrollBar.dispose();
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('does not bridge non-overlapping cache bounds when calculating cache diff', () => {
@@ -1353,7 +1010,6 @@ describe('engine scene viewport extra', () => {
         expect(diffBounds).toEqual([currentBound]);
 
         scene.dispose();
-        engine.dispose();
     });
 
     it('expands cache diff strips only toward retained cache content', () => {
@@ -1403,6 +1059,5 @@ describe('engine scene viewport extra', () => {
         ]);
 
         scene.dispose();
-        engine.dispose();
     });
 });

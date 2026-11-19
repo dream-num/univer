@@ -17,23 +17,19 @@
 import type { Dependency } from '@univerjs/core';
 import type { IMessageProtocol } from '@univerjs/rpc';
 import type { ChildProcess, Serializable } from 'node:child_process';
-import type { IUniverRPCNodeMainConfig, IUniverRPCNodeWorkerThreadConfig } from './config/config';
-import { fork } from 'node:child_process';
-import process from 'node:process';
 import { IConfigService, ILogService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import {
     ChannelService,
     DataSyncPrimaryController,
-    DataSyncReplicaController,
-    IRemoteInstanceService,
     IRemoteSyncService,
     IRPCChannelService,
     RemoteSyncPrimaryService,
-    WebWorkerRemoteInstanceService,
 } from '@univerjs/rpc';
+import { fork } from 'node:child_process';
 import { Observable, shareReplay } from 'rxjs';
+import type { IUniverRPCNodeMainConfig } from './config/config';
 import pkg from '../package.json';
-import { defaultPluginMainThreadConfig, defaultPluginWorkerThreadConfig, PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD } from './config/config';
+import { defaultPluginMainThreadConfig, PLUGIN_CONFIG_KEY_MAIN_THREAD } from './config/config';
 
 export class UniverRPCNodeMainPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_NODE_MAIN_PLUGIN';
@@ -68,8 +64,9 @@ export class UniverRPCNodeMainPlugin extends Plugin {
 
         const dependencies: Dependency[] = [
             [IRPCChannelService, {
-                // eslint-disable-next-line react/no-unnecessary-use-prefix
-                useFactory: () => new ChannelService(messageProtocol),
+                useFactory: function createChannelService() {
+                    return new ChannelService(messageProtocol);
+                },
             }],
             [DataSyncPrimaryController],
             [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
@@ -95,41 +92,6 @@ export class UniverRPCNodeMainPlugin extends Plugin {
     }
 }
 
-export class UniverRPCNodeWorkerPlugin extends Plugin {
-    static override pluginName = 'UNIVER_RPC_NODE_WORKER_PLUGIN';
-    static override packageName = pkg.name;
-    static override version = pkg.version;
-
-    constructor(
-        private readonly _config: Partial<IUniverRPCNodeWorkerThreadConfig> = defaultPluginWorkerThreadConfig,
-        @Inject(Injector) protected readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
-    ) {
-        super();
-
-        // Manage the plugin configuration.
-        const { ...rest } = merge(
-            {},
-            defaultPluginWorkerThreadConfig,
-            this._config
-        );
-        this._configService.setConfig(PLUGIN_CONFIG_KEY_WORKER_THREAD, rest);
-    }
-
-    override onStarting(): void {
-        ([
-            [DataSyncReplicaController],
-            [IRPCChannelService, {
-                // eslint-disable-next-line react/no-unnecessary-use-prefix
-                useFactory: () => new ChannelService(createNodeWorkerMessageProtocol()),
-            }],
-            [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],
-        ] as Dependency[]).forEach((d) => this._injector.add(d));
-
-        this._injector.get(DataSyncReplicaController);
-    }
-}
-
 function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessageProtocol, ChildProcess] {
     const logService = injector.get(ILogService);
 
@@ -152,20 +114,4 @@ function createNodeMessagePortOnMain(injector: Injector, path: string): [IMessag
     };
 
     return [messageProtocol, child];
-}
-
-function createNodeWorkerMessageProtocol(): IMessageProtocol {
-    return {
-        send(message) {
-            process.send!(message as Serializable);
-        },
-        onMessage: new Observable<unknown>((subscriber) => {
-            const handler = (event: unknown) => {
-                subscriber.next(event);
-            };
-
-            process.on('message', handler);
-            return () => process.off('message', handler);
-        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
-    };
 }

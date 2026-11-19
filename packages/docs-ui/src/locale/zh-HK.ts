@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: '節設定',
             },
             paragraphSetting: {
+                wordWrap: '允許英文字元在字中換行',
                 alignment: '對齊',
                 indentation: '縮排',
                 left: '左',

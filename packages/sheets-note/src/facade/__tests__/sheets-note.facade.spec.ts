@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, Injector, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     ICommandService,
     ILogService,
-    Inject,
-    Injector,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
-    Plugin,
     RANGE_TYPE,
     touchDependencies,
+    UndoCommand,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import {
-    DefinedNamesService,
-    FormulaDataModel,
-    FunctionService,
-    IDefinedNamesService,
-    IFunctionService,
-    LexerTreeBuilder,
-} from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -69,7 +60,7 @@ const subUnitId = 'sheet1';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: unitId,
-    sheetOrder: [subUnitId],
+    sheetOrder: [subUnitId, 'sheet2'],
     name: '',
     appVersion: '0.15.4',
     locale: LocaleType.EN_US,
@@ -82,6 +73,13 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
             columnCount: 10,
             cellData: {},
         },
+        sheet2: {
+            id: 'sheet2',
+            name: 'Sheet2',
+            rowCount: 10,
+            columnCount: 10,
+            cellData: {},
+        },
     },
 };
 
@@ -89,38 +87,28 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             // Ensure undo/redo exists.
             this._injector.get(IUndoRedoService);
 
-            (dependencies ?? []).forEach((d) => this._injector.add(d));
+            (dependencies ?? []).forEach((d) => this._injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
 
             // Minimal set of dependencies required by Sheets facade classes.
             this._injector.add([SheetsSelectionsService]);
             this._injector.add([SheetInterceptorService]);
-            this._injector.add([IFunctionService, { useClass: FunctionService }]);
             this._injector.add([ISocketService, { useClass: WebSocketService }]);
             this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            this._injector.add([FormulaDataModel]);
-            this._injector.add([LexerTreeBuilder]);
             this._injector.add([RefRangeService]);
             this._injector.add([WorksheetPermissionService]);
             this._injector.add([WorkbookPermissionService]);
             this._injector.add([WorksheetProtectionPointModel]);
             this._injector.add([RangeProtectionRuleModel]);
             this._injector.add([WorksheetProtectionRuleModel]);
-            this._injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             this._injector.add([SheetLazyExecuteScheduleService]);
 
             ([
@@ -135,9 +123,11 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
                 [SheetsNoteController],
             ]);
         }
+
+        override onReady(): void {}
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData ?? TEST_WORKBOOK_DATA);
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit(unitId);
@@ -219,6 +209,51 @@ describe('sheets-note facade mixins', () => {
         range.deleteNote();
         expect(range.getNote()).toBeUndefined();
         expect(sheet.getNotes()).toHaveLength(0);
+    });
+
+    it('routes facade note writes through the note commands', async () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const sheet = workbook.getActiveSheet();
+        const commandService = injector.get(ICommandService);
+        const events: string[] = [];
+        const disposable = univerAPI.addEvent(univerAPI.Event.SheetNoteAdd, (event) => events.push(`add:${event.row}:${event.col}`));
+
+        sheet.getRange(0, 0).createOrUpdateNote({ width: 160, height: 72, note: 'hint' });
+
+        expect(events).toEqual(['add:0:0']);
+        expect(sheet.getRange(0, 0).getNote()?.note).toBe('hint');
+
+        // Being a command write, a facade-created note is undoable.
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(sheet.getRange(0, 0).getNote()).toBeUndefined();
+
+        disposable.dispose();
+    });
+
+    it('reports facade note events for the edited sheet and cell', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        const secondSheet = workbook.getSheetByName('Sheet2')!;
+        const events: string[] = [];
+        const disposables = [
+            univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteAdd, (event) => events.push(`before-add:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.SheetNoteUpdate, (event) => events.push(`update:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.BeforeSheetNoteDelete, (event) => events.push(`before-delete:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+            univerAPI.addEvent(univerAPI.Event.SheetNoteDelete, (event) => events.push(`delete:${event.worksheet.getSheetId()}:${event.row}:${event.col}`)),
+        ];
+
+        // The active sheet stays `sheet1`; the facade writes to `sheet2`.
+        secondSheet.getRange(1, 1).createOrUpdateNote({ width: 160, height: 72, note: 'first' });
+        secondSheet.getRange(1, 1).createOrUpdateNote({ width: 160, height: 72, note: 'second' });
+        secondSheet.getRange(1, 1).deleteNote();
+
+        expect(events).toEqual([
+            'before-add:sheet2:1:1',
+            'update:sheet2:1:1',
+            'before-delete:sheet2:1:1',
+            'delete:sheet2:1:1',
+        ]);
+
+        disposables.forEach((disposable) => disposable.dispose());
     });
 
     it('emits business events while notes are added, updated, shown, hidden and deleted', () => {

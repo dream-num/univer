@@ -17,6 +17,7 @@
 const locale = {
     design: {
         Accessibility: {
+            clearInput: 'Clear input',
             closeBadge: 'Close badge',
             close: 'Close',
             menu: 'Menu',
@@ -67,6 +68,7 @@ const locale = {
             confirm: 'ok',
         },
         GradientColorPicker: {
+            add: 'Add gradient stop',
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Angular',

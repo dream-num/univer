@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/ui-adapter-web-component` | `UniverUiAdapterWebComponent` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/ui-adapter-web-component` | `UniverUiAdapterWebComponent` | No | No | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/ui-adapter-web-component
 npm install @univerjs/ui-adapter-web-component
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverWebComponentAdapterPlugin } from '@univerjs/ui-adapter-web-component';

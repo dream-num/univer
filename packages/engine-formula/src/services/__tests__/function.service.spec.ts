@@ -17,18 +17,21 @@
 import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { FunctionType } from '../../basics/function';
-import { FORMULA_AST_CACHE } from '../../engine/utils/generate-ast-node';
+import { AstRootNode } from '../../engine/ast-node/ast-root-node';
+import { BaseAstNode } from '../../engine/ast-node/base-ast-node';
+import { FormulaCacheService } from '../formula-cache.service';
 import { FunctionService } from '../function.service';
 
-function createService(): FunctionService {
+function createService() {
     const injector = new Injector();
+    injector.add([FormulaCacheService]);
     injector.add([FunctionService]);
-    return injector.get(FunctionService);
+    return { service: injector.get(FunctionService), cache: injector.get(FormulaCacheService) };
 }
 
 describe('FunctionService', () => {
     it('makes registered formula executors available until they are unregistered', () => {
-        const service = createService();
+        const { service } = createService();
         const sumExecutor = { name: 'SUM' };
         const avgExecutor = { name: 'AVERAGE' };
 
@@ -43,7 +46,7 @@ describe('FunctionService', () => {
     });
 
     it('removes formula descriptions when a feature disposes its registration', () => {
-        const service = createService();
+        const { service } = createService();
         const sumDescription = {
             functionName: 'SUM',
             functionType: FunctionType.Math,
@@ -70,7 +73,7 @@ describe('FunctionService', () => {
     });
 
     it('removes formula metadata and invalidates AST cache entries for unregistered function names', () => {
-        const service = createService();
+        const { service, cache } = createService();
         service.registerDescriptions({
             functionName: 'SUM',
             functionType: FunctionType.Math,
@@ -82,18 +85,20 @@ describe('FunctionService', () => {
         service.unregisterDescriptions('SUM');
         expect(service.hasDescription('SUM')).toBe(false);
 
-        FORMULA_AST_CACHE.clear();
-        FORMULA_AST_CACHE.set('unit_sheet_SUM_expr', {} as never);
-        const textAst = { token: 'TEXT' };
-        FORMULA_AST_CACHE.set('unit_sheet_TEXT_expr', textAst as never);
+        const sumAst = new AstRootNode('ROOT');
+        new BaseAstNode('SUM').setParent(sumAst);
+        const textAst = new AstRootNode('ROOT');
+        new BaseAstNode('TEXT').setParent(textAst);
+        cache.setAst('unit_sheet_SUM_expr', 'unit', sumAst);
+        cache.setAst('unit_sheet_TEXT_expr', 'unit', textAst);
 
         service.deleteFormulaAstCacheKey('SUM');
-        expect(FORMULA_AST_CACHE.get('unit_sheet_SUM_expr')).toBeUndefined();
-        expect(FORMULA_AST_CACHE.get('unit_sheet_TEXT_expr')).toBe(textAst);
+        expect(cache.getAst('unit_sheet_SUM_expr')).toBeUndefined();
+        expect(cache.getAst('unit_sheet_TEXT_expr')).toBe(textAst);
     });
 
     it('drops registered formula executors and descriptions when the formula runtime is disposed', () => {
-        const service = createService();
+        const { service } = createService();
         service.registerExecutors({ name: 'SUM' } as never);
         service.registerDescriptions({
             functionName: 'SUM',

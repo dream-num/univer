@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Accessibility: {
+            clearInput: 'مسح الإدخال',
             closeBadge: 'إغلاق الشارة',
             close: 'إغلاق',
             menu: 'القائمة',
@@ -69,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'موافق',
         },
         GradientColorPicker: {
+            add: 'إضافة نقطة تدرج',
             linear: 'خطي',
             radial: 'شعاعي',
             angular: 'زاوي',

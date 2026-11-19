@@ -16,9 +16,9 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { ISuperTable } from '../basics/common';
 import { createIdentifier, Disposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import type { ISuperTable, ISuperTableData } from '../basics/common';
 import { TableOptionType } from '../basics/common';
 
 export interface ISuperTableOptionParam {
@@ -31,7 +31,7 @@ export interface ISuperTableService {
 
     getTableOptionMap(): Map<string, TableOptionType>;
 
-    registerTable(unitId: string, tableName: string, reference: ISuperTable): void;
+    registerTable(unitId: string, tableName: string, reference: ISuperTable | ISuperTableData): void;
 
     registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType): void;
 
@@ -83,11 +83,14 @@ export class SuperTableService extends Disposable implements ISuperTableService 
         return this._tableOptionMap;
     }
 
-    registerTable(unitId: string, tableName: string, reference: ISuperTable) {
+    registerTable(unitId: string, tableName: string, reference: ISuperTable | ISuperTableData) {
         if (this._tableMap.get(unitId) == null) {
             this._tableMap.set(unitId, new Map());
         }
-        this._tableMap.get(unitId)?.set(tableName, reference);
+        const table = reference.titleMap instanceof Map
+            ? reference as ISuperTable
+            : { ...reference, titleMap: new Map(Object.entries(reference.titleMap)) };
+        this._tableMap.get(unitId)?.set(tableName, table);
         this._update();
     }
 

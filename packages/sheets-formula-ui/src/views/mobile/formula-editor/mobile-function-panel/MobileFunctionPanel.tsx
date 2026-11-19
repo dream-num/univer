@@ -15,12 +15,12 @@
  */
 
 import type { IFunctionInfo, ISearchItem } from '@univerjs/engine-formula';
-import type { LocaleKey } from '../../../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../../locale/types';
 import { getFunctionTypeValues } from '../../../../services/utils';
 
 const RECENT_FUNCTIONS_KEY = 'univer-mobile-recent-formula-functions';
@@ -252,6 +252,7 @@ export function MobileFunctionPanel(props: {
                                     aria-label={copy.search}
                                     placeholder={copy.search}
                                     onChange={setQuery}
+                                    size="small"
                                 />
                             </div>
                             {!query && (

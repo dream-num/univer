@@ -30,6 +30,7 @@ import {
     applySheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,
+    transformDrawingsToChartSheet,
     tryRefreshSheetDrawingPlacement,
 } from '../sheet-drawing-placement';
 import { SheetDrawingAnchorType } from '../sheet-drawing.service';
@@ -213,4 +214,49 @@ describe('sheet drawing placement extents', () => {
             })).toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
         }
     );
+});
+
+describe('Drawing transfer to Chart Sheet model coordinates', () => {
+    const image = (id: string, left: number, top: number, width: number, height: number): ISheetDrawing => ({
+        unitId: 'source',
+        subUnitId: 'grid',
+        drawingId: id,
+        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        transform: { left, top, width, height },
+        sheetTransform: { from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 }, to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 } },
+    } as ISheetDrawing);
+
+    it.each([false, true])('fits a batch proportionally at the page start with RTL=%s without mutating its source', (rtl) => {
+        const drawings = [image('first', 2000, 500, 200, 100), image('second', 2300, 550, 100, 50)];
+        const before = Tools.deepClone(drawings);
+        const copies = transformDrawingsToChartSheet(drawings, { left: 20, top: 30, width: 200, height: 150 }, rtl)!;
+        expect(copies[0].transform).toMatchObject({ left: 20, top: 30, width: 100, height: 50 });
+        expect(copies[1].transform).toMatchObject({ left: 170, top: 55, width: 50, height: 25 });
+        expect(copies.every((drawing) => drawing.anchorType === SheetDrawingAnchorType.None)).toBe(true);
+        expect(drawings).toEqual(before);
+        expect(copies.map((drawing) => [drawing.unitId, drawing.subUnitId, drawing.drawingId])).toEqual(
+            drawings.map((drawing) => [drawing.unitId, drawing.subUnitId, drawing.drawingId])
+        );
+    });
+
+    it.each([false, true])('keeps small drawings at their size and uses the logical page corner with RTL=%s', (rtl) => {
+        const copy = transformDrawingsToChartSheet([image('small', 400, 300, 40, 20)], { left: 20, top: 30, width: 200, height: 150 }, rtl)![0];
+        expect(copy.transform).toMatchObject({ left: rtl ? 180 : 20, top: 30, width: 40, height: 20 });
+    });
+
+    it('fits rotated drawings without changing rotation or mirroring their content for RTL', () => {
+        const drawing = image('rotated', 200, 100, 80, 40);
+        drawing.transform = { ...drawing.transform, angle: 90, flipX: true };
+        const copy = transformDrawingsToChartSheet([drawing], { left: 0, top: 0, width: 40, height: 40 }, true)![0];
+        expect(copy.transform).toMatchObject({ width: 40, height: 20, angle: 90, flipX: true });
+        expect(copy.transform!.left!).toBeCloseTo(10);
+        expect(copy.transform!.top!).toBeCloseTo(30);
+    });
+
+    it('retains zero-width Shape lines and rejects malformed image geometry before creating a copy', () => {
+        const line = { ...image('line', 300, 200, 0, 100), drawingType: DrawingTypeEnum.DRAWING_SHAPE };
+        expect(transformDrawingsToChartSheet([line], { left: 0, top: 0, width: 200, height: 200 }, true)![0].transform)
+            .toMatchObject({ left: 200, top: 0, width: 0, height: 100 });
+        expect(transformDrawingsToChartSheet([image('invalid', 0, 0, -1, 10)], { left: 0, top: 0, width: 200, height: 200 }, false)).toBeNull();
+    });
 });

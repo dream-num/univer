@@ -16,7 +16,7 @@
 
 import type { ChangeEvent } from 'react';
 import { ClockIcon } from '@univerjs/icons';
-import { borderClassName } from '../../helper/class-utilities';
+import { borderClassName, inputStateClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { formatDateWithPattern } from '../../helper/date';
 
@@ -48,15 +48,13 @@ export function TimeInput(props: ITimeInputProps) {
             />
             <input
                 className={clsx(`
-                  univer-block univer-h-7 univer-w-fit univer-appearance-none univer-rounded-md univer-bg-transparent
-                  univer-pl-6 univer-pr-2 univer-text-center univer-text-gray-800 univer-shadow univer-outline-none
+                  univer-box-border univer-block univer-h-7 univer-w-fit univer-appearance-none univer-rounded-md
+                  univer-bg-gray-0 univer-pl-6 univer-pr-2 univer-text-center univer-text-sm univer-text-gray-800
                   univer-transition-all univer-duration-200
-                  focus:univer-border-primary-600
-                  dark:!univer-text-gray-0
-                  dark:focus:!univer-border-primary-500
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                   [&::-webkit-calendar-picker-indicator]:univer-hidden
                   [&::-webkit-calendar-picker-indicator]:univer-appearance-none
-                `, borderClassName, className)}
+                `, borderClassName, inputStateClassName, className)}
                 type="time"
                 step="1"
                 value={formatDateWithPattern(value, 'HH:mm:ss')}

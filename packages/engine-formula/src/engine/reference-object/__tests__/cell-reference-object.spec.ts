@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
+import type { ICellData } from '@univerjs/core';
 import { CellValueType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { CellReferenceObject } from '../cell-reference-object';
 import { RangeReferenceObject } from '../range-reference-object';
 
 describe('CellReferenceObject', () => {
+    it('resolves sheet names without case sensitivity while preserving exact identities', () => {
+        const reference = new CellReferenceObject('JAN!A1');
+        reference.setDefaultUnitId('book');
+        reference.setDefaultSheetId('summary');
+        reference.setForcedSheetId({ book: { Jan: 'sheet-jan' } });
+        expect(reference.getSheetId()).toBe('sheet-jan');
+
+        reference.setForcedSheetId({ book: { Jan: 'sheet-jan', JAN: 'exact-sheet' } });
+        expect(reference.getSheetId()).toBe('exact-sheet');
+
+        reference.setForcedSheetId({ book: { Other: 'sheet-other' } });
+        expect(reference.getForcedSheetId()).toBeUndefined();
+    });
+
     it('distinguishes forced error-looking text from a calculated error', () => {
         const reference = new CellReferenceObject('A1');
         const text = reference.getCellValueObject({ v: '#REF!', t: CellValueType.FORCE_STRING });
@@ -169,5 +184,32 @@ describe('CellReferenceObject', () => {
 
         expect(valueObject.isNumber()).toBe(true);
         expect(valueObject.getValue()).toBe(43497);
+    });
+
+    it.each([{ v: 20 }, { v: 0 }, { v: false }, { v: '' }])('invalidates a removed spill after its anchor becomes $v while preserving unrelated caches', (value) => {
+        const reference = new CellReferenceObject('A1');
+        reference.setDefaultUnitId('unit-1');
+        reference.setDefaultSheetId('sheet-1');
+        reference.setArrayFormulaRange({ 'unit-1': { 'sheet-1': { 0: {
+            0: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
+            3: { startRow: 0, endRow: 2, startColumn: 3, endColumn: 3 },
+        } } } });
+        reference.setArrayFormulaCellData({ 'unit-1': { 'sheet-1': new ObjectMatrix({
+            0: { 0: { v: 1 }, 3: { v: 4 } },
+            1: { 0: { v: 2 }, 3: { v: 5 } },
+            2: { 0: { v: 3 }, 3: { v: 6 } },
+        }) } });
+        const runtime = new ObjectMatrix<ICellData>({ 0: { 0: value } });
+        reference.setRuntimeData({ 'unit-1': { 'sheet-1': runtime } });
+        const range = reference.unionBy(new CellReferenceObject('A3'));
+        if (!(range instanceof RangeReferenceObject)) {
+            throw new TypeError('Expected a range reference');
+        }
+        expect(range.getCellData(0, 0)).toEqual(value);
+        expect(range.getCellData(1, 0)).toBeNull();
+        expect(range.getCellData(2, 0)).toBeNull();
+        expect(reference.getCellData(1, 3)).toEqual({ v: 5 });
+        runtime.setValue(0, 0, { ...value, f: '=SEQUENCE(3)' });
+        expect(range.getCellData(1, 0)).toEqual({ v: 2 });
     });
 });

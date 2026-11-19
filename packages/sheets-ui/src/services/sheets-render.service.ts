@@ -34,6 +34,7 @@ const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
  */
 export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
+    private readonly _selfRenderingMutations = new Map<string, number>();
 
     constructor(
         @IContextService private readonly _contextService: IContextService,
@@ -67,6 +68,23 @@ export class SheetsRenderService extends RxDisposable {
      */
     checkMutationShouldTriggerRerender(id: string): boolean {
         return this._skeletonChangeMutations.has(id);
+    }
+
+    /** The owning plugin must invalidate the affected sheets when its derived view changes. */
+    registerSelfRenderingMutations(mutationId: string): IDisposable {
+        this._selfRenderingMutations.set(mutationId, (this._selfRenderingMutations.get(mutationId) ?? 0) + 1);
+        return toDisposable(() => {
+            const remaining = (this._selfRenderingMutations.get(mutationId) ?? 1) - 1;
+            if (remaining) {
+                this._selfRenderingMutations.set(mutationId, remaining);
+            } else {
+                this._selfRenderingMutations.delete(mutationId);
+            }
+        });
+    }
+
+    shouldAutomaticallyRenderMutation(mutationId: string): boolean {
+        return !this._selfRenderingMutations.has(mutationId);
     }
 
     private _init() {

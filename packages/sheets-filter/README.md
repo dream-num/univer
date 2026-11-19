@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-filter` | `UniverSheetsFilter` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-filter` | `UniverSheetsFilter` | No | Yes | Yes | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-filter
 npm install @univerjs/sheets-filter
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
@@ -39,9 +39,22 @@ const univer = new Univer({
 univer.registerPlugin(UniverSheetsFilterPlugin);
 ```
 
+### Worker usage
+
+On the main thread, import `UniverSheetsFilterPlugin` from `@univerjs/sheets-filter`.
+
+In the worker entry, import `UniverSheetsFilterPlugin` from `@univerjs/sheets-filter/worker`:
+
+```ts
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter/worker';
+
+univer.registerPlugin(UniverSheetsFilterPlugin);
+```
+
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-filter-ui` when users need filter menus and panels.
+- Import `@univerjs/sheets-filter/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

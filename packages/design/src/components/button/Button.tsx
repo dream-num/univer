@@ -19,6 +19,7 @@ import type { ButtonHTMLAttributes } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva } from 'class-variance-authority';
 import { forwardRef } from 'react';
+import { focusClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 
 export const buttonVariants = cva(
@@ -46,9 +47,9 @@ export const buttonVariants = cva(
                   active:univer-bg-primary-700
                 `,
                 danger: `
-                  univer-border-red-500 univer-bg-red-500 univer-text-gray-0
-                  hover:univer-border-red-400 hover:univer-bg-red-400
-                  active:univer-border-red-600 active:univer-bg-red-600
+                  univer-border-red-600 univer-bg-red-600 univer-text-gray-0
+                  hover:univer-border-red-700 hover:univer-bg-red-700
+                  active:univer-border-red-800 active:univer-bg-red-800
                 `,
                 text: `
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
@@ -61,8 +62,11 @@ export const buttonVariants = cva(
                 link: `
                   univer-border-transparent univer-bg-transparent univer-text-primary-600 univer-decoration-current
                   univer-underline-offset-4
-                  hover:univer-text-primary-500 hover:univer-underline
+                  hover:univer-text-primary-700 hover:univer-underline
                   active:univer-text-primary-700
+                  dark:!univer-text-primary-300
+                  dark:hover:!univer-text-primary-200
+                  dark:active:!univer-text-primary-100
                 `,
                 ghost: `
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
@@ -76,8 +80,9 @@ export const buttonVariants = cva(
             size: {
                 icon: 'univer-size-8 !univer-p-0',
                 small: 'univer-h-6 univer-rounded-md univer-px-1.5 univer-text-xs',
-                middle: 'univer-h-8 univer-rounded-lg univer-px-2 univer-text-sm',
-                large: 'univer-h-10 univer-rounded-lg univer-px-3 univer-text-sm',
+                middle: 'univer-h-8 univer-rounded-md univer-px-2 univer-text-sm',
+                large: 'univer-h-10 univer-rounded-md univer-px-3 univer-text-sm',
+                'extra-large': 'univer-h-auto univer-min-h-12 univer-rounded-md univer-px-3 univer-text-base',
             },
         },
         defaultVariants: {
@@ -98,7 +103,7 @@ export const Button = forwardRef<HTMLButtonElement, IButtonProps>(
         const Comp = asChild ? Slot : 'button';
         return (
             <Comp
-                className={clsx(buttonVariants({ variant, size, className }))}
+                className={clsx(buttonVariants({ variant, size }), focusClassName, className)}
                 ref={ref}
                 data-u-comp="button"
                 {...props}

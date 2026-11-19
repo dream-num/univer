@@ -15,10 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverDrawingUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { IUniverDrawingUIConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
@@ -28,6 +28,7 @@ import { MobileImageUpdateController } from './controllers/mobile/image-update.c
 import { MobileDrawingUIController } from './controllers/mobile/ui.controller';
 import { DrawingImageClipService } from './services/drawing-image-clip.service';
 import { DrawingRenderService } from './services/drawing-render.service';
+import { OleUIService } from './services/ole-ui.service';
 
 @DependentOn(UniverDrawingPlugin, UniverRenderEnginePlugin)
 export class UniverDrawingMobileUIPlugin extends Plugin {
@@ -66,6 +67,7 @@ export class UniverDrawingMobileUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DrawingImageClipService],
             [DrawingRenderService],
+            [OleUIService],
             [DrawingUpdateController],
             [MobileDrawingUIController],
             [MobileImageCropperController],

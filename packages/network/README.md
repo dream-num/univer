@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/network` | `UniverNetwork` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/network` | `UniverNetwork` | No | No | Yes | No |
 
 ## Installation
 
@@ -20,15 +20,19 @@ pnpm add @univerjs/network
 npm install @univerjs/network
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverNetworkPlugin } from '@univerjs/network';
 
 univer.registerPlugin(UniverNetworkPlugin);
 ```
+
+## Integration Notes
+
+- Import `@univerjs/network/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

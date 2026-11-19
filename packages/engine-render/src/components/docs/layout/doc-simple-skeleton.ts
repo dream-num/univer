@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LineBreaker } from './line-breaker';
 import { BreakPointType } from './line-breaker/break';
+import { LineBreaker } from './line-breaker/line-breaker';
 import { FontCache } from './shaping-engine/font-cache';
 
 export interface ILineInfo {

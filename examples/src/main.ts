@@ -24,7 +24,6 @@ import './global.css';
 const loaders = {
     docs: () => import('./docs/mount'),
     sheets: () => import('./sheets/mount'),
-    slides: () => import('./slides/mount'),
 } satisfies Record<string, ExampleLoader>;
 
 type ExampleName = keyof typeof loaders;
@@ -58,7 +57,7 @@ if (location.search) {
 
 function getExampleName(): ExampleName {
     const name = location.hash.slice(1);
-    if (Object.hasOwn(loaders, name)) {
+    if (Object.prototype.hasOwnProperty.call(loaders, name)) {
         return name as ExampleName;
     }
 
@@ -89,7 +88,6 @@ function renderWorkbenchSettings(currentSettings = settings) {
     document.documentElement.style.setProperty('--workbench-accent', theme.primary[600]);
     renderWorkbenchSettingsControl(settingsContainer, {
         settings: currentSettings,
-        supportsMobile: getExampleName() !== 'slides',
         onDeviceChange,
         onLocaleChange,
         onRegionChange,

@@ -110,6 +110,8 @@ describe('formula reference mutations', () => {
 
     it('sets and removes structured-reference tables used by formulas', async () => {
         const tableReference = {
+            sheetId: 'sheet-1',
+            titleMap: new Map([['Amount', 0]]),
             range: {
                 startRow: 0,
                 endRow: 10,
@@ -134,6 +136,39 @@ describe('formula reference mutations', () => {
 
         expect(removeResult).toBe(true);
         expect(superTableService.hasTable('book-1', 'SalesTable')).toBe(false);
+    });
+
+    it.each([true, false])('restores table column maps after JSON transport (showHeader=%s)', async (showHeader) => {
+        const titleMap = Object.fromEntries([
+            ['Amount', 0],
+            ['__proto__', 1],
+            ['constructor', 2],
+            ['净额\n含税', 3],
+            ['10', 4],
+        ]);
+        const params = JSON.parse(JSON.stringify({
+            unitId: 'book-1',
+            tableName: 'SalesTable',
+            reference: {
+                sheetId: 'sheet-1',
+                titleMap,
+                range: { startRow: 0, endRow: 10, startColumn: 0, endColumn: 4 },
+                showHeader,
+                showFooter: true,
+            },
+        }));
+
+        expect(await commandService.executeCommand(SetSuperTableMutation.id, params)).toBe(true);
+
+        const table = superTableService.getTable('book-1', 'SalesTable')!;
+        expect(table).toEqual({ ...params.reference, titleMap: new Map(Object.entries(titleMap)) });
+        expect(table.titleMap.get('__proto__')).toBe(1);
+        expect(table.titleMap.get('净额\n含税')).toBe(3);
+        expect(table.titleMap.get('10')).toBe(4);
+        // The main-thread handler must leave the outgoing mutation JSON serializable.
+        expect(params.reference.titleMap).toEqual(titleMap);
+        expect(JSON.parse(JSON.stringify(params))).toEqual(params);
+        expect(params.reference.titleMap).not.toBeInstanceOf(Map);
     });
 
     it('registers localized structured-reference table options', async () => {

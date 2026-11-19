@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { IPointerEvent, IRenderContext } from '@univerjs/engine-render';
+import { EventSubject, Injector, IPermissionService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { CellCustomRenderController } from '../cell-custom-render.controller';
 
-function createEventSubject() {
-    const subscribers = new Set<(evt: any) => void>();
-
-    return {
-        subscribeEvent: vi.fn((handler: (evt: any) => void) => {
-            subscribers.add(handler);
-            const unsubscribe = vi.fn(() => subscribers.delete(handler));
-
-            return { dispose: unsubscribe, unsubscribe };
-        }),
-        emit: (evt: any) => subscribers.forEach((handler) => handler(evt)),
-    };
-}
-
 function createController(options?: { editable?: boolean; selectionEditable?: boolean }) {
-    const pointerDown$ = createEventSubject();
-    const pointerMove$ = createEventSubject();
+    const pointerDown$ = new EventSubject<Pick<IPointerEvent, 'offsetX' | 'offsetY'>>();
+    const pointerMove$ = new EventSubject<Pick<IPointerEvent, 'offsetX' | 'offsetY'>>();
     const renderA = {
         zIndex: 1,
         isHit: vi.fn(() => true),
@@ -64,7 +55,7 @@ function createController(options?: { editable?: boolean; selectionEditable?: bo
         getCellIndexByOffset: vi.fn(() => ({ row: 1, column: 2 })),
         getCellWithCoordByIndex: vi.fn(() => ({ startX: 10, startY: 20 })),
     };
-    const currentSkeleton$ = new Subject<any>();
+    const currentSkeleton$ = new Subject<{ skeleton: typeof skeleton }>();
     const spreadsheet = {
         onPointerDown$: pointerDown$,
         onPointerMove$: pointerMove$,
@@ -73,36 +64,46 @@ function createController(options?: { editable?: boolean; selectionEditable?: bo
         getActiveViewportByCoord: vi.fn(() => ({ viewportScrollX: 5, viewportScrollY: 6 })),
         getAncestorScale: vi.fn(() => ({ scaleX: 2, scaleY: 2 })),
     };
-    const controller = new CellCustomRenderController(
-        {
-            unitId: 'unit-1',
-            unit: { getActiveSheet: vi.fn(() => worksheet) },
-        } as any,
-        {
-            currentSkeleton$,
-            getCurrentParam: vi.fn(() => ({ skeleton })),
-        } as any,
-        {
-            getRenderUnitById: vi.fn(() => ({ mainComponent: spreadsheet, scene })),
-        } as any,
-        {
-            composePermission: vi.fn(() => [{ value: options?.editable ?? true }]),
-        } as any
-    );
+    const context = {
+        unitId: 'unit-1',
+        unit: { getActiveSheet: vi.fn(() => worksheet) },
+    } as unknown as IRenderContext<Workbook>;
+    const injector = new Injector([
+        [SheetSkeletonManagerService, {
+            useValue: {
+                currentSkeleton$,
+                getCurrentParam: vi.fn(() => ({ skeleton })),
+            },
+        }],
+        [IRenderManagerService, {
+            useValue: {
+                getRenderUnitById: vi.fn(() => ({ mainComponent: spreadsheet, scene })),
+            },
+        }],
+        [IPermissionService, {
+            useValue: {
+                composePermission: vi.fn(() => [{ value: options?.editable ?? true }]),
+            },
+        }],
+    ]);
 
-    return { controller, pointerDown$, pointerMove$, renderA, renderB, currentSkeleton$, skeleton, worksheet };
+    return { injector, context, pointerDown$, pointerMove$, renderA, renderB };
 }
+
+afterEach(() => vi.useRealTimers());
 
 describe('CellCustomRenderController', () => {
     it('dispatches pointer events to hit custom renderers when sheet and cell are editable', async () => {
-        const { controller, pointerDown$, pointerMove$, renderA, renderB } = createController();
+        vi.useFakeTimers();
+        const { injector, context, pointerDown$, pointerMove$, renderA, renderB } = createController();
+        const controller = injector.createInstance(CellCustomRenderController, context);
 
-        pointerDown$.emit({ offsetX: 20, offsetY: 30 });
-        pointerMove$.emit({ offsetX: 20, offsetY: 30 });
-        await new Promise((resolve) => setTimeout(resolve, 35));
+        pointerDown$.emitEvent({ offsetX: 20, offsetY: 30 });
+        pointerMove$.emitEvent({ offsetX: 20, offsetY: 30 });
+        await vi.advanceTimersByTimeAsync(35);
         renderA.isHit.mockReturnValue(false);
-        pointerMove$.emit({ offsetX: 200, offsetY: 300 });
-        await new Promise((resolve) => setTimeout(resolve, 35));
+        pointerMove$.emitEvent({ offsetX: 200, offsetY: 300 });
+        await vi.advanceTimersByTimeAsync(35);
 
         expect(renderA.onPointerDown).toHaveBeenCalled();
         expect(renderA.onPointerEnter).toHaveBeenCalled();
@@ -110,17 +111,18 @@ describe('CellCustomRenderController', () => {
         expect(renderB.onPointerEnter).not.toHaveBeenCalled();
 
         controller.dispose();
+        injector.dispose();
     });
 
-    it('does not dispatch pointer down when workbook or protected cell is not editable', () => {
-        const nonEditable = createController({ editable: false });
-        nonEditable.pointerDown$.emit({ offsetX: 20, offsetY: 30 });
-        expect(nonEditable.renderA.onPointerDown).not.toHaveBeenCalled();
-        nonEditable.controller.dispose();
-
-        const protectedCell = createController({ selectionEditable: false });
-        protectedCell.pointerDown$.emit({ offsetX: 20, offsetY: 30 });
-        expect(protectedCell.renderA.onPointerDown).not.toHaveBeenCalled();
-        protectedCell.controller.dispose();
+    it.each([
+        { editable: false, selectionEditable: true },
+        { editable: true, selectionEditable: false },
+    ])('does not dispatch pointer down when editing is denied: %j', (permissions) => {
+        const { injector, context, pointerDown$, renderA } = createController(permissions);
+        const controller = injector.createInstance(CellCustomRenderController, context);
+        pointerDown$.emitEvent({ offsetX: 20, offsetY: 30 });
+        expect(renderA.onPointerDown).not.toHaveBeenCalled();
+        controller.dispose();
+        injector.dispose();
     });
 });

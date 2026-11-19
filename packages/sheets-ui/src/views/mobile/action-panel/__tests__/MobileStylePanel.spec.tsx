@@ -17,7 +17,6 @@
 import type { IDisplayMenuItem, IMenuItem, IMenuSchema } from '@univerjs/ui';
 import type { ComponentProps } from 'react';
 import type { Root } from 'react-dom/client';
-import type { MobileNumberFormatItem } from '../MobileStylePanel';
 import {
     BorderStyleTypes,
     BorderType,
@@ -52,6 +51,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { MobileNumberFormatItem, MobileStyleView } from '../MobileStylePanel';
 import {
     ResetRangeTextColorCommand,
     SetRangeBoldCommand,
@@ -137,6 +137,55 @@ afterEach(() => {
 });
 
 describe('MobileStylePanel', () => {
+    it.each(['color', 'border', 'border-color', 'border-style'] as const)(
+        'disables an open %s view when its menu permission changes',
+        (kind) => {
+            const disabled$ = new BehaviorSubject(false);
+            const hidden$ = new BehaviorSubject(false);
+            const item = { id: SetBorderBasicCommand.id, type: MenuItemType.BUTTON as const, disabled$, hidden$ };
+            const currentView: MobileStyleView = kind === 'color'
+                ? { kind, title: 'Color', item, target: 'background' as const }
+                : { kind, title: 'Border', item };
+            const onExecute = vi.fn();
+            const rendered = renderStylePanel({ currentView, onExecute });
+            root = rendered.root;
+            container = rendered.container;
+            const button = container.querySelector('button')!;
+
+            act(() => disabled$.next(true));
+            expect(container.querySelector('fieldset')?.disabled).toBe(true);
+            act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+            expect(onExecute).not.toHaveBeenCalled();
+
+            act(() => disabled$.next(false));
+            expect(container.querySelector('fieldset')?.disabled).toBe(false);
+            act(() => button.click());
+            expect(onExecute).toHaveBeenCalledOnce();
+
+            act(() => hidden$.next(true));
+            expect(container.querySelector('button')).toBeNull();
+        }
+    );
+
+    it('does not open color or border navigation when the menu is disabled', () => {
+        const onOpenView = vi.fn();
+        const rendered = renderStylePanel({
+            groups: [{ key: 'style', order: 0, children: [SetBackgroundColorCommand.id, SetBorderBasicCommand.id].map((id) => ({
+                key: id,
+                order: 0,
+                item: { id, type: MenuItemType.BUTTON, title: id, disabled$: new BehaviorSubject(true) },
+            })) }],
+            onOpenView,
+        });
+        root = rendered.root;
+        container = rendered.container;
+        for (const button of container.querySelectorAll('button')) {
+            expect(button.disabled).toBe(true);
+            act(() => button.click());
+        }
+        expect(onOpenView).not.toHaveBeenCalled();
+    });
+
     it.each([
         [LocaleType.EN_US, 'Dashed'],
         [LocaleType.ZH_CN, '虚线'],

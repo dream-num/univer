@@ -14,135 +14,96 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService } from '@univerjs/core';
-import type { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import type { RegisterOtherFormulaService } from '@univerjs/engine-formula';
-import type { DataValidationCacheService } from '../dv-cache.service';
-import type { DataValidationListCacheService } from '../dv-list-cache.service';
-import { DataValidationType, UniverInstanceType } from '@univerjs/core';
-import { OtherFormulaBizType } from '@univerjs/engine-formula';
-import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import type { ISheetDataValidationRule } from '@univerjs/core';
+import { DataValidationType, ICommandService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import {
+    ActiveDirtyManagerService,
+    IActiveDirtyManagerService,
+    OtherFormulaMarkDirty,
+    RegisterOtherFormulaService,
+    RemoveOtherFormulaMutation,
+    SetFormulaCalculationResultMutation,
+    SetOtherFormulaMutation,
+} from '@univerjs/engine-formula';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DataValidationCacheService } from '../dv-cache.service';
 import { DataValidationFormulaService } from '../dv-formula.service';
+import { DataValidationListCacheService } from '../dv-list-cache.service';
+
+let univer: Univer;
+beforeEach(() => {
+    univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([DataValidationModel]);
+    injector.add([DataValidatorRegistryService]);
+    injector.add([DataValidationCacheService]);
+    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+    injector.add([RegisterOtherFormulaService]);
+    injector.add([DataValidationFormulaService]);
+    injector.add([DataValidationListCacheService]);
+    const commands = injector.get(ICommandService);
+    for (const command of [SetOtherFormulaMutation, RemoveOtherFormulaMutation, OtherFormulaMarkDirty, SetFormulaCalculationResultMutation]) {
+        commands.registerCommand(command);
+    }
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheets: { 'sheet-1': { id: 'sheet-1', name: 'Sheet1', rowCount: 10, columnCount: 10 } },
+        sheetOrder: ['sheet-1'],
+    });
+});
+afterEach(() => univer.dispose());
+
+const rule: ISheetDataValidationRule = {
+    uid: 'rule-1',
+    type: DataValidationType.LIST,
+    formula1: '=A1:A2',
+    formula2: '#f00,#0f0,#00f',
+    ranges: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }],
+};
 
 describe('DataValidationFormulaService', () => {
-    it('registers formula rules, fetches results, removes them, and reacts to formula result changes', async () => {
-        const formulaResult$ = new Subject<any>();
-        const registerOtherFormulaService = {
-            formulaResult$,
-            registerFormulaWithRange: vi.fn((unitId: string, subUnitId: string, formula: string, _ranges, extra) => `${extra.ruleId}-${formula}`),
-            deleteFormula: vi.fn(),
-            getFormulaValue: vi.fn(async (_unitId: string, _subUnitId: string, id: string) => ({ id })),
-            getFormulaValueSync: vi.fn((_unitId: string, _subUnitId: string, id: string) => ({ id })),
-        } as unknown as RegisterOtherFormulaService;
-        const cacheService = {
-            markRangeDirty: vi.fn(),
-        } as unknown as DataValidationCacheService;
-        const listCacheService = {
-            markRuleDirty: vi.fn(),
-        } as unknown as DataValidationListCacheService;
-        const rule = {
-            uid: 'rule-1',
-            type: DataValidationType.DECIMAL,
-            formula1: '=A1',
-            formula2: '=B1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
-        } as any;
-        const dataValidationModel = {
-            getRuleById: vi.fn(() => rule),
-        } as unknown as DataValidationModel;
-        const validatorRegistryService = {
-            getValidatorItem: vi.fn(() => ({ offsetFormulaByRange: false })),
-        } as unknown as DataValidatorRegistryService;
-        const instanceService = {
-            getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
-        } as unknown as IUniverInstanceService;
-
-        const service = new DataValidationFormulaService(
-            instanceService,
-            registerOtherFormulaService,
-            cacheService,
-            dataValidationModel,
-            validatorRegistryService,
-            listCacheService
-        );
-
+    it('refreshes list caches before range subscribers consume recalculated results', async () => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DataValidationFormulaService);
+        const lists = injector.get(DataValidationListCacheService);
+        injector.get(DataValidationModel).addRule('unit-1', 'sheet-1', rule, 'command');
         service.addRule('unit-1', 'sheet-1', rule);
-
-        expect(registerOtherFormulaService.registerFormulaWithRange).toHaveBeenCalledWith(
-            'unit-1',
-            'sheet-1',
-            '=A1',
-            [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }],
-            { ruleId: 'rule-1' },
-            OtherFormulaBizType.DATA_VALIDATION,
-            'rule-1'
-        );
-        expect(service.getRuleFormulaInfo('unit-1', 'sheet-1', 'rule-1')).toEqual([
-            { id: 'rule-1-=A1', text: '=A1' },
-            { id: 'rule-1-=B1', text: '=B1' },
-        ]);
-
-        await expect(service.getRuleFormulaResult('unit-1', 'sheet-1', 'rule-1')).resolves.toEqual([
-            { id: 'rule-1-=A1' },
-            { id: 'rule-1-=B1' },
-        ]);
-        expect(service.getRuleFormulaResultSync('unit-1', 'sheet-1', 'rule-1')).toEqual([
-            { id: 'rule-1-=A1' },
-            { id: 'rule-1-=B1' },
-        ]);
-
-        formulaResult$.next({
-            'unit-1': {
-                'sheet-1': [
-                    { extra: { ruleId: 'rule-1' } },
-                ],
-            },
+        const formulaId = service.getRuleFormulaInfo('unit-1', 'sheet-1', rule.uid)![0]!.id;
+        const pending = service.getRuleFormulaResult('unit-1', 'sheet-1', rule.uid);
+        lists.computeAndCache('unit-1', 'sheet-1', rule, null);
+        const observed = vi.fn(() => lists.getOrCompute('unit-1', 'sheet-1', rule).list);
+        injector.get(DataValidationCacheService).dirtyRanges$.subscribe(observed);
+        await injector.get(ICommandService).executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitOtherData: { 'unit-1': { 'sheet-1': { [formulaId]: { 0: { 0: [[{ v: 'A' }, { v: 'B' }]] } } } } },
         });
-
-        expect(listCacheService.markRuleDirty).toHaveBeenCalledWith('unit-1', 'sheet-1', 'rule-1');
-        expect(cacheService.markRangeDirty).toHaveBeenCalledWith('unit-1', 'sheet-1', rule.ranges);
-
-        service.removeRule('unit-1', 'sheet-1', 'rule-1');
-        expect(registerOtherFormulaService.deleteFormula).toHaveBeenCalledWith('unit-1', 'sheet-1', ['rule-1-=A1', 'rule-1-=B1']);
+        expect(observed).toHaveReturnedWith(['A', 'B']);
+        expect((await pending)?.[0]?.extra?.ruleId).toBe(rule.uid);
+        expect(service.getRuleFormulaResultSync('unit-1', 'sheet-1', rule.uid)?.[0]?.extra?.ruleId).toBe(rule.uid);
+        await injector.get(ICommandService).executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitOtherData: { 'unit-1': { 'sheet-1': { [formulaId]: { 0: { 0: [[{ v: 'Updated' }]] } } } } },
+        });
+        expect(lists.getOrCompute('unit-1', 'sheet-1', rule).list).toEqual(['Updated']);
+        service.removeRule('unit-1', 'sheet-1', rule.uid);
+        expect(injector.get(RegisterOtherFormulaService).getFormulaValueSync('unit-1', 'sheet-1', formulaId)).toBeUndefined();
     });
 
-    it('skips registration for non-formula rules, checkbox rules, and missing entries', async () => {
-        const formulaResult$ = new Subject<any>();
-        const registerOtherFormulaService = {
-            formulaResult$,
-            registerFormulaWithRange: vi.fn(),
-            deleteFormula: vi.fn(),
-            getFormulaValue: vi.fn(),
-            getFormulaValueSync: vi.fn(),
-        } as unknown as RegisterOtherFormulaService;
-
-        const service = new DataValidationFormulaService(
-            { getUnitType: vi.fn(() => UniverInstanceType.UNIVER_DOC) } as unknown as IUniverInstanceService,
-            registerOtherFormulaService,
-            { markRangeDirty: vi.fn() } as unknown as DataValidationCacheService,
-            { getRuleById: vi.fn(() => null) } as unknown as DataValidationModel,
-            { getValidatorItem: vi.fn(() => ({ offsetFormulaByRange: true })) } as unknown as DataValidatorRegistryService,
-            { markRuleDirty: vi.fn() } as unknown as DataValidationListCacheService
-        );
-
-        service.addRule('unit-1', 'sheet-1', {
-            uid: 'rule-2',
-            type: DataValidationType.DECIMAL,
-            formula1: '1',
-            formula2: '2',
-        } as any);
-        service.addRule('unit-1', 'sheet-1', {
-            uid: 'rule-3',
-            type: DataValidationType.CHECKBOX,
-            formula1: '=A1',
-            formula2: '=B1',
-        } as any);
-
-        expect(registerOtherFormulaService.registerFormulaWithRange).not.toHaveBeenCalled();
+    it('skips non-formula and checkbox rules and safely handles missing registrations', async () => {
+        const service = univer.__getInjector().get(DataValidationFormulaService);
+        service.addRule('unit-1', 'sheet-1', { ...rule, formula1: 'A,B', formula2: '' });
+        expect(service.getRuleFormulaInfo('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
+        service.addRule('unit-1', 'sheet-1', { ...rule, type: DataValidationType.CHECKBOX });
+        expect(service.getRuleFormulaInfo('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
         await expect(service.getRuleFormulaResult('unit-1', 'sheet-1', 'missing')).resolves.toBeNull();
         expect(service.getRuleFormulaResultSync('unit-1', 'sheet-1', 'missing')).toBeUndefined();
         service.removeRule('unit-1', 'sheet-1', 'missing');
-        expect(registerOtherFormulaService.deleteFormula).not.toHaveBeenCalled();
+    });
+
+    it('completes formula change subscriptions on disposal', () => {
+        const service = univer.__getInjector().get(DataValidationFormulaService);
+        const complete = vi.fn();
+        service.ruleFormulaResultChanged$.subscribe({ complete });
+        service.dispose();
+        expect(complete).toHaveBeenCalledOnce();
     });
 });

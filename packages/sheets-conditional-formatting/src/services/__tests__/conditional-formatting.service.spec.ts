@@ -165,7 +165,26 @@ describe('ConditionalFormattingService', () => {
         expect(clearCache).toHaveBeenCalled();
     });
 
+    it.each(['missing', 'empty', 'other-sheet'])('does not scan changed cells without sheet rules (%s)', (rules) => {
+        if (rules === 'empty') {
+            unitRules = new Map([['sheet-1', []]]);
+        } else if (rules === 'other-sheet') {
+            unitRules = new Map([['sheet-2', [{ cfId: 'cf-1', ranges: [] }]]]);
+        }
+        const readRow = vi.fn(() => ({ 2: { v: 10 } }));
+        const cellValue = Object.defineProperty({}, '1', { enumerable: true, get: readRow });
+
+        commandListener({
+            id: SetRangeValuesMutation.id,
+            params: { unitId: 'book-1', subUnitId: 'sheet-1', cellValue },
+        });
+
+        expect(readRow).not.toHaveBeenCalled();
+        expect(markRuleDirty).not.toHaveBeenCalled();
+    });
+
     it('marks affected conditional-formatting rules dirty after cell value and reorder mutations', () => {
+        unitRules = new Map([['sheet-1', [{ cfId: 'cf-1', ranges: [] }]]]);
         commandListener({
             id: SetRangeValuesMutation.id,
             params: {

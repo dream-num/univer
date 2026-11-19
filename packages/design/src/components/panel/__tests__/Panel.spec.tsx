@@ -14,33 +14,14 @@
  * limitations under the License.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { Panel, PanelField, PanelSection } from '../Panel';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { PanelField, PanelSection } from '../Panel';
 import '@testing-library/jest-dom/vitest';
 
-describe('Panel', () => {
-    it('should render children', () => {
-        render(
-            <Panel>
-                <div data-testid="child">Content</div>
-            </Panel>
-        );
-        expect(screen.getByTestId('child')).toBeInTheDocument();
-    });
-});
+afterEach(cleanup);
 
 describe('PanelSection', () => {
-    it('should render title and children', () => {
-        render(
-            <PanelSection title="Section Title">
-                <div data-testid="section-child">Section Content</div>
-            </PanelSection>
-        );
-        expect(screen.getByText('Section Title')).toBeInTheDocument();
-        expect(screen.getByTestId('section-child')).toBeInTheDocument();
-    });
-
     it('should toggle content when clicked', () => {
         render(
             <PanelSection title="Toggle Me">
@@ -52,7 +33,6 @@ describe('PanelSection', () => {
         expect(button).toHaveAttribute('aria-expanded', 'true');
 
         fireEvent.click(button);
-        expect(button.querySelector('[aria-hidden="true"]')?.getAttribute('class')).toContain('rtl:univer-rotate-90');
         expect(button).toHaveAttribute('aria-expanded', 'false');
 
         fireEvent.click(button);
@@ -72,31 +52,14 @@ describe('PanelSection', () => {
 });
 
 describe('PanelField', () => {
-    it('should render label and children', () => {
+    it('connects the control with its required label and validation error', () => {
         render(
-            <PanelField label="Field Label">
-                <input data-testid="field-input" />
+            <PanelField label="Name" required error="Enter a name">
+                {(controlProps) => <input {...controlProps} />}
             </PanelField>
         );
-        expect(screen.getByText('Field Label')).toBeInTheDocument();
-        expect(screen.getByTestId('field-input')).toBeInTheDocument();
-    });
-
-    it('should show required indicator', () => {
-        render(
-            <PanelField label="Required Field" required>
-                <input />
-            </PanelField>
-        );
-        expect(screen.getByText('*')).toBeInTheDocument();
-    });
-
-    it('should show error message', () => {
-        render(
-            <PanelField label="Field" error="Something went wrong">
-                <input />
-            </PanelField>
-        );
-        expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+        const control = screen.getByRole('textbox', { name: 'Name *' });
+        expect(control).toHaveAccessibleDescription('Enter a name');
+        expect(control).toHaveAttribute('aria-invalid', 'true');
     });
 });

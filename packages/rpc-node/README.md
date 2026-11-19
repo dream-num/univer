@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/rpc-node` | `UniverRpcNode` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/rpc-node` | `UniverRpcNode` | No | No | No | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/rpc-node
 npm install @univerjs/rpc-node
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { fileURLToPath } from 'node:url';
@@ -32,12 +32,21 @@ const workerSrc = fileURLToPath(new URL('./worker.js', import.meta.url));
 univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc });
 ```
 
-The referenced worker module must create its own Univer instance and register `UniverRPCNodeWorkerPlugin`; see the [Node.js worker example](../../examples/src/node/sdk/worker.ts).
-
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverRPCNodeMainPlugin`
-- `UniverRPCNodeWorkerPlugin`
+
+### Worker usage
+
+On the main thread, import `UniverRPCNodeMainPlugin` from `@univerjs/rpc-node`. Set `workerSrc` to the worker module path.
+
+In the worker entry, import `UniverRPCNodeWorkerPlugin` from `@univerjs/rpc-node/worker`:
+
+```ts
+import { UniverRPCNodeWorkerPlugin } from '@univerjs/rpc-node/worker';
+
+univer.registerPlugin(UniverRPCNodeWorkerPlugin);
+```
 
 ## Resources
 

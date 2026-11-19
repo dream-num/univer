@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, generateRandomId } from '@univerjs/core';
+import { Disposable, generateRandomId, ObjectMatrix } from '@univerjs/core';
 import { filter, map, Subject } from 'rxjs';
 
 export interface ISheetNote {
@@ -44,8 +44,16 @@ export type ISheetNoteChange = {
 
 export class SheetsNoteModel extends Disposable {
     private _notesMap: Map<string, Map<string, Map<string, ISheetNote>>> = new Map();
+    private _notePositionCache = new WeakMap<Map<string, ISheetNote>, ObjectMatrix<ISheetNote>>();
     private readonly _change$ = new Subject<ISheetNoteChange>();
     readonly change$ = this._change$.asObservable();
+
+    override dispose(): void {
+        this._notePositionCache = new WeakMap();
+        this._notesMap.clear();
+        this._change$.complete();
+        super.dispose();
+    }
 
     private _ensureNotesMap(unitId: string, subUnitId: string): Map<string, ISheetNote> {
         let unitMap = this._notesMap.get(unitId);
@@ -65,12 +73,20 @@ export class SheetsNoteModel extends Disposable {
 
     private _getNoteByPosition(unitId: string, subUnitId: string, row: number, col: number): Nullable<ISheetNote> {
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
-
-        for (const [_, note] of subUnitMap) {
-            if (note.row === row && note.col === col) {
-                return note;
+        let positions = this._notePositionCache.get(subUnitMap);
+        if (!positions) {
+            positions = new ObjectMatrix<ISheetNote>();
+            for (const note of subUnitMap.values()) {
+                // Preserve the ID map's first-insertion precedence when notes share a position.
+                if (!positions.getValue(note.row, note.col)) {
+                    positions.setValue(note.row, note.col, note);
+                }
             }
+            this._notePositionCache.set(subUnitMap, positions);
         }
+
+        const note = positions.getValue(row, col);
+        return note?.row === row && note.col === col ? note : undefined;
     }
 
     private _getNoteById(unitId: string, subUnitId: string, id: string): Nullable<ISheetNote> {
@@ -132,6 +148,7 @@ export class SheetsNoteModel extends Disposable {
             col,
         } as ISheetNote;
         subUnitMap.set(newNote.id, newNote);
+        this._notePositionCache.delete(subUnitMap);
 
         this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote, silent });
     }
@@ -146,6 +163,7 @@ export class SheetsNoteModel extends Disposable {
 
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
         subUnitMap.delete(oldNote.id);
+        this._notePositionCache.delete(subUnitMap);
 
         this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote: null, silent });
     }
@@ -161,6 +179,7 @@ export class SheetsNoteModel extends Disposable {
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
         const newNote = { ...oldNote, show: !oldNote.show };
         subUnitMap.set(newNote.id, newNote);
+        this._notePositionCache.delete(subUnitMap);
 
         this._change$.next({ unitId, subUnitId, oldNote, type: 'update', newNote, silent });
     }
@@ -176,6 +195,7 @@ export class SheetsNoteModel extends Disposable {
         const subUnitMap = this._ensureNotesMap(unitId, subUnitId);
         const newNote = { ...oldNote, row: newRow, col: newCol };
         subUnitMap.set(newNote.id, newNote);
+        this._notePositionCache.delete(subUnitMap);
 
         this._change$.next({ unitId, subUnitId, oldNote, type: 'ref', newNote, silent });
     }
@@ -201,6 +221,7 @@ export class SheetsNoteModel extends Disposable {
     }
 
     deleteUnitNotes(unitId: string): void {
+        this._notesMap.get(unitId)?.forEach((notes) => this._notePositionCache.delete(notes));
         this._notesMap.delete(unitId);
     }
 }

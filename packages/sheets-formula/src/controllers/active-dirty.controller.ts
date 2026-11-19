@@ -30,6 +30,7 @@ import type {
     ISetRangeValuesMutationParams,
     ISetRowHiddenMutationParams,
     ISetRowVisibleMutationParams,
+    ISetWorksheetOrderMutationParams,
 } from '@univerjs/sheets';
 import {
     Disposable,
@@ -57,6 +58,9 @@ import {
     SetRowVisibleMutation,
     SetStyleCommand,
     SetWorkbookCalculationSettingsMutation,
+    SetWorksheetColumnCountMutation,
+    SetWorksheetOrderMutation,
+    SetWorksheetRowCountMutation,
 } from '@univerjs/sheets';
 
 export class ActiveDirtyController extends Disposable {
@@ -177,6 +181,15 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialRowAndColumn() {
+        for (const mutation of [SetWorksheetRowCountMutation, SetWorksheetColumnCountMutation]) {
+            this._activeDirtyManagerService.register(mutation.id, {
+                commandId: mutation.id,
+                getDirtyData: (command: ICommandInfo) => ({
+                    dirtyReferenceUnits: [(command.params as { unitId: string }).unitId],
+                }),
+            });
+        }
+
         this._activeDirtyManagerService.register(RemoveRowMutation.id, {
             commandId: RemoveRowMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -268,6 +281,13 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
+        this._activeDirtyManagerService.register(SetWorksheetOrderMutation.id, {
+            commandId: SetWorksheetOrderMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const { unitId, fromOrder, toOrder } = command.params as ISetWorksheetOrderMutationParams;
+                return { dirtyReferenceUnits: fromOrder === toOrder ? [] : [unitId] };
+            },
+        });
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {

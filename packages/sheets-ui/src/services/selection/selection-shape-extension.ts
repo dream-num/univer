@@ -18,10 +18,19 @@ import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
-import type { SelectionControl } from './selection-control';
 import { ColorKit, IUniverInstanceService, LookUp, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    IRenderManagerService,
+    Rect,
+    ScrollTimer,
+    ScrollTimerType,
+    SHEET_VIEWPORT_KEY,
+    Vector2,
+    withCurrentTypeOfRenderer,
+} from '@univerjs/engine-render';
 import { attachSelectionWithCoord, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
+import type { SelectionControl } from './selection-control';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -614,15 +623,10 @@ export class SelectionShapeExtension {
         fillControl.onPointerDown$.subscribeEvent(this._autoFillForPointerdown.bind(this));
     }
 
-    // eslint-disable-next-line complexity
     private _autoFillMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
-        // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-        // const scrollXY = activeViewport ? scene.getScrollXY(activeViewport) : { x: 0, y: 0 };
         const scrollXY = scene.getViewportScrollXY(this._activeViewport);
-
         const { scaleX, scaleY } = scene.getAncestorScale();
-
         const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
@@ -630,27 +634,16 @@ export class SelectionShapeExtension {
             scaleY,
             scrollXY
         );
-
         const { row, column } = moveActualSelection;
-
         const moveRelativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
         const maxRow = this._skeleton.getRowCount() - 1;
-
         const maxColumn = this._skeleton.getColumnCount() - 1;
-
         let startRow = this._relativeSelectionPositionRow;
-
         let startColumn = this._relativeSelectionPositionColumn;
-
         let endRow = this._relativeSelectionPositionRow + this._relativeSelectionRowLength;
-
         let endColumn = this._relativeSelectionPositionColumn + this._relativeSelectionColumnLength;
-
         let isLighten = false;
-
         let isRowDropping = true;
-
         if ((column < startColumn || column > endColumn) && row >= startRow && row <= endRow) {
             const rulerValue = this._fillRuler(
                 column,
@@ -659,25 +652,18 @@ export class SelectionShapeExtension {
                 this._relativeSelectionColumnLength,
                 maxColumn
             );
-
             startColumn = rulerValue.startRowOrColumn;
-
             endColumn = rulerValue.endRowOrColumn;
-
             isLighten = rulerValue.isLighten;
-
             isRowDropping = false;
         } else if ((row < startRow || row > endRow) && column >= startColumn && column <= endColumn) {
             const rulerValue = this._fillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
-
             startRow = rulerValue.startRowOrColumn;
-
             endRow = rulerValue.endRowOrColumn;
-
             isLighten = rulerValue.isLighten;
         } else if (
-            Math.abs(this._startOffsetX - moveRelativeCoords.x - scrollXY.x) / 2 >
-            Math.abs(this._startOffsetY - moveRelativeCoords.y - scrollXY.y)
+            Math.abs(this._startOffsetX - moveRelativeCoords.x - scrollXY.x * scaleX) / 2 >
+            Math.abs(this._startOffsetY - moveRelativeCoords.y - scrollXY.y * scaleY)
         ) {
             const rulerValue = this._fillRuler(
                 column,
@@ -686,24 +672,21 @@ export class SelectionShapeExtension {
                 this._relativeSelectionColumnLength,
                 maxColumn
             );
-
             startColumn = rulerValue.startRowOrColumn;
-
             endColumn = rulerValue.endRowOrColumn;
-
             isLighten = rulerValue.isLighten;
-
             isRowDropping = false;
         } else {
             const rulerValue = this._fillRuler(row, startRow, endRow, this._relativeSelectionRowLength, maxRow);
-
             startRow = rulerValue.startRowOrColumn;
-
             endRow = rulerValue.endRowOrColumn;
-
             isLighten = rulerValue.isLighten;
         }
+        this._updateAutoFillPreview({ startRow, endRow, startColumn, endColumn }, isLighten, isRowDropping);
+    }
 
+    private _updateAutoFillPreview(range: IRange, isLighten: boolean, isRowDropping: boolean) {
+        const { startRow, endRow, startColumn, endColumn } = range;
         const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
         const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
 
@@ -758,37 +741,28 @@ export class SelectionShapeExtension {
         this._control.selectionFilling$.next(this._targetSelection);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _autoFillForPointerdown(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
         const scene = this._scene;
-
         const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-
-        this._startOffsetX = newEvtOffsetX;
-
-        this._startOffsetY = newEvtOffsetY;
-
+        this._activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))!;
+        const scrollXY = scene.getViewportScrollXY(this._activeViewport);
+        const { scaleX, scaleY } = scene.getAncestorScale();
+        // Use the same scaled sheet coordinates for both ends of the drag, including auto-scroll.
+        this._startOffsetX = newEvtOffsetX + scrollXY.x * scaleX;
+        this._startOffsetY = newEvtOffsetY + scrollXY.y * scaleY;
         const {
             startRow: originStartRow,
             startColumn: originStartColumn,
             endRow: originEndRow,
             endColumn: originEndColumn,
         } = this._control.model;
-
         this._isInMergeState = this._hasMergeInRange(originStartRow, originStartColumn, originEndRow, originEndColumn);
-
         this._relativeSelectionPositionRow = originStartRow;
-
         this._relativeSelectionPositionColumn = originStartColumn;
-
         this._relativeSelectionRowLength = originEndRow - originStartRow;
-
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
-
         const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
@@ -796,19 +770,13 @@ export class SelectionShapeExtension {
         if (stroke == null) {
             stroke = defaultStyle.stroke;
         }
-
         if (strokeWidth == null) {
             strokeWidth = defaultStyle.strokeWidth;
         }
-
         const scale = this._getScale();
-
         strokeWidth /= scale;
-
         const SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
-
         const darkenColor = new ColorKit(stroke).darken(2).toRgbString();
-
         if (this.isHelperSelection) {
             this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
                 stroke: darkenColor,
@@ -816,92 +784,22 @@ export class SelectionShapeExtension {
             });
             scene.addObject(this._helperSelection);
         }
-
-        this._activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))!;
-
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-
         const scrollTimer = ScrollTimer.create(
             scene,
             this._activeViewport.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
         );
-
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewportMain);
-
         this._scrollTimer = scrollTimer;
-
         scene.disableObjectsEvent();
-
         this._controlHandler((o) => {
             this._fillControlColors.push(o.fill as string);
         });
-
         // Controls the border of the expanding selection area
+        const originRange = this._control.model.getRange();
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-            const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
-            const permissionCheck = this._injector.get(ISheetSelectionRenderService, LookUp.SELF).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
-
-            if (!permissionCheck) {
-                return;
-            }
-
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
-                Vector2.FromArray([moveOffsetX, moveOffsetY])
-            );
-
-            this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
-
-            scene.setCursor(CURSOR_TYPE.CROSSHAIR);
-
-            const newSelection = this._targetSelection;
-
-            if (viewportMain && currentViewport && this._activeViewport?.viewportKey !== currentViewport?.viewportKey) {
-                let movingRange: IRangeWithCoord;
-                if (newSelection.startRow !== originStartRow) {
-                    scrollTimer.scrollTimerType = ScrollTimerType.Y;
-                    movingRange = {
-                        ...newSelection,
-                        endRow: newSelection.startRow,
-                    };
-                } else if (newSelection.endRow !== originEndRow) {
-                    scrollTimer.scrollTimerType = ScrollTimerType.Y;
-                    movingRange = {
-                        ...newSelection,
-                        startRow: newSelection.endRow,
-                    };
-                } else if (newSelection.startColumn !== originStartColumn) {
-                    scrollTimer.scrollTimerType = ScrollTimerType.X;
-                    movingRange = {
-                        ...newSelection,
-                        endColumn: newSelection.startColumn,
-                    };
-                } else {
-                    scrollTimer.scrollTimerType = ScrollTimerType.X;
-                    movingRange = {
-                        ...newSelection,
-                        startColumn: newSelection.endColumn,
-                    };
-                }
-
-                if (this._isSelectionInViewport(movingRange, currentViewport)) {
-                    if (this._viewportMainScrollBarNeedResetPosition(scrollTimer.scrollTimerType, this._activeViewport.viewportKey, currentViewport.viewportKey)) {
-                        viewportMain.scrollToBarPos({
-                            x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
-                            y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
-                        });
-                    }
-
-                    this._activeViewport = currentViewport;
-                }
-            }
-
-            scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
-            });
+            this._autoFillForPointermove(moveEvt, evt, originRange, viewportMain);
         });
-
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
@@ -917,6 +815,79 @@ export class SelectionShapeExtension {
                 });
             });
             this._fillControlColors = [];
+        });
+    }
+
+    private _autoFillForPointermove(
+        moveEvt: IMouseEvent | IPointerEvent,
+        startEvt: IMouseEvent | IPointerEvent,
+        originRange: IRange,
+        viewportMain: Nullable<Viewport>
+    ) {
+        const scene = this._scene;
+        const scrollTimer = this._scrollTimer;
+        const { startRow: originStartRow, endRow: originEndRow, startColumn: originStartColumn } = originRange;
+        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+        const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+
+        const permissionCheck = this._injector.get(ISheetSelectionRenderService, LookUp.SELF).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: startEvt.offsetX, y: startEvt.offsetY, skeleton: this._skeleton, scene: this._scene });
+
+        if (!permissionCheck) {
+            return;
+        }
+
+        const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
+            Vector2.FromArray([moveOffsetX, moveOffsetY])
+        );
+
+        this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
+
+        scene.setCursor(CURSOR_TYPE.CROSSHAIR);
+
+        const newSelection = this._targetSelection;
+
+        if (viewportMain && currentViewport && this._activeViewport?.viewportKey !== currentViewport?.viewportKey) {
+            let movingRange: IRangeWithCoord;
+            if (newSelection.startRow !== originStartRow) {
+                scrollTimer.scrollTimerType = ScrollTimerType.Y;
+                movingRange = {
+                    ...newSelection,
+                    endRow: newSelection.startRow,
+                };
+            } else if (newSelection.endRow !== originEndRow) {
+                scrollTimer.scrollTimerType = ScrollTimerType.Y;
+                movingRange = {
+                    ...newSelection,
+                    startRow: newSelection.endRow,
+                };
+            } else if (newSelection.startColumn !== originStartColumn) {
+                scrollTimer.scrollTimerType = ScrollTimerType.X;
+                movingRange = {
+                    ...newSelection,
+                    endColumn: newSelection.startColumn,
+                };
+            } else {
+                scrollTimer.scrollTimerType = ScrollTimerType.X;
+                movingRange = {
+                    ...newSelection,
+                    startColumn: newSelection.endColumn,
+                };
+            }
+
+            if (this._isSelectionInViewport(movingRange, currentViewport)) {
+                if (this._viewportMainScrollBarNeedResetPosition(scrollTimer.scrollTimerType, this._activeViewport.viewportKey, currentViewport.viewportKey)) {
+                    viewportMain.scrollToBarPos({
+                        x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
+                        y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
+                    });
+                }
+
+                this._activeViewport = currentViewport;
+            }
+        }
+
+        scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
+            this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
         });
     }
 

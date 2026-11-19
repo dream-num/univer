@@ -18,9 +18,6 @@ import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core'
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { CSSProperties, ReactNode, Ref } from 'react';
-import type { IUniverSheetsFormulaUIConfig } from '../../../config/config';
-import type { FormulaSelectingType } from '../../formula-editor/hooks/use-formula-selection';
-import type { IRefSelection } from '../../formula-editor/hooks/use-highlight';
 import {
     BuildTextUtils,
     createInternalEditorID,
@@ -53,6 +50,9 @@ import { EMBEDDING_FORMULA_EDITOR, MOBILE_FORMULA_FUNCTION_PANEL_OPEN } from '@u
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
+import type { IUniverSheetsFormulaUIConfig } from '../../../config/config';
+import type { FormulaSelectingType } from '../../formula-editor/hooks/use-formula-selection';
+import type { IRefSelection } from '../../formula-editor/hooks/use-highlight';
 import { PLUGIN_CONFIG_KEY_BASE } from '../../../config/config';
 import {
     IFormulaEmbedInteractionBoundaryService,
@@ -73,6 +73,7 @@ import { useStateRef } from '../../formula-editor/hooks/use-state-ref';
 import { useSwitchSheet } from '../../formula-editor/hooks/use-switch-sheet';
 import { useVerify } from '../../formula-editor/hooks/use-verify';
 import { getFormulaText } from '../../formula-editor/utils/get-formula-text';
+import { syncCounterpartFormulaEditorSelection } from '../../formula-editor/utils/sync-counterpart-formula-editor-selection';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../../range-selector/utils/find-index-from-sequence-nodes';
 import { MobileFunctionPanel } from './mobile-function-panel/MobileFunctionPanel';
 import { MobileSearchFunction } from './search-function/MobileSearchFunction';
@@ -125,32 +126,6 @@ export function shouldApplyFormulaSelectionChange(
     hasActiveInteraction: boolean
 ): boolean {
     return Boolean(selectingMode) || Boolean(isFocusing) || hasActiveInteraction;
-}
-
-interface IFormulaEditorSelectionSyncService {
-    getEditor: (editorId: string) => Pick<Editor, 'setSelectionRanges'> | null | undefined | void;
-}
-
-export function syncCounterpartFormulaEditorSelection(
-    editorService: IFormulaEditorSelectionSyncService,
-    editorId: string,
-    selections: ITextRange[] | undefined
-): void {
-    if (!selections?.length) {
-        return;
-    }
-
-    const syncEditorId = editorId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-        ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-        : editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-            : null;
-
-    if (!syncEditorId) {
-        return;
-    }
-
-    editorService.getEditor(syncEditorId)?.setSelectionRanges(selections, false);
 }
 
 export function restoreMobileFormulaEditorHostFocus(
@@ -655,7 +630,7 @@ export const MobileFormulaEditor = forwardRef((props: IMobileFormulaEditorProps,
         if (counterpartEditorId) {
             const counterpartEditor = editorService.getEditor(counterpartEditorId);
             counterpartEditor?.replaceText(result.text, false);
-            counterpartEditor?.setSelectionRanges([selection], false);
+            syncCounterpartFormulaEditorSelection(editorService, editorId, [selection]);
         }
 
         highlight(result.text, false, true, [selection]);

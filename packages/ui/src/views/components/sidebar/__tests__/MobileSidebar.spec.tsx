@@ -20,6 +20,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import enUS from '../../../../locale/en-US';
+import {
+    ContextMenuHostService,
+    IContextMenuHostService,
+} from '../../../../services/contextmenu/contextmenu-host.service';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
@@ -37,6 +41,7 @@ describe('MobileSidebar', () => {
 
     it('renders sidebar content in a modal drawer that can be closed', () => {
         injector = new Injector([
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [ISidebarService, { useClass: DesktopSidebarService }],
             [ILogService, { useClass: DesktopLogService }],
             [LocaleService],

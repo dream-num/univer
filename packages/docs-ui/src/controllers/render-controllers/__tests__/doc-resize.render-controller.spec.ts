@@ -19,7 +19,7 @@ import type { RenderUnit } from '@univerjs/engine-render';
 import { DocumentFlavor, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CanvasColorService, DocBackground, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { ContextMenuHostService, DesktopSidebarService, IContextMenuHostService, ISidebarService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DOCS_VIEW_KEY } from '../../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
@@ -53,6 +53,7 @@ describe('DocResizeRenderController', () => {
             const injector = univer.__getInjector();
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
             injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
             injector.add([DocLayoutExecutorService]);
             injector.add([DocSelectionManagerService]);
@@ -112,6 +113,7 @@ describe('DocResizeRenderController', () => {
             const injector = univer.__getInjector();
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
             injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
             injector.add([DocLayoutExecutorService]);
             injector.add([DocSelectionManagerService]);

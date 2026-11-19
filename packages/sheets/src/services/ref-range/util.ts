@@ -15,6 +15,7 @@
  */
 
 import type { IAccessor, ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import { getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
@@ -44,7 +45,6 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -967,78 +967,57 @@ export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams
     ];
 };
 
+/**
+ * A ref range follows the data it covers, whichever command entry produced the insertion:
+ * inserting above the range shifts it down, inserting inside the range expands it, and
+ * inserting below the range leaves it untouched.
+ *
+ * `direction` only decides which row the inserted cells inherit styles and height from, so it
+ * is deliberately ignored here: two entry points that insert a row at the same position must
+ * return the same range. This matches `handleBaseInsertRange`, which serves the mutation based
+ * ref-range paths, and the collaboration transform algorithms, which cannot supply a direction
+ * at all.
+ */
 export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams>, targetRange: IRange) => {
     const param = info.params!;
     const insertRow = param.range.startRow;
     const insertCount = param.range.endRow - param.range.startRow + 1;
-    const direction = param.direction;
+    // an endpoint moves only when the insertion point is at or above it
+    const startOffset = insertRow <= targetRange.startRow ? insertCount : 0;
+    const endOffset = insertRow <= targetRange.endRow ? insertCount : 0;
 
-    if (direction === Direction.UP) {
-        if (insertRow < targetRange.startRow) {
-            return [{
-                ...targetRange,
-                startRow: targetRange.startRow + insertCount,
-                endRow: targetRange.endRow + insertCount,
-            }];
-        } else if (insertRow <= targetRange.endRow) {
-            return [{
-                ...targetRange,
-                endRow: targetRange.endRow + insertCount,
-            }];
-        }
-    } else {
-        if (insertRow <= targetRange.startRow) {
-            return [{
-                ...targetRange,
-                startRow: targetRange.startRow + insertCount,
-                endRow: targetRange.endRow + insertCount,
-            }];
-        } else if (insertRow <= targetRange.endRow + 1) {
-            return [{
-                ...targetRange,
-                endRow: targetRange.endRow + insertCount,
-            }];
-        }
+    if (!startOffset && !endOffset) {
+        return [targetRange];
     }
 
-    return [targetRange];
+    return [{
+        ...targetRange,
+        startRow: targetRange.startRow + startOffset,
+        endRow: targetRange.endRow + endOffset,
+    }];
 };
 
+/**
+ * Column counterpart of {@link handleInsertRowCommon}: a ref range follows the data it covers,
+ * so `direction` is deliberately ignored here as well.
+ */
 export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams>, targetRange: IRange) => {
     const param = info.params!;
     const insertColumn = param.range.startColumn;
     const insertCount = param.range.endColumn - param.range.startColumn + 1;
-    const direction = param.direction;
+    // an endpoint moves only when the insertion point is at or above it
+    const startOffset = insertColumn <= targetRange.startColumn ? insertCount : 0;
+    const endOffset = insertColumn <= targetRange.endColumn ? insertCount : 0;
 
-    if (direction === Direction.LEFT) {
-        if (insertColumn < targetRange.startColumn) {
-            return [{
-                ...targetRange,
-                startColumn: targetRange.startColumn + insertCount,
-                endColumn: targetRange.endColumn + insertCount,
-            }];
-        } else if (insertColumn <= targetRange.endColumn) {
-            return [{
-                ...targetRange,
-                endColumn: targetRange.endColumn + insertCount,
-            }];
-        }
-    } else {
-        if (insertColumn <= targetRange.startColumn) {
-            return [{
-                ...targetRange,
-                startColumn: targetRange.startColumn + insertCount,
-                endColumn: targetRange.endColumn + insertCount,
-            }];
-        } else if (insertColumn <= targetRange.endColumn + 1) {
-            return [{
-                ...targetRange,
-                endColumn: targetRange.endColumn + insertCount,
-            }];
-        }
+    if (!startOffset && !endOffset) {
+        return [targetRange];
     }
 
-    return [targetRange];
+    return [{
+        ...targetRange,
+        startColumn: targetRange.startColumn + startOffset,
+        endColumn: targetRange.endColumn + endOffset,
+    }];
 };
 
 export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
@@ -1161,7 +1140,94 @@ export type MutationsAffectRange =
     | IInsertRowMutationParams
     | IMoveRangeMutationParams;
 
+const ROW_AXIS_COMMANDS: string[] = [
+    EffectRefRangId.InsertRowCommandId,
+    EffectRefRangId.RemoveRowCommandId,
+    EffectRefRangId.MoveRowsCommandId,
+    EffectRefRangId.InsertRangeMoveDownCommandId,
+    EffectRefRangId.DeleteRangeMoveUpCommandId,
+];
+
+const COLUMN_AXIS_COMMANDS: string[] = [
+    EffectRefRangId.InsertColCommandId,
+    EffectRefRangId.RemoveColCommandId,
+    EffectRefRangId.MoveColsCommandId,
+    EffectRefRangId.InsertRangeMoveRightCommandId,
+    EffectRefRangId.DeleteRangeMoveLeftCommandId,
+];
+
+/**
+ * A whole column/row/sheet range always covers the whole axis, so it does not follow concrete
+ * coordinates on that axis: structural edits there keep the range anchored at 0 and only move its
+ * end. Edits on the opposite axis still go through the regular coordinate based rules.
+ *
+ * @returns the adjusted ranges, or `undefined` when the regular logic should handle the command
+ */
+function handleWholeRangeCommand(targetRange: IRange, commandInfo: ICommandInfo): IRange[] | undefined {
+    const coversAllRows = targetRange.rangeType === RANGE_TYPE.COLUMN || targetRange.rangeType === RANGE_TYPE.ALL;
+    const coversAllColumns = targetRange.rangeType === RANGE_TYPE.ROW || targetRange.rangeType === RANGE_TYPE.ALL;
+    if (!coversAllRows && !coversAllColumns) {
+        return undefined;
+    }
+    // a typed range that still carries stale coordinates cannot be tracked reliably
+    if ((coversAllRows && !Number.isFinite(targetRange.endRow)) || (coversAllColumns && !Number.isFinite(targetRange.endColumn))) {
+        return undefined;
+    }
+
+    if (ROW_AXIS_COMMANDS.includes(commandInfo.id)) {
+        return coversAllRows ? [adjustWholeRange(targetRange, true, commandInfo)] : undefined;
+    }
+    if (COLUMN_AXIS_COMMANDS.includes(commandInfo.id)) {
+        return coversAllColumns ? [adjustWholeRange(targetRange, false, commandInfo)] : undefined;
+    }
+    if (commandInfo.id === EffectRefRangId.MoveRangeCommandId || commandInfo.id === EffectRefRangId.ReorderRangeCommandId) {
+        // moving cells around never changes how much of an axis a whole range covers
+        return [targetRange];
+    }
+    return undefined;
+}
+
+function adjustWholeRange(targetRange: IRange, isRow: boolean, commandInfo: ICommandInfo): IRange {
+    const currentEnd = isRow ? targetRange.endRow : targetRange.endColumn;
+
+    switch (commandInfo.id) {
+        case EffectRefRangId.InsertRowCommandId:
+        case EffectRefRangId.InsertColCommandId: {
+            const params = commandInfo.params as IInsertRowCommandParams | IInsertColCommandParams;
+            const count = isRow
+                ? params.range.endRow - params.range.startRow + 1
+                : params.range.endColumn - params.range.startColumn + 1;
+
+            return isRow
+                ? { ...targetRange, startRow: 0, endRow: currentEnd + count }
+                : { ...targetRange, startColumn: 0, endColumn: currentEnd + count };
+        }
+        case EffectRefRangId.RemoveRowCommandId:
+        case EffectRefRangId.RemoveColCommandId: {
+            const params = commandInfo.params as IRemoveRowColCommandInterceptParams;
+            const removedRanges = params.ranges ?? (params.range ? [params.range] : []);
+            const intervals: [number, number][] = removedRanges.map((range) => (isRow ? [range.startRow, range.endRow] : [range.startColumn, range.endColumn]));
+            const removedCount = mergeIntervals(intervals).reduce((total, [start, end]) => {
+                const overlap = Math.min(end, currentEnd) - Math.max(start, 0) + 1;
+                return total + Math.max(0, overlap);
+            }, 0);
+
+            return isRow
+                ? { ...targetRange, startRow: 0, endRow: Math.max(0, currentEnd - removedCount) }
+                : { ...targetRange, startColumn: 0, endColumn: Math.max(0, currentEnd - removedCount) };
+        }
+        default:
+            // shifting cells along the axis keeps the whole axis covered
+            return targetRange;
+    }
+}
+
 export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo): IRange[] => {
+    const wholeRangeResult = handleWholeRangeCommand(range, commandInfo);
+    if (wholeRangeResult) {
+        return wholeRangeResult;
+    }
+
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
         case EffectRefRangId.DeleteRangeMoveLeftCommandId: {

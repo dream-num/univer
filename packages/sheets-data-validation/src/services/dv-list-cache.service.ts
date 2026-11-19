@@ -16,7 +16,7 @@
 
 import type { ICellData, IDataValidationRule, Nullable } from '@univerjs/core';
 import type { IOtherFormulaResult } from '@univerjs/engine-formula';
-import { Disposable, Inject, Injector, isFormulaString, numfmt } from '@univerjs/core';
+import { Disposable, Inject, isFormulaString, numfmt } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeListOptions } from '@univerjs/sheets';
 import { isLegalFormulaResult } from '../utils/formula';
@@ -43,11 +43,14 @@ export class DataValidationListCacheService extends Disposable {
     private _cache: Map<UnitId, Map<SubUnitId, Map<RuleId, IListCacheItem>>> = new Map();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
 
+        this.disposeWithMe(this._formulaService.ruleFormulaResultChanged$.subscribe(({ unitId, subUnitId, ruleId }) => {
+            this.markRuleDirty(unitId, subUnitId, ruleId);
+        }));
         this._initRuleChangeListener();
     }
 
@@ -75,9 +78,8 @@ export class DataValidationListCacheService extends Disposable {
             return cached;
         }
 
-        const formulaService = this._injector.get(DataValidationFormulaService);
         // Compute and cache
-        const results = formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
         return this.computeAndCache(unitId, subUnitId, rule, results);
     }
 

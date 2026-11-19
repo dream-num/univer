@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from './array-value-object';
 import { BaseValueObject } from './base-value-object';
 import { NumberValueObject } from './primitive-object';
 
 export class CubeValueObject extends BaseValueObject {
-    static create(values: ArrayValueObject[]) {
-        return new CubeValueObject(values);
+    static create(values: ArrayValueObject[], references?: BaseReferenceObject[]) {
+        return new CubeValueObject(values, references);
     }
 
     override isCube() {
@@ -29,7 +30,7 @@ export class CubeValueObject extends BaseValueObject {
 
     private _values: ArrayValueObject[] = [];
 
-    constructor(values: ArrayValueObject[]) {
+    constructor(values: ArrayValueObject[], private _references?: BaseReferenceObject[]) {
         super();
         this._values = values;
     }
@@ -39,10 +40,15 @@ export class CubeValueObject extends BaseValueObject {
             value.dispose();
         });
         this._values = [];
+        this._references = undefined;
     }
 
     getCubeValues(): ArrayValueObject[] {
         return this._values;
+    }
+
+    getCubeReferences(): BaseReferenceObject[] | undefined {
+        return this._references;
     }
 
     getCubeCount(): number {

@@ -14,4 +14,15 @@
  * limitations under the License.
  */
 
+import type { IPermissionTypes } from '@univerjs/core';
+import { WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+
 export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';
+
+/**
+ * Notes have no permission point of their own; they follow the cell edit points.
+ */
+export const SHEET_NOTE_EDIT_PERMISSIONS: IPermissionTypes = {
+    workbookTypes: [WorkbookEditablePermission],
+    worksheetTypes: [WorksheetEditPermission],
+};

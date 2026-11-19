@@ -15,11 +15,11 @@
  */
 
 import type { IPreset } from '@univerjs/presets';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula/worker';
+import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc/worker';
+import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula/worker';
+import { UniverSheetsPlugin } from '@univerjs/sheets/worker';
 import type { IUniverFormulaWorkerConfig } from './types';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 
 export interface IUniverSheetsCoreWorkerPresetConfig {
     /**

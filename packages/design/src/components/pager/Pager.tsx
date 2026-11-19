@@ -16,7 +16,6 @@
 
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useContext } from 'react';
-
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -92,7 +91,7 @@ export function Pager(props: IPagerProps) {
                               dark:hover:!univer-bg-gray-600
                             `}
                             type="button"
-                            aria-label={previousButtonAriaLabel ?? locale?.Accessibility.previous ?? 'Previous'}
+                            aria-label={previousButtonAriaLabel ?? locale?.Accessibility.previous}
                             disabled={previousButtonDisabled}
                             onClick={onClickLeftArrow}
                         >
@@ -111,7 +110,7 @@ export function Pager(props: IPagerProps) {
                               dark:hover:!univer-bg-gray-600
                             `}
                             type="button"
-                            aria-label={nextButtonAriaLabel ?? locale?.Accessibility.next ?? 'Next'}
+                            aria-label={nextButtonAriaLabel ?? locale?.Accessibility.next}
                             disabled={nextButtonDisabled}
                             onClick={onClickRightArrow}
                         >

@@ -62,6 +62,7 @@ describe('HoverRenderController', () => {
         };
         const hoverManagerService = {
             triggerMouseMove: vi.fn(),
+            triggerMouseLeave: vi.fn(),
             triggerPointerDown: vi.fn(),
             triggerPointerUp: vi.fn(),
             triggerClick: vi.fn(),
@@ -86,14 +87,17 @@ describe('HoverRenderController', () => {
             } }],
             [SheetScrollManagerService, { useValue: { validViewportScrollInfo$ } }],
         ]);
-        const controller = injector.createInstance(HoverRenderController, {
-            unitId: 'unit-1',
-            mainComponent,
-            components: new Map([
-                [SHEET_VIEW_KEY.ROW, rowHeader],
-                [SHEET_VIEW_KEY.COLUMN, colHeader],
-            ]),
-        } as never);
+        injector.add([HoverRenderController, { useFactory: function createHoverController() {
+            return injector.createInstance(HoverRenderController, {
+                unitId: 'unit-1',
+                mainComponent,
+                components: new Map([
+                    [SHEET_VIEW_KEY.ROW, rowHeader],
+                    [SHEET_VIEW_KEY.COLUMN, colHeader],
+                ]),
+            } as never);
+        } }]);
+        const controller = injector.get(HoverRenderController);
 
         mainComponent.onPointerEnter$.emit({});
         expect(controller.active).toBe(true);

@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/rpc` | `UniverRpc` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/rpc` | `UniverRpc` | No | No | No | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/rpc
 npm install @univerjs/rpc
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
@@ -32,12 +32,21 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
 univer.onDispose(() => worker.terminate());
 ```
 
-The referenced worker module must create its own Univer instance and register `UniverRPCWorkerThreadPlugin`; see the [browser worker example](../../examples/src/sheets-mobile/worker.ts).
-
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverRPCMainThreadPlugin`
-- `UniverRPCWorkerThreadPlugin`
+
+### Worker usage
+
+On the main thread, import `UniverRPCMainThreadPlugin` from `@univerjs/rpc`. Set `workerURL` to the worker URL or instance.
+
+In the worker entry, import `UniverRPCWorkerThreadPlugin` from `@univerjs/rpc/worker`:
+
+```ts
+import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc/worker';
+
+univer.registerPlugin(UniverRPCWorkerThreadPlugin);
+```
 
 ## Resources
 

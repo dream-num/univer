@@ -69,6 +69,11 @@ export interface IFWorksheetDrawingMixin {
 
     /**
      * Insert an image to the sheet
+     *
+     * For multiple images, prefer {@link FWorksheet.insertImages} instead of repeated insertions.
+     * Prepare each ISheetImage with {@link FWorksheet.newOverGridImage} and `buildAsync()`, then pass
+     * the complete array to `insertImages()`; it accepts image data, not URLs or blobs.
+     *
      * @param {string} url - The image url
      * @returns {Promise<boolean>} true if the image is inserted successfully
      * @example
@@ -82,6 +87,10 @@ export interface IFWorksheetDrawingMixin {
      */
     insertImage(url: string): Promise<boolean>;
     /**
+     * For multiple images, prefer {@link FWorksheet.insertImages} instead of repeated insertions.
+     * Prepare each ISheetImage with {@link FWorksheet.newOverGridImage} and `buildAsync()`, then pass
+     * the complete array to `insertImages()`; it accepts image data, not URLs or blobs.
+     *
      * @param {string} url - The image url
      * @param {number} column - The column index to insert the image
      * @param {number} row - The row index to insert the image
@@ -97,6 +106,10 @@ export interface IFWorksheetDrawingMixin {
      */
     insertImage(url: string, column: number, row: number): Promise<boolean>;
     /**
+     * For multiple images, prefer {@link FWorksheet.insertImages} instead of repeated insertions.
+     * Prepare each ISheetImage with {@link FWorksheet.newOverGridImage} and `buildAsync()`, then pass
+     * the complete array to `insertImages()`; it accepts image data, not URLs or blobs.
+     *
      * @param {string} url - The image url
      * @param {number} column - The column index to insert the image
      * @param {number} row - The row index to insert the image

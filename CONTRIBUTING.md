@@ -174,7 +174,7 @@ Also, with the help of vscode and its rich ecosystem, you could directly debug u
 
 ### Browser workbench
 
-`pnpm dev` starts one Vite workbench with lazy-loaded Sheets, Docs, and Slides routes. Use the navigation bar or `#sheets`, `#docs`, and `#slides` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
+`pnpm dev` starts one Vite workbench with lazy-loaded Sheets and Docs routes. Use the navigation bar or `#sheets` and `#docs` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
 
 ### Build Preview
 
@@ -215,9 +215,4 @@ Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING-FACADE.md)
 
 ### Deprecate API
 
-If you are going to deprecate an API, follow the [API Stability Policy](./docs/API_STABILITY.md) and the steps below:
-
-1. Mark the API as deprecated in the JSDoc, and use `{@link}` to refer to the new API.
-2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
-3. Document the migration path in the relevant guide, README, changelog, or release notes when the API is broadly used.
-4. Deprecated stable APIs should remain available until the next major release unless the API is unsafe, broken, or impossible to preserve. In pre-1.0 releases, removals may happen in a minor release, but they should be documented as breaking changes.
+Follow the [deprecation requirements](./docs/API_STABILITY.md#deprecated) in the API Stability Policy for JSDoc annotations, runtime warnings, and migration guidance. Removing or incompatibly changing a deprecated API still requires a [breaking-change notice](./docs/API_STABILITY.md#breaking-changes).

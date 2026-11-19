@@ -41,7 +41,7 @@ export function getCellValue(cell: Nullable<ICellData>) {
 }
 
 function normalizeRichTextFormulaValue(value: string) {
-    return value.replace(/\r\n|\r|\n/g, '\r\n');
+    return value.replace(/\r\n|\r/g, '\n');
 }
 
 /**

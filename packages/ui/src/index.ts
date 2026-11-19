@@ -22,9 +22,20 @@ export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { objectPermissionMenuItemFactory } from './common/object-permission-menu';
+export { EditorDropdown, EditorDropdownTrigger, EditorFloatingToolbar, EditorToolbarButton, EditorToolbarIcon, EditorToolbarTooltip, resolveEditorDropdownSide } from './components/editor-toolbar/EditorFloatingToolbar';
+export { EditorMenuActions, EditorMenuItem, EditorMenuPanel } from './components/editor-toolbar/EditorMenu';
+export { keepFloatingToolbarPanelInteraction, preventFloatingToolbarPanelBlur, shouldKeepFloatingToolbarMouseDownDefault } from './components/editor-toolbar/floating-toolbar-interaction';
+export { HyperlinkEditor } from './components/hyperlink/HyperlinkEditor';
+export type { IHyperlinkEditorProps } from './components/hyperlink/HyperlinkEditor';
+export { HyperlinkPreview } from './components/hyperlink/HyperlinkPreview';
+export type { IHyperlinkPreviewProps } from './components/hyperlink/HyperlinkPreview';
+export { MobileTableSizePicker } from './components/table-size-picker/MobileTableSizePicker';
+export { TableSizePicker, useTableSizePicker } from './components/table-size-picker/TableSizePicker';
+export type { ITableSize, ITableSizePickerProps } from './components/table-size-picker/TableSizePicker';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
 export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { inheritUserInfoComponent } from './controllers/components.controller';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,
@@ -199,10 +210,13 @@ export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyboard-inset-context';
 export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
+
 export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export type { INotificationOptions } from './views/notification/Notification';
-export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 
+export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 export { ProgressBar } from './views/progress-bar/ProgressBar';
+export { DefaultUserInfo, USER_INFO_COMPONENT, UserInfo } from './views/user-info/UserInfo';
+export type { IUserInfoContext, IUserInfoData, IUserInfoProps } from './views/user-info/UserInfo';

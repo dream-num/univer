@@ -7,7 +7,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsrs --noEmit"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -18,7 +18,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.4"
+        "tsrs": "7.1.0-beta.tsrs2",
+        "vitest": "^5.1.1"
     }
 }

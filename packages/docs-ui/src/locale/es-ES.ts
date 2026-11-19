@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Configuración de sección',
             },
             paragraphSetting: {
+                wordWrap: 'Permitir ajuste de línea con división de palabra en el texto latino',
                 alignment: 'Alineación',
                 indentation: 'Sangría',
                 left: 'Izquierda',

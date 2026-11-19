@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem, getNumfmtParseValueFilter } from '@univerjs/core';
 import Decimal from 'decimal.js';
 
 // Decimal.cos has a bug when calculating PI/2
@@ -22,24 +23,145 @@ Decimal.prototype.cos = function (): Decimal {
     return new Decimal(Math.cos(num));
 };
 
+/**
+ * Finds the sign that separates the real and imaginary parts. A sign at the
+ * start of the string or right after the exponent marker of a number such as
+ * `1e-7` belongs to that number, so it is skipped. Excel splits the text at
+ * the first remaining sign, which keeps every later sign inside the imaginary
+ * part, e.g. `1+2-3i` reads its imaginary part as `2-3`.
+ */
+function findSeparatorIndex(inumberStr: string): number {
+    for (let i = 1; i < inumberStr.length; i++) {
+        const char = inumberStr[i];
+
+        if ((char === '+' || char === '-') && inumberStr[i - 1] !== 'e' && inumberStr[i - 1] !== 'E') {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * Matches the parts that are already plain numbers, so the common case skips
+ * the full text to number conversion.
+ */
+const DECIMAL_PART_REG = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+/**
+ * Reads one part of a complex number with the same text to number conversion
+ * Excel applies to cell text, so a part may also be a percentage such as `50%`
+ * or a date such as `2-3`, which is February 3 of the current year. The date
+ * serial follows the workbook date system, as it does for cell text.
+ */
+function parseComplexPart(part: string, dateSystem: DateSystem): number | null {
+    const value = part.trim();
+
+    if (value === '') {
+        return null;
+    }
+
+    if (DECIMAL_PART_REG.test(value)) {
+        const number = Number(value);
+
+        return Number.isFinite(number) ? number : null;
+    }
+
+    const parsed = getNumfmtParseValueFilter(value, { dateSystem });
+
+    if (!parsed || typeof parsed.v !== 'number' || !Number.isFinite(parsed.v)) {
+        return null;
+    }
+
+    return parsed.v;
+}
+
+/**
+ * Reads the coefficient of the imaginary unit. Excel accepts an empty
+ * coefficient and a bare sign, e.g. `i`, `1+i` and `-i`.
+ */
+function parseImaginaryCoefficient(part: string, dateSystem: DateSystem): number | null {
+    const value = part.trim();
+
+    if (value === '' || value === '+') {
+        return 1;
+    }
+
+    if (value === '-') {
+        return -1;
+    }
+
+    return parseComplexPart(value, dateSystem);
+}
+
+/**
+ * Excel prints the parts of a complex number with at most 15 significant
+ * digits and keeps plain decimal notation while the text fits in 21
+ * characters, e.g. `0.0000001` and `100000000000000000000`. Longer values fall
+ * back to scientific notation such as `1.23456789012345E-06`.
+ *
+ * The whole conversion stays inside Decimal so the rounded value is never
+ * turned into a double and formatted again, which can round a second time.
+ */
+const MAX_FIXED_LENGTH = 21;
+
+function formatComplexNumber(value: Decimal): string {
+    if (!value.isFinite()) {
+        return value.toString();
+    }
+
+    if (value.isZero()) {
+        return '0';
+    }
+
+    const sign = value.isNegative() ? '-' : '';
+    const abs = value.abs().toSignificantDigits(15, Decimal.ROUND_HALF_UP);
+    const fixed = abs.toFixed();
+
+    if (fixed.length <= MAX_FIXED_LENGTH) {
+        return `${sign}${fixed}`;
+    }
+
+    const [mantissa, exponent] = abs.toExponential().split('e');
+    const power = Number(exponent);
+    const exponentText = `${power < 0 ? '-' : '+'}${Math.abs(power).toString().padStart(2, '0')}`;
+
+    return `${sign}${mantissa}E${exponentText}`;
+}
+
+/**
+ * Formats the imaginary part. Excel omits the coefficient of the unit, so `1`
+ * and `-1` render as `i` and `-i`.
+ */
+function formatImaginaryNumber(iValue: Decimal, suffix: string): string {
+    if (iValue.eq(1)) {
+        return suffix;
+    }
+
+    if (iValue.eq(-1)) {
+        return `-${suffix}`;
+    }
+
+    return `${formatComplexNumber(iValue)}${suffix}`;
+}
+
 export class Complex {
     static getComplex(realNum: number, iNum: number, suffix: string): number | string {
-        const _realNum = new Decimal(realNum).toSignificantDigits(15).toNumber();
-        const _iNum = new Decimal(iNum).toSignificantDigits(15).toNumber();
+        const realValue = new Decimal(realNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
+        const iValue = new Decimal(iNum).toSignificantDigits(15, Decimal.ROUND_HALF_UP);
         const _suffix = suffix === '' ? 'i' : suffix;
 
         let result: number | string;
 
-        if (_realNum === 0 && _iNum === 0) {
+        if (realValue.isZero() && iValue.isZero()) {
             result = 0;
-        } else if (_realNum === 0) {
-            result = _iNum === 1 ? _suffix : `${_iNum}${_suffix}`;
-        } else if (_iNum === 0) {
-            result = _realNum;
+        } else if (realValue.isZero()) {
+            result = formatImaginaryNumber(iValue, _suffix);
+        } else if (iValue.isZero()) {
+            result = realValue.toNumber();
         } else {
-            const sign = _iNum > 0 ? '+' : '';
-            const suffixStr = _iNum === 1 ? _suffix : `${_iNum}${_suffix}`;
-            result = `${_realNum}${sign}${suffixStr}`;
+            const sign = iValue.gt(0) ? '+' : '';
+            result = `${formatComplexNumber(realValue)}${sign}${formatImaginaryNumber(iValue, _suffix)}`;
         }
 
         return result;
@@ -61,156 +183,66 @@ export class Complex {
 
     private _isError: boolean = false;
 
-    constructor(inumber: number | string) {
-        if (`${inumber}`.trim() === '') {
+    private _dateSystem: DateSystem = DateSystem.Date1900;
+
+    constructor(inumber: number | string, dateSystem: DateSystem = DateSystem.Date1900) {
+        this._inumber = inumber;
+        this._dateSystem = dateSystem;
+        this._parseInumber();
+    }
+
+    /**
+     * Reads the text into its real and imaginary parts. Excel converts every
+     * part with the same text to number conversion it applies to cell values,
+     * so `1+2-3i` keeps `2-3` as its imaginary part, and any part that cannot
+     * be read makes the whole number invalid.
+     */
+    private _parseInumber(): void {
+        const inumberStr = `${this._inumber}`.trim();
+
+        if (inumberStr === '') {
             this._isError = true;
             return;
         }
 
-        this._inumber = inumber;
-        this._getImReal();
-        this._getImAginary();
-        this._getImSuffix();
-    }
-
-    private _getImReal(): void {
-        if (this._inumber === 0 || this._inumber === '0') {
-            this._realNum = 0;
-            return;
-        }
-
-        const inumberStr = `${this._inumber}`;
-
-        if (['i', '+i', '1i', '+1i', '-i', '-1i', 'j', '+j', '1j', '+1j', '-j', '-1j'].indexOf(inumberStr) >= 0) {
-            this._realNum = 0;
-            return;
-        }
-
-        let plus = inumberStr.indexOf('+');
-        let minus = inumberStr.indexOf('-');
-
-        if (plus === 0) {
-            plus = inumberStr.indexOf('+', 1);
-        }
-
-        if (minus === 0) {
-            minus = inumberStr.indexOf('-', 1);
-        }
-
-        const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
+        const last = inumberStr.substring(inumberStr.length - 1);
         const unit = last === 'i' || last === 'j';
+        const body = unit ? inumberStr.substring(0, inumberStr.length - 1) : inumberStr;
+        const separatorIndex = findSeparatorIndex(body);
 
-        if (plus >= 0 || minus >= 0) {
-            if (!unit) {
-                this._isError = true;
-                return;
-            }
-
-            if (plus >= 0) {
-                if (Number.isNaN(+inumberStr.substring(0, plus)) || Number.isNaN(+inumberStr.substring(plus + 1, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._realNum = +inumberStr.substring(0, plus);
-                }
-            } else {
-                if (Number.isNaN(+inumberStr.substring(0, minus)) || Number.isNaN(+inumberStr.substring(minus + 1, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._realNum = +inumberStr.substring(0, minus);
-                }
-            }
-        } else {
-            if (unit) {
-                if (Number.isNaN(+inumberStr.substring(0, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._realNum = 0;
-                }
-            } else {
-                if (Number.isNaN(+inumberStr)) {
-                    this._isError = true;
-                } else {
-                    this._realNum = +inumberStr;
-                }
-            }
-        }
-    }
-
-    private _getImAginary(): void {
-        if (this._isError) {
+        if (!unit && separatorIndex >= 0) {
+            // A separator without an imaginary unit is not a complex number,
+            // e.g. `1+2-3`.
+            this._isError = true;
             return;
         }
 
-        if (this._inumber === 0 || this._inumber === '0') {
-            this._iNum = 0;
+        let realText = body;
+        let iText: string | null = null;
+
+        if (unit) {
+            realText = '';
+
+            if (separatorIndex >= 0) {
+                realText = body.substring(0, separatorIndex);
+                iText = body.substring(separatorIndex + 1);
+            } else {
+                iText = body;
+            }
+        }
+
+        const realNum = realText === '' ? 0 : parseComplexPart(realText, this._dateSystem);
+        const iNum = iText === null ? 0 : parseImaginaryCoefficient(iText, this._dateSystem);
+        const iSign = separatorIndex >= 0 && body[separatorIndex] === '-' ? -1 : 1;
+
+        if (realNum === null || iNum === null) {
+            this._isError = true;
             return;
         }
 
-        let inumberStr = `${this._inumber}`;
-
-        if (['i', 'j'].indexOf(inumberStr) >= 0) {
-            this._iNum = 1;
-            return;
-        }
-
-        inumberStr = inumberStr.replace('+i', '+1i').replace('-i', '-1i').replace('+j', '+1j').replace('-j', '-1j');
-
-        let plus = inumberStr.indexOf('+');
-        let minus = inumberStr.indexOf('-');
-
-        if (plus === 0) {
-            plus = inumberStr.indexOf('+', 1);
-        }
-
-        if (minus === 0) {
-            minus = inumberStr.indexOf('-', 1);
-        }
-
-        const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
-        const unit = last === 'i' || last === 'j';
-
-        if (plus >= 0 || minus >= 0) {
-            if (!unit) {
-                this._isError = true;
-                return;
-            }
-
-            if (plus >= 0) {
-                if (Number.isNaN(+inumberStr.substring(0, plus)) || Number.isNaN(+inumberStr.substring(plus + 1, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._iNum = +inumberStr.substring(plus + 1, inumberStr.length - 1);
-                }
-            } else {
-                if (Number.isNaN(+inumberStr.substring(0, minus)) || Number.isNaN(+inumberStr.substring(minus + 1, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._iNum = -(+inumberStr.substring(minus + 1, inumberStr.length - 1));
-                }
-            }
-        } else {
-            if (unit) {
-                if (Number.isNaN(+inumberStr.substring(0, inumberStr.length - 1))) {
-                    this._isError = true;
-                } else {
-                    this._iNum = +inumberStr.substring(0, inumberStr.length - 1);
-                }
-            } else {
-                if (Number.isNaN(+inumberStr)) {
-                    this._isError = true;
-                } else {
-                    this._iNum = 0;
-                }
-            }
-        }
-    }
-
-    private _getImSuffix(): void {
-        const inumberStr = `${this._inumber}`;
-
-        const suffix = inumberStr.substring(inumberStr.length - 1);
-
-        this._suffix = suffix === 'i' || suffix === 'j' ? suffix : '';
+        this._realNum = realNum;
+        this._iNum = iSign * iNum;
+        this._suffix = unit ? last : '';
     }
 
     getRealNum(): number {
@@ -389,9 +421,11 @@ export class Complex {
     }
 
     Ln(): number | string {
-        const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
-        const realNum = Decimal.ln(abs).toNumber();
-        const iNum = Decimal.acos(new Decimal(this._realNum).div(abs)).toNumber();
+        // Keep the real part and the argument in double precision so the
+        // result matches Excel, including ln|z| when |z| is close to 1.
+        // atan2 also carries the sign of the imaginary part.
+        const realNum = Math.log(Math.hypot(this._realNum, this._iNum));
+        const iNum = Math.atan2(this._iNum, this._realNum);
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }

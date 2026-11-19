@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
     CellValueType,
     ContextService,
@@ -28,14 +27,15 @@ import {
     ObjectMatrix,
     UniverInstanceService,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { ErrorType } from '../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createNewArray } from '../../engine/utils/array-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../engine/value-object/primitive-object';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
+import { FormulaCacheService } from '../formula-cache.service';
 import { HyperlinkEngineFormulaService, IHyperlinkEngineFormulaService } from '../hyperlink-engine-formula.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, IFormulaRuntimeService } from '../runtime.service';
 import { ISheetRowFilteredService, SheetRowFilteredService } from '../sheet-row-filtered.service';
@@ -53,6 +53,7 @@ function createRuntimeService() {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([LocaleService]);
+    injector.add([FormulaCacheService]);
     injector.add([LexerTreeBuilder]);
     injector.add([FormulaDataModel]);
     injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
@@ -96,6 +97,88 @@ function createRuntimeService() {
 }
 
 describe('FormulaRuntimeService', () => {
+    it('replaces authoritative circular diagnostics without reading formula input and preserves stopped state', () => {
+        const { injector, runtime } = createRuntimeService();
+        const config = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;
+        const previous = { unitId: 'unit', sheetId: 'sheet', row: 2, column: 3, groupId: 'old', iterations: 1 };
+        const current = { ...previous, row: 4, groupId: 'native', iterations: 5, converged: true };
+        runtime.recordCircularReferences([previous]);
+        runtime.completeCircularReferences();
+        const getter = vi.spyOn(config, 'getFormulaData');
+        try {
+            runtime.beginCircularReferences(true);
+            runtime.recordCircularReferences([current]);
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences).toEqual([current]);
+            current.iterations = 99;
+            expect(runtime.getRuntimeState().circularReferences?.[0].iterations).toBe(5);
+
+            runtime.beginCircularReferences(true);
+            runtime.recordCircularReferences([previous]);
+            runtime.stopExecution();
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences?.[0].groupId).toBe('native');
+
+            runtime.reset();
+            runtime.beginCircularReferences(true);
+            runtime.completeCircularReferences();
+            expect(runtime.getRuntimeState().circularReferences).toEqual([]);
+            expect(getter).not.toHaveBeenCalled();
+        } finally {
+            getter.mockRestore();
+            injector.dispose();
+        }
+    });
+
+    it('preserves legacy empty-circle reads while deferring unused snapshots and filtering deleted formulas', () => {
+        const { injector, runtime } = createRuntimeService();
+        const config = injector.get(IFormulaCurrentConfigService) as FormulaCurrentConfigService;
+        const formulaData = { unit: { sheet: { 2: { 3: { f: '=D3' } } } } };
+        const materialize = vi.fn(() => formulaData);
+        const getter = vi.spyOn(config, 'getFormulaData');
+        const current = { unitId: 'unit', sheetId: 'sheet', row: 2, column: 3, groupId: 'cycle', iterations: 1 };
+        const deleted = { ...current, row: 4, column: 5 };
+        try {
+            runtime.beginCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            getter.mockClear();
+            config.loadWithFormulaDataSnapshot({
+                allUnitData: config.getUnitData(),
+                unitStylesData: config.getUnitStylesData(),
+                unitSheetNameMap: config.getSheetNameMap(),
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            }, { materialize });
+            runtime.beginCircularReferences();
+            expect(getter).not.toHaveBeenCalled();
+            expect(materialize).not.toHaveBeenCalled();
+            runtime.recordCircularReferences([current, deleted]);
+            runtime.completeCircularReferences();
+            runtime.beginCircularReferences();
+            runtime.completeCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            expect(materialize).toHaveBeenCalledTimes(1);
+            expect(runtime.getRuntimeState().circularReferences).toEqual([current]);
+            runtime.beginCircularReferences();
+            runtime.clearCircularReferenceCells([{ unitId: 'unit', subUnitId: 'sheet', row: 2, column: 3 }]);
+            runtime.completeCircularReferences();
+            getter.mockClear();
+            runtime.beginCircularReferences();
+            expect(getter).toHaveBeenCalledTimes(1);
+            expect(materialize).toHaveBeenCalledTimes(1);
+            expect(runtime.getRuntimeState().circularReferences).toEqual([]);
+        } finally {
+            getter.mockRestore();
+            injector.dispose();
+        }
+    });
+
     it('keeps the scalar result source from before an asynchronous formula replacement and clears it on reset', () => {
         const { injector, runtime, unitDataMatrix } = createRuntimeService();
         try {
@@ -131,19 +214,19 @@ describe('FormulaRuntimeService', () => {
 
     it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
         const { injector, runtime } = createRuntimeService();
-        CELL_INVERTED_INDEX_CACHE.clear();
+        const index = runtime.getCalculationCache()!.invertedIndex;
         try {
             runtime.setCurrent(2, 3, 20, 20, 'sheet', 'unit');
             runtime.setRuntimeData(NumberValueObject.create(7));
-            CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
+            index.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
             runtime.setRuntimeData(NullValueObject.create());
             expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBeNull();
-            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
+            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
             runtime.setCurrent(4, 3, 20, 20, 'sheet', 'unit');
             runtime.setRuntimeData(createNewArray([[NullValueObject.create()], [NumberValueObject.create(1)]], 2, 1));
-            expect(CELL_INVERTED_INDEX_CACHE.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
+            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
         } finally {
-            CELL_INVERTED_INDEX_CACHE.clear();
+            index.clear();
             injector.dispose();
         }
     });

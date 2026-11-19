@@ -17,7 +17,6 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IValueOption } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
     ICommandService,
@@ -31,10 +30,15 @@ import {
     AutofillDoubleIcon,
     ChartIcon,
     MoreDownIcon,
-    TextWrapShapeIcon,
+    WrapBehindTextIcon,
+    WrapInFrontOfTextIcon,
+    WrapInlineIcon,
+    WrapSquareIcon,
+    WrapTopBottomIcon,
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -52,6 +56,7 @@ export interface IImagePopupMenuItem {
 
 export interface IImagePopupMenuExtraProps {
     menuItems: IImagePopupMenuItem[];
+    icon?: string;
     variant?: 'doc-floating-toolbar' | 'doc-chart-floating-toolbar';
     unitId?: string;
     subUnitId?: string;
@@ -70,10 +75,13 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const iconManager = useDependency(IconManager);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
-    if (!menuItems) return null;
+    if (!menuItems) {
+        return null;
+    }
 
     if (
         popup.extraProps?.variant === 'doc-floating-toolbar' &&
@@ -113,6 +121,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     };
 
     const showMore = visible || isHovered;
+    const Icon = popup.extraProps?.icon ? iconManager.get(popup.extraProps.icon) : AutofillDoubleIcon;
 
     return (
         <div
@@ -121,12 +130,21 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
         >
             <DropdownMenu
                 align="start"
-                items={menuItems.map((item) => ({
-                    type: 'item',
-                    children: localeService.t(item.label as LocaleKey),
-                    disabled: item.disable,
-                    onSelect: () => handleClick(item),
-                }))}
+                items={menuItems.map((item) => {
+                    const { icon } = item;
+                    const Icon = icon && iconManager.has(icon) ? iconManager.get(icon) : null;
+                    return {
+                        type: 'item',
+                        children: (
+                            <>
+                                {Icon && <Icon className="univer-size-4" />}
+                                {localeService.t(item.label as LocaleKey)}
+                            </>
+                        ),
+                        disabled: item.disable,
+                        onSelect: () => handleClick(item),
+                    };
+                })}
                 open={visible}
                 onOpenChange={onVisibleChange}
             >
@@ -140,7 +158,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                         'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                     })}
                 >
-                    <AutofillDoubleIcon
+                    <Icon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
                           dark:!univer-text-gray-0
@@ -216,7 +234,7 @@ function ToolbarButton(props: {
 
     return (
         <Tooltip
-            className="univer-fill-mode-backwards univer-delay-100"
+            className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
             title={props.title}
             placement="bottom"
             visible={tooltipVisible}
@@ -302,7 +320,7 @@ function ToolbarDropdownButton<T extends string | number>(props: {
         >
             <span>
                 <Tooltip
-                    className="univer-fill-mode-backwards univer-delay-100"
+                    className="univer-fill-mode-backwards univer-pointer-events-none univer-delay-100"
                     title={props.title}
                     placement="bottom"
                     visible={tooltipVisible && !open}
@@ -345,27 +363,27 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline'),
             value: TextWrappingStyle.INLINE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInlineIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.square'),
             value: TextWrappingStyle.WRAP_SQUARE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapSquareIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.topAndBottom'),
             value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapTopBottomIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.behindText'),
             value: TextWrappingStyle.BEHIND_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapBehindTextIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inFrontText'),
             value: TextWrappingStyle.IN_FRONT_OF_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInFrontOfTextIcon />,
         },
     ];
 
@@ -449,7 +467,8 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
         .filter((item) => item.type !== 'select' && item.icon)
         .sort((a, b) => a.index - b.index);
     const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => {
-        const Icon = option.icon ? iconManager.get(option.icon) : ChartIcon;
+        const { icon } = option;
+        const Icon = icon ? iconManager.get(icon) : ChartIcon;
 
         return {
             label: String(option.label),

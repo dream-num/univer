@@ -16,8 +16,6 @@
 
 import type { ICommandInfo, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IDirtyUnitSuperTableMap, IExecutionInProgressParams, IFormulaDirtyData, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
-import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
     ICommandService,
@@ -40,6 +38,8 @@ import {
     SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import { BehaviorSubject } from 'rxjs';
+import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
+import type { LocaleKey } from '../locale/types';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '../config/config';
 
 /**
@@ -170,15 +170,19 @@ export class TriggerCalculationController extends Disposable {
         );
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initialExecuteFormulaProcessListener() {
-        // Assignment operation after formula calculation.
         let startDependencyTimer: NodeJS.Timeout | null = null;
-        let calculationProcessCount = 0; // Multiple calculations are performed in parallel, but only one progress bar is displayed, and the progress is only closed after the last calculation is completed.
+        // Concurrent calculations share one progress bar until the last calculation finishes.
+        let calculationProcessCount = 0;
+
+        this.disposeWithMe(() => {
+            if (startDependencyTimer !== null) {
+                clearTimeout(startDependencyTimer);
+                startDependencyTimer = null;
+            }
+        });
 
         this.disposeWithMe(
-
-            // eslint-disable-next-line max-lines-per-function, complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this.clearProgress();
@@ -194,9 +198,7 @@ export class TriggerCalculationController extends Disposable {
                 }
 
                 if (params.stageInfo != null) {
-                    const {
-                        stage,
-                    } = params.stageInfo;
+                    const { stage } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START) {
                         // When calculations are started multiple times in succession, only the first time is recognized
@@ -204,10 +206,8 @@ export class TriggerCalculationController extends Disposable {
                             this._startExecutionTime = performance.now();
                         }
 
-                        // Increment the calculation process count and assign a new ID
                         calculationProcessCount++;
 
-                        // Clear any existing timer to prevent duplicate executions
                         if (startDependencyTimer !== null) {
                             clearTimeout(startDependencyTimer);
                             startDependencyTimer = null;
@@ -218,55 +218,13 @@ export class TriggerCalculationController extends Disposable {
                             startDependencyTimer = null;
                             this._startProgress();
                         }, 1000);
-                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
-                        this._executionInProgressParams = params.stageInfo;
-
-                        if (startDependencyTimer === null) {
-                            const calculating = this._localeService.t<LocaleKey>('sheets-formula.progress.calculating');
-                            this._calculateProgress(calculating);
-                        }
-                    } else if (stage === FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA) {
-                        this._executionInProgressParams = params.stageInfo;
-
-                        if (startDependencyTimer === null) {
-                            const arrayAnalysis = this._localeService.t<LocaleKey>('sheets-formula.progress.array-analysis');
-                            this._calculateProgress(arrayAnalysis);
-                        }
-                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
-                        this._executionInProgressParams = params.stageInfo;
-
-                        if (startDependencyTimer === null) {
-                            const arrayCalculation = this._localeService.t<LocaleKey>('sheets-formula.progress.array-calculation');
-                            this._calculateProgress(arrayCalculation);
-                        }
+                    } else {
+                        this._updateCalculationProgress(params.stageInfo, startDependencyTimer === null);
                     }
                 } else {
                     const state = params.functionsExecutedState;
-                    let result = '';
-
-                    // Decrement the calculation process count
-                    calculationProcessCount--;
-
-                    switch (state) {
-                        case FormulaExecutedStateType.NOT_EXECUTED:
-                            result = 'No tasks are being executed anymore';
-                            break;
-                        case FormulaExecutedStateType.STOP_EXECUTION:
-                            result = 'The execution of the formula has been stopped';
-                            calculationProcessCount = 0;
-                            break;
-                        case FormulaExecutedStateType.SUCCESS:
-                            result = 'Formula calculation succeeded';
-
-                            // When the calculation is stopped and then a successful calculation is triggered, the value is -1
-                            if (calculationProcessCount === 0 || calculationProcessCount === -1) {
-                                result += `. Total time consumed: ${performance.now() - this._startExecutionTime} ms`;
-                            }
-                            break;
-                        case FormulaExecutedStateType.INITIAL:
-                            result = 'Waiting for calculation';
-                            break;
-                    }
+                    calculationProcessCount = state === FormulaExecutedStateType.STOP_EXECUTION ? 0 : calculationProcessCount - 1;
+                    const result = this._getCalculationResultMessage(state, calculationProcessCount);
 
                     // When the calculation is stopped and then a successful calculation is triggered, the value is -1
                     if (calculationProcessCount === 0 || calculationProcessCount === -1) {
@@ -291,6 +249,47 @@ export class TriggerCalculationController extends Disposable {
                 }
             })
         );
+    }
+
+    private _updateCalculationProgress(stageInfo: IExecutionInProgressParams, showProgress: boolean): void {
+        let label: LocaleKey;
+        switch (stageInfo.stage) {
+            case FormulaExecuteStageType.CURRENTLY_CALCULATING:
+                label = 'sheets-formula.progress.calculating';
+                break;
+            case FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA:
+                label = 'sheets-formula.progress.array-analysis';
+                break;
+            case FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA:
+                label = 'sheets-formula.progress.array-calculation';
+                break;
+            default:
+                return;
+        }
+
+        this._executionInProgressParams = stageInfo;
+        if (showProgress) {
+            this._calculateProgress(this._localeService.t<LocaleKey>(label));
+        }
+    }
+
+    private _getCalculationResultMessage(state: FormulaExecutedStateType | undefined, calculationProcessCount: number): string {
+        switch (state) {
+            case FormulaExecutedStateType.NOT_EXECUTED:
+                return 'No tasks are being executed anymore';
+            case FormulaExecutedStateType.STOP_EXECUTION:
+                return 'The execution of the formula has been stopped';
+            case FormulaExecutedStateType.SUCCESS:
+                // A success notification after stopping a calculation can leave the count at -1.
+                if (calculationProcessCount === 0 || calculationProcessCount === -1) {
+                    return `Formula calculation succeeded. Total time consumed: ${performance.now() - this._startExecutionTime} ms`;
+                }
+                return 'Formula calculation succeeded';
+            case FormulaExecutedStateType.INITIAL:
+                return 'Waiting for calculation';
+            default:
+                return '';
+        }
     }
 
     private _initialExecuteFormula() {

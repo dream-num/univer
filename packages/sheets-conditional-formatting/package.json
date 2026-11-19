@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting",
-    "version": "1.2.0",
+    "version": "1.5.2",
     "private": false,
     "description": "Conditional formatting model, commands, and calculation support for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -76,9 +76,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -88,14 +88,14 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons-svg": "1.48.1",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/icons-svg": "^1.46.0",
         "@univerjs/sheets-formula": "workspace:*",
         "rxjs": "7.8.2",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.4"
+        "tsrs": "7.1.0-beta.tsrs2",
+        "vitest": "^5.1.1"
     }
 }

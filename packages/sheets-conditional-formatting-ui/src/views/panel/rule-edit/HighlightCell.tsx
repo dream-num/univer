@@ -421,7 +421,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
                     value={subType}
                     options={typeOptions}
                 />
-                {operatorOptions?.length && (
+                {!!operatorOptions?.length && (
                     <SelectComponent
                         className="univer-mt-3 univer-w-full"
                         onChange={onOperatorChange}

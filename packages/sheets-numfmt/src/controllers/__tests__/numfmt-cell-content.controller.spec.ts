@@ -28,12 +28,14 @@ import {
     IUniverInstanceService,
     LocaleType,
     LogLevel,
+    ObjectMatrix,
     Plugin,
     ThemeService,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    InterceptCellContentPriority,
     INTERCEPTOR_POINT,
     INumfmtService,
     NumfmtService,
@@ -41,7 +43,7 @@ import {
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetsNumfmtCellContentController } from '../numfmt-cell-content.controller';
 
@@ -82,6 +84,8 @@ function createWorkbookData(
                         2: { v: -12.3, t: CellValueType.NUMBER },
                         3: { v: '20%', t: CellValueType.STRING, s: 'textStyle' },
                         4: { v: 0, t: CellValueType.NUMBER },
+                        5: { v: 0.009999999999999787, t: CellValueType.NUMBER, s: 'textStyle' },
+                        6: { v: 12.345, t: CellValueType.NUMBER, s: { n: null } },
                     },
                 },
             },
@@ -182,6 +186,77 @@ describe('SheetsNumfmtCellContentController', () => {
         univer.dispose();
     });
 
+    it('formats runtime table number formats without persisting cell styles and respects direct formats', () => {
+        get(SheetsNumfmtCellContentController);
+        get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            priority: InterceptCellContentPriority.TABLE_STYLE,
+            effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
+            handler: (cell, location, next) => {
+                return next({ ...cell, themeStyle: { n: { pattern: '0.000' } } });
+            },
+        });
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.500');
+        expect(get(SheetInterceptorService).fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, InterceptorEffectEnum.Value)(
+            worksheet.getCellRaw(1, 1),
+            { rawData: worksheet.getCellRaw(1, 1), workbook, worksheet, unitId: 'test', subUnitId: 'sheet1', row: 1, col: 1 }
+        )?.v).toBe('1234.500');
+        expect(worksheet.getCellRaw(1, 1)).toEqual({ v: '1234.5', t: CellValueType.STRING });
+        expect(getInterceptedCell(worksheet, workbook, 1, 6, get)?.v).toBe(12.345);
+        expect(worksheet.getCellRaw(1, 6)?.s).toEqual({ n: null });
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.0', ranges: [cellToRange(1, 1)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.5');
+        expect(getInterceptedCell(worksheet, workbook, 1, 0, get)?.v).toBe('123');
+    });
+
+    it('keeps legacy number-format lookup when no table dxf is present', () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.5');
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.00', ranges: [cellToRange(1, 1), cellToRange(1, 6)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)?.v).toBe('1234.50');
+        expect(getInterceptedCell(worksheet, workbook, 1, 6, get)?.v).toBe('12.35');
+        expect(workbook.getStyles().getStyleByCell(worksheet.getCellRaw(1, 6))?.n?.pattern).toBe('0.00');
+    });
+
+    it('does not scan changed cells when the number-format render cache is empty', async () => {
+        get(SheetsNumfmtCellContentController);
+        const forValue = vi.spyOn(ObjectMatrix.prototype, 'forValue');
+        try {
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 1: { v: 42, t: CellValueType.NUMBER } } },
+            }, { onlyLocal: true, fromFormula: true });
+
+            expect(workbook.getSheetBySheetId('sheet1')?.getCellRaw(1, 1)?.v).toBe(42);
+            // The worksheet mutation still scans its payload; empty-cache invalidation adds no scan.
+            expect(forValue).toHaveBeenCalledTimes(1);
+        } finally {
+            forValue.mockRestore();
+        }
+    });
+
+    it('still invalidates populated render-cache entries during ordinary value edits', async () => {
+        get(SheetsNumfmtCellContentController);
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '0.00', ranges: [cellToRange(1, 1)] }]);
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '1234.50' });
+
+        const forValue = vi.spyOn(ObjectMatrix.prototype, 'forValue');
+        try {
+            await commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                cellValue: { 1: { 1: { v: 42, t: CellValueType.NUMBER } } },
+            });
+            expect(forValue).toHaveBeenCalledTimes(2);
+            expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({ v: '42.00' });
+        } finally {
+            forValue.mockRestore();
+        }
+    });
+
     it('skips unsupported cells and handles text format markers', () => {
         get(SheetsNumfmtCellContentController);
         const worksheet = workbook.getSheetBySheetId('sheet1')!;
@@ -214,6 +289,18 @@ describe('SheetsNumfmtCellContentController', () => {
             },
         });
 
+        expect(getInterceptedCell(worksheet, workbook, 1, 5, get)).toEqual({
+            v: 0.01,
+            t: CellValueType.NUMBER,
+            s: 'textStyle',
+            markers: {
+                tl: {
+                    size: 6,
+                    color: '#409f11',
+                },
+            },
+        });
+
         get(IConfigService).setConfig(SHEETS_NUMFMT_PLUGIN_CONFIG_KEY, { disableTextFormatMark: true });
 
         expect(getInterceptedCell(worksheet, workbook, 1, 0, get)).toEqual({
@@ -224,6 +311,11 @@ describe('SheetsNumfmtCellContentController', () => {
         expect(getInterceptedCell(worksheet, workbook, 1, 3, get)).toEqual({
             v: '20%',
             t: CellValueType.STRING,
+            s: 'textStyle',
+        });
+        expect(getInterceptedCell(worksheet, workbook, 1, 5, get)).toEqual({
+            v: 0.01,
+            t: CellValueType.NUMBER,
             s: 'textStyle',
         });
     });

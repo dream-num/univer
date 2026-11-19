@@ -29,9 +29,13 @@ describe('SuperTableService', () => {
     });
 
     it('registers workbook tables case-insensitively for structured references', () => {
-        const table = { name: 'SalesTable' };
+        const table = {
+            sheetId: 'sheet-1',
+            titleMap: new Map([['Amount', 0]]),
+            range: { startRow: 0, endRow: 10, startColumn: 0, endColumn: 0 },
+        };
 
-        service.registerTable('book-1', 'SalesTable', table as never);
+        service.registerTable('book-1', 'SalesTable', table);
 
         expect(service.hasTable('book-1', 'salestable')).toBe(true);
         expect(service.getTable('book-1', 'SalesTable')).toBe(table);
@@ -41,7 +45,11 @@ describe('SuperTableService', () => {
         const changes: unknown[] = [];
         service.update$.subscribe((change) => changes.push(change));
 
-        service.registerTable('book-1', 'SalesTable', { name: 'SalesTable' } as never);
+        service.registerTable('book-1', 'SalesTable', {
+            sheetId: 'sheet-1',
+            titleMap: { Amount: 0 },
+            range: { startRow: 0, endRow: 10, startColumn: 0, endColumn: 0 },
+        });
         service.remove('book-1', 'SalesTable');
 
         expect(changes).toEqual([null, null]);

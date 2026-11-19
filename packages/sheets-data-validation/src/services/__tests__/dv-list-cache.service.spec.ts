@@ -14,41 +14,70 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
-import type { DataValidationModel } from '@univerjs/data-validation';
-import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import type { ISheetDataValidationRule } from '@univerjs/core';
+import { DataValidationType, ICommandService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
+import {
+    ActiveDirtyManagerService,
+    IActiveDirtyManagerService,
+    OtherFormulaMarkDirty,
+    RegisterOtherFormulaService,
+    RemoveOtherFormulaMutation,
+    SetFormulaCalculationResultMutation,
+    SetOtherFormulaMutation,
+} from '@univerjs/engine-formula';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DataValidationCacheService } from '../dv-cache.service';
 import { DataValidationFormulaService } from '../dv-formula.service';
 import { DataValidationListCacheService } from '../dv-list-cache.service';
 
+let univer: Univer;
+beforeEach(() => {
+    univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([DataValidationModel]);
+    injector.add([DataValidatorRegistryService]);
+    injector.add([DataValidationCacheService]);
+    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+    injector.add([RegisterOtherFormulaService]);
+    injector.add([DataValidationFormulaService]);
+    injector.add([DataValidationListCacheService]);
+    const commands = injector.get(ICommandService);
+    for (const command of [SetOtherFormulaMutation, RemoveOtherFormulaMutation, OtherFormulaMarkDirty, SetFormulaCalculationResultMutation]) {
+        commands.registerCommand(command);
+    }
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheets: { 'sheet-1': { id: 'sheet-1', name: 'Sheet1', rowCount: 10, columnCount: 10 } },
+        sheetOrder: ['sheet-1'],
+    });
+});
+afterEach(() => univer.dispose());
+
+const rule: ISheetDataValidationRule = {
+    uid: 'rule-1',
+    type: DataValidationType.LIST,
+    formula1: '=A1:A2',
+    formula2: '#f00,#0f0,#00f',
+    ranges: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }],
+};
+
 describe('DataValidationListCacheService', () => {
-    it('computes, caches, invalidates, and clears list items', () => {
-        const ruleChange$ = new Subject<any>();
-        const formulaService = {
-            getRuleFormulaResultSync: vi.fn(() => [
-                { result: [[[[{ v: 'A' }, { v: 'B' }, { v: '#VALUE!' }, { v: 1, s: { n: { pattern: '0.00' } } }]]]] },
-            ]),
-        };
-        const injector = {
-            get(token: unknown) {
-                if (token === DataValidationFormulaService) {
-                    return formulaService;
-                }
-
-                throw new Error(`Unknown token: ${String(token)}`);
-            },
-        } as unknown as Injector;
-        const dataValidationModel = {
-            ruleChange$,
-        } as unknown as DataValidationModel;
-
-        const service = new DataValidationListCacheService(injector, dataValidationModel);
-        const rule = {
-            uid: 'rule-1',
-            formula1: '=A1',
-            formula2: '#f00,#0f0,#00f',
-        } as any;
-
+    it('computes and caches formatted formula lists and invalidates removed rules', async () => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DataValidationListCacheService);
+        const formulas = injector.get(DataValidationFormulaService);
+        injector.get(DataValidationModel).addRule('unit-1', 'sheet-1', rule, 'command');
+        formulas.addRule('unit-1', 'sheet-1', rule);
+        const formulaId = formulas.getRuleFormulaInfo('unit-1', 'sheet-1', rule.uid)![0]!.id;
+        await injector.get(ICommandService).executeCommand(SetFormulaCalculationResultMutation.id, {
+            unitOtherData: { 'unit-1': { 'sheet-1': { [formulaId]: { 0: { 0: [[
+                { v: 'A' },
+                { v: 'B' },
+                { v: '#VALUE!' },
+                { v: 1, s: { n: { pattern: '0.00' } } },
+            ]] } } } } },
+        });
         const first = service.getOrCompute('unit-1', 'sheet-1', rule);
         expect(first.list).toEqual(['A', 'B', '1.00']);
         expect(first.listWithColor).toEqual([
@@ -58,41 +87,34 @@ describe('DataValidationListCacheService', () => {
         ]);
         expect(first.colorMap).toEqual({ A: '#f00', B: '#0f0', '1.00': '#00f' });
         expect(first.set.has('A')).toBe(true);
-
         expect(service.getOrCompute('unit-1', 'sheet-1', rule)).toBe(first);
-        expect(formulaService.getRuleFormulaResultSync).toHaveBeenCalledTimes(1);
-
-        service.markRuleDirty('unit-1', 'sheet-1', 'rule-1');
-        expect(service.getCache('unit-1', 'sheet-1', 'rule-1')).toBeUndefined();
-
-        service.setCache('unit-1', 'sheet-1', 'rule-2', first);
-        expect(service.getCache('unit-1', 'sheet-1', 'rule-2')).toBe(first);
-
-        ruleChange$.next({ type: 'remove', unitId: 'unit-1', subUnitId: 'sheet-1', rule: { uid: 'rule-2' } });
-        expect(service.getCache('unit-1', 'sheet-1', 'rule-2')).toBeUndefined();
-
+        service.markRuleDirty('unit-1', 'sheet-1', rule.uid);
+        expect(service.getCache('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
+        service.setCache('unit-1', 'sheet-1', rule.uid, first);
+        injector.get(DataValidationModel).removeRule('unit-1', 'sheet-1', rule.uid, 'command');
+        expect(service.getCache('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
+        service.setCache('unit-1', 'sheet-1', rule.uid, first);
         service.clear();
-        expect(service.getCache('unit-1', 'sheet-1', 'rule-1')).toBeUndefined();
+        expect(service.getCache('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
     });
 
-    it('supports non-formula lists and update invalidation', () => {
-        const ruleChange$ = new Subject<any>();
-        const service = new DataValidationListCacheService(
-            {
-                get() {
-                    return {
-                        getRuleFormulaResultSync: vi.fn(),
-                    };
-                },
-            } as unknown as Injector,
-            { ruleChange$ } as unknown as DataValidationModel
-        );
-
-        const item = service.computeAndCache('unit-1', 'sheet-1', { uid: 'rule-3', formula1: 'x,y,,z', formula2: '' } as any, null);
+    it('supports literal lists and removes subscriptions on disposal', () => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DataValidationListCacheService);
+        const item = service.computeAndCache('unit-1', 'sheet-1', { ...rule, formula1: 'x,y,,z', formula2: '' }, null);
         expect(item.list).toEqual(['x', 'y', 'z']);
         expect(item.colorMap).toEqual({});
-
-        ruleChange$.next({ type: 'update', unitId: 'unit-1', subUnitId: 'sheet-1', rule: { uid: 'rule-3' } });
-        expect(service.getCache('unit-1', 'sheet-1', 'rule-3')).toBeUndefined();
+        const model = injector.get(DataValidationModel);
+        model.addRule('unit-1', 'sheet-1', rule, 'command');
+        model.updateRule('unit-1', 'sheet-1', rule.uid, {
+            type: UpdateRuleType.SETTING,
+            payload: { type: DataValidationType.LIST, formula1: 'Updated' },
+        }, 'command');
+        expect(service.getCache('unit-1', 'sheet-1', rule.uid)).toBeUndefined();
+        const dirty = vi.spyOn(service, 'markRuleDirty');
+        service.dispose();
+        injector.get(DataValidationModel).addRule('unit-1', 'sheet-1', rule, 'command');
+        injector.get(DataValidationModel).removeRule('unit-1', 'sheet-1', rule.uid, 'command');
+        expect(dirty).not.toHaveBeenCalled();
     });
 });

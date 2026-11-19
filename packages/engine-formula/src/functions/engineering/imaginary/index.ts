@@ -38,7 +38,7 @@ export class Imaginary extends BaseFunction {
 
         const inumberValue = `${inumberObject.getValue()}`;
 
-        const complex = new Complex(inumberValue);
+        const complex = new Complex(inumberValue, this.getDateSystem());
 
         if (complex.isError()) {
             return ErrorValueObject.create(ErrorType.NUM);

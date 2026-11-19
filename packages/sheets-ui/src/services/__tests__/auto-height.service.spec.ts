@@ -339,4 +339,95 @@ describe('AutoHeightService', () => {
         requestIdleCallbackSpy.mockRestore();
         dateNowSpy.mockRestore();
     });
+
+    describe('idle loop lifecycle', () => {
+        const deadline = { timeRemaining: () => 100, didTimeout: false } as IdleDeadline;
+        const range = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
+
+        function mockIdleCallbacks() {
+            const pending = new Map<number, IdleRequestCallback>();
+            let nextId = 1;
+            const idleGlobals = globalThis as unknown as IIdleGlobals & { cancelIdleCallback: (id: number) => void };
+            const requestSpy = vi.spyOn(idleGlobals, 'requestIdleCallback').mockImplementation((cb) => {
+                const id = nextId++;
+                pending.set(id, cb);
+                return id;
+            });
+            const cancelSpy = vi.spyOn(idleGlobals, 'cancelIdleCallback').mockImplementation((id) => {
+                pending.delete(id);
+            });
+            const flush = () => {
+                const [id, cb] = pending.entries().next().value!;
+                pending.delete(id);
+                cb(deadline);
+            };
+
+            return { pending, requestSpy, cancelSpy, flush };
+        }
+
+        it('stops scheduling idle callbacks once the queue is drained', () => {
+            const { pending, requestSpy, flush } = mockIdleCallbacks();
+            const service = createAutoHeightService({
+                calculateAutoHeightInRange: () => [],
+                getRowHeight: () => 10,
+            });
+
+            service.startAutoHeightTask({ id: 't', sheetId: 's-1', ranges: [range] });
+            expect(pending.size).toBe(1);
+
+            flush();
+            expect(pending.size).toBe(0);
+            expect(requestSpy).toHaveBeenCalledTimes(1);
+
+            // A later task restarts the loop.
+            service.startAutoHeightTask({ id: 't2', sheetId: 's-1', ranges: [range] });
+            expect(pending.size).toBe(1);
+
+            service.dispose();
+            vi.restoreAllMocks();
+        });
+
+        it('cancels the pending idle callback and drops queued tasks on dispose', () => {
+            const { pending, cancelSpy } = mockIdleCallbacks();
+            const calculateAutoHeightInRange = vi.fn(() => []);
+            const service = createAutoHeightService({ calculateAutoHeightInRange, getRowHeight: () => 10 });
+
+            service.startAutoHeightTask({ id: 't', sheetId: 's-1', ranges: [range] });
+            service.dispose();
+
+            expect(cancelSpy).toHaveBeenCalledTimes(1);
+            expect(pending.size).toBe(0);
+            expect(calculateAutoHeightInRange).not.toHaveBeenCalled();
+
+            vi.restoreAllMocks();
+        });
+
+        it('ignores new tasks after dispose', () => {
+            const { requestSpy } = mockIdleCallbacks();
+            const service = createAutoHeightService({ calculateAutoHeightInRange: () => [], getRowHeight: () => 10 });
+
+            service.dispose();
+            service.startAutoHeightTask({ id: 't', sheetId: 's-1', ranges: [range] });
+
+            expect(requestSpy).not.toHaveBeenCalled();
+
+            vi.restoreAllMocks();
+        });
+
+        it('skips queued tasks whose skeleton is no longer the current one', () => {
+            const { flush } = mockIdleCallbacks();
+            const staleCalculate = vi.fn(() => [{ row: 0, autoHeight: 30 }]);
+            const service = createAutoHeightService({ calculateAutoHeightInRange: staleCalculate, getRowHeight: () => 10 });
+
+            service.startAutoHeightTask({ id: 't', sheetId: 's-1', ranges: [range] });
+            TestSheetSkeletonManagerService.skeleton = { calculateAutoHeightInRange: () => [], getRowHeight: () => 10 };
+            flush();
+
+            expect(staleCalculate).not.toHaveBeenCalled();
+            expect(TestCommandService.executed).toEqual([]);
+
+            service.dispose();
+            vi.restoreAllMocks();
+        });
+    });
 });

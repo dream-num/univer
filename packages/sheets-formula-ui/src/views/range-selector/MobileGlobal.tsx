@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRangeSelectorInstance } from './index';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
+import type { IRangeSelectorInstance } from './index';
 import { GlobalRangeSelectorService } from '../../services/range-selector.service';
 import { MobileRangeSelector } from './MobileRangeSelector';
 
@@ -42,6 +42,7 @@ export function MobileGlobalRangeSelector() {
             unitId={current?.unitId ?? ''}
             subUnitId={current?.subUnitId ?? ''}
             maxRangeCount={current?.maxRangeCount}
+            supportAcrossSheet={current?.supportAcrossSheet}
             hideEditor
             selectorRef={instanceRef}
             onClose={() => current?.callback([])}

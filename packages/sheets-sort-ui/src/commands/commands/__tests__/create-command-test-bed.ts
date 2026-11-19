@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
-import { FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, HyperlinkEngineFormulaService, IFormulaCurrentConfigService, IFormulaRuntimeService, IHyperlinkEngineFormulaService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { Dependency, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Tools, Univer, UniverInstanceType } from '@univerjs/core';
+import { FormulaCurrentConfigService, FormulaRuntimeService, IFormulaCurrentConfigService, IFormulaRuntimeService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { FormulaReorderController } from '@univerjs/sheets-formula';
 import { SheetsSortService } from '@univerjs/sheets-sort';
@@ -133,24 +133,15 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
-            injector.add([IHyperlinkEngineFormulaService, { useClass: HyperlinkEngineFormulaService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([SheetsSortController]);
@@ -158,7 +149,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsSortUIService]);
             injector.add([FormulaReorderController]);
 
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {
@@ -167,7 +158,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(workbookData ?? TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = injector.get(IUniverInstanceService);

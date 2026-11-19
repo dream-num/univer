@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, Injector, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import {
     ILogService,
-    Inject,
-    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
     LogLevel,
-    Plugin,
     set,
     ThemeService,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
-import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, ISheetRowFilteredService, LexerTreeBuilder, SheetRowFilteredService } from '@univerjs/engine-formula';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -47,7 +44,6 @@ import {
 } from '@univerjs/sheets';
 import enUS from '@univerjs/sheets/locale/en-US';
 import zhCN from '@univerjs/sheets/locale/zh-CN';
-
 import '@univerjs/sheets/facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -110,45 +106,33 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
 
-            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
-            injector.add([FormulaDataModel]);
-            injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
 
             // register feature modules
             ([
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
             ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });
 
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
 
         override onReady(): void {
@@ -167,7 +151,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
 
     // register builtin plugins
     // note that UI plugins are not registered here, because the unit test environment does not have a UI
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
 
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
     const univerInstanceService = injector.get(IUniverInstanceService);

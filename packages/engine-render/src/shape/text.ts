@@ -15,11 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, TextDecoration, VerticalAlign } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
-import { CellValueType, HorizontalAlign, TextDecoration, VerticalAlign } from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '../basics/const';
 import { DocSimpleSkeleton } from '../components/docs/layout/doc-simple-skeleton';
+import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { Shape } from './shape';
 
 export interface ITextProps extends IShapeProps {
@@ -194,6 +195,30 @@ export class Text extends Shape<ITextProps> {
         }
 
         return totalHeight;
+    }
+
+    /** Ink bounds of the same uncropped layout used by drawPlainWith, before any canvas transform. */
+    static getPlainTextVerticalBounds(props: Pick<ITextProps, 'text' | 'fontStyle' | 'height' | 'top' | 'vAlign'>) {
+        const { text, fontStyle, height, top = 0, vAlign } = props;
+        if (!text) return { top: 0, bottom: 0 };
+        const metrics = FontCache.getMeasureText(text, fontStyle);
+        const cached = Text._layoutCache.get(`${fontStyle}\u0000${text}`);
+        // Avoid creating or evicting drawing layouts during style preparation.
+        const totalHeight = cached?.totalHeight ?? metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+        const lines = cached?.lines ?? [{ text, height: totalHeight, baseline: metrics.fontBoundingBoxAscent }];
+        const offsetY = vAlign === VerticalAlign.TOP ? 0 : vAlign === VerticalAlign.MIDDLE ? (height - totalHeight) / 2 : height - totalHeight;
+        let lineTop = top + offsetY;
+        let inkTop = Infinity;
+        let inkBottom = -Infinity;
+        for (const line of lines) {
+            if (line.text) {
+                const ink = line.text === text ? metrics : FontCache.getMeasureText(line.text, fontStyle);
+                inkTop = Math.min(inkTop, lineTop + line.baseline - (ink.actualBoundingBoxAscent ?? line.baseline));
+                inkBottom = Math.max(inkBottom, lineTop + line.baseline + (ink.actualBoundingBoxDescent ?? line.height - line.baseline));
+            }
+            lineTop += line.height;
+        }
+        return Number.isFinite(inkTop) && Number.isFinite(inkBottom) ? { top: inkTop, bottom: inkBottom } : { top: 0, bottom: 0 };
     }
 
     private static _getCachedLayout(text: string, fontStyle: string) {

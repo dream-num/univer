@@ -15,7 +15,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { keepTextSelected } from '../sheet-tab-name-editor';
+import { keepTextSelected, startSheetTabNameEditor } from '../sheet-tab-name-editor';
 
 describe('keepTextSelected', () => {
     afterEach(() => {
@@ -58,5 +58,39 @@ describe('keepTextSelected', () => {
         const selection = window.getSelection()!;
         expect(selection.isCollapsed).toBe(false);
         expect(selection.toString()).toBe('工作表 1');
+    });
+
+    it('cancels editing on Escape and restores the original name', () => {
+        const slideTabItem = document.createElement('div');
+        const editor = document.createElement('span');
+        editor.textContent = '工作表 1';
+        slideTabItem.appendChild(editor);
+        document.body.appendChild(slideTabItem);
+
+        const setEditMode = vi.fn();
+        const beforeCommit = vi.fn();
+        const onCommit = vi.fn();
+        const onCancel = vi.fn();
+        startSheetTabNameEditor({
+            slideTabItem,
+            canStart: () => true,
+            checkName: () => false,
+            setEditMode,
+            beforeCommit,
+            onCommit,
+            onCancel,
+        });
+
+        editor.textContent = '改名';
+        const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+        editor.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(editor.textContent).toBe('工作表 1');
+        expect(editor.getAttribute('contentEditable')).toBeNull();
+        expect(setEditMode).toHaveBeenLastCalledWith(false);
+        expect(beforeCommit).toHaveBeenCalledOnce();
+        expect(onCancel).toHaveBeenCalledOnce();
+        expect(onCommit).not.toHaveBeenCalled();
     });
 });

@@ -50,15 +50,17 @@ import {
     AddCommentMutation,
     DeleteCommentMutation,
     DeleteCommentTreeCommand,
+    IThreadCommentAuthzService,
     IThreadCommentDataSourceService,
     ResolveCommentCommand,
     ResolveCommentMutation,
+    ThreadCommentAuthzService,
     ThreadCommentDataSourceService,
     ThreadCommentModel,
 } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import threadCommentEnUS from '@univerjs/thread-comment-ui/locale/en-US';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -285,6 +287,14 @@ class TestEditor {
         return this._record.focused;
     }
 
+    get docSelectionRenderService() {
+        return {
+            isFocusing: this.isFocus(),
+            getAllTextRanges: () => this.getSelectionRanges(),
+            getAllRectRanges: () => [],
+        };
+    }
+
     focus(): void {
         this._record.focused = true;
         this.focus$.next(undefined);
@@ -474,6 +484,8 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector) as Injector['get'];
 
+    injector.add([ComponentManager]);
+    injector.add([IThreadCommentAuthzService, { useClass: ThreadCommentAuthzService }]);
     injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
     injector.add([ThreadCommentModel]);
     injector.add([SheetsThreadCommentModel]);

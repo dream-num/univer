@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-drawing` | `UniverSheetsDrawing` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-drawing` | `UniverSheetsDrawing` | No | No | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-drawing
 npm install @univerjs/sheets-drawing
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
@@ -33,6 +33,7 @@ univer.registerPlugin(UniverSheetsDrawingPlugin);
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-drawing-ui` when users need drawing interactions in the sheet UI.
+- Import `@univerjs/sheets-drawing/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

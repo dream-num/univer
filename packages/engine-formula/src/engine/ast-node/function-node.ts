@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
@@ -25,12 +26,11 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
-import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -66,10 +66,6 @@ export class FunctionNode extends BaseAstNode {
 
         if (this._functionExecutor.needsLocale) {
             this._setLocale();
-        }
-
-        if (this._functionExecutor.needsSheetsInfo) {
-            this._setSheetsInfo();
         }
 
         if (this._functionExecutor.needsFormulaDataModel) {
@@ -169,6 +165,11 @@ export class FunctionNode extends BaseAstNode {
         }
 
         return object.withDateSystem(dateSystem);
+    }
+
+    isAffectedBySheetMetadata(sheetOrderChanged: boolean, sheetSizeChanged: boolean): boolean {
+        return (sheetOrderChanged && this._functionExecutor.needsSheetsInfo) ||
+            (sheetSizeChanged && this._functionExecutor.needsSheetRowColumnCount);
     }
 
     isFunctionExecutorArgumentsIgnoreNumberPattern() {
@@ -404,6 +405,10 @@ export class FunctionNode extends BaseAstNode {
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount);
         this._functionExecutor.setDateSystem(this._currentConfigService.getDateSystem(currentUnitId));
 
+        if (this._functionExecutor.needsSheetsInfo) {
+            this._setSheetsInfo();
+        }
+
         if (this._functionExecutor.needsSheetRowColumnCount) {
             const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);
 
@@ -426,6 +431,7 @@ export class FunctionNode extends BaseAstNode {
         referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
 
         referenceObject.setRuntimeData(this._runtimeService.getUnitData());
+        referenceObject.setCalculationCache(this._runtimeService.getCalculationCache?.());
 
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
 
@@ -439,7 +445,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _setSheetsInfo() {
-        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
+        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo(this._runtimeService.currentUnitId));
     }
 
     private _setFilteredOutRows(referenceObject: BaseReferenceObject) {
@@ -548,18 +554,4 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
     private _isParentUnionNode(param: LexerNode) {
         return param.getParent()?.getParent()?.getToken() === matchToken.COLON;
     }
-}
-
-function normalizeFunctionToken(token: string): string {
-    if (token === 'REGEXTEST' || token === '_XLFN.REGEXTEST') {
-        return FUNCTION_NAMES_TEXT.REGEXMATCH;
-    }
-
-    for (const prefix of ['_XLFN.', '_XLWS.', '_XLETA.']) {
-        if (token.startsWith(prefix)) {
-            return token.slice(prefix.length);
-        }
-    }
-
-    return token;
 }

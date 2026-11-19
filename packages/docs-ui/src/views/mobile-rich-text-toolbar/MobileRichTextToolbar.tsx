@@ -16,8 +16,6 @@
 
 import type { ITextStyle, Nullable } from '@univerjs/core';
 import type { ReactNode } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { Editor } from '../../services/editor/editor';
 import {
     BooleanNumber,
     BuildTextUtils,
@@ -42,6 +40,8 @@ import {
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { merge } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type { Editor } from '../../services/editor/editor';
 import {
     getStyleInTextRange,
     ResetInlineFormatTextColorCommand,
@@ -155,10 +155,8 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
               univer-box-border univer-bg-gray-0 univer-shadow-[0_1px_0_rgba(0,0,0,0.06)]
               dark:!univer-bg-gray-800
             `, className)}
-            onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            }}
+            onPointerDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.preventDefault()}
         >
             {!colorsVisible
                 ? (
@@ -239,7 +237,7 @@ export function MobileRichTextToolbar({ editorId, className }: IMobileRichTextTo
                                 variant="text"
                                 size="icon"
                                 aria-label={localeService.t<LocaleKey>('docs-ui.toolbar.textColor.main')}
-                                className="univer-size-7 univer-justify-self-center"
+                                className="univer-justify-self-center"
                             >
                                 <ColorWheelMultiIcon className="!univer-size-6" />
                             </Button>

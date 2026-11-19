@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { AstRootNode } from '../../engine/ast-node';
 import { Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { AstRootNode } from '../../engine/ast-node';
 import { FormulaDependencyTree } from '../../engine/dependency/dependency-tree';
 import { DependencyManagerBaseService, DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
 
@@ -73,6 +73,92 @@ function createService(): IDependencyManagerService {
 }
 
 describe('DependencyManagerService', () => {
+    it.each([false, true])('retains incoming dependencies when clearing many source-sheet formulas (point: %s)', (point) => {
+        const service = createService();
+        const range = { unitId: 'unit-1', sheetId: 'source', range: {
+            startRow: 0,
+            endRow: point ? 0 : 10,
+            startColumn: 0,
+            endColumn: 0,
+        } };
+        for (let id = 0; id < 512; id++) {
+            const tree = createTree(id, id + 10, 1);
+            tree.subUnitId = 'source';
+            tree.rangeList = [range];
+            service.addFormulaDependency('unit-1', 'source', id + 10, 1, tree);
+            service.addDependencyRTreeCache(tree);
+        }
+        const kept = createTree(10000, 0, 5);
+        kept.rangeList = [range];
+        service.addFormulaDependency('unit-1', 'sheet-1', 0, 5, kept);
+        service.addDependencyRTreeCache(kept);
+        service.openKdTree();
+        expect(service.searchDependency([range]).size).toBe(513);
+        service.clearFormulaDependency('unit-1', 'source');
+        expect(service.searchDependency([range])).toEqual(new Set([10000]));
+        expect(service.getFormulaDependency('unit-1', 'sheet-1', 0, 5)).toBe(10000);
+        expect(service.hasDependencyRTreeCache(1)).toBe(false);
+        service.closeKdTree();
+        service.dispose();
+    });
+    it('removes old bounds when a tree moves to a disjoint referenced range', () => {
+        const service = createService();
+        const tree = createTree(91, 0, 0);
+        const oldRange = tree.rangeList;
+        service.addDependencyRTreeCache(tree);
+        tree.rangeList = [{ ...oldRange[0], range: { startRow: 20, endRow: 21, startColumn: 4, endColumn: 5 } }];
+        service.addDependencyRTreeCache(tree);
+        expect(service.searchDependency(oldRange)).toEqual(new Set());
+        expect(service.searchDependency(tree.rangeList)).toEqual(new Set([91]));
+    });
+
+    it('does not search overlapping entries when indexing new trees', () => {
+        const service = createService();
+        const index = (service as unknown as { _dependencyRTreeCache: { remove: (...args: unknown[]) => void } })._dependencyRTreeCache;
+        const remove = vi.spyOn(index, 'remove');
+        for (let id = 0; id < 512; id++) {
+            service.addDependencyRTreeCache(createTree(id, 0, 0));
+        }
+        expect(remove).not.toHaveBeenCalled();
+    });
+
+    it.each(['formula', 'other', 'feature'] as const)('clears only the %s trees owned by the requested sheet', (kind) => {
+        const service = createService();
+        const kept = createTree(92, 0, 0);
+        const removed = createTree(93, 2, 2);
+        removed.subUnitId = 'sheet-2';
+        kept.rangeList[0].sheetId = 'sheet-2';
+        removed.rangeList[0].sheetId = 'sheet-3';
+        if (kind === 'formula') {
+            service.addFormulaDependency('unit-1', 'sheet-1', 0, 0, kept);
+            service.addFormulaDependency('unit-1', 'sheet-2', 2, 2, removed);
+        } else if (kind === 'other') {
+            service.addOtherFormulaDependency('unit-1', 'sheet-1', 'kept', kept);
+            service.addOtherFormulaDependency('unit-1', 'sheet-2', 'removed', removed);
+        } else {
+            service.addFeatureFormulaDependency('unit-1', 'sheet-1', 'kept', kept);
+            service.addFeatureFormulaDependency('unit-1', 'sheet-2', 'removed', removed);
+        }
+        service.addDependencyRTreeCache(kept);
+        service.addDependencyRTreeCache(removed);
+        const clear = (sheetId: string) => {
+            if (kind === 'formula') {
+                service.clearFormulaDependency('unit-1', sheetId);
+            } else if (kind === 'other') {
+                service.clearOtherFormulaDependency('unit-1', sheetId);
+            } else {
+                service.clearFeatureFormulaDependency('unit-1', sheetId);
+            }
+        };
+        clear('missing-sheet');
+        expect(service.searchDependency(kept.rangeList)).toEqual(new Set([92]));
+        expect(service.searchDependency(removed.rangeList)).toEqual(new Set([93]));
+        clear('sheet-2');
+        expect(service.searchDependency(kept.rangeList)).toEqual(new Set([92]));
+        expect(service.hasDependencyRTreeCache(92)).toBe(true);
+        expect(service.searchDependency(removed.rangeList)).toEqual(new Set());
+        expect(service.hasDependencyRTreeCache(93)).toBe(false);
+    });
     it('should keep base dependency manager state through DI-created subclass', () => {
         const injector = new Injector();
         injector.add([DependencyManagerBaseService, { useClass: TestDependencyManagerBaseService }]);
@@ -148,6 +234,29 @@ describe('DependencyManagerService', () => {
         service.clearFormulaDependency('unit-1', 'sheet-1');
         expect(service.getFormulaDependency('unit-1', 'sheet-1', 1, 1)).toBeUndefined();
         expect(service.searchDependency(searchB)).toEqual(new Set());
+    });
+
+    it('keeps one index entry per tree after repeated registrations', () => {
+        const service = createService();
+        const tree = createTree(30, 0, 0);
+        const search = [{
+            unitId: 'unit-1',
+            sheetId: 'sheet-1',
+            range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 },
+        }];
+
+        // A tree that cannot reuse its previous result is registered again on every
+        // recalculation; that must not append another copy of its ranges.
+        for (let i = 0; i < 5; i++) {
+            service.addDependencyRTreeCache(tree);
+        }
+
+        const rtree = (service as unknown as {
+            _dependencyRTreeCache: { getTree: (unitId: string, sheetId: string) => { all: () => unknown[] } };
+        })._dependencyRTreeCache;
+
+        expect(rtree.getTree('unit-1', 'sheet-1').all()).toHaveLength(1);
+        expect(service.searchDependency(search)).toEqual(new Set([30]));
     });
 
     it('should manage other-formula dependency matrices and main-data flag', () => {

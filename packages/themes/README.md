@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/themes` | `UniverThemes` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/themes` | `UniverThemes` | No | No | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/themes
 # or
 npm install @univerjs/themes
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

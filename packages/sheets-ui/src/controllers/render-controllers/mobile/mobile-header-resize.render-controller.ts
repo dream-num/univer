@@ -23,6 +23,7 @@ import {
     ICommandService,
     IContextService,
     Inject,
+    IPermissionService,
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
@@ -32,7 +33,10 @@ import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
     SheetsSelectionsService,
+    WorksheetSetColumnStylePermission,
+    WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
+import { merge } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../../common/keys';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
@@ -74,7 +78,8 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
         this._init();
@@ -102,6 +107,16 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         this._initResizeShapes();
         this._initSelectionListener();
         this._initScrollListener();
+
+        this.disposeWithMe(
+            merge(
+                this._permissionService.permissionPointUpdate$,
+                this._context.unit.activeSheet$
+            ).subscribe(() => {
+                this._cancelResize();
+                this._handleSelectionChange(this._selectionManagerService.getCurrentSelections());
+            })
+        );
     }
 
     private _initResizeShapes(): void {
@@ -144,7 +159,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         this.disposeWithMe(this._scrollSubscription);
     }
 
-    private _handleSelectionChange(selections: ISelectionWithStyle[]): void {
+    private _handleSelectionChange(selections: readonly ISelectionWithStyle[]): void {
         // Hide all buttons first
         this._rowResizeButton?.hide();
         this._columnResizeButton?.hide();
@@ -161,9 +176,9 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         const rangeType = selection.range.rangeType;
 
         // Only show resize button for row/column selections
-        if (rangeType === RANGE_TYPE.ROW) {
+        if (rangeType === RANGE_TYPE.ROW && this._canResize('row')) {
             this._showRowResizeButton(selection);
-        } else if (rangeType === RANGE_TYPE.COLUMN) {
+        } else if (rangeType === RANGE_TYPE.COLUMN && this._canResize('column')) {
             this._showColumnResizeButton(selection);
         }
     }
@@ -285,7 +300,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
     private _startResize(evt: IPointerEvent | IMouseEvent, type: 'row' | 'column'): void {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!skeleton) {
+        if (!skeleton || !this._canResize(type)) {
             return;
         }
 
@@ -376,7 +391,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
             this._cleanupResize();
             e.preventDefault();
             // A meaningful drag can collapse a dimension smaller than MINIMAL_OFFSET.
-            if (shouldResize) {
+            if (shouldResize && this._canResize(type)) {
                 await this._commandService.executeCommand(
                     type === 'row' ? DeltaRowHeightCommand.id : DeltaColumnWidthCommand.id,
                     type === 'row' ? { deltaY: totalDelta, anchorRow: anchor } : { deltaX: totalDelta, anchorCol: anchor }
@@ -385,6 +400,19 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         };
 
         this._bindResizeListeners(canvasElement, pointerId, handlePointerMove, handlePointerUp);
+    }
+
+    private _canResize(type: 'row' | 'column'): boolean {
+        const unitId = this._context.unitId;
+        const subUnitId = this._context.unit.getActiveSheet()?.getSheetId();
+        if (!subUnitId) {
+            return false;
+        }
+
+        const permission = type === 'row'
+            ? new WorksheetSetRowStylePermission(unitId, subUnitId)
+            : new WorksheetSetColumnStylePermission(unitId, subUnitId);
+        return this._permissionService.getPermissionPoint(permission.id)?.value === true;
     }
 
     private _bindResizeListeners(

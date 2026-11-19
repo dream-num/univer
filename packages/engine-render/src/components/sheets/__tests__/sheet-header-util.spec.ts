@@ -15,7 +15,6 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import {
     CellValueType,
     HorizontalAlign,
@@ -29,6 +28,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../../basics/vector2';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import { Vector2 } from '../../../basics/vector2';
 import { Canvas } from '../../../canvas';

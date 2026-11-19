@@ -91,6 +91,23 @@ describe('drawing arrange and group operations', () => {
     let commandService: ICommandService;
     let drawingManagerService: IDrawingManagerService;
 
+    it('rejects grouping before publication and restores grouping after the check is removed', () => {
+        const drawings = [createDrawing('guarded-a', 0), createDrawing('guarded-b', 40)];
+        let published = 0;
+        const subscription = drawingManagerService.featurePluginGroupUpdate$.subscribe(() => published++);
+        const registration = drawingManagerService.registerCommandCheck((command) => command.id !== SetDrawingGroupOperation.id);
+        try {
+            expect(commandService.syncExecuteCommand(SetDrawingGroupOperation.id, { drawings })).toBe(false);
+            expect(published).toBe(0);
+            registration.dispose();
+            expect(commandService.syncExecuteCommand(SetDrawingGroupOperation.id, { drawings })).toBe(true);
+            expect(published).toBe(1);
+        } finally {
+            registration.dispose();
+            subscription.unsubscribe();
+        }
+    });
+
     beforeEach(() => {
         univer = new Univer();
         const injector = univer.__getInjector();

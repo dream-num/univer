@@ -15,10 +15,10 @@
  */
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
-import type { ITestBed } from './util';
-import { Direction, ICommandService, LocaleType } from '@univerjs/core';
+import { Direction, ICommandService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ITestBed } from './util';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 import { createCommandTestBed } from './util';
 
@@ -391,6 +391,115 @@ describe('FormulaRefRangeService', () => {
                 {
                     formulas: ['=C1'],
                     ranges: [{ startColumn: 7, endColumn: 12, startRow: 5, endRow: 10 }],
+                },
+            ]
+        );
+    });
+
+    it('keeps the inserted column covered when it is inserted inside the range', async () => {
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+
+        let newFormulas: {
+            formulas: string[];
+            ranges: IRange[];
+        }[] = [];
+
+        formulaRefRangeService.registerRangeFormula(
+            'test',
+            'sheet1',
+            [{
+                startRow: 5,
+                endRow: 10,
+                startColumn: 5,
+                endColumn: 10,
+            }],
+            ['=A1'],
+            (res) => {
+                newFormulas = res;
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            }
+        );
+
+        await testBed.get(ICommandService).executeCommand(
+            InsertColCommand.id,
+            {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startColumn: 7,
+                    endColumn: 7,
+                    startRow: 0,
+                    endRow: 9999,
+                },
+                direction: Direction.LEFT,
+            }
+        );
+
+        expect(newFormulas).toEqual(
+            [
+                {
+                    formulas: ['=C1'],
+                    ranges: [{ startRow: 5, endRow: 10, startColumn: 8, endColumn: 11 }],
+                },
+                {
+                    formulas: ['=A1'],
+                    ranges: [{ startRow: 5, endRow: 10, startColumn: 5, endColumn: 7 }],
+                },
+            ]
+        );
+    });
+
+    it('keeps a whole row range whole and unsplit when a column is inserted', async () => {
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+
+        let newFormulas: {
+            formulas: string[];
+            ranges: IRange[];
+        }[] = [];
+
+        formulaRefRangeService.registerRangeFormula(
+            'test',
+            'sheet1',
+            [{
+                startRow: 2,
+                endRow: 2,
+                startColumn: 0,
+                endColumn: 9,
+                rangeType: RANGE_TYPE.ROW,
+            }],
+            ['=A1'],
+            (res) => {
+                newFormulas = res;
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            }
+        );
+
+        await testBed.get(ICommandService).executeCommand(
+            InsertColCommand.id,
+            {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startColumn: 3,
+                    endColumn: 3,
+                    startRow: 0,
+                    endRow: 9999,
+                },
+                direction: Direction.LEFT,
+            }
+        );
+
+        expect(newFormulas).toEqual(
+            [
+                {
+                    formulas: ['=A1'],
+                    ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 10, rangeType: RANGE_TYPE.ROW }],
                 },
             ]
         );

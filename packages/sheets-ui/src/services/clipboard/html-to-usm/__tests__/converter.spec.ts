@@ -184,4 +184,48 @@ describe('HtmlToUSMService', () => {
         expect(cellMatrix.getValue(2, 0)?.v).toBe('right ');
         expect(cellMatrix.getValue(3, 0)).toBeUndefined();
     });
+
+    // Real Excel output keeps the marker between other declarations, and `mso-ignore` takes a property list.
+    it.each([
+        'mso-ignore:colspan',
+        'color: red; MSO-IGNORE: COLSPAN;',
+        'height:14.0pt;mso-ignore:colspan;width:104pt',
+        'mso-ignore: colspan padding',
+        'mso-ignore:rowspan,colspan',
+    ])('keeps Excel overflow cells separate: %s', (style) => {
+        const converter = new HtmlToUSMService({ getCurrentSkeleton: () => null });
+        const { cellMatrix } = converter.convert(`
+            <table>
+                <tr><td colspan="2" style="${style}">Long label</td><td>Next</td></tr>
+                <tr><td>First</td><td>Second</td><td>Third</td></tr>
+            </table>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)).toMatchObject({ v: 'Long label', colSpan: 1, rowSpan: 1 });
+        expect(cellMatrix.getValue(0, 1)?.v).toBeUndefined();
+        expect(cellMatrix.getValue(0, 2)?.v).toBe('Next');
+        expect(cellMatrix.getValue(1, 0)?.v).toBe('First');
+        expect(cellMatrix.getValue(1, 1)?.v).toBe('Second');
+        expect(cellMatrix.getValue(1, 2)?.v).toBe('Third');
+    });
+
+    it.each([
+        '',
+        'mso-ignore:padding',
+        '--mso-ignore:colspan',
+        'mso-ignore-colspan:1',
+        'mso-ignore:colspanx',
+    ])('preserves real merged cells: %s', (style) => {
+        const converter = new HtmlToUSMService({ getCurrentSkeleton: () => null });
+        const { cellMatrix } = converter.convert(`
+            <table>
+                <tr><td colspan="2" rowspan="2" style="${style}">Merged</td><td>Next</td></tr>
+                <tr><td>Below</td></tr>
+            </table>
+        `);
+
+        expect(cellMatrix.getValue(0, 0)).toMatchObject({ v: 'Merged', colSpan: 2, rowSpan: 2 });
+        expect(cellMatrix.getValue(0, 2)?.v).toBe('Next');
+        expect(cellMatrix.getValue(1, 2)?.v).toBe('Below');
+    });
 });

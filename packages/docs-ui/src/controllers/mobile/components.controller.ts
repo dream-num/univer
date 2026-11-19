@@ -132,14 +132,7 @@ export class MobileComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
-    }
-
-    private _registerParts(): void {
-        const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
-        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, MobileDocPasteOptions));
     }
 
     private _registerIcons(): void {
@@ -239,5 +232,9 @@ export class MobileComponentsController extends Disposable {
         this.disposeWithMe(this._componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(this._componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
         this.disposeWithMe(this._componentManager.register(DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery));
+
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
+        this.disposeWithMe(componentManager.register(DOC_PASTE_OPTIONS_COMPONENT, MobileDocPasteOptions));
     }
 }

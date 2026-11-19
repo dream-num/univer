@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/core",
-    "version": "1.2.0",
+    "version": "1.5.2",
     "private": false,
     "description": "Core runtime, data models, command system, dependency injection, and Facade APIs for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -69,9 +69,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsrs --noEmit",
         "build:bundle": "univer-cli build",
-        "build:types": "tsc -p tsconfig.node.json",
+        "build:types": "tsrs -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
     },
     "peerDependencies": {
@@ -94,7 +94,7 @@
         "@types/rbush": "^4.0.0",
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "7.8.2",
-        "typescript": "^6.0.3",
-        "vitest": "^5.0.4"
+        "tsrs": "7.1.0-beta.tsrs2",
+        "vitest": "^5.1.1"
     }
 }

@@ -15,6 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
@@ -26,8 +28,6 @@ import type { Engine } from './engine';
 import type { ILayerRenderOptions, IScrollRenderInfo } from './layer';
 import type { SceneViewer } from './scene-viewer';
 import type { Viewport } from './viewport';
-import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
@@ -205,6 +205,10 @@ export class Scene extends Disposable {
     private _layers: Layer[] = [];
     private _viewports: Viewport[] = [];
     private _preserveEngineOnRender = false;
+    private _viewportCacheReuseKey: Nullable<string> = null;
+    private _viewportCacheReuseBlocked = true;
+    private _viewportCacheReusePending = false;
+    private _renderedViewportCacheKey: Nullable<string> = null;
     private _hasPostRenderCanvasMutation = false;
     private _scrollbarDragViewport: Nullable<Viewport> = null;
     private _isScrollbarSeeking = false;
@@ -238,6 +242,9 @@ export class Scene extends Disposable {
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
 
+    private readonly _prepareRender$ = new Subject<void>();
+    /** Layout updates before scroll-cache decisions; paint on the canvas in beforeRender$ instead. */
+    readonly prepareRender$ = this._prepareRender$.asObservable();
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
     readonly beforeRender$ = this._beforeRender$.asObservable();
     private _afterRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
@@ -414,6 +421,9 @@ export class Scene extends Disposable {
     }
 
     makeDirty(state: boolean = true) {
+        if (state) {
+            this.invalidateViewportCacheReuse();
+        }
         this._preserveEngineOnRender = false;
         this._layers.forEach((layer) => {
             layer.makeDirty(state);
@@ -425,11 +435,77 @@ export class Scene extends Disposable {
     }
 
     makeDirtyForScrolling() {
+        if (this._viewportCacheReusePending) {
+            return this;
+        }
         this._preserveEngineOnRender = true;
         this._layers.forEach((layer) => {
             layer.makeDirty(true);
         });
         return this;
+    }
+
+    setViewportCacheReuseKey(key: Nullable<string>): void {
+        this._viewportCacheReuseKey = key;
+        this._renderedViewportCacheKey = null;
+        this.invalidateViewportCacheReuse();
+    }
+
+    invalidateViewportCacheReuse(): void {
+        this._viewportCacheReuseBlocked = true;
+        this._viewportCacheReusePending = false;
+    }
+
+    isViewportCacheReusePending(): boolean {
+        return this._viewportCacheReusePending;
+    }
+
+    makeDirtyForViewportScroll(viewport: Viewport): void {
+        const geometry = this._getViewportCacheGeometry();
+        const canReuse = viewport.viewportKey === this._viewportCacheReuseKey &&
+            !this._viewportCacheReuseBlocked && !this._preserveEngineOnRender &&
+            (!this.isDirty() || this._viewportCacheReusePending) &&
+            geometry != null && geometry.key === this._renderedViewportCacheKey &&
+            this._layers.some((layer) => layer.canReuseViewportCache()) &&
+            this._layers.every((layer) => layer.getObjectsByOrder().every((object) => !object.isDirty() && !object.isForceDirty())) &&
+            this._viewports.every((view) => !view.shouldIntoRender() || (!view.isDirty && !view.isForceDirty));
+        if (!canReuse) {
+            this.makeDirty(true);
+            return;
+        }
+        this._viewportCacheReusePending = true;
+        this._layers.forEach((layer) => layer.makeDirtyForViewportScroll());
+    }
+
+    private _getViewportCacheGeometry(): { key: string; bottom: number; viewportKeys: ReadonlySet<string> } | null {
+        const main = this._viewportCacheReuseKey ? this.getViewport(this._viewportCacheReuseKey) : null;
+        const canvas = this.getEngine()?.getCanvas();
+        if (!main || !canvas || this._parent.classType !== RENDER_CLASS_TYPE.ENGINE || this._beforeRender$.observed) {
+            return null;
+        }
+        const bottom = main.top;
+        const physicalBottom = bottom * canvas.getPixelRatio();
+        if (!Number.isInteger(bottom) || !Number.isInteger(physicalBottom) || bottom <= 0 || bottom >= canvas.getHeight()) {
+            return null;
+        }
+        const viewports = this._viewports.filter((viewport) => viewport.shouldIntoRender());
+        if (viewports.some((viewport) => viewport.top < bottom && viewport.top + viewport.height! > bottom)) {
+            return null;
+        }
+        const stationary = viewports.filter((viewport) => viewport.top + viewport.height! <= bottom);
+        if (stationary.length === 0) {
+            return null;
+        }
+        const viewportKeys = new Set(stationary.map((viewport) => viewport.viewportKey));
+        const key = JSON.stringify({
+            width: canvas.getWidth(),
+            height: canvas.getHeight(),
+            ratio: canvas.getPixelRatio(),
+            bottom,
+            transform: this.transform.getMatrix(),
+            viewports: viewports.map((viewport) => [viewport.viewportKey, viewport.left, viewport.top, viewport.width, viewport.height, viewport.viewportScrollX, viewportKeys.has(viewport.viewportKey) ? viewport.viewportScrollY : null]),
+        });
+        return { key, bottom, viewportKeys };
     }
 
     beginScrollbarDrag(viewport: Viewport) {
@@ -484,6 +560,9 @@ export class Scene extends Disposable {
     }
 
     makeDirtyNoParent(state: boolean = true) {
+        if (state) {
+            this.invalidateViewportCacheReuse();
+        }
         this._preserveEngineOnRender = false;
         this._layers.forEach((layer) => {
             layer.makeDirty(state);
@@ -1017,6 +1096,7 @@ export class Scene extends Disposable {
 
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
+        this._prepareRender$.next();
         const shouldTryPreservingEngine = this._preserveEngineOnRender &&
             !this._hasPostRenderCanvasMutation &&
             parentCtx == null &&
@@ -1032,6 +1112,12 @@ export class Scene extends Disposable {
             return;
         }
 
+        const retainedViewportCache = !parentCtx && !shouldTryPreservingEngine && this._viewportCacheReusePending && !this._viewportCacheReuseBlocked
+            ? this._getViewportCacheGeometry()
+            : null;
+        const canRetainViewportCache = retainedViewportCache?.key === this._renderedViewportCacheKey &&
+            this._viewports.every((viewport) => !viewport.shouldIntoRender() || (!viewport.isDirty && !viewport.isForceDirty));
+        this._viewportCacheReusePending = false;
         this._preserveEngineOnRender = false;
         let layerRenderOptions: ILayerRenderOptions | undefined;
 
@@ -1058,10 +1144,22 @@ export class Scene extends Disposable {
             this.getEngine()?.clearCanvas();
         }
 
-        this._beforeRender$.next(canvasInstance);
-        for (let i = 0, len = layers.length; i < len; i++) {
-            layers[i].render(parentCtx, i === len - 1, layerRenderOptions);
+        if (retainedViewportCache && canRetainViewportCache) {
+            layerRenderOptions = { ...layerRenderOptions, retainedViewportCache };
         }
+        this.getEngine()?.renderFrameTags$.next(['retainedViewportCache', false]);
+        this._beforeRender$.next(canvasInstance);
+        try {
+            for (let i = 0, len = layers.length; i < len; i++) {
+                layers[i].render(parentCtx, i === len - 1, layerRenderOptions);
+            }
+        } catch (error) {
+            this.invalidateViewportCacheReuse();
+            this._renderedViewportCacheKey = null;
+            throw error;
+        }
+        this._renderedViewportCacheKey = parentCtx ? null : this._getViewportCacheGeometry()?.key ?? null;
+        this._viewportCacheReuseBlocked = parentCtx != null;
         this._hasPostRenderCanvasMutation = this._notifyAfterRender(canvasInstance);
         this._recordRenderedViewportScrollPositions();
         if (shouldMeasureFullRender) {
@@ -1248,6 +1346,7 @@ export class Scene extends Disposable {
         this._inputManager = null;
         this._transformer?.dispose();
         this._transformer = null;
+        this._prepareRender$.complete();
 
         this.onFileLoaded$.complete();
         this.onClick$.complete();

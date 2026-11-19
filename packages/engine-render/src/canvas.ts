@@ -84,6 +84,9 @@ export class Canvas {
         this._canvasEle.tabIndex = 1;
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
+        // Safari can select the entire canvas when opening a context menu.
+        this._canvasEle.style.userSelect = 'none';
+        this._canvasEle.style.webkitUserSelect = 'none';
 
         const context = this._canvasEle.getContext('2d');
         if (context == null) {

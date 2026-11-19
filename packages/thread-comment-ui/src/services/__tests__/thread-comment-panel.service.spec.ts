@@ -16,7 +16,7 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
-import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
+import { ContextMenuHostService, DesktopSidebarService, IContextMenuHostService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentPanelService } from '../thread-comment-panel.service';
 
@@ -44,6 +44,7 @@ describe('ThreadCommentPanelService', () => {
     beforeEach(() => {
         univer = new Univer();
         const injector = univer.__getInjector();
+        injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
         injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
         injector.add([ThreadCommentPanelService]);
 

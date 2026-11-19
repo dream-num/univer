@@ -42,10 +42,10 @@ describe('FontSize input ownership', () => {
         try {
             const rendered = render(
                 <RediProvider value={{ injector }}>
-                    <CustomLabel label={label} onChange={onChange} />
+                    <CustomLabel label={label} ariaLabel="Font size" onChange={onChange} />
                 </RediProvider>
             );
-            const input = rendered.container.querySelector('input')!;
+            const input = rendered.getByRole('textbox', { name: 'Font size' }) as HTMLInputElement;
             expect(input).not.toBeNull();
             expect(changes).toEqual([]);
             rendered.rerender(
@@ -59,7 +59,7 @@ describe('FontSize input ownership', () => {
             expect(changes).toEqual([24]);
             rendered.rerender(
                 <RediProvider value={{ injector }}>
-                    <CustomLabel label={label} onChange={onChange} />
+                    <CustomLabel label={label} ariaLabel="Font size" onChange={onChange} />
                 </RediProvider>
             );
             expect(rendered.container.querySelector('input')).toBe(input);

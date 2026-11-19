@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-import { DesktopLogService, ILogService, Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import enUS from '../../locale/en-US';
 import { SheetsGenerateFilterValuesService } from '../generate-filter-values.service';
 
 describe('SheetsGenerateFilterValuesService', () => {
-    let service: SheetsGenerateFilterValuesService;
+    let univer: Univer;
 
     beforeEach(() => {
-        const injector = new Injector();
-        injector.add([LocaleService]);
-        injector.add([ILogService, { useClass: DesktopLogService }]);
-        injector.add([IUniverInstanceService, { useValue: { getUnit: () => null } as unknown as IUniverInstanceService }]);
+        univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        const injector = univer.__getInjector();
+        injector.get(LocaleService).setDirection('ltr');
         injector.add([SheetsGenerateFilterValuesService]);
-        service = injector.get(SheetsGenerateFilterValuesService);
+    });
+
+    afterEach(() => {
+        univer.dispose();
     });
 
     it('returns no filter value tree when the workbook or worksheet is unavailable', async () => {
+        const service = univer.__getInjector().get(SheetsGenerateFilterValuesService);
+
         await expect(service.getFilterValues({
             unitId: 'missing-book',
             subUnitId: 'sheet-1',
@@ -41,5 +46,39 @@ describe('SheetsGenerateFilterValuesService', () => {
             iterateRange: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 0 },
             alreadyChecked: [],
         })).resolves.toEqual([]);
+    });
+
+    it('counts matching values while excluding rows filtered by another column', async () => {
+        const service = univer.__getInjector().get(SheetsGenerateFilterValuesService);
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'workbook',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    name: 'Sales',
+                    rowCount: 4,
+                    columnCount: 1,
+                    cellData: {
+                        1: { 0: { v: 'A' } },
+                        2: { 0: { v: 'B' } },
+                        3: { 0: { v: 'A' } },
+                    },
+                },
+            },
+        });
+
+        const result = await service.getFilterValues({
+            unitId: 'workbook',
+            subUnitId: 'sheet',
+            filteredOutRowsByOtherColumns: [2],
+            filterColumn: null,
+            filters: false,
+            blankChecked: true,
+            iterateRange: { startRow: 1, endRow: 3, startColumn: 0, endColumn: 0 },
+            alreadyChecked: [],
+        });
+
+        expect(result).toMatchObject({ filterTreeItems: [{ title: 'A', count: 2 }] });
     });
 });

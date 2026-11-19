@@ -15,11 +15,11 @@
  */
 
 import type { Dependency, IAccessor, IRange, IWorkbookData } from '@univerjs/core';
-import type { IRangeProtectionRule } from '../../../models/range-protection-rule.model';
-import type { IRangeThemeStyleJSON, RangeThemeStyle } from '../../../models/range-theme-util';
 import { BooleanNumber, LocaleType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { IRangeProtectionRule } from '../../../models/range-protection-rule.model';
+import type { IRangeThemeStyleJSON, RangeThemeStyle } from '../../../models/range-theme-util';
 import { EditStateEnum, RangeProtectionRuleModel, ViewStateEnum } from '../../../models/range-protection-rule.model';
 import { SheetRangeThemeModel } from '../../../models/range-theme-model';
 import { WorksheetProtectionPointModel } from '../../../services/permission/worksheet-permission';
@@ -36,7 +36,6 @@ import { SetRangeThemeMutation } from '../set-range-theme.mutation';
 import { SetWorksheetColumnCountMutation, SetWorksheetColumnCountUndoMutationFactory } from '../set-worksheet-column-count.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../set-worksheet-protection.mutation';
-import { SetWorksheetRightToLeftMutation, SetWorksheetRightToLeftUndoMutationFactory } from '../set-worksheet-right-to-left.mutation';
 import { SetWorksheetRowCountMutation, SetWorksheetRowCountUndoMutationFactory } from '../set-worksheet-row-count.mutation';
 import { UnregisterWorksheetRangeThemeStyleMutation } from '../unregister-range-theme-style.mutation';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -156,7 +155,7 @@ describe('worksheet protection mutations', () => {
     });
 });
 
-describe('worksheet count and direction mutations', () => {
+describe('worksheet count mutations', () => {
     it('changes worksheet row and column counts and creates undo payloads from old dimensions', () => {
         const testBed = createWorkbookTestBed();
         const worksheet = testBed.sheet.getSheetBySheetId('sheet-1')!;
@@ -173,21 +172,6 @@ describe('worksheet count and direction mutations', () => {
         expect(SetWorksheetColumnCountMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'missing', columnCount: 30 })).toBe(false);
         expect(() => SetWorksheetRowCountUndoMutationFactory(testBed, { unitId: 'missing', subUnitId: 'sheet-1', rowCount: 1 })).toThrowError('[SetWorksheetRowCountUndoMutationFactory]: worksheet is null error!');
         expect(() => SetWorksheetColumnCountUndoMutationFactory(testBed, { unitId: 'unit-1', subUnitId: 'missing', columnCount: 1 })).toThrowError('[SetWorksheetColumnCountUndoMutationFactory]: worksheet is null error!');
-    });
-
-    it('updates right-to-left state and returns previous state for undo', () => {
-        const testBed = createWorkbookTestBed();
-        const worksheet = testBed.sheet.getSheetBySheetId('sheet-1')!;
-
-        expect(SetWorksheetRightToLeftUndoMutationFactory(testBed, { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE })).toEqual({
-            unitId: 'unit-1',
-            subUnitId: 'sheet-1',
-            rightToLeft: BooleanNumber.FALSE,
-        });
-        expect(SetWorksheetRightToLeftMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.TRUE })).toBe(true);
-        expect(worksheet.getConfig().rightToLeft).toBe(BooleanNumber.TRUE);
-        expect(SetWorksheetRightToLeftMutation.handler(testBed, { unitId: 'missing', subUnitId: 'sheet-1', rightToLeft: BooleanNumber.FALSE })).toBe(false);
-        expect(SetWorksheetRightToLeftMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'missing', rightToLeft: BooleanNumber.FALSE })).toBe(false);
     });
 });
 

@@ -18,15 +18,11 @@ import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core'
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { CSSProperties, ReactNode, Ref } from 'react';
-import type { IUniverSheetsFormulaUIConfig } from '../../config/config';
-import type { FormulaSelectingType } from './hooks/use-formula-selection';
-import type { IRefSelection } from './hooks/use-highlight';
 import {
     BuildTextUtils,
     createInternalEditorID,
     DisposableCollection,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     generateRandomId,
     HorizontalAlign,
@@ -52,6 +48,9 @@ import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useDependency, useEvent, useObservable, useUpdateEffect } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
+import type { IUniverSheetsFormulaUIConfig } from '../../config/config';
+import type { FormulaSelectingType } from './hooks/use-formula-selection';
+import type { IRefSelection } from './hooks/use-highlight';
 import { PLUGIN_CONFIG_KEY_BASE } from '../../config/config';
 import { findIndexFromSequenceNodes, findRefSequenceIndex } from '../range-selector/utils/find-index-from-sequence-nodes';
 import {
@@ -75,6 +74,7 @@ import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/get-formula-text';
+import { syncCounterpartFormulaEditorSelection } from './utils/sync-counterpart-formula-editor-selection';
 
 export interface IFormulaEditorProps {
     unitId: string;
@@ -120,32 +120,6 @@ export function shouldApplyFormulaSelectionChange(
     hasActiveInteraction: boolean
 ): boolean {
     return Boolean(selectingMode) || Boolean(isFocusing) || hasActiveInteraction;
-}
-
-interface IFormulaEditorSelectionSyncService {
-    getEditor: (editorId: string) => Pick<Editor, 'setSelectionRanges'> | null | undefined | void;
-}
-
-export function syncCounterpartFormulaEditorSelection(
-    editorService: IFormulaEditorSelectionSyncService,
-    editorId: string,
-    selections: ITextRange[] | undefined
-): void {
-    if (!selections?.length) {
-        return;
-    }
-
-    const syncEditorId = editorId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-        ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-        : editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-            : null;
-
-    if (!syncEditorId) {
-        return;
-    }
-
-    editorService.getEditor(syncEditorId)?.setSelectionRanges(selections, false);
 }
 
 export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {

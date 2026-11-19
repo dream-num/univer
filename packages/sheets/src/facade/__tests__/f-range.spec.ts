@@ -16,6 +16,7 @@
 
 import type {
     ICellData,
+    ICommandInfo,
     IDocumentData,
     Injector,
     IStyleData,
@@ -24,6 +25,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     AbsoluteRefType,
     BooleanNumber,
@@ -1303,5 +1305,64 @@ describe('Test FRange', () => {
                 ]);
             }
         });
+    });
+});
+
+describe('FRange formula replacement', () => {
+    function createBed() {
+        const bed = createFacadeTestBed(undefined, [[BorderStyleManagerService]]);
+        const commandService = bed.get(ICommandService);
+        [SetRangeValuesCommand, SetRangeValuesMutation].forEach((command) => commandService.registerCommand(command));
+
+        return { bed, commandService, worksheet: bed.univerAPI.getActiveWorkbook()!.getActiveSheet() };
+    }
+
+    it('removes the formula and the shared formula id from the collaboration changeset', () => {
+        const { bed, commandService, worksheet } = createBed();
+        try {
+            const durable: ICommandInfo[] = [];
+            commandService.onMutationExecutedForCollab((command, options) => {
+                if (options?.onlyLocal !== true) {
+                    durable.push(command);
+                }
+            });
+
+            worksheet.getRange('A1').setValues([[{ f: '=SUM(B1:B2)', si: 'shared-1', v: 3 }]]);
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ f: '=SUM(B1:B2)', si: 'shared-1' });
+
+            worksheet.getRange('A1').setValue({ v: 300 });
+
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ v: 300 });
+            expect(worksheet.getRange('A1').getCellData()?.f).toBeUndefined();
+            expect(worksheet.getRange('A1').getCellData()?.si).toBeUndefined();
+            expect((durable[durable.length - 1].params as ISetRangeValuesMutationParams).cellValue).toMatchObject({
+                0: { 0: { v: 300, f: null, si: null } },
+            });
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('disassociates a rewritten formula from the previous shared formula id', () => {
+        const { bed, commandService, worksheet } = createBed();
+        try {
+            const durable: ICommandInfo[] = [];
+            commandService.onMutationExecutedForCollab((command, options) => {
+                if (options?.onlyLocal !== true) {
+                    durable.push(command);
+                }
+            });
+
+            worksheet.getRange('A1').setValues([[{ f: '=SUM(B1:B2)', si: 'shared-1', v: 3 }]]);
+            worksheet.getRange('A1').setValue('=SUM(B1:B3)');
+
+            expect(worksheet.getRange('A1').getCellData()).toMatchObject({ f: '=SUM(B1:B3)' });
+            expect(worksheet.getRange('A1').getCellData()?.si).toBeUndefined();
+            expect((durable[durable.length - 1].params as ISetRangeValuesMutationParams).cellValue).toMatchObject({
+                0: { 0: { f: '=SUM(B1:B3)', si: null } },
+            });
+        } finally {
+            bed.univer.dispose();
+        }
     });
 });

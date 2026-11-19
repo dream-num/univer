@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -45,26 +46,22 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestPlugin extends Plugin {
+    class TestPlugin extends UniverFormulaEnginePlugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super();
-        }
-
         override onStarting(): void {
+            super.onStarting();
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            dependencies?.forEach((d) => injector.add(d));
+            dependencies?.forEach((d) => injector.replace(d.length === 1 ? [d[0], { useClass: d[0] }] : d));
         }
+
+        override onReady(): void {}
     }
 
-    univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(TestPlugin, { notExecuteFormula: true });
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData ?? getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);

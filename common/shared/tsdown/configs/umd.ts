@@ -1,16 +1,13 @@
 import type { UserConfig } from 'tsdown';
-import type { IEntryConfig } from '../types.ts';
 import { defineConfig } from 'tsdown';
+import type { IEntryConfig } from '../types.ts';
 import { peerDepsMap } from '../data/peer-deps.ts';
 import { createCssNoopInputOptions } from '../plugins/css-noop.ts';
 import { createOutputAliasPlugin } from '../plugins/output-alias.ts';
-import { createOutputObfuscatorPlugin } from '../plugins/output-obfuscator.ts';
 
 export interface ICreateUmdConfigOptions {
     baseConfig: Partial<UserConfig>;
-    enableObfuscation: boolean;
     entry: IEntryConfig;
-    obfuscatorIgnorePatterns?: RegExp[];
     outDir: string;
     packageDir: string;
     packageName: string;
@@ -56,7 +53,8 @@ function resolveUmdGlobal(source: string) {
             return `${convertLibNameFromPackageName(localeMatch[1])}${convertLibNameFromPackageName(localeMatch[2])}`;
         }
 
-        return convertLibNameFromPackageName(source);
+        // Main-thread UMD consumers use the shared APIs exposed by the package's root global.
+        return convertLibNameFromPackageName(source.replace(/\/worker$/, ''));
     }
 
     return null;
@@ -98,7 +96,7 @@ function getGlobalName(packageName: string, entryKey: string) {
  * Creates the browser-oriented UMD bundle config for a single package entry.
  */
 export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
-    const { baseConfig, enableObfuscation, entry, obfuscatorIgnorePatterns, outDir, packageDir, packageName, plugins } = options;
+    const { baseConfig, entry, outDir, packageDir, packageName, plugins } = options;
 
     return defineConfig({
         ...baseConfig,
@@ -121,7 +119,6 @@ export function createUmdConfig(options: ICreateUmdConfigOptions): UserConfig {
         platform: 'browser',
         plugins: [
             ...plugins,
-            ...(enableObfuscation ? [createOutputObfuscatorPlugin(obfuscatorIgnorePatterns)] : []),
             createOutputAliasPlugin({
                 copyToRoot: false,
                 keepRootIndexCss: false,

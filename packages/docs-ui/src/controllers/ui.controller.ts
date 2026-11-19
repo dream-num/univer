@@ -21,11 +21,14 @@ import {
     IConfigService,
     Inject,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
     Optional,
     UniverInstanceType,
 } from '@univerjs/core';
+import { getDocumentPermissionValue } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import {
     BuiltInUIPart,
     connectInjector,
@@ -143,10 +146,15 @@ export class DocUIController extends Disposable {
     private _initDateTimeFields(): void {
         const refreshed = new WeakSet<DocumentDataModel>();
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((model) => {
-            if (model && !refreshed.has(model)) {
-                refreshed.add(model);
-                this._commandService.syncExecuteCommand(RefreshHeaderFooterFieldsCommand.id, { unitId: model.getUnitId(), onOpen: true });
+            if (!model || refreshed.has(model)) {
+                return;
             }
+            const unitId = model.getUnitId();
+            if (!getDocumentPermissionValue(this._injector.get(IPermissionService), unitId, unitId, UnitAction.Edit)) {
+                return;
+            }
+            refreshed.add(model);
+            this._commandService.syncExecuteCommand(RefreshHeaderFooterFieldsCommand.id, { unitId, onOpen: true });
         }));
     }
 

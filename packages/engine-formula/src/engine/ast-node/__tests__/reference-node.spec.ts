@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
-import type { BaseValueObject } from '../../value-object/base-value-object';
-import { describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { ISuperTableService } from '../../../services/super-table.service';
 import { ReferenceObjectType } from '../../utils/value-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { BaseAstNode } from '../base-ast-node';
@@ -26,26 +28,31 @@ import { ReferenceNode, ReferenceNodeFactory } from '../reference-node';
 import { UnionNode } from '../union-node';
 
 describe('ReferenceNode external range loading', () => {
+    let testBed: ReturnType<typeof createFunctionTestBed>;
+
+    beforeEach(() => {
+        testBed = createFunctionTestBed();
+        testBed.get(IFormulaCurrentConfigService).load({
+            allUnitData: { [testBed.unitId]: testBed.sheetData },
+            formulaData: {},
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: false,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+        });
+        testBed.get(IFormulaRuntimeService).setCurrent(0, 0, 100, 100, testBed.sheetId, testBed.unitId);
+    });
+
+    afterEach(() => {
+        testBed.univer.dispose();
+    });
+
     it('loads the full colon range from the qualified left reference', async () => {
         const load = vi.fn(async () => undefined);
-        const currentConfig = {
-            getSheetNameMap: () => ({}),
-            getUnitData: () => ({}),
-            getArrayFormulaCellData: () => ({}),
-            getArrayFormulaRange: () => ({}),
-            getUnitStylesData: () => ({}),
-        };
-        const runtime = {
-            markExternalReferenceUnavailable: vi.fn(),
-            currentUnitId: 'host',
-            currentSubUnitId: 'host-sheet',
-            currentRow: 0,
-            currentColumn: 0,
-            getUnitData: () => ({}),
-            getRuntimeArrayFormulaCellData: () => ({}),
-            getUnitArrayFormula: () => ({}),
-            getRuntimeFeatureCellData: () => ({}),
-        };
         const resolver = {
             resolve: () => ({
                 unitId: 'source',
@@ -56,27 +63,19 @@ describe('ReferenceNode external range loading', () => {
                 },
             }),
         } satisfies IFormulaUnitReferenceResolver;
-        const superTableService = {
-            getTableMap: () => null,
-            getTableOptionMap: () => new Map(),
-        };
+        const currentConfig = testBed.get(IFormulaCurrentConfigService);
         const left = new ReferenceNode(
             currentConfig,
-            runtime,
+            testBed.get(IFormulaRuntimeService),
             "'[Sales]Data'!A1",
             ReferenceObjectType.CELL,
             resolver,
-            superTableService,
+            testBed.get(ISuperTableService),
             { load },
             true
         );
         const right = new BaseAstNode('B2');
-        const union = new UnionNode(':', {
-            getSheetsInfo: () => ({
-                sheetNameMap: {},
-                sheetOrder: [],
-            }),
-        } satisfies Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>);
+        const union = new UnionNode(':', currentConfig);
         left.setParent(union);
         right.setParent(union);
 
@@ -88,72 +87,17 @@ describe('ReferenceNode external range loading', () => {
     });
 
     it('returns REF for a missing local structured table reference', () => {
-        const currentConfig = {
-            getSheetNameMap: () => ({}),
-            getUnitData: () => ({}),
-            getArrayFormulaCellData: () => ({}),
-            getArrayFormulaRange: () => ({}),
-            getUnitStylesData: () => ({}),
-        };
-        const runtime = {
-            markExternalReferenceUnavailable: vi.fn(),
-            currentUnitId: 'host',
-            currentSubUnitId: 'host-sheet',
-            currentRow: 0,
-            currentColumn: 0,
-            getUnitData: () => ({}),
-            getRuntimeArrayFormulaCellData: () => ({}),
-            getUnitArrayFormula: () => ({}),
-            getRuntimeFeatureCellData: () => ({}),
-        };
-        const factory = new ReferenceNodeFactory(
-            currentConfig as never,
-            runtime as never,
-            {} as never,
-            {
-                getTableMap: () => null,
-                getTableOptionMap: () => new Map(),
-            } as never,
-            { resolve: () => ({ unitId: 'host' }) } as IFormulaUnitReferenceResolver,
-            { load: vi.fn() } as never
-        );
+        const factory = testBed.get(ReferenceNodeFactory);
 
         const node = factory.checkAndCreateNodeType('Tout[Quantity]');
         expect(node).toBeInstanceOf(ReferenceNode);
         node?.execute();
-        expect((node?.getValue() as BaseValueObject).getValue()).toBe(ErrorType.REF);
+        const value = node?.getValue();
+        expect(value instanceof ErrorValueObject && value.getValue()).toBe(ErrorType.REF);
     });
 
     it('keeps ordinary cell references out of the structured-table path', () => {
-        const currentConfig = {
-            getSheetNameMap: () => ({}),
-            getUnitData: () => ({}),
-            getArrayFormulaCellData: () => ({}),
-            getArrayFormulaRange: () => ({}),
-            getUnitStylesData: () => ({}),
-        };
-        const runtime = {
-            markExternalReferenceUnavailable: vi.fn(),
-            currentUnitId: 'host',
-            currentSubUnitId: 'host-sheet',
-            currentRow: 0,
-            currentColumn: 0,
-            getUnitData: () => ({}),
-            getRuntimeArrayFormulaCellData: () => ({}),
-            getUnitArrayFormula: () => ({}),
-            getRuntimeFeatureCellData: () => ({}),
-        };
-        const factory = new ReferenceNodeFactory(
-            currentConfig as never,
-            runtime as never,
-            {} as never,
-            {
-                getTableMap: () => null,
-                getTableOptionMap: () => new Map(),
-            } as never,
-            { resolve: () => ({ unitId: 'host' }) } as IFormulaUnitReferenceResolver,
-            { load: vi.fn() } as never
-        );
+        const factory = testBed.get(ReferenceNodeFactory);
 
         const node = factory.checkAndCreateNodeType('G2');
         expect(node).toBeInstanceOf(ReferenceNode);

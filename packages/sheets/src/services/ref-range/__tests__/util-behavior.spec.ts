@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, ICommandInfo, IRange } from '@univerjs/core';
+import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, Range, RANGE_TYPE } from '@univerjs/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -23,8 +25,6 @@ import type {
 } from '../../../basics';
 import type { IMoveRangeMutationParams } from '../../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, Range, RANGE_TYPE } from '@univerjs/core';
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../../commands/mutations/move-range.mutation';
 import { MoveColsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
@@ -257,7 +257,7 @@ describe('ref range util behavior coverage', () => {
             ]));
         });
 
-        it('handles row/column insertion direction at the right and bottom boundaries', () => {
+        it('expands when the insertion starts at the last row and leaves ranges below it untouched', () => {
             expect(handleInsertRowCommon({
                 id: EffectRefRangId.InsertRowCommandId,
                 params: { unitId: 'unit', subUnitId: 'sheet', range: r(9, 10, 0, 10), direction: Direction.DOWN },
@@ -277,6 +277,83 @@ describe('ref range util behavior coverage', () => {
                 id: EffectRefRangId.InsertColCommandId,
                 params: { unitId: 'unit', subUnitId: 'sheet', range: r(0, 10, 8, 9), direction: Direction.RIGHT },
             }, r(2, 4, 5, 8))).toEqual([r(2, 4, 5, 10)]);
+        });
+
+        it('returns the same range for both insertion entries at one position', () => {
+            // A2:A10 as a row ref range
+            const rowTarget = r(1, 9, 2, 4);
+            const insertRow = (startRow: number, direction: Direction.UP | Direction.DOWN) => handleInsertRowCommon({
+                id: EffectRefRangId.InsertRowCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(startRow, startRow, 0, 10), direction },
+            }, rowTarget);
+
+            // insertRowsBefore(1) and insertRowsAfter(0) create the same new row 2
+            expect(insertRow(1, Direction.UP)).toEqual(insertRow(1, Direction.DOWN));
+            expect(insertRow(1, Direction.UP)).toEqual([r(2, 10, 2, 4)]);
+
+            // insertRowsBefore(10) and insertRowsAfter(9) create the same new row 11
+            expect(insertRow(10, Direction.UP)).toEqual(insertRow(10, Direction.DOWN));
+            expect(insertRow(10, Direction.UP)).toEqual([rowTarget]);
+
+            // insertRowsBefore(5) and insertRowsAfter(4) both insert inside the range
+            expect(insertRow(5, Direction.UP)).toEqual(insertRow(5, Direction.DOWN));
+            expect(insertRow(5, Direction.UP)).toEqual([r(1, 10, 2, 4)]);
+
+            // B20:F20 as a column ref range
+            const colTarget = r(19, 19, 1, 5);
+            const insertColumn = (startColumn: number, direction: Direction.LEFT | Direction.RIGHT) => handleInsertColCommon({
+                id: EffectRefRangId.InsertColCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(0, 10, startColumn, startColumn), direction },
+            }, colTarget);
+
+            // insertColumnsBefore(1) and insertColumnsAfter(0) create the same new column B
+            expect(insertColumn(1, Direction.LEFT)).toEqual(insertColumn(1, Direction.RIGHT));
+            expect(insertColumn(1, Direction.LEFT)).toEqual([r(19, 19, 2, 6)]);
+
+            // insertColumnsBefore(6) and insertColumnsAfter(5) create the same new column G
+            expect(insertColumn(6, Direction.LEFT)).toEqual(insertColumn(6, Direction.RIGHT));
+            expect(insertColumn(6, Direction.LEFT)).toEqual([colTarget]);
+
+            // insertColumnsBefore(3) and insertColumnsAfter(2) both insert inside the range
+            expect(insertColumn(3, Direction.LEFT)).toEqual(insertColumn(3, Direction.RIGHT));
+            expect(insertColumn(3, Direction.LEFT)).toEqual([r(19, 19, 1, 6)]);
+        });
+
+        it('keeps whole column and whole row ranges covering their axis', () => {
+            const wholeColumn = r(0, 9, 2, 3, RANGE_TYPE.COLUMN);
+            const insertRows = (startRow: number) => handleCommonDefaultRangeChangeWithEffectRefCommands(wholeColumn, {
+                id: EffectRefRangId.InsertRowCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(startRow, startRow, 0, 10), direction: Direction.UP },
+            });
+
+            // rows may be inserted anywhere: a whole column range covers every one of them
+            expect(insertRows(0)).toEqual([r(0, 10, 2, 3, RANGE_TYPE.COLUMN)]);
+            expect(insertRows(5)).toEqual([r(0, 10, 2, 3, RANGE_TYPE.COLUMN)]);
+
+            // columns are concrete coordinates, so the regular rules still apply
+            expect(handleCommonDefaultRangeChangeWithEffectRefCommands(wholeColumn, {
+                id: EffectRefRangId.InsertColCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(0, 10, 3, 3), direction: Direction.LEFT },
+            })).toEqual([r(0, 9, 2, 4, RANGE_TYPE.COLUMN)]);
+
+            // removing rows shrinks the range instead of deleting the rule
+            expect(handleCommonDefaultRangeChangeWithEffectRefCommands(wholeColumn, {
+                id: EffectRefRangId.RemoveRowCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(2, 3, 0, 10) },
+            })).toEqual([r(0, 7, 2, 3, RANGE_TYPE.COLUMN)]);
+
+            // moving rows keeps a whole column range untouched
+            expect(handleCommonDefaultRangeChangeWithEffectRefCommands(wholeColumn, {
+                id: EffectRefRangId.MoveRowsCommandId,
+                params: { fromRange: r(1, 2, 0, 10), toRange: r(6, 7, 0, 10) },
+            })).toEqual([wholeColumn]);
+
+            // and the transposed case
+            const wholeRow = r(2, 3, 0, 9, RANGE_TYPE.ROW);
+            expect(handleCommonDefaultRangeChangeWithEffectRefCommands(wholeRow, {
+                id: EffectRefRangId.InsertColCommandId,
+                params: { unitId: 'unit', subUnitId: 'sheet', range: r(0, 10, 4, 4), direction: Direction.LEFT },
+            })).toEqual([r(2, 3, 0, 10, RANGE_TYPE.ROW)]);
         });
 
         it('skips filtered rows when removing a row range', () => {

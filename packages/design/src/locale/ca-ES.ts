@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Accessibility: {
+            clearInput: 'Esborra l’entrada',
             closeBadge: 'Tanca la insígnia',
             close: 'Tanca',
             menu: 'Menú',
@@ -69,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'D\'acord',
         },
         GradientColorPicker: {
+            add: 'Afegeix una parada de degradat',
             linear: 'Lineal',
             radial: 'Radial',
             angular: 'Angular',

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { CommandType, ICommandService, IConfigService, Injector, Univer, UniverInstanceType } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import { SHEET_EXTENSION_PREFIX, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { ITelemetryService } from '@univerjs/telemetry';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { SheetRenderController } from '../sheet.render-controller';
 
 const renderClasses = vi.hoisted(() => {
@@ -93,14 +97,22 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
 });
 
 function createCommandService() {
+    const beforeHandlers = new Set<(command: any, options?: any) => void>();
     const handlers = new Set<(command: any, options?: any) => void>();
 
     return {
+        beforeCommandExecuted: vi.fn((handler: (command: any, options?: any) => void) => {
+            beforeHandlers.add(handler);
+            return { dispose: vi.fn(() => beforeHandlers.delete(handler)) };
+        }),
         onCommandExecuted: vi.fn((handler: (command: any, options?: any) => void) => {
             handlers.add(handler);
             return { dispose: vi.fn(() => handlers.delete(handler)) };
         }),
-        emit: (command: any, options?: any) => handlers.forEach((handler) => handler(command, options)),
+        emit: (command: any, options?: any) => {
+            beforeHandlers.forEach((handler) => handler(command, options));
+            handlers.forEach((handler) => handler(command, options));
+        },
     };
 }
 
@@ -115,6 +127,8 @@ function createController() {
         enableLayerCache: vi.fn(),
         attachControl: vi.fn(),
         makeDirty: vi.fn(),
+        setViewportCacheReuseKey: vi.fn(),
+        invalidateViewportCacheReuse: vi.fn(),
         getViewports: vi.fn(function (this: any) {
             return this.__viewports;
         }),
@@ -127,18 +141,22 @@ function createController() {
         runRenderLoop: vi.fn(),
         stopRenderLoop: vi.fn(),
     };
-    const worksheet = {
-        getSheetId: vi.fn(() => 'sheet-1'),
-        getConfig: vi.fn(() => ({
-            rowHeader: { width: 46 },
-            columnHeader: { height: 20 },
-        })),
-    };
-    const workbook = {
-        getUnitId: vi.fn(() => 'unit-1'),
-        getActiveSheet: vi.fn(() => worksheet),
-        getSheetBySheetId: vi.fn(() => worksheet),
-    };
+    const univer = new Univer();
+    onTestFinished(() => univer.dispose());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+        id: 'unit-1',
+        sheetOrder: ['sheet-1'],
+        sheets: {
+            'sheet-1': {
+                id: 'sheet-1',
+                rowCount: 20,
+                columnCount: 20,
+                rowHeader: { width: 46 },
+                columnHeader: { height: 20 },
+            },
+        },
+    });
+    const worksheet = workbook.getActiveSheet();
     const skeleton = {
         rowHeaderWidth: 46,
         columnHeaderHeight: 20,
@@ -164,14 +182,18 @@ function createController() {
         components: new Map(),
         mainComponent: null as any,
     };
-    const controller = new SheetRenderController(
-        context as any,
-        { getConfig: vi.fn(() => ({ scrollConfig: { barSize: 8 } })) } as any,
-        sheetSkeletonManagerService as any,
-        { checkMutationShouldTriggerRerender: vi.fn((id: string) => id === 'sheet.custom-rerender') } as any,
-        commandService as any,
-        telemetryService as any
-    );
+    const injector = new Injector([
+        [IConfigService, { useValue: { getConfig: vi.fn(() => ({ scrollConfig: { barSize: 8 } })) } }],
+        [SheetSkeletonManagerService, { useValue: sheetSkeletonManagerService }],
+        [SheetsRenderService, { useValue: { checkMutationShouldTriggerRerender: vi.fn((id: string) => id === 'sheet.custom-rerender'), shouldAutomaticallyRenderMutation: () => true } }],
+        [ICommandService, { useValue: commandService }],
+        [ITelemetryService, { useValue: telemetryService }],
+    ]);
+    const controller = injector.createInstance(SheetRenderController, context as never);
+    onTestFinished(() => {
+        controller.dispose();
+        injector.dispose();
+    });
 
     return {
         activated$,

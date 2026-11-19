@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Accessibility: {
+            clearInput: 'Xóa nội dung nhập',
             closeBadge: 'Đóng huy hiệu',
             close: 'Đóng',
             menu: 'Trình đơn',
@@ -69,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'Xác nhận',
         },
         GradientColorPicker: {
+            add: 'Thêm điểm chuyển màu',
             linear: 'Tuyến tính',
             radial: 'Tỏa ra',
             angular: 'Góc',

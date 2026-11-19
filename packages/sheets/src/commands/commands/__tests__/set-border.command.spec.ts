@@ -15,7 +15,7 @@
  */
 
 import type { IBorderData, Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import { BorderStyleTypes, BorderType, ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, TestConfirmService, UniverInstanceType } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, ICommandService, IConfirmService, IUniverInstanceService, RANGE_TYPE, RedoCommand, TestConfirmService, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
@@ -71,6 +71,88 @@ describe('Test style commands', () => {
 
     describe('set border style', () => {
         describe('correct situations', () => {
+            it.each([
+                { type: BorderType.TLBR, keys: ['tl_br'] },
+                { type: BorderType.TLBC_TLMR, keys: ['tl_bc', 'tl_mr'] },
+                { type: BorderType.TLBR_TLBC_TLMR, keys: ['tl_br', 'tl_bc', 'tl_mr'] },
+                { type: BorderType.BLTR, keys: ['bl_tr'] },
+                { type: BorderType.MLTR_BCTR, keys: ['ml_tr', 'bc_tr'] },
+            ] satisfies Array<{ type: BorderType; keys: Array<keyof IBorderData> }>)(
+                'sets $type without removing existing borders',
+                async ({ type, keys }) => {
+                    const service = get(ICommandService);
+                    const range = { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 };
+                    const diagonal = { s: BorderStyleTypes.DASHED, cl: { rgb: '#abcdef' } };
+                    const expected = Object.fromEntries(keys.map((key) => [key, diagonal]));
+                    get(SheetsSelectionsService).setSelections([{ range, primary: null, style: null }]);
+                    for (const merged of [false, true]) {
+                        if (merged) {
+                            await service.executeCommand(AddWorksheetMergeAllCommand.id);
+                        }
+                        await service.executeCommand(SetBorderBasicCommand.id, {
+                            value: { type: BorderType.TOP, color: '#123456', style: BorderStyleTypes.THIN },
+                        });
+                        const before = getBorder(range);
+                        await service.executeCommand(SetBorderBasicCommand.id, {
+                            value: { type, color: '#abcdef', style: BorderStyleTypes.DASHED },
+                        });
+                        expect(getBorder(range)).toEqual({ ...before, ...expected });
+                        for (let row = 0; row <= 1; row++) {
+                            for (let column = 0; column <= 1; column++) {
+                                const border = getBorder({ startRow: row, endRow: row, startColumn: column, endColumn: column });
+                                if (!merged || (row === 0 && column === 0)) {
+                                    expect(border).toMatchObject(expected);
+                                } else {
+                                    for (const key of keys) expect(border?.[key]).toBeFalsy();
+                                }
+                            }
+                        }
+                        await service.executeCommand(UndoCommand.id);
+                        expect(getBorder(range)).toEqual(before);
+                        await service.executeCommand(RedoCommand.id);
+                        expect(getBorder(range)).toEqual({ ...before, ...expected });
+                        await service.executeCommand(SetBorderPositionCommand.id, { value: BorderType.NONE });
+                        for (const key of keys) expect(getBorder(range)?.[key]).toBeFalsy();
+                        expect(getBorder(range)?.t).toBeFalsy();
+                    }
+                }
+            );
+
+            it.each([
+                { type: BorderType.TOP, edges: [['t'], ['t'], [], []] },
+                { type: BorderType.BOTTOM, edges: [[], [], ['b'], ['b']] },
+                { type: BorderType.LEFT, edges: [['l'], [], ['l'], []] },
+                { type: BorderType.RIGHT, edges: [[], ['r'], [], ['r']] },
+                { type: BorderType.NONE, edges: [[], [], [], []] },
+                { type: BorderType.ALL, edges: [['t', 'b', 'l', 'r'], ['t', 'b', 'l', 'r'], ['t', 'b', 'l', 'r'], ['t', 'b', 'l', 'r']] },
+                { type: BorderType.OUTSIDE, edges: [['t', 'l'], ['t', 'r'], ['b', 'l'], ['b', 'r']] },
+                { type: BorderType.INSIDE, edges: [['b', 'r'], ['b', 'l'], ['t', 'r'], ['t', 'l']] },
+                { type: BorderType.HORIZONTAL, edges: [['b'], ['b'], ['t'], ['t']] },
+                { type: BorderType.VERTICAL, edges: [['r'], ['l'], ['r'], ['l']] },
+            ])('applies $type to the requested cell edges', async ({ type, edges }) => {
+                const service = get(ICommandService);
+                const range = { startRow: 2, startColumn: 2, endRow: 3, endColumn: 3 };
+                const value = { type, color: '#123456', style: BorderStyleTypes.THIN };
+                if (type === BorderType.NONE) {
+                    await service.executeCommand(SetBorderBasicCommand.id, {
+                        ranges: [range],
+                        value: { ...value, type: BorderType.ALL },
+                    });
+                }
+                await service.executeCommand(SetBorderBasicCommand.id, { ranges: [range], value });
+                for (let row = 2; row <= 3; row++) {
+                    for (let column = 2; column <= 3; column++) {
+                        const border = getBorder({ startRow: row, endRow: row, startColumn: column, endColumn: column });
+                        const actual = Object.fromEntries(Object.entries(border ?? {}).filter(([, style]) => style));
+                        const expected = Object.fromEntries(edges[(row - 2) * 2 + column - 2].map((key) => [
+                            key,
+                            { s: BorderStyleTypes.THIN, cl: { rgb: '#123456' } },
+                        ]));
+                        expect(actual).toEqual(expected);
+                    }
+                }
+            });
+
             it('will set border style when there is a selected range', async () => {
                 const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([

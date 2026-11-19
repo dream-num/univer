@@ -24,13 +24,8 @@ import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../dependency/dependency-tree';
 import { regexp } from '@univerjs/core';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { ErrorNode } from '../ast-node/base-ast-node';
-
-const FORMULA_CACHE_LRU_COUNT = 5000;
-
-export const FORMULA_AST_CACHE = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
 
 type IDirtyStringMap = Record<string, string>;
 
@@ -53,9 +48,10 @@ export function generateAstNode(
     }
 
     const executeSubUnitId = subUnitId ?? currentConfigService.getExecuteSubUnitId() ?? '';
+    const cache = astTreeBuilder.cacheService;
     const cacheKey = `${unitId}:${executeSubUnitId}:${definedNameRefOffsetX}:${definedNameRefOffsetY}:${formulaString}`;
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
-    let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(cacheKey);
+    let astNode: Nullable<AstRootNode> = cache.getAst(cacheKey);
 
     // Dirty registry metadata invalidates the cached AST for this calculation because
     // defined names and SuperTable references are resolved while the AST is built.
@@ -88,7 +84,7 @@ export function generateAstNode(
     // the old AST, while the newly parsed AST reflects the current registry and must
     // replace it. Otherwise, after the dirty map is cleared, an ordinary range
     // recalculation can fall back to the stale pre-registration AST.
-    FORMULA_AST_CACHE.set(cacheKey, astNode);
+    cache.setAst(cacheKey, unitId, astNode);
 
     return astNode;
 }

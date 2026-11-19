@@ -15,7 +15,6 @@
  */
 
 import type { Root } from 'react-dom/client';
-import type { TestRenderManagerService } from './hyper-link-popup-test-bed';
 import { CustomRangeType, LocaleService, LocaleType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -25,6 +24,7 @@ import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { TestRenderManagerService } from './hyper-link-popup-test-bed';
 import { ISheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { CellLinkEdit } from '../CellLinkEdit';
@@ -228,10 +228,10 @@ describe('CellLinkEdit', () => {
         });
 
         const typeSelect = container.querySelector('[data-u-comp="select"]');
-        expect(typeSelect?.textContent).toContain('sheets-hyper-link-ui.form.link');
+        expect(typeSelect?.textContent).toContain('Web link');
 
         await act(async () => {
-            await selectOption(typeSelect!, 'sheets-hyper-link-ui.form.worksheet');
+            await selectOption(typeSelect!, 'Worksheet');
             await Promise.resolve();
         });
 

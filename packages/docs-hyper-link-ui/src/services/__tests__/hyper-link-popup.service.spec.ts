@@ -30,8 +30,10 @@ import { Documents, FontCache, IRenderManagerService, UniverRenderEnginePlugin }
 import { UnitAction } from '@univerjs/protocol';
 import {
     CanvasPopupService,
+    ContextMenuHostService,
     DesktopDialogService,
     ICanvasPopupService,
+    IContextMenuHostService,
     IDialogService,
     IUIPartsService,
     UIPartsService,
@@ -63,6 +65,7 @@ function createService(documentFlavor = DocumentFlavor.TRADITIONAL) {
     univer.registerPlugin(UniverRenderEnginePlugin);
     const injector = univer.__getInjector();
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
     injector.add([DocCanvasPopManagerService]);

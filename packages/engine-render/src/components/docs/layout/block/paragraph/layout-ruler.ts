@@ -666,9 +666,26 @@ function _appendOverflowingGlyphs(
             return;
         }
         const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
+        const firstGlyph = glyphGroup[0];
+        // shortcut: mixed metrics keep whole-suffix layout until continuation heights can be preserved without rescanning.
+        const uniformMetrics = glyphGroup.every((glyph) =>
+            !glyph.noteId &&
+            (__isStructuralTerminatorGlyph(glyph)
+                ? glyph.bBox.ba <= firstGlyph.bBox.ba && glyph.bBox.bd <= firstGlyph.bBox.bd &&
+                    (glyph.bBox.normalLineHeight ?? 0) <= (firstGlyph.bBox.normalLineHeight ?? 0)
+                : glyph.glyphType === GlyphType.LETTER && glyph.fontStyle?.fontString === firstGlyph.fontStyle?.fontString &&
+                    glyph.bBox.ba === firstGlyph.bBox.ba && glyph.bBox.bd === firstGlyph.bBox.bd &&
+                    glyph.bBox.normalLineHeight === firstGlyph.bBox.normalLineHeight)
+        );
+        const snapshot = ctx.viewModel.getSnapshot();
+        // Word chooses divides using the remaining word width, including floats in later pages and stories.
+        const canStreamGlyphs = uniformMetrics && (!isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)
+            || (lastPage.skeDrawings.size === 0 && lastPage.skeTables.size === 0
+                && [snapshot.drawings, snapshot.tableSource, snapshot.headers, snapshot.footers].every((source) => !source || Object.keys(source).length === 0)));
 
-        while (glyphGroup.length) {
-            sliceGlyphGroup.push(glyphGroup.shift()!);
+        let consumed = 0;
+        while (consumed < glyphGroup.length) {
+            sliceGlyphGroup.push(glyphGroup[consumed++]);
 
             if (isGlyphGroupBeyondDivideWidth(
                 sliceGlyphGroup,
@@ -682,11 +699,13 @@ function _appendOverflowingGlyphs(
             )) {
                 // To avoid infinity loop when width is less than one char's width.
                 if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
-                    glyphGroup.unshift(sliceGlyphGroup.pop()!);
+                    sliceGlyphGroup.pop();
+                    consumed--;
                 }
                 break;
             }
         }
+        glyphGroup.splice(0, consumed);
 
         if (sliceGlyphGroup.length > 0) {
             // An oversized first glyph still owns its paragraph terminator;
@@ -698,18 +717,31 @@ function _appendOverflowingGlyphs(
         }
 
         if (glyphGroup.length) {
-            // Only Divide in the first paragraph is the beginning of the paragraph
-            _divideOperator(
-                ctx,
-                glyphGroup,
-                pages,
-                sectionBreakConfig,
-                paragraphConfig,
-                false,
-
-                breakPointType,
-                defaultSpanMetrics
-            );
+            if (!canStreamGlyphs) {
+                _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, false, breakPointType, defaultSpanMetrics);
+                return;
+            }
+            // The word already exceeds an empty line; consume its emergency breaks without rescanning the entire suffix.
+            let tail = glyphGroup.length;
+            while (tail > 0) {
+                const glyph = glyphGroup[tail - 1];
+                if (glyph.content !== DataStreamTreeTokenType.SPACE && !(drawingML && glyph.content === '\u3000') && !__isStructuralTerminatorGlyph(glyph)) {
+                    break;
+                }
+                tail--;
+            }
+            for (let index = 0; index < glyphGroup.length && index <= tail; index++) {
+                _divideOperator(
+                    ctx,
+                    index === tail ? glyphGroup.slice(index) : [glyphGroup[index]],
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    false,
+                    index === tail || index === glyphGroup.length - 1 ? breakPointType : BreakPointType.Normal,
+                    defaultSpanMetrics
+                );
+            }
         }
     } else if (hyphenLineCount > consecutiveHyphenLimit) {
         const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
@@ -1027,8 +1059,14 @@ function _adjustIncomingTabStops(
                 } else if (stop.alignment === TabStopAlignment.CENTER) {
                     alignmentOffset = followingWidth / 2;
                 }
-                const width = Math.min(stop.offset, divide.left + divide.paddingLeft + divide.width)
-                    - position - alignmentOffset;
+                const rightEdge = divide.left + divide.paddingLeft + divide.width;
+                // Word keeps a tab-aligned field inside the paragraph: when the following text would
+                // pass the right edge the tab is pulled left instead of pushing the text out of the
+                // line and wrapping its last glyph onto the next line.
+                const limit = stop.alignment === TabStopAlignment.START
+                    ? rightEdge
+                    : rightEdge - (followingWidth - alignmentOffset);
+                const width = Math.min(stop.offset, limit) - position - alignmentOffset;
                 if (width > 0) {
                     glyph.width = width;
                     glyph.tabLeader = stop.leader;
@@ -1115,7 +1153,12 @@ function _adjustExplicitTabStop(
         : tabStop.alignment === TabStopAlignment.CENTER
             ? followingWidth / 2
             : 0;
-    const targetOffset = Math.min(tabStop.offset, origin + divide.width);
+    const rightEdge = origin + divide.width;
+    // Same rule as the incoming-tab pass: an aligned field must not cross the right edge.
+    const targetOffset = Math.min(
+        tabStop.offset,
+        tabStop.alignment === TabStopAlignment.START ? rightEdge : rightEdge - (followingWidth - alignmentOffset)
+    );
     const width = targetOffset - tabLeft - alignmentOffset;
     if (width <= 0) {
         if (usesFixedTabStops) {

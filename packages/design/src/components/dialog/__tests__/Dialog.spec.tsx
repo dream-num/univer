@@ -97,9 +97,11 @@ describe('Dialog', () => {
         const onClose = vi.fn();
         const onOpenChange = vi.fn();
         const { getByRole } = render(
-            <Dialog open title="Title" mask={mask} keyboard={false} onClose={onClose} onOpenChange={onOpenChange}>
-                <input aria-label="Dialog draft" />
-            </Dialog>
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <Dialog open title="Title" mask={mask} keyboard={false} onClose={onClose} onOpenChange={onOpenChange}>
+                    <input aria-label="Dialog draft" />
+                </Dialog>
+            </ConfigProvider>
         );
         const input = getByRole('textbox');
         input.focus();

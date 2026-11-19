@@ -216,6 +216,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorkbookCalculationSettingsMutation,
             SetWorkbookNameMutation,
             SetWorksheetNameMutation,
+            SetWorksheetOrderMutation,
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
@@ -325,7 +326,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetHideMutation,
                 SetWorksheetNameCommand,
                 SetWorksheetOrderCommand,
-                SetWorksheetOrderMutation,
 
                 SetWorksheetRowAutoHeightMutation,
                 SetWorksheetRowHeightMutation,

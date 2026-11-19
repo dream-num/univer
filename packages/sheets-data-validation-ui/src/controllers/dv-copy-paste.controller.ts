@@ -113,7 +113,7 @@ export class DataValidationCopyPasteController extends Disposable {
         const repeatRange = getRepeatRange(sourceVirtualRange, targetVirtualRange, true);
         const clearTargetRanges = targetVirtualization.mapRange(targetVirtualRange);
         const getTargetRanges = (sourceRanges: IRange[]) => repeatRange.flatMap(({ startRange }) => sourceRanges.flatMap((sourceRange) => (
-            targetVirtualization.mapRange(Rectangle.getPositionRange(sourceRange, startRange))
+            targetVirtualization.mapRange(Rectangle.moveOffset(sourceRange, startRange.startColumn, startRange.startRow))
         )));
 
         if (pastedUnitId !== copyUnitId || pastedSubUnitId !== copySubUnitId) {

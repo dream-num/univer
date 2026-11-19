@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     design: {
         Accessibility: {
+            clearInput: 'Hapus input',
             closeBadge: 'Tutup lencana',
             close: 'Tutup',
             menu: 'Menu',
@@ -69,6 +70,7 @@ const locale: typeof enUS = {
             confirm: 'OK',
         },
         GradientColorPicker: {
+            add: 'Tambahkan titik gradien',
             linear: 'Linear',
             radial: 'Radial',
             angular: 'Angular',

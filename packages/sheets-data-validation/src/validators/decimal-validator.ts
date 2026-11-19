@@ -28,8 +28,22 @@ import { BaseSheetValidator } from './base-sheet-validator';
 import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
 
+// Numeric text as a sheet reads it: an optional sign, digits with an optional decimal
+// point, and an optional exponent. Unary plus also read blank text as 0, the 0x, 0b and
+// 0o literals as numbers, and booleans as 1 and 0.
+const NUMERIC_TEXT = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i;
+
 export function getCellValueNumber(cellValue: CellValue) {
-    return +cellValue;
+    if (typeof cellValue === 'number') {
+        return cellValue;
+    }
+
+    if (typeof cellValue === 'string') {
+        const text = cellValue.trim();
+        return NUMERIC_TEXT.test(text) ? Number(text) : Number.NaN;
+    }
+
+    return Number.NaN;
 }
 
 export class DecimalValidator extends BaseSheetValidator {

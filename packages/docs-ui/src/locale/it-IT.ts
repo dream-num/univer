@@ -185,6 +185,7 @@ const locale: typeof enUS = {
                 sectionSetting: 'Impostazioni sezione',
             },
             paragraphSetting: {
+                wordWrap: 'Consenti sillabazione testo in alfabeto latino',
                 alignment: 'Allineamento',
                 indentation: 'Rientro',
                 left: 'Sinistra',

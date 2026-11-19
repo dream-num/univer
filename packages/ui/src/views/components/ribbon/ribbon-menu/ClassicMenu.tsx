@@ -18,6 +18,7 @@ import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { useDependency } from '../../../../utils/di';
+import { useRibbonTabs } from './use-ribbon-tabs';
 
 export function ClassicMenu({
     ribbon,
@@ -29,6 +30,7 @@ export function ClassicMenu({
     onSelectTab: (tab: IMenuSchema) => void;
 }) {
     const localeService = useDependency(LocaleService);
+    const handleKeyDown = useRibbonTabs(ribbon, onSelectTab);
     return (
         <div
             className={`
@@ -37,6 +39,7 @@ export function ClassicMenu({
               dark:!univer-bg-gray-900
             `}
             role="tablist"
+            onKeyDown={handleKeyDown}
         >
             {ribbon.map((group) => {
                 const isActive = activatedTab === group.key;
@@ -46,14 +49,15 @@ export function ClassicMenu({
                         type="button"
                         role="tab"
                         aria-selected={isActive}
+                        tabIndex={isActive ? 0 : -1}
                         title={localeService.t(group.title || group.key)}
                         onClick={() => onSelectTab(group)}
                         className={clsx(`
                           univer-flex univer-cursor-pointer univer-appearance-none univer-items-center univer-gap-1
                           univer-rounded-sm univer-border-none univer-px-2 univer-py-1 univer-text-sm
-                          univer-transition-colors
-                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500
-                          dark:focus:!univer-ring-primary-300
+                          univer-outline-none univer-transition-colors
+                          focus-visible:univer-ring-2 focus-visible:univer-ring-primary-500
+                          dark:focus-visible:!univer-ring-primary-300
                         `, isActive
                             ? `
                               univer-bg-primary-50 univer-font-semibold univer-text-primary-600 univer-shadow-sm

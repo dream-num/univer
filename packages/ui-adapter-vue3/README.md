@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/ui-adapter-vue3` | `UniverUiAdapterVue3` | No | No | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/ui-adapter-vue3` | `UniverUiAdapterVue3` | No | No | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/ui-adapter-vue3
 npm install @univerjs/ui-adapter-vue3
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverVue3AdapterPlugin } from '@univerjs/ui-adapter-vue3';

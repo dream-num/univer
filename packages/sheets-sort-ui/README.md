@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-sort-ui` | `UniverSheetsSortUi` | Yes | Yes | No |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-sort-ui` | `UniverSheetsSortUi` | Yes | Yes | No | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-sort-ui
 npm install @univerjs/sheets-sort-ui
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import '@univerjs/sheets-sort-ui/lib/index.css';

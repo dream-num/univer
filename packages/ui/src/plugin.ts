@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverUIConfig } from './config/config';
 import {
     DependentOn,
     generateRandomId,
@@ -31,6 +30,7 @@ import {
     touchDependencies,
 } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { IUniverUIConfig } from './config/config';
 import pkg from '../package.json';
 import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';
@@ -144,7 +144,7 @@ export class UniverUIPlugin extends Plugin {
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],
-            [IDialogService, { useClass: DesktopDialogService, lazy: true }],
+            [IDialogService, { useClass: DesktopDialogService }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             // Mount the message host before a command can publish its first error.
@@ -170,6 +170,7 @@ export class UniverUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [ComponentsController],
+            [IDialogService],
             [IUIController],
             [ErrorController],
         ]);

@@ -49,28 +49,6 @@
             }
         },
         {
-            "name": "Launch Slide (Chrome)",
-            "request": "launch",
-            "type": "chrome",
-            "url": "http://localhost:5173/#slides",
-            "webRoot": "${workspaceFolder}/examples",
-            "presentation": {
-                "group": "0_example",
-                "order": 6
-            }
-        },
-        {
-            "name": "Launch Slide (Edge)",
-            "request": "launch",
-            "type": "msedge",
-            "url": "http://localhost:5173/#slides",
-            "webRoot": "${workspaceFolder}/examples",
-            "presentation": {
-                "group": "0_example",
-                "order": 5
-            }
-        },
-        {
             "type": "node",
             "name": "vscode-jest-tests",
             "request": "launch",

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IScale } from '@univerjs/core';
+import type { IScale, ThemeService } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { SheetExtension } from '@univerjs/engine-render';
@@ -26,6 +26,8 @@ const EXTENSION_CAN_VIEW_Z_INDEX = 25;
 const EXTENSION_CAN_NOT_VIEW_Z_INDEX = 80;
 
 export class WorksheetProtectionRenderExtension extends SheetExtension {
+    override readonly viewportCacheReusable = this.constructor === WorksheetProtectionRenderExtension;
+
     override uKey = worksheetProtectionKey;
 
     override Z_INDEX = EXTENSION_CAN_VIEW_Z_INDEX;
@@ -34,8 +36,15 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
     private _img = new Image();
     protected _shadowStrategy: 'always' | 'non-editable' | 'non-viewable' | 'none' = 'always';
 
-    constructor(shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none') {
+    constructor(
+        private readonly _themeService: ThemeService,
+        shadowStrategy?: 'always' | 'non-editable' | 'non-viewable' | 'none'
+    ) {
         super();
+        this._img.onload = () => {
+            this._img.onload = null;
+            this.parent?.makeDirty(true);
+        };
         this._img.src = base64;
         if (shadowStrategy) {
             this._shadowStrategy = shadowStrategy;
@@ -54,6 +63,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         }
 
         ctx.save();
+        ctx.globalAlpha *= this._themeService.darkMode ? 0.16 : 1;
         if (!this._pattern) {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
@@ -63,6 +73,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
 
         const { hasWorksheetRule = false, selectionProtection = [] } = worksheet.getCell(startRow, startColumn) as IWorksheetProtectionRenderCellData || {};
         if (!this._pattern) {
+            ctx.restore();
             return;
         }
 
@@ -102,6 +113,12 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         }
 
         ctx.restore();
+    }
+
+    override dispose(): void {
+        this._img.onload = null;
+        this._pattern = null;
+        super.dispose();
     }
 
     /**

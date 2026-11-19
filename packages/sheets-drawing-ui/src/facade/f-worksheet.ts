@@ -19,7 +19,6 @@ import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { ICanvasFloatDom, ICanvasFloatDomInfo, IDOMAnchor } from '@univerjs/sheets-drawing-ui';
 import type { IFComponentKey } from '@univerjs/sheets-ui/facade';
 import type { FRange } from '@univerjs/sheets/facade';
-import type { ISaveCellImagesOptions } from './f-range';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import {
     ISheetDrawingService,
@@ -31,6 +30,7 @@ import { FileNamePart, IBatchSaveImagesService, SheetCanvasFloatDomManagerServic
 import { transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
+import type { ISaveCellImagesOptions } from './f-range';
 
 // why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey { }
@@ -82,6 +82,10 @@ export interface IFWorksheetDrawingUIMixin {
 
     /**
      * Update float dom position and properties
+     *
+     * For multiple floating DOM elements on this worksheet, prefer {@link FWorksheet.batchUpdateFloatDoms}
+     * with an array of `{ id, config }` updates instead of calling this method in a loop.
+     *
      * @param {string} id - float dom id
      * @param {Partial<IFCanvasFloatDomResult>} config - new float dom config
      * @returns {FWorksheet} The worksheet instance for chaining

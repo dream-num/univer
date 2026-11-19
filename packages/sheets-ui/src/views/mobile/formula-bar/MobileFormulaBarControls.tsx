@@ -81,10 +81,8 @@ export function MobileFormulaBarOverlays(props: IMobileFormulaBarOverlayProps) {
                               dark:!univer-text-gray-100
                               dark:active:!univer-bg-primary-900
                             "
-                            onPointerDown={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }}
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onMouseDown={(event) => event.preventDefault()}
                             onClick={() => props.onOperator(operator.value)}
                         >
                             {operator.label}
@@ -160,7 +158,7 @@ export function MobileFormulaBarActions(props: IMobileFormulaBarActionProps) {
                       active:univer-scale-95 active:univer-bg-gray-100
                       dark:active:!univer-bg-gray-700
                     `, action.color)}
-                    onPointerDown={(event) => event.preventDefault()}
+                    onMouseDown={(event) => event.preventDefault()}
                     onClick={action.onClick}
                 >
                     {action.icon}

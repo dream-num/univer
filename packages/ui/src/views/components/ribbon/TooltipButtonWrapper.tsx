@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
-import type { ComponentType, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ComponentType, ReactNode } from 'react';
 import { FOCUSING_SHEET, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     clsx,
@@ -39,18 +39,26 @@ import {
 } from 'react';
 import { combineLatest, map, merge, of, scan, startWith, switchMap } from 'rxjs';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
+import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { getEmbedBoundaryOwner, keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
+import { useMenuHost } from '../../../utils/use-menu-host';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { FONT_FAMILY_ITEM_COMPONENT } from '../../font-family/FontFamilyItem';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
     setDropdownVisible: (_visible: boolean) => {},
+    restoreTriggerFocus: (_event: Event) => {},
 });
+
+export function ToolbarDropdownButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+    const { dropdownVisible } = useContext(TooltipWrapperContext);
+    return <button {...props} type="button" aria-expanded={dropdownVisible} />;
+}
 
 // Ribbon dropdowns share one open key; disabled items must only clear it when they own it.
 const ToolbarDropdownContext = createContext<{
@@ -114,6 +122,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
     const { children, dropdownKey, ...tooltipProps } = props;
 
     const spanRef = useRef<HTMLSpanElement>(null);
+    const triggerFocusRef = useRef<HTMLElement | null>(null);
 
     const [localDropdownVisible, setLocalDropdownVisible] = useState(false);
     const toolbarDropdownContext = useContext(ToolbarDropdownContext);
@@ -121,18 +130,52 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         ? toolbarDropdownContext.openDropdownKey === dropdownKey
         : localDropdownVisible;
 
+    const menuHost = useMenuHost(() => {
+        if (dropdownVisible) {
+            triggerFocusRef.current = null;
+            if (dropdownKey && toolbarDropdownContext) {
+                toolbarDropdownContext.setOpenDropdownKey(null);
+            } else {
+                setLocalDropdownVisible(false);
+            }
+        }
+    });
+    const openRevisionRef = useRef(menuHost.revision);
+
     const handleChangeDropdownVisible = useCallback((visible: boolean) => {
+        if (visible) {
+            if (menuHost.suspended) return;
+            openRevisionRef.current = menuHost.revision;
+            const active = spanRef.current?.ownerDocument.activeElement;
+            triggerFocusRef.current = active instanceof HTMLElement && spanRef.current?.contains(active) ? active : null;
+        }
         if (dropdownKey && toolbarDropdownContext) {
             toolbarDropdownContext.setOpenDropdownKey(visible ? dropdownKey : null);
         } else {
             setLocalDropdownVisible(visible);
         }
-    }, [dropdownKey, toolbarDropdownContext]);
+    }, [dropdownKey, toolbarDropdownContext, menuHost]);
+
+    const restoreTriggerFocus = useCallback((event: Event) => {
+        if (openRevisionRef.current !== menuHost.revision || menuHost.suspended) {
+            event.preventDefault();
+            return;
+        }
+        const trigger = triggerFocusRef.current;
+        triggerFocusRef.current = null;
+        if (!trigger?.isConnected) return;
+        const active = trigger.ownerDocument.activeElement;
+        if (active === trigger.ownerDocument.body || (event.target instanceof HTMLElement && event.target.contains(active))) {
+            event.preventDefault();
+            trigger.focus({ preventScroll: true });
+        }
+    }, [menuHost]);
 
     const contextValue = useMemo(() => ({
         dropdownVisible,
         setDropdownVisible: handleChangeDropdownVisible,
-    }), [dropdownVisible, handleChangeDropdownVisible]);
+        restoreTriggerFocus,
+    }), [dropdownVisible, handleChangeDropdownVisible, restoreTriggerFocus]);
 
     useImperativeHandle(ref, () => ({
         el: spanRef.current,
@@ -165,7 +208,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
 }) {
     const { children, overlay, disabled, align, dropdownComponent: DropdownComponent = Dropdown } = props;
     const { direction } = useContext(ConfigContext);
-    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const { dropdownVisible, setDropdownVisible, restoreTriggerFocus } = useContext(TooltipWrapperContext);
     const triggerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -216,6 +259,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
             disabled={disabled}
             open={dropdownVisible}
             onOpenChange={handleVisibleChange}
+            onCloseAutoFocus={restoreTriggerFocus}
         >
             <div ref={triggerRef} className="univer-h-full" onClick={(e) => e.stopPropagation()}>
                 {children}
@@ -288,7 +332,9 @@ export function DropdownMenuWrapper({
     dropdownComponent?: ComponentType<IDropdownProps>;
     dropdownMenuComponent?: ComponentType<IDropdownMenuProps>;
 }) {
-    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const { dropdownVisible, setDropdownVisible, restoreTriggerFocus } = useContext(TooltipWrapperContext);
+    const menuHost = useDependency(IContextMenuHostService);
+    const openRevisionRef = useRef(menuHost.revision);
     const shortcutService = useDependency(IShortcutService);
     const contextService = useDependency(IContextService);
     const instanceService = useDependency(IUniverInstanceService);
@@ -380,6 +426,8 @@ export function DropdownMenuWrapper({
 
     function handleVisibleChange(visible: boolean) {
         if (visible) {
+            if (menuHost.suspended) return;
+            openRevisionRef.current = menuHost.revision;
             const element = document.activeElement;
             const workbook = contextService.getContextValue(FOCUSING_SHEET)
                 ? instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
@@ -400,6 +448,10 @@ export function DropdownMenuWrapper({
     function handleCloseAutoFocus(event: Event) {
         const editorFocus = editorFocusRef.current;
         editorFocusRef.current = null;
+        if (openRevisionRef.current !== menuHost.revision || menuHost.suspended) {
+            event.preventDefault();
+            return;
+        }
         if (sheetTargetRef.current && !sheetTargetRef.current.valid) {
             event.preventDefault();
             const activeElement = document.activeElement;
@@ -407,6 +459,10 @@ export function DropdownMenuWrapper({
             if (activeElement === document.body || focusInClosingMenu) {
                 layoutService.focus();
             }
+            return;
+        }
+        if (!editorFocus) {
+            restoreTriggerFocus(event);
             return;
         }
         if (!editorFocus?.element.isConnected || getEmbedBoundaryOwner(editorFocus.element) !== editorFocus.owner) {

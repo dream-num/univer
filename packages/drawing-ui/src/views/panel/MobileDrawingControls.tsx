@@ -17,7 +17,6 @@
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import type { ComponentProps } from 'react';
-import type { LocaleKey } from '../../locale/types';
 import { debounce, DrawingTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
 import { Button, Checkbox, clsx, InputNumber, MobileSelect } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -25,6 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IconManager, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { filter, map, merge } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../../commands/operations/drawing-group.operation';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
@@ -54,24 +54,23 @@ function MobileDrawingInputNumber(props: ComponentProps<typeof InputNumber>) {
         <InputNumber
             {...props}
             controls={false}
-            className={clsx('univer-h-12 univer-w-full', props.className)}
-            inputClassName={clsx('[&_input]:!univer-h-12 [&_input]:!univer-text-base', props.inputClassName)}
+            className={clsx('univer-w-full', props.className)}
+            inputClassName={clsx('', props.inputClassName)}
+            size="small"
         />
     );
 }
 
 function MobileDrawingCheckbox(props: ComponentProps<typeof Checkbox>) {
-    return <Checkbox {...props} className={clsx('univer-flex univer-min-h-12 univer-items-center univer-justify-center', props.className)} />;
+    return <Checkbox {...props} className={clsx('univer-flex univer-items-center univer-justify-center', props.className)} />;
 }
 
 function MobileDrawingButton(props: ComponentProps<typeof Button>) {
     return (
         <Button
             {...props}
-            className={clsx(`
-              univer-flex univer-min-h-12 univer-flex-1 univer-items-center univer-justify-center univer-gap-2
-              univer-text-base
-            `, props.className)}
+            className={clsx('univer-flex univer-flex-1 univer-items-center univer-justify-center univer-gap-2', props.className)}
+            size="middle"
         />
     );
 }
@@ -394,7 +393,7 @@ export function MobileDrawingAlign(props: IMobileDrawingAlignProps) {
                       dark:!univer-text-gray-0
                     "
                 >
-                    <MobileSelect value={alignValue} options={alignOptions} onChange={handleAlignChange} />
+                    <MobileSelect value={alignValue} options={alignOptions} onChange={handleAlignChange} size="small" />
                 </div>
             </div>
         </div>

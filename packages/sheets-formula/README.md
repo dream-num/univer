@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-formula` | `UniverSheetsFormula` | No | Yes | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-formula` | `UniverSheetsFormula` | No | Yes | Yes | Yes |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-formula
 npm install @univerjs/sheets-formula
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import EnUS from '@univerjs/sheets-formula/locale/en-US';
@@ -33,14 +33,26 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 // Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
-Exported plugin classes:
+Main-thread plugin classes:
 
 - `UniverSheetsFormulaPlugin`
-- `UniverRemoteSheetsFormulaPlugin`
+
+### Worker usage
+
+On the main thread, import `UniverSheetsFormulaPlugin` from `@univerjs/sheets-formula`. Set `notExecuteFormula: true` to delegate calculation to the worker.
+
+In the worker entry, import `UniverRemoteSheetsFormulaPlugin` from `@univerjs/sheets-formula/worker`:
+
+```ts
+import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula/worker';
+
+univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
+```
 
 ## Integration Notes
 
 Register this package with `@univerjs/engine-formula` and `@univerjs/sheets` before adding formula UI packages.
+- Import `@univerjs/sheets-formula/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

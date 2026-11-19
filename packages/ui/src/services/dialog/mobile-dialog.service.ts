@@ -17,15 +17,17 @@
 import { Inject, Injector } from '@univerjs/core';
 import { connectInjector } from '../../utils/di';
 import { MobileDialogPart } from '../../views/components/dialog-part/MobileDialogPart';
+import { IContextMenuHostService } from '../contextmenu/contextmenu-host.service';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import { DesktopDialogService } from './desktop-dialog.service';
 
 export class MobileDialogService extends DesktopDialogService {
     constructor(
         @Inject(Injector) injector: Injector,
-        @IUIPartsService uiPartsService: IUIPartsService
+        @IUIPartsService uiPartsService: IUIPartsService,
+        @IContextMenuHostService menuHostService: IContextMenuHostService
     ) {
-        super(injector, uiPartsService);
+        super(injector, uiPartsService, menuHostService);
     }
 
     override close(id: string): void {

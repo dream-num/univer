@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { UniverRPCNodeMainPlugin, UniverRPCNodeWorkerPlugin } from './plugin';
+export { UniverRPCNodeMainPlugin } from './plugin';

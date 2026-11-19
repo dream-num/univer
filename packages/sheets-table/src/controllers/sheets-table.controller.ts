@@ -16,8 +16,8 @@
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import type { ITableResource } from '../types/type';
 import {
+    composeStyles,
     Disposable,
     generateRandomId,
     Inject,
@@ -26,12 +26,15 @@ import {
     IUniverInstanceService,
     Rectangle,
     RTree,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { CopySheetCommand, INTERCEPTOR_POINT, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { CopySheetCommand, InterceptCellContentPriority, INTERCEPTOR_POINT, RangeThemeInterceptorId, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { ITableResource } from '../types/type';
 import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { PLUGIN_NAME } from '../const';
+import { getTableDxfStyle, hasTableDxfStyles } from '../models/table-dxf';
 import { TableManager } from '../models/table-manager';
 
 export class SheetsTableController extends Disposable {
@@ -46,6 +49,7 @@ export class SheetsTableController extends Disposable {
         this.registerTableChangeEvent();
         this._initSnapshot();
         this._initSheetChange();
+        this.registerTableStyleInterceptor();
         this.registerTableHeaderInterceptor();
     }
 
@@ -119,6 +123,30 @@ export class SheetsTableController extends Disposable {
         );
     }
 
+    registerTableStyleInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            id: RangeThemeInterceptorId,
+            effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
+            priority: InterceptCellContentPriority.TABLE_STYLE,
+            handler: (cell, context, next) => {
+                const { row, col, unitId, subUnitId } = context;
+                const table = this.getContainerTableWithRange(unitId, subUnitId, {
+                    startRow: row,
+                    endRow: row,
+                    startColumn: col,
+                    endColumn: col,
+                });
+                const style = table && getTableDxfStyle(table, row, col);
+                if (!style) {
+                    return next(cell);
+                }
+                const result = (!cell || cell === context.rawData) ? { ...context.rawData } : cell;
+                result.themeStyle = composeStyles(result.themeStyle, style);
+                return next(result);
+            },
+        }));
+    }
+
     registerTableHeaderInterceptor() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
@@ -137,12 +165,9 @@ export class SheetsTableController extends Disposable {
                                 const tableStartRow = tableRange.startRow;
                                 if (tableStartRow === row) {
                                     const columnName = table.getColumnNameByIndex(index);
-                                    if (!cell || cell === context.rawData) {
-                                        cell = { ...context.rawData };
-                                    }
-
-                                    cell.v = columnName;
-                                    return next(cell);
+                                    const result = (!cell || cell === context.rawData) ? { ...context.rawData } : cell;
+                                    result.v = columnName;
+                                    return next(result);
                                 }
                             }
                         }
@@ -235,9 +260,10 @@ export class SheetsTableController extends Disposable {
                                     name: tableJson.name,
                                     range: tableJson.range,
                                     tableId: tableJson.id,
+                                    ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
                                     options: {
                                         ...tableJson.options,
-                                        columns: tableJson.columns,
+                                        columns: hasTableDxfStyles(tableJson) ? Tools.deepClone(tableJson.columns) : tableJson.columns,
                                         filters: tableJson.filters.tableColumnFilterList,
                                     },
                                 },
@@ -277,9 +303,10 @@ export class SheetsTableController extends Disposable {
                                         sheetId: targetSubUnitId,
                                     },
                                     tableId,
+                                    ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
                                     options: {
                                         ...tableJson.options,
-                                        columns: tableJson.columns,
+                                        columns: hasTableDxfStyles(tableJson) ? Tools.deepClone(tableJson.columns) : tableJson.columns,
                                         filters: tableJson.filters.tableColumnFilterList,
                                     },
                                 },

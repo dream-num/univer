@@ -15,12 +15,14 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
+import type { IOleConfig } from '../models/ole-model';
 
 export const DRAWING_PLUGIN_CONFIG_KEY = 'drawing.config';
 
 export const configSymbol = Symbol(DRAWING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDrawingConfig {
+    ole?: IOleConfig;
     override?: DependencyOverride;
     /**
      * The maximum allowed size of uploaded images in bytes.

@@ -40,7 +40,10 @@ export class Choose extends BaseFunction {
         }
 
         if (_indexNum.isReferenceObject()) {
-            _indexNum = (_indexNum as BaseReferenceObject).toArrayValueObject();
+            const values = (_indexNum as BaseReferenceObject).toArrayValueObject();
+            _indexNum = values.getRowCount() === 1 && values.getColumnCount() === 1
+                ? values.get(0, 0) as BaseValueObject
+                : values;
         }
 
         if (!_indexNum.isArray()) {

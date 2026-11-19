@@ -15,8 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
-import { getDateSerialNumberByObject, getWeekDayByDateSerialNumber } from '../../../basics/date';
+import { getDateSerialNumberByObject, getIsoWeekNumber } from '../../../basics/date';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -50,40 +49,6 @@ export class Isoweeknum extends BaseFunction {
             return dateSerialNumber;
         }
 
-        const currentDate = excelSerialToDate(dateSerialNumber, this.getDateSystem());
-        const currentYear = this.getDateSystem() === DateSystem.Date1900 && dateSerialNumber === 0
-            ? 1900
-            : currentDate.getUTCFullYear();
-        let yearStart = new Date(Date.UTC(currentYear, 0, 1));
-        let yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
-        let yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
-
-        let yearWeekStartSerialNumber: number;
-
-        if (yearStartWeekDay < 1) {
-            yearWeekStartSerialNumber = yearStartSerialNumber + 1;
-        } else if (yearStartWeekDay <= 4) {
-            yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
-        } else {
-            yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
-        }
-
-        if (dateSerialNumber < yearWeekStartSerialNumber) {
-            yearStart = new Date(Date.UTC(currentYear - 1, 0, 1));
-            yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
-            yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
-
-            if (yearStartWeekDay < 1) {
-                yearWeekStartSerialNumber = yearStartSerialNumber + 1;
-            } else if (yearStartWeekDay <= 4) {
-                yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay - 1);
-            } else {
-                yearWeekStartSerialNumber = yearStartSerialNumber + (11 - yearStartWeekDay);
-            }
-        }
-
-        const result = Math.ceil((dateSerialNumber - yearWeekStartSerialNumber + 1) / 7);
-
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(getIsoWeekNumber(dateSerialNumber, this.getDateSystem()));
     }
 }

@@ -1,9 +1,8 @@
-import type { WorkbenchLocale } from './workbench-settings';
-
 import { mergeLocales } from '@univerjs/core';
+import type { WorkbenchLocale } from './workbench-settings';
 import { WORKBENCH_LOCALE_META } from './workbench-settings';
 
-type DevLocaleProduct = 'docs' | 'sheets' | 'slides';
+type DevLocaleProduct = 'docs' | 'sheets';
 type LocalePack = Record<string, unknown>;
 
 interface IDevLocaleResponse {

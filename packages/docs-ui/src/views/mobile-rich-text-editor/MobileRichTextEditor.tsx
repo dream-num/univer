@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Editor } from '../../services/editor/editor';
-import type { IRichTextEditorProps } from '../RichTextEditor';
 import { Button, clsx, useMobileKeyboardViewportLayout } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CheckMarkIcon, CloseIcon, DownIcon } from '@univerjs/icons';
 import { MobileKeyboardInsetContext, useEvent, useMobileCanvasPanel } from '@univerjs/ui';
 import { useContext, useEffect, useRef, useState } from 'react';
+import type { Editor } from '../../services/editor/editor';
+import type { IRichTextEditorProps } from '../RichTextEditor';
 import { MobileRichTextToolbar } from '../mobile-rich-text-toolbar/MobileRichTextToolbar';
 import { RichTextEditor } from '../RichTextEditor';
 
@@ -63,7 +63,7 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
         keyboardWasVisibleRef.current = visible;
     }, [confirmOnDismiss, keyboardInset]);
 
-    const buttonClassName = clsx('univer-h-12 univer-shrink-0 univer-text-lg', expanded
+    const buttonClassName = clsx('univer-shrink-0', expanded
         ? 'univer-flex-1'
         : 'univer-w-10');
     const expandButton = (
@@ -74,6 +74,7 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
             aria-expanded={expanded}
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => onExpandedChange(!expanded)}
+            size="middle"
         >
             <DownIcon className={clsx('univer-size-5', !expanded && 'univer-rotate-180')} />
         </Button>
@@ -117,10 +118,10 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
                   dark:!univer-bg-gray-800
                 `)}
             >
-                <Button variant="ghost" className={buttonClassName} aria-label={labels.cancel} onPointerDown={(event) => event.preventDefault()} onClick={onCancel}>
+                <Button variant="ghost" className={buttonClassName} aria-label={labels.cancel} onPointerDown={(event) => event.preventDefault()} onClick={onCancel} size="middle">
                     <CloseIcon />
                 </Button>
-                <Button variant="ghost" className={clsx(buttonClassName, 'univer-text-primary-600')} aria-label={labels.confirm} onPointerDown={(event) => event.preventDefault()} onClick={onConfirm}>
+                <Button variant="ghost" className={clsx(buttonClassName, 'univer-text-primary-600')} aria-label={labels.confirm} onPointerDown={(event) => event.preventDefault()} onClick={onConfirm} size="middle">
                     <CheckMarkIcon />
                 </Button>
                 {expanded && expandButton}

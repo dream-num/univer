@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package | UMD global | CSS | Locales | Facade entry |
-| --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-numfmt` | `UniverSheetsNumfmt` | No | No | Yes |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/sheets-numfmt` | `UniverSheetsNumfmt` | No | No | Yes | No |
 
 ## Installation
 
@@ -20,9 +20,9 @@ pnpm add @univerjs/sheets-numfmt
 npm install @univerjs/sheets-numfmt
 ```
 
-Keep all `@univerjs/*` packages on the same version.
-
 ## Usage
+
+Start with the [integration setup](https://docs.univer.ai/) for your document type, including its required plugins, styles, and locale resources. The snippet below assumes that setup is complete.
 
 ```ts
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
@@ -33,6 +33,7 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 ## Integration Notes
 
 Use this package with `@univerjs/sheets-numfmt-ui` when users need number-format menus and editors.
+- Import `@univerjs/sheets-numfmt/facade` when using this package through Univer Facade APIs.
 
 ## Resources
 

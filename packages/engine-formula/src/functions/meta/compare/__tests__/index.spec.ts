@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
 import { compareToken } from '../../../../basics/token';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -26,11 +25,6 @@ import { Compare } from '../index';
 
 describe('Test compare function', () => {
     const testFunction = new Compare(FUNCTION_NAMES_META.COMPARE);
-
-    beforeEach(() => {
-        // Cache will affect the calculation results
-        CELL_INVERTED_INDEX_CACHE.clear();
-    });
 
     describe('Compare', () => {
         it('Comparing Boolean and number', () => {

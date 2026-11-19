@@ -28,7 +28,15 @@ import {
 } from '@univerjs/core';
 import { SetDocumentPermissionCommand, UniverDocsPlugin } from '@univerjs/docs';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { DesktopDialogService, IDialogService, IUIPartsService, RediProvider, UIPartsService } from '@univerjs/ui';
+import {
+    ContextMenuHostService,
+    DesktopDialogService,
+    IContextMenuHostService,
+    IDialogService,
+    IUIPartsService,
+    RediProvider,
+    UIPartsService,
+} from '@univerjs/ui';
 import uiEnUS from '@univerjs/ui/locale/en-US';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -83,6 +91,7 @@ function setup(supportedTypes: UnitObject[] = []) {
     const injector = univer.__getInjector();
     injector.get(IPermissionService).addPermissionPoint({ id: `${UnitObject.Document}.${UnitAction.Edit}_doc`, type: UnitObject.Document, subType: UnitAction.Edit, value: true, status: PermissionStatus.DONE });
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
+    injector.add([IContextMenuHostService, { useClass: ContextMenuHostService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     return { injector, dialogs: injector.get(IDialogService) };
 }

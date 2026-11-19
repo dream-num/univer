@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -24,6 +23,7 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 import pkg from '../package.json';
 import { AddSheetDrawingCommentOperation, OpenSheetCommentPanelOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -32,7 +32,7 @@ import { SheetsThreadCommentDrawingRenderController } from './controllers/render
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
-import { SheetsThreadCommentPermissionController } from './controllers/sheets-thread-comment-permission.controller';
+import { SheetsThreadCommentOperationPermissionController } from './controllers/sheets-thread-comment-operation-permission.controller';
 import { SheetsThreadCommentPopupController } from './controllers/sheets-thread-comment-popup.controller';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
@@ -84,7 +84,7 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
             [SheetsThreadCommentHoverController],
             [SheetsThreadCommentPopupController],
             [SheetsThreadCommentPopupService],
-            [SheetsThreadCommentPermissionController],
+            [SheetsThreadCommentOperationPermissionController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -113,6 +113,6 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
         this._injector.get(SheetsThreadCommentCopyPasteController);
         this._injector.get(SheetsThreadCommentHoverController);
         this._injector.get(SheetsThreadCommentPopupController);
-        this._injector.get(SheetsThreadCommentPermissionController);
+        this._injector.get(SheetsThreadCommentOperationPermissionController);
     }
 }

@@ -15,12 +15,10 @@
  */
 
 import type { BooleanNumber, ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+import type { ISetArrayFormulaDataMutationParams, ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-
+import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable, SheetTypes, toDisposable } from '@univerjs/core';
+import { FormulaDataModel, SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     Rect,
     ScrollBar,
@@ -31,9 +29,17 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
+    MoveRangeMutation,
+    SetRangeValuesMutation,
+} from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
+import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
@@ -59,6 +65,8 @@ export interface ITelemetryData {
 const FRAME_STACK_THRESHOLD = 60;
 
 export class SheetRenderController extends RxDisposable implements IRenderModule {
+    private _arrayFormulaSheets: Set<string> | undefined;
+    private _hadEmbeddedArrayData: boolean | undefined;
     private _renderMetric$: Subject<ITelemetryData> = new Subject();
     renderMetric$ = this._renderMetric$.asObservable();
     constructor(
@@ -67,17 +75,29 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
+        @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService,
+        @Optional(FormulaDataModel) private readonly _formulaDataModel?: FormulaDataModel
     ) {
         super();
+        if (this._formulaDataModel) {
+            this._arrayFormulaSheets = getArrayFormulaSheetIds(this._context.unitId, {
+                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+            });
+        }
         this._addNewRender();
         this._initRenderMetricSubscriber();
+    }
+
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
     }
 
     private _addNewRender() {
         const { scene, engine, unit: workbook } = this._context;
 
         this._addComponent(workbook);
+        this._initWorksheetVisibility();
         this._initRerenderScheduler();
         this._initCommandListener();
 
@@ -244,6 +264,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             strokeWidth: 1,
         });
 
+        SpreadsheetLeftTopPlaceholder.viewportCacheReusable = true;
+        scene.setViewportCacheReuseKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        this.disposeWithMe(toDisposable(() => scene.setViewportCacheReuseKey(null)));
         this._context.mainComponent = spreadsheet;
         components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
         components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
@@ -364,6 +387,57 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         return viewMain;
     }
 
+    private _initWorksheetVisibility(): void {
+        let chartActive = false;
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe((worksheet) => {
+            const { scene, components } = this._context;
+            const isChart = worksheet?.getConfig().type === SheetTypes.CHART;
+            if (!isChart && !chartActive) {
+                return;
+            }
+            chartActive = isChart;
+            for (const key of [SHEET_VIEW_KEY.MAIN, SHEET_VIEW_KEY.ROW, SHEET_VIEW_KEY.COLUMN, SHEET_VIEW_KEY.LEFT_TOP]) {
+                const component = components.get(key);
+                if (isChart) {
+                    component?.hide();
+                } else {
+                    component?.show();
+                }
+            }
+            if (isChart) {
+                for (const key of [
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_ROW_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM,
+                    SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT,
+                    SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT,
+                    SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP,
+                ]) {
+                    const viewport = scene.getViewport(key);
+                    if (!viewport) {
+                        continue;
+                    }
+                    if (viewport.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN) {
+                        viewport.enable();
+                        viewport.setMargin(0, 0);
+                        viewport.resetPadding();
+                        viewport.resizeWhenFreezeChange({ left: 0, top: 0, right: 0, bottom: 0 });
+                    } else {
+                        viewport.disable();
+                    }
+                }
+            } else {
+                for (const key of [SHEET_VIEWPORT_KEY.VIEW_MAIN, SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP]) {
+                    scene.getViewport(key)?.enable();
+                }
+            }
+            scene.makeDirty();
+        }));
+    }
+
     private _initRerenderScheduler(): void {
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) return null;
@@ -371,7 +445,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const { skeleton: spreadsheetSkeleton, sheetId } = param;
             const workbook = this._context.unit;
             const worksheet = workbook?.getSheetBySheetId(sheetId);
-            if (workbook == null || worksheet == null) return;
+            if (!worksheet || worksheet !== workbook.getActiveSheet() || worksheet.getConfig().type === SheetTypes.CHART) {
+                return;
+            }
 
             const { mainComponent, components } = this._context;
             const spreadsheet = mainComponent as Spreadsheet;
@@ -405,6 +481,11 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _initCommandListener(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id !== SetScrollRelativeCommand.id && command.id !== SetScrollOperation.id) {
+                this._context.scene.invalidateViewportCacheReuse();
+            }
+        }));
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             const { unit: workbook } = this._context;
             const { id: commandId } = command;
@@ -451,8 +532,26 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _markUnitDirty(command: ICommandInfo, options: IExecutionOptions | undefined) {
-        if (command.id.substring(0, 3) === 'doc') {
+        if (command.id.substring(0, 3) === 'doc' || !this._sheetRenderService.shouldAutomaticallyRenderMutation(command.id)) {
             return;
+        }
+
+        let repaintCells = true;
+        if (command.id === SetArrayFormulaDataMutation.id && command.params) {
+            const params = command.params as ISetArrayFormulaDataMutationParams;
+            const affected = getArrayFormulaSheetIds(this._context.unitId, params);
+            const previous = this._arrayFormulaSheets;
+            this._arrayFormulaSheets = affected;
+            const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
+            const hadEmbedded = this._hadEmbeddedArrayData;
+            const hasEmbedded = Object.values(params.arrayFormulaEmbedded ?? {})
+                .some((unit) => Object.values(unit ?? {}).some((matrix) => Object.keys(matrix ?? {}).length > 0));
+            this._hadEmbeddedArrayData = hasEmbedded;
+            // Linked drawings still need a scene refresh even when the active sheet has no changed spill cells.
+            if (previous && sheetId && !previous.has(sheetId) && !affected.has(sheetId)
+                && hadEmbedded === false && !hasEmbedded) {
+                repaintCells = false;
+            }
         }
 
         const { mainComponent: spreadsheet, scene } = this._context;
@@ -464,12 +563,14 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             }
         }
 
-        if (spreadsheet) {
+        if (spreadsheet && repaintCells) {
             spreadsheet.makeDirty(); // refresh spreadsheet
         }
 
         scene.makeDirty();
-        if (!command.params) return;
+        if (!command.params || this._getSheetType() === SheetTypes.CHART) {
+            return;
+        }
 
         const cmdParams = command.params as Record<string, any>;
         const viewports = this._spreadsheetViewports(scene);
@@ -537,8 +638,14 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _rangeToBounds(ranges: IRange[]) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
-        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
+        // Backstop for a stale or disposed current skeleton: the manager now follows the active worksheet, but a
+        // mutation can still arrive while the skeleton param is in flux, and a dirty-bounds miss is harmless.
+        const param = this._sheetSkeletonManagerService.getCurrentParam();
+        if (!param) {
+            return [];
+        }
+
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = param.skeleton;
 
         const dirtyBounds: IViewportInfos[] = [];
         for (const r of ranges) {
@@ -566,6 +673,22 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _spreadsheetViewports(scene: Scene) {
         return scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
     }
+}
+
+export function getArrayFormulaSheetIds(
+    unitId: string,
+    params: Pick<ISetArrayFormulaDataMutationParams, 'arrayFormulaCellData' | 'arrayFormulaRange'>
+): Set<string> {
+    const sheets = new Set<string>();
+    for (const units of [params.arrayFormulaCellData, params.arrayFormulaRange]) {
+        const data = units?.[unitId];
+        for (const sheetId in data) {
+            if (data[sheetId] && Object.keys(data[sheetId]).length) {
+                sheets.add(sheetId);
+            }
+        }
+    }
+    return sheets;
 }
 
 export function getLeftTopPlaceholderSize(skeleton: {

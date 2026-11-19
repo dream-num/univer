@@ -15,12 +15,6 @@
  */
 
 import type { MobileDrawerSnap } from '@univerjs/ui';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    ByColorsModel,
-    ByConditionsModel,
-    ByValuesModel,
-} from '../../services/sheets-filter-panel.service';
 import { ICommandService, IContextService, LocaleService, Tools } from '@univerjs/core';
 import {
     Button,
@@ -40,6 +34,12 @@ import {
 } from '@univerjs/ui';
 import { useRef, useState } from 'react';
 import { map, of } from 'rxjs';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    ByColorsModel,
+    ByConditionsModel,
+    ByValuesModel,
+} from '../../services/sheets-filter-panel.service';
 import {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,
@@ -96,6 +96,7 @@ function MobileFilterSyncSwitch() {
                 </div>
             </div>
             <Switch
+                aria-label={localeService.t<LocaleKey>('sheets-filter-ui.sync.title')}
                 defaultChecked={enabled}
                 onChange={(checked) => {
                     filterSyncController.setEnabled(checked);
@@ -230,13 +231,14 @@ function MobileSheetsFilterPanelContent() {
                             "
                         >
                             <MobileActionRowGroup>
-                                <Button onClick={() => closePanel().catch(() => undefined)}>
+                                <Button onClick={() => closePanel().catch(() => undefined)} size="middle">
                                     {localeService.t<LocaleKey>('sheets-filter-ui.panel.cancel')}
                                 </Button>
                                 <Button
                                     variant="primary"
                                     disabled={!canApply || !filterByModel}
                                     onClick={() => applyFilter().catch(() => undefined)}
+                                    size="middle"
                                 >
                                     {localeService.t<LocaleKey>('sheets-filter-ui.panel.confirm')}
                                 </Button>
@@ -263,12 +265,14 @@ function MobileSheetsFilterPanelContent() {
                                     <Button
                                         disabled={!filterRange || col <= filterRange.startColumn}
                                         onClick={() => changeColumn(-1)}
+                                        size="middle"
                                     >
                                         {localeService.t<LocaleKey>('sheets-filter-ui.panel.mobile.previous-column')}
                                     </Button>
                                     <Button
                                         disabled={!filterRange || col >= filterRange.endColumn}
                                         onClick={() => changeColumn(1)}
+                                        size="middle"
                                     >
                                         {localeService.t<LocaleKey>('sheets-filter-ui.panel.mobile.next-column')}
                                     </Button>
@@ -311,7 +315,7 @@ function MobileSheetsFilterPanelContent() {
                             </div>
                             <MobileFilterSyncSwitch />
                             <Button
-                                size="large"
+                                size="middle"
                                 disabled={!hasCriteria || !filterByModel}
                                 onClick={() => clearFilter().catch(() => undefined)}
                             >

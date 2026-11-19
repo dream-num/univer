@@ -15,11 +15,19 @@
  */
 
 import type { IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
-import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type {
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+    IWheelEvent,
+    Viewport,
+} from '@univerjs/engine-render';
+import type {
+    IScrollToCellOperationParams,
+    ISetSelectionsOperationParams,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
 import {
     Direction,
     Disposable,
@@ -29,11 +37,20 @@ import {
     Inject,
     Injector,
     RANGE_TYPE,
+    SheetTypes,
     toDisposable,
     Tools,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
+import { take } from 'rxjs';
+import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
+import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
+import type {
+    IScrollState,
+    IScrollStateSearchParam,
+    IViewportScrollState,
+} from '../../services/scroll-manager.service';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
@@ -49,6 +66,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     private _pendingWheelOffsetX = 0;
     private _pendingWheelOffsetY = 0;
     private _pendingWheelFrameId: number | null = null;
+    private _scrollGeneration = 0;
+    private readonly _selectionScrollTimers = new Set<ReturnType<typeof setTimeout>>();
+    private _pendingWheelFrameSubscription: Subscription | null = null;
+    private _pendingWheelSheetId: string | undefined;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -67,6 +88,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._initSkeletonListener();
     }
 
+    private _getSheetType(): SheetTypes | undefined {
+        return this._context.unit.getActiveSheet()?.getConfig().type;
+    }
+
     private _wheelEventListener() {
         const { scene } = this._context;
         if (!scene) return;
@@ -75,16 +100,23 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (!viewMain) return;
 
         this.disposeWithMe(toDisposable(() => {
-            if (this._pendingWheelFrameId != null) {
-                cancelAnimationFrame(this._pendingWheelFrameId);
-                this._pendingWheelFrameId = null;
-            }
+            this._cancelPendingScroll();
         }));
+        this.disposeWithMe(toDisposable(this._context.activated$.subscribe((active) => {
+            if (!active) {
+                this._cancelPendingWheelScroll();
+            }
+        })));
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
                 }
+                const sheetId = this._context.unit.getActiveSheet(true)?.getSheetId();
+                if (this._pendingWheelSheetId !== sheetId) {
+                    this._cancelPendingWheelScroll();
+                }
+                this._pendingWheelSheetId = sheetId;
 
                 let offsetX = 0;
                 let offsetY = 0;
@@ -115,12 +147,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 // add offset on scroll position to check whether scrolling is reaching limit
                 this._pendingWheelOffsetX += offsetX;
                 this._pendingWheelOffsetY += offsetY;
-                if (this._pendingWheelFrameId == null) {
-                    this._pendingWheelFrameId = requestAnimationFrame(() => {
-                        this._pendingWheelFrameId = null;
-                        this._flushPendingWheelScroll();
-                    });
-                }
+                this._queueWheelScroll();
                 const targetViewportScrollX = viewMain.viewportScrollX + this._pendingWheelOffsetX;
                 const targetViewportScrollY = viewMain.viewportScrollY + this._pendingWheelOffsetY;
                 const { x: targetScrollX, y: targetScrollY } = viewMain.transViewportScroll2ScrollValue(
@@ -146,6 +173,35 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         );
     }
 
+    private _queueWheelScroll() {
+        if (this._pendingWheelFrameId != null || this._pendingWheelFrameSubscription != null) {
+            return;
+        }
+        const engine = this._context.scene.getEngine();
+        const flush = () => {
+            this._pendingWheelFrameId = null;
+            this._pendingWheelFrameSubscription = null;
+            this._flushPendingWheelScroll();
+        };
+        if (engine?.beginFrame$) {
+            this._pendingWheelFrameSubscription = engine.beginFrame$.pipe(take(1)).subscribe(flush);
+        } else {
+            this._pendingWheelFrameId = requestAnimationFrame(flush);
+        }
+    }
+
+    private _cancelPendingWheelScroll() {
+        this._pendingWheelFrameSubscription?.unsubscribe();
+        this._pendingWheelFrameSubscription = null;
+        if (this._pendingWheelFrameId != null) {
+            cancelAnimationFrame(this._pendingWheelFrameId);
+            this._pendingWheelFrameId = null;
+        }
+        this._pendingWheelOffsetX = 0;
+        this._pendingWheelOffsetY = 0;
+        this._pendingWheelSheetId = undefined;
+    }
+
     private _flushPendingWheelScroll() {
         const offsetX = this._pendingWheelOffsetX;
         const offsetY = this._pendingWheelOffsetY;
@@ -155,9 +211,25 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         this._pendingWheelOffsetX = 0;
         this._pendingWheelOffsetY = 0;
+        const sheetId = this._pendingWheelSheetId;
+        this._pendingWheelSheetId = undefined;
+        if (sheetId !== this._context.unit.getActiveSheet(true)?.getSheetId() ||
+            !this._contextService.getContextValue(FOCUSING_SHEET)) {
+            return;
+        }
+        if (this._getSheetType() === SheetTypes.CHART) {
+            this._context.scene.getMainViewport().scrollByViewportDeltaVal({ viewportScrollX: offsetX, viewportScrollY: offsetY });
+            this._context.scene.makeDirty();
+            return;
+        }
+        const viewMain = this._context.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const previousX = viewMain?.viewportScrollX;
+        const previousY = viewMain?.viewportScrollY;
         const canUseScrollFastPath = this._canUseScrollFastPath();
         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
-        this._markSceneDirtyForScrolling(canUseScrollFastPath);
+        if (!viewMain || viewMain.viewportScrollX !== previousX || viewMain.viewportScrollY !== previousY) {
+            this._markSceneDirtyForScrolling(canUseScrollFastPath);
+        }
     }
 
     private _canUseScrollFastPath() {
@@ -177,6 +249,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _markSceneDirtyForScrolling(canUseScrollFastPath: boolean) {
         const { scene } = this._context;
+        if (scene.isViewportCacheReusePending()) {
+            return;
+        }
         if (canUseScrollFastPath) {
             scene.makeDirtyForScrolling();
         } else {
@@ -196,7 +271,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+                    const skeleton = this._getActiveGridSkeleton();
                     if (!skeleton) return;
 
                     if (rawScrollInfo == null) {
@@ -238,7 +313,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+                const skeleton = this._getActiveGridSkeleton();
                 if (skeleton == null || scrollAfterParam.isTrigger === false) {
                     return;
                 }
@@ -287,7 +362,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // get scrollByBar event from viewport and exec ScrollCommand.id.
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+                const skeleton = this._getActiveGridSkeleton();
                 if (skeleton == null || param.isTrigger === false || (param.isBarDragging && !param.isBarDragEnd)) {
                     return;
                 }
@@ -317,10 +392,40 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         //#endregion
     }
 
+    private _cancelPendingScroll() {
+        this._scrollGeneration++;
+        this._cancelPendingWheelScroll();
+        this._selectionScrollTimers.forEach((timer) => clearTimeout(timer));
+        this._selectionScrollTimers.clear();
+        const viewport = this._context.scene.getMainViewport();
+        if (viewport?.scrollAnimationFrameId != null) {
+            cancelAnimationFrame(viewport.scrollAnimationFrameId);
+            viewport.scrollAnimationFrameId = null;
+        }
+    }
+
+    private _getActiveGridSkeleton() {
+        const worksheet = this._context.unit.getActiveSheet();
+        const param = this._sheetSkeletonManagerService.getCurrentParam();
+        if (worksheet?.getConfig().type === SheetTypes.CHART || param?.unitId !== this._context.unitId ||
+            param.sheetId !== worksheet?.getSheetId()) {
+            return;
+        }
+        return param.skeleton;
+    }
+
     private _initSkeletonListener() {
+        this.disposeWithMe(this._context.unit.activeSheet$.subscribe(() => {
+            this._cancelPendingScroll();
+            this._scrollManagerService.setSearchParam(null);
+            if (this._getSheetType() === SheetTypes.CHART) {
+                this._scrollManagerService.validViewportScrollInfo$.next(null);
+                this._context.scene.getMainViewport().scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: 0 });
+            }
+        }));
         this.disposeWithMe(toDisposable(
             this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
-                if (param == null) {
+                if (param == null || !this._getActiveGridSkeleton() || param.sheetId !== this._context.unit.getActiveSheet()?.getSheetId()) {
                     return;
                 }
                 const scrollParam = { unitId: param.unitId, sheetId: param.sheetId } as IScrollStateSearchParam;
@@ -345,7 +450,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const offsetX = viewportScrollX - startX;
         const offsetY = viewportScrollY - startY;
 
-        function animate(now: number) {
+        const generation = this._scrollGeneration;
+        const worksheet = this._context.unit.getActiveSheet();
+        const animate = (now: number) => {
+            if (this._disposed || generation !== this._scrollGeneration || worksheet !== this._context.unit.getActiveSheet() ||
+                worksheet?.getConfig().type === SheetTypes.CHART) {
+                return;
+            }
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1); // 0 → 1
             const ease = 1 - (1 - progress) ** 3; // cubic easing
@@ -363,7 +474,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             } else {
                 viewportMain.scrollAnimationFrameId = null;
             }
-        }
+        };
 
         viewportMain.scrollAnimationFrameId = requestAnimationFrame(animate);
     }
@@ -396,6 +507,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return false;
+        }
         let { endRow, endColumn, startColumn, startRow } = range;
         const bounding = this._getViewportBounding();
         if (range.rangeType === RANGE_TYPE.ROW) {
@@ -426,6 +540,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
      */
     scrollToCell(row: number, column: number, duration?: number): boolean {
         const worksheet = this._context.unit.getActiveSheet();
+        if (worksheet?.getConfig().type === SheetTypes.CHART) {
+            return false;
+        }
         const {
             ySplit: freezeYSplit,
             xSplit: freezeXSplit,
@@ -477,7 +594,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
-        setTimeout(() => {
+        const generation = this._scrollGeneration;
+        const worksheet = this._context.unit.getActiveSheet();
+        if (worksheet?.getConfig().type === SheetTypes.CHART) {
+            return;
+        }
+        const timer = setTimeout(() => {
+            this._selectionScrollTimers.delete(timer);
+            if (this._disposed || generation !== this._scrollGeneration || worksheet !== this._context.unit.getActiveSheet()) {
+                return;
+            }
             const selection = this._getSelectionsService().getCurrentLastSelection();
             if (selection == null) {
                 return;
@@ -523,10 +649,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
             this._scrollToCell(row, column);
         }, 0);
+        this._selectionScrollTimers.add(timer);
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        return this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
+        return this._getActiveGridSkeleton()?.worksheet.getFreeze();
     }
 
     private _getSheetObject() {
@@ -595,7 +722,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const skeleton = this._getActiveGridSkeleton();
         if (skeleton == null) {
             return;
         }
@@ -607,6 +734,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
+        if (this._getSheetType() === SheetTypes.CHART) {
+            return false;
+        }
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentSkeleton() ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
@@ -617,7 +747,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
+        const skeleton = this._getActiveGridSkeleton();
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();

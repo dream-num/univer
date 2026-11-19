@@ -8,9 +8,9 @@
 
 ## Package Overview
 
-| Package                            | CSS | Locales | Facade entry |
-| ---------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-hyper-link` | Yes |   Yes   |      No      |
+| Package | UMD global | CSS | Locales | Facade entry | Worker entry |
+| --- | --- | :---: | :---: | :---: | :---: |
+| `@univerjs/preset-docs-hyper-link` | — | Yes | Yes | No | No |
 
 ## Installation
 
@@ -19,8 +19,6 @@ pnpm add @univerjs/preset-docs-hyper-link
 # or
 npm install @univerjs/preset-docs-hyper-link
 ```
-
-Keep all `@univerjs/*` packages on the same version.
 
 ## Usage
 

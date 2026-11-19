@@ -295,6 +295,17 @@ function canKeepDiagonalRepairStrips(viewportInfo: IViewportInfo, scaleX: number
         && viewportInfo.diffX !== 0 && viewportInfo.diffY !== 0 && !!viewportInfo.shouldCacheUpdate;
 }
 
+function hasPreparedDocumentText(skeleton: SpreadsheetSkeleton) {
+    let found = false;
+    skeleton.stylesCache.fontMatrix.forValue((_row, _column, font) => {
+        if (font.documentSkeleton) {
+            found = true;
+            return false;
+        }
+    });
+    return found;
+}
+
 function exceedsMergeRepairThreshold(
     cacheBound: IBoundRectNoAngle,
     repaintBounds: IRepaintBound[],
@@ -751,10 +762,16 @@ export class Spreadsheet extends SheetComponent {
             || this._requiresNativeFrozenEdgeRepaint(mainCtx, viewportInfo, repaintBounds);
         const shouldRefreshForNativeGridlines = isScrolling && this._requiresNativeGridlineRepaint(mainCtx, spreadsheetSkeleton, viewportInfo, hasMergeData);
         const shouldRefreshForGapStripes = isScrolling && this._requiresGapStripeRepaint(spreadsheetSkeleton, viewportInfo);
+        // At unit zoom on high-DPR displays, cached native document glyphs can differ at clip edges after a copy.
+        const shouldRefreshForHighDensityText = isScrolling && cachePixelRatio > 2
+            && scaleX === cachePixelRatio && scaleY === cachePixelRatio
+            && (viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN || viewportInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT)
+            && hasPreparedDocumentText(spreadsheetSkeleton);
         const incompatibleCache = this._scrollCacheStates.has(viewportInfo.viewportKey) && !previousState;
         const shouldRefreshCache = isDirty || isForceDirty || incompatibleCache || isScrollJumpOutsideCache || shouldRefreshForMergeRepairArea
-            || shouldRefreshForHorizontalResampling || shouldRefreshForFrozenEdge || shouldRefreshForNativeGridlines || shouldRefreshForGapStripes ||
-            (shouldCacheUpdate && diffX !== 0 && !this._canPaintHorizontalScrollIncrementally(mainCtx, viewportInfo));
+            || shouldRefreshForHorizontalResampling || shouldRefreshForFrozenEdge || shouldRefreshForNativeGridlines || shouldRefreshForGapStripes
+            || shouldRefreshForHighDensityText
+            || (shouldCacheUpdate && diffX !== 0 && !this._canPaintHorizontalScrollIncrementally(mainCtx, viewportInfo));
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
             if (shouldRefreshCache) {
                 this.addRenderTagToScene('scrolling', false);

@@ -137,7 +137,9 @@ export class Amordegrc extends BaseFunction {
                 rate = 1;
             }
 
-            depreciation = bookValue < salvageValue ? Math.max(bookValue - salvageValue, 0) : scheduled;
+            // Excel does not stop at the salvage value: a period that starts at or above it takes its
+            // whole share, even when the book value ends below it. A period that starts below it is 0.
+            depreciation = bookValue < salvageValue ? 0 : scheduled;
             bookValue -= depreciation;
 
             // Once nothing is left to depreciate, every later period is 0 as well.

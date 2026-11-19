@@ -140,7 +140,6 @@ describe('Test amordegrc function', () => {
         it('Period < 0 or period is not an integer', () => {
             expect(amordegrc({ period: -1 })).toBe(ErrorType.NUM);
 
-            // The same rounding as AMORLINC: up to 1, a fraction counts as period 1; above 1 it is truncated.
             // Between 0 and 1 Excel returns 0, above 1 it uses the whole number of periods.
             expect(amordegrc({ period: 0.5 })).toBe(0);
             expect(amordegrc({ period: 1.9 })).toBe(776);

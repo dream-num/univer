@@ -5239,6 +5239,10 @@ export class DocumentSkeleton extends Skeleton {
             state.interactionWindowResume = null;
             return;
         }
+        // Reference projection resolves fields against the finalized page offsets.
+        if (state.mode === 'paginated' && hasDocumentReferenceLayout(ctx.viewModel.getDataModel())) {
+            this._finalizePaginatedPagesForPublication(state, skeleton.pages.length);
+        }
         ctx.skeleton = this._projectReferenceLayout(skeleton);
         setPageParent(ctx.skeleton.pages, ctx.skeleton);
         state.complete = true;

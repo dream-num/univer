@@ -26,7 +26,6 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import type { LocaleKey } from '../locale/types';
 import {
     DataValidationRenderMode,
     DataValidationType,
@@ -45,6 +44,7 @@ import {
     sequenceNodeType,
 } from '@univerjs/engine-formula';
 import { deserializeListOptions } from '@univerjs/sheets';
+import type { LocaleKey } from '../locale/types';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationListCacheService } from '../services/dv-list-cache.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
@@ -206,7 +206,8 @@ export class ListValidator extends BaseSheetValidator {
         const selected = rule.type === DataValidationType.LIST
             ? (value === undefined || value === null || value === '' ? [] : [`${value}`])
             : this.parseCellValue(value!);
-        // Excel's list validation ignores case: "green" is in a list of "Green".
+        // Google Sheets ignores case for list validation, and so does our dropdown search, so "green"
+        // must match the "Green" option. Excel only ignores case for range-referenced lists.
         const options = new Set(formula1Result.map((option) => `${option}`.toLowerCase()));
         return selected.every((i) => options.has(i.toLowerCase()));
     }

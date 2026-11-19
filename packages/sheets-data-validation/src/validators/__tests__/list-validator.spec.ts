@@ -202,22 +202,6 @@ describe('list-validator helpers', () => {
             {} as any,
             { ...rule, type: DataValidationType.LIST_MULTIPLE }
         )).resolves.toBe(true);
-        // Excel's list validation ignores case: "green" is in a list of "Green".
-        await expect(validator.isValidType(
-            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as never,
-            {} as never,
-            rule
-        )).resolves.toBe(true);
-        await expect(validator.isValidType(
-            { value: 'RED,blue', unitId: 'unit1', subUnitId: 'sheet1' } as never,
-            {} as never,
-            { ...rule, type: DataValidationType.LIST_MULTIPLE }
-        )).resolves.toBe(true);
-        await expect(validator.isValidType(
-            { value: 'GREY', unitId: 'unit1', subUnitId: 'sheet1' } as never,
-            {} as never,
-            rule
-        )).resolves.toBe(false);
         await expect(validator.isValidType(
             { value: undefined, unitId: 'unit1', subUnitId: 'sheet1' } as any,
             {} as any,
@@ -225,6 +209,38 @@ describe('list-validator helpers', () => {
         )).resolves.toBe(true);
 
         expect(listCacheService.getOrCompute).toHaveBeenCalled();
+    });
+
+    it('matches list entries case-insensitively for literal and reference lists', async () => {
+        const { validator } = createContext();
+        const literalRule = {
+            uid: 'rule-case-literal',
+            type: DataValidationType.LIST,
+            formula1: 'Red,Green,Blue',
+        } as any;
+
+        await expect(validator.isValidType(
+            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            literalRule
+        )).resolves.toBe(true);
+        await expect(validator.isValidType(
+            { value: 'GREY', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            literalRule
+        )).resolves.toBe(false);
+        await expect(validator.isValidType(
+            { value: 'RED,blue', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            { ...literalRule, type: DataValidationType.LIST_MULTIPLE }
+        )).resolves.toBe(true);
+
+        // A reference-sourced list resolves through the list cache service instead of the literal parser.
+        await expect(validator.isValidType(
+            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            { ...literalRule, uid: 'rule-case-reference', formula1: '=Sheet1!A1:B2' }
+        )).resolves.toBe(true);
     });
 
     it('reads cached and async list options for the active workbook', async () => {

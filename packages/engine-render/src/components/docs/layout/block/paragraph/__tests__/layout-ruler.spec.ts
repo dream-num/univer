@@ -1063,6 +1063,59 @@ describe('layout-ruler', () => {
         expect(alignment === TabStopAlignment.END ? end : (start + end) / 2).toBeCloseTo(offset);
     });
 
+    it.each([
+        { mode: '14', count: 49, offset: 400, suffix: '93', ends: ['93'] },
+        { mode: '15', count: 49, offset: 400, suffix: '93', ends: ['b', '93'] },
+        { mode: '15', count: 44, offset: 384, suffix: '93, 94', ends: ['93,', '94'] },
+    ])('matches Word numeric end-tab wrapping in compatibility mode $mode ($suffix)', ({ mode, count, offset, suffix, ends }) => {
+        const content = `${'ax'.repeat(Math.floor(count / 2))}${count % 2 ? 'b' : ''}\t${suffix}`;
+        const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: mode },
+                pageSize: { width: 400, height: 800 },
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { fs: 11 },
+            },
+            body: {
+                paragraphs: [{ startIndex: content.length, paragraphStyle: {
+                    tabStops: [{ offset, alignment: TabStopAlignment.END }],
+                } }],
+            },
+        });
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+        expect(lines).toHaveLength(ends.length);
+        const text = lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').trim());
+        expect(text.map((value, index) => value.endsWith(ends[index]))).toEqual(ends.map(() => true));
+    });
+
+    it.each([
+        { mode: '11', punctuation: ')', hangingPunctuation: undefined, rows: 1 },
+        { mode: '14', punctuation: ')', hangingPunctuation: BooleanNumber.TRUE, rows: 1 },
+        { mode: '14', punctuation: ')', hangingPunctuation: BooleanNumber.FALSE, rows: 2 },
+        { mode: '14', punctuation: 'x', hangingPunctuation: undefined, rows: 2 },
+        { mode: '15', punctuation: ')', hangingPunctuation: BooleanNumber.TRUE, rows: 2 },
+    ])('matches Word closing punctuation in compatibility mode $mode ($punctuation, $hangingPunctuation)', ({ mode, punctuation, hangingPunctuation, rows }) => {
+        const content = `a ${'x'.repeat(47)}${punctuation}`;
+        const { ctx, viewModel, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                compatibilitySettings: { compatibilityMode: mode },
+                pageSize: { width: 396, height: 800 },
+                marginLeft: 0,
+                marginRight: 0,
+                textStyle: { fs: 11 },
+            },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { hangingPunctuation } }] },
+        });
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        expect(pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))).toHaveLength(rows);
+    });
+
     it('keeps the entire positioned end-tab field on an indented line', () => {
         const bed = createParagraphLayoutTestBed('\t行业点评', {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },

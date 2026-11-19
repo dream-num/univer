@@ -354,6 +354,8 @@ export interface IDocumentSkeletonGlyph {
     kerningAdjustment?: number;
     tabLeader?: TabStopLeader;
     tabAlignedTextWidth?: number;
+    /** Width of the first breakable numeric group after an alignment tab. */
+    tabAlignedNumberWidth?: number;
     /** Runtime-only positions for tracked text that shares one shaping glyph. */
     textSpacing?: { content: string; segments: Array<{ content: string; left: number }> };
 }

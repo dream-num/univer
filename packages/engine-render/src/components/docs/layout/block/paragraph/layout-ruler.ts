@@ -72,7 +72,8 @@ function isGlyphGroupBeyondDivideWidth(
     lineWrapTolerance?: number,
     includeParagraphMark = false,
     justifyWordSpacing = false,
-    wordCompatibilityMode?: number
+    wordCompatibilityMode?: number,
+    allowLegacyClosingParen = false
 ) {
     let trailingIndex = glyphGroup.length - 1;
     while (trailingIndex >= 0 && (
@@ -114,6 +115,9 @@ function isGlyphGroupBeyondDivideWidth(
         let hanging = 0;
         if (hangingPunctuation && punctuationGlyph && justifyWordSpacing && isWesternHangingPunctuation(punctuationGlyph.content)) {
             // Word justification can place the complete punctuation advance outside the text extent.
+            hanging = punctuationGlyph.width;
+        } else if (allowLegacyClosingParen && punctuationGlyph?.content === ')') {
+            // Word 2003–2010 can keep a closing parenthesis outside the text extent.
             hanging = punctuationGlyph.width;
         } else if (hangingPunctuation && punctuationGlyph && /^[.,]$/.test(punctuationGlyph.content) &&
             (punctuationLanguage == null || /^(?:ja|zh|ko)(?:-|$)/i.test(punctuationLanguage) ||
@@ -485,12 +489,13 @@ function _fitGlyphsToDivide(
     const wordCompatibilityMode = Number(ctx.dataModel.documentStyle.compatibilitySettings?.compatibilityMode);
     // Word 2013 compatibility uses the exact column edge for authored tab stops.
     const columnTabTolerance = wordCompatibilityMode >= 15 ? 0 : 1 / 15;
-    _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops, columnTabTolerance);
+    const legacyWordLayout = wordCompatibilityMode >= 11 && wordCompatibilityMode < 15;
+    _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig, tabStops, columnTabTolerance, legacyWordLayout);
     const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
     const lastWidth = lastGlyph?.width || 0;
     const lastLeft = lastGlyph?.left || 0;
     const preOffsetLeft = lastWidth + lastLeft;
-    _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops, columnTabTolerance);
+    _adjustIncomingTabStops(divide, glyphGroup, preOffsetLeft, sectionBreakConfig, paragraphConfig, tabStops, columnTabTolerance, legacyWordLayout);
     const fitOffsetLeft = preOffsetLeft + getGlyphPairKerningAdjustment(lastGlyph, glyphGroup[0]) -
         (lastGlyph?.kerningAdjustment ?? 0);
     const drawingML = sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml';
@@ -522,14 +527,15 @@ function _fitGlyphsToDivide(
     const beyondWidth = isGlyphGroupBeyondDivideWidth(
         glyphGroup,
         fitOffsetLeft,
-        getExplicitTabFitWidth(divide, glyphGroup, preOffsetLeft, paragraphConfig, tabStops, columnTabTolerance),
+        getExplicitTabFitWidth(divide, glyphGroup, preOffsetLeft, paragraphConfig, tabStops, columnTabTolerance, legacyWordLayout),
         hangingPunctuation,
         allowLineCompression || justifyWordSpacing ? divide.glyphGroup : undefined,
         preserveWordSpacing,
         lineWrapTolerance,
         !isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy),
         justifyWordSpacing,
-        wordCompatibilityMode
+        wordCompatibilityMode,
+        legacyWordLayout && paragraphConfig.paragraphStyle?.hangingPunctuation !== BooleanNumber.FALSE
     );
     return {
         preOffsetLeft,
@@ -1065,7 +1071,8 @@ function _adjustIncomingTabStops(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     tabStops: ITabStop[] | undefined,
-    columnTabTolerance: number
+    columnTabTolerance: number,
+    allowNumericTabOverflow: boolean
 ): void {
     if (!isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) ||
         !glyphs.some((glyph) => glyph.glyphType === GlyphType.TAB)) {
@@ -1091,8 +1098,8 @@ function _adjustIncomingTabStops(
             if (stop) {
                 const followingWidth = glyph.tabAlignedTextWidth ?? 0;
                 const origin = divide.left + divide.paddingLeft;
-                const width = getExplicitTabOffset(divide, paragraphConfig, origin, position, stop, followingWidth, columnTabTolerance) - position;
-                if (width > 0) {
+                const width = getExplicitTabOffset(divide, paragraphConfig, origin, position, stop, followingWidth, columnTabTolerance, glyph.tabAlignedNumberWidth, allowNumericTabOverflow) - position;
+                if (width > 0 || (width === 0 && stop.alignment === TabStopAlignment.END && glyph.tabAlignedNumberWidth != null)) {
                     glyph.width = width;
                     glyph.tabLeader = stop.leader;
                 }
@@ -1150,11 +1157,22 @@ function getExplicitTabOffset(
     tabStart: number,
     stop: ITabStop,
     followingWidth: number,
-    columnTabTolerance: number
+    columnTabTolerance: number,
+    numberWidth: number | undefined,
+    allowNumericTabOverflow: boolean
 ): number {
     const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop, columnTabTolerance);
     const target = Math.min(stop.offset, boundary);
     if (stop.alignment === TabStopAlignment.END) {
+        if (numberWidth != null && numberWidth > 0 && numberWidth <= divide.width &&
+            isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy) &&
+            paragraphConfig.paragraphStyle?.fixedTabStops !== BooleanNumber.TRUE &&
+            tabStart <= target && target - followingWidth < tabStart) {
+            // A page list can wrap after its first number when the whole list cannot align to the stop.
+            if (allowNumericTabOverflow || tabStart + numberWidth <= boundary + 1e-6) {
+                return Math.max(tabStart, target - numberWidth);
+            }
+        }
         return target - followingWidth;
     }
     if (stop.alignment === TabStopAlignment.CENTER) {
@@ -1169,26 +1187,30 @@ function getExplicitTabFitWidth(
     offsetLeft: number,
     paragraphConfig: IParagraphConfig,
     tabStops: ITabStop[] | undefined,
-    columnTabTolerance: number
+    columnTabTolerance: number,
+    allowNumericTabOverflow: boolean
 ): number {
     if (!isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy)) {
         return divide.width;
     }
     const origin = divide.left + divide.paddingLeft;
-    let tabLeft: number | undefined;
+    let tab: IDocumentSkeletonGlyph | undefined;
+    let tabLeft = 0;
     for (const glyph of divide.glyphGroup) {
         if (glyph.glyphType === GlyphType.TAB) {
-            tabLeft = glyph.ts?.positionedTab == null ? origin + glyph.left : undefined;
+            tab = glyph;
+            tabLeft = origin + glyph.left;
         }
     }
     let position = origin + offsetLeft;
     for (const glyph of glyphs) {
         if (glyph.glyphType === GlyphType.TAB) {
-            tabLeft = glyph.ts?.positionedTab == null ? position : undefined;
+            tab = glyph;
+            tabLeft = position;
         }
         position += glyph.width;
     }
-    if (tabLeft == null) {
+    if (tab == null || tab.ts?.positionedTab != null) {
         return divide.width;
     }
     const tabStart = tabLeft;
@@ -1197,7 +1219,15 @@ function getExplicitTabFitWidth(
     if (stop == null) {
         return divide.width;
     }
-    return Math.max(divide.width, getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop, columnTabTolerance) - origin);
+    const boundary = getExplicitTabBoundary(divide, paragraphConfig, origin, tabStart, stop, columnTabTolerance);
+    const numberWidth = tab.tabAlignedNumberWidth;
+    // Older Word modes let the first numeric group extend beyond the right margin.
+    const overflowEdge = allowNumericTabOverflow && stop.alignment === TabStopAlignment.END &&
+        paragraphConfig.paragraphStyle?.fixedTabStops !== BooleanNumber.TRUE &&
+        tabStart <= Math.min(stop.offset, boundary) && numberWidth != null && numberWidth <= divide.width
+        ? tabStart + numberWidth
+        : boundary;
+    return Math.max(divide.width, boundary - origin, overflowEdge - origin);
 }
 
 function _adjustExplicitTabStop(
@@ -1205,7 +1235,8 @@ function _adjustExplicitTabStop(
     followingGlyphs: IDocumentSkeletonGlyph[],
     paragraphConfig: IParagraphConfig,
     tabStops = paragraphConfig.paragraphStyle?.tabStops,
-    columnTabTolerance = 1 / 15
+    columnTabTolerance = 1 / 15,
+    allowNumericTabOverflow = false
 ): void {
     let tabIndex = divide.glyphGroup.length - 1;
     while (tabIndex >= 0 && isCustomRangeMarker(divide.glyphGroup[tabIndex])) {
@@ -1249,8 +1280,8 @@ function _adjustExplicitTabStop(
     const followingWidth = tabGlyph.tabAlignedTextWidth
         ?? followingGlyphs.reduce((width, glyph) => width + glyph.width, 0);
 
-    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabLeft, tabStop, followingWidth, columnTabTolerance) - tabLeft;
-    if (width <= 0) {
+    const width = getExplicitTabOffset(divide, paragraphConfig, origin, tabLeft, tabStop, followingWidth, columnTabTolerance, tabGlyph.tabAlignedNumberWidth, allowNumericTabOverflow) - tabLeft;
+    if (width < 0 || (width === 0 && (tabStop.alignment !== TabStopAlignment.END || tabGlyph.tabAlignedNumberWidth == null))) {
         if (usesFixedTabStops) {
             tabGlyph.width = 0;
             tabGlyph.bBox.width = 0;

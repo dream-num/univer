@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRangeForInterceptor, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocxBreakType, GridType, PositionedObjectLayoutType, resolveDocumentParagraphStyle } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocxBreakType, GridType, PositionedObjectLayoutType, resolveDocumentParagraphStyle, TabStopAlignment } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
@@ -539,7 +539,36 @@ function appendShapedText(
     }
 }
 
-function setTabAlignedTextWidths(shapedTextList: IShapedText[]): void {
+function getLeadingTabNumberWidth(shapedTextList: IShapedText[], index: number, start: number): number | undefined {
+    for (; index < shapedTextList.length; index++) {
+        let text = '';
+        let width = 0;
+        let reachedBoundary = false;
+        const glyphs = shapedTextList[index].glyphs;
+        for (let glyphIndex = start; glyphIndex < glyphs.length; glyphIndex++) {
+            const glyph = glyphs[glyphIndex];
+            if (glyph.glyphType === GlyphType.TAB || glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.content === '\v') {
+                reachedBoundary = true;
+                break;
+            }
+            if (glyph.width > 0) {
+                text += glyph.content;
+                if (glyph.content.trim()) {
+                    width += glyph.width;
+                }
+            }
+        }
+        if (text.trim()) {
+            return /^\d+(?:[–-]\d+)?,?$/.test(text.trim()) ? width : undefined;
+        }
+        if (reachedBoundary) {
+            return;
+        }
+        start = 0;
+    }
+}
+
+function setTabAlignedTextWidths(shapedTextList: IShapedText[], measureNumbers: boolean): void {
     // Alignment tabs measure the entire following field, not just the next word-break slice.
     let tabAlignedTextWidth = 0;
     for (let index = shapedTextList.length - 1; index >= 0; index--) {
@@ -548,6 +577,9 @@ function setTabAlignedTextWidths(shapedTextList: IShapedText[]): void {
             const glyph = glyphs[glyphIndex];
             if (glyph.glyphType === GlyphType.TAB) {
                 glyph.tabAlignedTextWidth = tabAlignedTextWidth;
+                if (measureNumbers && tabAlignedTextWidth > 0) {
+                    glyph.tabAlignedNumberWidth = getLeadingTabNumberWidth(shapedTextList, index, glyphIndex + 1);
+                }
                 tabAlignedTextWidth = 0;
             } else if (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.content === '\v') {
                 tabAlignedTextWidth = 0;
@@ -810,7 +842,9 @@ export function shaping(
         addCJKLatinSpacing(shapedTextList);
     }
 
-    setTabAlignedTextWidths(shapedTextList);
+    const measureTabNumbers = traditionalLayout && resolvedParagraphStyle.fixedTabStops !== BooleanNumber.TRUE &&
+        resolvedParagraphStyle.tabStops?.some((stop) => !stop.clear && stop.alignment === TabStopAlignment.END) === true;
+    setTabAlignedTextWidths(shapedTextList, measureTabNumbers);
 
     return shapedTextList;
 }

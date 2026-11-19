@@ -74,11 +74,18 @@ describe('Test amordegrc function', () => {
             expect(periods.map((period) => amordegrc({ period, salvage: 0 }))).toStrictEqual([330, 776, 485, 303, 190, 158, 158, 0]);
         });
 
-        it('Never depreciates below the salvage value', () => {
+        it('Returns 0 for a period that starts below the salvage value', () => {
             const capped = { cost: 9940.54, datePurchased: '2019/3/31', firstPeriod: '2020/3/30', salvage: 4677, rate: 0.441321, basis: 0 };
             expect(amordegrc({ ...capped, period: 0 })).toBe(5264);
             expect(amordegrc({ ...capped, period: 1 })).toBe(0);
             expect(amordegrc({ salvage: 2400, period: 0 })).toBe(0);
+        });
+
+        it('Still depreciates a period that starts at the salvage value', () => {
+            // Period 0 is capped at cost - salvage, which leaves the book value at exactly 10. Excel's own result.
+            const atSalvage = { cost: 100, datePurchased: '1998/2/28', firstPeriod: '2000/2/29', salvage: 10, rate: 0.3 };
+            expect(amordegrc({ ...atSalvage, period: 0 })).toBe(90);
+            expect(amordegrc({ ...atSalvage, period: 1 })).toBe(5);
         });
 
         it('Picks the coefficient from the life of the asset', () => {

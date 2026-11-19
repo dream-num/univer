@@ -17,8 +17,6 @@
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
-import type { LocaleKey } from '../../locale/types';
-import type { IBaseDropdownProps } from './type';
 import { ColorKit, LocaleService, ThemeService } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
@@ -31,6 +29,8 @@ import {
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IBaseDropdownProps } from './type';
 import { getListDropdownValue } from './list-dropdown/utils';
 
 interface ISelectListProps {
@@ -151,7 +151,9 @@ function SelectList(props: ISelectListProps) {
                         onChange(newValue);
                     };
 
-                    const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
+                    // Must fold case exactly like the filter above, otherwise the highlight can miss
+                    // options that do match (e.g. "I" in a Turkish locale).
+                    const index = item.label.toLowerCase().indexOf(lowerFilter!);
 
                     const isThemeColor = Boolean(item.color?.includes('.') && themeService.isValidThemeColor(item.color));
                     const backgroundColor = isThemeColor

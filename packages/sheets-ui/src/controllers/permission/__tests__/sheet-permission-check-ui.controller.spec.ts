@@ -35,7 +35,7 @@ import { DocSelectionManagerService, DocStateChangeManagerService, DocStateEmitS
 import { EditorService, IEditorService, IMEInputCommand } from '@univerjs/docs-ui';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Spreadsheet, Viewport } from '@univerjs/engine-render';
 import { UnitObject } from '@univerjs/protocol';
-import { EditStateEnum, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetPermissionCheckController, SheetsSelectionsService, UniverSheetsPlugin, ViewStateEnum, WorkbookDeleteSheetPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookRenameSheetPermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { EditStateEnum, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetPermissionCheckController, SheetsSelectionsService, UniverSheetsPlugin, ViewStateEnum, WorkbookDeleteSheetPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookRenameSheetPermission, WorksheetEditPermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
 import { IDialogService, IPlatformService, IShortcutService, IUIRuntimeScopeService, KeyCode, PlatformService, ShortcutService, UIRuntimeScopeService } from '@univerjs/ui';
 import { EMPTY } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,6 +49,7 @@ import {
     SetSelectionFrozenCommand,
 } from '../../../commands/commands/set-frozen.command';
 import { MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import { SetWorksheetColAutoWidthCommand } from '../../../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../../../commands/commands/unhide.command';
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
@@ -275,6 +276,36 @@ describe('SheetPermissionCheckUIController', () => {
             workbookTypes: [WorkbookEditablePermission, WorkbookHideSheetPermission],
         });
         expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('translated:sheets-ui.permission.dialog.operatorSheetErr');
+        injector.dispose();
+    });
+
+    it('blocks auto column width without the column style permission', () => {
+        const { injector, executeBefore, permissionCheckWithoutRange, blockExecuteWithoutPermission } = createControllerTestBed();
+        injector.get(SheetPermissionCheckUIController);
+
+        executeBefore({
+            id: SetWorksheetColAutoWidthCommand.id,
+            params: { unitId: 'unit', subUnitId: 'sheet' },
+        });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledWith({
+            worksheetTypes: [WorksheetSetColumnStylePermission],
+        }, 'unit', 'sheet');
+        expect(blockExecuteWithoutPermission).toHaveBeenCalledWith('translated:sheets-ui.permission.dialog.setRowColStyleErr');
+        injector.dispose();
+    });
+
+    it('allows auto column width with the column style permission', () => {
+        const { injector, executeBefore, permissionCheckWithoutRange, blockExecuteWithoutPermission } = createControllerTestBed();
+        permissionCheckWithoutRange.mockReturnValue(true);
+        injector.get(SheetPermissionCheckUIController);
+
+        executeBefore({ id: SetWorksheetColAutoWidthCommand.id });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledWith({
+            worksheetTypes: [WorksheetSetColumnStylePermission],
+        }, undefined, undefined);
+        expect(blockExecuteWithoutPermission).not.toHaveBeenCalled();
         injector.dispose();
     });
 });

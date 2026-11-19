@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'O intervalo está protegido e você não tem permissão para inserir linhas e colunas. Para inserir linhas e colunas, entre em contato com o criador.',
                 moveRangeErr: 'O intervalo está protegido e você não tem permissão para mover a seleção. Para mover a seleção, entre em contato com o criador.',
                 moveRowColErr: 'O intervalo está protegido e você não tem permissão para mover linhas e colunas. Para mover linhas e colunas, entre em contato com o criador.',
-                operatorSheetErr: 'A planilha está protegida e você não tem permissão para operar a planilha. Para operar a planilha, entre em contato com o criador.',
+                operatorSheetErr: 'Você não tem permissão para operar a planilha. Para operar a planilha, entre em contato com o criador.',
                 removeRowColErr: 'O intervalo está protegido e você não tem permissão para excluir linhas e colunas. Para excluir linhas e colunas, entre em contato com o criador.',
                 setRowColStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos de linhas e colunas. Para definir estilos de linhas e colunas, entre em contato com o criador.',
                 setStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos. Para definir estilos, entre em contato com o criador.',

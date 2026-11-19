@@ -40,6 +40,8 @@ export interface IInsertSheetMutationParams {
     sheet: IWorksheetData;
     unitId: string;
     styles?: Record<string, Nullable<IStyleData>>;
+    /** Whether the inserted sheet is copied from an existing sheet. */
+    isCopy?: boolean;
 }
 
 /** Params of InsertRowMutation */

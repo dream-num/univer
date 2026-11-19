@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Skúste iné meno alebo vymažte vyhľadávanie.',
                 commonErr: 'Rozsah je chránený a nemáte oprávnenie na túto operáciu. Ak chcete upravovať, kontaktujte autora.',
                 editErr: 'Rozsah je chránený a nemáte oprávnenie na úpravy. Ak chcete upravovať, kontaktujte autora.',
+                operatorSheetErr: 'Nemáte oprávnenie pracovať s hárkom. Ak chcete pracovať s hárkom, kontaktujte autora.',
                 pasteErr: 'Rozsah je chránený a nemáte oprávnenie na prilepenie. Ak chcete prilepiť, kontaktujte autora.',
                 setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
                 copyErr: 'Rozsah je chránený a nemáte oprávnenie na kopírovanie. Ak chcete kopírovať, kontaktujte autora.',

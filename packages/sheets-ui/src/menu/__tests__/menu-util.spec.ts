@@ -36,12 +36,13 @@ import {
     IExclusiveRangeService,
     RangeProtectionRuleModel,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '../menu-util';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getWorkbookPermissionDisable$ } from '../menu-util';
 
 describe('getCurrentExclusiveRangeInterest$', () => {
     it('uses the current sheet selections when the active sheet changes', () => {
@@ -123,6 +124,37 @@ describe('getCurrentRangeDisable$', () => {
 
         expect(states[states.length - 1]).toBe(true);
         expect(permissionService.composePermission$).not.toHaveBeenCalled();
+        subscription.unsubscribe();
+    });
+});
+
+describe('getWorkbookPermissionDisable$', () => {
+    it('only checks the supplied workbook permission points', () => {
+        const permission$ = new BehaviorSubject([{ value: true }]);
+        const permissionService = { composePermission$: vi.fn(() => permission$) };
+        const workbook$ = new BehaviorSubject({ getUnitId: () => 'unit-1' });
+        const worksheetProtectionRuleModel = { getRule: vi.fn(() => ({ permissionId: 'permission-1' })) };
+        const rangeProtectionRuleModel = { getSubunitRuleList: vi.fn(() => [{ permissionId: 'permission-1' }]) };
+        const services = new Map<unknown, unknown>([
+            [IUniverInstanceService, { getCurrentTypeOfUnit$: () => workbook$ }],
+            [UserManagerService, { currentUser$: new BehaviorSubject(null) }],
+            [IPermissionService, permissionService],
+            [WorksheetProtectionRuleModel, worksheetProtectionRuleModel],
+            [RangeProtectionRuleModel, rangeProtectionRuleModel],
+        ]);
+        const accessor = { get: (token: unknown) => services.get(token) } as never;
+
+        const states: boolean[] = [];
+        const subscription = getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission])
+            .subscribe((state) => states.push(state));
+
+        expect(states[states.length - 1]).toBe(false);
+        expect(worksheetProtectionRuleModel.getRule).not.toHaveBeenCalled();
+        expect(rangeProtectionRuleModel.getSubunitRuleList).not.toHaveBeenCalled();
+
+        permission$.next([{ value: false }]);
+
+        expect(states[states.length - 1]).toBe(true);
         subscription.unsubscribe();
     });
 });

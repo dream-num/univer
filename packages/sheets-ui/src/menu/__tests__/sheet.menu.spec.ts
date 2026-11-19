@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
-import { SetTabColorCommand, SetTabColorMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ICommandService, IPermissionService, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    SetTabColorCommand,
+    SetTabColorMutation,
+    SetWorksheetActiveOperation,
+    WorkbookEditablePermission,
+} from '@univerjs/sheets';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { createCommandTestBed } from '../../commands/commands/__tests__/create-command-test-bed';
@@ -69,6 +74,30 @@ describe('sheet tab color menu', () => {
         try {
             commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: sheet.getUnitId(), subUnitId: 'sheet2' });
             expect(colors.at(-1)).toBe('#f05252');
+        } finally {
+            subscription.unsubscribe();
+            testBed.univer.dispose();
+        }
+    });
+
+    it('disables instead of hiding the tab color item without workbook edit permission', () => {
+        const testBed = createCommandTestBed();
+        const permissionService = testBed.get(IPermissionService);
+        const unitId = testBed.sheet.getUnitId();
+        permissionService.addPermissionPoint(new WorkbookEditablePermission(unitId));
+        const menu = ChangeColorSheetMenuItemFactory(testBed.univer.__getInjector());
+
+        expect(menu.hidden$).toBeUndefined();
+        expect(menu.disabled$).toBeDefined();
+
+        const states: boolean[] = [];
+        const subscription = menu.disabled$!.subscribe((state) => states.push(state));
+        try {
+            expect(states[states.length - 1]).toBe(false);
+
+            permissionService.updatePermissionPoint(new WorkbookEditablePermission(unitId).id, false);
+
+            expect(states[states.length - 1]).toBe(true);
         } finally {
             subscription.unsubscribe();
             testBed.univer.dispose();

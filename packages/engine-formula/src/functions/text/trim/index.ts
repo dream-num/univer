@@ -53,7 +53,9 @@ export class Trim extends BaseFunction {
             textValue = textValue.toLocaleUpperCase();
         }
 
-        textValue = textValue.trim().replace(/\s+/g, ' ');
+        // Excel's TRIM removes only the space character (32): tabs, line feeds and
+        // non-breaking spaces (160) stay.
+        textValue = textValue.replace(/^ +| +$/g, '').replace(/ {2,}/g, ' ');
 
         return StringValueObject.create(textValue);
     }

@@ -164,6 +164,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     >();
 
     private _isIMEInputApply = false;
+    private _pendingCompositionInput: Nullable<{ data: string; inputType: string }> = null;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
     // When the user switches editors, whether to clear the doc ranges.
@@ -1520,7 +1521,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         });
     }
 
-    // FIXME: listeners here are not correctly disposed
     private _initInputEvents() {
         this.disposeWithMe(
             fromEvent(this._input, 'keydown').subscribe((e) => {
@@ -1539,10 +1539,23 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
 
         this.disposeWithMe(
+            fromEvent<InputEvent>(this._input, 'beforeinput').subscribe((e) => {
+                if (this._shouldSuppressHostHiddenEditorEvent(e)) {
+                    return;
+                }
+                this._pendingCompositionInput = this._isIMEInputApply && e.data
+                    ? { data: e.data, inputType: e.inputType }
+                    : null;
+            })
+        );
+
+        this.disposeWithMe(
             fromEvent(this._input, 'input').subscribe((e) => {
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
+                const pendingCompositionInput = this._pendingCompositionInput;
+                this._pendingCompositionInput = null;
                 // A mixed text and rect selection can replace the selected document ranges.
                 if ((e as InputEvent).inputType === 'historyUndo' || (e as InputEvent).inputType === 'historyRedo') {
                     return;
@@ -1553,6 +1566,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 }
 
                 if (this._isIMEInputApply) {
+                    return;
+                }
+                // Firefox can finish composition between a composing beforeinput and its matching input.
+                if (pendingCompositionInput != null &&
+                    pendingCompositionInput.data === (e as InputEvent).data &&
+                    pendingCompositionInput.inputType === (e as InputEvent).inputType) {
+                    this._input.innerHTML = '';
                     return;
                 }
 
@@ -1576,6 +1596,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 }
 
                 this._isIMEInputApply = true;
+                this._pendingCompositionInput = null;
 
                 this._eventHandle(e, (config) => {
                     this._onCompositionstart$.next(config);
@@ -1589,6 +1610,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     return;
                 }
                 this._isIMEInputApply = false;
+                if (this._pendingCompositionInput?.data !== (e as CompositionEvent).data) {
+                    this._pendingCompositionInput = null;
+                }
 
                 this._eventHandle(e, (config) => {
                     this._onCompositionend$.next(config);

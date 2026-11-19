@@ -81,7 +81,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.47.0",
-        "@univerjs/icons-svg": "https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz",
+        "@univerjs/icons-svg": "1.48.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",

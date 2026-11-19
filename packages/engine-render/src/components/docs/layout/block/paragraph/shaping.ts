@@ -842,7 +842,7 @@ export function shaping(
         addCJKLatinSpacing(shapedTextList);
     }
 
-    const measureTabNumbers = traditionalLayout && resolvedParagraphStyle.fixedTabStops !== BooleanNumber.TRUE &&
+    const measureTabNumbers = traditionalLayout && paragraphStyle.fixedTabStops !== BooleanNumber.TRUE &&
         resolvedParagraphStyle.tabStops?.some((stop) => !stop.clear && stop.alignment === TabStopAlignment.END) === true;
     setTabAlignedTextWidths(shapedTextList, measureTabNumbers);
 

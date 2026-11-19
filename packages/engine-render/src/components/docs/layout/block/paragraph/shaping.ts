@@ -568,7 +568,14 @@ function getLeadingTabNumberWidth(shapedTextList: IShapedText[], index: number, 
     }
 }
 
-function setTabAlignedTextWidths(shapedTextList: IShapedText[], measureNumbers: boolean): void {
+function setTabAlignedTextWidths(
+    shapedTextList: IShapedText[],
+    traditionalLayout: boolean,
+    fixedTabStops: BooleanNumber | undefined,
+    tabStops: IParagraphStyle['tabStops']
+): void {
+    const measureNumbers = traditionalLayout && fixedTabStops !== BooleanNumber.TRUE &&
+        tabStops?.some((stop) => !stop.clear && stop.alignment === TabStopAlignment.END) === true;
     // Alignment tabs measure the entire following field, not just the next word-break slice.
     let tabAlignedTextWidth = 0;
     for (let index = shapedTextList.length - 1; index >= 0; index--) {
@@ -842,9 +849,7 @@ export function shaping(
         addCJKLatinSpacing(shapedTextList);
     }
 
-    const measureTabNumbers = traditionalLayout && paragraphStyle.fixedTabStops !== BooleanNumber.TRUE &&
-        resolvedParagraphStyle.tabStops?.some((stop) => !stop.clear && stop.alignment === TabStopAlignment.END) === true;
-    setTabAlignedTextWidths(shapedTextList, measureTabNumbers);
+    setTabAlignedTextWidths(shapedTextList, traditionalLayout, paragraphStyle.fixedTabStops, resolvedParagraphStyle.tabStops);
 
     return shapedTextList;
 }

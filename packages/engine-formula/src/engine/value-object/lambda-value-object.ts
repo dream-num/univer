@@ -82,6 +82,10 @@ export class LambdaValueObjectObject extends BaseValueObject {
         return true;
     }
 
+    getBodyNode(): Nullable<BaseAstNode> {
+        return this._lambdaNode;
+    }
+
     execute(...variants: FunctionVariantType[]) {
         const paramCount = this._lambdaPrivacyVarKeys.length;
         if (variants.length !== paramCount || !this._interpreter || !this._lambdaNode) {
@@ -92,23 +96,26 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         this._setLambdaNodeValue(this._lambdaNode);
 
-        this._lambdaNode.setNotEmpty(false);
-
-        let value: AsyncObject | BaseValueObject;
-        if (this._interpreter.checkAsyncNode(this._lambdaNode)) {
-            value = new AsyncObject(this._interpreter.executeAsync(generateExecuteAstNodeData(this._lambdaNode)) as Promise<BaseValueObject>);
-        } else {
-            const o = this._interpreter.execute(generateExecuteAstNodeData(this._lambdaNode));
-            if (o.isReferenceObject()) {
-                value = (o as BaseReferenceObject).toArrayValueObject();
-            } else {
-                value = o as BaseValueObject;
-            }
+        const node = this._lambdaNode;
+        const binding = node.getValue();
+        const data = generateExecuteAstNodeData(node);
+        const restoreBinding = () => {
+            node.setNotEmpty(true);
+            node.setValue(binding);
+        };
+        node.setNotEmpty(false);
+        if (this._interpreter.checkAsyncNode(node)) {
+            const result = this._interpreter.executeAsync(data) as Promise<BaseValueObject>;
+            return new AsyncObject(result.finally(restoreBinding));
         }
-
-        this._lambdaNode.setNotEmpty(true);
-
-        return value;
+        try {
+            const result = this._interpreter.execute(data);
+            return result.isReferenceObject()
+                ? (result as BaseReferenceObject).toArrayValueObject()
+                : result as BaseValueObject;
+        } finally {
+            restoreBinding();
+        }
     }
 
     /**

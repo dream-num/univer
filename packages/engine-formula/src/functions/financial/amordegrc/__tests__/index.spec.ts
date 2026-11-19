@@ -65,30 +65,54 @@ describe('Test amordegrc function', () => {
             expect(getObjectValue(result)).toBe(776);
         });
 
+        // Expected values below are Excel's, as reported in review of this function.
         it('Depreciates period by period until the salvage value is reached', () => {
-            // Period 0 is prorated from the purchase date, the period that would pass the
-            // salvage value takes half of the book value, and the following ones take nothing.
+            // Period 0 is prorated from the purchase date. The period before the last one of the
+            // asset's life takes half of the book value and the last one what is left above the salvage value.
             const periods = [0, 1, 2, 3, 4, 5, 6, 7];
             expect(periods.map((period) => amordegrc({ period }))).toStrictEqual([330, 776, 485, 303, 190, 158, 0, 0]);
+            expect(periods.map((period) => amordegrc({ period, salvage: 0 }))).toStrictEqual([330, 776, 485, 303, 190, 158, 158, 0]);
+        });
+
+        it('Never depreciates below the salvage value', () => {
+            const capped = { cost: 9940.54, datePurchased: '2019/3/31', firstPeriod: '2020/3/30', salvage: 4677, rate: 0.441321, basis: 0 };
+            expect(amordegrc({ ...capped, period: 0 })).toBe(5264);
+            expect(amordegrc({ ...capped, period: 1 })).toBe(0);
+            expect(amordegrc({ salvage: 2400, period: 0 })).toBe(0);
         });
 
         it('Picks the coefficient from the life of the asset', () => {
-            // 1 / rate is the life: under 3 years 1, under 5 years 1.5, up to 6 years 2, and 2.5 beyond.
-            expect(amordegrc({ rate: 0.5 })).toBe(981);
+            // 1 / rate is the life: (2, 4] years 1.5, (4, 6] years 2, and 2.5 beyond.
             expect(amordegrc({ rate: 0.3 })).toBe(902);
             expect(amordegrc({ rate: 0.25 })).toBe(776);
-            expect(amordegrc({ rate: 0.2 })).toBe(820);
+            expect(amordegrc({ rate: 0.24 })).toBe(949);
+            expect(amordegrc({ rate: 0.2222 })).toBe(893);
+            expect(amordegrc({ rate: 0.21 })).toBe(853);
             expect(amordegrc({ rate: 0.1 })).toBe(545);
         });
 
-        it('Purchased on the first period date', () => {
-            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 0 })).toBe(0);
-            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 1 })).toBe(900);
+        it('Returns #NUM! for a life of two years or less', () => {
+            expect(amordegrc({ rate: 0.49 })).not.toBe(ErrorType.NUM);
+            expect(amordegrc({ rate: 0.5 })).toBe(ErrorType.NUM);
+            expect(amordegrc({ cost: 10000, datePurchased: '2023/1/1', firstPeriod: '2023/12/31', salvage: 0, rate: 1.5 })).toBe(ErrorType.NUM);
         });
 
-        it('Rounds halves away from zero', () => {
-            // With a rate above 100% the book value turns negative after the first period.
-            expect(amordegrc({ cost: 10000, datePurchased: '2023/1/1', firstPeriod: '2023/12/31', salvage: 0, rate: 1.5 })).toBe(-7439);
+        it('Purchased on the first period date', () => {
+            // The first period then counts as a whole period.
+            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 0 })).toBe(900);
+            expect(amordegrc({ datePurchased: '2020/5/15', firstPeriod: '2020/5/15', period: 1 })).toBe(563);
+        });
+
+        it('Counts 28 and 29 February of a leap year as 28 February', () => {
+            expect(amordegrc({ datePurchased: '2024/2/29', firstPeriod: '2024/12/31', basis: 1 })).toBe(617);
+        });
+
+        it('Rounds at Excel\'s 15 significant digits', () => {
+            expect(amordegrc({ rate: 0.333333333333333 })).toBe(980);
+        });
+
+        it('Returns 0 quickly when a tiny rate rounds every period to 0', () => {
+            expect(amordegrc({ rate: 1e-9, period: 1e6 })).toBe(0);
         });
 
         it('Cost is normal string', () => {
@@ -111,7 +135,8 @@ describe('Test amordegrc function', () => {
             expect(amordegrc({ period: -1 })).toBe(ErrorType.NUM);
 
             // The same rounding as AMORLINC: up to 1, a fraction counts as period 1; above 1 it is truncated.
-            expect(amordegrc({ period: 0.5 })).toBe(776);
+            // Between 0 and 1 Excel returns 0, above 1 it uses the whole number of periods.
+            expect(amordegrc({ period: 0.5 })).toBe(0);
             expect(amordegrc({ period: 1.9 })).toBe(776);
             expect(amordegrc({ period: 2.9 })).toBe(485);
         });
@@ -126,7 +151,7 @@ describe('Test amordegrc function', () => {
             expect(amordegrc({ period: 0, basis: 0 })).toBe(330);
             expect(amordegrc({ period: 0, basis: 1 })).toBe(330);
             expect(amordegrc({ period: 0, basis: 3 })).toBe(330);
-            expect(amordegrc({ period: 0, basis: 4 })).toBe(327);
+            expect(amordegrc({ period: 0, basis: 4 })).toBe(328);
             expect(amordegrc({ period: 1, basis: 4 })).toBe(777);
         });
 

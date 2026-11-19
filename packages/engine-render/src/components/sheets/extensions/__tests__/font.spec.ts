@@ -15,7 +15,18 @@
  */
 
 import type { ICellData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, HorizontalAlign, Injector, LocaleType, ObjectMatrix, Univer, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CellValueType,
+    HorizontalAlign,
+    Injector,
+    LocaleType,
+    ObjectMatrix,
+    Univer,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Documents } from '../../../docs/document';
 import { setupRenderTestEnv } from '../../../../__tests__/render-test-utils';
@@ -23,6 +34,7 @@ import { VERTICAL_ROTATE_ANGLE } from '../../../../basics/text-rotation';
 import { UniverRenderingContext2D } from '../../../../context';
 import { Rect } from '../../../../shape/rect';
 import { Text } from '../../../../shape/text';
+import { SHEET_VIEWPORT_KEY } from '../../interfaces';
 import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
 import { Spreadsheet } from '../../spreadsheet';
 import { Font } from '../font';
@@ -1175,7 +1187,8 @@ describe('font extension', () => {
 
 describe('rich text outside a frozen viewport', () => {
     it.each([
-        { name: 'wrapped text outside the clip', hidden: false },
+        { name: 'wrapped text outside the clip at 100%', hidden: false, nativeText: true },
+        { name: 'wrapped text clipped in frozen rows at 100%', hidden: false, nativeText: false },
         { name: 'unknown viewport bounds', hidden: true, unknownBound: true },
         { name: 'printing', hidden: true, printing: true },
         { name: 'overflowing text', hidden: true, style: { tb: WrapStrategy.OVERFLOW } },
@@ -1256,12 +1269,25 @@ describe('rich text outside a frozen viewport', () => {
             },
             deps: [Injector, CanvasRenderingContext2D],
         }]);
+        const fontsDescriptor = Object.getOwnPropertyDescriptor(document, 'fonts');
         try {
             const skeleton = container.get(SpreadsheetSkeleton);
             const font = container.get(Font);
             const ctx = container.get(UniverRenderingContext2D);
             ctx.canvas.width = 1000;
             ctx.canvas.height = 1000;
+            if (test.nativeText !== undefined) {
+                const fonts = Object.assign(document.createElement('span'), { status: 'loaded' });
+                Object.defineProperty(document, 'fonts', { configurable: true, value: fonts });
+                ctx.canvas.dir = 'ltr';
+                vi.spyOn(ctx._context, 'measureText').mockReturnValue({
+                    width: 10,
+                    actualBoundingBoxLeft: 0,
+                    actualBoundingBoxRight: 10,
+                    actualBoundingBoxAscent: 10,
+                    actualBoundingBoxDescent: 0,
+                } as TextMetrics);
+            }
             if (test.printing) ctx.__mode = 'printing';
             skeleton.calculate();
             const worksheet = workbook.getActiveSheet()!;
@@ -1281,9 +1307,10 @@ describe('rich text outside a frozen viewport', () => {
             });
             const documentPaint = vi.spyOn(font.getDocuments()! as Documents, 'render');
             const viewColumn = test.merged ? 3 : 0;
+            const viewportKey = test.nativeText === false ? SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP : SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT;
             font.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
                 viewRanges: [{ startRow: 0, endRow: 0, startColumn: viewColumn, endColumn: viewColumn }],
-                viewportKey: 'viewMainLeft',
+                viewportKey,
                 viewBound: test.unknownBound
                     ? undefined
                     : {
@@ -1297,7 +1324,10 @@ describe('rich text outside a frozen viewport', () => {
             expect(texts).toContain('V');
             expect(texts.includes('H')).toBe(test.hidden);
             const clips = documentPaint.mock.calls.flatMap(([, bounds]) => bounds?.glyphClipBound ? [bounds.glyphClipBound] : []);
-            if (test.name === 'wrapped text outside the clip') expect(clips.length).toBeGreaterThan(0);
+            if (test.nativeText !== undefined) {
+                expect(paints[0].mock.calls.some(([text]) => text === 'V')).toBe(test.nativeText);
+                expect(clips.length).toBeGreaterThan(0);
+            }
             for (const clip of clips) {
                 expect(clip.top).toBeGreaterThanOrEqual(0);
                 expect(clip.bottom).toBeLessThanOrEqual(40);
@@ -1305,6 +1335,11 @@ describe('rich text outside a frozen viewport', () => {
         } finally {
             rootInjector.dispose();
             vi.restoreAllMocks();
+            if (fontsDescriptor) {
+                Object.defineProperty(document, 'fonts', fontsDescriptor);
+            } else {
+                Reflect.deleteProperty(document, 'fonts');
+            }
             environment.restore();
         }
     });

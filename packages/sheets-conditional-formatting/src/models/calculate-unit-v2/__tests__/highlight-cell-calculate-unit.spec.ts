@@ -189,13 +189,38 @@ describe('HighlightCellCalculateUnit text', () => {
         testBed = undefined;
     });
 
-    // Lower-casing turns a Greek capital sigma into final ς at the end of a word and σ
-    // elsewhere; Excel still matches these, case-insensitively.
-    it.each([
-        { operator: CFTextOperator.beginsWith, cell: 'ΟΣΑ', value: 'ΟΣ' },
-        { operator: CFTextOperator.containsText, cell: 'ΟΣΑ', value: 'ΟΣ' },
-        { operator: CFTextOperator.endsWith, cell: 'ΟΣ', value: 'Σ' },
-    ])('matches $cell $operator "$value"', ({ operator, cell, value }) => {
+    // Expected values were verified against the conditional formatting rules of Excel 16.0:
+    // "Text that contains" and "does not contain" are built from SEARCH, the other text rules
+    // from LEFT or RIGHT and "=", and each comparison behaves differently on ligatures.
+    it.each<{ operator: CFTextOperator; cell: string; value: string; matched: boolean }>([
+        // SEARCH folds case but compares ligatures as written.
+        { operator: CFTextOperator.containsText, cell: 'Straße', value: 'STRASSE', matched: false },
+        { operator: CFTextOperator.notContainsText, cell: 'Straße', value: 'STRASSE', matched: true },
+        // "=" folds ligatures and composes Unicode normalization.
+        { operator: CFTextOperator.equal, cell: 'Straße', value: 'STRASSE', matched: true },
+        { operator: CFTextOperator.beginsWith, cell: 'Straße', value: 'STRASSE', matched: true },
+        { operator: CFTextOperator.equal, cell: 'æther', value: 'AETHER', matched: true },
+        { operator: CFTextOperator.equal, cell: 'œuvre', value: 'OEUVRE', matched: true },
+        { operator: CFTextOperator.equal, cell: 'ﬁle', value: 'FILE', matched: true },
+        { operator: CFTextOperator.equal, cell: 'café', value: 'cafe\u0301', matched: true },
+        // Accents are not folded, and the dotted and dotless I stay distinct.
+        { operator: CFTextOperator.containsText, cell: 'café', value: 'cafe', matched: false },
+        { operator: CFTextOperator.containsText, cell: '\u0130STANBUL', value: 'istanbul', matched: false },
+        { operator: CFTextOperator.containsText, cell: '\u0130STANBUL', value: 'i', matched: false },
+        { operator: CFTextOperator.beginsWith, cell: '\u0130STANBUL', value: 'i', matched: false },
+        { operator: CFTextOperator.equal, cell: 'I', value: 'ı', matched: false },
+        // The Kelvin sign lower-cases to k.
+        { operator: CFTextOperator.equal, cell: '\u212A', value: 'k', matched: true },
+        { operator: CFTextOperator.endsWith, cell: '😀AB', value: 'b', matched: true },
+        // Greek final sigma and sigma compare equal, in both directions.
+        { operator: CFTextOperator.beginsWith, cell: 'ΟΣΑ', value: 'ΟΣ', matched: true },
+        { operator: CFTextOperator.containsText, cell: 'ΟΣΑ', value: 'ΟΣ', matched: true },
+        { operator: CFTextOperator.endsWith, cell: 'ΟΣ', value: 'Σ', matched: true },
+        { operator: CFTextOperator.endsWith, cell: 'ΟΣ', value: 'σ', matched: true },
+        { operator: CFTextOperator.equal, cell: 'ΟΣ', value: 'Οσ', matched: true },
+        { operator: CFTextOperator.endsWith, cell: 'ΑΣ', value: 'ς', matched: true },
+        { operator: CFTextOperator.containsText, cell: 'ΟΣΑ', value: 'ος', matched: true },
+    ])('$cell $operator "$value" matches $matched', ({ operator, cell, value, matched }) => {
         testBed = createTestBed();
         testBed.getConditionalFormattingViewModel();
         const { unitId, subUnitId } = testBed;
@@ -206,7 +231,7 @@ describe('HighlightCellCalculateUnit text', () => {
         });
 
         const rule: IConditionFormattingRule<ITextHighlightCell> = {
-            cfId: 'greek-text',
+            cfId: 'text-rule',
             ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
             stopIfTrue: false,
             rule: {
@@ -224,6 +249,6 @@ describe('HighlightCellCalculateUnit text', () => {
         });
 
         const service = testBed.getConditionalFormattingService();
-        expect(service.composeStyle(unitId, subUnitId, 0, 0)).toEqual({ style: { bl: BooleanNumber.TRUE } });
+        expect(service.composeStyle(unitId, subUnitId, 0, 0)).toEqual({ style: matched ? { bl: BooleanNumber.TRUE } : {} });
     });
 });

@@ -173,6 +173,8 @@ export { AsyncArrayObject, AsyncObject } from './engine/reference-object/base-re
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { generateExecuteAstNodeData } from './engine/utils/ast-node-tool';
 export { extractFormulaError } from './engine/utils/cell';
+export { upperCaseKeepingPositions } from './engine/utils/char-kit';
+export { normalizeTextForComparison } from './engine/utils/compare';
 export { generateAstNode } from './engine/utils/generate-ast-node';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';

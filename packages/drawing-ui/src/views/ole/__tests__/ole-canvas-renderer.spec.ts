@@ -24,8 +24,8 @@ class TestPath2D {
 
 function context() {
     vi.stubGlobal('Path2D', TestPath2D);
-    return {
-        _context: { fillStyle: '', strokeStyle: '' },
+    const native = {
+        strokeStyle: '',
         save: vi.fn(),
         restore: vi.fn(),
         beginPath: vi.fn(),
@@ -44,6 +44,7 @@ function context() {
         textAlign: '',
         textBaseline: '',
     };
+    return { ...native, _context: native };
 }
 
 afterEach(() => vi.unstubAllGlobals());

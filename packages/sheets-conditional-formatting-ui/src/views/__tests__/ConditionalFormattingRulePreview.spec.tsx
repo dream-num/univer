@@ -20,7 +20,6 @@ import {
     CFRuleType,
     CFSubRuleType,
     CFValueType,
-    iconMap,
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -119,10 +118,10 @@ describe('ConditionalFormattingRulePreview', () => {
             />
         );
 
-        expect(Array.from(container.querySelectorAll('img'), (image) => image.getAttribute('src'))).toEqual([
-            iconMap[IIconSetType.threeArrows][2],
-            iconMap[IIconSetType.threeArrowsGray][0],
-        ]);
+        const icons = Array.from(container.querySelectorAll('svg'));
+        expect(icons.map((icon) => icon.style.color)).toEqual(['#FE4B4B', '#999999']);
+        expect(icons[0].classList.contains('univerjs-icon-arrow-down-icon')).toBe(true);
+        expect(icons[1].classList.contains('univerjs-icon-arrow-up-icon')).toBe(true);
     });
 
     it('renders nothing while no rule is selected', () => {

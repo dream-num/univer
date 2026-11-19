@@ -17,16 +17,13 @@
 import type { ThemeService } from '@univerjs/core';
 import type { Image, Scene, UniverRenderingContext } from '@univerjs/engine-render';
 import { DisposableCollection } from '@univerjs/core';
-import { render, unmount } from '@univerjs/design';
 import { CURSOR_TYPE, Rect, Vector2 } from '@univerjs/engine-render';
-import { ExpandIcon } from '@univerjs/icons';
-import { createElement } from 'react';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
 
 /** Transient canvas chrome: never part of the image model or its transformer. */
 export class MobileImagePreviewButton extends Rect {
     private _enabled = true;
-    private readonly _icon = document.createElement('img');
-    private readonly _iconContainer = document.createElement('div');
+    private _iconColor = '';
     private readonly _gesture = new DisposableCollection();
     private _pressed = false;
     private _background = '';
@@ -50,26 +47,9 @@ export class MobileImagePreviewButton extends Rect {
             this._background = themeService.getColorFromTheme('white');
             this._border = themeService.getColorFromTheme('gray.200');
             this._pressedBackground = themeService.getColorFromTheme('gray.100');
-            render(createElement(
-                ExpandIcon,
-                {
-                    width: 20,
-                    height: 20,
-                    color: themeService.getColorFromTheme('gray.900'),
-                    ref: (svg) => {
-                        if (svg) {
-                            this._icon.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
-                        }
-                    },
-                }
-            ), this._iconContainer);
+            this._iconColor = themeService.getColorFromTheme('gray.900');
             this.makeDirty(true);
         }));
-        this._icon.onload = () => this.makeDirty(true);
-        this.disposeWithMe(() => {
-            this._icon.onload = null;
-            unmount(this._iconContainer);
-        });
         this.disposeWithMe(this.onPointerDown$.subscribeEvent((event) => {
             this._gesture.dispose();
             const start = { x: event.offsetX, y: event.offsetY, time: Date.now() };
@@ -163,9 +143,7 @@ export class MobileImagePreviewButton extends Rect {
             stroke: this._border,
             strokeWidth: 1,
         });
-        if (this._icon.complete && this._icon.naturalWidth > 0) {
-            ctx.drawImage(this._icon, 6, 6, 20, 20);
-        }
+        drawCanvasIcon(ctx._context, 'expand-icon', 6, 6, 20, this._iconColor);
         ctx.restore();
     }
 }

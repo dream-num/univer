@@ -30,7 +30,11 @@ import {
     AutofillDoubleIcon,
     ChartIcon,
     MoreDownIcon,
-    TextWrapShapeIcon,
+    WrapBehindTextIcon,
+    WrapInFrontOfTextIcon,
+    WrapInlineIcon,
+    WrapSquareIcon,
+    WrapTopBottomIcon,
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -359,27 +363,27 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inline'),
             value: TextWrappingStyle.INLINE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInlineIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.square'),
             value: TextWrappingStyle.WRAP_SQUARE,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapSquareIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.topAndBottom'),
             value: TextWrappingStyle.WRAP_TOP_AND_BOTTOM,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapTopBottomIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.behindText'),
             value: TextWrappingStyle.BEHIND_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapBehindTextIcon />,
         },
         {
             label: localeService.t<LocaleKey>('drawing-ui.image-text-wrap.inFrontText'),
             value: TextWrappingStyle.IN_FRONT_OF_TEXT,
-            icon: <TextWrapShapeIcon />,
+            icon: <WrapInFrontOfTextIcon />,
         },
     ];
 

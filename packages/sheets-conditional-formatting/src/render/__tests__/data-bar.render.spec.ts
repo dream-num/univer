@@ -26,6 +26,8 @@ function createCtx(canvasColorService?: ICanvasColorService) {
     const gradient = { addColorStop: vi.fn() };
     const native = {
         canvas: document.createElement('canvas'),
+        translate: vi.fn(),
+        scale: vi.fn(),
         save: vi.fn(),
         restore: vi.fn(),
         beginPath: vi.fn(),
@@ -96,6 +98,7 @@ function createSkeleton(
 
 describe('conditional formatting render extensions', () => {
     beforeEach(() => {
+        vi.stubGlobal('Path2D', class {});
         univer = new Univer();
         const injector = univer.__getInjector();
         injector.add([DataBar]);
@@ -364,9 +367,6 @@ describe('conditional formatting render extensions', () => {
             },
         }, new Set([10]), new Set([4]), [merge]);
         const extension = kind === 'dataBar' ? univer.__getInjector().get(DataBar) : univer.__getInjector().get(ConditionalFormattingIcon);
-        if (extension instanceof ConditionalFormattingIcon) {
-            (extension as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, document.createElement('img'));
-        }
         const resolver = vi.fn((_unitId: string, _sheetId: string, ranges: IRange[]) => (
             ranges.some((range) => range.startRow === 0 && range.startColumn === 0) ? [anchor] : []
         ));
@@ -375,7 +375,7 @@ describe('conditional formatting render extensions', () => {
         extension.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [repair]);
 
         expect(resolver).toHaveBeenCalledOnce();
-        expect(kind === 'dataBar' ? ctx.fill : ctx.drawImage).toHaveBeenCalledOnce();
+        expect(kind === 'dataBar' ? ctx.fill : ctx._context.stroke).toHaveBeenCalledOnce();
         expect(vi.mocked(skeleton.worksheet.getCell).mock.calls.length).toBeLessThanOrEqual(4);
         expect(vi.mocked(skeleton.worksheet.getCell).mock.calls).toEqual(expect.arrayContaining([[11, 5], [0, 0]]));
         expect(vi.mocked(skeleton.worksheet.getCell).mock.calls.every(([row, col]: [number, number]) => (
@@ -383,11 +383,9 @@ describe('conditional formatting render extensions', () => {
         ))).toBe(true);
     });
 
-    it('draws configured conditional-formatting icons and skips unavailable icons', () => {
-        const ctx = createCtx();
+    it('preserves the icon palette on a recolored canvas and skips unavailable icons', () => {
+        const ctx = createCtx({ getRenderColor: () => '#FF00FF' });
         const icon = univer.__getInjector().get(ConditionalFormattingIcon);
-        const nativeImage = document.createElement('img');
-        (icon as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, nativeImage);
 
         const skeleton = createSkeleton({
             '0,0': {
@@ -417,15 +415,14 @@ describe('conditional formatting render extensions', () => {
             { startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 },
         ]);
 
-        expect(ctx.drawImage).toHaveBeenCalledTimes(1);
-        expect(ctx.drawImage).toHaveBeenCalledWith(nativeImage, 2, 4.5, 15, 15);
+        expect(ctx._context.stroke).toHaveBeenCalledOnce();
+        expect(ctx._context.translate).toHaveBeenCalledWith(2, 4.5);
+        expect(ctx._context.strokeStyle).toBe('#59D01E');
     });
 
     it('skips icon drawing for missing worksheet and cells too small for the icon', () => {
         const ctx = createCtx();
         const icon = univer.__getInjector().get(ConditionalFormattingIcon);
-        const nativeImage = document.createElement('img');
-        (icon as any)._imageMap.set(`${IIconSetType.threeArrows}_0`, nativeImage);
 
         expect(icon.draw(ctx, { scaleX: 1, scaleY: 1 }, { worksheet: undefined } as any, [])).toBe(false);
 
@@ -442,7 +439,7 @@ describe('conditional formatting render extensions', () => {
         icon.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [
             { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
         ]);
-        expect(ctx.drawImage).not.toHaveBeenCalled();
+        expect(ctx._context.stroke).not.toHaveBeenCalled();
     });
 
     it('skips icon cell visits when a configured rule-range resolver confirms no matching rule', () => {

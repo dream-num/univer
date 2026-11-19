@@ -748,26 +748,15 @@ function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawings
 
     const divideSkeleton: IDocumentSkeletonDivide[] = [];
     let start = 0;
-    const splitLength = drawingSplit.length;
 
-    for (let i = 0; i < splitLength; i++) {
-        const split = drawingSplit[i];
-        const { left, width } = split;
-
+    for (const { left, width } of drawingSplit) {
         if (left > start) {
-            // Insert divide for the gap from start to left
-            let width = left - start;
-            width = width < columnWidth ? width : columnWidth - start;
-            const divide = __getDivideSKe(start, width);
-            divideSkeleton.push(divide);
+            divideSkeleton.push(__getDivideSKe(start, left - start));
         }
         start = Math.max(left + width, start);
-
-        if (i === splitLength - 1 && left + width < columnWidth) {
-            // Divide from the last split to the right boundary
-            const divide = __getDivideSKe(left + width, columnWidth - left - width);
-            divideSkeleton.push(divide);
-        }
+    }
+    if (start < columnWidth) {
+        divideSkeleton.push(__getDivideSKe(start, columnWidth - start));
     }
 
     if (divideSkeleton.length === 0 && columnWidth > 0) {

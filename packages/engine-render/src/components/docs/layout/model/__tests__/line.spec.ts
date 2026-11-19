@@ -79,6 +79,38 @@ describe('line model', () => {
         expect(drawing).toMatchObject({ aLeft: 30, width: 20 });
     });
 
+    it('keeps body text outside overlapping header drawings and indents', () => {
+        const page = { marginTop: 30, skeDrawings: new Map(), skeTables: new Map() } as unknown as IDocumentSkeletonPage;
+        const header = {
+            marginTop: 10,
+            skeDrawings: new Map([['logo', {
+                aTop: 7,
+                aLeft: -8,
+                width: 70,
+                height: 25,
+                drawingOrigin: {
+                    behindDoc: BooleanNumber.TRUE,
+                    layoutType: PositionedObjectLayoutType.WRAP_TIGHT,
+                    distL: 2,
+                    distR: 3,
+                },
+            }]]),
+        } as unknown as IDocumentSkeletonPage;
+        const line = createSkeletonLine(
+            0,
+            LineType.PARAGRAPH,
+            { lineHeight: 16, contentHeight: 16, lineTop: 0, paddingLeft: 15 },
+            100,
+            0,
+            true,
+            { documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL) } as never,
+            page,
+            header,
+            null
+        );
+        expect(line.divides.map((divide) => [divide.left, divide.width])).toEqual([[65, 35]]);
+    });
+
     it.each([PositionedObjectLayoutType.WRAP_SQUARE, PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM])('reserves asymmetric effect bounds while leaving drawing geometry unchanged (%s)', (layoutType) => {
         const drawing = {
             aTop: 20,

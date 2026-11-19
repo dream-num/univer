@@ -568,6 +568,49 @@ describe('layout-ruler', () => {
         expect(line.paddingBottom).toBe(6);
     });
 
+    it('finishes replaying a bordered line with font leading and an inline image', () => {
+        const bed = createParagraphLayoutTestBed('ABC', {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const text = createGlyph('A', 10);
+        text.bBox = { ...text.bBox, ba: 8.5, bd: 2.4, normalLineHeight: 12.61 };
+        const continuation = createGlyph('B', 10);
+        continuation.bBox = { ...text.bBox };
+        const picture = createGlyph('C', 68);
+        picture.streamType = DataStreamTreeTokenType.CUSTOM_BLOCK;
+        picture.bBox = { ...picture.bBox, ba: 8.47, bd: 0 };
+        const paragraph = createGlyph('\r', 0);
+        paragraph.streamType = DataStreamTreeTokenType.PARAGRAPH;
+        paragraph.bBox = { ...text.bBox, width: 0 };
+        const config = {
+            paragraphIndex: 3,
+            paragraphStyle: {
+                snapToGrid: BooleanNumber.FALSE,
+                spacingRule: SpacingRule.AUTO,
+                lineSpacing: 1.15,
+            },
+            borderBottomSpace: 2 / 3,
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            useWordStyleLineHeight: true,
+        } as IParagraphConfig;
+
+        try {
+            let pages = [bed.curPage];
+            for (const [index, glyph] of [text, continuation, picture, paragraph].entries()) {
+                pages = layoutParagraph(bed.ctx, [glyph], pages, bed.sectionBreakConfig, config, index === 0);
+            }
+            const lines = pages[0].sections[0].columns[0].lines;
+            expect(pages).toHaveLength(1);
+            expect(lines).toHaveLength(1);
+            expect(lines[0].divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.content).join('')).toBe('ABC\r');
+            expect(lines[0].borderBottomSpace).toBeCloseTo(2 / 3);
+            expect(lines[0].lineHeight).toBeGreaterThan(lines[0].contentHeight + (lines[0].borderBottomSpace ?? 0));
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it.each([BooleanNumber.FALSE, BooleanNumber.TRUE])('preserves mixed-font reflow metrics after a zero-height page hint (grid: %s)', (snapToGrid) => {
         const { ctx, curPage, sectionBreakConfig } = createParagraphLayoutTestBed('3.3外', {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },

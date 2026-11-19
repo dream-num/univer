@@ -104,6 +104,12 @@ describe('cell utils', () => {
         expect(style.bd).toBeDefined();
     });
 
+    it('should keep a transparent background transparent', () => {
+        const style = handleStringToStyle(undefined, 'background-color:transparent');
+
+        expect(style.bg).toEqual({ rgb: 'rgba(255,255,255,0)' });
+    });
+
     it('should parse additional style variants and clamp font sizes', () => {
         const style = handleStringToStyle(
             undefined,

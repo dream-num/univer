@@ -26,6 +26,15 @@ describe('ColorKit', () => {
         expect(new ColorKit('hsv(240,100,100)').toRgb()).toEqual({ r: 0, g: 0, b: 255 });
     });
 
+    it('should keep the transparent keyword fully transparent', () => {
+        const color = new ColorKit('transparent');
+
+        expect(color.isValid).toBe(true);
+        expect(color.toRgb()).toEqual({ r: 255, g: 255, b: 255, a: 0 });
+        expect(color.getAlpha()).toBe(0);
+        expect(color.toRgbString()).toBe('rgba(255,255,255,0)');
+    });
+
     it('should stringify colors and support short hex output when possible', () => {
         const color = new ColorKit({ r: 255, g: 255, b: 255, a: 0 });
 

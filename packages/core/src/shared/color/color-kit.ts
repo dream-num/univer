@@ -473,7 +473,7 @@ const toColor: (color: string | Color) => Color | undefined = (color) => {
             b: Math.round(colorArray[2]),
         };
 
-        rgb.a = colorArray[3] || 1;
+        rgb.a = colorArray[3] ?? 1;
 
         return rgb;
     }

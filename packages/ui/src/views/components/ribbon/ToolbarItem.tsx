@@ -230,7 +230,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         iconSize,
         iconColor,
         fullWidth,
-        preserveStrokeWidth,
+        preserveStrokeWidth = true,
         dropdownComponent,
         dropdownMenuComponent,
     } = props;
@@ -422,6 +422,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                     >
                                         <CustomLabel
                                             ariaLabel={selectorAriaLabel}
+                                            preserveStrokeWidth={preserveStrokeWidth}
                                             title={titleToDisplay}
                                             value={value}
                                             label={label}

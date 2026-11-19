@@ -200,7 +200,7 @@ describe('FormulaRuntimeService', () => {
         try {
             unitDataMatrix.setValue(3, 2, { f: '=$B$4' });
             runtime.setCurrent(3, 2, 20, 20, 'sheet', 'unit');
-            unitDataMatrix.setValue(3, 2, null);
+            unitDataMatrix.realDeleteValue(3, 2);
             runtime.setRuntimeData(createNewArray([[NumberValueObject.create(50)]], 1, 1));
 
             expect(runtime.getUnitData().unit?.sheet?.getValue(3, 2)?.v).toBe(50);
@@ -215,7 +215,7 @@ describe('FormulaRuntimeService', () => {
         try {
             unitDataMatrix.setValue(6, 2, { f: '=B5:B6' });
             runtime.setCurrent(6, 2, 20, 20, 'sheet', 'unit');
-            unitDataMatrix.setValue(6, 2, null);
+            unitDataMatrix.realDeleteValue(6, 2);
             runtime.setRuntimeData(createNewArray(
                 [[NumberValueObject.create(0.25)], [NumberValueObject.create(50)]],
                 2,

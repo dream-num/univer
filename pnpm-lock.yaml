@@ -1520,8 +1520,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.47.0
-        version: 1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 1.48.0
+        version: 1.48.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

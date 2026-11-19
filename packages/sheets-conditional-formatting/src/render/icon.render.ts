@@ -19,15 +19,15 @@ import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engi
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import { drawCanvasIcon } from '@univerjs/icons-svg';
+import type { IConditionalFormattingIcon } from '../models/icon-map';
 import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
-import { CANVAS_ICONS_BY_URL } from '../assets/icon-map';
-import { iconMap } from '../models/icon-map';
+import { conditionalFormattingIcons } from '../models/icon-map';
 import { ConditionalFormattingRasterCache } from './conditional-formatting-raster-cache';
 import { resolveRenderRanges } from './resolve-render-ranges';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
-const canvasIcons = new Map<string, (typeof CANVAS_ICONS_BY_URL)[string]>(Object.entries(iconMap).flatMap(([type, urls]) =>
-    urls.map((url, index) => [`${type}_${index}`, CANVAS_ICONS_BY_URL[url]] as const)));
+const canvasIcons = new Map<string, IConditionalFormattingIcon>(Object.entries(conditionalFormattingIcons).flatMap(([type, icons]) =>
+    icons.map((icon, index) => [`${type}_${index}`, icon] as const)));
 
 const EXTENSION_Z_INDEX = 35;
 export const DEFAULT_WIDTH = 15;

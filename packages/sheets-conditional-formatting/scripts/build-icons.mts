@@ -124,6 +124,7 @@ function replaceFillAndConvertToBase64(filePath: string, replaceMap: Record<stri
 
 function runTask() {
     const base64EncodedSVGs: Record<string, Record<string, string>> = {};
+    const canvasEntries: string[] = [];
     const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedback2, flag, cell };
     for (const iconType in obj) {
         const list = obj[iconType as keyof typeof obj];
@@ -132,6 +133,8 @@ function runTask() {
         for (const element of list) {
             const [key, path, replaceMap] = element;
             const base64 = replaceFillAndConvertToBase64(`./node_modules/${path}`, typeof replaceMap === 'object' ? replaceMap : {});
+            const name = String(path).split('/').pop()!.replace(/\.svg$/, '');
+            canvasEntries.push(`    [ICON_MAP.${iconType}[${JSON.stringify(key)}]]: ${JSON.stringify({ name, colors: replaceMap })},`);
             map[key as keyof typeof map] = `data:image/svg+xml;charset=utf-8,${base64}`;
         }
     }
@@ -140,7 +143,13 @@ function runTask() {
         fs.mkdirSync('./src/assets');
     }
 
-    fs.writeFileSync('./src/assets/icon-map.ts', `/* eslint-disable */\nexport const ICON_MAP = ${JSON.stringify(base64EncodedSVGs, null, 4)};\n`);
+    fs.writeFileSync('./src/assets/icon-map.ts', `/* eslint-disable */
+import type { CanvasIconName } from '@univerjs/icons-svg';
+export const ICON_MAP = ${JSON.stringify(base64EncodedSVGs, null, 4)};
+export const CANVAS_ICONS_BY_URL: Record<string, { name: CanvasIconName; colors?: Record<string, string> }> = {
+${canvasEntries.join('\n')}
+};
+`);
 };
 
 runTask();

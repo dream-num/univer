@@ -1222,8 +1222,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: 1.47.0
-        version: 1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-1.47.1.tgz
+        version: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-1.47.1.tgz(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@univerjs/icons-svg':
+        specifier: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
+        version: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1479,6 +1482,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/icons-svg':
+        specifier: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
+        version: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1486,9 +1492,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/icons-svg':
-        specifier: ^1.47.0
-        version: 1.47.0
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
@@ -1841,6 +1844,9 @@ importers:
       '@univerjs/icons':
         specifier: 1.47.0
         version: 1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@univerjs/icons-svg':
+        specifier: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
+        version: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2376,6 +2382,9 @@ importers:
       '@univerjs/icons':
         specifier: 1.47.0
         version: 1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@univerjs/icons-svg':
+        specifier: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
+        version: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -6729,8 +6738,19 @@ packages:
   '@univerjs/icons-svg@1.47.0':
     resolution: {integrity: sha512-19KDLLUIeVoRdtYvDuWptyYY3kjXZXkUbbjlC9zRf33oKRM3Yy8iyF6uWDNKIEjXOZHurvVoBVmVv2KFHR07kw==}
 
+  '@univerjs/icons-svg@https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz':
+    resolution: {integrity: sha512-sE7MOfqkp4/D+xFf3KUksphPAABAUJWvPbHHSRXEIXWSavzQxTKLwjzvppABPVRFiB5+EjFvPq8v4r5JzpeTYA==, tarball: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz}
+    version: 1.47.1
+
   '@univerjs/icons@1.47.0':
     resolution: {integrity: sha512-c7ujagbPpufqoFYpUZhOlLcSLjWJsR/U/DfW7lfSJcA2Ud5EV2oQNwmIVdOyupcmdTKWd2PP8Rg9TQknz8FpPg==}
+    peerDependencies:
+      react: 19.3.0
+      react-dom: 19.3.0
+
+  '@univerjs/icons@https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-1.47.1.tgz':
+    resolution: {integrity: sha512-muj9NhGVZaNVxp1j/DlB3Ss3ic+2dn/A2s9T+KDtXt+w2QbEX5KJeRypu4j5sYkBelkWNuqOxaKF/z/OtnaUIQ==, tarball: https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-1.47.1.tgz}
+    version: 1.47.1
     peerDependencies:
       react: 19.3.0
       react-dom: 19.3.0
@@ -13967,7 +13987,14 @@ snapshots:
 
   '@univerjs/icons-svg@1.47.0': {}
 
+  '@univerjs/icons-svg@https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-svg-1.47.1.tgz': {}
+
   '@univerjs/icons@1.47.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+
+  '@univerjs/icons@https://raw.githubusercontent.com/dream-num/univer-icons/1b010766394e1f74fa41428f39f52f07792dec69/preview/univerjs-icons-1.47.1.tgz(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)

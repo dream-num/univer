@@ -116,8 +116,8 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                     data-testid="ribbon-grid-group-grid"
                                     className="
                                       univer-grid univer-min-h-0 univer-flex-1 univer-grid-flow-col
-                                      univer-grid-rows-[repeat(2,1.75rem)] univer-content-center univer-gap-y-0
-                                      univer-py-2
+                                      univer-grid-rows-[repeat(2,1.75rem)] univer-content-center univer-gap-y-2
+                                      univer-py-1
                                       [&>div>span>span]:univer-h-full
                                     "
                                     style={{ columnGap: 'calc(8px - 4px * var(--ribbon-grid-density, 0))' }}

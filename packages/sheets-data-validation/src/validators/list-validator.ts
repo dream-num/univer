@@ -158,9 +158,7 @@ export class ListValidator extends BaseSheetValidator {
     override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, { style: defaultStyle }: { style: IStyleData }): Nullable<IStyleData> {
         const tb = (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP;
         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
-            const colorMap = this.getListWithColorMap(rule);
-            const valueStr = `${value ?? ''}`;
-            const color = colorMap[valueStr];
+            const color = this.getOptionColor(rule, value);
             if (color) {
                 return {
                     bg: {
@@ -278,5 +276,20 @@ export class ListValidator extends BaseSheetValidator {
             subUnitId,
             rule
         ).colorMap;
+    }
+
+    /**
+     * Resolve the color configured for a list option. List entries are matched case-insensitively,
+     * so the option color has to resolve the same way, otherwise an accepted value renders unstyled.
+     */
+    getOptionColor(rule: IDataValidationRule, value: Nullable<CellValue>, currentUnitId?: string, currentSubUnitId?: string): string | undefined {
+        const colorMap = this.getListWithColorMap(rule, currentUnitId, currentSubUnitId);
+        const valueStr = `${value ?? ''}`;
+        if (colorMap[valueStr]) {
+            return colorMap[valueStr];
+        }
+
+        const matched = Object.keys(colorMap).find((option) => option.toLowerCase() === valueStr.toLowerCase());
+        return matched ? colorMap[matched] : undefined;
     }
 }

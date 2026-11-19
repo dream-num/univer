@@ -18,10 +18,10 @@ import type { ICellRenderContext, IPaddingData } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR, DROP_DOWN_ICON_COLOR } from '../../const';
 
@@ -181,10 +181,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
-        const colorMap = validator.getListWithColorMap(rule);
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
-        const activeColor = colorMap[valueStr];
+        const activeColor = validator.getOptionColor(rule, valueStr);
         let { tb, vt, ht, pd } = style || {};
         tb = tb ?? WrapStrategy.WRAP;
         vt = vt ?? VerticalAlign.BOTTOM;

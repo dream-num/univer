@@ -182,6 +182,11 @@ describe('list-validator helpers', () => {
             bg: { rgb: '#ff0000' },
             tb: WrapStrategy.CLIP,
         });
+        // An entry that differs only in case resolves to the same option, including its color.
+        expect(validator.getExtraStyle(rule, 'green', { style: { tb: WrapStrategy.OVERFLOW } as any })).toEqual({
+            bg: { rgb: '#00ff00' },
+            tb: WrapStrategy.CLIP,
+        });
         expect(validator.getExtraStyle({ ...rule, renderMode: undefined }, 'Missing', { style: {} as any })).toEqual({
             tb: WrapStrategy.WRAP,
         });

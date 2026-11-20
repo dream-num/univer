@@ -1359,49 +1359,46 @@ describe('documents render', () => {
     });
 
     it('paints the thick stroke, gap and thin stroke of a Word compound paragraph border', () => {
-        const skeleton = { getSkeletonData: () => ({ pages: [] }) } as unknown as DocumentSkeleton;
-        const injector = new Injector();
-        const documents = injector.createInstance(Documents, 'compound-paragraph-border', skeleton);
-        const host = documents as unknown as {
-            _drawBorder: () => void;
-            _getDocumentFlavor: () => DocumentFlavor;
-        };
-        vi.spyOn(host, '_getDocumentFlavor').mockReturnValue(DocumentFlavor.TRADITIONAL);
-        const draw = vi.spyOn(host, '_drawBorder').mockImplementation(() => undefined);
-        const page = createPage(DocumentSkeletonPageType.BODY, '');
-        const line = page.sections[0].columns[0].lines[1];
-        line.borderTop = line.borderLeft = line.borderRight = undefined;
-        line.borderBottom = {
+        const text = 'Paragraph';
+        const border = {
             color: { rgb: '#112233' },
             width: 4,
             padding: 4 / 3,
             dashStyle: DashStyleType.SOLID,
             style: 'thinThickSmallGap',
         };
-        line.lineHeight = 28;
-        line.marginTop = line.paddingTop = line.marginBottom = 0;
-        line.borderBottomSpace = 6 + 4 / 3;
-        Reflect.set(documents, '_drawLiquid', { x: 0, y: -page.marginTop });
+        const bed = createParagraphLayoutTestBed(text, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { paragraphs: [{
+                startIndex: text.length,
+                paragraphId: 'compound-border',
+                paragraphStyle: { borderBottom: border, lineSpacing: 20, spacingRule: SpacingRule.EXACT },
+            }] },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = bed.injector.createInstance(Documents, 'compound-paragraph-border', skeleton);
+        const context = canvas.getContext();
+        const move = vi.spyOn(context, 'moveTo');
+        const nativeStroke = context.stroke.bind(context);
+        const strokes: Array<{ width: number; y: number }> = [];
+        const stroke = vi.spyOn(context, 'stroke').mockImplementation((path) => {
+            if (context.strokeStyle === border.color.rgb && move.mock.lastCall) {
+                strokes.push({ width: context.lineWidth, y: move.mock.lastCall[1] });
+            }
+            nativeStroke(path);
+        });
         try {
-            Reflect.get(documents, '_drawParagraphBorders').call(documents, {}, page, line, 72);
-            expect(draw).toHaveBeenCalledTimes(2);
-            expect(draw).toHaveBeenNthCalledWith(
-                1,
-                {},
-                expect.objectContaining({ width: { v: 4 } }),
-                BORDER_TYPE.BOTTOM,
-                expect.objectContaining({ endY: 24 })
-            );
-            expect(draw).toHaveBeenNthCalledWith(
-                2,
-                {},
-                expect.objectContaining({ width: { v: 1 } }),
-                BORDER_TYPE.BOTTOM,
-                expect.objectContaining({ endY: 27.5 })
-            );
+            skeleton.calculate();
+            documents.draw(context);
+            expect(strokes.map(({ width }) => width)).toEqual([4, 1]);
+            expect(strokes[1].y - strokes[0].y).toBeCloseTo(3.5);
         } finally {
+            move.mockRestore();
+            stroke.mockRestore();
             documents.dispose();
-            injector.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
         }
     });
 

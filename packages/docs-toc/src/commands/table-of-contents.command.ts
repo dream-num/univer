@@ -447,13 +447,34 @@ function resolvePageReferenceOffset(body: IDocumentBody, pageField: ICustomRange
         if (bookmark) {
             return bookmark.startIndex;
         }
+        const headingOffset = findHeadingOffset(body, targetId);
+        if (headingOffset != null) {
+            return headingOffset;
+        }
     }
     const link = body.customRanges?.find((range) =>
         range.rangeType === CustomRangeType.HYPERLINK &&
         range.startIndex <= pageField.startIndex && pageField.endIndex <= range.endIndex
     );
-    const headingId = link?.properties?.headingId;
-    return body.paragraphs?.find((paragraph) => paragraph.paragraphStyle?.headingId === headingId || paragraph.paragraphId === headingId)?.startIndex;
+    return findHeadingOffset(body, link?.properties?.headingId);
+}
+
+function findHeadingOffset(body: IDocumentBody, headingId: string | undefined): number | undefined {
+    if (!headingId || !body.paragraphs) {
+        return;
+    }
+    const index = body.paragraphs.findIndex((paragraph) => paragraph.paragraphStyle?.headingId === headingId || paragraph.paragraphId === headingId);
+    if (index < 0) {
+        return;
+    }
+    return skipFieldMarkers(body.dataStream, (body.paragraphs[index - 1]?.startIndex ?? -1) + 1);
+}
+
+function skipFieldMarkers(dataStream: string, offset: number): number {
+    while (dataStream[offset] === FIELD_START || dataStream[offset] === FIELD_END) {
+        offset += 1;
+    }
+    return offset;
 }
 
 function replaceFieldResult(body: IDocumentBody, field: ICustomRange, value: string): void {
@@ -849,10 +870,7 @@ function collectHeadings(body: IDocumentBody, toc: ICustomRange | undefined, min
     const paragraphs = [...(body.paragraphs ?? [])].sort((left, right) => left.startIndex - right.startIndex);
     let paragraphStart = 0;
     return paragraphs.flatMap((paragraph) => {
-        let startOffset = paragraphStart;
-        while (body.dataStream[startOffset] === FIELD_START || body.dataStream[startOffset] === FIELD_END) {
-            startOffset += 1;
-        }
+        const startOffset = skipFieldMarkers(body.dataStream, paragraphStart);
         paragraphStart = paragraph.startIndex + 1;
         const level = getOutlineLevel(paragraph, styles);
         const headingId = paragraph.paragraphStyle?.headingId || paragraph.paragraphId;

@@ -655,6 +655,36 @@ describe('table of contents body builder', () => {
         expect(result.paragraphs![0]).toMatchObject({ startIndex: 1, styleId, paragraphStyle: { outlineLevel: 9 } });
     });
 
+    it('keeps both pages when updating only page numbers after rebuilding an unlinked TOC', () => {
+        const { body, toc } = createBody();
+        toc.properties!.instruction = 'TOC \\o "1-1"';
+        body.customRanges = [toc];
+        const headings = body.paragraphs!.slice(1);
+        headings[1].paragraphStyle = { namedStyleType: NamedStyleType.HEADING_1, outlineLevel: 0 };
+        const resolvePage = (dataStream: string) => (offset: number) => offset < dataStream.lastIndexOf('Subheading') ? 1 : 2;
+        const replacement = buildTableOfContentsBody(body, toc, resolvePage(body.dataStream))!;
+        const generatedToc = replacement.customRanges!.find((range) => range.rangeId === toc.rangeId)!;
+        const pageFields = replacement.customRanges!.filter((range) => range.properties?.fieldType === 'PAGEREF');
+        expect(pageFields.map((range) => range.properties?.instruction)).toEqual(['PAGEREF heading-1', 'PAGEREF heading-2-paragraph']);
+        expect(generatedToc.properties?.cachedResult).toBe('Heading One\t1\rSubheading\t2\r');
+
+        const replacedLength = toc.endIndex + 1;
+        const shift = replacement.dataStream.length - replacedLength;
+        const document: IDocumentBody = {
+            ...replacement,
+            dataStream: replacement.dataStream + body.dataStream.slice(replacedLength),
+            paragraphs: [...replacement.paragraphs!, ...headings.map((paragraph) => ({ ...paragraph, startIndex: paragraph.startIndex + shift }))],
+        };
+        const pagesOnly = buildPageNumberOnlyTableOfContentsBody(document, generatedToc, resolvePage(document.dataStream));
+        expect(pagesOnly?.dataStream).toBe(replacement.dataStream);
+        expect(pagesOnly?.customRanges?.find((range) => range.rangeId === toc.rangeId)?.properties?.cachedResult).toBe(generatedToc.properties?.cachedResult);
+
+        pageFields[1].properties!.instruction = 'PAGEREF missing-heading';
+        const unresolved = vi.fn(resolvePage(document.dataStream));
+        expect(buildPageNumberOnlyTableOfContentsBody(document, generatedToc, unresolved)).toBeNull();
+        expect(unresolved).not.toHaveBeenCalled();
+    });
+
     it('builds supplied caption entries with printed page labels and supports a pageless directory', () => {
         const { body, toc } = createBody();
         toc.properties!.instruction = 'TOC \\c "Figure" \\h';

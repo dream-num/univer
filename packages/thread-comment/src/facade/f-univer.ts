@@ -23,7 +23,7 @@ export interface IFUniverThreadCommentMixin {
      * Creates a root comment on a drawing, page element, page position, or Base record anchor.
      * For a sheet-cell comment, use `FRange.addCommentAsync`; for document text, use `FDocumentTextRange.createCommentAsync`.
      * @param options Comment content, owner IDs, stable anchor, and optional caller-controlled IDs.
-     * @returns {Promise<boolean>} `true` when the command succeeds; otherwise, `false`.
+     * @returns {Promise<boolean>} `true` when the command succeeds; otherwise, `false`. Rejects when a host permission interceptor denies the write.
      * @throws {TypeError} If the content is empty or the anchor is invalid.
      * @example
      * ```ts
@@ -52,7 +52,7 @@ export interface IFUniverThreadCommentMixin {
     /**
      * Adds a reply to an existing root thread.
      * @param options Reply content and the owning unit, subunit, and thread IDs.
-     * @returns {Promise<boolean>} `true` when the reply is created. Returns `false` when the root thread is not loaded or the command fails.
+     * @returns {Promise<boolean>} `true` when the reply is created. Returns `false` when the root thread is not loaded or the command fails. Rejects when a host permission interceptor denies the write.
      * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
@@ -71,7 +71,7 @@ export interface IFUniverThreadCommentMixin {
     /**
      * Updates the content or attachments of an existing root comment or reply.
      * @param options Updated content and the owning unit, subunit, and comment IDs.
-     * @returns {Promise<boolean>} `true` when the update command succeeds; otherwise, `false`.
+     * @returns {Promise<boolean>} `true` when the update command succeeds; otherwise, `false`. Rejects when a host permission interceptor denies the write.
      * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
@@ -90,7 +90,7 @@ export interface IFUniverThreadCommentMixin {
     /**
      * Deletes one comment, or the complete root and reply tree when `deleteThread` is `true`.
      * @param options Owning IDs, target comment ID, and the optional whole-thread flag.
-     * @returns {Promise<boolean>} `true` when the delete command succeeds; otherwise, `false`.
+     * @returns {Promise<boolean>} `true` when the delete command succeeds; otherwise, `false`. Rejects when a host permission interceptor denies the write.
      * @example
      * ```ts
      * const [comment] = univerAPI.getComments({ resolved: false });
@@ -108,7 +108,7 @@ export interface IFUniverThreadCommentMixin {
     /**
      * Resolves a thread. Pass `resolved: false` to reopen it.
      * @param options Owning IDs, a comment ID in the thread, and the desired resolution state.
-     * @returns {Promise<boolean>} `true` when the resolve command succeeds; otherwise, `false`.
+     * @returns {Promise<boolean>} `true` when the resolve command succeeds; otherwise, `false`. Rejects when a host permission interceptor denies the write.
      * @example
      * ```ts
      * const [comment] = univerAPI.getComments({ resolved: false });

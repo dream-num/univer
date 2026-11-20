@@ -21,6 +21,7 @@ import { registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 
 export interface IEditorRuntimeConfig {
     layout?: IDocumentLayoutPresentation;
+    workbenchHostUnitId?: string;
     inheritParagraphStartStyle?: boolean;
     disableSelectionAutoScroll?: boolean;
     /** The host editor provides its own hyperlink menus and pointer interaction. */

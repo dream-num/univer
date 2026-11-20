@@ -309,7 +309,7 @@ export function calculateRectRotate(
 
     const finalXY = newVector.rotateByPoint(finalAngle, rotationVector);
 
-    const newXY = finalXY.add(offsetPoint).transformCoordinateOnRotate(finalAngle);
+    const newXY = finalXY.addInPlace(offsetPoint).transformCoordinateOnRotate(finalAngle);
 
     return newXY;
 }

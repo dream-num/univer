@@ -15,21 +15,23 @@
  */
 
 import type { ICollaborator } from '@univerjs/protocol';
-import type { LocaleKey } from '../../locale/types';
 import { IAuthzIoService, LocaleService, UserManagerService } from '@univerjs/core';
-import { Avatar, borderClassName, Button, Checkbox, clsx, Input } from '@univerjs/design';
+import { borderClassName, Button, Checkbox, clsx, Input } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { useDependency } from '../../utils/di';
+import { UserInfo } from '../user-info/UserInfo';
 
 interface IObjectPermissionMembersProps {
     unitId: string;
+    objectId: string;
     value: ICollaborator[];
     disabled: boolean;
     onChange: (value: ICollaborator[]) => void;
 }
 
-export function ObjectPermissionMembers({ unitId, value, disabled, onChange }: IObjectPermissionMembersProps) {
+export function ObjectPermissionMembers({ unitId, objectId, value, disabled, onChange }: IObjectPermissionMembersProps) {
     const locale = useDependency(LocaleService);
     const authz = useDependency(IAuthzIoService);
     const userManager = useDependency(UserManagerService);
@@ -112,6 +114,8 @@ export function ObjectPermissionMembers({ unitId, value, disabled, onChange }: I
                 {users.map((user) => {
                     const userId = user.subject?.userID || user.id;
                     const name = user.subject?.name || userId;
+                    const userInfo = { userId, name, avatar: user.subject?.avatar };
+                    const context = { scene: 'permission-member' as const, unitId, objectId };
                     const inherited = inheritOwner && user.role === UnitRole.Owner;
                     let roleLabel: LocaleKey = 'ui.objectPermission.roleEditor';
                     if (user.role === UnitRole.Owner) {
@@ -130,8 +134,13 @@ export function ObjectPermissionMembers({ unitId, value, disabled, onChange }: I
                                 : value.filter((member) => (member.subject?.userID || member.id) !== userId))}
                         >
                             <span className="univer-flex univer-min-w-0 univer-items-center univer-gap-2">
-                                <span aria-hidden="true"><Avatar size={24} src={user.subject?.avatar}>{Array.from(name)[0]}</Avatar></span>
-                                <span className="univer-min-w-0 univer-break-words" title={name}>{name}</span>
+                                <span aria-hidden="true"><UserInfo part="avatar" user={userInfo} context={context} /></span>
+                                <UserInfo
+                                    part="name"
+                                    user={userInfo}
+                                    context={context}
+                                    className="univer-min-w-0 univer-break-words"
+                                />
                                 <span
                                     className="
                                       univer-rounded univer-bg-gray-100 univer-px-1.5 univer-py-0.5 univer-text-xs

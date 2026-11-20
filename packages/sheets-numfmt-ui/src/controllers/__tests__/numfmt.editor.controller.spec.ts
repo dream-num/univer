@@ -134,6 +134,51 @@ describe('NumfmtEditorController explicit command targets', () => {
             });
         }
     }
+
+    it('writes accounting negatives without inventing a number format', async () => {
+        const injector = univer.__getInjector();
+        const instances = injector.get(IUniverInstanceService);
+        const workbook = instances.createUnit<IWorkbookData, Workbook>(
+            UniverInstanceType.UNIVER_SHEET,
+            workbookData('paren'),
+            { makeCurrent: true }
+        );
+        injector.get(NumfmtEditorController);
+        const worksheet = workbook.getSheetBySheetId('sheet2')!;
+        const commands = injector.get(ICommandService);
+        const interceptor = injector.get(SheetInterceptorService).writeCellInterceptor;
+        const numfmt = injector.get(INumfmtService);
+
+        const cases: Array<{ input: string; value: number | string; pattern?: string }> = [
+            { input: '(5)', value: -5 },
+            { input: '(1,000)', value: -1000, pattern: '#,##0' },
+            { input: '($1,000)', value: -1000, pattern: '$#,##0' },
+            { input: '(5', value: '(5' },
+            { input: '(+5)', value: '(+5)' },
+        ];
+
+        for (const [row, testCase] of cases.entries()) {
+            const value = interceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)({ v: testCase.input }, {
+                workbook,
+                worksheet,
+                unitId: 'paren',
+                subUnitId: 'sheet2',
+                row,
+                col: 0,
+                origin: worksheet.getCellRaw(row, 0),
+            })!;
+
+            expect(await commands.executeCommand(SetRangeValuesCommand.id, {
+                unitId: 'paren',
+                subUnitId: 'sheet2',
+                range: { startRow: row, endRow: row, startColumn: 0, endColumn: 0 },
+                value,
+            })).toBe(true);
+
+            expect(worksheet.getCellRaw(row, 0)?.v).toBe(testCase.value);
+            expect(numfmt.getValue('paren', 'sheet2', row, 0)?.pattern).toBe(testCase.pattern);
+        }
+    });
 });
 
 function workbookData(id: string): IWorkbookData {

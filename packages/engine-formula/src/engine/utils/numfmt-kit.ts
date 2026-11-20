@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DateSystem, ICellData, Nullable, Styles } from '@univerjs/core';
-import { currencySymbols, getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
+import type { DateSystem, ICellData, LocaleType, Nullable, Styles } from '@univerjs/core';
+import { currencySymbols, getCurrencySymbolByLocale, getNumfmtParseValueFilter, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
 
@@ -251,35 +251,6 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
     return previousPattern || nextPattern;
 }
 
-/**
- * Get the currency symbol based on the locale
- */
-const localeCurrencySymbolMap = new Map<LocaleType, string>([
-    [LocaleType.EN_US, '$'],
-    [LocaleType.RU_RU, '₽'],
-    [LocaleType.VI_VN, '₫'],
-    [LocaleType.ZH_CN, '¥'],
-    [LocaleType.ZH_TW, 'NT$'],
-    [LocaleType.ZH_HK, 'HK$'],
-    [LocaleType.FR_FR, '€'],
-    [LocaleType.FA_IR, '﷼'],
-    [LocaleType.KO_KR, '₩'],
-    [LocaleType.ES_ES, '€'],
-    [LocaleType.CA_ES, '€'],
-    [LocaleType.SK_SK, '€'],
-    [LocaleType.JA_JP, '¥'],
-    [LocaleType.PT_BR, 'R$'],
-    [LocaleType.DE_DE, '€'],
-    [LocaleType.IT_IT, '€'],
-    [LocaleType.ID_ID, 'Rp'],
-    [LocaleType.PL_PL, 'zł'],
-    [LocaleType.AR_SA, '﷼'],
-]);
-
-function getCurrencySymbol(locale: LocaleType): string {
-    return localeCurrencySymbolMap.get(locale) || '$';
-}
-
 export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
     let _numberDigits = numberDigits;
 
@@ -293,7 +264,7 @@ export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2):
         decimal = `.${'0'.repeat(_numberDigits)}`;
     }
 
-    return `"${getCurrencySymbol(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbol(locale)}"#,##0${decimal})`;
+    return `"${getCurrencySymbolByLocale(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbolByLocale(locale)}"#,##0${decimal})`;
 }
 
 export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {

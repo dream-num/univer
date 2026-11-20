@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Coba nama lain atau hapus pencarian.',
                 commonErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk operasi ini. Untuk edit, silakan hubungi pembuatnya.',
                 editErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin edit. Untuk edit, silakan hubungi pembuatnya.',
+                operatorSheetErr: 'Anda tidak memiliki izin untuk mengoperasikan lembar kerja. Untuk mengoperasikan lembar kerja, silakan hubungi pembuatnya.',
                 pasteErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin menempel. Untuk menempel, silakan hubungi pembuatnya.',
                 setStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',
                 copyErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin menyalin. Untuk menyalin, silakan hubungi pembuatnya.',

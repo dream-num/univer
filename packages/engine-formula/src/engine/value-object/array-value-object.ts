@@ -22,7 +22,7 @@ import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
-import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isWildcard } from '../utils/compare';
+import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare, isLiteralTextMatch, isWildcard, normalizeTextForComparison } from '../utils/compare';
 import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import {
@@ -56,6 +56,43 @@ enum ArrayCalculateType {
     ROW,
     COLUMN,
     SINGLE,
+}
+
+/** Literal text order: case-insensitive, and ? and * are ordinary characters rather than wildcards. */
+function compareTextOrder(left: string, right: string): number {
+    const leftText = normalizeTextForComparison(left);
+    const rightText = normalizeTextForComparison(right);
+
+    if (leftText === rightText) {
+        return 0;
+    }
+
+    return leftText.localeCompare(rightText) < 0 ? -1 : 1;
+}
+
+/**
+ * Order two values for the next smaller or larger item that XLOOKUP and XMATCH match modes -1
+ * and 1 fall back to. Text compares as text, so ? and * inside an array item are ordinary
+ * characters, and the other types keep the order of the value objects.
+ */
+function compareOrderValues(left: BaseValueObject, right: BaseValueObject): number {
+    if (left.isString() && right.isString()) {
+        return compareTextOrder(String(left.getValue()), String(right.getValue()));
+    }
+
+    if (left.isEqual(right).getValue() === true) {
+        return 0;
+    }
+
+    if (left.isLessThan(right).getValue() === true) {
+        return -1;
+    }
+
+    if (left.isGreaterThan(right).getValue() === true) {
+        return 1;
+    }
+
+    return 0;
 }
 
 export function transformToValueObject(
@@ -661,6 +698,10 @@ export class ArrayValueObject extends BaseValueObject {
      * Due to the inability to effectively utilize the cache,
      * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
      * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
+     *
+     * With literalText, the exact match and the next smaller or larger fallback read ? and * in a text value as
+     * ordinary characters, as XLOOKUP and XMATCH do outside match mode 2. MATCH leaves it off, because its exact
+     * match accepts wildcards.
      */
 
     orderSearch(
@@ -668,8 +709,12 @@ export class ArrayValueObject extends BaseValueObject {
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
         isDesc = false,
         isFuzzyMatching = false,
-        keepFirstNearest = false
+        keepFirstNearest = false,
+        literalText = false
     ) {
+        const literalPattern = literalText && valueObject.isString() && isWildcard(String(valueObject.getValue()))
+            ? String(valueObject.getValue())
+            : null;
         let result: Nullable<BaseValueObject>;
         let maxOrMin: Nullable<BaseValueObject>;
         let resultPosition: Nullable<{ row: number; column: number }>;
@@ -677,11 +722,45 @@ export class ArrayValueObject extends BaseValueObject {
         let maxOrMinPosition: Nullable<{ row: number; column: number }>;
 
         const _isNearer = (itemValue: BaseValueObject, currentValue: BaseValueObject) => {
-            const distance = itemValue.minus(valueObject).abs();
-            const currentDistance = currentValue.minus(valueObject).abs();
-            return keepFirstNearest
-                ? distance.isLessThan(currentDistance).getValue() === true
-                : distance.isLessThanOrEqual(currentDistance).getValue() === true;
+            if (literalText === false) {
+                // MATCH keeps the fallback it had. XLOOKUP and XMATCH order candidates by value
+                // instead, because subtracting text does not produce a usable distance.
+                const distance = itemValue.minus(valueObject).abs();
+                const currentDistance = currentValue.minus(valueObject).abs();
+                return keepFirstNearest
+                    ? distance.isLessThan(currentDistance).getValue() === true
+                    : distance.isLessThanOrEqual(currentDistance).getValue() === true;
+            }
+
+            const comparison = compareOrderValues(itemValue, currentValue);
+            if (comparison !== 0) {
+                // Candidates are on the same side of the lookup value: for MAX the smaller one is
+                // nearer, and for MIN the larger one is.
+                return searchType === ArrayOrderSearchType.MAX ? comparison < 0 : comparison > 0;
+            }
+
+            return keepFirstNearest === false;
+        };
+
+        /**
+         * The order of an item against the lookup value for the next smaller or larger fallback.
+         * With literalText, text is ordered as text, so ? and * in the lookup value are not a
+         * wildcard pattern.
+         */
+        const _compareWithLookup = (itemValue: BaseValueObject) => {
+            if (literalText && itemValue.isString() && valueObject.isString()) {
+                return compareTextOrder(String(itemValue.getValue()), String(valueObject.getValue()));
+            }
+
+            if (itemValue.isLessThan(valueObject).getValue() === true) {
+                return -1;
+            }
+
+            if (itemValue.isGreaterThan(valueObject).getValue() === true) {
+                return 1;
+            }
+
+            return 0;
         };
 
         const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
@@ -693,6 +772,8 @@ export class ArrayValueObject extends BaseValueObject {
             let matchObject: Nullable<BaseValueObject>;
             if (isFuzzyMatching === true) {
                 matchObject = itemValue.compare(valueObject as StringValueObject, compareToken.EQUALS);
+            } else if (literalPattern !== null) {
+                matchObject = BooleanValueObject.create(itemValue.isString() && isLiteralTextMatch(String(itemValue.getValue()), literalPattern));
             } else if (searchType === ArrayOrderSearchType.NORMAL && itemValue.isNumber() && valueObject.isNumber()) {
                 matchObject = BooleanValueObject.create(Number(itemValue.getValue()) === Number(valueObject.getValue()));
             } else {
@@ -705,8 +786,10 @@ export class ArrayValueObject extends BaseValueObject {
                 return false;
             }
 
+            const comparison = _compareWithLookup(itemValue);
+
             if (searchType === ArrayOrderSearchType.MAX) {
-                if (itemValue.isGreaterThan(valueObject).getValue() === true) {
+                if (comparison > 0) {
                     if (
                         maxOrMin == null ||
                         _isNearer(itemValue, maxOrMin)
@@ -716,7 +799,7 @@ export class ArrayValueObject extends BaseValueObject {
                     }
                 }
             } else if (searchType === ArrayOrderSearchType.MIN) {
-                if (itemValue.isLessThan(valueObject).getValue() === true) {
+                if (comparison < 0) {
                     if (
                         maxOrMin == null ||
                         _isNearer(itemValue, maxOrMin)

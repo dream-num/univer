@@ -720,6 +720,26 @@ describe('line-adjustment', () => {
         expect(divide.paddingLeft).toBe(0);
     });
 
+    it('keeps East Asian punctuation at its shaped width when filling a justified line', () => {
+        const latin = ['1', '2', '3'].map((char) => createGlyph(char, 8));
+        const open = createGlyph('（', 8, { isJustifiable: true });
+        const close = createGlyph('）', 8, { isJustifiable: true });
+        const divide = {
+            width: 60,
+            isFull: true,
+            paddingLeft: 0,
+            glyphGroup: [...latin, open, close],
+        } as any;
+        const context = createPagesWithLine(divide, HorizontalAlign.BOTH);
+
+        lineAdjustment(context.pages, context.viewModel, context.paragraphNode, context.sectionBreakConfig);
+
+        // A Latin run has no stretchable space, so the remainder must not land in the brackets.
+        expect(open.width).toBe(8);
+        expect(close.width).toBe(8);
+        expect(divide.glyphGroupWidth).toBe(40);
+    });
+
     it.each([HorizontalAlign.JUSTIFIED, HorizontalAlign.BOTH])('justifies wrapped CJK lines without stretching the paragraph ending (%s)', (horizontalAlign) => {
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: text.length * 8,

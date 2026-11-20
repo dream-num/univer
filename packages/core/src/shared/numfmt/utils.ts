@@ -240,7 +240,15 @@ export const getNumfmtParseValueFilter = (value: string, options: ParseOptions =
         if (z.includes('#,##0')) {
             if (/[.,]$/.test(value)) return null;
 
-            const normalized = value.replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim();
+            // Accounting negatives wrap the number, e.g. "(1,000)" or "($1,000)",
+            // so unwrap one surrounding pair before validating the grouping.
+            const unwrapParens = (input: string) => {
+                const trimmed = input.trim();
+                return trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed.slice(1, -1).trim() : trimmed;
+            };
+            const normalized = unwrapParens(
+                unwrapParens(value).replace(CURRENCY_SYMBOL_PREFIX_REG, '').trim()
+            );
 
             if (normalized.includes(',')) {
                 const validGrouping = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/.test(normalized);

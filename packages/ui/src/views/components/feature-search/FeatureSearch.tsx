@@ -39,6 +39,7 @@ import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition } from '../../../services/menu/types';
+import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
@@ -70,7 +71,10 @@ export function FeatureSearch() {
     const commandService = useDependency(ICommandService);
     const dialogService = useDependency(IDialogService);
     const layoutService = useDependency(ILayoutService);
-    const ribbonService = useDependency(IRibbonService);
+    const defaultRibbonService = useDependency(IRibbonService);
+    const overrideService = useDependency(IRibbonOverrideService);
+    const override = useObservable(overrideService.override$, overrideService.getOverride());
+    const ribbonService = override?.ribbonService ?? defaultRibbonService;
     const items$ = useMemo(() => {
         function resolveParams(item: IMenuItem, value: MenuItemDefaultValueType) {
             const params = typeof item.params === 'function' ? item.params() : item.params;

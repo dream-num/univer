@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: '試試其他姓名，或清除搜尋。',
                 commonErr: '該範圍已被保護，目前無該操作權限。如需編輯，請聯絡創建者。 ',
                 editErr: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
+                operatorSheetErr: '目前無操作工作表權限。如需操作工作表，請聯絡創建者。',
                 pasteErr: '該範圍已被保護，目前無貼上權限。如需貼上，請聯絡創作者。 ',
                 setStyleErr: '該範圍已被保護，目前無設定樣式權限。如需設定樣式，請聯絡建立者。 ',
                 copyErr: '該範圍已被保護，目前無複製權限。如需複製，請聯絡創建者。 ',

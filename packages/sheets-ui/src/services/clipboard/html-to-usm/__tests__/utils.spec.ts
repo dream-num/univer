@@ -125,6 +125,22 @@ describe('extractNodeStyle', () => {
             ol: { s: BooleanNumber.TRUE },
         });
     });
+
+    it('reads every line when a pasted text decoration names several lines', () => {
+        ['underline line-through', 'line-through underline'].forEach((textDecoration) => {
+            expect(extractNodeStyle(document.createElement('span'), { 'text-decoration': textDecoration })).toEqual({
+                ul: { s: BooleanNumber.TRUE },
+                st: { s: BooleanNumber.TRUE },
+            });
+        });
+
+        expect(extractNodeStyle(document.createElement('span'), { 'text-decoration-line': 'underline overline' })).toEqual({
+            ul: { s: BooleanNumber.TRUE },
+            ol: { s: BooleanNumber.TRUE },
+        });
+
+        expect(extractNodeStyle(document.createElement('span'), { 'text-decoration': 'none' })).toEqual({});
+    });
 });
 
 describe('html-to-usm text body helpers', () => {

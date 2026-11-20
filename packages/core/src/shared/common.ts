@@ -17,13 +17,14 @@
 import type { CellValue, ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { IColorStyle, IStyleBase, IStyleData } from '../types/interfaces/i-style-data';
 import type { IObjectMatrixPrimitiveType } from './object-matrix';
 import type { Nullable } from './types';
 import { isCellV, isICellData, RANGE_TYPE } from '../sheets/typedef';
 import { THEME_COLORS } from '../types/const/theme-color-map';
 import {
     BaselineOffset,
+    BooleanNumber,
     BorderStyleTypes,
     HorizontalAlign,
     TextDirection,
@@ -181,6 +182,9 @@ export function isFormulaId(value: any): boolean {
  * @returns
  */
 
+// The lines already written: `text-decoration-line: …`, or the `text-decoration: …` shorthand that underline uses.
+const TEXT_DECORATION_LINE_REGEX = /(text-decoration(?:-line)?:\s*[^;]+)(?=;)/;
+
 // eslint-disable-next-line max-lines-per-function
 export function handleStyleToString(style: IStyleData, isCell: boolean = false) {
     let str = '';
@@ -231,8 +235,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.ul?.s) {
                     // If there are existing lines, add new lines
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} underline`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} underline`);
                     } else {
                         str += 'text-decoration: underline; ';
                     }
@@ -249,8 +253,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'st',
             () => {
                 if (style.st?.s) {
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} line-through`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} line-through`);
                     } else {
                         str += 'text-decoration-line: line-through; ';
                     }
@@ -267,8 +271,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'ol',
             () => {
                 if (style.ol?.s) {
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} overline`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} overline`);
                     } else {
                         str += 'text-decoration-line: overline; ';
                     }
@@ -418,6 +422,27 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         styleMap.get(k)?.();
     }
     return str;
+}
+
+/**
+ * Mark every line a `text-decoration` value names on a style object.
+ *
+ * A single `text-decoration` can name several lines at once, e.g. `underline line-through`,
+ * so every line has to be read instead of only the first one. Existing data of a line, such
+ * as its color or line style, is kept.
+ */
+export function setTextDecorationLines(style: Pick<IStyleBase, 'ul' | 'st' | 'ol'>, value: string) {
+    const lines = value.split(/\s+/);
+
+    if (lines.includes('underline')) {
+        style.ul = { ...style.ul, s: BooleanNumber.TRUE };
+    }
+    if (lines.includes('line-through')) {
+        style.st = { ...style.st, s: BooleanNumber.TRUE };
+    }
+    if (lines.includes('overline')) {
+        style.ol = { ...style.ol, s: BooleanNumber.TRUE };
+    }
 }
 
 function getBorderStyle(type: BorderStyleTypes) {

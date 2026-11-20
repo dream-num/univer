@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IUser } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import type { LocaleKey } from '../locale/types';
 import {
     BuildTextUtils,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -26,15 +25,23 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ActionRow, Button, clsx } from '@univerjs/design';
-import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
+import { ActionRow, Button } from '@univerjs/design';
+import {
+    BreakLineCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    IEditorService,
+    RichTextEditor,
+} from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { focusThreadCommentEditor } from './thread-comment-editor/util';
 
 export interface IThreadCommentEditorProps {
     id?: string;
+    isNewThread?: boolean;
     comment?: Pick<IThreadComment, 'attachments' | 'text' | 'mentions'>;
     onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => boolean | void | Promise<boolean | void>;
     onCancel?: () => void;
@@ -60,6 +67,8 @@ function getSnapshot(body: IDocumentBody): IDocumentData {
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus, unitId, type, editorId, ActionRowComponent = ActionRow } = props;
+    const createLabel = props.isNewThread ? 'thread-comment-ui.panel.addComment' : 'thread-comment-ui.editor.reply';
+    const placeholder = props.isNewThread ? 'thread-comment-ui.panel.addComment' : 'thread-comment-ui.editor.placeholder';
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
@@ -195,7 +204,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     preserveHostFocus
                     autoFocus={autoFocus}
                     keyboardEventConfig={keyboardEventConfig}
-                    placeholder={localeService.t<LocaleKey>('thread-comment-ui.editor.placeholder')}
+                    placeholder={localeService.t<LocaleKey>(placeholder)}
                     initialValue={comment?.text && getSnapshot(comment.text)}
                     onChange={(data) => setCanSubmit(BuildTextUtils.transform.getPlainText(data.body?.dataStream ?? ''))}
                     onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
@@ -234,7 +243,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                             disabled={!canSubmit || submitting}
                             onClick={handleSave}
                         >
-                            {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
+                            {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : createLabel)}
                         </Button>
                     </ActionRowComponent>
                 )
@@ -242,21 +251,3 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         </div>
     );
 });
-
-export const ThreadCommentSuggestion = ({ active, user }: { active: boolean; user: IUser }) => (
-    <div
-        className={clsx(`
-          univer-flex univer-items-center univer-text-sm univer-text-gray-900
-          dark:!univer-text-gray-0
-        `, {
-            'univer-bg-gray-50 dark:!univer-bg-gray-900': active,
-        })}
-    >
-        <img
-            className="univer-mr-1.5 univer-size-6 univer-rounded-full"
-            src={user.avatar}
-            draggable={false}
-        />
-        <span>{user.name}</span>
-    </div>
-);

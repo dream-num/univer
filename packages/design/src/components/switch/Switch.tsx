@@ -51,7 +51,8 @@ const Switch = (props: ISwitchProps) => {
                     className={clsx(`
                       univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-transition-colors
                       univer-duration-200
-                      peer-focus:univer-ring-2 peer-focus:univer-ring-primary-600 peer-focus:univer-ring-offset-2
+                      peer-focus-visible:univer-ring-2 peer-focus-visible:univer-ring-primary-600
+                      peer-focus-visible:univer-ring-offset-2
                     `, {
                         'univer-bg-primary-600': checked,
                         'univer-bg-gray-200 dark:!univer-bg-gray-600': !checked,

@@ -66,7 +66,16 @@ describe('Test code function', () => {
             expect(getObjectValue(result2)).toStrictEqual(3627);
         });
 
-        it('More test', () => {
+        it('Value starts with a character above U+FFFF', () => {
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('\u{1F600}a')))).toStrictEqual(128512);
+        });
+
+        it('Value starts with a partial surrogate', () => {
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('\uD83D')))).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(testFunction.calculate(StringValueObject.create('\uDE00')))).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Value is empty', () => {
             const text = StringValueObject.create('');
             const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);

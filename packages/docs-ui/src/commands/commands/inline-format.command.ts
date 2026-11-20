@@ -48,6 +48,7 @@ import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/d
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
+import { isEastAsianTextAtRange } from '../../utils/east-asian-text';
 
 function handleInlineFormat(
     preCommandId: string,
@@ -338,9 +339,21 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 break;
             }
 
-            case SetInlineFormatFontSizeCommand.id:
+            case SetInlineFormatFontSizeCommand.id: {
+                formatValue = value;
+                break;
+            }
+
             case SetInlineFormatFontFamilyCommand.id: {
                 formatValue = value;
+
+                // Word applies the picked family to East Asian text through the eastAsia slot, so the
+                // rendered CJK glyphs, the font selector and the exported w:rFonts keep agreeing.
+                if (typeof value === 'string' && docRanges.some(
+                    (range) => isEastAsianTextAtRange(body.dataStream, range.startOffset, range.endOffset)
+                )) {
+                    formatPatch = { ff: value, eastAsiaFontFamily: value };
+                }
                 break;
             }
 
@@ -570,6 +583,10 @@ export function getStyleInTextRange(
     style.fs = style.fs ? Math.max(style.fs!, ...fsArr) : fsArr.length ? Math.max(...fsArr) : undefined;
     style.fs = !style.fs || Number.isNaN(style.fs) ? undefined : style.fs;
     style.ff = textRuns.find((t) => t.ts?.ff != null)?.ts?.ff ?? style.ff;
+    // The font selector reports the East Asian family for CJK selections, so the menu state has
+    // to carry that slot for expanded ranges as well.
+    const eastAsianRun = textRuns.find((t) => t.ts?.eastAsiaFontFamily != null);
+    style.eastAsiaFontFamily = eastAsianRun?.ts?.eastAsiaFontFamily ?? style.eastAsiaFontFamily;
     style.it = textRuns.length && textRuns.every((t) => t.ts?.it === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
     style.bl = textRuns.length && textRuns.every((t) => t.ts?.bl === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
     style.ul = textRuns.length && textRuns.every((t) => t.ts?.ul?.s === BooleanNumber.TRUE) ? textRuns[0].ts?.ul : style.ul;

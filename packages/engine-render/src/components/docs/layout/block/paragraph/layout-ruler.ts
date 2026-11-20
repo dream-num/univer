@@ -1059,8 +1059,14 @@ function _adjustIncomingTabStops(
                 } else if (stop.alignment === TabStopAlignment.CENTER) {
                     alignmentOffset = followingWidth / 2;
                 }
-                const width = Math.min(stop.offset, divide.left + divide.paddingLeft + divide.width)
-                    - position - alignmentOffset;
+                const rightEdge = divide.left + divide.paddingLeft + divide.width;
+                // Word keeps a tab-aligned field inside the paragraph: when the following text would
+                // pass the right edge the tab is pulled left instead of pushing the text out of the
+                // line and wrapping its last glyph onto the next line.
+                const limit = stop.alignment === TabStopAlignment.START
+                    ? rightEdge
+                    : rightEdge - (followingWidth - alignmentOffset);
+                const width = Math.min(stop.offset, limit) - position - alignmentOffset;
                 if (width > 0) {
                     glyph.width = width;
                     glyph.tabLeader = stop.leader;
@@ -1147,7 +1153,12 @@ function _adjustExplicitTabStop(
         : tabStop.alignment === TabStopAlignment.CENTER
             ? followingWidth / 2
             : 0;
-    const targetOffset = Math.min(tabStop.offset, origin + divide.width);
+    const rightEdge = origin + divide.width;
+    // Same rule as the incoming-tab pass: an aligned field must not cross the right edge.
+    const targetOffset = Math.min(
+        tabStop.offset,
+        tabStop.alignment === TabStopAlignment.START ? rightEdge : rightEdge - (followingWidth - alignmentOffset)
+    );
     const width = targetOffset - tabLeft - alignmentOffset;
     if (width <= 0) {
         if (usesFixedTabStops) {

@@ -251,6 +251,7 @@ function createPopupTestBed() {
             'sheets-hyper-link-ui': {
                 popup: {
                     open: 'Open link',
+                    copy: 'Copy',
                     edit: 'Edit',
                     cancel: 'Remove link',
                 },
@@ -280,6 +281,8 @@ function createPopupTestBed() {
             },
         },
     });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    injector.get(LocaleService).setDirection('ltr');
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(SetRangeValuesMutation);
     commandService.registerCommand(SetSelectionsOperation);

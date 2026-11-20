@@ -104,6 +104,12 @@ describe('cell utils', () => {
         expect(style.bd).toBeDefined();
     });
 
+    it('should keep a transparent background transparent', () => {
+        const style = handleStringToStyle(undefined, 'background-color:transparent');
+
+        expect(style.bg).toEqual({ rgb: 'rgba(255,255,255,0)' });
+    });
+
     it('should parse additional style variants and clamp font sizes', () => {
         const style = handleStringToStyle(
             undefined,
@@ -127,6 +133,20 @@ describe('cell utils', () => {
         const largeStyle = handleStringToStyle(undefined, 'font-size:400px;vertical-align:super;text-align:right;');
         expect(largeStyle.fs).toBe(78);
         expect(largeStyle.ht).toBe(3);
+    });
+
+    it('should read every line of a combined text-decoration', () => {
+        [
+            'text-decoration:underline line-through',
+            'text-decoration:line-through underline',
+            'text-decoration-line: line-through underline',
+        ].forEach((css) => {
+            const style = handleStringToStyle(undefined, css);
+            expect(style.ul?.s).toBe(1);
+            expect(style.st?.s).toBe(1);
+            expect(style.ol).toBeUndefined();
+        });
+        expect(handleStringToStyle(undefined, 'text-decoration:none').ul).toBeUndefined();
     });
 
     it('should parse additional style branches and clean empty border objects', () => {

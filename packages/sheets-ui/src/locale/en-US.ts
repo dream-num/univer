@@ -379,6 +379,7 @@ const locale = {
                 searchEmptyDescription: 'Try another name or clear the search.',
                 commonErr: 'The range is protected, and you do not have permission for this operation. To edit, please contact the creator.',
                 editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+                operatorSheetErr: 'You do not have permission to operate the worksheet. To operate the worksheet, please contact the creator.',
                 pasteErr: 'The range is protected, and you do not have paste permission. To paste, please contact the creator.',
                 setStyleErr: 'The range is protected, and you do not have permission to set styles. To set styles, please contact the creator.',
                 copyErr: 'The range is protected, and you do not have copy permission. To copy, please contact the creator.',

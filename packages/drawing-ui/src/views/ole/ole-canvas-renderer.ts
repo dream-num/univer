@@ -133,10 +133,7 @@ export class OleCanvasRenderer {
         drawCanvasIcon(ctx._context, this._glyph, (width - layout.icon) / 2, layout.top, layout.icon);
         if (this._warning && layout.icon >= 12) {
             const size = Math.min(16, layout.icon / 2);
-            drawCanvasIcon(ctx._context, 'warning-triangle-double-icon', (width + layout.icon) / 2 - size, layout.top + layout.icon - size, size, {
-                black: this._warning.color(),
-                '#E5E5E5': '#fff',
-            });
+            drawCanvasIcon(ctx._context, 'warning-triangle-multi-icon', (width + layout.icon) / 2 - size, layout.top + layout.icon - size, size);
         }
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';

@@ -1165,13 +1165,11 @@ describe('SheetsThreadCommentPanel', () => {
             col: 3,
         });
 
-        const editorPlaceholder = Array.from(container.querySelectorAll('div')).reverse().find((element) => element.textContent === 'Reply or add others with @');
+        const editorPlaceholder = Array.from(container.querySelectorAll('div')).reverse().find((element) => element.textContent === threadCommentEnUS['thread-comment-ui'].panel.addComment);
         expect(editorPlaceholder).toBeInstanceOf(HTMLElement);
-        const editorSurface = editorPlaceholder!.parentElement?.parentElement?.parentElement;
-        expect(editorSurface).toBeInstanceOf(HTMLElement);
 
         await act(async () => {
-            editorSurface!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
+            editorPlaceholder!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
             await Promise.resolve();
         });
 

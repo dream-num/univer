@@ -48,11 +48,11 @@ describe('sheet drawing placement extents', () => {
         ['missing from', { sheetTransform: { to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 } } }],
         ['null to', { sheetTransform: { from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 }, to: null } }],
         ['invalid cell', { sheetTransform: {
-            from: { row: NaN, column: 1, rowOffset: 0, columnOffset: 0 },
+            from: { row: Number.NaN, column: 1, rowOffset: 0, columnOffset: 0 },
             to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
         } }],
         ['negative extent', { transform: { left: 10, top: 20, width: 20, height: -4243 } }],
-        ['non-finite extent', { transform: { left: 10, top: 20, width: NaN, height: 20 } }],
+        ['non-finite extent', { transform: { left: 10, top: 20, width: Number.NaN, height: 20 } }],
     ])('returns a diagnostic for %s without rewriting the drawing', (_name, patch) => {
         const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
         const drawing = {
@@ -102,10 +102,13 @@ describe('sheet drawing placement extents', () => {
     it.each([
         [0, 81.9],
         [81.9, 0],
-    ])('preserves a line bounding box of %s by %s in every anchor mode', (width, height) => {
+    ])('keeps a %s by %s line, and a two-cell anchor stops at the cell edge', (width, height) => {
         const skeleton = bed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
         const from = { row: 2, column: 2, rowOffset: 0, columnOffset: 0 };
         const to = { ...from, rowOffset: height, columnOffset: width };
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(from.row, from.column);
+        const cellWidth = (cell?.endX ?? 0) - (cell?.startX ?? 0);
+        const cellHeight = (cell?.endY ?? 0) - (cell?.startY ?? 0);
         const drawing: ISheetDrawing = {
             unitId: 'test',
             subUnitId: 'sheet1',
@@ -122,7 +125,13 @@ describe('sheet drawing placement extents', () => {
         ];
         for (const placement of placements) {
             const result = applySheetDrawingPlacement(drawing, placement, skeleton);
-            expect(result.transform).toMatchObject({ width, height });
+            const extent = placement.kind === SheetDrawingAnchorType.Both
+                ? {
+                    width: width > cellWidth ? cellWidth : width,
+                    height: height > cellHeight ? cellHeight : height,
+                }
+                : { width, height };
+            expect(result.transform).toMatchObject(extent);
             expect(result.anchorType).toBe(placement.kind);
             for (const drawingType of [DrawingTypeEnum.DRAWING_IMAGE, DrawingTypeEnum.DRAWING_DOM]) {
                 expect(() => applySheetDrawingPlacement({ ...drawing, drawingType }, placement, skeleton))
@@ -202,7 +211,7 @@ describe('sheet drawing placement extents', () => {
         }
     });
 
-    it.each([[0, 0], [-1, 20], [20, -1], [NaN, 20], [20, Infinity]])(
+    it.each([[0, 0], [-1, 20], [20, -1], [Number.NaN, 20], [20, Infinity]])(
         'rejects an invalid extent of %s by %s',
         (width, height) => {
             expect(() => normalizeSheetDrawingPlacement({

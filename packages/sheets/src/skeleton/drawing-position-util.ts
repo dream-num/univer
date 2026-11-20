@@ -19,6 +19,19 @@ import { precisionTo } from '@univerjs/engine-render';
 import type { ICellOverGridPosition, ISheetOverGridPosition } from '../basics';
 import { attachRangeWithCoord } from './util';
 
+/**
+ * A positive anchor offset stops at the cell's far edge. The stored offset stays unchanged.
+ */
+function offsetInsideCell(offset: number, cellSize: number): number {
+    if (!(offset > 0)) {
+        return offset;
+    }
+    if (!(cellSize > 0)) {
+        return 0;
+    }
+    return Math.min(offset, cellSize);
+}
+
 export function convertPositionSheetOverGridToAbsolute(
     unitId: string,
     subUnitId: string,
@@ -47,11 +60,16 @@ export function convertPositionSheetOverGridToAbsolute(
 
     const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    const fromColumnOffsetInCell = offsetInsideCell(fromColumnOffset, startSelectionCell.endX - startSelectionX);
+    const fromRowOffsetInCell = offsetInsideCell(fromRowOffset, startSelectionCell.endY - startSelectionY);
+    const toColumnOffsetInCell = offsetInsideCell(toColumnOffset, endSelectionCell.endX - endSelectionX);
+    const toRowOffsetInCell = offsetInsideCell(toRowOffset, endSelectionCell.endY - endSelectionY);
 
-    let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
-    let height = precisionTo(endSelectionY + toRowOffset - top, 1);
+    const left = precisionTo(startSelectionX + fromColumnOffsetInCell, 1);
+    const top = precisionTo(startSelectionY + fromRowOffsetInCell, 1);
+
+    let width = precisionTo(endSelectionX + toColumnOffsetInCell - left, 1);
+    let height = precisionTo(endSelectionY + toRowOffsetInCell - top, 1);
 
     if (startSelectionCell.startX === endSelectionCell.endX) {
         width = 0;
@@ -90,8 +108,11 @@ export function convertPositionCellToSheetOverGrid(
 
     const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    const columnOffsetInCell = offsetInsideCell(fromColumnOffset, startSelectionCell.endX - startSelectionX);
+    const rowOffsetInCell = offsetInsideCell(fromRowOffset, startSelectionCell.endY - startSelectionY);
+
+    const left = precisionTo(startSelectionX + columnOffsetInCell, 1);
+    const top = precisionTo(startSelectionY + rowOffsetInCell, 1);
 
     const endSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left + width, top + height, 1, 1, { x: 0, y: 0 });
 

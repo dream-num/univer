@@ -310,16 +310,14 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <Radio value={SortType.DESC}>{localeService.t<LocaleKey>('sheets-sort-ui.general.sort-desc')}</Radio>
                 </RadioGroup>
                 {showDelete && (
-                    <a
-                        className={`
-                          univer-flex univer-cursor-pointer univer-items-center univer-text-sm univer-transition-colors
-                          hover:univer-text-red-500
-                        `}
+                    <Button
+                        size="icon"
+                        variant="text"
                         aria-label={localeService.t<LocaleKey>('sheets-sort-ui.dialog.delete-condition')}
                         onClick={() => onChange(null, currentIndex)}
                     >
                         <DeleteEmptyIcon />
-                    </a>
+                    </Button>
                 )}
             </div>
         </div>

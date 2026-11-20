@@ -93,6 +93,8 @@ export type MenuSchemaType = {
     order?: number;
     replace?: boolean;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
+    /** Extend the registered item before applying application menu configuration. */
+    customizeMenuItem?: (accessor: IAccessor, item: IMenuItem) => IMenuItem;
     headerActionMenuItemFactory?: (accessor: IAccessor) => IMenuItem;
     title?: string;
     contextual?: boolean;
@@ -392,7 +394,10 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 continue;
             }
 
-            const item: IMenuItem | undefined = value.menuItemFactory ? this._injector.invoke(value.menuItemFactory) : undefined;
+            const baseItem: IMenuItem | undefined = value.menuItemFactory ? this._injector.invoke(value.menuItemFactory) : undefined;
+            const item = baseItem && value.customizeMenuItem
+                ? this._injector.invoke<IMenuItem>((accessor) => value.customizeMenuItem(accessor, baseItem))
+                : baseItem;
             const config = menuConfig?.[item?.id ?? key];
             const menuItem: Partial<IMenuSchema> = {
                 key,

@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { DrawingTypeEnum, ImageSourceType, IResourceLoaderService, JSON1, Tools } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, IResourceLoaderService, JSON1, RedoCommand, Tools, UndoCommand } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { expect, it, onTestFinished } from 'vitest';
@@ -26,6 +26,7 @@ import { SHEET_DRAWING_PLUGIN } from '../../../controllers/sheet-drawing.control
 import { getLegacySheetDrawingPosition } from '../../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../../commands/insert-sheet-drawing.command';
+import { RemoveSheetDrawingCommand } from '../../commands/remove-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../set-drawing-apply.mutation';
 
 it.each([
@@ -104,6 +105,46 @@ it.each([
     const saved = bed.get(IResourceLoaderService).saveUnit<IWorkbookData>(unitId)!;
     const resource = saved.resources!.find(({ name }) => name === SHEET_DRAWING_PLUGIN)!;
     expect(JSON.parse(resource.data)[subUnitId].data[image.drawingId]).toEqual(result);
+});
+
+it('restores a chart loaded from legacy two-cell markers after deleting it', async () => {
+    const seed = createSheetsDrawingTestBed();
+    onTestFinished(() => seed.univer.dispose());
+    const snapshot = seed.workbook.getSnapshot();
+    const drawing = { unitId: 'test', subUnitId: 'sheet1', drawingId: 'imported-chart' };
+    snapshot.resources = [{
+        name: SHEET_DRAWING_PLUGIN,
+        data: JSON.stringify({
+            sheet1: {
+                order: [drawing.drawingId],
+                data: {
+                    [drawing.drawingId]: {
+                        ...drawing,
+                        drawingType: DrawingTypeEnum.DRAWING_CHART,
+                        anchorType: SheetDrawingAnchorType.Both,
+                        transform: { left: 0, top: 0, width: 0, height: 0 },
+                        sheetTransform: {
+                            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                            to: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+                        },
+                    },
+                },
+            },
+        }),
+    }];
+    const bed = createSheetsDrawingTestBed(snapshot);
+    onTestFinished(() => bed.univer.dispose());
+    const sheet = bed.get(ISheetDrawingService);
+    const manager = bed.get(IDrawingManagerService);
+    const before = Tools.deepClone(sheet.getDrawingByParam(drawing));
+    expect(before?.transform?.width).toBeGreaterThan(0);
+    expect(bed.commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, { unitId: drawing.unitId, drawings: [drawing] })).toBe(true);
+    expect(sheet.getDrawingByParam(drawing)).toBeUndefined();
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(sheet.getDrawingByParam(drawing)).toEqual(before);
+    expect(manager.getDrawingByParam(drawing)).toEqual(before);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(sheet.getDrawingByParam(drawing)).toBeUndefined();
 });
 
 it.each([{ reference: { axis: 'row', action: 'insert', start: 0, end: 0, limit: 0, boundaryOffset: 24 } }, {

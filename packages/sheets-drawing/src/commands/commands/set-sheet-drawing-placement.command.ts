@@ -73,16 +73,14 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             if (original.anchorType === drawing.anchorType) continue;
             // Changing mode reinterprets marker origins, even when an index
             // such as zero happens to be numerically unchanged.
-            for (const field of ['sheetTransform', 'axisAlignSheetTransform'] as const) {
-                for (const endpoint of ['from', 'to'] as const) {
-                    for (const axis of ['row', 'column'] as const) {
-                        const before = original[field]?.[endpoint]?.[axis];
-                        const after = drawing[field]?.[endpoint]?.[axis];
-                        if (before === undefined || after === undefined) continue;
-                        const path = [unitId, subUnitId, 'data', drawing.drawingId, field, endpoint, axis];
-                        redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
-                        undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
-                    }
+            for (const endpoint of ['from', 'to'] as const) {
+                for (const axis of ['row', 'column'] as const) {
+                    const before = original.axisAlignSheetTransform?.[endpoint]?.[axis];
+                    const after = drawing.axisAlignSheetTransform?.[endpoint]?.[axis];
+                    if (before === undefined || after === undefined) continue;
+                    const path = [unitId, subUnitId, 'data', drawing.drawingId, 'axisAlignSheetTransform', endpoint, axis];
+                    redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
+                    undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
                 }
             }
         }

@@ -57,15 +57,19 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
 
                 if (
                     skeletonParam &&
-                    drawingData.sheetTransform &&
+                    (drawingData.axisAlignSheetTransform || drawingData.sheetTransform) &&
                     !drawingData.groupId &&
                     drawingData.anchorType !== SheetDrawingAnchorType.None
                 ) {
                     try {
                         if (drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP) {
-                            const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
+                            const placement = refreshSheetDrawingPlacement(drawingData, skeletonParam.skeleton);
+                            const transform = drawingPositionToTransform({
+                                ...placement.axisAlignSheetTransform,
+                                ...placement.transform,
+                            }, skeletonParam);
                             refreshedDrawings.push({
-                                ...drawingData,
+                                ...placement,
                                 transform: transform && {
                                     ...transform,
                                     left: (transform.left ?? 0) - skeletonParam.skeleton.rowHeaderWidthAndMarginLeft,
@@ -81,7 +85,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                             subUnitId,
                             drawingId,
                             transform: drawingData.transform,
-                            sheetTransform: drawingData.sheetTransform,
+                            axisAlignSheetTransform: drawingData.axisAlignSheetTransform,
                             error,
                         });
                     }

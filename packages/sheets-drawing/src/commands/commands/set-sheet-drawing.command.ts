@@ -25,7 +25,7 @@ import {
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '../../basics/transform-position';
+import { transformToAxisAlignPosition } from '../../basics/transform-position';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { getSheetDrawingTransformWithOrientation } from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
@@ -140,16 +140,9 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
             }
             // Pixel-only Facade and group edits are authored geometry. Capture
             // their anchors before replicas derive pixels from their own layout.
-            const sheetTransform = transformToDrawingPosition(transform, skeleton);
-            const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeleton);
-            if (transform.angle === undefined) {
-                delete sheetTransform.angle;
-                delete axisAlignSheetTransform.angle;
-            }
             return {
                 ...patch,
-                sheetTransform,
-                axisAlignSheetTransform,
+                axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
             };
         });
         const normalizedParams = { ...params, drawings: normalizedDrawings };

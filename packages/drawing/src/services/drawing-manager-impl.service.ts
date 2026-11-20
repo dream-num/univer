@@ -305,7 +305,11 @@ export class UnitDrawingService<T extends IDrawingParam & IDrawingRefreshMetadat
             param.transform = updateParam.transform;
             // Cell anchors must describe the same bounds as the refreshed pixel transform.
             if (Object.prototype.hasOwnProperty.call(updateParam, 'sheetTransform')) {
-                param.sheetTransform = updateParam.sheetTransform;
+                if (updateParam.sheetTransform === undefined) {
+                    delete param.sheetTransform;
+                } else {
+                    param.sheetTransform = updateParam.sheetTransform;
+                }
             }
             if (Object.prototype.hasOwnProperty.call(updateParam, 'axisAlignSheetTransform')) {
                 param.axisAlignSheetTransform = updateParam.axisAlignSheetTransform;

@@ -43,6 +43,7 @@ export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
 export {
     applySheetDrawingPlacement,
+    getLegacySheetDrawingPosition,
     getSheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
     refreshSheetDrawingPlacement,

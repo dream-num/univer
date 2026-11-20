@@ -240,6 +240,8 @@ describe('sheet drawing integration', () => {
             unitId: 'test',
             drawings: [...graph, unrelated],
         })).toBe(true);
+        const beforeGraph = graph.map((drawing) => Tools.deepClone(get(ISheetDrawingService).getDrawingByParam(drawing)!));
+        beforeGraph.forEach((drawing) => expect(drawing).not.toHaveProperty('sheetTransform'));
         get(IUndoRedoService).clearUndoRedo('test');
         const params = { unitId: 'test', drawings: [graph[0], graph[2]] };
         const beforeParams = Tools.deepClone(params);
@@ -266,7 +268,7 @@ describe('sheet drawing integration', () => {
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['outside-group']);
         expect(get(IUndoRedoService).getUndoRedoStatus('test')).toEqual({ undos: 1, redos: 0 });
         expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
-        for (const drawing of graph) {
+        for (const drawing of beforeGraph) {
             expect(sheetDrawingService.getDrawingByParam(drawing)).toEqual(drawing);
             expect(drawingManagerService.getDrawingByParam(drawing)).toEqual(drawing);
         }
@@ -392,8 +394,6 @@ describe('sheet drawing integration', () => {
                 height: 45,
                 angle: 30,
             },
-            sheetTransform: expect.objectContaining({ angle: 30 }),
-            axisAlignSheetTransform: expect.objectContaining({ angle: 30 }),
         });
 
         expect(await commandService.executeCommand(SetSheetDrawingCommand.id, {
@@ -417,8 +417,6 @@ describe('sheet drawing integration', () => {
                 height: 45,
                 angle: 30,
             },
-            sheetTransform: expect.objectContaining({ angle: 30 }),
-            axisAlignSheetTransform: expect.objectContaining({ angle: 30 }),
         });
     });
 
@@ -428,7 +426,7 @@ describe('sheet drawing integration', () => {
             ...drawing,
             drawingType: DrawingTypeEnum.DRAWING_CHART,
             transform: withoutAngle(createSheetDrawingTransform()),
-            sheetTransform: withoutAngle(drawing.sheetTransform),
+            sheetTransform: withoutAngle(drawing.sheetTransform!),
             axisAlignSheetTransform: withoutAngle(drawing.axisAlignSheetTransform),
         } as ISheetDrawing;
 
@@ -463,7 +461,7 @@ describe('sheet drawing integration', () => {
         })!;
 
         expect(Object.prototype.hasOwnProperty.call(restoredChart.transform ?? {}, 'angle')).toBe(false);
-        expect(Object.prototype.hasOwnProperty.call(restoredChart.sheetTransform, 'angle')).toBe(false);
+        expect(restoredChart.sheetTransform).toBeUndefined();
         expect(Object.prototype.hasOwnProperty.call(restoredChart.axisAlignSheetTransform, 'angle')).toBe(false);
     });
 

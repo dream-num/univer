@@ -121,7 +121,6 @@ describe('MoveDrawingsCommand', () => {
                 const skeleton = bed.get(SheetSkeletonService).getSkeleton(bed.unitId, bed.subUnitId)!;
                 const origin = createSheetDrawing('rotated-edge', 200, 160);
                 origin.transform = { ...origin.transform, angle, width: 160, height: 40 };
-                origin.sheetTransform.angle = angle;
                 const box = getTransformBoundingBox(origin.transform);
                 const left = origin.transform.left! + skeleton.rowHeaderWidthAndMarginLeft - box.left;
                 const top = origin.transform.top! + skeleton.columnHeaderHeightAndMarginTop - box.top;
@@ -172,7 +171,7 @@ describe('MoveDrawingsCommand on Chart Sheets', () => {
         expect(await bed.commandService.executeCommand(MoveDrawingsCommand.id, { direction: Direction.RIGHT })).toBe(true);
         const after = bed.drawings.getDrawingByParam(search)!;
         expect(after.transform).toEqual({ ...before.transform, left: 151 });
-        expect(after.sheetTransform.from).toEqual({ row: 0, column: 0, rowOffset: 120, columnOffset: 151 });
+        expect(after.axisAlignSheetTransform.from).toEqual({ row: 0, column: 0, rowOffset: 120, columnOffset: 151 });
         expect(bed.drawingManager.getDrawingByParam(search)).toEqual(after);
         expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(bed.drawings.getDrawingByParam(search)).toEqual(before);
@@ -208,9 +207,9 @@ describe('MoveDrawingsCommand on Chart Sheets', () => {
         expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(bed.drawings.getDrawingByParam(drawing)).toEqual(drawing);
         if (kind === SheetDrawingAnchorType.None) {
-            expect(after.sheetTransform.from).toEqual({ row: 0, column: 0, rowOffset: 180, columnOffset: 251 });
+            expect(after.axisAlignSheetTransform.from).toEqual({ row: 0, column: 0, rowOffset: 180, columnOffset: 251 });
         } else {
-            expect(after.sheetTransform.from.column).toBeGreaterThan(0);
+            expect(after.axisAlignSheetTransform.from.column).toBeGreaterThan(0);
         }
     });
 

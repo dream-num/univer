@@ -687,7 +687,11 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             subUnitId: this.getSheetId(),
             drawingId,
         });
-        return drawing ? getSheetDrawingPlacement(drawing) : null;
+        if (!drawing) return null;
+        const skeleton = drawing.anchorType === SheetDrawingAnchorType.None
+            ? undefined
+            : this._sheetSkeletonService.ensureSkeleton(drawing.unitId, drawing.subUnitId);
+        return getSheetDrawingPlacement(drawing, skeleton ?? undefined);
     }
 
     override setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacementInput): boolean {
@@ -734,7 +738,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
                 drawingId,
                 drawingType: drawing.drawingType,
                 bounds,
-                placement: getSheetDrawingPlacement(drawing),
+                placement: getSheetDrawingPlacement(drawing, skeleton),
                 groupId: drawing.groupId,
             });
         }

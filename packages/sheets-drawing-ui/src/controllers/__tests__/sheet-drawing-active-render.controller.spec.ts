@@ -81,7 +81,6 @@ async function insertDrawing(
         imageSourceType: ImageSourceType.URL,
         source: 'https://example.com/drawing.png',
         anchorType,
-        sheetTransform,
         axisAlignSheetTransform: sheetTransform,
         transform: { left, top, width, height, ...position },
     };
@@ -232,7 +231,7 @@ describe('SheetDrawingActiveRenderController', () => {
                     ...base,
                     drawingId: 'invalid',
                     transform: { ...base.transform, width: -1 },
-                    sheetTransform: { ...base.sheetTransform, to: { ...base.sheetTransform.from, columnOffset: -2 } },
+                    sheetTransform: { ...base.axisAlignSheetTransform, to: { ...base.axisAlignSheetTransform.from, columnOffset: -2 } },
                     axisAlignSheetTransform: { ...base.axisAlignSheetTransform, to: { ...base.axisAlignSheetTransform.from, columnOffset: -2 } },
                 };
                 const secondInvalid = { ...invalid, drawingId: 'second-invalid' };
@@ -334,9 +333,12 @@ describe('SheetDrawingActiveRenderController', () => {
             bed.getController();
             bed.render.activate();
             expect(() => vi.runOnlyPendingTimers()).not.toThrow();
-            expect(removed).toHaveBeenLastCalledWith([drawing]);
+            expect(removed).toHaveBeenLastCalledWith([expect.objectContaining({
+                drawingId: drawing.drawingId,
+                transform: { ...drawing.transform, [axis === 'row' ? 'height' : 'width']: 0 },
+            })]);
             expect(added).toHaveBeenLastCalledWith([]);
-            expect(sheetService.getDrawingByParam(drawing)?.sheetTransform).toEqual(before!.sheetTransform);
+            expect(sheetService.getDrawingByParam(drawing)?.axisAlignSheetTransform).toEqual(before!.axisAlignSheetTransform);
             expect(sheetService.getDrawingByParam(drawing)?.transform?.[axis === 'row' ? 'height' : 'width']).toBe(0);
             bed.render.deactivate();
             for (let index = 3; index < 6; index++) {
@@ -381,7 +383,7 @@ describe('SheetDrawingActiveRenderController', () => {
                 { unitId: bed.unitId, subUnitId: bed.subUnitId, range }
             )).toBe(true);
             const after = read();
-            expect(after.sheetTransform!.from[axis]).toBe(before.sheetTransform!.from[axis] - 1);
+            expect(after.axisAlignSheetTransform.from[axis]).toBe(before.axisAlignSheetTransform.from[axis] - 1);
             expect(after.transform![axis === 'row' ? 'top' : 'left']).toBeLessThan(
                 before.transform![axis === 'row' ? 'top' : 'left']!
             );
@@ -421,7 +423,6 @@ describe('SheetDrawingActiveRenderController', () => {
                 drawingId: 'line',
                 drawingType: DrawingTypeEnum.DRAWING_SHAPE,
                 anchorType,
-                sheetTransform,
                 axisAlignSheetTransform: sheetTransform,
                 transform: drawingPositionToTransform(sheetTransform, skeleton),
             };
@@ -483,7 +484,7 @@ describe('SheetDrawingActiveRenderController', () => {
                 expect(current).toEqual(drawing);
             } else {
                 const skeleton = bed.get(SheetSkeletonService).getSkeletonParam(bed.unitId, bed.subUnitId);
-                const position = drawingPositionToTransform(drawing.sheetTransform, skeleton)!;
+                const position = drawingPositionToTransform(drawing.axisAlignSheetTransform, skeleton)!;
                 expect(current.transform).toMatchObject({
                     left: position.left,
                     top: position.top,

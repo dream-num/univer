@@ -14,14 +14,62 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, ImageSourceType, IResourceLoaderService, Tools } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, IResourceLoaderService, JSON1, Tools } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
 import { expect, it, onTestFinished } from 'vitest';
 import type { ISheetImage } from '../../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
+import { transformToAxisAlignPosition } from '../../../basics/transform-position';
+import { SHEET_DRAWING_PLUGIN } from '../../../controllers/sheet-drawing.controller';
+import { getLegacySheetDrawingPosition } from '../../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../../commands/insert-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../set-drawing-apply.mutation';
+
+it('replays a legacy position edit on a canonical image and saves only the Excel marker', () => {
+    const bed = createSheetsDrawingTestBed();
+    onTestFinished(() => bed.univer.dispose());
+    const unitId = 'test';
+    const subUnitId = 'sheet1';
+    const skeleton = bed.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId)!;
+    const transform = { left: 200, top: 200, width: 160, height: 40, angle: 90, flipX: true };
+    const image: ISheetImage = {
+        unitId,
+        subUnitId,
+        drawingId: 'rotated',
+        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        imageSourceType: ImageSourceType.URL,
+        source: 'https://example.com/image.png',
+        anchorType: SheetDrawingAnchorType.Position,
+        transform,
+        axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
+    };
+    expect(bed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId, drawings: [image] })).toBe(true);
+    const legacy = getLegacySheetDrawingPosition(image, skeleton);
+    const op = JSON1.replaceOp(
+        [unitId, subUnitId, 'data', image.drawingId, 'sheetTransform', 'from', 'row'],
+        legacy.from.row,
+        legacy.from.row + 1
+    );
+    expect(bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+        unitId,
+        subUnitId,
+        op,
+        objects: [image],
+        type: DrawingApplyType.UPDATE,
+    }, { fromCollab: true })).toBe(true);
+
+    const result = bed.get(ISheetDrawingService).getDrawingByParam(image)!;
+    expect(result.transform).toMatchObject({ ...transform, top: transform.top + skeleton.worksheet.getRowHeight(legacy.from.row) });
+    expect(result.axisAlignSheetTransform.from.row).toBe(image.axisAlignSheetTransform.from.row + 1);
+    expect(result).not.toHaveProperty('sheetTransform');
+    expect(bed.get(IDrawingManagerService).getDrawingByParam(image)).toEqual(result);
+    const saved = bed.get(IResourceLoaderService).saveUnit<IWorkbookData>(unitId)!;
+    const resource = saved.resources!.find(({ name }) => name === SHEET_DRAWING_PLUGIN)!;
+    expect(JSON.parse(resource.data)[subUnitId].data[image.drawingId]).toEqual(result);
+});
 
 it.each([{ reference: { axis: 'row', action: 'insert', start: 0, end: 0, limit: 0, boundaryOffset: 24 } }, {
     reference: { axis: 'row', action: 'move', start: 0, end: 0, limit: 21, boundaryOffset: 24 },

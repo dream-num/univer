@@ -81,19 +81,11 @@ export function transformToDrawingPosition(transform: ITransformState, skeleton:
 export function transformToAxisAlignPosition(transform: ITransformState, skeleton: SpreadsheetSkeleton): ISheetDrawingPosition {
     const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = transform;
 
-    if (!isDrawingAxisSwapped(angle)) {
-        return transformToDrawingPosition(transform, skeleton);
-    }
-
-    const rotatedTransform = {
-        ...transform,
-        left: left + width / 2 - height / 2,
-        top: top + height / 2 - width / 2,
-        width: height,
-        height: width,
-    };
-
-    return transformToDrawingPosition(rotatedTransform, skeleton);
+    const bounds = isDrawingAxisSwapped(angle)
+        ? { left: left + (width - height) / 2, top: top + (height - width) / 2, width: height, height: width }
+        : { left, top, width, height };
+    const { from, to } = transformToDrawingPosition(bounds, skeleton);
+    return { from, to };
 }
 
 export function isDrawingAxisSwapped(angle = 0): boolean {

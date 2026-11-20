@@ -165,7 +165,7 @@ describe('SheetsDrawingRenderController', () => {
             }
             await Promise.resolve();
             const hidden = Tools.deepClone(service.getDrawingByParam(image)!);
-            expect(hidden.sheetTransform.from).toEqual(before.sheetTransform.from);
+            expect(hidden.axisAlignSheetTransform.from).toEqual(before.axisAlignSheetTransform.from);
             if (scenario !== 'auto height') {
                 expect(hidden.transform?.[rows ? 'top' : 'left']).toBe(rows ? cell.startY : cell.startX);
             }

@@ -83,7 +83,7 @@ describe('sheet drawing placement extents', () => {
         const expectedAxisTop = anchorCell.endY;
         expect(result.transform).toMatchObject({ angle: 90, flipX: true });
         expect(result.transform!.top! + result.transform!.height! / 2 - result.transform!.width! / 2).toBeCloseTo(expectedAxisTop);
-        expect(result.axisAlignSheetTransform).toEqual(drawing.axisAlignSheetTransform);
+        expect(result.axisAlignSheetTransform).toEqual({ from, to });
         expect(drawing).toEqual(before);
     });
 
@@ -132,15 +132,15 @@ describe('sheet drawing placement extents', () => {
             drawingId: 'xlsx-image',
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             anchorType,
-            sheetTransform,
-            transform: { left: 0, top: 0, width: 0, height: 0 },
+            axisAlignSheetTransform: sheetTransform,
+            transform: { left: 0, top: 0, width: 0, height: 0, angle, flipX: true },
         } as ISheetDrawing;
         const result = refreshSheetDrawingPlacement(drawing, skeleton);
         expect(result.anchorType).toBe(anchorType);
         expect(result.transform).toMatchObject(bounds);
         expect(result.axisAlignSheetTransform).toEqual(sheetTransform);
         expect(refreshSheetDrawingPlacement(result, skeleton).transform).toMatchObject(bounds);
-        expect(drawing.transform).toEqual({ left: 0, top: 0, width: 0, height: 0 });
+        expect(drawing.transform).toEqual({ left: 0, top: 0, width: 0, height: 0, angle, flipX: true });
     });
 
     it('uses stored orientation for an absolute image and fills missing orientation from XLSX', () => {
@@ -168,9 +168,9 @@ describe('sheet drawing placement extents', () => {
         } as ISheetDrawing;
         const result = refreshSheetDrawingPlacement(drawing, skeleton);
         expect(result.transform).toMatchObject({ left: 222, top: 116, width: 160, height: 40 });
-        expect(result.sheetTransform.from).toEqual(from);
-        expect(result.sheetTransform.to).toEqual({ row: 5, column: 3, rowOffset: 16, columnOffset: 72 });
-        expect(drawing.sheetTransform.to).toEqual(to);
+        expect(result.axisAlignSheetTransform.from).toEqual(from);
+        expect(result.axisAlignSheetTransform.to).toEqual({ row: 5, column: 3, rowOffset: 16, columnOffset: 72 });
+        expect(drawing.sheetTransform!.to).toEqual(to);
     });
 
     it.each([
@@ -292,7 +292,7 @@ describe('sheet drawing placement extents', () => {
         skeleton.makeDirty(true);
         skeleton.calculate();
         const hidden = refreshSheetDrawingPlacement(drawing, skeleton);
-        expect(hidden.sheetTransform).toEqual(drawing.sheetTransform);
+        expect(hidden.axisAlignSheetTransform).toEqual(drawing.axisAlignSheetTransform);
         expect(hidden.transform?.[rows ? 'height' : 'width']).toBe(0);
         expect(refreshSheetDrawingPlacement(hidden, skeleton)).toEqual(hidden);
         expect(await bed.commandService.executeCommand(

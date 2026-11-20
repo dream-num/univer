@@ -89,7 +89,7 @@ import {
 } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { getSheetDrawingPositionAnchorField, tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../services/sheet-drawing-placement';
+import { getLegacySheetDrawingPosition, getSheetDrawingPositionAnchorField, tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../services/sheet-drawing-placement';
 import { SheetDrawingTransformPlanService } from '../services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
@@ -267,17 +267,14 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 ...original,
                 ...patch,
                 transform: { ...original.transform, ...patch.transform },
-                sheetTransform: { ...(patch.sheetTransform ?? original.sheetTransform) },
                 axisAlignSheetTransform: { ...(patch.axisAlignSheetTransform ?? original.axisAlignSheetTransform) },
             };
             // Layout changes cannot author orientation or insert optional default
             // fields another replica may concurrently insert through JSON1.
-            for (const field of ['transform', 'sheetTransform', 'axisAlignSheetTransform'] as const) {
-                for (const key of ['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const) {
-                    const value = original[field]?.[key];
-                    if (value === undefined) delete candidate[field][key];
-                    else Object.assign(candidate[field], { [key]: value });
-                }
+            for (const key of ['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const) {
+                const value = original.transform?.[key];
+                if (value === undefined) delete candidate.transform[key];
+                else Object.assign(candidate.transform, { [key]: value });
             }
             plan.updates.set(patch.drawingId, candidate);
         });
@@ -324,15 +321,13 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 // same: offset-only edits inside a deleted boundary need them.
                 for (const drawing of updates) {
                     const original = plan.originals.get(drawing.drawingId);
-                    for (const field of ['sheetTransform', 'axisAlignSheetTransform'] as const) {
-                        for (const endpoint of ['from', 'to'] as const) {
-                            const before = original?.[field]?.[endpoint]?.[reference.axis];
-                            const after = drawing[field]?.[endpoint]?.[reference.axis];
-                            if (before === undefined || after === undefined) continue;
-                            const path = [unitId, subUnitId, 'data', drawing.drawingId, field, endpoint, reference.axis];
-                            redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
-                            undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
-                        }
+                    for (const endpoint of ['from', 'to'] as const) {
+                        const before = original?.axisAlignSheetTransform?.[endpoint]?.[reference.axis];
+                        const after = drawing.axisAlignSheetTransform?.[endpoint]?.[reference.axis];
+                        if (before === undefined || after === undefined) continue;
+                        const path = [unitId, subUnitId, 'data', drawing.drawingId, 'axisAlignSheetTransform', endpoint, reference.axis];
+                        redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
+                        undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
                     }
                 }
             }
@@ -389,10 +384,10 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             return;
         }
         const { axis } = reference;
-        const { sheetTransform, axisAlignSheetTransform } = drawing;
+        const { axisAlignSheetTransform } = drawing;
         let candidate: ISheetDrawing;
         if (drawing.anchorType === SheetDrawingAnchorType.Both) {
-            const anchor = axisAlignSheetTransform ?? sheetTransform;
+            const anchor = axisAlignSheetTransform;
             if (anchor.to[axis] < reference.start) return;
             if (reference.action === 'remove' && anchor.from[axis] >= reference.start && anchor.to[axis] <= reference.end) return null;
             const mapPosition = (position: ISheetDrawingPosition) => ({
@@ -400,12 +395,12 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: transformSheetDrawingReference(position.from, reference),
                 to: transformSheetDrawingReference(position.to, reference),
             });
-            candidate = { ...drawing, sheetTransform: mapPosition(sheetTransform), axisAlignSheetTransform: mapPosition(anchor) };
+            candidate = { ...drawing, axisAlignSheetTransform: mapPosition(anchor) };
         } else {
             const field = getSheetDrawingPositionAnchorField(drawing);
-            const from = drawing[field].from;
+            const { from, to } = drawing[field]!;
             // An edit after the anchor may still change its derived cell markers.
-            const lastMarker = Math.max(from[axis], sheetTransform?.to?.[axis] ?? Infinity, axisAlignSheetTransform?.to?.[axis] ?? Infinity);
+            const lastMarker = Math.max(from[axis], to?.[axis] ?? Infinity);
             if (lastMarker < reference.start) return;
             candidate = { ...drawing, [field]: { ...drawing[field], from: transformSheetDrawingReference(from, reference) } };
         }
@@ -446,18 +441,19 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const deleteDrawings: Partial<ISheetDrawing>[] = [];
 
         const { anchorType = SheetDrawingAnchorType.Position, transform, unitId, subUnitId, drawingId } = drawing;
-        const sheetTransform = drawing[anchorType === SheetDrawingAnchorType.Position
-            ? getSheetDrawingPositionAnchorField(drawing)
-            : 'sheetTransform'];
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
 
-        if (anchorType === SheetDrawingAnchorType.None || !sheetTransform?.from || !sheetTransform.to || !transform || !sheetSkeletonParam) {
+        if (anchorType === SheetDrawingAnchorType.None || !transform || !sheetSkeletonParam) {
             return {
                 updateDrawings,
                 deleteDrawings,
             };
         }
 
+        const sheetTransform = anchorType === SheetDrawingAnchorType.Position
+            ? drawing[getSheetDrawingPositionAnchorField(drawing)]
+            : getLegacySheetDrawingPosition(drawing, sheetSkeletonParam.skeleton);
+        if (!sheetTransform?.from || !sheetTransform.to) return { updateDrawings, deleteDrawings };
         const { from, to } = sheetTransform;
         const { row: fromRow, column: fromColumn } = from;
         const { row: toRow, column: toColumn } = to;
@@ -523,8 +519,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             axisAlignSheetTransform = param?.axisAlignSheetTransform ?? undefined;
         }
 
-        if (newSheetTransform && newTransform) {
-            updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform, axisAlignSheetTransform });
+        if (newSheetTransform && newTransform && axisAlignSheetTransform) {
+            updateDrawings.push({ ...drawing, transform: newTransform, axisAlignSheetTransform });
         }
 
         return { updateDrawings, deleteDrawings };
@@ -612,8 +608,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings = containedDrawings.flatMap((drawing) => {
             const result = tryRefreshSheetDrawingPlacement({
                 ...drawing,
-                sheetTransform: movePosition(drawing.sheetTransform),
-                axisAlignSheetTransform: drawing.axisAlignSheetTransform && movePosition(drawing.axisAlignSheetTransform),
+                axisAlignSheetTransform: movePosition(drawing.axisAlignSheetTransform),
             }, skeleton);
             if (result.ok) return [result.drawing];
             this._logSkippedDrawingRefresh(drawing, this._currentCommand.id, result);
@@ -947,7 +942,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const field = getSheetDrawingPositionAnchorField(drawing);
         const result = tryRefreshSheetDrawingPlacement({ ...drawing, [field]: { ...drawing[field], from } }, skeleton);
         if (!result.ok) return null;
-        const { transform: newTransform, sheetTransform: newSheetTransform, axisAlignSheetTransform } = result.drawing;
+        const { transform: newTransform, axisAlignSheetTransform } = result.drawing;
+        const newSheetTransform = getLegacySheetDrawingPosition(result.drawing, skeleton);
         return { newSheetTransform, newTransform, axisAlignSheetTransform };
     }
 
@@ -989,7 +985,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 return;
             }
             const oneCell = (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position;
-            const rebuildEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
+            const rebuildEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both });
             const rebuilt = rebuildEndpoint ? tryRefreshSheetDrawingPlacement(drawing, skeleton) : undefined;
             if (rebuilt && !rebuilt.ok) {
                 this._logSkippedDrawingRefresh(drawing, commandId, rebuilt);
@@ -997,12 +993,10 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             }
             const candidate = rebuilt?.ok ? rebuilt.drawing : drawing;
             const anchor = oneCell
-                ? candidate[getSheetDrawingPositionAnchorField(candidate)]
+                ? candidate[getSheetDrawingPositionAnchorField(candidate)]!
                 : candidate.axisAlignSheetTransform ?? candidate.sheetTransform;
             const { from } = anchor;
-            const legacy = candidate.sheetTransform;
-            if (shouldRefresh && !shouldRefresh({ from, to: anchor.to ?? from })
-                && !(oneCell && legacy !== anchor && legacy?.from && legacy.to && shouldRefresh(legacy))) {
+            if (shouldRefresh && !shouldRefresh({ from, to: anchor.to ?? from })) {
                 return rebuilt?.ok ? rebuilt.drawing : undefined;
             }
             const result = rebuilt ?? tryRefreshSheetDrawingPlacement(candidate, skeleton);
@@ -1022,7 +1016,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             drawingId: drawing?.drawingId,
             commandId,
             transform: drawing?.transform,
-            sheetTransform: drawing?.sheetTransform,
+            axisAlignSheetTransform: drawing?.axisAlignSheetTransform,
             failure,
         });
     }

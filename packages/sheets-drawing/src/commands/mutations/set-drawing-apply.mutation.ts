@@ -16,12 +16,17 @@
 
 import type { IAccessor, IDrawingSearch, IExecutionOptions, IMutation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam } from '@univerjs/drawing';
-import { CommandType, ILogService, Quantity } from '@univerjs/core';
+import { CommandType, ILogService, JSON1, Quantity } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { transformSheetDrawingReference } from '../../basics/drawing-reference';
-import { tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import {
+    getLegacySheetDrawingPosition,
+    normalizeSheetDrawing,
+    tryRefreshSheetDrawingPlacement,
+    validateSheetDrawingPlacement,
+} from '../../services/sheet-drawing-placement';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 
 export enum DrawingApplyType {
@@ -52,13 +57,50 @@ export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
 
 function needsPlacementHydration(drawing: ISheetDrawing): boolean {
     const oneCell = (drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position;
-    const invalidEndpoint = oneCell && validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
-    return (!drawing.transform?.width && !drawing.transform?.height)
-        || (drawing.sheetTransform?.angle !== undefined && drawing.transform?.angle !== drawing.sheetTransform.angle)
-        || Boolean(invalidEndpoint);
+    return Boolean(drawing.sheetTransform)
+        || (!drawing.transform?.width && !drawing.transform?.height)
+        || (oneCell && Boolean(validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both })));
 }
 
-function refreshReceivedDrawings(accessor: IAccessor, params: ISetDrawingApplyMutationParams, hydrateOnly: boolean): void {
+/** Supply the old JSON1 path only while applying a legacy operation. */
+function adaptLegacyDrawingUpdate(accessor: IAccessor, params: ISetDrawingApplyMutationParams) {
+    const { unitId, subUnitId, op } = params;
+    const cursor = JSON1.type.readCursor(op);
+    const legacy = new Map<string, boolean>();
+    const authoredAxis = new Set<string>();
+    cursor.traverse(null, (component) => {
+        const [unit, sheet, root, id, field] = cursor.getPath();
+        if (unit !== unitId || sheet !== subUnitId || root !== 'data' || typeof id !== 'string') return;
+        if (field === 'axisAlignSheetTransform') authoredAxis.add(id);
+        if (field === 'sheetTransform') {
+            legacy.set(id, cursor.getPath().length > 5 || component.r !== undefined);
+        }
+    });
+
+    const legacyPositionDrawings = new Set(params.reference?.legacyPositionDrawingIds);
+    if (!legacy.size) return { op, legacyPositionDrawings };
+    const service = accessor.get(ISheetDrawingService);
+    const skeleton = accessor.get(SheetSkeletonService, Quantity.OPTIONAL)?.ensureSkeleton(unitId, subUnitId);
+    let initial: JSON1.JSONOp = null;
+    for (const [drawingId, needsExistingValue] of legacy) {
+        if (!authoredAxis.has(drawingId)) legacyPositionDrawings.add(drawingId);
+        const drawing = service.getDrawingByParam({ unitId, subUnitId, drawingId });
+        if (drawing && skeleton && needsExistingValue && !drawing.sheetTransform) {
+            initial = JSON1.type.compose(initial, JSON1.insertOp(
+                [unitId, subUnitId, 'data', drawingId, 'sheetTransform'],
+                getLegacySheetDrawingPosition(drawing, skeleton) as unknown as JSON1.Doc
+            ));
+        }
+    }
+    return { op: initial ? JSON1.type.compose(initial, op) : op, legacyPositionDrawings };
+}
+
+function refreshReceivedDrawings(
+    accessor: IAccessor,
+    params: ISetDrawingApplyMutationParams,
+    hydrateOnly: boolean,
+    legacyPositionDrawings: ReadonlySet<string>
+): void {
     if (params.type === DrawingApplyType.REMOVE || params.type === DrawingApplyType.ARRANGE || !Array.isArray(params.objects) || !params.objects.length) {
         return;
     }
@@ -73,23 +115,26 @@ function refreshReceivedDrawings(accessor: IAccessor, params: ISetDrawingApplyMu
     if (params.recalculate || (params.reference && dimensionsChanged)) skeleton.makeDirty(true);
     skeleton.calculate();
     const service = accessor.get(ISheetDrawingService);
-    const legacyPositionDrawings = new Set(params.reference?.legacyPositionDrawingIds);
     const drawings = [];
     const objects = params.type === DrawingApplyType.GROUP || params.type === DrawingApplyType.UNGROUP
         ? (params.objects as IDrawingGroupUpdateParam[]).flatMap(({ parent, children }) => [parent, ...children])
         : params.objects as IDrawingSearch[];
     for (const object of objects) {
         const drawing = service.getDrawingByParam(object);
-        if (!drawing || drawing.groupId || drawing.anchorType === SheetDrawingAnchorType.None) {
+        if (!drawing) {
             continue;
         }
         if (hydrateOnly && !needsPlacementHydration(drawing)) {
             continue;
         }
         try {
+            if (drawing.groupId || drawing.anchorType === SheetDrawingAnchorType.None) {
+                const normalized = normalizeSheetDrawing(drawing);
+                if (normalized !== drawing) drawings.push({ ...normalized, sheetTransform: undefined });
+                continue;
+            }
             let placementSource = drawing;
-            if ((drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position
-                && legacyPositionDrawings.has(drawing.drawingId)) {
+            if (drawing.sheetTransform && legacyPositionDrawings.has(drawing.drawingId)) {
                 // Replaying the original insert may have already filled the
                 // axis cache. The rebased operation only moved the legacy start.
                 placementSource = { ...drawing };
@@ -120,7 +165,7 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
         const drawingManagerService = accessor.get(IDrawingManagerService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        const { op, unitId, subUnitId, type, objects } = params;
+        const { unitId, subUnitId, type, objects } = params;
 
         if (params.reference !== undefined) {
             const { legacyPositionDrawingIds } = params.reference;
@@ -134,16 +179,17 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
             throw new Error('Invalid drawing reference change.');
         }
 
-        drawingManagerService.applyJson1(unitId, subUnitId, op);
-        sheetDrawingService.applyJson1(unitId, subUnitId, op);
+        const adapted = adaptLegacyDrawingUpdate(accessor, params);
+        drawingManagerService.applyJson1(unitId, subUnitId, adapted.op);
+        sheetDrawingService.applyJson1(unitId, subUnitId, adapted.op);
 
         const importedOrientation = type === DrawingApplyType.INSERT && (objects as IDrawingSearch[]).some((object) => {
             const drawing = sheetDrawingService.getDrawingByParam(object);
-            return drawing && !drawing.groupId && drawing.anchorType !== SheetDrawingAnchorType.None && needsPlacementHydration(drawing);
+            return drawing && needsPlacementHydration(drawing);
         });
         const received = Boolean(options?.fromCollab || options?.fromChangeset || params.reference || params.recalculate);
         if (received || importedOrientation) {
-            refreshReceivedDrawings(accessor, params, !received);
+            refreshReceivedDrawings(accessor, params, !received, adapted.legacyPositionDrawings);
         }
 
         switch (type) {

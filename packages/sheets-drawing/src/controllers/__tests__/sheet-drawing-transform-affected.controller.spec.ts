@@ -67,6 +67,7 @@ import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawin
 import { SetDrawingApplyMutation } from '../../commands/mutations/set-drawing-apply.mutation';
 import {
     applySheetDrawingPlacement,
+    getLegacySheetDrawingPosition,
     getSheetDrawingPlacement,
     normalizeSheetDrawingPlacement,
 } from '../../services/sheet-drawing-placement';
@@ -133,8 +134,8 @@ describe('explicit deletion targets', () => {
                 { unitId: 'test', subUnitId: 'sheet1', range }
             )).toBe(true);
             const after = Tools.deepClone(readDrawing());
-            expect(after.sheetTransform?.from[axis]).toBe(before.sheetTransform!.from[axis] - 1);
-            expect(after.sheetTransform?.to[axis]).toBe(before.sheetTransform!.to[axis] - 1);
+            expect(after.axisAlignSheetTransform.from[axis]).toBe(before.axisAlignSheetTransform.from[axis] - 1);
+            expect(after.axisAlignSheetTransform.to[axis]).toBe(before.axisAlignSheetTransform.to[axis] - 1);
             const position = axis === 'row' ? 'top' : 'left';
             expect(after.transform?.[position]).toBeLessThan(before.transform![position]!);
             expect(after.transform?.width).toBe(before.transform?.width);
@@ -270,7 +271,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         };
         expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
         const row = drawing.axisAlignSheetTransform.to.row - 1;
-        expect(row).toBeGreaterThan(drawing.sheetTransform.to.row);
+        expect(row).toBeGreaterThan(transformToDrawingPosition(transform, skeleton).to.row);
         const rowHeight = testBed.workbook.getSheetBySheetId('sheet1')!.getRowHeight(row);
         expect(testBed.commandService.syncExecuteCommand(SetRowHeightCommand.id, {
             unitId: 'test',
@@ -331,7 +332,6 @@ describe('sheet drawing transforms without UI plugins', () => {
         })).toBe(true);
         expect(getDrawing(service)).toMatchObject({
             source: 'https://example.com/updated.png',
-            sheetTransform: before.sheetTransform,
             axisAlignSheetTransform: before.axisAlignSheetTransform,
             transform: before.transform,
         });
@@ -382,7 +382,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         const original = Tools.deepClone(getDrawing(service));
         const legacy = {
             ...original,
-            sheetTransform: { ...original.sheetTransform, to: { ...original.sheetTransform.to, row: -2, column: -2 } },
+            sheetTransform: { ...original.axisAlignSheetTransform, to: { ...original.axisAlignSheetTransform.to, row: -2, column: -2 } },
         };
         expect(testBed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
@@ -390,7 +390,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         })).toBe(true);
         const read = () => Tools.deepClone(service.getDrawingByParam({ ...legacy, drawingId: 'legacy-position' })!);
         const before = read();
-        expect(before.sheetTransform.to).toEqual(original.sheetTransform.to);
+        expect(before.axisAlignSheetTransform.to).toEqual(original.axisAlignSheetTransform.to);
         const commandId = rows ? RemoveRowCommand.id : RemoveColCommand.id;
         for (let i = 0; i < 2; i++) {
             expect(await testBed.commandService.executeCommand(commandId, {
@@ -399,8 +399,8 @@ describe('sheet drawing transforms without UI plugins', () => {
                 range: { startRow: 0, endRow: rows ? 0 : 19, startColumn: 0, endColumn: rows ? 19 : 0 },
             })).toBe(true);
             expect(read().transform).toMatchObject({ width: before.transform?.width, height: before.transform?.height });
-            expect(read().sheetTransform.to.row).toBeGreaterThanOrEqual(0);
-            expect(read().sheetTransform.to.column).toBeGreaterThanOrEqual(0);
+            expect(read().axisAlignSheetTransform.to.row).toBeGreaterThanOrEqual(0);
+            expect(read().axisAlignSheetTransform.to.column).toBeGreaterThanOrEqual(0);
         }
         const after = read();
         for (let i = 0; i < 2; i++) {
@@ -528,8 +528,8 @@ describe('sheet drawing transforms without UI plugins', () => {
             range: { startRow: 0, endRow: rows ? 2 : 19, startColumn: 0, endColumn: rows ? 19 : 2 },
         })).toBe(true);
         const after = Tools.deepClone(getDrawing(service));
-        expect(after.sheetTransform.from).toMatchObject({ row: 0, column: 0 });
-        expect(after.sheetTransform.to[rows ? 'row' : 'column']).toBe(1);
+        expect(after.axisAlignSheetTransform.from).toMatchObject({ row: 0, column: 0 });
+        expect(after.axisAlignSheetTransform.to[rows ? 'row' : 'column']).toBe(1);
         expect(after.transform?.[rows ? 'height' : 'width']).toBeGreaterThanOrEqual(0);
         expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(before);
@@ -706,7 +706,7 @@ describe('sheet drawing transforms without UI plugins', () => {
                 after[1].transform?.height !== before[1].transform?.height,
             ]).toContain(true);
         }
-        expect(after.map(getSheetDrawingPlacement).map(({ kind }) => kind)).toEqual([
+        expect(after.map((drawing) => getSheetDrawingPlacement(drawing)).map(({ kind }) => kind)).toEqual([
             SheetDrawingAnchorType.Position,
             SheetDrawingAnchorType.Both,
             SheetDrawingAnchorType.None,
@@ -781,7 +781,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             const before = structuredClone(readDrawing());
             expect(getSheetDrawingPlacement(before)).toMatchObject({
                 kind: SheetDrawingAnchorType.Position,
-                from: floating.sheetTransform.from,
+                from: floating.axisAlignSheetTransform.from,
                 width: floating.transform?.width,
                 height: floating.transform?.height,
             });
@@ -827,7 +827,7 @@ describe('sheet drawing transforms without UI plugins', () => {
             imageSourceType: ImageSourceType.URL,
             source: 'https://example.com/one-cell.png',
             anchorType: SheetDrawingAnchorType.Position,
-            sheetTransform: transformToAxisAlignPosition(bounds, skeleton),
+            sheetTransform: { ...transformToAxisAlignPosition(bounds, skeleton), angle: 90 },
             transform: { left: 0, top: 0, width: 0, height: 0 },
         } as ISheetDrawing;
         const { commandService } = testBed;
@@ -836,7 +836,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         const manager = testBed.get(IDrawingManagerService);
         const before = Tools.deepClone(service.getDrawingByParam(drawing)!);
         expect(before.axisAlignSheetTransform.from.row).toBe(7);
-        expect(before.sheetTransform.from.row).toBeGreaterThan(8);
+        expect(getLegacySheetDrawingPosition(before, skeleton).from.row).toBeGreaterThan(8);
         expect(before.transform).toMatchObject(bounds);
 
         expect(await commandService.executeCommand(commandId, {
@@ -847,7 +847,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         const after = Tools.deepClone(service.getDrawingByParam(drawing)!);
         expect(after.transform).toMatchObject(bounds);
         expect(after.axisAlignSheetTransform.from).toEqual(before.axisAlignSheetTransform.from);
-        expect(after.sheetTransform.from).toEqual(transformToDrawingPosition(bounds, skeleton).from);
+        expect(after.sheetTransform).toBeUndefined();
         expect(manager.getDrawingByParam(drawing)).toEqual(after);
 
         expect(await commandService.executeCommand(UndoCommandId)).toBe(true);
@@ -936,8 +936,8 @@ describe('sheet drawing transforms without UI plugins', () => {
                 subUnitId: 'sheet1',
                 drawings: [{ drawingId: before.drawingId, placement: {
                     kind: SheetDrawingAnchorType.Both,
-                    from: { ...peerDrawing.sheetTransform.from, row: 5 },
-                    to: { ...peerDrawing.sheetTransform.to, row: 8 },
+                    from: { ...peerDrawing.axisAlignSheetTransform.from, row: 5 },
+                    to: { ...peerDrawing.axisAlignSheetTransform.to, row: 8 },
                 } }],
             })).toBe(true);
             const moved = peer.get(ISheetDrawingService).getDrawingByParam(before)!;
@@ -1076,13 +1076,8 @@ describe('sheet drawing transforms without UI plugins', () => {
                 skewX: 4,
                 skewY: 2,
             }));
-            expect(result.sheetTransform).toEqual(expect.objectContaining({
-                angle: 37,
-                flipX: true,
-                flipY: false,
-                skewX: 4,
-                skewY: 2,
-            }));
+            expect(result.sheetTransform).toBeUndefined();
+            expect(result.axisAlignSheetTransform.angle).toBeUndefined();
         }
     });
 
@@ -1213,15 +1208,15 @@ describe('sheet drawing transforms without UI plugins', () => {
         if (anchorType === SheetDrawingAnchorType.None) {
             expect(hidden.transform).toEqual(before.transform);
         } else {
-            expect(hidden.sheetTransform.from).toEqual(before.sheetTransform.from);
+            expect(hidden.axisAlignSheetTransform.from).toEqual(before.axisAlignSheetTransform.from);
             expect(hidden.transform?.[rows ? 'top' : 'left']).toBe(rows ? cell.startY : cell.startX);
             if (anchorType === SheetDrawingAnchorType.Both) {
-                expect(hidden.sheetTransform.to).toEqual(before.sheetTransform.to);
+                expect(hidden.axisAlignSheetTransform.to).toEqual(before.axisAlignSheetTransform.to);
                 expect(hidden.transform?.[rows ? 'height' : 'width'])
                     .toBeLessThan(before.transform?.[rows ? 'height' : 'width'] ?? 0);
             } else {
                 expect(hidden.transform).toMatchObject({ width: 180, height: 120 });
-                expect(hidden.sheetTransform.to).not.toEqual(before.sheetTransform.to);
+                expect(hidden.axisAlignSheetTransform.to).not.toEqual(before.axisAlignSheetTransform.to);
             }
         }
         expect(await testBed.commandService.executeCommand(UndoCommandId)).toBe(true);
@@ -1260,10 +1255,10 @@ describe('sheet drawing transforms without UI plugins', () => {
         const healthy = Tools.deepClone(getDrawing(service));
         const from = legacyMarkers
             ? { column: 3, columnOffset: 0, row: 198, rowOffset: -4460 }
-            : { ...healthy.sheetTransform.from, row: anchorType === SheetDrawingAnchorType.Both ? -1 : 1 };
+            : { ...healthy.axisAlignSheetTransform.from, row: anchorType === SheetDrawingAnchorType.Both ? -1 : 1 };
         const to = legacyMarkers
             ? { column: 4, columnOffset: 60.3, row: -2, rowOffset: 0 }
-            : healthy.sheetTransform.to;
+            : healthy.axisAlignSheetTransform.to;
         const invalid: ISheetDrawing = {
             ...healthy,
             drawingId: 'invalid-image',
@@ -1275,7 +1270,7 @@ describe('sheet drawing transforms without UI plugins', () => {
         if (missing === 'sheetTransform') {
             Reflect.deleteProperty(invalid, missing);
         } else if (missing) {
-            Reflect.deleteProperty(invalid.sheetTransform, missing);
+            Reflect.deleteProperty(invalid.sheetTransform!, missing);
         }
         const snapshot = testBed.get(IResourceLoaderService).saveUnit<IWorkbookData>('test')!;
         snapshot.sheets.sheet1.rowCount = 300;

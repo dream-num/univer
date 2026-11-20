@@ -239,7 +239,7 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Get the placement of any drawing on this sheet.
      *
-     * Image, Shape, Chart, and Group use the same placement contract.
+     * Image, Shape, Chart, and Group use the same Excel-aligned cell markers.
      * @param {string} drawingId Drawing id.
      * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing does not exist.
      * @example

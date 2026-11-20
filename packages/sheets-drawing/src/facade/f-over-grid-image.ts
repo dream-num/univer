@@ -498,7 +498,7 @@ export class FOverGridImageBuilder {
      *
      * This placement takes precedence over the individual row, column, size,
      * and anchor type builder fields. Use bounds inference for an existing
-     * transform; use exact markers when a caller explicitly chose cells.
+     * unrotated transform; use exact Excel-aligned markers to select cells.
      * @param {ISheetDrawingPlacementInput} placement Exact placement or bounds with an explicit anchor type.
      * @returns {FOverGridImageBuilder} This builder.
      * @example
@@ -859,7 +859,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * Get this image's explicit placement.
+     * Get this image's placement with Excel-aligned cell markers.
      * @returns {ISheetDrawingPlacement} OneCell, TwoCell, or Absolute placement.
      * @example
      * ```ts
@@ -913,8 +913,8 @@ export class FOverGridImage extends FBase {
     /**
      * Set this image's explicit placement through the drawing command.
      * `Position`, `Both`, and `None` correspond to OneCell, TwoCell, and
-     * Absolute. Bounds inference is preferable when preserving the current
-     * visual bounds; exact markers are for user-selected cells and offsets.
+     * Absolute. Use the unrotated rectangle to infer placement, or specify
+     * exact Excel-aligned cell markers and offsets.
      * @param {ISheetDrawingPlacementInput} placement Exact placement or bounds with an explicit anchor type.
      * @returns {boolean} `true` when the command succeeds.
      * @example OneCell

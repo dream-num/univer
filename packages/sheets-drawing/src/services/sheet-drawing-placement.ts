@@ -37,11 +37,11 @@ import {
 export interface ISheetDrawingOneCellPlacement {
     /** Placement discriminator. */
     kind: SheetDrawingAnchorType.Position;
-    /** Zero-based anchor cell and pixel offsets from its top-left corner. */
+    /** Start marker of the Excel-aligned rectangle, with zero-based cell coordinates. */
     from: ICellOverGridPosition;
-    /** Drawing width in pixels. */
+    /** Fixed, unrotated drawing width in pixels. */
     width: number;
-    /** Drawing height in pixels. */
+    /** Fixed, unrotated drawing height in pixels. */
     height: number;
 }
 
@@ -51,9 +51,9 @@ export interface ISheetDrawingOneCellPlacement {
 export interface ISheetDrawingTwoCellPlacement {
     /** Placement discriminator. */
     kind: SheetDrawingAnchorType.Both;
-    /** Zero-based start cell and pixel offsets. */
+    /** Start marker of the Excel-aligned rectangle, with zero-based cell coordinates. */
     from: ICellOverGridPosition;
-    /** Zero-based end cell and pixel offsets. */
+    /** End marker of the Excel-aligned rectangle, with zero-based cell coordinates. */
     to: ICellOverGridPosition;
 }
 
@@ -125,6 +125,15 @@ export function getSheetDrawingPositionAnchorField(drawing: ISheetDrawing): 'axi
     return 'axisAlignSheetTransform';
 }
 
+function getAxisAlignedDrawingPosition(drawing: ISheetDrawing, usesImportedMarkers = false): ISheetDrawingPosition | undefined {
+    if (usesImportedMarkers) {
+        return drawing.axisAlignSheetTransform ?? drawing.sheetTransform;
+    }
+    if (drawing.anchorType === SheetDrawingAnchorType.Both || getSheetDrawingPositionAnchorField(drawing) === 'axisAlignSheetTransform') {
+        return drawing.axisAlignSheetTransform;
+    }
+}
+
 /** Reconstruct the unrotated coordinates expected by legacy drawing APIs. */
 export function getLegacySheetDrawingPosition(drawing: ISheetDrawing, skeleton: SpreadsheetSkeleton): ISheetDrawingPosition {
     const transform = getSheetDrawingTransformWithOrientation(drawing);
@@ -170,9 +179,8 @@ export function getSheetDrawingPlacement(drawing: ISheetDrawing, skeleton?: Spre
         };
     }
 
-    const position = skeleton
-        ? getLegacySheetDrawingPosition(drawing, skeleton)
-        : drawing.sheetTransform ?? drawing.axisAlignSheetTransform;
+    const current = skeleton && !getAxisAlignedDrawingPosition(drawing) ? normalizeSheetDrawing(drawing, skeleton) : drawing;
+    const position = getAxisAlignedDrawingPosition(current) ?? current.sheetTransform ?? current.axisAlignSheetTransform;
     if (anchorType === SheetDrawingAnchorType.Both) {
         return {
             kind: SheetDrawingAnchorType.Both,
@@ -184,8 +192,8 @@ export function getSheetDrawingPlacement(drawing: ISheetDrawing, skeleton?: Spre
     return {
         kind: SheetDrawingAnchorType.Position,
         from: { ...position.from },
-        width: drawing.transform?.width ?? 0,
-        height: drawing.transform?.height ?? 0,
+        width: current.transform?.width ?? 0,
+        height: current.transform?.height ?? 0,
     };
 }
 
@@ -212,7 +220,7 @@ export function applySheetDrawingPlacement(
     const requiresArea = requiresDrawingArea(drawing);
     const placement = normalizePlacement(input, skeleton, requiresArea);
 
-    return resolveSheetDrawingPlacement(drawing, placement, skeleton);
+    return resolveSheetDrawingPlacement(drawing, placement, skeleton, !('bounds' in input));
 }
 
 /** Place a batch at the logical start corner of a Chart Sheet, preserving its relative geometry. */
@@ -289,16 +297,18 @@ export function tryRefreshSheetDrawingPlacement(drawing: ISheetDrawing, skeleton
         return { ok: true, drawing };
     }
 
-    const anchor = drawing.axisAlignSheetTransform ?? drawing.sheetTransform!;
-    const placement = deriveFixedExtent || drawing.anchorType === SheetDrawingAnchorType.Both
+    const resolvesBoth = deriveFixedExtent || drawing.anchorType === SheetDrawingAnchorType.Both;
+    const axisAnchor = getAxisAlignedDrawingPosition(drawing, resolvesBoth && isUnprojectedImage(drawing));
+    const anchor = axisAnchor ?? drawing.sheetTransform!;
+    const placement = resolvesBoth
         ? { kind: SheetDrawingAnchorType.Both as const, from: anchor.from, to: anchor.to }
         : {
             kind: SheetDrawingAnchorType.Position as const,
-            from: drawing[getSheetDrawingPositionAnchorField(drawing)]!.from,
+            from: anchor.from,
             width: drawing.transform?.width ?? 0,
             height: drawing.transform?.height ?? 0,
         };
-    const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton, true);
+    const resolved = resolveSheetDrawingPlacement(drawing, placement, skeleton, Boolean(axisAnchor));
     // A valid two-cell drawing can temporarily collapse when its cells are hidden.
     const extentFailure = validateExtent(resolved.transform?.width ?? 0, resolved.transform?.height ?? 0, requiresDrawingArea(drawing), !deriveFixedExtent);
     if (extentFailure) {
@@ -349,8 +359,8 @@ export function getSheetDrawingTransformWithOrientation(drawing: ISheetDrawing):
 function resolveSheetDrawingPlacement(
     drawing: ISheetDrawing,
     placement: ISheetDrawingPlacement,
-    skeleton?: SpreadsheetSkeleton,
-    refresh = false
+    skeleton: SpreadsheetSkeleton | undefined,
+    usesAxisMarkers: boolean
 ): ISheetDrawing {
     const existingTransform = getSheetDrawingTransformWithOrientation(drawing);
     const { sheetTransform: _legacy, ...model } = drawing;
@@ -369,15 +379,12 @@ function resolveSheetDrawingPlacement(
     }
 
     if (placement.kind === SheetDrawingAnchorType.Position) {
-        const axisFrom = refresh && getSheetDrawingPositionAnchorField(drawing) === 'axisAlignSheetTransform'
-            ? drawing.axisAlignSheetTransform.from
-            : undefined;
         const { width, height } = placement;
-        const origin = projectCellMarker(axisFrom ?? placement.from, skeleton);
+        const origin = projectCellMarker(placement.from, skeleton);
         // The Excel marker is the start of the major-axis rectangle. Recover
         // the unrotated origin without re-anchoring when the sheet layout changes.
         const swapped = isDrawingAxisSwapped(existingTransform.angle);
-        if (axisFrom && swapped) {
+        if (usesAxisMarkers && swapped) {
             origin.left = precisionTo(origin.left + (height - width) / 2, 6);
             origin.top = precisionTo(origin.top + (width - height) / 2, 6);
         }
@@ -392,7 +399,7 @@ function resolveSheetDrawingPlacement(
             anchorType: SheetDrawingAnchorType.Position,
             transform,
             axisAlignSheetTransform: {
-                from: { ...(axisFrom ?? (swapped ? axis.from : placement.from)) },
+                from: { ...(usesAxisMarkers || !swapped ? placement.from : axis.from) },
                 to: axis.to,
             },
         };
@@ -400,12 +407,9 @@ function resolveSheetDrawingPlacement(
 
     // Excel's two-cell anchor follows the nearest major axis of a rotated
     // drawing. Refresh that rectangle, then recover the unrotated render box.
-    const axisAnchor = refresh
-        ? drawing.axisAlignSheetTransform ?? (isUnprojectedImage(drawing) ? drawing.sheetTransform : undefined)
-        : undefined;
     const swapped = isDrawingAxisSwapped(existingTransform.angle);
-    const from = projectCellMarker(axisAnchor?.from ?? placement.from, skeleton);
-    const to = projectCellMarker(axisAnchor?.to ?? placement.to, skeleton);
+    const from = projectCellMarker(placement.from, skeleton);
+    const to = projectCellMarker(placement.to, skeleton);
     // Keep sub-pixel anchor precision. Rounding the axis box to tenths before
     // swapping its axes causes repeated refreshes to change the drawing size.
     const bounds = {
@@ -415,7 +419,7 @@ function resolveSheetDrawingPlacement(
         height: precisionTo(to.top - from.top, 6),
     };
     let transform = withExistingTransform(existingTransform, bounds);
-    if (axisAnchor && swapped) {
+    if (usesAxisMarkers && swapped) {
         transform = {
             ...transform,
             left: precisionTo(bounds.left + bounds.width / 2 - bounds.height / 2, 6),
@@ -424,7 +428,7 @@ function resolveSheetDrawingPlacement(
             height: bounds.width,
         };
     }
-    const markers = axisAnchor ?? (swapped ? transformToAxisAlignPosition(transform, skeleton) : placement);
+    const markers = usesAxisMarkers || !swapped ? placement : transformToAxisAlignPosition(transform, skeleton);
     return {
         ...model,
         anchorType: SheetDrawingAnchorType.Both,

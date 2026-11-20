@@ -42,6 +42,7 @@ import {
     MAX_ROW_COUNT,
     moveRangeByOffset,
     ObjectMatrix,
+    RANGE_TYPE,
     Rectangle,
     Tools,
     UniverInstanceType,
@@ -78,11 +79,17 @@ import type {
 } from '../../commands/commands/remove-row-col.command';
 import type { IRemoveSheetCommandParams } from '../../commands/commands/remove-sheet.command';
 import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
-import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
+import type {
+    ISetColHiddenCommandParams,
+    ISetSpecificColsVisibleCommandParams,
+} from '../../commands/commands/set-col-visible.command';
 import type { ICancelFrozenCommandParams, ISetFrozenCommandParams } from '../../commands/commands/set-frozen.command';
 import type { ISetGridlinesColorCommandParams } from '../../commands/commands/set-gridlines-color.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
-import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
+import type {
+    ISetRowHiddenCommandParams,
+    ISetSpecificRowsVisibleCommandParams,
+} from '../../commands/commands/set-row-visible.command';
 import type { ISetStyleCommandParams } from '../../commands/commands/set-style.command';
 import type { ISetTabColorCommandParams } from '../../commands/commands/set-tab-color.command';
 import type { ISetColWidthCommandParams } from '../../commands/commands/set-worksheet-col-width.command';
@@ -116,6 +123,7 @@ import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands
 import { RemoveSheetCommand } from '../../commands/commands/remove-sheet.command';
 import { SetBorderCommand } from '../../commands/commands/set-border.command';
 import {
+    SetColHiddenCommand,
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../../commands/commands/set-col-visible.command';
@@ -124,6 +132,7 @@ import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/s
 import { SetGridlinesColorCommand } from '../../commands/commands/set-gridlines-color.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import {
+    SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '../../commands/commands/set-row-visible.command';
@@ -582,6 +591,38 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
                 break;
 
+            // hide rows/columns
+            case SetColHiddenCommand.id:
+                params = commandInfo.params as ISetColHiddenCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    this._getRangesForHideCommand(params, RANGE_TYPE.COLUMN),
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+            case SetRowHiddenCommand.id:
+                params = commandInfo.params as ISetRowHiddenCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    this._getRangesForHideCommand(params, RANGE_TYPE.ROW),
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+
             // freeze pane
             case SetFrozenCommand.id:
             case CancelFrozenCommand.id:
@@ -721,6 +762,23 @@ export class SheetPermissionCheckController extends Disposable {
             this.blockExecuteWithoutPermission(errorMsg);
         }
     };
+
+    /**
+     * Hide commands act on whole rows or columns. When they receive no ranges, resolve the same
+     * row/column selections they would use so an unrelated cell selection cannot block them, and
+     * widen explicit ranges to the whole row or column so protected cells are covered.
+     */
+    private _getRangesForHideCommand(params: { ranges?: IRange[] } | undefined, rangeType: RANGE_TYPE): IRange[] {
+        const ranges = params?.ranges?.length
+            ? params.ranges
+            : (this._selectionManagerService.getCurrentSelections() ?? [])
+                .map((selection) => selection.range)
+                .filter((range) => range.rangeType === rangeType);
+
+        return ranges.map((range) => (rangeType === RANGE_TYPE.ROW
+            ? { ...range, startColumn: 0, endColumn: MAX_COLUMN_COUNT - 1 }
+            : { ...range, startRow: 0, endRow: MAX_ROW_COUNT - 1 }));
+    }
 
     public permissionCheckWithRanges(permissionTypes: IPermissionTypes, selectionRanges?: IRange[], unitId?: string, subUnitId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });

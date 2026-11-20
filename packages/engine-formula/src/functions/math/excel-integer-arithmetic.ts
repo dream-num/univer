@@ -97,7 +97,7 @@ class ExcelLcm extends ExcelGcd {
 
 type Operation = 'mod' | 'mround' | 'quotient';
 
-function binaryArithmetic(kind: Operation) {
+function binaryArithmetic(kind: Operation): typeof BaseFunction {
     return class ExcelBinaryArithmetic extends BaseFunction {
         override minParams = 2;
         override maxParams = 2;

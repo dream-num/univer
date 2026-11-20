@@ -28,6 +28,8 @@ import { IFormulaCurrentConfigService } from '../../../../services/current-data.
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { FUNCTION_NAMES_META } from '../../../meta/function-names';
+import { Minus } from '../../../meta/minus';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Randarray } from '../index';
@@ -179,8 +181,10 @@ describe('Test randarray function', () => {
             testBed.unitId
         );
 
+        const injector = testBed.univer.__getInjector();
         functionService.registerExecutors(
-            new Randarray(FUNCTION_NAMES_MATH.RANDARRAY)
+            injector.createInstance(Randarray, FUNCTION_NAMES_MATH.RANDARRAY),
+            injector.createInstance(Minus, FUNCTION_NAMES_META.MINUS)
         );
 
         calculate = (formula: string) => {

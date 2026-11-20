@@ -784,8 +784,14 @@ export function studentTPositiveTailFromSquare(square: number, degrees: number):
 // Coefficients of sqrt(w / (1 - exp(-w))) at w = 0. Using the transformed
 // density avoids a beta continued fraction evaluated just below 1.
 const STUDENT_T_TAIL_COEFFICIENTS = [
-    1 / 4, 1 / 96, -1 / 384, -1 / 10240, 19 / 368640,
-    79 / 61931520, -55 / 49545216, -2339 / 118908518400,
+    1 / 4,
+    1 / 96,
+    -1 / 384,
+    -1 / 10240,
+    19 / 368640,
+    79 / 61931520,
+    -55 / 49545216,
+    -2339 / 118908518400,
 ];
 
 function studentTNormalTail(degrees: number, logRatio: number, logBeta: number): number {

@@ -585,7 +585,7 @@ describe('ThreadCommentPanel', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(container.textContent).toContain('thread-comment-ui.editor.placeholder');
+        expect(testBed.injector.get(IEditorService).getAllEditor().size).toBe(1);
         expect(testBed.panelService.activeCommentId).toEqual({
             unitId: UNIT_ID,
             subUnitId: SHEET_ID,
@@ -671,7 +671,7 @@ describe('ThreadCommentPanel', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(container.textContent).not.toContain('thread-comment-ui.editor.placeholder');
+        expect(testBed.injector.get(IEditorService).getAllEditor().size).toBe(0);
         expect(onTempCommentClose).toHaveBeenCalledTimes(1);
     });
 

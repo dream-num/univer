@@ -84,8 +84,11 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
             data-u-comp="ribbon-grid-toolbar"
             className={clsx(`
               univer-relative univer-box-border univer-flex univer-h-[calc(4.25rem+1px)] univer-min-w-0
-              univer-overflow-hidden univer-bg-gray-50 univer-text-sm
+              univer-overflow-hidden univer-bg-gray-50 univer-text-xs
               dark:!univer-bg-gray-900
+              [&_.univer-text-sm:not(svg)]:univer-text-xs
+              [&_[data-u-comp='button']]:univer-gap-1
+              [&_input]:!univer-text-xs
             `, borderBottomClassName, className)}
             role="toolbar"
             aria-label={localeService.t(title)}

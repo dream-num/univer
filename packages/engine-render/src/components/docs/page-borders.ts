@@ -20,7 +20,7 @@ import type { UniverRenderingContext } from '../../context';
 import { COLOR_BLACK_RGB } from '../../basics/const';
 import { getColorStyleForCanvas } from './layout/style/color';
 
-function getBorderBands(border: IPageBorder | undefined): number[] {
+export function getDocumentBorderBands(border: IPageBorder | undefined): number[] {
     if (!border) {
         return [];
     }
@@ -54,6 +54,10 @@ function getBorderBands(border: IPageBorder | undefined): number[] {
     }
 }
 
+export function getDocumentBorderWidth(border: IPageBorder | undefined): number {
+    return getDocumentBorderBands(border).reduce((sum, width) => sum + width, 0);
+}
+
 /** Draws section page borders without contributing to text/table layout. */
 export function drawPageBorders(
     ctx: UniverRenderingContext,
@@ -68,7 +72,7 @@ export function drawPageBorders(
         return;
     }
     const sides = [borders.top, borders.right, borders.bottom, borders.left];
-    const bands = sides.map(getBorderBands);
+    const bands = sides.map(getDocumentBorderBands);
     const widths = bands.map((values) => values.reduce((sum, value) => sum + value, 0));
     const padding = sides.map((side) => Number.isFinite(side?.padding) ? Math.max(0, side!.padding!) : 0);
     const fromPage = borders.offsetFrom === 'page';

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
 import type { Documents, IPageRenderConfig, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
+import { CustomRangeType, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
+import { drawDocCustomRangeChrome } from '../../basics/doc-custom-range-chrome';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocFieldRenderController extends Disposable implements IRenderModule {
     private _hovered = new Set<string>();
     private _shade = '';
+    private readonly _outline = { background: 'transparent', border: '' };
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -36,6 +38,7 @@ export class DocFieldRenderController extends Disposable implements IRenderModul
         const documents = this._context.mainComponent as Documents;
         this.disposeWithMe(theme.currentTheme$.subscribe(() => {
             this._shade = theme.getColorFromTheme('gray.200');
+            this._outline.border = theme.getColorFromTheme('primary.600');
             documents.makeDirty(true);
         }));
         this.disposeWithMe(this._events.hoverCustomRanges$.subscribe((ranges) => {
@@ -57,8 +60,9 @@ export class DocFieldRenderController extends Disposable implements IRenderModul
         if (this._instances.getFocusedUnit()?.getUnitId() !== this._context.unitId) {
             return;
         }
-        const active = this._getActiveFields();
-        if (!active.size) {
+        const isTraditional = this._context.unit.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL;
+        const { selected, focused } = this._getSelectedFields(isTraditional);
+        if (!selected.size && !this._hovered.size) {
             return;
         }
         const documents = this._context.mainComponent as Documents;
@@ -73,7 +77,7 @@ export class DocFieldRenderController extends Disposable implements IRenderModul
         ctx.rect(pageLeft, pageTop, page.pageWidth, page.pageHeight);
         ctx.clip();
         ctx.fillStyle = this._shade;
-        ctx.globalAlpha *= 0.45;
+        const alpha = ctx.globalAlpha;
         for (const { customRange: field, segmentId, segmentPageIndex, rects } of this._events.getCustomRangeBounds()) {
             if (field.rangeType !== CustomRangeType.FIELD) {
                 continue;
@@ -85,28 +89,53 @@ export class DocFieldRenderController extends Disposable implements IRenderModul
             } else if (area !== DocumentEditArea.BODY) {
                 continue;
             }
-            if (!active.has(`${segmentId ?? ''}:${segmentPageIndex}:${field.rangeId}`)) {
+            const key = `${segmentId ?? ''}:${segmentPageIndex}:${field.rangeId}`;
+            const isSelected = selected.has(key);
+            const outlined = focused.has(key);
+            const shaded = isTraditional && !segmentId && isSelected ? false : isSelected || this._hovered.has(key);
+            if (!outlined && !shaded) {
                 continue;
             }
+            ctx.globalAlpha = outlined ? alpha : alpha * 0.45;
             for (const rect of rects) {
-                ctx.fillRect(rect.left - docsLeft, rect.top - docsTop, rect.right - rect.left, rect.bottom - rect.top);
+                const left = rect.left - docsLeft;
+                const top = rect.top - docsTop;
+                if (outlined) {
+                    drawDocCustomRangeChrome(ctx, { left, top, right: rect.right - docsLeft, bottom: rect.bottom - docsTop }, this._outline);
+                } else {
+                    ctx.fillRect(left, top, rect.right - rect.left, rect.bottom - rect.top);
+                }
             }
         }
         ctx.restore();
     }
 
-    private _getActiveFields(): Set<string> {
-        const active = new Set(this._hovered);
+    private _getSelectedFields(isTraditional: boolean): { selected: Set<string>; focused: Set<string> } {
+        const selected = new Set<string>();
+        const focused = new Set<string>();
+        const unit = this._context.unit;
         const selections = this._selections.getTextRanges({ unitId: this._context.unitId, subUnitId: this._context.unitId }) ?? [];
         for (const selection of selections) {
             const segmentId = selection.segmentId ?? '';
-            const fields = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
+            const inTraditionalBody = isTraditional && !segmentId;
+            const includeFieldStart = inTraditionalBody && selection.collapsed;
+            const endOffset = selection.endOffset + (includeFieldStart ? 1 : 0);
+            const fields = unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
+            let focusedField: ICustomRange | undefined;
             for (const field of fields) {
-                if (field.rangeType === CustomRangeType.FIELD && selection.startOffset <= field.endIndex && selection.endOffset > field.startIndex) {
-                    active.add(`${segmentId}:${segmentId ? selection.segmentPage : -1}:${field.rangeId}`);
+                if (field.rangeType !== CustomRangeType.FIELD || selection.startOffset > field.endIndex || endOffset <= field.startIndex) {
+                    continue;
+                }
+                selected.add(`${segmentId}:${segmentId ? selection.segmentPage : -1}:${field.rangeId}`);
+                if (inTraditionalBody && selection.startOffset >= field.startIndex && selection.endOffset <= field.endIndex + 1 &&
+                    (!focusedField || field.endIndex - field.startIndex < focusedField.endIndex - focusedField.startIndex)) {
+                    focusedField = field;
                 }
             }
+            if (focusedField) {
+                focused.add(`:-1:${focusedField.rangeId}`);
+            }
         }
-        return active;
+        return { selected, focused };
     }
 }

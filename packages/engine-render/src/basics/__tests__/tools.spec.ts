@@ -71,6 +71,7 @@ import {
     pxToPt,
     radToDeg,
     requestNewFrame,
+    resolveTextStyleEastAsiaFont,
     startWithEmoji,
     toPx,
 } from '../tools';
@@ -78,6 +79,32 @@ import {
 describe('tools extra', () => {
     afterEach(() => {
         vi.restoreAllMocks();
+    });
+
+    it.each([
+        { content: '中', language: 'en-US', expected: 'Hans' },
+        { content: 'あ', language: 'en-US', expected: 'Jpan' },
+        { content: '한', language: 'en-US', expected: 'Hang' },
+        { content: '中', language: 'zh-TW', expected: 'Hant' },
+        { content: '中', language: 'ja-JP', expected: 'Jpan' },
+        { content: '中', language: 'ko-KR', expected: 'Hang' },
+        { content: '中', language: 'zh-Hans', expected: 'Hans' },
+        { content: 'A', language: 'en-US', expected: undefined },
+        { content: '§', language: 'en-US', expected: undefined },
+        { content: undefined, language: 'en-US', expected: undefined },
+    ])('resolves theme scripts for actual glyph content while preserving declared language: %j', ({ content, language, expected }) => {
+        const textStyle = { eastAsiaFontTheme: 'minor' as const, eastAsiaFontFamily: 'Declared Face', altLang: language };
+        const before = JSON.stringify(textStyle);
+        const result = resolveTextStyleEastAsiaFont(textStyle, {
+            major: {},
+            minor: { scriptFonts: { Hans: 'Hans', Hant: 'Hant', Jpan: 'Jpan', Hang: 'Hang' } },
+        }, content);
+        expect(result.eastAsiaFontFamily).toBe(expected ?? 'Declared Face');
+        expect(result.altLang).toBe(language);
+        expect(JSON.stringify(textStyle)).toBe(before);
+        if (!expected) {
+            expect(result).toBe(textStyle);
+        }
     });
 
     it('avoids Unicode segmentation for individual code units while preserving complex graphemes', () => {
@@ -190,6 +217,62 @@ describe('tools extra', () => {
             expect(getFontStyleString({ ...textStyle, va }).fontKerning).toBe(expected);
         }
         expect(textStyle).toEqual({ ff: 'Arial', fs: 12.5, kerning });
+    });
+
+    it.each([
+        ['roman', 'serif'],
+        ['swiss', 'sans-serif'],
+        ['modern', 'monospace'],
+        ['script', 'cursive'],
+        ['decorative', 'fantasy'],
+    ] as const)('uses declared font class %s after authored names and alternates', (classification, generic) => {
+        const textStyle = { ff: 'Authored Family', fs: 12 };
+        const style = getFontStyleString(
+            textStyle,
+            { 'Authored Family': 'Alternate Family' },
+            { 'Authored Family': classification }
+        );
+
+        expect(style.fontFamily).toBe(`"Authored Family", "Alternate Family", ${generic}`);
+        expect(style.fontString.indexOf(generic)).toBeLessThan(style.fontString.indexOf('Helvetica Neue'));
+        expect(textStyle.ff).toBe('Authored Family');
+    });
+
+    it.each([0, 1] as const)('uses the Word automatic-family substitute while preserving authored weight %s', (bl) => {
+        const textStyle = { ff: 'Unavailable Author Font', fs: 13, bl };
+        const style = getFontStyleString(textStyle, undefined, { 'Unavailable Author Font': 'auto' });
+
+        expect(style.fontFamily).toBe('"Unavailable Author Font", Calibri');
+        expect(style.fontString).toContain(bl ? 'bold 13pt' : 'normal 13pt');
+        expect(textStyle).toEqual({ ff: 'Unavailable Author Font', fs: 13, bl });
+        expect(getFontStyleString(textStyle).fontFamily).toBe('"Unavailable Author Font"');
+    });
+
+    it('keeps an authored alternate ahead of the automatic-family substitute', () => {
+        expect(getFontStyleString(
+            { ff: 'Authored Family', fs: 12 },
+            { 'Authored Family': 'Alternate Family' },
+            { 'Authored Family': 'auto' }
+        ).fontFamily).toBe('"Authored Family", "Alternate Family", Calibri');
+    });
+
+    it.each([
+        [undefined, '"Authored Family", "Alternate Family", "East Asian Family", "East Asian Alternate"'],
+        ['auto', '"Authored Family", "Alternate Family", Calibri, "East Asian Family", "East Asian Alternate"'],
+        ['roman', '"Authored Family", "Alternate Family", "East Asian Family", "East Asian Alternate", serif'],
+    ] as const)('keeps the East Asian slot after authored Latin substitutes for class %s', (classification, expected) => {
+        const textStyle = { ff: 'Authored Family, Alternate Family', eastAsiaFontFamily: 'East Asian Family', fs: 13, bl: 1 as const };
+        const before = JSON.stringify(textStyle);
+        const style = getFontStyleString(textStyle, {
+            'Authored Family': 'Alternate Family',
+            'Alternate Family': 'Authored Family',
+            'East Asian Family': 'East Asian Alternate',
+            'East Asian Alternate': 'East Asian Family',
+        }, classification ? { 'Authored Family': classification } : undefined);
+
+        expect(style.fontFamily).toBe(expected);
+        expect(style.fontString).toContain(`bold 13pt ${expected}`);
+        expect(JSON.stringify(textStyle)).toBe(before);
     });
 
     it('builds font styles and language detectors', () => {

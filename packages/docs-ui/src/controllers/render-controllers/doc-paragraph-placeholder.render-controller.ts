@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
 import type {
     Documents,
     IDocumentSkeletonColumn,
@@ -26,8 +26,6 @@ import type {
     IRenderModule,
     UniverRenderingContext,
 } from '@univerjs/engine-render';
-import type { IUniverDocsUIConfig } from '../../config/config';
-import type { LocaleKey } from '../../locale/types';
 import {
     DataStreamTreeTokenType,
     Disposable,
@@ -38,10 +36,13 @@ import {
     LocaleService,
     NAMED_STYLE_MAP,
     NamedStyleType,
+    resolveDocumentParagraphBullet,
     ThemeService,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getDocsTableRenderViewport, getDocsTableViewportLeft, getTableIdAndSliceIndex } from '@univerjs/engine-render';
+import type { IUniverDocsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'gray.300';
@@ -77,6 +78,7 @@ interface IParagraphPlaceholderLocale {
 interface IParagraphPlaceholderLayoutOptions {
     docsLeft?: number;
     unitId?: string;
+    document?: Pick<IDocumentData, 'styles' | 'lists'>;
 }
 
 interface IParagraphPlaceholderClip {
@@ -144,6 +146,7 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
             {
                 docsLeft: (this._context.mainComponent as Documents | undefined)?.getOffsetConfig().docsLeft,
                 unitId: this._context.unitId,
+                document: this._context.unit.getSnapshot(),
             }
         );
         if (!placeholders.length) {
@@ -192,7 +195,10 @@ export function getParagraphPlaceholderLayouts(
     activeOffset: number,
     options?: IParagraphPlaceholderLayoutOptions
 ): IParagraphPlaceholderLayout[] {
-    const paragraphs = new Map((body.paragraphs ?? []).map((paragraph) => [paragraph.startIndex, paragraph]));
+    const paragraphs = new Map((body.paragraphs ?? []).map((paragraph) => [paragraph.startIndex, {
+        ...paragraph,
+        bullet: options?.document ? resolveDocumentParagraphBullet(options.document, paragraph) : paragraph.bullet,
+    }]));
     const layouts: IParagraphPlaceholderLayout[] = [];
 
     const visitSection = (

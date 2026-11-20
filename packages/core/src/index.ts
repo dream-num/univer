@@ -61,7 +61,14 @@ export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';
 export * from './docs';
-export { resolveDocumentParagraphWordWrap } from './docs/data-model/paragraph-style';
+export {
+    getDocumentParagraphStyleForUpdate,
+    resolveDocumentParagraphBullet,
+    resolveDocumentParagraphStyle,
+    resolveDocumentParagraphWordWrap,
+    resolveDocumentTextStyle,
+} from './docs/data-model/paragraph-style';
+export type { IResolveDocumentParagraphStyleOptions } from './docs/data-model/paragraph-style';
 export { getSdtBindingKey, getSdtBindingValue } from './docs/sdt-binding';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';

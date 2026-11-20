@@ -123,7 +123,13 @@ describe('GETPIVOTDATA', () => {
             protected override get pivotReportLookup(): IPivotFormulaReportLookup {
                 return {
                     getPivotFormulaReport: (_unit, _sheet, candidate) => Rectangle.intersects(range, candidate)
-                        ? { ranges: [range], fields: ['Region', 'Product'], columnFields: ['Product'], dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }] }
+                        ? {
+                            ranges: [range],
+                            fields: ['Region', 'Year', 'Category'],
+                            columnFields: ['Year'],
+                            dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
+                            layout: { firstDataRow: 4, pageFields: [{ names: ['Category'], value: 'X' }] },
+                        }
                         : undefined,
                 };
             }
@@ -134,8 +140,8 @@ describe('GETPIVOTDATA', () => {
             [2, 0, text('Sum of Amount')],
             [2, 1, text('Column Labels')],
             [3, 0, text('Row Labels')],
-            [3, 1, text('A')],
-            [3, 2, text('B')],
+            [3, 1, number(2025)],
+            [3, 2, number(2026)],
             [3, 3, text('Grand Total')],
             [4, 0, text('North')],
             [4, 1, number(80)],
@@ -150,10 +156,15 @@ describe('GETPIVOTDATA', () => {
         const lookup = (reference: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg('Amount'), anchor(cells, reference), ...pairs.map(textArg)));
         try {
             expect(lookup('B5', 'Region', 'North')).toBe(114);
-            expect(lookup('A3', 'Region', 'North', 'Product', 'A')).toBe(80);
-            expect(lookup('A3', 'Region', 'North', 'Product', 'Missing')).toBe(ErrorType.REF);
+            expect(lookup('A3', 'Region', 'North', 'Year', '2025')).toBe(80);
+            expect(lookup('A3', 'Year', '2025')).toBe(80);
+            expect(lookup('A3', 'Region', 'North', 'Year', '2025', 'Category', 'X')).toBe(80);
+            expect(lookup('A3', 'Region', 'North', 'Category', 'Y')).toBe(ErrorType.REF);
+            expect(lookup('A3', 'Region', 'North', 'Year', 'Missing')).toBe(ErrorType.REF);
             expect(lookup('A3', 'Unknown', 'North')).toBe(ErrorType.REF);
             expect(lookup('H3', 'Region', 'North')).toBe(ErrorType.REF);
+            range.endColumn = 2;
+            expect(lookup('A3', 'Region', 'North')).toBe(ErrorType.REF);
         } finally {
             injector.dispose();
         }

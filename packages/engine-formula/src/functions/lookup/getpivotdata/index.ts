@@ -55,6 +55,11 @@ export interface IPivotFormulaReport {
     dataFields: readonly { sourceName: string; displayName: string }[];
     fields: readonly string[];
     columnFields: readonly string[];
+    layout?: {
+        firstDataRow?: number;
+        grandTotalLabel?: string;
+        pageFields?: readonly { names: readonly string[]; value: string }[];
+    };
 }
 
 export interface IPivotFormulaReportLookup {
@@ -166,7 +171,16 @@ export class Getpivotdata extends BaseFunction {
 
         const fieldPairs: PivotFieldPair[] = [];
         for (let index = 2; index < variants.length; index += 2) {
-            fieldPairs.push([this._textArgument(variants[index]), this._textArgument(variants[index + 1])]);
+            const field = this._textArgument(variants[index]);
+            const item = this._textArgument(variants[index + 1]);
+            const pageField = report?.layout?.pageFields?.find(({ names }) => names.some((name) => samePivotText(name, field)));
+            if (pageField) {
+                if (!pageField.value || !samePivotText(pageField.value, item)) {
+                    return ErrorValueObject.create(ErrorType.REF);
+                }
+            } else {
+                fieldPairs.push([field, item]);
+            }
         }
 
         let dataField = this._textArgument(variants[0]).trim();
@@ -216,7 +230,10 @@ function visiblePivotGet(
     const maxRow = report ? anchorRange.endRow : startRow + PIVOT_SCAN_ROW_LIMIT;
     const maxColumn = report ? anchorRange.endColumn : startColumn + PIVOT_SCAN_COLUMN_LIMIT;
 
-    for (let headerRow = startRow; headerRow <= maxRow; headerRow++) {
+    const firstDataRow = report?.layout?.firstDataRow;
+    const grandTotalLabel = report?.layout?.grandTotalLabel ?? PIVOT_GRAND_TOTAL_LABEL;
+    const lastHeaderRow = firstDataRow == null ? maxRow : Math.min(maxRow, firstDataRow - 1);
+    for (let headerRow = startRow; headerRow <= lastHeaderRow; headerRow++) {
         const dataColumn = findPivotDataColumn(reader, headerRow, startColumn, maxColumn, dataField);
         if (dataColumn == null) {
             continue;
@@ -225,11 +242,14 @@ function visiblePivotGet(
         const columnPairs = report
             ? fieldPairs.filter(([field]) => report.columnFields.some((name) => samePivotText(name, field)))
             : fieldPairs;
-        const columnMatch = columnPairs.length ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs) : null;
-        const totalColumn = report?.columnFields.length && !columnPairs.length
-            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, [['', PIVOT_GRAND_TOTAL_LABEL]])?.column
+        const columnMatch = columnPairs.length
+            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs, firstDataRow)
+            : null;
+        const needsTotalColumn = Boolean(report?.columnFields.length && !columnPairs.length);
+        const totalColumn = needsTotalColumn
+            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, [['', grandTotalLabel]], firstDataRow)?.column
             : undefined;
-        if (report && columnPairs.length && !columnMatch) {
+        if ((report && columnPairs.length && !columnMatch) || (needsTotalColumn && totalColumn == null)) {
             return null;
         }
         const resolvedColumn = columnMatch?.column ?? totalColumn ?? dataColumn;
@@ -240,7 +260,7 @@ function visiblePivotGet(
         let row: Nullable<number>;
         if (rowPairs.length === 0) {
             row = findRowlessPivotRow(reader, headerRow, startColumn, maxRow)
-                ?? findGrandTotalRow(reader, headerRow, startColumn, maxRow);
+                ?? findGrandTotalRow(reader, headerRow, startColumn, maxRow, grandTotalLabel);
         } else {
             row = findTabularPivotRow(reader, headerRow, startColumn, resolvedColumn, maxRow, rowPairs)
                 ?? findHierarchyPivotRow(reader, headerRow, startColumn, maxRow, rowPairs);
@@ -281,14 +301,15 @@ function findPivotColumnItemMatch(
     dataColumn: number,
     maxRow: number,
     maxColumn: number,
-    fieldPairs: PivotFieldPair[]
+    fieldPairs: PivotFieldPair[],
+    dataStartRow?: number
 ): Nullable<IPivotColumnItemMatch> {
-    const firstDataRow = findFirstPivotDataRow(reader, headerRow, dataColumn, maxRow, maxColumn);
+    const firstDataRow = dataStartRow ?? findFirstPivotDataRow(reader, headerRow, dataColumn, maxRow, maxColumn);
     if (firstDataRow == null) {
         return null;
     }
 
-    const lastHeaderRow = firstDataRow - 1;
+    const lastHeaderRow = Math.min(maxRow, firstDataRow - 1);
     if (dataColumn >= maxColumn || lastHeaderRow < headerRow) {
         return null;
     }
@@ -353,10 +374,11 @@ function findGrandTotalRow(
     reader: IPivotCellReader,
     headerRow: number,
     startColumn: number,
-    maxRow: number
+    maxRow: number,
+    label: string
 ): Nullable<number> {
     for (let row = headerRow + 1; row <= maxRow; row++) {
-        if (samePivotText(reader.text(row, startColumn), PIVOT_GRAND_TOTAL_LABEL)) {
+        if (samePivotText(reader.text(row, startColumn), label)) {
             return row;
         }
     }

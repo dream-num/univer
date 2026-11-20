@@ -36,6 +36,7 @@ export type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     grid?: boolean;
     overflow?: boolean;
     large?: boolean;
+    alignStart?: boolean;
     showLabel?: boolean;
     iconSize?: number;
     iconColor?: string;
@@ -224,6 +225,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         grid,
         overflow,
         large,
+        alignStart,
         showLabel,
         iconSize,
         iconColor,
@@ -266,6 +268,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
     }, [icon, options, value]);
 
     const iconToDisplay = useObservable(icon$, undefined, true);
+    const alignIconStart = alignStart && iconToDisplay && !label;
 
     function renderSelectorType(menuType: MenuItemType) {
         const selectionsCommandId = (props as IDisplayMenuItem<IMenuSelectorItem>).selectionsCommandId;
@@ -320,7 +323,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
                         'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-text-xs': grid && large,
                         'univer-box-border univer-h-full univer-text-xs': grid && !large,
-                        'univer-mx-auto !univer-w-max': grid && !large && !overflow && iconToDisplay && !label && !titleToDisplay,
+                        'univer-mx-auto !univer-w-max': grid && !large && !overflow && !alignStart && iconToDisplay && !label && !titleToDisplay,
                         '!univer-h-auto univer-min-h-7 univer-w-full univer-text-xs': overflow,
                     })}
                 >
@@ -335,6 +338,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         `, toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
                             'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-6': grid && large,
                             'univer-min-w-5 univer-flex-1 univer-px-0.5 [&>svg]:univer-size-4': grid && !large,
+                            'univer-text-xs': grid,
+                            'univer-flex-none univer-justify-start univer-px-1': alignIconStart,
                             'univer-min-h-7 univer-min-w-0 univer-flex-1 univer-gap-1.5 univer-whitespace-normal univer-px-1.5 univer-text-start': overflow,
                         })}
                         onClick={handleClick}
@@ -371,6 +376,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             `, toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
                                 'univer-absolute univer-bottom-0 univer-h-4 univer-w-full univer-justify-center univer-rounded-b univer-rounded-t-none': grid && large,
                                 'univer-h-full univer-w-4 univer-flex-none univer-justify-center': grid && !large,
+                                'univer-flex-1 univer-justify-start': alignIconStart,
                             })}
                             data-disabled={disabled}
                         >
@@ -494,7 +500,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
               !univer-h-auto univer-min-h-7 univer-w-full univer-justify-start univer-gap-1.5 univer-whitespace-normal
               univer-px-1.5 univer-py-1 univer-text-start univer-text-xs
               focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
-            `);
+            `, alignIconStart && 'univer-justify-start univer-px-1');
         const buttonStyle = grid && large ? { textAlign: 'center', whiteSpace: 'normal' } as const : undefined;
 
         if (isCustomComponent) {

@@ -15,36 +15,51 @@
  */
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import { Direction, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { BooleanNumber, Direction, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IAutoFillRule } from '../type';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../__tests__/util';
+import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
+import { SetWorksheetRowAutoHeightMutation } from '../../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
+import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { SheetsSelectionsService } from '../../selections/selection.service';
-import { AutoFillService } from '../auto-fill.service';
+import { AutoFillService, IAutoFillService } from '../auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../type';
 
 describe('AutoFillService', () => {
     let univer: Univer;
     let get: Injector['get'];
-    let service: AutoFillService;
-    let commandService: ICommandService;
+    let workbook: Workbook;
     let unitId: string;
     let subUnitId: string;
 
     beforeEach(() => {
-        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
+        const testBed = createTestBase({
+            ...TEST_WORKBOOK_DATA_DEMO,
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    defaultRowHeight: 40,
+                    rowData: {
+                        2: { h: 50, ia: BooleanNumber.TRUE },
+                        3: { ah: 80 },
+                        4: { h: 30, ia: BooleanNumber.FALSE },
+                        5: { h: 35 },
+                    },
+                    cellData: { 0: { 0: { v: 'Tall', s: { fs: 36 } }, 1: { v: 'Short', s: { fs: 10 } } } },
+                },
+            },
+        }, [
             [SheetsSelectionsService],
-            [AutoFillService],
+            [IAutoFillService, { useClass: AutoFillService }],
+            [AutoFillController],
         ]);
 
         univer = testBed.univer;
         get = testBed.get;
-        service = get(AutoFillService);
-        commandService = get(ICommandService);
-        commandService.registerCommand(SetSelectionsOperation);
-
-        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook = testBed.sheet;
+        get(ICommandService).registerCommand(SetSelectionsOperation);
         unitId = workbook.getUnitId();
         subUnitId = workbook.getActiveSheet()!.getSheetId();
     });
@@ -54,12 +69,14 @@ describe('AutoFillService', () => {
     });
 
     it('should initialize default rules by priority', () => {
+        const service = get(IAutoFillService);
         const rules = service.getRules();
         expect(rules[0].type).toBe(AUTO_FILL_DATA_TYPE.DATE);
         expect(rules[rules.length - 1].type).toBe(AUTO_FILL_DATA_TYPE.OTHER);
     });
 
     it('should register rule by priority and reject duplicate type', () => {
+        const service = get(IAutoFillService);
         const customRule: IAutoFillRule = {
             type: 'custom-rule',
             priority: 2000,
@@ -73,6 +90,7 @@ describe('AutoFillService', () => {
     });
 
     it('should add hooks with defaults and remove by disposable', () => {
+        const service = get(IAutoFillService);
         const disposable = service.addHook({
             id: 'append-hook',
         });
@@ -88,12 +106,13 @@ describe('AutoFillService', () => {
     });
 
     it('should pick ONLY hook by max priority, otherwise default + append hooks', () => {
+        const service = get(IAutoFillService);
         service.autoFillLocation = {
             unitId,
             subUnitId,
             source: { rows: [0], cols: [0] },
             target: { rows: [1], cols: [0] },
-        } as any;
+        };
         service.direction = Direction.DOWN;
         service.applyType = AUTO_FILL_APPLY_TYPE.COPY;
 
@@ -120,6 +139,7 @@ describe('AutoFillService', () => {
     });
 
     it('should toggle menu/status flags and apply type', () => {
+        const service = get(IAutoFillService);
         service.setDisableApplyType(AUTO_FILL_APPLY_TYPE.COPY, true);
         expect(service.menu.find((item) => item.value === AUTO_FILL_APPLY_TYPE.COPY)?.disable).toBe(true);
 
@@ -136,11 +156,13 @@ describe('AutoFillService', () => {
     });
 
     it('should return false when filling without location', () => {
+        const service = get(IAutoFillService);
         service.autoFillLocation = null;
         expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(false);
     });
 
     it('should select hooks using the requested type and commit it only after preparation', () => {
+        const service = get(IAutoFillService);
         service.autoFillLocation = {
             unitId,
             subUnitId,
@@ -169,6 +191,7 @@ describe('AutoFillService', () => {
     });
 
     it('should trigger auto fill and set direction for expansion', async () => {
+        const service = get(IAutoFillService);
         const source: IRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
 
         expect(await service.triggerAutoFill(unitId, subUnitId, source, source, AUTO_FILL_APPLY_TYPE.COPY)).toBe(false);
@@ -186,41 +209,31 @@ describe('AutoFillService', () => {
         expect(service.autoFillLocation?.unitId).toBe(unitId);
     });
 
-    it('should replay previous undo mutations before next fill', () => {
-        service.autoFillLocation = {
-            unitId,
-            subUnitId,
-            source: { rows: [0], cols: [0] },
-            target: { rows: [1], cols: [0] },
-        } as any;
-        service.direction = Direction.DOWN;
-        const prevRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
-        (service as any)._prevUndos = [{
-            id: SetSelectionsOperation.id,
-            params: {
-                unitId,
-                subUnitId,
-                selections: [{ range: prevRange, primary: null, style: null }],
-            },
-        }];
+    it('keeps destination row heights and grows auto-sized rows to fit the tallest filled cell', async () => {
+        const service = get(IAutoFillService);
+        get(AutoFillController);
+        const commands = get(ICommandService);
+        commands.registerCommand(SetRangeValuesMutation);
+        commands.registerCommand(SetWorksheetRowAutoHeightMutation);
+        const sheet = workbook.getActiveSheet()!;
+        // Supply the cell measurements normally provided by the renderer.
+        sheet.__registerGetCellHeight((_row, col) => col === 0 ? 64 : 17);
+        const shortCell = { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 };
+        await service.triggerAutoFill(unitId, subUnitId, shortCell, { ...shortCell, endRow: 1 }, AUTO_FILL_APPLY_TYPE.COPY);
+        expect(sheet.getCellRaw(1, 1)?.v).toBe('Short');
+        expect(sheet.getRowHeight(1)).toBe(40);
 
-        const syncSpy = vi.spyOn(commandService, 'syncExecuteCommand');
-        service.fillData(AUTO_FILL_APPLY_TYPE.COPY);
+        const source = { ...shortCell, startColumn: 0 };
+        await service.triggerAutoFill(unitId, subUnitId, source, { ...source, endRow: 5 }, AUTO_FILL_APPLY_TYPE.COPY);
+        const heights = () => [1, 2, 3, 4, 5].map((row) => sheet.getRowHeight(row));
+        expect(heights()).toEqual([64, 64, 80, 30, 35]);
+        await commands.executeCommand(UndoCommand.id);
+        expect(heights()).toEqual([40, 50, 80, 30, 35]);
+        await commands.executeCommand(RedoCommand.id);
+        expect(heights()).toEqual([64, 64, 80, 30, 35]);
 
-        expect(syncSpy).toHaveBeenCalledWith(SetSelectionsOperation.id, {
-            unitId,
-            subUnitId,
-            selections: [{ range: prevRange, primary: null, style: null }],
-        });
-        expect((service as any)._prevUndos).toEqual([]);
-    });
-
-    it('should skip auto-height mutation generation in NO_FORMAT mode', () => {
-        const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet()!;
-        service.applyType = AUTO_FILL_APPLY_TYPE.NO_FORMAT;
-
-        const result = (service as any)._getAutoHeightUndoRedos([], workbook, worksheet);
-        expect(result).toEqual({ undos: [], redos: [] });
+        service.fillData(AUTO_FILL_APPLY_TYPE.NO_FORMAT);
+        expect(sheet.getCellRaw(2, 0)?.v).toBe('Tall');
+        expect(heights()).toEqual([40, 50, 80, 30, 35]);
     });
 });

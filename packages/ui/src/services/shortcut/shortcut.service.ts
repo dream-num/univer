@@ -405,7 +405,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
     private _deriveBindingFromEvent(e: KeyboardEvent): number | null {
         const { shiftKey, metaKey, altKey, keyCode } = e;
 
-        let binding = keyCode;
+        let binding = e.key === 'ContextMenu' ? KeyCode.CONTEXT_MENU : keyCode;
 
         if (shiftKey) {
             binding |= MetaKeys.SHIFT;

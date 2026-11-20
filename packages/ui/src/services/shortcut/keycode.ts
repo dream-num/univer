@@ -78,6 +78,8 @@ export enum KeyCode {
     Y,
     Z,
 
+    CONTEXT_MENU = 93,
+
     F1 = 112,
     F2 = 113,
     F3 = 114,
@@ -163,6 +165,7 @@ export const KeyCodeToChar: { [key: number]: string } = {
     [KeyCode.F7]: 'F7',
     [KeyCode.F8]: 'F8',
     [KeyCode.F9]: 'F9',
+    [KeyCode.CONTEXT_MENU]: 'Menu',
     [KeyCode.F10]: 'F10',
     [KeyCode.F11]: 'F11',
     [KeyCode.F12]: 'F12',

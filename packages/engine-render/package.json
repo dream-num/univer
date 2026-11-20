@@ -77,6 +77,7 @@
         "@floating-ui/dom": "^1.8.0",
         "@floating-ui/utils": "^0.2.12",
         "@univerjs/core": "workspace:*",
+        "@univerjs/icons-svg": "1.49.0",
         "franc-min": "^6.2.0"
     },
     "devDependencies": {

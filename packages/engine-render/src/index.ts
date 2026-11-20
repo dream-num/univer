@@ -169,6 +169,7 @@ export { type IChangeObserverConfig } from './scene.transformer';
 export * from './scroll-timer';
 export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from './services/canvas-color.service';
 export * from './shape';
+export { CanvasIconShape } from './shape/canvas-icon-shape';
 export * from './viewport';
 
 export type { IDocumentLayoutSessionStartOptions, IDocumentLayoutStepResult } from './worker-layout';

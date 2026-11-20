@@ -165,6 +165,7 @@ class RecordingRenderContext {
     restore(): void {}
     translateWithPrecision(): void {}
     translate(): void {}
+    scale(): void {}
     beginPath(): void {}
     rect(): void {}
     clip(): void {}

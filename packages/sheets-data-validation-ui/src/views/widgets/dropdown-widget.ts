@@ -20,6 +20,7 @@ import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingCo
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
+import { drawCanvasIcon } from '@univerjs/icons-svg';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
@@ -39,8 +40,6 @@ const PADDING_V = 1;
 const MARGIN_H = 6;
 const MARGIN_V = 3;
 const RADIUS_BG = 8;
-
-const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
 
 function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, fontHeight: number, vt: VerticalAlign, ht: HorizontalAlign, margin = true) {
     let paddingTop = 0;
@@ -123,8 +122,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         }
         ctx.save();
         ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
-        ctx.fillStyle = DROP_DOWN_ICON_COLOR;
-        ctx.fill(downPath);
+        drawCanvasIcon(ctx, 'down-icon', -2, -2, 10, DROP_DOWN_ICON_COLOR);
         ctx.restore();
     }
 
@@ -271,8 +269,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             ctx.restore();
             ctx.translateWithPrecision(realWidth + PADDING_H + 4, ((fontHeight) - ICON_SIZE) / 2);
-            ctx.fillStyle = DROP_DOWN_ICON_COLOR;
-            ctx.fill(downPath);
+            drawCanvasIcon(ctx, 'down-icon', -2, -2, 10, DROP_DOWN_ICON_COLOR);
             ctx.restore();
         }
     }

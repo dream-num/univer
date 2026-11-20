@@ -1301,6 +1301,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/icons-svg':
+        specifier: 1.49.0
+        version: 1.49.0
       franc-min:
         specifier: ^6.2.0
         version: 6.2.0
@@ -1675,6 +1678,9 @@ importers:
       '@univerjs/icons':
         specifier: 1.49.0
         version: 1.49.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@univerjs/icons-svg':
+        specifier: 1.49.0
+        version: 1.49.0
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

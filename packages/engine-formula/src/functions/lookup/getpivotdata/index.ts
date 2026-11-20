@@ -18,6 +18,7 @@ import type { ICellData, IRange, Nullable, Styles } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { createIdentifier } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject } from '../../../engine/value-object/primitive-object';
@@ -48,6 +49,20 @@ const PIVOT_AGGREGATE_PREFIXES = [
 
 type PivotFieldPair = [string, string];
 
+export interface IPivotFormulaReport {
+    /** The body is last, following any page field ranges. */
+    ranges: readonly IRange[];
+    dataFields: readonly { sourceName: string; displayName: string }[];
+    fields: readonly string[];
+    columnFields: readonly string[];
+}
+
+export interface IPivotFormulaReportLookup {
+    getPivotFormulaReport(unitId: string, sheetId: string, anchor: IRange): IPivotFormulaReport | undefined;
+}
+
+export const IPivotFormulaReportLookup = createIdentifier<IPivotFormulaReportLookup>('univer.formula.pivot-report-lookup');
+
 interface IPivotColumnItemMatch {
     index: number;
     column: number;
@@ -66,7 +81,7 @@ interface IPivotCellReader {
 class PivotCellReader implements IPivotCellReader {
     private readonly _styles: Nullable<Styles>;
 
-    constructor(private readonly _anchor: BaseReferenceObject) {
+    constructor(private readonly _anchor: BaseReferenceObject, private readonly _range?: IRange) {
         this._styles = _anchor.getCurrentStylesData();
     }
 
@@ -99,12 +114,20 @@ class PivotCellReader implements IPivotCellReader {
     }
 
     private _readCell(row: number, column: number): Nullable<ICellData> {
+        if (!this._contains(row, column)) {
+            return null;
+        }
         const runtimeCell = this._anchor.getCurrentRuntimeSheetData()?.getValue(row, column);
-        return runtimeCell ?? this._storedCell(row, column);
+        return runtimeCell ?? (this._range && this._anchor.getRuntimeFeatureCellValue(row, column)) ?? this._storedCell(row, column);
     }
 
     private _storedCell(row: number, column: number): Nullable<ICellData> {
-        return this._anchor.getCurrentActiveSheetData()?.cellData.getValue(row, column) ?? null;
+        return this._contains(row, column) ? this._anchor.getCurrentActiveSheetData()?.cellData.getValue(row, column) : null;
+    }
+
+    private _contains(row: number, column: number): boolean {
+        const range = this._range;
+        return !range || (row >= range.startRow && row <= range.endRow && column >= range.startColumn && column <= range.endColumn);
     }
 }
 
@@ -114,6 +137,10 @@ export class Getpivotdata extends BaseFunction {
     override maxParams = 254;
 
     override needsReferenceObject = true;
+
+    protected get pivotReportLookup(): IPivotFormulaReportLookup | undefined {
+        return undefined;
+    }
 
     override calculate(...variants: FunctionVariantType[]): BaseValueObject {
         if (variants.length < 2 || variants.length % 2 !== 0) {
@@ -127,8 +154,14 @@ export class Getpivotdata extends BaseFunction {
 
         const reference = anchor as BaseReferenceObject;
         const range = reference.getRangePosition();
-        if (range.startRow !== range.endRow || range.startColumn !== range.endColumn) {
+        const lookup = this.pivotReportLookup;
+        if (!lookup && (range.startRow !== range.endRow || range.startColumn !== range.endColumn)) {
             return ErrorValueObject.create(ErrorType.VALUE);
+        }
+        const report = lookup?.getPivotFormulaReport(reference.getUnitId(), reference.getSheetId(), range);
+        const body = report?.ranges.at(-1);
+        if (lookup && !body) {
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const fieldPairs: PivotFieldPair[] = [];
@@ -136,12 +169,16 @@ export class Getpivotdata extends BaseFunction {
             fieldPairs.push([this._textArgument(variants[index]), this._textArgument(variants[index + 1])]);
         }
 
-        const result = visiblePivotGet(
-            new PivotCellReader(reference),
-            range,
-            this._textArgument(variants[0]).trim(),
-            fieldPairs
-        );
+        let dataField = this._textArgument(variants[0]).trim();
+        if (report) {
+            const measure = report.dataFields.find((field) => samePivotText(field.displayName, dataField)) ??
+                report.dataFields.find((field) => samePivotText(field.sourceName, dataField));
+            if (!measure || fieldPairs.some(([field]) => !report.fields.some((name) => samePivotText(name, field)))) {
+                return ErrorValueObject.create(ErrorType.REF);
+            }
+            dataField = measure.displayName || measure.sourceName;
+        }
+        const result = visiblePivotGet(new PivotCellReader(reference, body), body ?? range, dataField, fieldPairs, report);
 
         return result ?? ErrorValueObject.create(ErrorType.REF);
     }
@@ -167,7 +204,8 @@ function visiblePivotGet(
     reader: IPivotCellReader,
     anchorRange: IRange,
     dataField: string,
-    fieldPairs: PivotFieldPair[]
+    fieldPairs: PivotFieldPair[],
+    report?: IPivotFormulaReport
 ): Nullable<BaseValueObject> {
     if (fieldPairs.some((pair) => isInvalidPivotItem(pair[1]))) {
         return null;
@@ -175,8 +213,8 @@ function visiblePivotGet(
 
     const startRow = anchorRange.startRow;
     const startColumn = anchorRange.startColumn;
-    const maxRow = startRow + PIVOT_SCAN_ROW_LIMIT;
-    const maxColumn = startColumn + PIVOT_SCAN_COLUMN_LIMIT;
+    const maxRow = report ? anchorRange.endRow : startRow + PIVOT_SCAN_ROW_LIMIT;
+    const maxColumn = report ? anchorRange.endColumn : startColumn + PIVOT_SCAN_COLUMN_LIMIT;
 
     for (let headerRow = startRow; headerRow <= maxRow; headerRow++) {
         const dataColumn = findPivotDataColumn(reader, headerRow, startColumn, maxColumn, dataField);
@@ -184,11 +222,20 @@ function visiblePivotGet(
             continue;
         }
 
-        const columnMatch = findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, fieldPairs);
-        const resolvedColumn = columnMatch?.column ?? dataColumn;
+        const columnPairs = report
+            ? fieldPairs.filter(([field]) => report.columnFields.some((name) => samePivotText(name, field)))
+            : fieldPairs;
+        const columnMatch = columnPairs.length ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs) : null;
+        const totalColumn = report?.columnFields.length && !columnPairs.length
+            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, [['', PIVOT_GRAND_TOTAL_LABEL]])?.column
+            : undefined;
+        if (report && columnPairs.length && !columnMatch) {
+            return null;
+        }
+        const resolvedColumn = columnMatch?.column ?? totalColumn ?? dataColumn;
         const rowPairs = columnMatch == null
             ? fieldPairs
-            : fieldPairs.filter((_, index) => index !== columnMatch.index);
+            : fieldPairs.filter((pair) => pair !== columnPairs[columnMatch.index]);
 
         let row: Nullable<number>;
         if (rowPairs.length === 0) {
@@ -287,7 +334,7 @@ function findRowlessPivotRow(
     startColumn: number,
     maxRow: number
 ): Nullable<number> {
-    if (headerRow + 2 > maxRow) {
+    if (headerRow >= maxRow) {
         return null;
     }
     if (pivotAggregateSourceName(reader.text(headerRow, startColumn)) == null) {

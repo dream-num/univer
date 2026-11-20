@@ -44,6 +44,8 @@ import { Month } from '../date/month';
 import { NetworkdaysIntl } from '../date/networkdays-intl';
 import { Today } from '../date/today';
 import { Year } from '../date/year';
+import { FUNCTION_NAMES_INFORMATION } from '../information/function-names';
+import { Isref } from '../information/isref';
 import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
 import { If } from '../logical/if';
 import { Iferror } from '../logical/iferror';
@@ -648,6 +650,7 @@ describe('Test nested functions', () => {
         functionService.registerExecutors(
             new If(FUNCTION_NAMES_LOGICAL.IF),
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
+            testBed.univer.__getInjector().createInstance(Isref, FUNCTION_NAMES_INFORMATION.ISREF),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
             new Median(FUNCTION_NAMES_STATISTICAL.MEDIAN),
@@ -788,10 +791,10 @@ describe('Test nested functions', () => {
             expect(result).toBe(0);
         });
 
-        it('Nested functions IF,INDEX converts selected blank referenced cells to zero', () => {
-            const result = calculate('=IF(FALSE,1,INDEX(Z99:Z99,1))');
+        it('Nested functions IF,INDEX preserves the selected blank reference', () => {
+            const result = calculate('=ISREF(IF(FALSE,1,INDEX(Z99:Z99,1)))');
 
-            expect(result).toBe(0);
+            expect(result).toBe(true);
         });
 
         it('Nested functions IF,INDEX writes selected style-only blank references as zero', () => {
@@ -818,10 +821,12 @@ describe('Test nested functions', () => {
             expect(result).toBe(3);
         });
 
-        it('Nested functions IF keeps selected single-cell references scalar', () => {
-            const result = calculate('=IF(TRUE,B2,0)');
+        it('Nested functions IF preserves a single-cell reference and writes its scalar value', () => {
+            expect(calculate('=ISREF(IF(TRUE,B2,0))')).toBe(true);
 
-            expect(result).toBe(101);
+            const result = calculateByRuntime('=IF(TRUE,B2,0)');
+            expect(result?.v).toBe(101);
+            expect(result?.t).toBe(CellValueType.NUMBER);
         });
 
         it('Nested INDEX selects from a vertical array constant using MATCH', () => {

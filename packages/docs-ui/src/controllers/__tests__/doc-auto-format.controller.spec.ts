@@ -14,141 +14,88 @@
  * limitations under the License.
  */
 
-import { QuickListTypeMap } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import type { DocumentDataModel, IDocumentData, IParagraph } from '@univerjs/core';
+import { DocStyleType, LocaleService, LocaleType, PresetListType, QuickListTypeMap, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../../commands/commands/break-line.command';
 import { ChangeListNestingLevelCommand, ChangeListNestingLevelType, ListOperationCommand, QuickListCommand } from '../../commands/commands/list.command';
 import { QUICK_HEADING_MAP, QuickHeadingCommand } from '../../commands/commands/set-heading.command';
-import { DocTableTabCommand } from '../../commands/commands/table/doc-table-tab.command';
+import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 import { DocAutoFormatController } from '../doc-auto-format.controller';
 
-interface IAutoFormatRule {
-    id: string;
-    priority?: number;
-    match: (context: unknown) => boolean;
-    getMutations: (context: unknown) => Array<Record<string, unknown>>;
+function createTestBed(dataStream: string, paragraphs: IParagraph[], offset: number) {
+    const univer = new Univer();
+    onTestFinished(() => univer.dispose());
+    univer.registerPlugin(UniverRenderEnginePlugin);
+    const injector = univer.__getInjector();
+    injector.add([DocSelectionManagerService]);
+    injector.add([DocAutoFormatService]);
+    injector.add([DocAutoFormatController]);
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    injector.get(LocaleService).setDirection('ltr');
+    const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+        id: 'auto-format-doc',
+        documentStyle: {},
+        styles: { numbered: { name: 'Numbered', type: DocStyleType.paragraph, bullet: { listId: 'list', listType: PresetListType.ORDER_LIST } } },
+        body: { dataStream, paragraphs, sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'section_body' }] },
+    });
+    const selections = injector.get(DocSelectionManagerService);
+    selections.__TEST_ONLY_setCurrentSelection({ unitId: model.getUnitId(), subUnitId: model.getUnitId() });
+    selections.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true, segmentId: '', style: null }] as never);
+    injector.get(DocAutoFormatController);
+    return injector.get(DocAutoFormatService);
 }
 
 describe('doc auto format controller', () => {
-    it('registers five auto-format rules and maps list, table, heading, and enter behaviors', () => {
-        const rules: IAutoFormatRule[] = [];
-        const service = {
-            registerAutoFormat: vi.fn((rule) => {
-                rules.push(rule);
-                return { dispose: vi.fn() };
-            }),
-        };
-        const renderManagerService = {
-            getRenderUnitById: vi.fn(() => ({
-                with: vi.fn(() => ({
-                    getSkeleton: () => ({ id: 'skeleton' }),
-                })),
-            })),
-        };
-
-        const controller = new DocAutoFormatController(service as never, renderManagerService as never);
-
-        expect(controller).toBeInstanceOf(DocAutoFormatController);
-        expect(service.registerAutoFormat).toHaveBeenCalledTimes(5);
-
-        const listTabRule = rules.find((rule) => rule.id === TabCommand.id && rule.priority === 100)!;
-        const tableTabRule = rules.find((rule) => rule.id === TabCommand.id && rule.priority === 99)!;
-        const spaceRule = rules.find((rule) => rule.id === AfterSpaceCommand.id)!;
-        const exitListRule = rules.find((rule) => rule.id === EnterCommand.id && rule.priority == null)!;
-        const defaultEnterRule = rules.find((rule) => rule.id === EnterCommand.id && rule.priority === -9999)!;
-
-        expect(listTabRule.match({
-            selection: { startOffset: 4 },
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_31', paragraphStart: 4, startIndex: 4, bullet: { listId: 'list-1' } }],
-            unit: {
-                getBody: () => ({
-                    paragraphs: [
-                        { paragraphId: 'para_docs_ui_fixture_32', startIndex: 1, bullet: { listId: 'list-1' } },
-                        { paragraphId: 'para_docs_ui_fixture_33', startIndex: 4, bullet: { listId: 'list-1' } },
-                    ],
-                }),
-            },
-        })).toBe(true);
-        expect(listTabRule.getMutations({ commandParams: { shift: true } })).toEqual([{
+    it.each([false, true])('indents inherited list items using real selection and document state (shift=%s)', (shift) => {
+        const service = createTestBed('A\rB\r\n', [
+            { startIndex: 1, paragraphId: 'para_first', styleId: 'numbered' },
+            { startIndex: 3, paragraphId: 'para_second', styleId: 'numbered', bullet: { nestingLevel: 1 } },
+        ], 2);
+        expect(service.onAutoFormat(TabCommand.id, { shift })).toEqual([{
             id: ChangeListNestingLevelCommand.id,
-            params: {
-                type: ChangeListNestingLevelType.decrease,
-            },
+            params: { type: shift ? ChangeListNestingLevelType.decrease : ChangeListNestingLevelType.increase },
         }]);
+    });
 
-        expect(tableTabRule.match({
-            selection: {
-                startNodePosition: { path: ['pages', 0, 'cells', 0] },
-            },
-            unit: {
-                getUnitId: () => 'test-doc',
-            },
-        })).toBe(true);
-        expect(tableTabRule.getMutations({ commandParams: { shift: true } })).toEqual([{
-            id: DocTableTabCommand.id,
-            params: { shift: true },
-        }]);
+    it('does not indent an explicitly suppressed inherited list', () => {
+        const service = createTestBed('A\rB\r\n', [
+            { startIndex: 1, paragraphId: 'para_first', styleId: 'numbered' },
+            { startIndex: 3, paragraphId: 'para_second', styleId: 'numbered', bullet: null },
+        ], 2);
+        expect(service.onAutoFormat(TabCommand.id, null)).toEqual([]);
+    });
 
-        const quickListText = Object.keys(QuickListTypeMap)[0];
-        expect(spaceRule.match({
-            selection: { collapsed: true, startOffset: quickListText.length + 1 },
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_34', paragraphStart: 0 }],
-            unit: {
-                getBody: () => ({ dataStream: `${quickListText} \r\n` }),
-            },
-        })).toBe(true);
-        expect(spaceRule.getMutations({
-            selection: { startOffset: quickListText.length + 1 },
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_35', paragraphStart: 0, startIndex: 0 }],
-            unit: {
-                getBody: () => ({ dataStream: `${quickListText} \r\n` }),
-            },
-        })).toEqual([{
+    it.each([0, 1])('exits an empty inherited list at level %i', (nestingLevel) => {
+        const service = createTestBed('\r\n', [{ startIndex: 0, paragraphId: 'para_empty', styleId: 'numbered', bullet: { nestingLevel } }], 0);
+        expect(service.onAutoFormat(EnterCommand.id, null)).toEqual(nestingLevel > 0
+            ? [{ id: ChangeListNestingLevelCommand.id, params: { type: ChangeListNestingLevelType.decrease } }]
+            : [{ id: ListOperationCommand.id, params: { listType: PresetListType.ORDER_LIST } }]);
+    });
+
+    it('uses ordinary line breaks outside a list', () => {
+        const service = createTestBed('Text\r\n', [{ startIndex: 4, paragraphId: 'para_text' }], 4);
+        expect(service.onAutoFormat(EnterCommand.id, null)).toEqual([{ id: BreakLineCommand.id }]);
+    });
+
+    it('recognizes quick list input from the document body', () => {
+        const text = Object.keys(QuickListTypeMap)[0];
+        const service = createTestBed(`${text} \r\n`, [{ startIndex: text.length + 1, paragraphId: 'para_quick_list' }], text.length + 1);
+        expect(service.onAutoFormat(AfterSpaceCommand.id, null)).toMatchObject([{
             id: QuickListCommand.id,
-            params: {
-                listType: QuickListTypeMap[quickListText as keyof typeof QuickListTypeMap],
-                paragraph: { paragraphId: 'para_docs_ui_fixture_35', paragraphStart: 0, startIndex: 0 },
-            },
+            params: { listType: QuickListTypeMap[text as keyof typeof QuickListTypeMap] },
         }]);
+    });
 
-        const quickHeadingText = Object.keys(QUICK_HEADING_MAP)[0];
-        expect(spaceRule.getMutations({
-            selection: { startOffset: quickHeadingText.length + 1 },
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_36', paragraphStart: 0 }],
-            unit: {
-                getBody: () => ({ dataStream: `${quickHeadingText} \r\n` }),
-            },
-        })).toEqual([{
+    it('recognizes quick heading input from the document body', () => {
+        const text = Object.keys(QUICK_HEADING_MAP)[0];
+        const service = createTestBed(`${text} \r\n`, [{ startIndex: text.length + 1, paragraphId: 'para_quick_heading' }], text.length + 1);
+        expect(service.onAutoFormat(AfterSpaceCommand.id, null)).toEqual([{
             id: QuickHeadingCommand.id,
-            params: {
-                value: QUICK_HEADING_MAP[quickHeadingText as keyof typeof QUICK_HEADING_MAP],
-            },
-        }]);
-
-        expect(exitListRule.match({
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_37', bullet: { listType: 'bullet', nestingLevel: 0 }, paragraphStart: 0, paragraphEnd: 0 }],
-        })).toBe(true);
-        expect(exitListRule.getMutations({
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_38', bullet: { listType: 'bullet', nestingLevel: 1 } }],
-        })).toEqual([{
-            id: ChangeListNestingLevelCommand.id,
-            params: {
-                type: ChangeListNestingLevelType.decrease,
-            },
-        }]);
-        expect(exitListRule.getMutations({
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_39', bullet: { listType: 'bullet', nestingLevel: 0 } }],
-        })).toEqual([{
-            id: ListOperationCommand.id,
-            params: {
-                listType: 'bullet',
-            },
-        }]);
-
-        expect(defaultEnterRule.match({})).toBe(true);
-        expect(defaultEnterRule.getMutations({})).toEqual([{
-            id: BreakLineCommand.id,
+            params: { value: QUICK_HEADING_MAP[text as keyof typeof QUICK_HEADING_MAP] },
         }]);
     });
 });

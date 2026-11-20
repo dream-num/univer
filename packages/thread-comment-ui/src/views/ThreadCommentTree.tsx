@@ -99,8 +99,6 @@ export interface IThreadCommentItemProps {
     EditorComponent: typeof ThreadCommentEditor;
 }
 
-const MOCK_ID = '__mock__';
-
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const {
         item,
@@ -128,10 +126,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const userInfo = { userId: item.personId, name: user?.name || item.authorName, avatar: user?.avatar };
     const userContext = { scene: 'comment-author' as const, unitId, subUnitId, commentId: item.id, threadId: item.threadId };
     const authzService = useDependency(IThreadCommentAuthzService);
-    const isMock = item.id === MOCK_ID;
-    const canEdit = !isMock && authzService.canWrite('update', item);
-    const canDelete = !isMock && authzService.canWrite('delete', item);
-    const canReply = !isMock && authzService.canWrite('reply', item);
+    const canEdit = authzService.canWrite('update', item);
+    const canDelete = authzService.canWrite('delete', item);
+    const canReply = authzService.canWrite('reply', item);
     const [showReply, setShowReply] = useState(false);
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
@@ -152,7 +149,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
         });
     }
 
-    const dateText = isMock ? null : formatCommentDateTime(item.dT, currentRegion);
+    const dateText = formatCommentDateTime(item.dT, currentRegion);
 
     const handleDeleteItem = async () => {
         if (onDeleteComment?.(item) === false) {
@@ -208,7 +205,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                             <UserInfo user={userInfo} context={userContext} part="name" />
                         </div>
                         <div>
-                            {(isMock || resolved || !canReply)
+                            {(resolved || !canReply)
                                 ? null
                                 : (
                                     showReply && user
@@ -464,24 +461,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         : authzService.canWrite('add', { unitId, subUnitId, ref: refStr ?? '' });
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
     const fallbackEditorId = useMemo(() => generateRandomId(6), []);
-    const renderComments: IThreadComment[] = [
-        ...comments ?
-            [comments.root] :
-            // mock empty comment
-            [{
-                id: MOCK_ID,
-                text: {
-                    dataStream: '\n\r',
-                },
-                personId: currentUser?.userID ?? '',
-                ref: refStr ?? '',
-                dT: '',
-                unitId,
-                subUnitId,
-                threadId: '',
-            }],
-        ...(comments?.children ?? []) as IThreadComment[],
-    ];
+    const renderComments = comments ? [comments.root, ...comments.children] : [];
     const scrollerRef = useRef<HTMLDivElement>(null);
     const handleMouseLeave = useEvent(onMouseLeave);
     const handleResolve: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
@@ -724,6 +704,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     <EditorComponent
                         key={`${autoFocus}`}
                         ref={editorRef}
+                        isNewThread={!comments}
                         type={type}
                         unitId={unitId}
                         subUnitId={subUnitId}

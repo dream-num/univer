@@ -21,7 +21,7 @@ import { OpenTableOfContentsDialogOperation } from '../commands/table-of-content
 import { DeleteTableOfContentsMenuFactory, INSERT_TABLE_OF_CONTENTS_MENU_ID, InsertTableOfContentsMenuFactory, UpdateTableOfContentsMenuFactory } from './menu';
 
 export const DOC_TABLE_OF_CONTENTS_RIBBON_TAB = 'ribbon.table-of-contents';
-const DOC_TABLE_OF_CONTENTS_RIBBON_GROUP = 'ribbon.table-of-contents.manage';
+export const DOC_TABLE_OF_CONTENTS_RIBBON_GROUP = 'ribbon.table-of-contents.manage';
 
 export const tableOfContentsRibbonMenuSchema: MenuSchemaType = {
     [MenuManagerPosition.RIBBON]: {

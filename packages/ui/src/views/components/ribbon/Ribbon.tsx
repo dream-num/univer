@@ -295,6 +295,7 @@ export function Ribbon(props: IRibbonProps) {
                     {...embedRibbonOverrideAttributes}
                     groups={activeGroup.allGroups}
                     title={activatedTabTitle}
+                    alignStart={effectiveActivatedTab === RibbonPosition.DATA}
                 />
             )}
 

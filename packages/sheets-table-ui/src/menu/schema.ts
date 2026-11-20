@@ -23,8 +23,8 @@ import { SHEET_TABLE_CONTEXT_INSERT_MENU_ID, SHEET_TABLE_CONTEXT_REMOVE_MENU_ID,
 export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [OpenTableSelectorOperation.id]: {
-            order: 0,
-            gridLayout: { row: 1, column: 1 },
+            order: 2,
+            gridLayout: { row: 1, column: 2 },
             menuItemFactory: sheetTableToolbarInsertMenuFactory,
         },
     },

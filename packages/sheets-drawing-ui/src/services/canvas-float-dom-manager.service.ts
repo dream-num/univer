@@ -95,7 +95,6 @@ import {
     SetSheetDrawingCommand,
     SheetDrawingAnchorType,
     transformToAxisAlignPosition,
-    transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
 import {
     ISheetSelectionRenderService,
@@ -1037,9 +1036,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!skeletonParam) {
             return;
         }
-        const sheetTransform = transformToDrawingPosition(transform, skeletonParam.skeleton);
         const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeletonParam.skeleton);
-        if (!sheetTransform || !axisAlignSheetTransform) {
+        if (!axisAlignSheetTransform) {
             return;
         }
 
@@ -1048,7 +1046,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawings: [{
                 ...drawing,
                 transform,
-                sheetTransform,
                 axisAlignSheetTransform,
             }],
         });
@@ -1925,7 +1922,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingId: id,
             drawingType: layer.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
-            sheetTransform,
             transform: {
                 left: initPosition.startX,
                 top: initPosition.startY,
@@ -2020,7 +2016,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingId: id,
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
-            sheetTransform,
             axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: domPosFromRange.startX,
@@ -2282,7 +2277,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawingId: id,
             drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
-            sheetTransform,
             axisAlignSheetTransform: sheetTransform,
             transform: {
                 left: headerCellPosition.startX,

@@ -17,14 +17,16 @@
 import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
     CustomRangeType,
+    DocumentDataModel,
     HorizontalAlign,
+    Injector,
     IUniverInstanceService,
     PresetListType,
     VerticalAlign,
 } from '@univerjs/core';
 import { NodePositionConvertToCursor } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IEditorBridgeService } from '../../editor-bridge.service';
 import {
     calcPadding,
@@ -74,6 +76,16 @@ function spyCursorRange() {
 }
 
 describe('doc-skeleton-util', () => {
+    let injector: Injector;
+
+    beforeEach(() => {
+        injector = new Injector();
+    });
+
+    afterEach(() => {
+        injector.dispose();
+    });
+
     it('calcPadding handles vertical and horizontal alignment branches', () => {
         const cell = {
             mergeInfo: {
@@ -109,6 +121,7 @@ describe('doc-skeleton-util', () => {
     });
 
     it('does not add cell alignment padding to skeleton drawing positions', () => {
+        const docModel = injector.createInstance(DocumentDataModel, { body: { dataStream: '\r\n', customRanges: [], paragraphs: [] } });
         const docSkeleton = {
             getSkeletonData: () => ({
                 pages: [{
@@ -123,12 +136,7 @@ describe('doc-skeleton-util', () => {
                 }],
             }),
             getViewModel: () => ({
-                getDataModel: () => ({
-                    getBody: () => ({
-                        customRanges: [],
-                        paragraphs: [],
-                    }),
-                }),
+                getDataModel: () => docModel,
             }),
         };
 
@@ -145,6 +153,13 @@ describe('doc-skeleton-util', () => {
     it('collects hyperlink and checklist hit rects with cell padding applied', () => {
         const cursorSpy = spyCursorRange();
         const bulletGlyph = { glyphType: 'list-mark' };
+        const docModel = injector.createInstance(DocumentDataModel, {
+            body: {
+                dataStream: 'link\r\n',
+                customRanges: [{ rangeId: 'link-1', rangeType: CustomRangeType.HYPERLINK, startIndex: 0, endIndex: 2 }],
+                paragraphs: [{ startIndex: 4, paragraphId: 'check1', bullet: { listType: PresetListType.CHECK_LIST_CHECKED, listId: 'check-list', nestingLevel: 0, textStyle: {} } }],
+            },
+        });
         const docSkeleton = {
             findNodePositionByCharIndex: () => ({ segmentPage: 0, left: 0, top: 0 }),
             findPositionByGlyph: (glyph: unknown) => glyph === bulletGlyph ? { segmentPage: 0, left: 0, top: 0 } : null,
@@ -169,20 +184,7 @@ describe('doc-skeleton-util', () => {
                 }],
             }),
             getViewModel: () => ({
-                getDataModel: () => ({
-                    getBody: () => ({
-                        customRanges: [{
-                            rangeId: 'link-1',
-                            rangeType: CustomRangeType.HYPERLINK,
-                            startIndex: 0,
-                            endIndex: 2,
-                        }],
-                        paragraphs: [{
-                            startIndex: 4,
-                            bullet: { listType: PresetListType.CHECK_LIST_CHECKED },
-                        }],
-                    }),
-                }),
+                getDataModel: () => docModel,
             }),
         } as any;
 

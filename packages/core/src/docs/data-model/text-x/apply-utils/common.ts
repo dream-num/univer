@@ -104,9 +104,9 @@ export function insertTextRuns(
     textLength: number,
     currentIndex: number
 ) {
-    const { textRuns } = body;
+    const textRuns = body.textRuns ?? [];
 
-    if (textRuns == null) {
+    if (body.textRuns == null && !insertBody.textRuns?.some((run) => run.sId || Object.keys(run.ts ?? {}).length)) {
         return;
     }
 
@@ -259,7 +259,7 @@ export function normalizeInsertedParagraphIdsForDocument(
     }
 ) {
     if (!paragraphs || !insertParagraphs?.length) {
-        return;
+        return false;
     }
 
     const splitParagraph = getParagraphSplitByInsert(paragraphs, currentIndex, options.dataStream);
@@ -322,6 +322,7 @@ export function normalizeInsertedParagraphIdsForDocument(
             options.reservedParagraphIds?.add(insertParagraph.paragraphId);
         }
     }
+    return splitParagraph != null;
 }
 
 function collectParagraphIds(paragraphs: IParagraph[] | undefined): Set<string> {
@@ -740,6 +741,7 @@ export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIn
         range.rangeType !== CustomRangeType.FIELD &&
         range.rangeType !== CustomRangeType.SDT &&
         range.rangeType !== CustomRangeType.BOOKMARK &&
+        !(range.rangeType === CustomRangeType.CUSTOM && range.properties?.kind === 'docx-permission') &&
         range.startIndex < currentIndex &&
         range.endIndex >= currentIndex
     );
@@ -823,7 +825,8 @@ export function insertCustomRanges(
         if (
             (customRange.rangeType === CustomRangeType.FIELD ||
                 customRange.rangeType === CustomRangeType.SDT ||
-                customRange.rangeType === CustomRangeType.BOOKMARK) &&
+                customRange.rangeType === CustomRangeType.BOOKMARK ||
+                (customRange.rangeType === CustomRangeType.CUSTOM && customRange.properties?.kind === 'docx-permission')) &&
             startIndex < currentIndex &&
             customRange.endIndex >= currentIndex
         ) {
@@ -913,6 +916,9 @@ export function insertCustomDecorations(
     textLength: number,
     currentIndex: number
 ) {
+    if (body.customDecorations == null && !insertBody.customDecorations?.length) {
+        return;
+    }
     if (!body.customDecorations) {
         body.customDecorations = [];
     }

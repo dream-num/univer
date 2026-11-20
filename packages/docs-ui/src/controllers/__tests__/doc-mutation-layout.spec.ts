@@ -15,11 +15,27 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { CustomRangeType, JSONX, TextX } from '@univerjs/core';
+import { CustomRangeType, DocStyleType, JSONX, TextX } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { getDocumentMutationLayoutImpact } from '../render-controllers/doc-mutation-layout';
 
 describe('document mutation layout range index', () => {
+    it('invalidates paragraphs whose list counter comes from a parent style', () => {
+        const jsonX = JSONX.getInstance();
+        const action = jsonX.replaceOp(['lists', 'counter', 'nestingLevel', 0, 'glyphFormat'], '%1.', '(%1)');
+        const impact = getDocumentMutationLayoutImpact(action, {
+            styles: {
+                base: { name: 'Base', type: DocStyleType.paragraph, bullet: { listId: 'counter' } },
+                child: { name: 'Child', type: DocStyleType.paragraph, basedOn: 'base' },
+            },
+            body: { dataStream: '', paragraphs: [
+                { startIndex: 20, paragraphId: 'numbered', styleId: 'child' },
+                { startIndex: 40, paragraphId: 'disabled', styleId: 'child', bullet: null },
+            ] },
+        });
+        expect(impact).toMatchObject({ global: false, range: { start: 20, end: 21 } });
+    });
+
     it.each(['first-note', 'another-note', 'edit-note'])('starts %s layout at the body reference instead of the start of the document', (operation) => {
         const note = { type: 'footnote' as const, noteId: 'note', body: { dataStream: 'Explanation\r\n' } };
         const jsonX = JSONX.getInstance();

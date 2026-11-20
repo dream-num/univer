@@ -24,7 +24,7 @@ import {
     setDocsCustomBlockRenderViewportProvider,
 } from '@univerjs/engine-render/worker';
 import { ChannelService, fromModule } from '@univerjs/rpc';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, share } from 'rxjs';
 import type {
     IDocLayoutCancelRequest,
     IDocLayoutCreateSessionRequest,
@@ -90,7 +90,7 @@ function createDocsLayoutWorkerMessageProtocol(
             const handler = (event: MessageEvent) => subscriber.next(event.data);
             addEventListener('message', handler);
             return () => removeEventListener('message', handler);
-        }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
+        }).pipe(share()),
     };
 }
 
@@ -295,6 +295,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             ['', dataModel] as const,
             ...dataModel.headerModelMap,
             ...dataModel.footerModelMap,
+            ...dataModel.noteModelMap,
         ];
         for (const [segmentId, segmentModel] of segmentModels) {
             const rangeMap = new Map<string, ICustomRangeForInterceptor>();

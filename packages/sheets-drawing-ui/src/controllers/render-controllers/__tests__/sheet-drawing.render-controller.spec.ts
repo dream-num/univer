@@ -21,14 +21,64 @@ import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SetWorksheetRowAutoHeightMutation, SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService, SHEET_DRAWING_PLUGIN, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import { describe, expect, it, vi } from 'vitest';
+import { ISheetDrawingService, SetSheetDrawingCommand, SHEET_DRAWING_PLUGIN, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 import '@univerjs/sheets/facade';
 import '@univerjs/sheets-drawing/facade';
 
 describe('SheetsDrawingRenderController', () => {
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both])(
+        'reopens a rotated group without changing the parent or image geometry in anchor mode %s',
+        async (kind) => {
+            const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+                { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
+            );
+            onTestFinished(() => canvasContext.mockRestore());
+            const bed = createSheetsDrawingUiTestBed();
+            onTestFinished(() => bed.univer.dispose());
+            const book = FUniver.newAPI(bed.univer).getActiveWorkbook()!;
+            const sheet = book.getActiveSheet();
+            const unitId = book.getId();
+            const subUnitId = sheet.getSheetId();
+            const images = await Promise.all([2, 4].map((column) => sheet.newOverGridImage()
+                .setSource('https://example.com/image.png')
+                .setRow(4)
+                .setColumn(column)
+                .setWidth(40)
+                .setHeight(60)
+                .buildAsync()));
+            sheet.insertImages(images);
+            const groupId = sheet.groupDrawings(images.map(({ drawingId }) => drawingId))!;
+            const group = { unitId, subUnitId, drawingId: groupId };
+            const bounds = { left: 220, top: 220, width: 180, height: 60 };
+            expect(sheet.setDrawingPlacement(groupId, { kind, bounds })).toBe(true);
+            expect(bed.commandService.syncExecuteCommand(SetSheetDrawingCommand.id, {
+                unitId,
+                drawings: [{ ...group, transform: { angle: 90 } }],
+            })).toBe(true);
+            const source = bed.get(ISheetDrawingService);
+            const before = Tools.deepClone(source.getDrawingByParam(group)!);
+            expect(before.transform).toMatchObject({ ...bounds, angle: 90 });
+
+            const restored = createSheetsDrawingUiTestBed(book.save(), [[ICanvasColorService, { useClass: CanvasColorService }]]);
+            onTestFinished(() => restored.univer.dispose());
+            restored.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId);
+            const manager = restored.get(IRenderManagerService);
+            manager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsDrawingRenderController]);
+            manager.createRender(unitId).with(SheetsDrawingRenderController);
+
+            const sheetDrawings = restored.get(ISheetDrawingService);
+            const canvasDrawings = restored.get(IDrawingManagerService);
+            expect(sheetDrawings.getDrawingByParam(group)).toEqual(before);
+            expect(canvasDrawings.getDrawingByParam(group)).toEqual(before);
+            for (const image of images) {
+                expect(canvasDrawings.getDrawingByParam(image)).toEqual(source.getDrawingByParam(image));
+            }
+        }
+    );
+
     it('loads issue 5842 data, initializes healthy images, and preserves edits across save and reload', async () => {
         const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
             { setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D
@@ -165,7 +215,7 @@ describe('SheetsDrawingRenderController', () => {
             }
             await Promise.resolve();
             const hidden = Tools.deepClone(service.getDrawingByParam(image)!);
-            expect(hidden.sheetTransform.from).toEqual(before.sheetTransform.from);
+            expect(hidden.axisAlignSheetTransform.from).toEqual(before.axisAlignSheetTransform.from);
             if (scenario !== 'auto height') {
                 expect(hidden.transform?.[rows ? 'top' : 'left']).toBe(rows ? cell.startY : cell.startX);
             }

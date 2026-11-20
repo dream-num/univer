@@ -25,6 +25,8 @@ import type { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import { transformBoundingCoord } from '../../basics/position';
+import { Vector2 } from '../../basics/vector2';
 import { RenderComponent } from '../component';
 
 /** Paint-only physical clipping supplied by a host; never used to calculate document layout. */
@@ -39,6 +41,8 @@ export interface IPageMarginLayout {
 }
 
 export interface IDocumentsConfig extends IPageMarginLayout {
+    /** Page fields inside an embedded document use its host's pagination. Runtime only. */
+    pageFieldContext?: Pick<IDocumentSkeletonPage, 'pageNumber' | 'pageNumberFormat'> & { pageCount: number };
     hasEditor?: boolean;
     backgroundFillColor?: string;
     pageFillColor?: string;
@@ -119,7 +123,25 @@ export abstract class DocComponent extends RenderComponent<
         mainCtx.save();
 
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._draw(mainCtx, bounds);
+        // Viewport bounds are in scene coordinates; page culling and painting use document coordinates.
+        const toLocal = (rect: IBoundRectNoAngle): IBoundRectNoAngle => {
+            const { minX, maxX, minY, maxY } = transformBoundingCoord(this, {
+                tl: Vector2.create(rect.left, rect.top),
+                tr: Vector2.create(rect.right, rect.top),
+                bl: Vector2.create(rect.left, rect.bottom),
+                br: Vector2.create(rect.right, rect.bottom),
+                dx: rect.right - rect.left,
+                dy: rect.bottom - rect.top,
+            });
+            return { left: minX, right: maxX, top: minY, bottom: maxY };
+        };
+        this._draw(mainCtx, bounds && {
+            ...bounds,
+            viewBound: bounds.viewBound && toLocal(bounds.viewBound),
+            cacheBound: bounds.cacheBound && toLocal(bounds.cacheBound),
+            diffBounds: bounds.diffBounds?.map(toLocal),
+            diffCacheBounds: bounds.diffCacheBounds?.map(toLocal),
+        });
         mainCtx.restore();
     }
 

@@ -49,6 +49,7 @@ export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export type { IWorkbenchOptions, RibbonType } from './controllers/ui/ui.controller';
+export { RedoMenuItemFactory, UndoMenuItemFactory } from './menu/history.menu';
 export { menuSchema as UIMenuSchema } from './menu/schema';
 export { UniverMobileUIPlugin } from './mobile-plugin';
 export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './plugin';

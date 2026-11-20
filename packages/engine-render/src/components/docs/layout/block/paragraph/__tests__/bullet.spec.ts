@@ -46,8 +46,32 @@ function createBullet(overrides: Partial<IBullet> = {}): IBullet {
     };
 }
 
+it('uses the document font classification for list-marker glyphs', () => {
+    const lists = createLists([createNestingLevel({ textStyle: { ff: 'Authored Roman' } })]);
+    const result = dealWithBullet(createBullet(), lists, undefined, undefined, false, undefined, {
+        fontFamilyClasses: { 'Authored Roman': 'roman' },
+    });
+    expect(result?.fontStyle?.fontFamily).toBe('"Authored Roman", serif');
+    expect(result?.ts?.ff).toBe('Authored Roman');
+});
+
 describe('bullet', () => {
     describe('dealWithBullet', () => {
+        it('reads a single placeholder digit and preserves following digits and literal percent signs', () => {
+            const lists = createLists([
+                createNestingLevel({ glyphType: ListGlyphType.DECIMAL, startNumber: 0, glyphFormat: '%1%' }),
+                createNestingLevel({ glyphType: ListGlyphType.DECIMAL, startNumber: 0, glyphFormat: '%135.%2' }),
+            ]);
+            const first = dealWithBullet(createBullet(), lists)!;
+            expect(first.symbol).toBe('1%');
+            expect(dealWithBullet(createBullet({ nestingLevel: 1 }), lists, [first])?.symbol).toBe('135.1');
+        });
+
+        it('keeps an explicitly unnumbered level empty even when its format contains a counter', () => {
+            const lists = createLists([createNestingLevel({ glyphType: ListGlyphType.NONE, glyphFormat: '.%1' })]);
+            expect(dealWithBullet(createBullet(), lists)?.symbol).toBe('');
+        });
+
         it('returns undefined when bullet is missing', () => {
             expect(dealWithBullet(undefined, {} as unknown as ILists)).toBeUndefined();
         });

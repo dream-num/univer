@@ -121,6 +121,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                       [&>div>span>span]:univer-h-full
                                     "
                                 >
+                                    {/* Fading individual controls can shift their icons at fractional positions in Chrome. */}
                                     {placements.map((placement) => placement.item.item && (
                                         <div
                                             key={placement.item.key}
@@ -130,6 +131,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                               [&>span>span]:univer-w-full
                                               [&>span]:univer-h-full [&>span]:univer-w-full
                                               [&_[data-u-command]]:univer-w-full
+                                              [&_[data-u-command]]:univer-animate-none
                                             "
                                             style={{
                                                 gridRow: `${placement.row} / span ${placement.rowSpan}`,

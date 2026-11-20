@@ -78,7 +78,8 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.needsLocale) {
             this._setLocale();
         }
-        this._functionExecutor.bindCalculationRegion?.(() => this._currentConfigService.getCalculationRegion());
+        this._functionExecutor.bindCalculationRegion?.(() => _currentConfigService.getCalculationRegion());
+        this._functionExecutor.bindCalculationTimestamp?.(() => _currentConfigService.getCalculationTimestamp?.() ?? Date.now());
 
         if (this._functionExecutor.needsFormulaDataModel) {
             this._functionExecutor.setFormulaDataModel(this._formulaDataModel);

@@ -99,6 +99,7 @@ export interface IFormulaCurrentConfigService {
     getExternalReferences(): IFormulaExternalReferences;
 
     getCalculationGeneration(): number;
+    getCalculationTimestamp?(): number;
 
     isForceCalculate(): boolean;
 
@@ -183,6 +184,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _calculationRowData: IUnitRowData = Object.create(null);
 
     private _calculationGeneration = 0;
+    private _calculationTimestamp: number | undefined;
 
     private _forceCalculate: boolean = false;
 
@@ -304,6 +306,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._calculationGeneration;
     }
 
+    getCalculationTimestamp(): number {
+        return this._calculationTimestamp ??= Date.now();
+    }
+
     isForceCalculate() {
         return this._forceCalculate;
     }
@@ -422,6 +428,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _loadFormulaDataset(config: IFormulaDatasetConfig | Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot?: IFormulaDataSnapshot): void {
         this._calculationGeneration++;
+        this._calculationTimestamp = undefined;
         this._calculationRegion = config.region ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
         this._calculationRowData = Object.create(null);
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {

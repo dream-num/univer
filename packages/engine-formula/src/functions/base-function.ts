@@ -109,6 +109,7 @@ export class BaseFunction {
     needsAstChildren: boolean = false;
 
     bindCalculationRegion?(getRegion: () => LocaleType): void;
+    bindCalculationTimestamp?(getTimestamp: () => number): void;
 
     /**
      * Arguments that preserve a selected lazy IF branch as a reference array.

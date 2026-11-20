@@ -140,7 +140,7 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
                         <>
                             <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />
                             <span
-                                className="univer-flex univer-items-center univer-gap-0.5"
+                                className="univer-flex univer-items-center univer-gap-1"
                             >
                                 {label}
                                 <MoreDownIcon

@@ -88,7 +88,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "1.48.1",
+        "@univerjs/icons-svg": "1.49.0",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

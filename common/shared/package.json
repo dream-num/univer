@@ -50,8 +50,8 @@
         "vitest": "^5.1.1"
     },
     "devDependencies": {
-        "@univerjs/icons": "1.48.0",
-        "@univerjs/icons-svg": "1.48.1",
+        "@univerjs/icons": "1.49.0",
+        "@univerjs/icons-svg": "1.49.0",
         "tsrs": "7.1.0-beta.tsrs2",
         "typescript": "^6.0.3",
         "vue-tsc": "^3.3.14"

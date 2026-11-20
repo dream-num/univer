@@ -28,6 +28,7 @@ import type {
     IMoveRangeCommandParams,
     IMoveRowsCommandParams,
     IRemoveRowColCommandParams,
+    IReorderRangeCommandParams,
     ISetColHiddenMutationParams,
     ISetColVisibleMutationParams,
     ISetRowHiddenMutationParams,
@@ -59,6 +60,7 @@ import {
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
+    ReorderRangeCommand,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -122,6 +124,7 @@ const UPDATE_COMMANDS = [
     MoveColsCommand.id,
     MoveRowsCommand.id,
     MoveRangeCommand.id,
+    ReorderRangeCommand.id,
 ];
 
 const REFRESH_MUTATIONS = [
@@ -168,6 +171,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
                     if (id === InsertRowCommand.id) {
                         return this._moveRowInterceptor(params as IInsertRowCommandParams, 'insert');
+                    } else if (id === ReorderRangeCommand.id) {
+                        return this._reorderRangeInterceptor(params as IReorderRangeCommandParams);
                     } else if ([MoveColsCommand.id, MoveRowsCommand.id, MoveRangeCommand.id].includes(id)) {
                         let target;
                         if (id === MoveRangeCommand.id) {
@@ -543,6 +548,58 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             };
 
             return params;
+        });
+
+        return this._finalizePlan(unitId, subUnitId, updateDrawings);
+    }
+
+    private _reorderRangeInterceptor(params: IReorderRangeCommandParams) {
+        const { unitId, subUnitId, range, order } = params;
+        const sheetSkeletonParam = this._getCalculatedSkeletonParam(unitId, subUnitId);
+        if (!sheetSkeletonParam) {
+            return { redos: [], undos: [] };
+        }
+
+        const destinationRowBySourceRow = new Map<number, number>();
+        Object.entries(order).forEach(([destinationRow, sourceRow]) => {
+            destinationRowBySourceRow.set(sourceRow, Number(destinationRow));
+        });
+
+        const drawings = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
+        const updateDrawings: Partial<ISheetDrawing>[] = [];
+        Object.values(drawings).forEach((drawing) => {
+            const { anchorType = SheetDrawingAnchorType.Position, sheetTransform, transform } = drawing;
+            if (anchorType === SheetDrawingAnchorType.None || !sheetTransform || !transform) {
+                return;
+            }
+
+            const { from } = sheetTransform;
+            if (
+                from.row < range.startRow || from.row > range.endRow ||
+                from.column < range.startColumn || from.column > range.endColumn
+            ) {
+                return;
+            }
+
+            const destinationRow = destinationRowBySourceRow.get(from.row);
+            if (destinationRow == null || destinationRow === from.row) {
+                return;
+            }
+
+            const result = this._resolveShiftedPositionDrawing({
+                ...sheetTransform,
+                from: { ...from, row: destinationRow },
+            }, transform, sheetSkeletonParam);
+            if (!result) {
+                return;
+            }
+
+            updateDrawings.push({
+                ...drawing,
+                transform: result.newTransform,
+                sheetTransform: result.newSheetTransform,
+                axisAlignSheetTransform: result.axisAlignSheetTransform ?? undefined,
+            });
         });
 
         return this._finalizePlan(unitId, subUnitId, updateDrawings);

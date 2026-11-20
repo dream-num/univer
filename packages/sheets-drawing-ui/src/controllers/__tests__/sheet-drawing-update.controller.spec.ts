@@ -225,6 +225,34 @@ it('commits actual None feature updates through both stores, full save/reopen an
     expect(reopened.skeletons.ensureSkeleton('test', 'chart')).toBeUndefined();
 });
 
+it('persists aspect ratio lock updates through save/reopen and undo/redo', async () => {
+    const bed = createChartDrawingTestBed(undefined, createAbsoluteChart());
+    const search = { unitId: 'test', subUnitId: 'chart', drawingId: 'child' };
+    const before = bed.drawings.getDrawingByParam(search)!;
+
+    bed.drawingManager.featurePluginUpdateNotification([{
+        ...search,
+        drawingType: DrawingTypeEnum.DRAWING_CHART,
+        locks: {
+            ...before.locks,
+            noChangeAspect: false,
+        },
+    }]);
+    await Promise.resolve();
+
+    const changed = bed.drawings.getDrawingByParam(search)!;
+    expect(changed.locks?.noChangeAspect).toBe(false);
+    expect(bed.drawingManager.getDrawingByParam(search)?.locks?.noChangeAspect).toBe(false);
+    expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)?.locks).toEqual(before.locks);
+    expect(await bed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+    expect(bed.drawings.getDrawingByParam(search)?.locks?.noChangeAspect).toBe(false);
+
+    const reopened = createChartDrawingTestBed(bed.save());
+    expect(reopened.drawings.getDrawingByParam(search)?.locks?.noChangeAspect).toBe(false);
+    expect(reopened.drawingManager.getDrawingByParam(search)?.locks?.noChangeAspect).toBe(false);
+});
+
 describe('target-bound image insertion', () => {
     function imageBed() {
         const bed = createChartDrawingTestBed();

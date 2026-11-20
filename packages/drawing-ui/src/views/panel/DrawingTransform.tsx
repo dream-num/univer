@@ -16,14 +16,16 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import type { LocaleKey } from '../../locale/types';
-import { debounce, LocaleService } from '@univerjs/core';
+import type { FocusEvent } from 'react';
+import { debounce, FOCUSING_PANEL_EDITOR, IContextService, LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
+import { getDrawingKeepRatio } from '../../utils/drawing-keep-ratio';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { resolveDrawingUIRotateEnabled } from '../../utils/rotate-enabled';
 import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotationDisabled } from './drawing-transform-rotation';
@@ -50,6 +52,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
 function DrawingTransformContent(props: IDrawingTransformProps) {
     const localeService = useDependency(LocaleService);
+    const contextService = useDependency(IContextService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
 
@@ -79,7 +82,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     const [xPosition, setXPosition] = useState(originX);
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
-    const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
+    const [lockRatio, setLockRatio] = useState(() => getDrawingKeepRatio(drawingParam));
     const rotateEnabled = resolveDrawingUIRotateEnabled(drawingParam, {
         getChildren: (drawing) => drawingManagerService.getDrawingsByGroup(drawing),
     });
@@ -201,6 +204,9 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
                     return;
                 }
 
+                const nextLockRatio = getDrawingKeepRatio(drawingParam);
+                setLockRatio(nextLockRatio);
+
                 const transform = drawingParam.transform;
 
                 if (transform == null) {
@@ -241,6 +247,29 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             subscriptions.forEach((sub) => sub.unsubscribe());
         };
     }, []);
+
+    useEffect(() => {
+        const subscription = drawingManagerService.update$.subscribe((drawings) => {
+            const updated = drawings.some((drawing) =>
+                drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId
+            );
+            if (!updated) {
+                return;
+            }
+
+            const drawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
+            if (drawing) {
+                const nextLockRatio = getDrawingKeepRatio(drawing);
+                setLockRatio(nextLockRatio);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [drawingId, drawingManagerService, subUnitId, transformer, unitId]);
+
+    useEffect(() => () => {
+        contextService.setContextValue(FOCUSING_PANEL_EDITOR, false);
+    }, [contextService]);
 
     const handleWidthChange = debounce((val: number | null) => {
         if (val == null) {
@@ -347,7 +376,28 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             return;
         }
         setLockRatio(val);
-        transformer.keepRatio = val;
+        const currentDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) ?? drawingParam;
+        drawingManagerService.featurePluginUpdateNotification([{
+            unitId,
+            subUnitId,
+            drawingId,
+            drawingType,
+            locks: {
+                ...currentDrawing.locks,
+                noChangeAspect: val,
+            },
+        }]);
+    };
+
+    const handlePanelFocus = () => {
+        contextService.setContextValue(FOCUSING_PANEL_EDITOR, true);
+    };
+
+    const handlePanelBlur = (event: FocusEvent<HTMLDivElement>) => {
+        const nextTarget = event.relatedTarget;
+        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+            contextService.setContextValue(FOCUSING_PANEL_EDITOR, false);
+        }
     };
 
     return (
@@ -355,6 +405,8 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             className={clsx('univer-grid univer-gap-2 univer-py-2 univer-text-gray-400', {
                 'univer-hidden': !transformShow,
             })}
+            onFocusCapture={handlePanelFocus}
+            onBlurCapture={handlePanelBlur}
         >
             <header
                 className={`

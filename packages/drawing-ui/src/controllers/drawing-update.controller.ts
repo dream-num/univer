@@ -24,7 +24,6 @@ import type {
 } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
-import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
     BooleanNumber,
     checkIfMove,
@@ -45,9 +44,11 @@ import {
     IRenderManagerService,
     RENDER_CLASS_TYPE,
 } from '@univerjs/engine-render';
+import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ensureDrawingRenderLayer } from '../services/drawing-render.service';
+import { syncDrawingKeepRatio } from '../utils/drawing-keep-ratio';
 import { getUpdateParams } from '../utils/get-update-params';
 import { disposeDrawingRenderObject, getCurrentUnitInfo, insertGroupObject, syncGroupRotateEnabled } from './utils';
 
@@ -769,6 +770,7 @@ export class DrawingUpdateController extends Disposable {
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     (drawingShape as Image).setClipBounds?.((transform as IDrawingTransformStateWithClipBounds).clipBounds);
+                    syncDrawingKeepRatio(drawingShape, drawingParam);
                     syncDrawingHiddenState(drawingShape, drawingParam);
                     syncDrawingSelectableState(drawingShape, drawingParam, scene, this._drawingManagerService);
                     ensureDrawingRenderLayer(scene, drawingShape, drawingParam);
@@ -829,6 +831,7 @@ export class DrawingUpdateController extends Disposable {
 
                         drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                         (drawingShape as Image).setClipBounds?.((instanceTransform as IDrawingTransformStateWithClipBounds).clipBounds);
+                        syncDrawingKeepRatio(drawingShape, drawingParam);
                         syncDrawingHiddenState(drawingShape, drawingParamWithRefreshMetadata);
                         syncDrawingSelectableState(drawingShape, drawingParamWithRefreshMetadata, scene, this._drawingManagerService);
                         ensureDrawingRenderLayer(scene, drawingShape, drawingParamWithRefreshMetadata);

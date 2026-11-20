@@ -53,8 +53,13 @@ const baseQuery: IFindQuery = {
     findBy: FindBy.VALUE,
 };
 
-function createWorksheet(sheetId: string, cells: Record<string, ICellData>, options?: { hidden?: boolean; filteredRows?: number[] }) {
+function createWorksheet(
+    sheetId: string,
+    cells: Record<string, ICellData>,
+    options?: { hidden?: boolean; filteredRows?: number[]; displayedCells?: Record<string, ICellData> }
+) {
     const getCellData = (row: number, col: number) => cells[`${row},${col}`];
+    const getDisplayedCellData = (row: number, col: number) => options?.displayedCells?.[`${row},${col}`] ?? getCellData(row, col);
 
     return {
         getSheetId: () => sheetId,
@@ -65,11 +70,12 @@ function createWorksheet(sheetId: string, cells: Record<string, ICellData>, opti
         getRowFiltered: (row: number) => options?.filteredRows?.includes(row) ?? false,
         getRowRawVisible: () => true,
         getColVisible: () => true,
+        getCell: vi.fn((row: number, col: number) => getDisplayedCellData(row, col) ?? null),
         getCellRaw: vi.fn((row: number, col: number) => getCellData(row, col) ?? null),
         * iterateByRow(range: IRange) {
             for (let row = range.startRow; row <= range.endRow; row++) {
                 for (let col = range.startColumn; col <= range.endColumn; col++) {
-                    const value = getCellData(row, col);
+                    const value = getDisplayedCellData(row, col);
                     if (value) {
                         yield { row, col, value };
                     }
@@ -79,7 +85,7 @@ function createWorksheet(sheetId: string, cells: Record<string, ICellData>, opti
         * iterateByColumn(range: IRange) {
             for (let col = range.startColumn; col <= range.endColumn; col++) {
                 for (let row = range.startRow; row <= range.endRow; row++) {
-                    const value = getCellData(row, col);
+                    const value = getDisplayedCellData(row, col);
                     if (value) {
                         yield { row, col, value };
                     }
@@ -561,6 +567,48 @@ describe('SheetFindModel search and replace', () => {
                     },
                 },
             ],
+        });
+
+        model.dispose();
+    });
+
+    it('replaces the formatted text that was matched instead of the raw date serial', async () => {
+        const activeSheet = createWorksheet('sheet-1', {
+            '0,0': { v: 45482, t: 2, s: 'date-style' },
+        }, {
+            displayedCells: {
+                '0,0': { v: '2024-07-09' },
+            },
+        });
+        const workbook = createWorkbook(activeSheet);
+        const { model, commandService } = createModel(workbook);
+
+        model.start({ ...baseQuery, findString: '2024' });
+        model.moveToNextMatch({ noFocus: true, ignoreSelection: true });
+
+        await expect(model.replace('2025')).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenLastCalledWith(SetRangeValuesCommand.id, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            value: {
+                0: {
+                    0: { v: '2025-07-09' },
+                },
+            },
+        });
+
+        await expect(model.replaceAll('2025')).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenLastCalledWith(SheetReplaceCommand.id, {
+            unitId: 'unit-1',
+            replacements: [{
+                count: 1,
+                subUnitId: 'sheet-1',
+                value: {
+                    0: {
+                        0: { v: '2025-07-09' },
+                    },
+                },
+            }],
         });
 
         model.dispose();

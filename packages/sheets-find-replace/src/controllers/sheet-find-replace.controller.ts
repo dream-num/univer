@@ -969,8 +969,10 @@ export class SheetFindModel extends FindModel {
         const range = match.range.range;
         const { startRow, startColumn } = range;
 
-        const currentContent = worksheet.getCellRaw(startRow, startColumn)!;
-        // TODO: should not get it again, just hook to match item
+        const currentContent = worksheet.getCellRaw(startRow, startColumn);
+        if (!currentContent) {
+            return null;
+        }
 
         // replace formula
         if (match.isFormula) {
@@ -978,7 +980,7 @@ export class SheetFindModel extends FindModel {
                 return null;
             }
 
-            const newContent = currentContent!.f!.replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString);
+            const newContent = currentContent.f!.replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString);
             return { f: newContent, v: null };
         }
 
@@ -991,7 +993,13 @@ export class SheetFindModel extends FindModel {
         }
 
         // replace plain text string
-        const newContent = currentContent.v!.toString().replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString!);
+        const displayedContent = worksheet.getCell(startRow, startColumn) ?? currentContent;
+        const displayedValue = extractPureValue(displayedContent);
+        if (displayedValue == null) {
+            return null;
+        }
+
+        const newContent = displayedValue.replace(regexp.createLiteralRegExp(findString, replaceFlag), replaceString);
         return { v: newContent };
     }
 }

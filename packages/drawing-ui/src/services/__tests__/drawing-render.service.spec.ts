@@ -310,6 +310,7 @@ describe('DrawingRenderService', () => {
         expect(object).toBeInstanceOf(OleObject);
         expect(readSource).not.toHaveBeenCalled();
         expect(readCache).not.toHaveBeenCalled();
+        expect(object.transformerConfig?.keepRatio).toBe(true);
         expect(object.transformerConfig?.rotateEnabled).toBe(false);
         expect(harness.oleUI.bindObject).toHaveBeenCalledWith(object, drawing, true);
     });
@@ -363,6 +364,7 @@ describe('DrawingRenderService', () => {
 
         const result = await service.renderImages(imageParam({
             hidden: true,
+            locks: { noChangeAspect: false },
             prstGeom: 'roundRect',
             adjustValues: { adj: 0.25 },
             srcRect,
@@ -385,6 +387,7 @@ describe('DrawingRenderService', () => {
         expect(image.prstGeom).toBe('roundRect');
         expect(image.prstGeomAdjValues).toEqual({ adj: 0.25 });
         expect(image.srcRect).toEqual(srcRect);
+        expect(image.transformerConfig?.keepRatio).toBe(false);
         expect(scene.addedObjects.map(({ object, layerIndex }) => [object.oKey, layerIndex])).toEqual([[key, DRAWING_OBJECT_LAYER_INDEX]]);
         expect(scene.transformerObjects).toEqual([image]);
         expect(imageIoService.cacheWrites).toEqual([{ source: 'image-source', imageSourceType: ImageSourceType.BASE64, image: image.getNative() }]);
@@ -396,17 +399,27 @@ describe('DrawingRenderService', () => {
         const image = new Image(key, { ...BASE_TRANSFORM, url: 'existing-image' });
         scene.objects.set(key, image);
 
-        await service.renderImages(imageParam({ hidden: true, transform: SECOND_TRANSFORM }), scene as unknown as Scene);
+        await service.renderImages(imageParam({
+            hidden: true,
+            locks: { noChangeAspect: false },
+            transform: SECOND_TRANSFORM,
+        }), scene as unknown as Scene);
 
         expect(image.visible).toBe(false);
         expect(image.left).toBe(50);
         expect(image.top).toBe(60);
         expect(image.width).toBe(70);
         expect(image.height).toBe(80);
+        expect(image.transformerConfig?.keepRatio).toBe(false);
 
-        await service.renderImages(imageParam({ hidden: false, transform: BASE_TRANSFORM }), scene as unknown as Scene);
+        await service.renderImages(imageParam({
+            hidden: false,
+            locks: { noChangeAspect: true },
+            transform: BASE_TRANSFORM,
+        }), scene as unknown as Scene);
 
         expect(image.visible).toBe(true);
+        expect(image.transformerConfig?.keepRatio).toBe(true);
     });
 
     it('applies image opacity and restores the sheet default for legacy models', async () => {

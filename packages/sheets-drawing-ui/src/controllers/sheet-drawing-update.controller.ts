@@ -772,12 +772,13 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             (params as IImageData[]).forEach((param) => {
                 const { unitId, subUnitId, drawingId, transform } = param;
                 const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
-                if (!transform) {
+                const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+                if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-                if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
+                if (!transform) {
+                    drawings.push(param);
                     return;
                 }
 

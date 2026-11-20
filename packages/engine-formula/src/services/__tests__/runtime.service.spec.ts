@@ -560,8 +560,8 @@ describe('FormulaRuntimeService', () => {
 
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
-        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toBeNull();
-        expect(runtime.getUnitData().unit?.sheet?.getValue(4, 3)).toBeNull();
+        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toEqual({ v: null, t: null });
+        expect(runtime.getUnitData().unit?.sheet?.getValue(4, 3)).toEqual({ v: null, t: null });
         expect(runtime.getUnitData().unit?.sheet?.getValue(4, 4)?.v).toBe(111);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(4, 4)).toBeUndefined();
@@ -597,7 +597,7 @@ describe('FormulaRuntimeService', () => {
 
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
-        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toBeNull();
+        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toEqual({ v: null, t: null });
         expect(runtime.getUnitData().unit?.sheet?.getValue(4, 3)?.v).toBe(222);
         expect(runtime.getUnitData().unit?.sheet?.getValue(4, 4)?.v).toBe(111);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
@@ -635,7 +635,7 @@ describe('FormulaRuntimeService', () => {
 
         runtime.setRuntimeData(twoByTwo as never);
         expect(runtime.getUnitData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
-        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toBeNull();
+        expect(runtime.getUnitData().unit?.sheet?.getValue(3, 4)).toEqual({ v: null, t: null });
         expect(runtime.getUnitData().unit?.sheet?.getValue(4, 3)?.v).toBe(222);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(3, 3)?.v).toBe(ErrorType.SPILL);
         expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(4, 3)).toBeUndefined();

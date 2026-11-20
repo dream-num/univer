@@ -29,6 +29,7 @@ import {
     ColorKit,
     generateRandomId,
     getBorderStyleType,
+    setTextDecorationLines,
     Tools,
 } from '@univerjs/core';
 import { ptToPx } from '@univerjs/engine-render';
@@ -136,34 +137,6 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     };
 
     return p;
-}
-
-/**
- * `text-decoration-line` can name several lines at once, e.g. `underline line-through`.
- */
-function setTextDecorationLines(styleList: IStyleData, value: string) {
-    const lines = value.split(/\s+/);
-
-    if (lines.includes('underline')) {
-        if (!styleList.ul) {
-            styleList.ul = { s: 1 };
-        }
-        styleList.ul.s = 1;
-    }
-
-    if (lines.includes('line-through')) {
-        if (!styleList.st) {
-            styleList.st = { s: 1 };
-        }
-        styleList.st.s = 1;
-    }
-
-    if (lines.includes('overline')) {
-        if (!styleList.ol) {
-            styleList.ol = { s: 1 };
-        }
-        styleList.ol.s = 1;
-    }
 }
 
 /**

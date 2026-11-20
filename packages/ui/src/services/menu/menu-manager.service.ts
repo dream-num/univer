@@ -176,16 +176,20 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                     order: 0,
                     title: 'ui.ribbon.groups.formulas',
                 },
-                [RibbonDataGroup.RULES]: {
-                    order: 1,
-                    title: 'ui.ribbon.groups.rules',
-                },
                 [RibbonDataGroup.ORGANIZATION]: {
-                    order: 2,
+                    order: 1,
                     title: 'ui.ribbon.groups.organization',
                 },
-                [RibbonDataGroup.OTHERS]: {
+                [RibbonDataGroup.RULES]: {
+                    order: 2,
+                    title: 'ui.ribbon.groups.rules',
+                },
+                [RibbonDataGroup.ANALYSIS]: {
                     order: 3,
+                    title: 'ui.ribbon.groups.analysis',
+                },
+                [RibbonDataGroup.OTHERS]: {
+                    order: 4,
                     title: 'ui.ribbon.groups.tools',
                 },
             },

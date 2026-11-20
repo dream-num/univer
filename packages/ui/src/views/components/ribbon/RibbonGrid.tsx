@@ -28,9 +28,10 @@ import { ToolbarDropdownProvider } from './TooltipButtonWrapper';
 interface IRibbonGridProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
     groups: IMenuSchema[];
     title: string;
+    alignStart?: boolean;
 }
 
-export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridProps) {
+export function RibbonGrid({ groups, title, alignStart, className, ...props }: IRibbonGridProps) {
     const localeService = useDependency(LocaleService);
     const containerRef = useRef<HTMLDivElement>(null);
     const moreRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                                 {...placement.item.item}
                                                 grid
                                                 large={placement.rowSpan > 1}
+                                                alignStart={alignStart && placement.rowSpan === 1}
                                                 showLabel={placement.showLabel}
                                                 iconSize={placement.iconSize}
                                                 fullWidth={placement.width !== undefined}

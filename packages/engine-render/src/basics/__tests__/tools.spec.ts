@@ -256,6 +256,15 @@ describe('tools extra', () => {
         ).fontFamily).toBe('"Authored Family", "Alternate Family", Calibri');
     });
 
+    it('escapes a backslash in an authored or East Asian font family once', () => {
+        const style = getFontStyleString({
+            ff: 'Deferred\\Delta, Arial',
+            eastAsiaFontFamily: 'Eastern\\Delta',
+        });
+
+        expect(style.fontFamily).toBe('"Deferred\\\\Delta", Arial, "Eastern\\\\Delta"');
+    });
+
     it.each([
         [undefined, '"Authored Family", "Alternate Family", "East Asian Family", "East Asian Alternate"'],
         ['auto', '"Authored Family", "Alternate Family", Calibri, "East Asian Family", "East Asian Alternate"'],

@@ -274,6 +274,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const customLabelName = typeof label === 'string' ? label : label?.name ?? '';
         const hasCustomLabel = Boolean(componentManager.get(customLabelName));
         const SelectorTrigger = hasCustomLabel ? ToolbarDropdownButton : 'div';
+        const isGridField = grid && !large && !icon;
         let titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
         if (overflow) {
             titleToDisplay = hasCustomLabel || (iconToDisplay && !showLabel) ? undefined : gridLabel;
@@ -319,6 +320,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
                         'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-text-xs': grid && large,
                         'univer-box-border univer-h-full univer-text-xs': grid && !large,
+                        'univer-mx-auto !univer-w-max': grid && !large && !overflow && iconToDisplay && !label && !titleToDisplay,
                         '!univer-h-auto univer-min-h-7 univer-w-full univer-text-xs': overflow,
                     })}
                 >
@@ -332,7 +334,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                           focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                         `, toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
                             'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-6': grid && large,
-                            '[&>svg]:univer-size-4': grid && !large,
+                            'univer-min-w-5 univer-flex-1 univer-px-0.5 [&>svg]:univer-size-4': grid && !large,
                             'univer-min-h-7 univer-min-w-0 univer-flex-1 univer-gap-1.5 univer-whitespace-normal univer-px-1.5 univer-text-start': overflow,
                         })}
                         onClick={handleClick}
@@ -368,7 +370,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                               focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                             `, toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
                                 'univer-absolute univer-bottom-0 univer-h-4 univer-w-full univer-justify-center univer-rounded-b univer-rounded-t-none': grid && large,
-                                'univer-h-full': grid && !large,
+                                'univer-h-full univer-w-4 univer-flex-none univer-justify-center': grid && !large,
                             })}
                             data-disabled={disabled}
                         >
@@ -399,10 +401,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-6': grid && large,
                             'univer-box-border univer-h-full univer-text-xs': grid && !large,
-                            'univer-bg-gray-0 dark:!univer-bg-gray-800': grid && !large && !icon,
+                            'univer-bg-gray-0 univer-pr-0.5 rtl:univer-pl-0.5 rtl:univer-pr-1 dark:!univer-bg-gray-800': isGridField,
                             '[&>svg]:univer-size-4': grid && !large,
                             '!univer-h-auto univer-min-h-7 univer-w-full univer-min-w-0 univer-gap-1.5 univer-whitespace-normal univer-px-1.5 univer-text-start univer-text-xs focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 [&>span]:univer-min-w-0 [&>span]:univer-whitespace-normal': overflow,
-                        }, grid && !large && !icon && borderClassName)}
+                        }, isGridField && borderClassName)}
                     >
                         {grid && large
                             ? (
@@ -449,11 +451,12 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                         disabled={hasCustomLabel ? disabled : undefined}
                                         aria-label={hasCustomLabel ? selectorAriaLabel : undefined}
                                         aria-haspopup={hasCustomLabel ? slot ? 'dialog' : 'menu' : undefined}
-                                        className={clsx(toolbarSelectorTriggerVariants({ disabled }), {
-                                            'univer-ml-auto rtl:univer-ml-0 rtl:univer-mr-auto': grid && !large && !icon,
-                                        }, iconToDisplay
+                                        className={clsx(toolbarSelectorTriggerVariants({ disabled }), iconToDisplay
                                             ? 'univer-w-4 univer-shrink-0 univer-justify-start'
-                                            : 'univer-w-6 univer-shrink-0 univer-justify-center', hasCustomLabel && `
+                                            : 'univer-w-6 univer-shrink-0 univer-justify-center', isGridField && `
+                                              univer-ml-auto univer-justify-end
+                                              rtl:univer-ml-0 rtl:univer-mr-auto
+                                            `, hasCustomLabel && `
                                               univer-h-7 univer-cursor-pointer univer-rounded univer-border-0
                                               univer-bg-transparent univer-p-0 univer-text-inherit
                                               focus-visible:univer-outline-none focus-visible:univer-ring-2

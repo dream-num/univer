@@ -156,7 +156,12 @@ export function normalizeSheetDrawing<T extends ISheetDrawing>(drawing: T, skele
     const transform = getSheetDrawingTransformWithOrientation(drawing);
     if (skeleton && !drawing.groupId && drawing.anchorType !== SheetDrawingAnchorType.None) {
         const result = tryRefreshSheetDrawingPlacement({ ...drawing, transform }, skeleton);
-        return result.ok ? result.drawing as T : drawing;
+        if (!result.ok) return drawing;
+        return {
+            ...model,
+            transform: result.drawing.transform,
+            axisAlignSheetTransform: result.drawing.axisAlignSheetTransform,
+        } as T;
     }
 
     const markers = axisAlignSheetTransform ?? sheetTransform;

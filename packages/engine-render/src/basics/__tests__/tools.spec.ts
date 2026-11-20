@@ -256,6 +256,15 @@ describe('tools extra', () => {
         ).fontFamily).toBe('"Authored Family", "Alternate Family", Calibri');
     });
 
+    it('escapes font family names once and looks up alternates by the authored name', () => {
+        const fontFamily = 'Deferred\\Delta';
+        expect(getFontStyleString({ ff: `${fontFamily}, Arial` }).fontFamily).toBe('"Deferred\\\\Delta", Arial');
+        expect(getFontStyleString(
+            { ff: fontFamily, eastAsiaFontFamily: 'East Asian Family' },
+            { [fontFamily]: 'Alternate Family' }
+        ).fontFamily).toBe('"Deferred\\\\Delta", "Alternate Family", "East Asian Family"');
+    });
+
     it.each([
         [undefined, '"Authored Family", "Alternate Family", "East Asian Family", "East Asian Alternate"'],
         ['auto', '"Authored Family", "Alternate Family", Calibri, "East Asian Family", "East Asian Alternate"'],

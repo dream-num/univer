@@ -366,13 +366,12 @@ export function getFontStyleString(
     }
     let fontSize = originFontSize;
 
-    const authoredFamilies = normalizeFontFamily(textStyle.ff, defaultFont);
-    const family = authoredFamilies.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
-    const classification = fontFamilyClasses?.[family];
+    const authoredFamilies = splitFontFamilies(textStyle.ff?.trim() || defaultFont);
+    const classification = fontFamilyClasses?.[authoredFamilies[0]];
     const fallback = classification && DOCUMENT_FONT_FAMILY_FALLBACKS[classification];
     const familyGroups = [authoredFamilies];
     if (textStyle.eastAsiaFontFamily?.trim()) {
-        familyGroups.push(normalizeFontFamily(textStyle.eastAsiaFontFamily, defaultFont));
+        familyGroups.push(splitFontFamilies(textStyle.eastAsiaFontFamily));
     }
 
     const expanded: string[] = [];
@@ -381,8 +380,7 @@ export function getFontStyleString(
         if (index > 0 && classification === 'auto' && fallback && !expanded.includes(fallback)) {
             expanded.push(fallback);
         }
-        const families = group.split(',').map((family) => family.trim().replace(/^['"]|['"]$/g, ''));
-        for (const family of families) {
+        for (const family of group) {
             let current: string | undefined = family;
             while (typeof current === 'string' && current && !expanded.includes(current)) {
                 expanded.push(current);
@@ -444,14 +442,15 @@ function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string):
         return defaultFont;
     }
 
-    return fontFamily
-        .split(',')
-        .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
-        .filter(Boolean)
+    return splitFontFamilies(fontFamily)
         .map((family) => /^[\p{L}_-][\p{L}\p{N}_-]*$/u.test(family)
             ? family
             : `"${family.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`)
         .join(', ');
+}
+
+function splitFontFamilies(fontFamily: string): string[] {
+    return fontFamily.split(',').map((family) => family.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
 }
 
 export function hasAllLatin(text: string) {

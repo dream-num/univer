@@ -257,7 +257,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         FDtree.unitId = unitId;
         FDtree.subUnitId = subUnitId;
-        FDtree.rangeList = dependencyRanges;
+        // Tree ranges are cleared after selection; preserve the feature's registered inputs.
+        FDtree.rangeList = [...dependencyRanges];
         FDtree.getDirtyData = getDirtyData;
 
         const allDependency = getDirtyData(this._currentConfigService.getDirtyData(true) as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);

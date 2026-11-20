@@ -295,6 +295,23 @@ describe('Sheets numfmt commands', () => {
         expect(numfmtService.getValue('test', 'sheet1', 0, 6)).toEqual({ pattern: '0.000E+00' });
     });
 
+    it('keeps a dotted date format when decimals are added or subtracted', async () => {
+        await commandService.executeCommand(SetNumfmtCommand.id, { values: [{ row: 0, col: 1, pattern: 'dd.mm.yyyy' }] });
+        selectionService.addSelections([
+            {
+                range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                primary: null,
+                style: null,
+            },
+        ]);
+
+        await commandService.executeCommand(AddDecimalCommand.id);
+        expect(numfmtService.getValue('test', 'sheet1', 0, 1)).toEqual({ pattern: 'dd.mm.yyyy' });
+
+        await commandService.executeCommand(SubtractDecimalCommand.id);
+        expect(numfmtService.getValue('test', 'sheet1', 0, 1)).toEqual({ pattern: 'dd.mm.yyyy' });
+    });
+
     it('adds and subtracts decimals based on selections and existing formats', async () => {
         selectionService.addSelections([
             {

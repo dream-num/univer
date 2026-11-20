@@ -38,6 +38,16 @@ describe('decimal formats', () => {
         expect(setPatternDecimal('0.0', 0)).toBe('0');
     });
 
+    it('setPatternDecimal leaves the separators of a date pattern alone', () => {
+        expect(setPatternDecimal('dd.mm.yyyy', 1)).toBe('dd.mm.yyyy');
+        expect(setPatternDecimal('dd.mm.yyyy', 0)).toBe('dd.mm.yyyy');
+        expect(setPatternDecimal('yyyy. mm. dd.', 1)).toBe('yyyy. mm. dd.');
+        expect(setPatternDecimal('[$-409]d-mmm-yy', 1)).toBe('[$-409]d-mmm-yy');
+        // fractional seconds are still decimals
+        expect(setPatternDecimal('mm:ss.0', 2)).toBe('mm:ss.00');
+        expect(setPatternDecimal('mm:ss.0', 0)).toBe('mm:ss');
+    });
+
     it('isPatternHasDecimal', () => {
         expect(isPatternHasDecimal('0.00')).toBe(true);
         expect(isPatternHasDecimal('#,##0')).toBe(true);

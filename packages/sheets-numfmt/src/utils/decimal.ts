@@ -32,7 +32,15 @@ export const getDecimalString = (length: number) =>
     new Array(Math.min(Math.max(0, Number(length)), 30)).fill(0).join('');
 
 export const setPatternDecimal = (patterns: string, decimalLength: number) => {
+    // A dot in a date or time pattern separates its parts (`dd.mm.yyyy`); only one followed by zeros (`mm:ss.0`) is a decimal point.
+    const isDate = numfmt.getFormatInfo(patterns).isDate;
     const tokens = patterns.split(';').map((pattern) => {
+        if (isDate) {
+            return pattern.replace(
+                /\.0+/g,
+                `${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
+            );
+        }
         if (/\.0?/.test(pattern)) {
             return pattern.replace(
                 /\.0*/g,

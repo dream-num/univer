@@ -804,6 +804,58 @@ describe('sheet drawing transforms without UI plugins', () => {
         }
     });
 
+    it.each([
+        {
+            operation: 'row resize',
+            commandId: SetRowHeightCommand.id,
+            params: { ranges: [{ startRow: 8, endRow: 8, startColumn: 0, endColumn: 19 }], value: 60 },
+        },
+        {
+            operation: 'delete cells',
+            commandId: DeleteRangeMoveUpCommand.id,
+            params: { range: { startRow: 8, endRow: 8, startColumn: 0, endColumn: 19 } },
+        },
+    ])('keeps the Excel start marker of an imported rotated one-cell image across $operation and history', async ({ commandId, params }) => {
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const anchor = skeleton.getNoMergeCellWithCoordByIndex(7, 2);
+        const bounds = { left: 200, top: anchor.startY + 61, width: 160, height: 40, angle: 90 };
+        const drawing = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'rotated-one-cell',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType: ImageSourceType.URL,
+            source: 'https://example.com/one-cell.png',
+            anchorType: SheetDrawingAnchorType.Position,
+            sheetTransform: transformToAxisAlignPosition(bounds, skeleton),
+            transform: { left: 0, top: 0, width: 0, height: 0 },
+        } as ISheetDrawing;
+        const { commandService } = testBed;
+        expect(await commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);
+        const service = testBed.get(ISheetDrawingService);
+        const manager = testBed.get(IDrawingManagerService);
+        const before = Tools.deepClone(service.getDrawingByParam(drawing)!);
+        expect(before.axisAlignSheetTransform.from.row).toBe(7);
+        expect(before.sheetTransform.from.row).toBeGreaterThan(8);
+        expect(before.transform).toMatchObject(bounds);
+
+        expect(await commandService.executeCommand(commandId, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            ...params,
+        })).toBe(true);
+        const after = Tools.deepClone(service.getDrawingByParam(drawing)!);
+        expect(after.transform).toMatchObject(bounds);
+        expect(after.axisAlignSheetTransform.from).toEqual(before.axisAlignSheetTransform.from);
+        expect(after.sheetTransform.from).toEqual(transformToDrawingPosition(bounds, skeleton).from);
+        expect(manager.getDrawingByParam(drawing)).toEqual(after);
+
+        expect(await commandService.executeCommand(UndoCommandId)).toBe(true);
+        expect(service.getDrawingByParam(drawing)).toEqual(before);
+        expect(await commandService.executeCommand(RedoCommandId)).toBe(true);
+        expect(service.getDrawingByParam(drawing)).toEqual(after);
+    });
+
     it('resizes both-anchored drawings when row height changes', async () => {
         const service = await insertDrawing(SheetDrawingAnchorType.Both);
         const before = structuredClone(getDrawing(service));

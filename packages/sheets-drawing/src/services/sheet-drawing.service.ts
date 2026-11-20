@@ -45,8 +45,8 @@ export interface ISheetDrawingBase {
     /** Unrotated cell rectangle. Pixel transform is persisted, but reprojected on each replica's layout. */
     sheetTransform: ISheetDrawingPosition;
     /**
-     * Excel's major-axis cell rectangle. Authoritative for Both anchors during
-     * layout refresh; Position uses sheetTransform.from and transform.width/height,
+     * Excel's major-axis cell rectangle. Both uses both markers and Position
+     * uses the start marker with transform.width/height,
      * while None uses transform directly. Group children retain relative transforms.
      */
     axisAlignSheetTransform: ISheetDrawingPosition;

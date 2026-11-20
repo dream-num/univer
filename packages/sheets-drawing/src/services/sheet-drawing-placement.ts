@@ -26,7 +26,7 @@ import type {
     ISheetFloatDom,
     ISheetImage,
 } from './sheet-drawing.service';
-import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
+import { isDrawingAxisSwapped, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
     SheetDrawingAnchorType,
 } from './sheet-drawing.service';
@@ -112,6 +112,19 @@ interface ISheetDrawingPlacementFailure {
 
 type SheetDrawingPlacementRefreshResult = { ok: true; drawing: ISheetDrawing } | ISheetDrawingPlacementFailure;
 
+export function getSheetDrawingPositionAnchorField(drawing: ISheetDrawing): 'axisAlignSheetTransform' | 'sheetTransform' {
+    const axis = drawing.axisAlignSheetTransform;
+    const from = axis?.from;
+    if (!from || validateCellPosition(from)) return 'sheetTransform';
+    // Old snapshots could retain a corrupt axis cache with an invalid
+    // endpoint and a negative offset in the sheet interior (#5842).
+    if (axis.to && validateCellPosition(axis.to)
+        && ((from.row > 0 && from.rowOffset < 0) || (from.column > 0 && from.columnOffset < 0))) {
+        return 'sheetTransform';
+    }
+    return 'axisAlignSheetTransform';
+}
+
 export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
     const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
     if (anchorType === SheetDrawingAnchorType.None) {
@@ -134,7 +147,7 @@ export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingP
 
     return {
         kind: SheetDrawingAnchorType.Position,
-        from: { ...drawing.sheetTransform.from },
+        from: { ...(drawing.sheetTransform?.from ?? drawing.axisAlignSheetTransform.from) },
         width: drawing.transform?.width ?? 0,
         height: drawing.transform?.height ?? 0,
     };
@@ -221,12 +234,15 @@ export function validateSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDra
     if (anchorType !== SheetDrawingAnchorType.Position && anchorType !== SheetDrawingAnchorType.Both) {
         return { ok: false, reason: PLACEMENT_ERROR.KIND_INVALID };
     }
-    const markerFailure = validateCellPosition(drawing.sheetTransform?.from)
-        ?? (anchorType === SheetDrawingAnchorType.Both ? validateCellPosition(drawing.sheetTransform?.to) : undefined);
+    if (anchorType === SheetDrawingAnchorType.Position) {
+        return validateCellPosition(drawing[getSheetDrawingPositionAnchorField(drawing)]?.from)
+            ?? validateExtent(drawing.transform?.width ?? 0, drawing.transform?.height ?? 0, requiresDrawingArea(drawing));
+    }
+    const markerFailure = validateCellPosition(drawing.sheetTransform?.from) ?? validateCellPosition(drawing.sheetTransform?.to);
     if (markerFailure) {
         return markerFailure;
     }
-    if (anchorType === SheetDrawingAnchorType.Both && drawing.axisAlignSheetTransform) {
+    if (drawing.axisAlignSheetTransform) {
         const axisFailure = validateCellPosition(drawing.axisAlignSheetTransform.from)
             ?? validateCellPosition(drawing.axisAlignSheetTransform.to);
         if (axisFailure) {
@@ -322,24 +338,37 @@ function resolveSheetDrawingPlacement(
     }
 
     if (placement.kind === SheetDrawingAnchorType.Position) {
+        const axisFrom = refresh && getSheetDrawingPositionAnchorField(drawing) === 'axisAlignSheetTransform'
+            ? drawing.axisAlignSheetTransform.from
+            : undefined;
+        const { width, height } = placement;
+        const origin = projectCellMarker(axisFrom ?? placement.from, skeleton);
+        // The Excel marker is the start of the major-axis rectangle. Recover
+        // the unrotated origin without re-anchoring when the sheet layout changes.
+        const swapped = isDrawingAxisSwapped(existingTransform.angle);
+        if (axisFrom && swapped) {
+            origin.left = precisionTo(origin.left + (height - width) / 2, 6);
+            origin.top = precisionTo(origin.top + (width - height) / 2, 6);
+        }
         const transform = withExistingTransform(existingTransform, {
-            ...projectCellMarker(placement.from, skeleton),
-            width: placement.width,
-            height: placement.height,
+            ...origin,
+            width,
+            height,
         });
-        const sheetTransform = withExistingSheetTransform(drawing.sheetTransform, {
-            from: placement.from,
-            to: transformToDrawingPosition(transform, skeleton).to,
-        });
+        const unrotated = transformToDrawingPosition(transform, skeleton);
+        const axis = transformToAxisAlignPosition(transform, skeleton);
         return {
             ...drawing,
             anchorType: SheetDrawingAnchorType.Position,
-            sheetTransform,
+            sheetTransform: withExistingSheetTransform(drawing.sheetTransform, {
+                from: axisFrom && swapped ? unrotated.from : axisFrom ?? placement.from,
+                to: unrotated.to,
+            }),
             transform,
-            axisAlignSheetTransform: withExistingSheetTransform(
-                drawing.axisAlignSheetTransform,
-                transformToAxisAlignPosition(transform, skeleton)
-            ),
+            axisAlignSheetTransform: withExistingSheetTransform(drawing.axisAlignSheetTransform, {
+                from: axisFrom ?? (swapped ? axis.from : placement.from),
+                to: axis.to,
+            }),
         };
     }
 
@@ -364,8 +393,7 @@ function resolveSheetDrawingPlacement(
     };
     let transform = withExistingTransform(existingTransform, bounds);
     if (axisAnchor) {
-        const angle = ((existingTransform.angle ?? 0) % 360 + 360) % 360;
-        if ((angle >= 45 && angle < 135) || (angle >= 225 && angle < 315)) {
+        if (isDrawingAxisSwapped(existingTransform.angle)) {
             transform = {
                 ...transform,
                 left: precisionTo(bounds.left + bounds.width / 2 - bounds.height / 2, 6),

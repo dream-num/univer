@@ -43,6 +43,8 @@ export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
         end: number;
         limit: number;
         boundaryOffset: number;
+        /** Imported changesets from clients that only sent the unrotated start marker. */
+        legacyPositionDrawingIds?: string[];
     };
     /** Reproject a rebased history mutation before notifying render consumers. */
     recalculate?: boolean;
@@ -71,6 +73,7 @@ function refreshReceivedDrawings(accessor: IAccessor, params: ISetDrawingApplyMu
     if (params.recalculate || (params.reference && dimensionsChanged)) skeleton.makeDirty(true);
     skeleton.calculate();
     const service = accessor.get(ISheetDrawingService);
+    const legacyPositionDrawings = new Set(params.reference?.legacyPositionDrawingIds);
     const drawings = [];
     const objects = params.type === DrawingApplyType.GROUP || params.type === DrawingApplyType.UNGROUP
         ? (params.objects as IDrawingGroupUpdateParam[]).flatMap(({ parent, children }) => [parent, ...children])
@@ -84,7 +87,15 @@ function refreshReceivedDrawings(accessor: IAccessor, params: ISetDrawingApplyMu
             continue;
         }
         try {
-            const result = tryRefreshSheetDrawingPlacement(drawing, skeleton);
+            let placementSource = drawing;
+            if ((drawing.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position
+                && legacyPositionDrawings.has(drawing.drawingId)) {
+                // Replaying the original insert may have already filled the
+                // axis cache. The rebased operation only moved the legacy start.
+                placementSource = { ...drawing };
+                Reflect.deleteProperty(placementSource, 'axisAlignSheetTransform');
+            }
+            const result = tryRefreshSheetDrawingPlacement(placementSource, skeleton);
             if (result.ok) {
                 drawings.push(result.drawing);
             } else {
@@ -112,6 +123,11 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
         const { op, unitId, subUnitId, type, objects } = params;
 
         if (params.reference !== undefined) {
+            const { legacyPositionDrawingIds } = params.reference;
+            if (legacyPositionDrawingIds !== undefined
+                && (!Array.isArray(legacyPositionDrawingIds) || legacyPositionDrawingIds.some((id) => typeof id !== 'string'))) {
+                throw new Error('Invalid drawing reference change.');
+            }
             transformSheetDrawingReference({ row: 0, column: 0, rowOffset: 0, columnOffset: 0 }, params.reference);
         }
         if (params.recalculate !== undefined && typeof params.recalculate !== 'boolean') {

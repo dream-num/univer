@@ -44,7 +44,6 @@ import { Disposable, ICommandService, ILogService, Inject, IUniverInstanceServic
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
-    convertPositionCellToSheetOverGrid,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     DeltaColumnWidthCommand,
@@ -90,7 +89,7 @@ import {
 } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../services/sheet-drawing-placement';
+import { getSheetDrawingPositionAnchorField, tryRefreshSheetDrawingPlacement, validateSheetDrawingPlacement } from '../services/sheet-drawing-placement';
 import { SheetDrawingTransformPlanService } from '../services/sheet-drawing-transform-plan.service';
 import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
@@ -389,26 +388,28 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             this._logService.warn('[SheetDrawingTransformAffectedController]', 'Skipping invalid structural drawing anchor', { drawingId: drawing.drawingId });
             return;
         }
-        const both = drawing.anchorType === SheetDrawingAnchorType.Both;
-        const anchor = both ? drawing.axisAlignSheetTransform ?? drawing.sheetTransform : drawing.sheetTransform;
-        const validEndpoint = both || !validateSheetDrawingPlacement({ ...drawing, anchorType: SheetDrawingAnchorType.Both, axisAlignSheetTransform: drawing.sheetTransform });
-        if (validEndpoint && anchor.to[reference.axis] < reference.start) return;
-        if (both && reference.action === 'remove' && anchor.from[reference.axis] >= reference.start && anchor.to[reference.axis] <= reference.end) {
-            return null;
+        const { axis } = reference;
+        const { sheetTransform, axisAlignSheetTransform } = drawing;
+        let candidate: ISheetDrawing;
+        if (drawing.anchorType === SheetDrawingAnchorType.Both) {
+            const anchor = axisAlignSheetTransform ?? sheetTransform;
+            if (anchor.to[axis] < reference.start) return;
+            if (reference.action === 'remove' && anchor.from[axis] >= reference.start && anchor.to[axis] <= reference.end) return null;
+            const mapPosition = (position: ISheetDrawingPosition) => ({
+                ...position,
+                from: transformSheetDrawingReference(position.from, reference),
+                to: transformSheetDrawingReference(position.to, reference),
+            });
+            candidate = { ...drawing, sheetTransform: mapPosition(sheetTransform), axisAlignSheetTransform: mapPosition(anchor) };
+        } else {
+            const field = getSheetDrawingPositionAnchorField(drawing);
+            const from = drawing[field].from;
+            // An edit after the anchor may still change its derived cell markers.
+            const lastMarker = Math.max(from[axis], sheetTransform?.to?.[axis] ?? Infinity, axisAlignSheetTransform?.to?.[axis] ?? Infinity);
+            if (lastMarker < reference.start) return;
+            candidate = { ...drawing, [field]: { ...drawing[field], from: transformSheetDrawingReference(from, reference) } };
         }
-        const sheetTransform = {
-            ...drawing.sheetTransform,
-            from: transformSheetDrawingReference(drawing.sheetTransform.from, reference),
-            to: both ? transformSheetDrawingReference(drawing.sheetTransform.to, reference) : drawing.sheetTransform.to,
-        };
-        const axisAlignSheetTransform = both
-            ? {
-                ...anchor,
-                from: transformSheetDrawingReference(anchor.from, reference),
-                to: transformSheetDrawingReference(anchor.to, reference),
-            }
-            : drawing.axisAlignSheetTransform;
-        const result = tryRefreshSheetDrawingPlacement({ ...drawing, sheetTransform, axisAlignSheetTransform }, skeleton);
+        const result = tryRefreshSheetDrawingPlacement(candidate, skeleton);
         if (result.ok) return { ...result.drawing, anchorType: drawing.anchorType };
         this._logService.warn('[SheetDrawingTransformAffectedController]', 'Skipping invalid structural drawing placement', { drawingId: drawing.drawingId, result });
     }
@@ -444,10 +445,13 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: Partial<ISheetDrawing>[] = [];
         const deleteDrawings: Partial<ISheetDrawing>[] = [];
 
-        const { sheetTransform, anchorType = SheetDrawingAnchorType.Position, transform, unitId, subUnitId, drawingId } = drawing;
+        const { anchorType = SheetDrawingAnchorType.Position, transform, unitId, subUnitId, drawingId } = drawing;
+        const sheetTransform = drawing[anchorType === SheetDrawingAnchorType.Position
+            ? getSheetDrawingPositionAnchorField(drawing)
+            : 'sheetTransform'];
         const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
 
-        if (anchorType === SheetDrawingAnchorType.None || !sheetTransform || !transform || !sheetSkeletonParam) {
+        if (anchorType === SheetDrawingAnchorType.None || !sheetTransform?.from || !sheetTransform.to || !transform || !sheetSkeletonParam) {
             return {
                 updateDrawings,
                 deleteDrawings,
@@ -470,6 +474,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             } else {
                 // move drawing left
                 const param = this._shrinkCol(startColumn, endColumn, {
+                    drawing,
                     sheetSkeletonParam,
                     sheetTransform,
                     transform,
@@ -486,6 +491,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             } else {
                 // move drawing up
                 const param = this._shrinkRow(startRow, endRow, {
+                    drawing,
                     sheetSkeletonParam,
                     sheetTransform,
                     transform,
@@ -628,7 +634,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updates: Partial<ISheetDrawing>[] = [];
         const deletes: Partial<ISheetDrawing>[] = [];
         for (const drawing of Object.values(this._sheetDrawingService.getDrawingData(unitId, subUnitId))) {
-            if (drawing.anchorType === SheetDrawingAnchorType.None || drawing.groupId || !drawing.sheetTransform || !drawing.transform) continue;
+            if (drawing.anchorType === SheetDrawingAnchorType.None || drawing.groupId || !drawing.transform) continue;
             const result = this._transformDrawingReference(drawing, reference, skeletonParam.skeleton);
             if (result === null) deletes.push({ unitId, subUnitId, drawingId: drawing.drawingId });
             else if (result) updates.push(result);
@@ -700,6 +706,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         colStartIndex: number,
         colEndIndex: number,
         options: {
+            drawing: ISheetDrawing;
             sheetSkeletonParam: ISheetSkeletonManagerParam;
             sheetTransform: ISheetDrawingPosition;
             transform: ITransformState;
@@ -732,7 +739,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 to: { ...to, column: toColumn - colCount },
             };
             if (anchorType === SheetDrawingAnchorType.Position) {
-                return this._resolveShiftedPositionDrawing(newSheetTransform, transform, sheetSkeletonParam);
+                return this._resolveShiftedPositionDrawing(newSheetTransform.from, options.drawing, skeleton);
             }
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
         } else if (anchorType === SheetDrawingAnchorType.Both && fromColumn >= colStartIndex && toColumn <= colEndIndex) {
@@ -762,10 +769,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
                 axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
             } else {
-                return this._resolveShiftedPositionDrawing({
-                    ...sheetTransform,
-                    from: { ...from, column: colStartIndex, columnOffset: 0 },
-                }, transform, sheetSkeletonParam);
+                return this._resolveShiftedPositionDrawing({ ...from, column: colStartIndex, columnOffset: 0 }, options.drawing, skeleton);
             }
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // At the sheet edge there is no surviving column after the deletion boundary.
@@ -852,6 +856,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         rowStartIndex: number,
         rowEndIndex: number,
         options: {
+            drawing: ISheetDrawing;
             sheetSkeletonParam: ISheetSkeletonManagerParam;
             sheetTransform: ISheetDrawingPosition;
             transform: ITransformState;
@@ -884,7 +889,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 to: { ...to, row: toRow - rowCount },
             };
             if (anchorType === SheetDrawingAnchorType.Position) {
-                return this._resolveShiftedPositionDrawing(newSheetTransform, transform, sheetSkeletonParam);
+                return this._resolveShiftedPositionDrawing(newSheetTransform.from, options.drawing, skeleton);
             }
             newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
         } else if (anchorType === SheetDrawingAnchorType.Both && fromRow >= rowStartIndex && toRow <= rowEndIndex) {
@@ -914,10 +919,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 newTransform = drawingPositionToTransform(newSheetTransform, sheetSkeletonParam);
                 axisAlignSheetTransform = transformToAxisAlignPosition(newTransform!, skeleton);
             } else {
-                return this._resolveShiftedPositionDrawing({
-                    ...sheetTransform,
-                    from: { ...from, row: rowStartIndex, rowOffset: 0 },
-                }, transform, sheetSkeletonParam);
+                return this._resolveShiftedPositionDrawing({ ...from, row: rowStartIndex, rowOffset: 0 }, options.drawing, skeleton);
             }
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // At the sheet edge there is no surviving row after the deletion boundary.
@@ -938,25 +940,15 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _resolveShiftedPositionDrawing(
-        sheetTransform: ISheetDrawingPosition,
-        transform: ITransformState,
-        { unitId, sheetId, skeleton }: ISheetSkeletonManagerParam
+        from: ISheetDrawingPosition['from'],
+        drawing: ISheetDrawing,
+        skeleton: SpreadsheetSkeleton
     ) {
-        const converted = convertPositionCellToSheetOverGrid(
-            unitId,
-            sheetId,
-            sheetTransform.from,
-            transform.width ?? 0,
-            transform.height ?? 0,
-            skeleton
-        );
-        const newTransform = { ...transform, ...converted.transform };
-        return this._getStructuralDrawingResult(
-            { ...sheetTransform, ...transformToDrawingPosition(newTransform, skeleton) },
-            newTransform,
-            null,
-            skeleton
-        );
+        const field = getSheetDrawingPositionAnchorField(drawing);
+        const result = tryRefreshSheetDrawingPlacement({ ...drawing, [field]: { ...drawing[field], from } }, skeleton);
+        if (!result.ok) return null;
+        const { transform: newTransform, sheetTransform: newSheetTransform, axisAlignSheetTransform } = result.drawing;
+        return { newSheetTransform, newTransform, axisAlignSheetTransform };
     }
 
     private _getStructuralDrawingResult(
@@ -988,7 +980,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         drawing: ISheetDrawing,
         skeleton: SpreadsheetSkeleton,
         commandId: string,
-        shouldRefresh?: (position: ISheetDrawingPosition) => boolean
+        shouldRefresh?: (position: Pick<ISheetDrawingPosition, 'from' | 'to'>) => boolean
     ): ISheetDrawing | undefined {
         try {
             const failure = validateSheetDrawingPlacement(drawing);
@@ -1004,10 +996,13 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 return;
             }
             const candidate = rebuilt?.ok ? rebuilt.drawing : drawing;
-            const anchor = candidate.anchorType === SheetDrawingAnchorType.Both
-                ? candidate.axisAlignSheetTransform ?? candidate.sheetTransform
-                : candidate.sheetTransform;
-            if (shouldRefresh && !shouldRefresh(anchor)) {
+            const anchor = oneCell
+                ? candidate[getSheetDrawingPositionAnchorField(candidate)]
+                : candidate.axisAlignSheetTransform ?? candidate.sheetTransform;
+            const { from } = anchor;
+            const legacy = candidate.sheetTransform;
+            if (shouldRefresh && !shouldRefresh({ from, to: anchor.to ?? from })
+                && !(oneCell && legacy !== anchor && legacy?.from && legacy.to && shouldRefresh(legacy))) {
                 return rebuilt?.ok ? rebuilt.drawing : undefined;
             }
             const result = rebuilt ?? tryRefreshSheetDrawingPlacement(candidate, skeleton);

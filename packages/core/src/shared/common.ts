@@ -17,13 +17,14 @@
 import type { CellValue, ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { IColorStyle, IStyleBase, IStyleData } from '../types/interfaces/i-style-data';
 import type { IObjectMatrixPrimitiveType } from './object-matrix';
 import type { Nullable } from './types';
 import { isCellV, isICellData, RANGE_TYPE } from '../sheets/typedef';
 import { THEME_COLORS } from '../types/const/theme-color-map';
 import {
     BaselineOffset,
+    BooleanNumber,
     BorderStyleTypes,
     HorizontalAlign,
     TextDirection,
@@ -421,6 +422,27 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         styleMap.get(k)?.();
     }
     return str;
+}
+
+/**
+ * Mark every line a `text-decoration` value names on a style object.
+ *
+ * A single `text-decoration` can name several lines at once, e.g. `underline line-through`,
+ * so every line has to be read instead of only the first one. Existing data of a line, such
+ * as its color or line style, is kept.
+ */
+export function setTextDecorationLines(style: Pick<IStyleBase, 'ul' | 'st' | 'ol'>, value: string) {
+    const lines = value.split(/\s+/);
+
+    if (lines.includes('underline')) {
+        style.ul = { ...style.ul, s: BooleanNumber.TRUE };
+    }
+    if (lines.includes('line-through')) {
+        style.st = { ...style.st, s: BooleanNumber.TRUE };
+    }
+    if (lines.includes('overline')) {
+        style.ol = { ...style.ol, s: BooleanNumber.TRUE };
+    }
 }
 
 function getBorderStyle(type: BorderStyleTypes) {

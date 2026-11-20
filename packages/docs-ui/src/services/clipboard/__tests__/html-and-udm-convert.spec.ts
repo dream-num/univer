@@ -339,6 +339,26 @@ describe('test case in html and udm convert', () => {
                 bg: { rgb: 'rgb(240,240,10)' },
             });
         });
+
+        it('should read every line of a combined text decoration', () => {
+            ['underline line-through', 'line-through underline'].forEach((textDecoration) => {
+                const span = document.createElement('span');
+                span.setAttribute('style', `text-decoration: ${textDecoration};`);
+
+                expect(extractNodeStyle(span)).toMatchObject({
+                    ul: { s: BooleanNumber.TRUE },
+                    st: { s: BooleanNumber.TRUE },
+                });
+            });
+
+            const span = document.createElement('span');
+            span.setAttribute('style', 'text-decoration-line: line-through underline;');
+
+            expect(extractNodeStyle(span)).toMatchObject({
+                ul: { s: BooleanNumber.TRUE },
+                st: { s: BooleanNumber.TRUE },
+            });
+        });
     });
 
     describe('test cases in udm-to-html', () => {

@@ -181,6 +181,9 @@ export function isFormulaId(value: any): boolean {
  * @returns
  */
 
+// The lines already written: `text-decoration-line: …`, or the `text-decoration: …` shorthand that underline uses.
+const TEXT_DECORATION_LINE_REGEX = /(text-decoration(?:-line)?:\s*[^;]+)(?=;)/;
+
 // eslint-disable-next-line max-lines-per-function
 export function handleStyleToString(style: IStyleData, isCell: boolean = false) {
     let str = '';
@@ -231,8 +234,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.ul?.s) {
                     // If there are existing lines, add new lines
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} underline`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} underline`);
                     } else {
                         str += 'text-decoration: underline; ';
                     }
@@ -249,8 +252,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'st',
             () => {
                 if (style.st?.s) {
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} line-through`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} line-through`);
                     } else {
                         str += 'text-decoration-line: line-through; ';
                     }
@@ -267,8 +270,8 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'ol',
             () => {
                 if (style.ol?.s) {
-                    if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} overline`);
+                    if (TEXT_DECORATION_LINE_REGEX.test(str)) {
+                        str = str.replace(TEXT_DECORATION_LINE_REGEX, (_, p1) => `${p1} overline`);
                     } else {
                         str += 'text-decoration-line: overline; ';
                     }

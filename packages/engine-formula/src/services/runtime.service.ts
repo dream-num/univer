@@ -15,6 +15,17 @@
  */
 
 import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import {
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    Inject,
+    isNullCell,
+    isRealNum,
+    IUniverInstanceService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -32,17 +43,6 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
 import type { FormulaCalculationCache } from './formula-cache.service';
-import {
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    Inject,
-    isNullCell,
-    isRealNum,
-    IUniverInstanceService,
-    ObjectMatrix,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
@@ -988,7 +988,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType) {
-        this._runtimeFeatureRange[featureId] = featureRange;
+        if (Object.keys(featureRange).length) {
+            this._runtimeFeatureRange[featureId] = featureRange;
+        } else {
+            delete this._runtimeFeatureRange[featureId];
+        }
     }
 
     getRuntimeFeatureCellData() {
@@ -996,7 +1000,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     }
 
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType) {
-        this._runtimeFeatureCellData[featureId] = featureData;
+        if (Object.keys(featureData).length) {
+            this._runtimeFeatureCellData[featureId] = featureData;
+        } else {
+            delete this._runtimeFeatureCellData[featureId];
+        }
     }
 
     setDependencyTreeModelData(data: IFormulaDependencyTreeJson[]) {

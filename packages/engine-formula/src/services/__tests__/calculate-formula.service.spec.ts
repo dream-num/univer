@@ -229,6 +229,63 @@ function createService() {
 }
 
 describe('CalculateFormulaService', () => {
+    it('releases one feature registration while another with the same ID still supplies cells on its sheet', async () => {
+        const client = createCommandTestBed({
+            id: 'test',
+            name: 'Feature outputs',
+            appVersion: '1.0',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['first', 'second'],
+            sheets: {
+                first: { id: 'first', name: 'First', rowCount: 10, columnCount: 10 },
+                second: { id: 'second', name: 'Second', rowCount: 10, columnCount: 10 },
+            },
+        });
+        const features = client.get(IFeatureCalculationManagerService);
+        const calculation = client.get(ICalculateFormulaService);
+        const values: unknown[][] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => {
+            const cells = data.unitData.test?.first;
+            values.push([cells?.getValue(0, 4)?.v, cells?.getValue(0, 5)?.v]);
+        });
+        try {
+            for (const [index, owner] of ['first', 'second'].entries()) {
+                const column = index + 2;
+                features.register('test', owner, 'report', {
+                    unitId: 'test',
+                    subUnitId: owner,
+                    dependencyRanges: [],
+                    getDirtyData: () => ({
+                        runtimeCellData: { test: { first: new ObjectMatrix({ 0: { [column]: { v: 11 + index } } }) } },
+                        dirtyRanges: { test: { first: [{ startRow: 0, endRow: 0, startColumn: column, endColumn: column }] } },
+                    }),
+                });
+            }
+            const dataset: IFormulaDatasetConfig = {
+                formulaData: { test: { first: { 0: { 4: { f: '=C1' }, 5: { f: '=D1' } } } } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+            };
+            await calculation.execute(dataset);
+            expect(values[values.length - 1]).toEqual([11, 12]);
+            features.remove('test', 'first', ['report']);
+            await calculation.execute({ ...dataset, forceCalculate: false });
+            expect(values[values.length - 1][0]).toBe(0);
+            await calculation.execute(dataset);
+            expect(values[values.length - 1]).toEqual([0, 12]);
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
     it('releases runtime data and rejects without a false completion when writeback throws, then calculates again', async () => {
         const { service, mocks } = createService();
         vi.spyOn(service as unknown as { _executeStep(): Promise<void> }, '_executeStep').mockResolvedValue();

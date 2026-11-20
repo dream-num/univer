@@ -28,7 +28,7 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
 import { InsertSheetDrawingCommand } from '../../commands/insert-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../set-drawing-apply.mutation';
 
-it('replays a legacy position edit on a canonical image and saves only the Excel marker', () => {
+it.each([{ fromCollab: true }, { fromChangeset: true }])('applies legacy edits at the receive boundary (%j)', (options) => {
     const bed = createSheetsDrawingTestBed();
     onTestFinished(() => bed.univer.dispose());
     const unitId = 'test';
@@ -46,25 +46,29 @@ it('replays a legacy position edit on a canonical image and saves only the Excel
         transform,
         axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton),
     };
-    expect(bed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId, drawings: [image] })).toBe(true);
+    const other = { ...image, drawingId: 'other-image' };
+    expect(bed.commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId, drawings: [image, other] })).toBe(true);
     const legacy = getLegacySheetDrawingPosition(image, skeleton);
-    const op = JSON1.replaceOp(
+    const legacyEdit = JSON1.replaceOp(
         [unitId, subUnitId, 'data', image.drawingId, 'sheetTransform', 'from', 'row'],
         legacy.from.row,
         legacy.from.row + 1
     );
+    const canonicalEdit = JSON1.insertOp([unitId, subUnitId, 'data', other.drawingId, 'hidden'], true);
     expect(bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
         unitId,
         subUnitId,
-        op,
-        objects: [image],
+        op: JSON1.type.compose(legacyEdit, canonicalEdit),
+        objects: [image, other],
         type: DrawingApplyType.UPDATE,
-    }, { fromCollab: true })).toBe(true);
+    }, options)).toBe(true);
 
-    const result = bed.get(ISheetDrawingService).getDrawingByParam(image)!;
+    const service = bed.get(ISheetDrawingService);
+    const result = service.getDrawingByParam(image)!;
     expect(result.transform).toMatchObject({ ...transform, top: transform.top + skeleton.worksheet.getRowHeight(legacy.from.row) });
     expect(result.axisAlignSheetTransform.from.row).toBe(image.axisAlignSheetTransform.from.row + 1);
     expect(result).not.toHaveProperty('sheetTransform');
+    expect(service.getDrawingByParam(other)).toMatchObject({ hidden: true, transform });
     expect(bed.get(IDrawingManagerService).getDrawingByParam(image)).toEqual(result);
     const saved = bed.get(IResourceLoaderService).saveUnit<IWorkbookData>(unitId)!;
     const resource = saved.resources!.find(({ name }) => name === SHEET_DRAWING_PLUGIN)!;

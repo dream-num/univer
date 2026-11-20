@@ -117,7 +117,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
                 || !!activeElement.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}]`));
         const focusReturnTarget = focusReturnTargetRef.current;
         if (isFocusInMenu && focusReturnTarget?.isConnected) {
-            focusReturnTarget.focus();
+            focusReturnTarget.focus({ preventScroll: true });
         }
         focusReturnTargetRef.current = null;
         contextMenuHostService.deactivateMenu(hostId);
@@ -128,6 +128,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             return;
         }
 
+        const ownerDocument = contentRef.current?.ownerDocument ?? document;
         const isTargetInSubmenu = (target: EventTarget | null) => {
             return target instanceof Element
                 && target.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}]`);
@@ -139,6 +140,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             }
 
             if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+                focusReturnTargetRef.current = null;
                 onRequestCloseRef.current();
             }
         };
@@ -164,14 +166,14 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             event.stopPropagation();
         };
 
-        document.addEventListener('pointerdown', handlePointerDown);
-        document.addEventListener('keydown', handleEscape);
-        document.addEventListener('wheel', handleWheel, { capture: true, passive: false });
+        ownerDocument.addEventListener('pointerdown', handlePointerDown);
+        ownerDocument.addEventListener('keydown', handleEscape);
+        ownerDocument.addEventListener('wheel', handleWheel, { capture: true, passive: false });
 
         return () => {
-            document.removeEventListener('pointerdown', handlePointerDown);
-            document.removeEventListener('keydown', handleEscape);
-            document.removeEventListener('wheel', handleWheel, true);
+            ownerDocument.removeEventListener('pointerdown', handlePointerDown);
+            ownerDocument.removeEventListener('keydown', handleEscape);
+            ownerDocument.removeEventListener('wheel', handleWheel, true);
         };
     }, [visible]);
 
@@ -199,7 +201,8 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
                     <ContextMenuPanel
                         key={menuSessionVersionRef.current}
                         menuType={menuType}
-                        autoFocus={autoFocus}
+                        autoFocus
+                        autoFocusTarget={autoFocus ? 'first-item' : 'container'}
                         menuManagerService={menuManagerService}
                         layoutService={layoutService}
                         menuSessionVersion={menuSessionVersionRef.current}

@@ -741,7 +741,9 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         const view = menuElement.ownerDocument.defaultView ?? window;
         const frameId = view.requestAnimationFrame(() => {
             if (autoFocusTarget === 'container') {
-                menuElement.focus();
+                if (!menuElement.contains(menuElement.ownerDocument.activeElement)) {
+                    menuElement.focus({ preventScroll: true });
+                }
                 return;
             }
 
@@ -830,6 +832,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
     return (
         <div
             ref={setMenuElement}
+            data-u-context-menu-panel=""
             tabIndex={-1}
             className={clsx(
                 getContextMenuPanelClassName(sizeVariant),

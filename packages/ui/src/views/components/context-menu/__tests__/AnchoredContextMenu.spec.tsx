@@ -96,7 +96,7 @@ describe('AnchoredContextMenu', () => {
         injectors.splice(0).forEach((injector) => injector.dispose());
     });
 
-    it('restores the element focused before the menu opened', () => {
+    it('moves focus away from the editor when a pointer menu opens and restores it on close', async () => {
         const { rerender } = renderWithDependencies(
             <>
                 <button type="button">Editor canvas</button>
@@ -124,7 +124,10 @@ describe('AnchoredContextMenu', () => {
                 />
             </>
         );
-        screen.getByRole('button', { name: /Context menu item/ }).focus();
+        const action = screen.getByRole('button', { name: /Context menu item/ });
+        await waitFor(() => expect(document.activeElement?.contains(action) && document.activeElement !== document.body).toBe(true));
+        fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+        expect(document.activeElement).toBe(action);
 
         rerender(
             <>

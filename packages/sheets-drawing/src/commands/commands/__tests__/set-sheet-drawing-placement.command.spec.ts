@@ -144,7 +144,7 @@ it('retains GRID Position and Both placement through undo and redo', async () =>
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: 'https://example.com/grid.png',
-        sheetTransform: { from: marker, to: { ...marker, row: 3, column: 3 } },
+        transform: { left: 134, top: 44, width: 160, height: 40 },
         axisAlignSheetTransform: { from: marker, to: { ...marker, row: 3, column: 3 } },
     };
     expect(await bed.commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: 'test', drawings: [drawing] })).toBe(true);

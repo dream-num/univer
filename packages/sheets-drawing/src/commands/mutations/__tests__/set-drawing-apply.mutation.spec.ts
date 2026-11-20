@@ -28,7 +28,11 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
 import { InsertSheetDrawingCommand } from '../../commands/insert-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../set-drawing-apply.mutation';
 
-it.each([{ fromCollab: true }, { fromChangeset: true }])('applies legacy edits at the receive boundary (%j)', (options) => {
+it.each([
+    { source: 'snapshot replay', options: { fromChangeset: true } },
+    { source: 'live peer', options: { fromCollab: true } },
+    { source: 'live server', options: {} },
+])('only applies legacy edits during snapshot replay ($source)', ({ options }) => {
     const bed = createSheetsDrawingTestBed();
     onTestFinished(() => bed.univer.dispose());
     const unitId = 'test';
@@ -55,15 +59,42 @@ it.each([{ fromCollab: true }, { fromChangeset: true }])('applies legacy edits a
         legacy.from.row + 1
     );
     const canonicalEdit = JSON1.insertOp([unitId, subUnitId, 'data', other.drawingId, 'hidden'], true);
-    expect(bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+    const params = {
         unitId,
         subUnitId,
         op: JSON1.type.compose(legacyEdit, canonicalEdit),
         objects: [image, other],
         type: DrawingApplyType.UPDATE,
-    }, options)).toBe(true);
+    };
 
     const service = bed.get(ISheetDrawingService);
+    if (!options.fromChangeset) {
+        const manager = bed.get(IDrawingManagerService);
+        const legacyId = 'legacy-wire-image';
+        const draft = { ...image, drawingId: legacyId, sheetTransform: legacy };
+        const insert = {
+            ...params,
+            op: JSON1.type.compose(
+                JSON1.insertOp([unitId, subUnitId, 'data', legacyId], draft as unknown as JSON1.Doc),
+                JSON1.insertOp([unitId, subUnitId, 'order', 2], legacyId)
+            ),
+            objects: [draft],
+            type: DrawingApplyType.INSERT,
+        };
+        const read = () => Tools.deepClone({
+            sheet: service.getDrawingDataForUnit(unitId),
+            render: manager.getDrawingDataForUnit(unitId),
+        });
+        const before = read();
+        for (const edit of [params, insert]) {
+            expect(() => bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, edit, options))
+                .toThrow('Live sheet drawing edits require the current anchor format.');
+            expect(read()).toEqual(before);
+        }
+        return;
+    }
+    expect(bed.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, params, options)).toBe(true);
+
     const result = service.getDrawingByParam(image)!;
     expect(result.transform).toMatchObject({ ...transform, top: transform.top + skeleton.worksheet.getRowHeight(legacy.from.row) });
     expect(result.axisAlignSheetTransform.from.row).toBe(image.axisAlignSheetTransform.from.row + 1);

@@ -16,12 +16,42 @@
 
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { JSON1 } from '@univerjs/core';
+import type { ISetDrawingApplyMutationParams } from '../commands/mutations/set-drawing-apply.mutation';
 import type { ISheetDrawing } from './sheet-drawing.service';
 import { getLegacySheetDrawingPosition, normalizeSheetDrawing, refreshSheetDrawingPlacement } from './sheet-drawing-placement';
 import { SheetDrawingAnchorType } from './sheet-drawing.service';
 
-/** Translate old marker edits against a detached view before applying them to either drawing store. */
-export function normalizeReceivedSheetDrawingEdit(
+function isLegacyDrawing(value: JSON1.Doc | undefined): boolean {
+    return value !== undefined && value !== null && typeof value === 'object' && 'sheetTransform' in value;
+}
+
+function hasLegacyDrawingInInsert(value: JSON1.Doc, path: JSON1.Path): boolean {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+    if (path.length === 4) return path[2] === 'data' && isLegacyDrawing(value);
+    if (path.length === 3) return path[2] === 'data' && Object.values(value).some(isLegacyDrawing);
+    if (path.length === 2) {
+        return value.data !== undefined && hasLegacyDrawingInInsert(value.data, [...path, 'data']);
+    }
+    return Object.entries(value).some(([key, child]) => hasLegacyDrawingInInsert(child, [...path, key]));
+}
+
+/** Only snapshot replay may apply updates authored against the old drawing format. */
+export function assertCurrentSheetDrawingEdit({ op, reference }: Pick<ISetDrawingApplyMutationParams, 'op' | 'reference'>): void {
+    if (reference?.legacyPositionDrawingIds !== undefined) {
+        throw new Error('Live sheet drawing edits require the current anchor format.');
+    }
+    const cursor = JSON1.type.readCursor(op);
+    cursor.traverse(null, (component) => {
+        const path = cursor.getPath();
+        if ((path[2] === 'data' && path[4] === 'sheetTransform')
+            || (path.length <= 4 && component.i !== undefined && hasLegacyDrawingInInsert(component.i, path))) {
+            throw new Error('Live sheet drawing edits require the current anchor format.');
+        }
+    });
+}
+
+/** Translate old marker edits in persisted history against a detached view. */
+export function normalizeHistoricalSheetDrawingEdit(
     op: JSON1.JSONOp,
     unitId: string,
     subUnitId: string,

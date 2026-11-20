@@ -21,7 +21,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { transformSheetDrawingReference } from '../../basics/drawing-reference';
-import { normalizeReceivedSheetDrawingEdit } from '../../services/sheet-drawing-changeset';
+import { assertCurrentSheetDrawingEdit, normalizeHistoricalSheetDrawingEdit } from '../../services/sheet-drawing-changeset';
 import {
     normalizeSheetDrawing,
     tryRefreshSheetDrawingPlacement,
@@ -146,9 +146,12 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
             throw new Error('Invalid drawing reference change.');
         }
 
-        const received = Boolean(options?.fromCollab || options?.fromChangeset || params.reference || params.recalculate);
-        const op = received
-            ? normalizeReceivedSheetDrawingEdit(
+        const replay = options?.fromChangeset === true && options.fromCollab !== true;
+        if (!replay) {
+            assertCurrentSheetDrawingEdit(params);
+        }
+        const op = replay
+            ? normalizeHistoricalSheetDrawingEdit(
                 params.op,
                 unitId,
                 subUnitId,
@@ -163,6 +166,7 @@ export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> 
             const drawing = sheetDrawingService.getDrawingByParam(object);
             return drawing && needsPlacementHydration(drawing);
         });
+        const received = Boolean(options?.fromCollab || replay || params.reference || params.recalculate);
         if (received || importedOrientation) {
             refreshReceivedDrawings(accessor, params, !received, params.reference?.legacyPositionDrawingIds ?? []);
         }

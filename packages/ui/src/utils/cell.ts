@@ -139,6 +139,34 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 }
 
 /**
+ * `text-decoration-line` can name several lines at once, e.g. `underline line-through`.
+ */
+function setTextDecorationLines(styleList: IStyleData, value: string) {
+    const lines = value.split(/\s+/);
+
+    if (lines.includes('underline')) {
+        if (!styleList.ul) {
+            styleList.ul = { s: 1 };
+        }
+        styleList.ul.s = 1;
+    }
+
+    if (lines.includes('line-through')) {
+        if (!styleList.st) {
+            styleList.st = { s: 1 };
+        }
+        styleList.st.s = 1;
+    }
+
+    if (lines.includes('overline')) {
+        if (!styleList.ol) {
+            styleList.ol = { s: 1 };
+        }
+        styleList.ol.s = 1;
+    }
+}
+
+/**
  * A single span parses out the ITextStyle style sheet
  * @param $dom
  * @returns
@@ -225,28 +253,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // text line type
         else if (key === 'text-decoration-line') {
-            // underline
-            if (value === 'underline') {
-                if (!styleList.ul) {
-                    styleList.ul = { s: 1 };
-                }
-                styleList.ul.s = 1;
-            }
-
-            // line through
-            else if (value === 'line-through') {
-                if (!styleList.st) {
-                    styleList.st = { s: 1 };
-                }
-                styleList.st.s = 1;
-            }
-            // overline
-            else if (value === 'overline') {
-                if (!styleList.ol) {
-                    styleList.ol = { s: 1 };
-                }
-                styleList.ol.s = 1;
-            }
+            setTextDecorationLines(styleList, value);
         }
 
         // text line color
@@ -301,28 +308,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // line through
         else if (key === 'text-decoration' || key === 'univer-strike') {
-            const lineValue = value.split(' ')?.[0];
-            if (lineValue === 'underline') {
-                if (!styleList.ul) {
-                    styleList.ul = { s: 1 };
-                }
-                styleList.ul.s = 1;
-            }
-
-            // line through
-            else if (lineValue === 'line-through') {
-                if (!styleList.st) {
-                    styleList.st = { s: 1 };
-                }
-                styleList.st.s = 1;
-            }
-            // overline
-            else if (lineValue === 'overline') {
-                if (!styleList.ol) {
-                    styleList.ol = { s: 1 };
-                }
-                styleList.ol.s = 1;
-            }
+            setTextDecorationLines(styleList, value);
         }
         // underline
         if (key === 'univer-underline') {

@@ -17,10 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
-import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -30,6 +30,7 @@ import { SetWorksheetBackgroundImageCommand } from '../commands/commands/set-wor
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { SetWorksheetBackgroundImageMutation } from '../commands/mutations/set-worksheet-background-image.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { normalizeSheetDrawing } from '../services/sheet-drawing-placement';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
@@ -62,7 +63,8 @@ export class SheetsDrawingLoadController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IResourceManagerService private _resourceManagerService: IResourceManagerService
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
     ) {
         super();
 
@@ -119,6 +121,15 @@ export class SheetsDrawingLoadController extends Disposable {
                     this._drawingManagerService.removeDrawingDataForUnit(unitId);
                 },
                 onLoad: (unitId, value) => {
+                    for (const [subUnitId, sheet] of Object.entries(value)) {
+                        const drawings = Object.entries(sheet.data);
+                        const skeleton = drawings.some(([, drawing]) => drawing.sheetTransform)
+                            ? this._sheetSkeletonService.ensureSkeleton(unitId, subUnitId)
+                            : undefined;
+                        for (const [drawingId, drawing] of drawings) {
+                            sheet.data[drawingId] = normalizeSheetDrawing(drawing, skeleton);
+                        }
+                    }
                     this._sheetDrawingService.registerDrawingData(unitId, value);
                     this._drawingManagerService.registerDrawingData(unitId, value);
                 },

@@ -19,8 +19,6 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { FWorkbook } from '@univerjs/sheets/facade';
-import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     DrawingTypeEnum,
     ICommandService,
@@ -33,7 +31,10 @@ import {
 } from '@univerjs/core';
 import { SheetSkeletonService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
+import { transformToAxisAlignPosition } from '../../basics/transform-position';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { getSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
@@ -322,7 +323,8 @@ describe('FWorksheetDrawingMixin group drawings', () => {
             kind: SheetDrawingAnchorType.Both,
             bounds,
         })).toBe(true);
-        expect(fWorksheet.getDrawingPlacement(drawing.drawingId)).toEqual(both);
+        const current = fWorksheet.getDrawingPlacement(drawing.drawingId);
+        expect(both).toEqual({ ...current, bounds });
 
         const layout = fWorksheet.getDrawingLayout();
         expect(layout.gridBounds.width).toBeGreaterThan(0);
@@ -333,10 +335,32 @@ describe('FWorksheetDrawingMixin group drawings', () => {
             expect.objectContaining({
                 drawingId: drawing.drawingId,
                 bounds,
-                placement: both,
+                placement: current,
             }),
         ]);
     });
+
+    it.each([SheetDrawingAnchorType.Position, SheetDrawingAnchorType.Both])(
+        'preserves rotated geometry when applying resolved bounds in anchor mode %s',
+        (kind) => {
+            const fWorksheet = createFacade(injector);
+            const commandService = injector.get(ICommandService);
+            const drawing = createDrawing('rotated-layout-drawing', 120);
+            const bounds = { left: 200, top: 220, width: 160, height: 40 };
+            const skeleton = injector.get(SheetSkeletonService).ensureSkeleton(drawing.unitId, drawing.subUnitId)!;
+            const transform = { ...bounds, angle: 90 };
+            expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+                unitId: drawing.unitId,
+                drawings: [{ ...drawing, transform, axisAlignSheetTransform: transformToAxisAlignPosition(transform, skeleton) }],
+            })).toBe(true);
+
+            const resolved = fWorksheet.resolveDrawingPlacement({ kind, bounds });
+            expect(fWorksheet.setDrawingPlacement(drawing.drawingId, resolved)).toBe(true);
+            const saved = injector.get(ISheetDrawingService).getDrawingByParam(drawing)!;
+            expect(saved.transform).toMatchObject(transform);
+            expect(saved.axisAlignSheetTransform).toEqual(transformToAxisAlignPosition(transform, skeleton));
+        }
+    );
 
     it('rejects invalid bounds and reversed TwoCell markers without mutating the drawing', () => {
         const fWorksheet = createFacade(injector);

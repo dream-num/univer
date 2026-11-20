@@ -17,7 +17,6 @@
 import type { IAccessor, ICommand, ITransformState } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { Image } from '@univerjs/engine-render';
-import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import {
     CommandType,
     DrawingTypeEnum,
@@ -28,7 +27,7 @@ import {
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition } from '@univerjs/sheets-drawing';
 
 interface IFlipDrawingCommandParam {
     unitId: string;
@@ -87,8 +86,7 @@ export const FlipSheetDrawingCommand: ICommand = {
                 transform.flipY = !transform.flipY;
             }
 
-            const sheetTransform = transformToDrawingPosition(transform, skeleton);
-            const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeleton) as ISheetDrawingPosition;
+            const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeleton);
 
             const updateParamItem: any = {
                 unitId,
@@ -96,7 +94,6 @@ export const FlipSheetDrawingCommand: ICommand = {
                 drawingType: existing.drawingType,
                 drawingId,
                 transform,
-                sheetTransform,
                 axisAlignSheetTransform,
             };
 

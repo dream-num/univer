@@ -239,7 +239,7 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Get the placement of any drawing on this sheet.
      *
-     * Image, Shape, Chart, and Group use the same placement contract.
+     * Image, Shape, Chart, and Group use the same Excel-aligned cell markers.
      * @param {string} drawingId Drawing id.
      * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing does not exist.
      * @example
@@ -306,8 +306,10 @@ export interface IFWorksheetDrawingMixin {
      * transform. Exact markers are useful when the caller must preserve a
      * user-selected cell and offset. `Position` maps to OOXML OneCell,
      * `Both` maps to TwoCell, and `None` maps to Absolute.
+     * For cell-anchored bounds, the result also carries the original bounds.
+     * Pass the full result to a placement setter so it can use the target drawing's rotation.
      * @param {ISheetDrawingPlacementInput} placement Exact markers or bounds with an explicit anchor type.
-     * @returns {ISheetDrawingPlacement} The normalized Placement.
+     * @returns {ISheetDrawingPlacement & { bounds?: IGroupBaseBound }} The normalized Placement and any retained bounds.
      * @example Infer Position and Both placements from bounds in Node/headless
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
@@ -323,7 +325,7 @@ export interface IFWorksheetDrawingMixin {
      * console.log(bothPlacement.from, bothPlacement.to);
      * ```
      */
-    resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement;
+    resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement & { bounds?: IGroupBaseBound };
 
     /**
      * Get the Sheet host layout in model coordinates.
@@ -687,7 +689,11 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
             subUnitId: this.getSheetId(),
             drawingId,
         });
-        return drawing ? getSheetDrawingPlacement(drawing) : null;
+        if (!drawing) return null;
+        const skeleton = drawing.anchorType === SheetDrawingAnchorType.None
+            ? undefined
+            : this._sheetSkeletonService.ensureSkeleton(drawing.unitId, drawing.subUnitId);
+        return getSheetDrawingPlacement(drawing, skeleton ?? undefined);
     }
 
     override setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacementInput): boolean {
@@ -698,14 +704,17 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         });
     }
 
-    override resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement {
+    override resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement & { bounds?: IGroupBaseBound } {
         const skeleton = placement.kind === SheetDrawingAnchorType.None
             ? undefined
             : this._sheetSkeletonService.ensureSkeleton(this._fWorkbook.getId(), this.getSheetId());
         if (placement.kind !== SheetDrawingAnchorType.None && !skeleton) {
             throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
         }
-        return normalizeSheetDrawingPlacement(placement, skeleton);
+        const resolved = normalizeSheetDrawingPlacement(placement, skeleton);
+        return 'bounds' in placement && resolved.kind !== SheetDrawingAnchorType.None
+            ? { ...resolved, bounds: { ...placement.bounds } }
+            : resolved;
     }
 
     override getDrawingLayout(): ISheetDrawingLayout {
@@ -734,7 +743,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
                 drawingId,
                 drawingType: drawing.drawingType,
                 bounds,
-                placement: getSheetDrawingPlacement(drawing),
+                placement: getSheetDrawingPlacement(drawing, skeleton),
                 groupId: drawing.groupId,
             });
         }

@@ -52,7 +52,6 @@ import {
     SheetDrawingAnchorType,
     transformDrawingsToChartSheet,
     transformToAxisAlignPosition,
-    transformToDrawingPosition,
 } from '@univerjs/sheets-drawing';
 import {
     COPY_TYPE,
@@ -355,7 +354,7 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
             unitId,
             subUnitId,
             isCut: copyType === COPY_TYPE.CUT,
-            getTransform: (transform, sheetTransform) => {
+            getTransform: (transform, axisAlignSheetTransform) => {
                 const pasteRect = attachRangeWithCoord(pasteToSkeleton, {
                     startRow: pasteRange.startRow,
                     endRow: pasteRange.endRow,
@@ -375,8 +374,7 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
 
                 return {
                     transform: newTransform,
-                    sheetTransform: transformToDrawingPosition(newTransform, pasteToSkeleton) ?? sheetTransform,
-                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, pasteToSkeleton) ?? sheetTransform,
+                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, pasteToSkeleton) ?? axisAlignSheetTransform,
                 };
             },
         });
@@ -415,9 +413,9 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
             unitId,
             subUnitId,
             isCut: false,
-            getTransform: (_transform, _sheetTransform, drawing) => {
+            getTransform: (_transform, _axisAlignSheetTransform, drawing) => {
                 const copy = copies.get(drawing.drawingId)!;
-                return { anchorType: copy.anchorType, transform: copy.transform, sheetTransform: copy.sheetTransform, axisAlignSheetTransform: copy.axisAlignSheetTransform };
+                return { anchorType: copy.anchorType, transform: copy.transform, axisAlignSheetTransform: copy.axisAlignSheetTransform };
             },
         });
     }
@@ -425,11 +423,10 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
     private _generateMutations(drawings: ISheetDrawing[], payload: {
         unitId: string;
         subUnitId: string;
-        getTransform: (transform: ISheetDrawing['transform'], sheetTransform: ISheetDrawing['sheetTransform'], drawing: ISheetDrawing) => {
+        getTransform: (transform: ISheetDrawing['transform'], axisAlignSheetTransform: ISheetDrawing['axisAlignSheetTransform'], drawing: ISheetDrawing) => {
             anchorType?: SheetDrawingAnchorType;
             transform: ISheetDrawing['transform'];
-            sheetTransform: ISheetDrawing['sheetTransform'];
-            axisAlignSheetTransform: ISheetDrawing['sheetTransform'];
+            axisAlignSheetTransform: ISheetDrawing['axisAlignSheetTransform'];
         };
         isCut: boolean;
     }) {
@@ -446,11 +443,11 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
         const { _drawingService } = this;
 
         drawings.forEach((drawing) => {
-            const { transform, sheetTransform } = drawing;
+            const { transform, axisAlignSheetTransform } = drawing;
             if (!transform) {
                 return;
             }
-            const transformContext = getTransform(transform, sheetTransform, drawing);
+            const transformContext = getTransform(transform, axisAlignSheetTransform, drawing);
             const drawingObject: Partial<ISheetDrawing> = {
                 ...drawing,
                 ...transformContext,
@@ -558,13 +555,11 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
 
         const leftOffset = pasteRect.startX - copyRect.startX;
         const topOffset = pasteRect.startY - copyRect.startY;
-        const rowOffset = pasteRow - copyRow;
-        const columnOffset = pasteCol - copyCol;
 
         return this._generateMutations(drawings, {
             unitId: toUnitId,
             subUnitId: toSubUnitId,
-            getTransform: (transform, sheetTransform) => {
+            getTransform: (transform, axisAlignSheetTransform) => {
                 const newTransform = {
                     ...transform,
                     left: (transform?.left ?? 0) + leftOffset,
@@ -573,20 +568,18 @@ export class SheetsDrawingCopyPasteController extends RxDisposable {
 
                 return {
                     transform: newTransform,
-                    sheetTransform: {
-                        ...sheetTransform,
-                        to: {
-                            ...sheetTransform.to,
-                            row: sheetTransform.to.row + rowOffset,
-                            column: sheetTransform.to.column + columnOffset,
-                        },
+                    axisAlignSheetTransform: axisAlignSheetTransform && {
                         from: {
-                            ...sheetTransform.from,
-                            row: sheetTransform.from.row + rowOffset,
-                            column: sheetTransform.from.column + columnOffset,
+                            ...axisAlignSheetTransform.from,
+                            row: axisAlignSheetTransform.from.row + pasteRow - copyRow,
+                            column: axisAlignSheetTransform.from.column + pasteCol - copyCol,
+                        },
+                        to: {
+                            ...axisAlignSheetTransform.to,
+                            row: axisAlignSheetTransform.to.row + pasteRow - copyRow,
+                            column: axisAlignSheetTransform.to.column + pasteCol - copyCol,
                         },
                     },
-                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, toSkeleton) ?? sheetTransform,
                 };
             },
             isCut: copyType === COPY_TYPE.CUT,

@@ -21,6 +21,7 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { formatExcelTextNumber } from '../format-excel-text-number';
 
 export class Arraytotext extends BaseFunction {
     override minParams = 1;
@@ -47,7 +48,7 @@ export class Arraytotext extends BaseFunction {
         return this._handleSingleObject(array, _format);
     }
 
-    private _handleSingleObject(array: BaseValueObject, format: BaseValueObject): BaseValueObject {
+    protected _handleSingleObject(array: BaseValueObject, format: BaseValueObject): BaseValueObject {
         if (array.isError()) {
             return array;
         }
@@ -60,7 +61,7 @@ export class Arraytotext extends BaseFunction {
 
         const [formatObject] = variants as BaseValueObject[];
 
-        const formatValue = +formatObject.getValue();
+        const formatValue = this._readFormat(formatObject);
         if (formatValue !== 0 && formatValue !== 1) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -73,17 +74,7 @@ export class Arraytotext extends BaseFunction {
         for (let r = 0; r < arrayRowCount; r++) {
             for (let c = 0; c < arrayColumnCount; c++) {
                 const valueObject = array.isArray() ? (array as ArrayValueObject).getRealValue(r, c) : array;
-                let value = valueObject == null || valueObject.isNull() ? '' : String(valueObject.getValue());
-                if (valueObject?.isNumber()) {
-                    value = formatNumber(Number(valueObject.getValue()));
-                } else if (valueObject?.isBoolean()) {
-                    value = value.toUpperCase();
-                }
-                if (valueObject?.isString() && formatValue) {
-                    result += `"${value.replace(/"/g, '""')}"`;
-                } else {
-                    result += value;
-                }
+                result += this._serializeCell(valueObject, formatValue === 1);
 
                 if (!(r === arrayRowCount - 1 && c === arrayColumnCount - 1)) {
                     if (formatValue) {
@@ -109,26 +100,20 @@ export class Arraytotext extends BaseFunction {
 
         return StringValueObject.create(result);
     }
-}
 
-function formatNumber(value: number): string {
-    if (!Number.isFinite(value) || (Number.isInteger(value) && Math.abs(value) < 1e15)) {
-        return String(value);
+    private _serializeCell(value: BaseValueObject | null | undefined, strict: boolean): string {
+        if (value == null || value.isNull()) return '';
+        if (value.isNumber()) return this._formatNumber(Number(value.getValue()));
+        const text = String(value.getValue());
+        if (value.isBoolean()) return text.toUpperCase();
+        return value.isString() && strict ? `"${text.replace(/"/g, '""')}"` : text;
     }
-    const [coefficient, power] = Math.abs(value).toExponential(14).split('e');
-    const exponent = Number(power);
-    const mantissa = coefficient.replace(/\.?0+$/, '');
-    const sign = value < 0 ? '-' : '';
-    if (exponent >= 20 || exponent < -18) {
-        return `${sign}${mantissa}E${power}`;
+
+    protected _formatNumber(value: number): string {
+        return formatExcelTextNumber(value, false);
     }
-    const digits = mantissa.replace('.', '');
-    const point = exponent + 1;
-    if (point <= 0) {
-        return `${sign}0.${'0'.repeat(-point)}${digits}`;
+
+    protected _readFormat(format: BaseValueObject): number {
+        return Number(format.getValue());
     }
-    if (point >= digits.length) {
-        return sign + digits.padEnd(point, '0');
-    }
-    return `${sign}${digits.slice(0, point)}.${digits.slice(point)}`;
 }

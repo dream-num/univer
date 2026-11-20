@@ -38,6 +38,8 @@ function isSameRankNumber(left: number, right: number): boolean {
 }
 
 export class RankEq extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 3;
@@ -140,7 +142,7 @@ export class RankEq extends BaseFunction {
                 return false;
             }
 
-            if (_refObject.isNull() || _refObject.isBoolean()) {
+            if (_refObject.isNull() || _refObject.isBoolean() || (this.numbersOnly && !_refObject.isNumber())) {
                 return true;
             }
 

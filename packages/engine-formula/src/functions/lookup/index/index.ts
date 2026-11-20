@@ -15,11 +15,13 @@
  */
 
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import type { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
+import type { MultiAreaValue } from '../../../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import type { CubeValueObject } from '../../../engine/value-object/cube-value-object';
+import { RANGE_TYPE } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -54,8 +56,8 @@ export class Index extends BaseFunction {
 
         let areas: (BaseReferenceObject | ErrorValueObject)[] | undefined;
         if (reference.isReferenceObject()) {
-            if ((reference as BaseReferenceObject).isMultiArea()) {
-                areas = (reference as MultiAreaReferenceObject).getAreas().flat();
+            if (reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()) {
+                areas = reference.getAreas().flat();
             }
         } else if ((reference as BaseValueObject).isCube()) {
             areas = (reference as CubeValueObject).getCubeReferences();
@@ -106,7 +108,9 @@ export class Index extends BaseFunction {
 
         // If maxRowLength and maxColumnLength are both 1, pick the value from the reference array
         // Otherwise, filter the results from the reference according to the specified rowNum/columnNum/areaNum, take the upper left corner cell value of each result array, and then form an array with maxRowLength row number and maxColumnLength column number.
-        if (maxRowLength === 1 && maxColumnLength === 1) {
+        const referenceGrid = reference instanceof MultiAreaReferenceObject && reference.isArrayOfReferences();
+        const hasArraySelector = rowNum.isArray() || columnNum?.isArray() || areaNum?.isArray();
+        if (maxRowLength === 1 && maxColumnLength === 1 && !(referenceGrid && hasArraySelector)) {
             return this._handleSingleObject(
                 reference,
                 _rowNum.isArray()
@@ -129,12 +133,29 @@ export class Index extends BaseFunction {
             const columnNumArray = _columnNum ? expandArrayValueObject(maxRowLength, maxColumnLength, _columnNum as BaseValueObject, ErrorValueObject.create(ErrorType.NA)) : [];
             const areaNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _areaNum as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
 
-            return rowNumArray.mapValue((rowNumObject, rowIndex, columnIndex) => {
+            const select = (rowNumObject: BaseValueObject, rowIndex: number, columnIndex: number) => {
                 const columnNumObject = _columnNum ? (columnNumArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : undefined;
                 const areaNumObject = areaNumArray.get(rowIndex, columnIndex) as BaseValueObject;
+                return this._handleSingleObject(reference, rowNumObject, columnNumObject, areaNumObject, referenceRowColumnCounts);
+            };
 
-                const result = this._handleSingleObject(reference, rowNumObject, columnNumObject, areaNumObject, referenceRowColumnCounts);
+            if (referenceGrid) {
+                const areas: MultiAreaValue[][] = [];
+                for (let row = 0; row < maxRowLength; row++) {
+                    const references: MultiAreaValue[] = [];
+                    for (let column = 0; column < maxColumnLength; column++) {
+                        const result = select(rowNumArray.get(row, column) as BaseValueObject, row, column);
+                        references.push(result instanceof MultiAreaReferenceObject
+                            ? result.getAreas()[0][0]
+                            : result as MultiAreaValue);
+                    }
+                    areas.push(references);
+                }
+                return new MultiAreaReferenceObject('', areas);
+            }
 
+            return rowNumArray.mapValue((rowNumObject, rowIndex, columnIndex) => {
+                const result = select(rowNumObject, rowIndex, columnIndex);
                 if (result.isReferenceObject()) {
                     return (result as BaseReferenceObject).getCellByPosition();
                 }
@@ -220,6 +241,17 @@ export class Index extends BaseFunction {
             return _reference;
         }
 
+        if (_reference instanceof MultiAreaReferenceObject && _reference.isArrayOfReferences()) {
+            const areas = _reference.getAreas();
+            if (rowNumValue > 0 && columnNumValue > 0) {
+                return areas[rowNumValue - 1][columnNumValue - 1];
+            }
+            const rows = rowNumValue > 0 ? [areas[rowNumValue - 1]] : areas;
+            return new MultiAreaReferenceObject('', columnNumValue > 0
+                ? rows.map((row) => [row[columnNumValue - 1]])
+                : rows);
+        }
+
         if (
             !columnNum &&
             rowNumValue > 0 &&
@@ -238,11 +270,10 @@ export class Index extends BaseFunction {
     }
 
     private _getReferenceArea(reference: FunctionVariantType, areaNum: number): FunctionVariantType {
-        if (reference.isReferenceObject()) {
-            if ((reference as BaseReferenceObject).isMultiArea()) {
-                return (reference as MultiAreaReferenceObject).getAreas().flat()[areaNum - 1];
-            }
-        } else if ((reference as BaseValueObject).isCube()) {
+        if (reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()) {
+            return reference.getAreas().flat()[areaNum - 1];
+        }
+        if (!reference.isReferenceObject() && (reference as BaseValueObject).isCube()) {
             const cube = reference as CubeValueObject;
             return cube.getCubeReferences()?.[areaNum - 1] ?? cube.getCubeValues()[areaNum - 1];
         }
@@ -257,8 +288,8 @@ export class Index extends BaseFunction {
             },
         ];
 
-        if (reference.isReferenceObject() && (reference as BaseReferenceObject).isMultiArea()) {
-            referenceRowColumnCounts = (reference as MultiAreaReferenceObject).getAreas().flat().map((area) => {
+        if (reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()) {
+            referenceRowColumnCounts = reference.getAreas().flat().map((area) => {
                 if (area instanceof ErrorValueObject) {
                     return { rowCount: 1, columnCount: 1 };
                 }
@@ -314,6 +345,26 @@ export class Index extends BaseFunction {
 
         if (referenceStartRow > endRow || referenceStartColumn > endColumn) {
             return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const sourceType = reference.getRangeData().rangeType;
+        if (sourceType === RANGE_TYPE.ROW && columnNum === 0) {
+            return this.createReferenceObject(reference, {
+                startRow: referenceStartRow,
+                endRow: referenceEndRow,
+                startColumn: Number.NaN,
+                endColumn: Number.NaN,
+                rangeType: RANGE_TYPE.ROW,
+            });
+        }
+        if (sourceType === RANGE_TYPE.COLUMN && rowNum === 0) {
+            return this.createReferenceObject(reference, {
+                startRow: Number.NaN,
+                endRow: Number.NaN,
+                startColumn: referenceStartColumn,
+                endColumn: referenceEndColumn,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
         }
 
         const range = {

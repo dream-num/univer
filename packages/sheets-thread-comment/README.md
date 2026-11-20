@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry | Worker entry |
 | --- | --- | :---: | :---: | :---: | :---: |
-| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadComment` | No | No | Yes | No |
+| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadComment` | No | Yes | Yes | No |
 
 ## Installation
 

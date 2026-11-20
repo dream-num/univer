@@ -14,62 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
-import { ErrorType } from '../../../basics/error-type';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
+import { SecurityFunction } from '../security';
 
-export class Accrintm extends BaseFunction {
-    override minParams = 4;
-
-    override maxParams = 5;
-
-    override calculate(issue: BaseValueObject, settlement: BaseValueObject, rate: BaseValueObject, par: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
-        const _basis = basis ?? NumberValueObject.create(0);
-
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, settlement, rate, par, _basis);
-
-        if (isError) {
-            return errorObject as ErrorValueObject;
-        }
-
-        const [issueObject, settlementObject, rateObject, parObject, basisObject] = variants as BaseValueObject[];
-
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
-
-        if (typeof issueSerialNumber !== 'number') {
-            return issueSerialNumber;
-        }
-
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
-
-        if (typeof settlementSerialNumber !== 'number') {
-            return settlementSerialNumber;
-        }
-
-        const rateValue = +rateObject.getValue();
-        const parValue = +parObject.getValue();
-        const basisValue = Math.floor(+basisObject.getValue());
-
-        if (Number.isNaN(rateValue) || Number.isNaN(parValue) || Number.isNaN(basisValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        if (rateValue <= 0 || parValue <= 0 || basisValue < 0 || basisValue > 4 || Math.floor(issueSerialNumber) > Math.floor(settlementSerialNumber)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        if (Math.floor(issueSerialNumber) === Math.floor(settlementSerialNumber)) {
-            return NumberValueObject.create(0);
-        }
-
-        const { days, yearDays } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());
-
-        const result = parValue * rateValue * days / yearDays;
-
-        return NumberValueObject.create(result);
-    }
+export class Accrintm extends SecurityFunction {
+    protected override readonly mode = 'accrintm';
 }

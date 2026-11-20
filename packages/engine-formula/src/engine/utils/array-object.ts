@@ -27,7 +27,7 @@ export function isExplicitDynamicArrayFormula(config: IFormulaCurrentConfigServi
 
 export function getFixedArrayResultRange(config: IFormulaCurrentConfigService, unitId: string, sheetId: string, row: number, column: number) {
     const range = config.getArrayFormulaRange()[unitId]?.[sheetId]?.[row]?.[column];
-    if (!range || (range.endRow <= row && range.endColumn <= column)) {
+    if (!range) {
         return;
     }
     const anchor = config.getUnitData()[unitId]?.[sheetId]?.cellData.getValue(row, column);

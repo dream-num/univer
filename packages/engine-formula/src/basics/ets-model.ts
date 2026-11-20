@@ -91,6 +91,7 @@ const SEASONAL: readonly Weights[] = [
 
 export function etsSlope(values: readonly number[], seasons: readonly number[]): number {
     const n = values.length;
+    if (n === 1) return 0;
     const center = (n - 1) / 2;
     let covariance = 0;
     for (let i = 0; i < n; i++) {
@@ -114,7 +115,7 @@ function lagCorrelation(changes: readonly number[], lag: number): number {
 }
 
 export function detectEtsPeriod(values: readonly number[]): number {
-    if (values.length < 6) return 0;
+    if (values.length < 5) return 0;
     const differences = values.slice(1).map((value, i) => value - values[i]);
     const mean = differences.reduce((sum, value) => sum + value, 0) / differences.length;
     const changes = differences.map((value) => value - mean);
@@ -153,17 +154,8 @@ function initialize(values: readonly number[], period: number): IState {
             window -= values[i];
             window += values[i + width];
         }
-        if (counts.includes(0)) {
-            const previous = values.slice(0, period).reduce((sum, value) => sum + value, 0);
-            const next = values.slice(period, width).reduce((sum, value) => sum + value, 0);
-            const trend = (next - previous) / (period * period);
-            for (let i = 0; i < period; i++) {
-                seasons[i] = (values[i] + values[i + period] - (2 * i + period) * trend) / 2;
-            }
-        } else {
-            for (let i = 0; i < period; i++) {
-                seasons[i] /= counts[i];
-            }
+        for (let i = 0; i < period; i++) {
+            seasons[i] /= counts[i];
         }
         const mean = seasons.reduce((sum, value) => sum + value, 0) / period;
         for (let i = 0; i < period; i++) seasons[i] -= mean;
@@ -213,21 +205,39 @@ function selectWeights(seed: IState, trainingValues: readonly number[], period: 
     return weights;
 }
 
-export function trainEts(values: readonly number[], period: number): IEtsModel {
-    let trainingValues = values;
-    if (period <= 1 && values.length < 7) {
-        // Pad two alternating phases for parameter selection. Only observations
-        // from the input series contribute to the final fit.
-        const trend = etsSlope(values, [0]);
-        trainingValues = Array.from({ length: 7 }, (_, index) => values[index] ?? values[index % 2] + (index - index % 2) * trend);
+function completeTraining(values: readonly number[], period: number): readonly number[] {
+    const phases = Math.max(2, period);
+    const length = Math.ceil(7 * phases / 2);
+    if (values.length >= length) return values;
+
+    let trend = etsSlope(values, [0]);
+    if (period > 1) {
+        trend = 0;
+        for (let phase = 0; phase < phases; phase++) {
+            const observations = [];
+            for (let i = phase; i < values.length && observations.length < 4; i += phases) observations.push(values[i]);
+            trend += etsSlope(observations, [0]);
+        }
+        trend = trend / phases / phases;
     }
+    return Array.from({ length }, (_, index) => values[index] ?? values[index % phases] + (index - index % phases) * trend);
+}
+
+function getTrainingCount(length: number, period: number): number {
+    return length <= 10
+        ? length
+        : length - Math.min(Math.floor(length * 2 / 5), Math.max(10, 2 * period, length - Math.floor(length * 4 / 5)));
+}
+
+export function trainEts(values: readonly number[], period: number): IEtsModel {
+    // Parameter selection uses completed history; final statistics use real observations.
+    const trainingValues = completeTraining(values, period);
     const seed = initialize(trainingValues, period);
     const len = values.length;
-    const trainingCount = len <= 10
-        ? len
-        : len - Math.min(Math.floor(len * 2 / 5), Math.max(10, 2 * period, len - Math.floor(len * 4 / 5)));
-    const weights = selectWeights(seed, trainingValues, period, trainingValues.length === len ? trainingCount : trainingValues.length);
+    const trainingCount = getTrainingCount(len, period);
+    let weights = selectWeights(seed, trainingValues, period, getTrainingCount(trainingValues.length, period));
 
+    const initialTrend = seed.trend;
     const state = seed;
     const scoringStart = trainingCount === len ? 0 : trainingCount;
     let naive = 0;
@@ -235,6 +245,10 @@ export function trainEts(values: readonly number[], period: number): IEtsModel {
     let absolute = 0;
     let squared = 0;
     let innovationVariance = 0;
+    let trendSum = 0;
+    let trendSquares = 0;
+    const trendStart = len <= 10 ? 0 : Math.floor(len / 2);
+    const trendCount = len <= 10 ? len : Math.floor(len / 2);
     for (let i = 0; i < len; i++) {
         const phase = i % state.seasons.length;
         const prediction = state.level + state.trend + state.seasons[phase];
@@ -248,6 +262,19 @@ export function trainEts(values: readonly number[], period: number): IEtsModel {
             squared += error * error;
         }
         advance(state, phase, error, weights);
+        if (i > trendStart) {
+            trendSum += state.trend;
+            trendSquares += state.trend * state.trend;
+        }
+    }
+
+    // Excel restores the initial trend when the fitted trend is unstable.
+    const meanTrend = trendSum / trendCount;
+    const trendDeviation = Math.sqrt(Math.abs((trendSquares - trendSum * trendSum / (trendCount - 1)) / (trendCount - 1)));
+    if (period <= 1 && (meanTrend === 0 || Math.abs(trendDeviation / meanTrend) > 1)) {
+        state.level = values[len - 1] - state.seasons[0];
+        state.trend = initialTrend;
+        weights = [weights[0], 0.001, weights[2]];
     }
 
     const count = len - scoringStart;
@@ -256,8 +283,9 @@ export function trainEts(values: readonly number[], period: number): IEtsModel {
     innovationVariance /= len;
 
     return {
-        statistic: (metric) => metrics[metric - 1],
-        project: (index) => state.level + (index - len + 1) * state.trend + state.seasons[index % state.seasons.length],
+        // Excel exposes a positive floor for the unused seasonal smoothing coefficient.
+        statistic: (metric) => metric === 3 && weights[2] === 0 ? Number.EPSILON : metrics[metric - 1],
+        project: (index) => state.level + (index - len + 1) * state.trend + state.seasons[((index % state.seasons.length) + state.seasons.length) % state.seasons.length],
         confidenceWidth: (horizon, confidence) => {
             if (horizon <= 0 || innovationVariance === 0) return 0;
             const count = horizon - 1;

@@ -28,6 +28,10 @@ export class Imsum extends BaseFunction {
 
     override maxParams = 255;
 
+    protected parseComplex(value: BaseValueObject): Complex {
+        return new Complex(`${value.getValue()}`, this.getDateSystem());
+    }
+
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
         let result: string | ErrorValueObject = '';
 
@@ -78,30 +82,27 @@ export class Imsum extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const value = `${variant.getValue()}`;
+        const complex = this.parseComplex(variant);
+
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
         if (!result) {
-            const complex = new Complex(value, this.getDateSystem());
-
-            if (complex.isError()) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
             _result = complex.toString();
         } else {
             const complex1: Complex = new Complex(result, this.getDateSystem());
-            const complex2 = new Complex(value, this.getDateSystem());
 
-            if (complex1.isError() || complex2.isError()) {
+            if (complex1.isError()) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
             // Cannot perform operations on complex numbers with different suffixes.
-            if (complex1.isDifferentSuffixes(complex2)) {
+            if (complex1.isDifferentSuffixes(complex)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            _result = complex1.Sum(complex2);
+            _result = complex1.Sum(complex);
         }
 
         return _result;

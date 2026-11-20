@@ -112,7 +112,6 @@ export function RibbonOverflow({ groups, grid = false }: IRibbonOverflowProps) {
                                                         showLabel={child.gridLayout?.showLabel}
                                                         fullWidth
                                                         overflow
-                                                        preserveStrokeWidth
                                                     />
                                                 </div>
                                             ))}

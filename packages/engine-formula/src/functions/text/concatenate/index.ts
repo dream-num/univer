@@ -35,7 +35,7 @@ export class Concatenate extends BaseFunction {
                     return value;
                 }
                 if (!value.isNull()) {
-                    text += formatValueForFormulaText(value.getValue());
+                    text += this._formatText(value.getValue());
                 }
             }
             return StringValueObject.create(text);
@@ -83,8 +83,8 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                const resultValueObjectString = resultValueObject?.isNull() ? '' : formatValueForFormulaText(resultValueObject?.getValue() ?? null);
-                const textValueObjectString = textValueObject?.isNull() ? '' : formatValueForFormulaText(textValueObject?.getValue() ?? null);
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : this._formatText(resultValueObject?.getValue() ?? null);
+                const textValueObjectString = textValueObject?.isNull() ? '' : this._formatText(textValueObject?.getValue() ?? null);
 
                 return StringValueObject.create(`${resultValueObjectString}${textValueObjectString}`);
             });
@@ -102,5 +102,9 @@ export class Concatenate extends BaseFunction {
         }
 
         return result;
+    }
+
+    protected _formatText(value: string | number | boolean | null): string {
+        return formatValueForFormulaText(value);
     }
 }

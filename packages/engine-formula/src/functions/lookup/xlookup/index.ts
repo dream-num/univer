@@ -20,9 +20,10 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
-import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue, isLiteralTextMatch, isWildcard } from '../../../engine/utils/compare';
+import { handleRegExp } from '../../../engine/utils/regexp-check';
 import { baseValueObjectToArrayValueObject } from '../../../engine/utils/value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject, formatValueForFormulaText } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -272,6 +273,7 @@ export class Xlookup extends BaseFunction {
         }
 
         const position = this._findPosition(value, searchArray, matchModeValue, searchModeValue);
+        if (position instanceof ErrorValueObject) return position;
         if (position == null) {
             return ifNotFound;
         }
@@ -305,7 +307,23 @@ export class Xlookup extends BaseFunction {
         searchArray: ArrayValueObject,
         matchModeValue: number,
         searchModeValue: number
-    ): Nullable<{ row: number; column: number }> {
+    ): Nullable<{ row: number; column: number }> | ErrorValueObject {
+        if (matchModeValue === 3) {
+            const pattern = value.isNull() ? '' : formatValueForFormulaText(value.getValue());
+            const ignoreCase = pattern.startsWith('(?i)');
+            const { regExp } = handleRegExp(ignoreCase ? pattern.slice(4) : pattern, false, ignoreCase);
+            if (!regExp) return ErrorValueObject.create(ErrorType.VALUE);
+            let position: Nullable<{ row: number; column: number }>;
+            const find = (candidate: Nullable<BaseValueObject>, row: number, column: number) => {
+                if (candidate != null && !candidate.isError() && regExp.test(candidate.isNull() ? '' : formatValueForFormulaText(candidate.getValue()))) {
+                    position = { row, column };
+                    return false;
+                }
+            };
+            if (searchModeValue === -1) searchArray.iteratorReverse(find);
+            else searchArray.iterator(find);
+            return position;
+        }
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
             const searchType = getSearchModeValue(searchModeValue);
             const matchType = getMatchModeValue(matchModeValue);
@@ -330,6 +348,7 @@ export class Xlookup extends BaseFunction {
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
                 false,
+                true,
                 true
             );
         }
@@ -372,6 +391,11 @@ export class Xlookup extends BaseFunction {
             return false;
         }
 
+        // Match mode 0 is an exact match: ? and * are ordinary characters. Only match mode 2 reads them as wildcards.
+        if (value.isString() && isWildcard(String(value.getValue()))) {
+            return isLiteralTextMatch(String(candidate.getValue()), String(value.getValue()));
+        }
+
         return candidate.isEqual(value).getValue() === true;
     }
 
@@ -390,7 +414,8 @@ export class Xlookup extends BaseFunction {
      * @returns
      */
     private _checkErrorCombination(matchModeValue: number, searchModeValue: number) {
-        if (matchModeValue === 2 && (searchModeValue === -2 || searchModeValue === 2)) {
+        if (![-1, 0, 1, 2, 3].includes(matchModeValue) || ![-2, -1, 1, 2].includes(searchModeValue) ||
+            ((matchModeValue === 2 || matchModeValue === 3) && (searchModeValue === -2 || searchModeValue === 2))) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

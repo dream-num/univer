@@ -40,7 +40,7 @@ interface ICouponSchedule {
 
 const COUPON_DATE_PARTS_OPTIONS = { hours: 0, minutes: 0, seconds: 0, fractionalSecond: 0 };
 
-function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDateParts {
+export function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDateParts {
     const parts = excelSerialToDateTimeParts(serial, { dateSystem });
 
     if (parts) {
@@ -60,7 +60,7 @@ function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDate
     return { year, month, day, monthEnd: day === getDaysInMonth(year, month - 1) };
 }
 
-function getCouponDateSerial(parts: ICouponDateParts, dateSystem: DateSystem): number {
+export function getCouponDateSerial(parts: ICouponDateParts, dateSystem: DateSystem): number {
     if (dateSystem === DateSystem.Date1900 && parts.year === 1900 && parts.month === 1 && parts.day === 0) {
         return 0;
     }
@@ -121,7 +121,7 @@ export function getMaturityBondActualYearDays(issue: number, settlement: number,
 }
 
 // Excel keeps the maturity day/month-end rule for every coupon period; it must not be inferred from an intermediate date.
-function addCouponMonths(parts: ICouponDateParts, months: number): ICouponDateParts {
+export function addCouponMonths(parts: ICouponDateParts, months: number): ICouponDateParts {
     const monthIndex = parts.year * 12 + parts.month - 1 + months;
     const year = Math.floor(monthIndex / 12);
     const month = monthIndex - year * 12 + 1;
@@ -207,11 +207,13 @@ export function calculateAccruedInterest(
     return rate * par / frequency * accrued;
 }
 
-function accruedDays(start: number, end: number, basis: number, dateSystem: DateSystem): number {
+export function accruedDays(start: number, end: number, basis: number, dateSystem: DateSystem): number {
     if (basis !== 0) return getTwoDateDaysByBasis(start, end, basis, dateSystem).days;
 
-    const from = getCouponDateParts(start, dateSystem);
-    const to = getCouponDateParts(end, dateSystem);
+    return accruedDaysBetweenParts(getCouponDateParts(start, dateSystem), getCouponDateParts(end, dateSystem));
+}
+
+export function accruedDaysBetweenParts(from: ICouponDateParts, to: ICouponDateParts): number {
     const lastFebruaryFrom = from.month === 2 && from.monthEnd;
     const lastFebruaryTo = to.month === 2 && to.monthEnd;
     const firstDay = lastFebruaryFrom ? 30 : Math.min(from.day, 30);
@@ -291,6 +293,23 @@ export function calculateDuration(settlementSerialNumber: number, maturitySerial
     den += num;
 
     return duration / den / frequency;
+}
+
+export function calculateCompoundingTerm(rate: number, periods: number): number {
+    if (!Number.isInteger(periods) || Math.abs(periods) > 0x7FFF_FFFF) {
+        return (1 + rate) ** periods;
+    }
+
+    // Integer multiplication preserves the compounding factor in loan balances.
+    let term = 1;
+    let factor = 1 + rate;
+    for (let exponent = Math.abs(periods); exponent > 0; exponent = Math.floor(exponent / 2)) {
+        if (exponent % 2 === 1) {
+            term *= factor;
+        }
+        factor *= factor;
+    }
+    return periods < 0 ? 1 / term : term;
 }
 
 export function calculatePMT(rate: number, nper: number, pv: number, fv: number, type: number): number {

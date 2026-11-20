@@ -49,6 +49,7 @@ interface IToken {
     remember?: boolean;
     followedBy?: boolean;
     notFollowedBy?: boolean;
+    lookbehind?: boolean;
     not?: boolean;
     min?: number;
     max?: number;
@@ -62,6 +63,8 @@ interface IReference {
 
 interface IOptions {
     limit?: number;
+    excelSyntax?: boolean;
+    multiline?: boolean;
 }
 
 // Define digit character set (0-9)
@@ -228,7 +231,7 @@ const anyChar = (): ICharSet => ({
 });
 
 // eslint-disable-next-line
-function tokenizer(regExpString: string) {
+function tokenizer(regExpString: string, excelSyntax: boolean) {
     const root: IToken = {
         type: CharTypes.ROOT,
         stack: [],
@@ -258,6 +261,10 @@ function tokenizer(regExpString: string) {
                 }
 
                 char = strChars[i++];
+                // shortcut: named backreferences need to be resolved by the safety tokenizer before allowing them.
+                if (excelSyntax && char === 'k') {
+                    throw new SyntaxError('Named backreferences are unsupported');
+                }
 
                 switch (char) {
                     case 'b':
@@ -372,7 +379,19 @@ function tokenizer(regExpString: string) {
                     i += 2; // Skip '?' and the following character
 
                     // Determine the group type based on the following character
-                    if (nextChar === '=') {
+                    if (nextChar === '<' && excelSyntax) {
+                        if (strChars[i] === '=' || strChars[i] === '!') {
+                            group.lookbehind = true;
+                            group.remember = false;
+                            i++;
+                        } else {
+                            // RegExp has already validated the capture group name.
+                            i = strChars.indexOf('>', i) + 1;
+                            if (i === 0) {
+                                throw new SyntaxError('Unterminated named capture group');
+                            }
+                        }
+                    } else if (nextChar === '=') {
                         group.followedBy = true; // Positive lookahead
                     } else if (nextChar === '!') {
                         group.notFollowedBy = true; // Negative lookahead
@@ -380,8 +399,11 @@ function tokenizer(regExpString: string) {
                         throw new SyntaxError(`Invalid regular expression: /${regExpString}/: Invalid group, character '${nextChar}' after '?' at column ${i - 1}`);
                     }
 
-                    group.remember = false;
-                } else {
+                    if (nextChar !== '<') {
+                        group.remember = false;
+                    }
+                }
+                if (group.remember) {
                     captureCount += 1; // Increment capture group count
                 }
 
@@ -400,6 +422,12 @@ function tokenizer(regExpString: string) {
                     throw new SyntaxError(`Invalid regular expression: /${regExpString}/: Unmatched ) at column ${i - 1}`);
                 }
 
+                if (currentScope.lookbehind && (currentScope.options || !stack.every((token) =>
+                    token.type === CharTypes.CHAR || token.type === CharTypes.SET
+                ))) {
+                    // shortcut: only sequences of fixed-width characters or classes are validated for lookbehind.
+                    throw new SyntaxError('Unsupported lookbehind');
+                }
                 currentScope = groups.pop()!;
                 stack = (currentScope.options ? currentScope.options[currentScope.options.length - 1] : currentScope.stack) as IToken[];
                 break;
@@ -632,8 +660,8 @@ function processReferences(references: IReference[], captureCount: number): void
     }
 };
 
-export function handleRegExp(regExpString: string, isGlobal: boolean, ignoreCase = false) {
-    if (!isValidRegExp(regExpString)) {
+export function handleRegExp(regExpString: string, isGlobal: boolean, ignoreCase = false, options?: IOptions) {
+    if (!options?.excelSyntax && !isValidRegExp(regExpString)) {
         return {
             isError: true,
             regExp: null,
@@ -641,9 +669,9 @@ export function handleRegExp(regExpString: string, isGlobal: boolean, ignoreCase
     }
 
     try {
-        const regExp = new RegExp(regExpString, `u${isGlobal ? 'g' : ''}${ignoreCase ? 'i' : ''}`);
+        const regExp = new RegExp(regExpString, `u${isGlobal ? 'g' : ''}${ignoreCase ? 'i' : ''}${options?.multiline ? 'm' : ''}`);
 
-        if (!isSafeRegExp(regExp)) {
+        if (!isSafeRegExp(regExp, options)) {
             return {
                 isError: true,
                 regExp: null,
@@ -683,7 +711,7 @@ function isSafeRegExp(regExp: RegExp, options?: IOptions): boolean {
     let tokens;
 
     try {
-        tokens = tokenizer(str as string);
+        tokens = tokenizer(str as string, options?.excelSyntax ?? false);
     } catch (error) { // eslint-disable-line
         return false;
     }

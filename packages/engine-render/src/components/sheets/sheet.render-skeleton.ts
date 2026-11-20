@@ -1652,7 +1652,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const { documentModel } = modelObject;
             if (documentModel) {
                 const { fontString, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
-                if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign)) {
+                const wrapsAtCellWidth = wrapStrategy === WrapStrategy.WRAP && !vertexAngle && !centerAngle && style.stf !== BooleanNumber.TRUE;
+                // Rotated and shrink-to-fit cells retain their measurement path.
+                if (FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(horizontalAlign) || wrapsAtCellWidth) {
                     updateDocumentPageWidth(documentModel, this.getCellWithCoordByIndex(row, col, false));
                 }
                 const documentViewModel = new SheetCellDocumentViewModel(documentModel);
@@ -1661,6 +1663,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     // Wrapped stacks are laid out once their physical cell height is available below.
                     if (wrapStrategy !== WrapStrategy.WRAP || centerAngle !== VERTICAL_ROTATE_ANGLE || style.stf === BooleanNumber.TRUE) {
                         documentSkeleton.calculate();
+                        // This layout already uses Font's final width; the first paint can reuse it.
+                        if (wrapsAtCellWidth) {
+                            documentSkeleton.makeDirty(false);
+                        }
                     }
 
                     config = {

@@ -26,6 +26,8 @@ export class Isref extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override calculate(value: FunctionVariantType) {
         if (!value.isReferenceObject()) {
             return BooleanValueObject.create(false);

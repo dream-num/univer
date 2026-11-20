@@ -18,7 +18,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { MoreDownIcon } from '@univerjs/icons';
 import { useContext, useMemo, useState } from 'react';
 import type { IDropdownMenuProps } from '../dropdown-menu/DropdownMenu';
-import { borderClassName, focusClassName, inputStateClassName } from '../../helper/class-utilities';
+import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { DropdownMenu } from '../dropdown-menu/DropdownMenu';
@@ -76,9 +76,18 @@ export interface ISelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
 
 export const selectClassName = clsx(`
   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center univer-justify-between
-  univer-gap-2 univer-rounded-md univer-bg-gray-0 univer-px-2.5 univer-transition-colors univer-duration-200
+  univer-gap-2 univer-rounded-md univer-bg-gray-0 univer-px-2.5 univer-outline-none univer-transition-colors
+  univer-duration-200
+  aria-[invalid=true]:!univer-border-red-600
+  focus-visible:!univer-border-primary-600 focus-visible:univer-outline-0 focus-visible:univer-ring-2
+  focus-visible:univer-ring-primary-50
+  aria-[invalid=true]:focus-visible:!univer-border-red-600 aria-[invalid=true]:focus-visible:univer-ring-red-50
   dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-`, borderClassName, focusClassName, inputStateClassName);
+  dark:aria-[invalid=true]:!univer-border-red-400
+  dark:focus-visible:!univer-border-primary-300 dark:focus-visible:!univer-ring-primary-900
+  dark:aria-[invalid=true]:focus-visible:!univer-border-red-400
+  dark:aria-[invalid=true]:focus-visible:!univer-ring-red-900
+`, borderClassName);
 
 const EMPTY_OPTIONS: NonNullable<ISelectProps['options']> = [];
 

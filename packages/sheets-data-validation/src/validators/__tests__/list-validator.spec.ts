@@ -182,6 +182,11 @@ describe('list-validator helpers', () => {
             bg: { rgb: '#ff0000' },
             tb: WrapStrategy.CLIP,
         });
+        // An entry that differs only in case resolves to the same option, including its color.
+        expect(validator.getExtraStyle(rule, 'green', { style: { tb: WrapStrategy.OVERFLOW } as any })).toEqual({
+            bg: { rgb: '#00ff00' },
+            tb: WrapStrategy.CLIP,
+        });
         expect(validator.getExtraStyle({ ...rule, renderMode: undefined }, 'Missing', { style: {} as any })).toEqual({
             tb: WrapStrategy.WRAP,
         });
@@ -209,6 +214,38 @@ describe('list-validator helpers', () => {
         )).resolves.toBe(true);
 
         expect(listCacheService.getOrCompute).toHaveBeenCalled();
+    });
+
+    it('matches list entries case-insensitively for literal and reference lists', async () => {
+        const { validator } = createContext();
+        const literalRule = {
+            uid: 'rule-case-literal',
+            type: DataValidationType.LIST,
+            formula1: 'Red,Green,Blue',
+        } as any;
+
+        await expect(validator.isValidType(
+            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            literalRule
+        )).resolves.toBe(true);
+        await expect(validator.isValidType(
+            { value: 'GREY', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            literalRule
+        )).resolves.toBe(false);
+        await expect(validator.isValidType(
+            { value: 'RED,blue', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            { ...literalRule, type: DataValidationType.LIST_MULTIPLE }
+        )).resolves.toBe(true);
+
+        // A reference-sourced list resolves through the list cache service instead of the literal parser.
+        await expect(validator.isValidType(
+            { value: 'green', unitId: 'unit1', subUnitId: 'sheet1' } as any,
+            {} as any,
+            { ...literalRule, uid: 'rule-case-reference', formula1: '=Sheet1!A1:B2' }
+        )).resolves.toBe(true);
     });
 
     it('reads cached and async list options for the active workbook', async () => {

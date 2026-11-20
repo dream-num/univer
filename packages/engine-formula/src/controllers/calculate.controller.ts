@@ -28,7 +28,6 @@ import type {
     IFormulaDependencyTreeJson,
     IFormulaDependentsAndInRangeResults,
 } from '../engine/dependency/dependency-tree';
-import type { IFormulaDirtyData } from '../services/current-data.service';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetCellFormulaDependencyCalculationMutation,
@@ -98,7 +97,7 @@ export class CalculateController extends Disposable {
         );
     }
 
-    private async _calculate(formulaDirtyData: Partial<IFormulaDirtyData>) {
+    private async _calculate(formulaDirtyData: Partial<ISetFormulaCalculationStartMutation>) {
         const {
             dirtyIterationUnits,
             dirtyReferenceUnits,
@@ -112,6 +111,7 @@ export class CalculateController extends Disposable {
             clearDependencyTreeCache = {},
             calculationSettings,
             rowData,
+            region,
             externalReferences,
             isCalculateTreeModel = false,
         } = formulaDirtyData;
@@ -144,6 +144,7 @@ export class CalculateController extends Disposable {
             calculationSettings,
             isCalculateTreeModel,
             rowData,
+            ...(region === undefined ? {} : { region }),
             externalReferences,
         };
         if (snapshot && typeof snapshotExecutor === 'function') {

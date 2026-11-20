@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, Zeilen und Spalten einzufügen. Um Zeilen und Spalten einzufügen, wenden Sie sich bitte an den Ersteller.',
                 moveRangeErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, die Auswahl zu verschieben. Um die Auswahl zu verschieben, wenden Sie sich bitte an den Ersteller.',
                 moveRowColErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, Zeilen und Spalten zu verschieben. Um Zeilen und Spalten zu verschieben, wenden Sie sich bitte an den Ersteller.',
-                operatorSheetErr: 'Das Arbeitsblatt ist geschützt, und Sie haben keine Berechtigung, das Arbeitsblatt zu bearbeiten. Um das Arbeitsblatt zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
+                operatorSheetErr: 'Sie haben keine Berechtigung, das Arbeitsblatt zu bearbeiten. Um das Arbeitsblatt zu bearbeiten, wenden Sie sich bitte an den Ersteller.',
                 removeRowColErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, Zeilen und Spalten zu löschen. Um Zeilen und Spalten zu löschen, wenden Sie sich bitte an den Ersteller.',
                 setRowColStyleErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, Zeilen- und Spaltenstile festzulegen. Um Zeilen- und Spaltenstile festzulegen, wenden Sie sich bitte an den Ersteller.',
                 setStyleErr: 'Der Bereich ist geschützt, und Sie haben keine Berechtigung, Stile festzulegen. Um Stile festzulegen, wenden Sie sich bitte an den Ersteller.',

@@ -64,19 +64,15 @@ export class Textjoin extends BaseFunction {
             return delimiterValues as ErrorValueObject;
         }
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(ignoreEmpty);
+        const ignoreEmptyValue = this._readIgnoreEmpty(ignoreEmpty);
 
-        if (isError) {
-            return errorObject as ErrorValueObject;
+        if (ignoreEmptyValue instanceof ErrorValueObject) {
+            return ignoreEmptyValue;
         }
 
         if (textValues instanceof ErrorValueObject) {
-            return textValues as ErrorValueObject;
+            return textValues;
         }
-
-        const [ignoreEmptyObject] = variants as BaseValueObject[];
-
-        const ignoreEmptyValue = +ignoreEmptyObject.getValue();
 
         let _textValues = textValues;
 
@@ -96,7 +92,20 @@ export class Textjoin extends BaseFunction {
             }
         }
 
-        return StringValueObject.create(result);
+        return this._createResult(result);
+    }
+
+    protected _readIgnoreEmpty(value: BaseValueObject): boolean | ErrorValueObject {
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(value);
+        return isError ? errorObject as ErrorValueObject : Boolean(Number(variants![0].getValue()));
+    }
+
+    protected _formatNumber(value: number): string {
+        return formatNumberForFormulaText(value);
+    }
+
+    protected _createResult(value: string): BaseValueObject {
+        return StringValueObject.create(value);
     }
 
     private _getDelimiterValues(delimiter: BaseValueObject): string[] | ErrorValueObject {
@@ -114,7 +123,7 @@ export class Textjoin extends BaseFunction {
                 }
 
                 let value = valueObject.isNumber()
-                    ? formatNumberForFormulaText(Number(valueObject.getValue()))
+                    ? this._formatNumber(Number(valueObject.getValue()))
                     : String(valueObject.getValue());
 
                 if (valueObject.isNull()) {
@@ -153,7 +162,7 @@ export class Textjoin extends BaseFunction {
                     }
 
                     let value = valueObject.isNumber()
-                        ? formatNumberForFormulaText(Number(valueObject.getValue()))
+                        ? this._formatNumber(Number(valueObject.getValue()))
                         : String(valueObject.getValue());
 
                     if (valueObject.isBoolean()) {

@@ -911,14 +911,18 @@ describe('Test indirect', () => {
             expect((result as BaseValueObject).getValue()).toStrictEqual(3);
         });
 
-        it('resolves blank current-row cells with normalized line-break column names', async () => {
+        it.each([[0, false], [1, true]])('checks a blank current-row cell with a line-break header on row %i', (row, expected) => {
+            const runtime = get(IFormulaRuntimeService);
+            runtime.setCurrent(row, 5, runtime.currentRowCount, runtime.currentColumnCount, runtime.currentSubUnitId, runtime.currentUnitId);
             const lexerNode = lexer.treeBuilder('=ISBLANK(Table1[[#This Row],[Blank\r\nColumn]])') as LexerNode;
             const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
-            expect((result as BaseValueObject).getValue()).toBe(true);
+            expect((result as BaseValueObject).getValue()).toBe(expected);
         });
 
         it('calculates FMEA current-row formulas with parenthesized column names', () => {
+            const runtime = get(IFormulaRuntimeService);
+            runtime.setCurrent(1, 5, runtime.currentRowCount, runtime.currentColumnCount, runtime.currentSubUnitId, runtime.currentUnitId);
             const lexerNode = lexer.treeBuilder(
                 '=IF(OR(ISBLANK(Table_FMEA[[#This Row],[F\r\n(1-5)]]),ISBLANK(Table_FMEA[[#This Row],[S\r\n(1-5)]]))," - ",Table_FMEA[[#This Row],[F\r\n(1-5)]]*Table_FMEA[[#This Row],[S\r\n(1-5)]])'
             ) as LexerNode;
@@ -1104,6 +1108,8 @@ describe('Linear forecasts and scalar arguments', () => {
         ['=VDB(2400,300,10,8,10,2,"TRUE")', 102.653184],
         ['=FORECAST.ETS(5,{8,14,11,20},{1,2,3,4},0)', 21.716830212285714],
         ['=FORECAST.ETS.STAT({8,14,11,20},{1,2,3,4},2,0)', 0.001],
+        ['=FORECAST.ETS(200,{1.5,2,3.25,4,5.5,8,13,21,34,55},{12,18,24,30,36,42,7,5,9,60},0,0)', 51.65917288045224],
+        ['=FORECAST.ETS.STAT({1.5,2,3.25,4,5.5,8,13,21,34,55},{12,18,24,30,36,42,7,5,9,60},1,0)', 0.998],
         ['=FORECAST.ETS.SEASONALITY({18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8})', 2],
         ['=FORECAST.ETS.CONFINT(9,{18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8},0.95,4)', 0],
         ['=FORECAST.ETS(NA(),{8,14,11,20},{1,2,3,4})', ErrorType.NA],
@@ -1129,6 +1135,28 @@ describe('Linear forecasts and scalar arguments', () => {
             } else {
                 expect(actual).toBe(expected);
             }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Excel array arguments and sheet references', () => {
+    it.each([
+        ['=TEXTJOIN("|",FALSE,FREQUENCY({-1,0,"2",8,11,TRUE},{10,0,10,0}))', '1|2|0|0|1'],
+        ['=TEXTJOIN("|",FALSE,FREQUENCY({-1,0,2,8,11},C1))', '2|3'],
+        ['=FREQUENCY(1/0,NA())', ErrorType.DIV_BY_ZERO],
+        ['=EXPAND({1,2},2,3,{8,9})', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(EXPAND({1,2},2,3,),1)', '{1,2,0;0,0,0}'],
+        ['=EXPAND({1,2},-2,3,9)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(SORT({2,9;1,8;2,7},{1,2}),1)', '{1,8;2,7;2,9}'],
+        ['=SORT(1,2,1)', ErrorType.VALUE],
+        ['=SHEETS(B1)', 1],
+        ['=SHEETS(INDIRECT("nope"))', ErrorType.REF],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
         } finally {
             bed.univer.dispose();
         }

@@ -155,25 +155,22 @@ export class BaseReferenceObject extends ObjectClassType {
 
     getRangePosition() {
         const { x, y } = this.getRefOffset();
-        const newRange = moveRangeByOffset(this.getRangeData(), x, y);
-
-        if (Number.isNaN(newRange.startRow)) {
-            newRange.startRow = 0;
+        const range = moveRangeByOffset(this.getRangeData(), x, y);
+        const openStartRow = Number.isNaN(range.startRow);
+        const openStartColumn = Number.isNaN(range.startColumn);
+        const openEndRow = Number.isNaN(range.endRow);
+        const openEndColumn = Number.isNaN(range.endColumn);
+        if (!openStartRow && !openStartColumn && !openEndRow && !openEndColumn) {
+            return range;
         }
 
-        if (Number.isNaN(newRange.startColumn)) {
-            newRange.startColumn = 0;
-        }
-
-        if (Number.isNaN(newRange.endRow)) {
-            newRange.endRow = this.getActiveSheetRowCount() - 1;
-        }
-
-        if (Number.isNaN(newRange.endColumn)) {
-            newRange.endColumn = this.getActiveSheetColumnCount() - 1;
-        }
-
-        return newRange;
+        return {
+            ...range,
+            startRow: openStartRow ? 0 : range.startRow,
+            startColumn: openStartColumn ? 0 : range.startColumn,
+            endRow: openEndRow ? this.getActiveSheetRowCount() - 1 : range.endRow,
+            endColumn: openEndColumn ? this.getActiveSheetColumnCount() - 1 : range.endColumn,
+        };
     }
 
     override isReferenceObject() {

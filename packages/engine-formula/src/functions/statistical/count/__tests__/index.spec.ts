@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -23,7 +24,17 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Count } from '../index';
 
 describe('Test count function', () => {
-    const testFunction = new Count(FUNCTION_NAMES_STATISTICAL.COUNT);
+    let injector: Injector;
+    let testFunction: Count;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Count, { useFactory: () => injector.createInstance(Count, FUNCTION_NAMES_STATISTICAL.COUNT) }],
+        ]);
+        testFunction = injector.get(Count);
+    });
+
+    afterEach(() => injector.dispose());
 
     describe('Count', () => {
         it('Var1 is error', () => {
@@ -64,7 +75,10 @@ describe('Test count function', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(2);
+        });
+        it('counts explicitly omitted scalar arguments', () => {
+            expect(testFunction.calculate(NullValueObject.create(true), NullValueObject.create(true)).getValue()).toBe(2);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);

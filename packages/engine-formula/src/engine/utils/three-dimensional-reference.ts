@@ -69,7 +69,8 @@ export function createThreeDimensionalReference(
     return new MultiAreaReferenceObject(
         `${firstSheetName}:${source.getToken()}`,
         areas,
-        MultiAreaArrayMode.STACK_AREAS
+        MultiAreaArrayMode.STACK_AREAS,
+        true
     );
 }
 

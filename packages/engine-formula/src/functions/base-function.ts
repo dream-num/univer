@@ -108,9 +108,13 @@ export class BaseFunction {
      */
     needsAstChildren: boolean = false;
 
+    bindCalculationRegion?(getRegion: () => LocaleType): void;
+
     /**
      * Arguments that preserve a selected lazy IF branch as a reference array.
      */
+    implicitIntersectionReferenceArguments: readonly number[] = [];
+
     lazyIfReferenceArrayArgumentIndexes: readonly number[] = [];
 
     /**
@@ -243,6 +247,18 @@ export class BaseFunction {
 
     isAddress() {
         return false;
+    }
+
+    needsAddressDependencies?: (args: readonly BaseAstNode[]) => boolean;
+
+    evaluatesIfArgumentsAsArrays?: boolean;
+
+    resolveAddressDependencyReferences?: (
+        argument: (index: number) => Promise<BaseReferenceObject | null>
+    ) => Promise<readonly BaseReferenceObject[]>;
+
+    takeAddressDependencyReferences(): readonly BaseReferenceObject[] | undefined {
+        return undefined;
     }
 
     isCustom() {
@@ -692,6 +708,10 @@ export class BaseFunction {
         object.setUnitData(reference.getUnitData());
         object.setRuntimeData(reference.getRuntimeData());
         object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
+        object.setArrayFormulaRange(reference.getArrayFormulaRange());
+        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
+        object.setRuntimeArrayFormulaRange(reference.getRuntimeArrayFormulaRange());
+        object.setRuntimeFeatureCellData(reference.getRuntimeFeatureCellData());
         object.setUnitStylesData(reference.getUnitStylesData());
 
         return object;

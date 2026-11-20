@@ -14,16 +14,40 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Iferror } from '../index';
 
 describe('Test iferror function', () => {
-    const testFunction = new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR);
+    let injector: Injector;
+    let testFunction: Iferror;
+
+    beforeEach(() => {
+        injector = new Injector([
+            [Iferror, { useFactory: () => injector.createInstance(Iferror, FUNCTION_NAMES_LOGICAL.IFERROR) }],
+        ]);
+        testFunction = injector.get(Iferror);
+    });
+
+    afterEach(() => injector.dispose());
+
+    it('coerces array blanks without changing scalar blanks or its input', () => {
+        const value = ArrayValueObject.create({ calculateValueList: transformToValueObject([[null], [''], [false], [0]]), rowCount: 4, columnCount: 1, unitId: '', sheetId: '', row: 0, column: 0 });
+        const result = testFunction.calculate(value, NumberValueObject.create(99)) as ArrayValueObject;
+        expect(transformToValue(result.getArrayValue())).toEqual([[0], [''], [false], [0]]);
+        expect(value.getFirstCell().isNull()).toBe(true);
+        expect(testFunction.calculate(NullValueObject.create(), NumberValueObject.create(99)).isNull()).toBe(true);
+    });
+
+    it('uses the fallback for missing array positions', () => {
+        const result = testFunction.calculate(ArrayValueObject.create('{1;2}'), ArrayValueObject.create('{99;99;99}')) as ArrayValueObject;
+        expect(transformToValue(result.getArrayValue())).toEqual([[1], [2], [99]]);
+    });
 
     describe('Iferror', () => {
         it('Value is normal', () => {

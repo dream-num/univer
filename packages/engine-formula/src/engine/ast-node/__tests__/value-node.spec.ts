@@ -21,6 +21,7 @@ import { FUNCTION_NAMES_INFORMATION } from '../../../functions/information/funct
 import { Isnumber } from '../../../functions/information/isnumber';
 import { Compare } from '../../../functions/meta/compare';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
+import { Minus } from '../../../functions/meta/minus';
 import { Concatenate } from '../../../functions/text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../../../functions/text/function-names';
 import { getObjectValue } from '../../../functions/util';
@@ -55,10 +56,12 @@ function createCalculate(testBed: ReturnType<typeof createFunctionTestBed>) {
         allUnitData: { [testBed.unitId]: testBed.sheetData },
     });
     runtimeService.setCurrent(0, 0, 1, 1, testBed.sheetId, testBed.unitId);
+    const injector = testBed.univer.__getInjector();
     testBed.get(IFunctionService).registerExecutors(
-        new Compare(FUNCTION_NAMES_META.COMPARE),
-        new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
-        new Isnumber(FUNCTION_NAMES_INFORMATION.ISNUMBER)
+        injector.createInstance(Compare, FUNCTION_NAMES_META.COMPARE),
+        injector.createInstance(Minus, FUNCTION_NAMES_META.MINUS),
+        injector.createInstance(Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE),
+        injector.createInstance(Isnumber, FUNCTION_NAMES_INFORMATION.ISNUMBER)
     );
 
     return (formula: string) => {
@@ -120,6 +123,17 @@ describe('ValueNode number literals', () => {
         expect(calculate('="12.50"')).toBe('12.50');
         expect(calculate('="007"&""')).toBe('007');
         expect(calculate('=ISNUMBER("12.50")')).toBe(false);
+    });
+
+    it.each([
+        { formula: '=@{1,2;3,4}', expected: 1 },
+        { formula: '=@ {TRUE,FALSE}', expected: true },
+        { formula: '=@@{2,3}', expected: 2 },
+        { formula: '=@{#N/A,1}', expected: ErrorType.NA },
+        { formula: '=ISNUMBER(@{"2",3})', expected: false },
+        { formula: '="@{1,2}"', expected: '@{1,2}' },
+    ])('applies implicit intersection to constant values in $formula', ({ formula, expected }) => {
+        expect(createCalculate(testBed)(formula)).toStrictEqual(expected);
     });
 
     it('returns NUM errors for overflowing scalar and array number literals', () => {

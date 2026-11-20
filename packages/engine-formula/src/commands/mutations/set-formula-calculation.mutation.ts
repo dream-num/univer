@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, IUnitRange, LocaleType, Nullable } from '@univerjs/core';
 import type {
     IFormulaData,
     IFormulaExecuteResultMap,
@@ -33,6 +33,7 @@ import { CommandType } from '@univerjs/core';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
+    region?: LocaleType;
 }
 
 export interface ISetFormulaStringBatchCalculationMutation {

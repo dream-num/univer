@@ -122,7 +122,7 @@ export class Text extends BaseFunction {
     }
 }
 
-function normalizeExcelWeekdayFormat(formatText: string): string {
+export function normalizeExcelWeekdayFormat(formatText: string): string {
     if (!formatText.includes('\u00C5')) {
         return formatText;
     }

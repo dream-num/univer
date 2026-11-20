@@ -88,8 +88,10 @@ export class TableReferenceObject extends BaseReferenceObject {
                 endRow = tableStartRow;
                 break;
             case TableOptionType.TOTALS:
-                startRow = tableEndRow;
-                endRow = tableEndRow;
+                if (this._tableData.showFooter !== false) {
+                    startRow = tableEndRow;
+                    endRow = tableEndRow;
+                }
                 break;
             case TableOptionType.THIS_ROW: {
                 const r = this._resolveThisRow(dataStartRow, dataEndRow);
@@ -109,6 +111,22 @@ export class TableReferenceObject extends BaseReferenceObject {
             startRow,
             endRow,
         });
+    }
+
+    getReferenceError(row: number, isBase: boolean): ErrorType | undefined {
+        const range = super.getRangeData();
+        const table = this._tableData;
+        if (range.startColumn < table.range.startColumn || range.endColumn > table.range.endColumn ||
+            range.endColumn < range.startColumn || range.startRow < 0 || range.endRow < range.startRow) {
+            return ErrorType.REF;
+        }
+        if (this._isCurrentRowForRange && !isBase) {
+            const firstDataRow = table.range.startRow + (table.showHeader === false ? 0 : 1);
+            const lastDataRow = table.range.endRow - (table.showFooter === true ? 1 : 0);
+            if (row < firstDataRow || row > lastDataRow) {
+                return ErrorType.VALUE;
+            }
+        }
     }
 
     override getRangeData() {
@@ -370,9 +388,9 @@ export class TableReferenceObject extends BaseReferenceObject {
         const normalizedHit = titleMap.get(keyNorm);
         if (normalizedHit !== undefined) return normalizedHit;
 
-        const lineBreakNorm = keyNorm.replace(/\r\n?/g, '\n');
+        const lineBreakNorm = keyNorm.replace(/\r\n?/g, '\n').toLowerCase();
         for (const [title, index] of titleMap.entries()) {
-            if (title.replace(/\u3000/g, ' ').trim().replace(/\r\n?/g, '\n') === lineBreakNorm) {
+            if (title.replace(/\u3000/g, ' ').trim().replace(/\r\n?/g, '\n').toLowerCase() === lineBreakNorm) {
                 return index;
             }
         }

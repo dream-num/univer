@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Thử tên khác hoặc xóa nội dung tìm kiếm.',
                 commonErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thực hiện thao tác này. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
                 editErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
+                operatorSheetErr: 'Hiện không có quyền thao tác trên trang bảng. Nếu cần thao tác trên trang bảng, vui lòng liên hệ với người tạo.',
                 pasteErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền dán. Nếu cần dán, vui lòng liên hệ với người tạo.',
                 setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
                 copyErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền sao chép. Nếu cần sao chép, vui lòng liên hệ với người tạo.',

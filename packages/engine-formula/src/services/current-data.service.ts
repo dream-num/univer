@@ -23,6 +23,8 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    Optional,
+    RegionService,
     UniverInstanceType,
 } from '@univerjs/core';
 import type {
@@ -141,6 +143,7 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
+    getCalculationRegion(): LocaleType;
     getDateSystem(unitId?: string): DateSystem;
 
     getSheetsInfo(unitId?: string): {
@@ -203,12 +206,14 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
+    private _calculationRegion: LocaleType | undefined;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService
+        @Inject(ISheetRowFilteredService) private readonly _sheetRowFilteredService: ISheetRowFilteredService,
+        @Optional(RegionService) private readonly _regionService?: RegionService
     ) {
         super();
     }
@@ -347,6 +352,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._localeService.getCurrentLocale();
     }
 
+    getCalculationRegion(): LocaleType {
+        return this._calculationRegion ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
+    }
+
     getDateSystem(unitId = this._executeUnitId ?? undefined): DateSystem {
         if (!unitId) return DateSystem.Date1900;
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getDateSystem() ?? DateSystem.Date1900;
@@ -413,6 +422,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _loadFormulaDataset(config: IFormulaDatasetConfig | Omit<IFormulaDatasetConfig, 'formulaData'>, snapshot?: IFormulaDataSnapshot): void {
         this._calculationGeneration++;
+        this._calculationRegion = config.region ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
         this._calculationRowData = Object.create(null);
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
             this._unitData = copyUnitData(config.allUnitData);

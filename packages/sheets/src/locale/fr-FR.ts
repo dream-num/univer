@@ -46,7 +46,7 @@ const locale: typeof enUS = {
                 insertRowColErr: 'La plage est protégée, et vous n\'avez pas la permission d\'insérer des lignes et des colonnes. Pour insérer des lignes et des colonnes, veuillez contacter le créateur.',
                 moveRangeErr: 'La plage est protégée, et vous n\'avez pas la permission de déplacer la sélection. Pour déplacer la sélection, veuillez contacter le créateur.',
                 moveRowColErr: 'La plage est protégée, et vous n\'avez pas la permission de déplacer les lignes et les colonnes. Pour déplacer les lignes et les colonnes, veuillez contacter le créateur.',
-                operatorSheetErr: 'La feuille de calcul est protégée, et vous n\'avez pas la permission de travailler sur la feuille de calcul. Pour travailler sur la feuille de calcul, veuillez contacter le créateur.',
+                operatorSheetErr: 'Vous n\'avez pas la permission de travailler sur la feuille de calcul. Pour travailler sur la feuille de calcul, veuillez contacter le créateur.',
                 removeRowColErr: 'La plage est protégée, et vous n\'avez pas la permission de supprimer les lignes et les colonnes. Pour supprimer les lignes et les colonnes, veuillez contacter le créateur.',
                 setRowColStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles de ligne et de colonne. Pour définir les styles de ligne et de colonne, veuillez contacter le créateur.',
                 setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',

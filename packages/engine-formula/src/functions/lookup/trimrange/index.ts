@@ -20,9 +20,12 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { copyReferenceContext } from '../../../engine/utils/three-dimensional-reference';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { FUNCTION_NAMES_LOOKUP } from '../function-names';
 
 const DENSE_TRIM_LIMIT = 4096;
 
@@ -38,8 +41,14 @@ export class Trimrange extends BaseFunction {
             return value;
         }
 
-        const rowMode = getTrimMode(rows);
-        const columnMode = getTrimMode(columns);
+        const rowArg = readTrimArgument(rows);
+        const columnArg = readTrimArgument(columns);
+        if (rowArg?.isArray() || columnArg?.isArray()) {
+            return trimArrayArguments(rowArg, columnArg);
+        }
+
+        const rowMode = getTrimMode(rowArg);
+        const columnMode = getTrimMode(columnArg);
         if (typeof rowMode !== 'number') {
             return rowMode;
         }
@@ -68,26 +77,36 @@ export class Trimrange extends BaseFunction {
     }
 }
 
-function getTrimMode(arg?: FunctionVariantType) {
-    if (arg == null) {
+export class TrimReferenceOperator extends Trimrange {
+    override maxParams = 1;
+
+    override calculate(value: FunctionVariantType) {
+        const mode = this.name === FUNCTION_NAMES_LOOKUP._TRO_LEADING ? 1 : this.name === FUNCTION_NAMES_LOOKUP._TRO_TRAILING ? 2 : 3;
+        const argument = NumberValueObject.create(mode);
+        return super.calculate(value, argument, argument);
+    }
+}
+
+function readTrimArgument(arg?: FunctionVariantType): BaseValueObject | undefined {
+    if (!arg?.isReferenceObject()) {
+        return arg as BaseValueObject | undefined;
+    }
+    const reference = arg as BaseReferenceObject;
+    if (reference.isMultiArea()) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+    const range = reference.getRangePosition();
+    if (range.startRow !== range.endRow || range.startColumn !== range.endColumn) {
+        return reference.toArrayValueObject();
+    }
+    const value = reference.getFirstCell();
+    return value.isNull() ? NumberValueObject.create(0) : value;
+}
+
+function getTrimMode(value?: BaseValueObject) {
+    if (value == null || value.isNull()) {
         return 3;
     }
-
-    let value: BaseValueObject;
-    if (arg.isReferenceObject()) {
-        const reference = arg as BaseReferenceObject;
-        const range = reference.getRangePosition();
-        if (reference.isMultiArea() || range.startRow !== range.endRow || range.startColumn !== range.endColumn) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-        value = reference.getFirstCell();
-    } else {
-        value = arg as BaseValueObject;
-        if (value.isNull()) {
-            return 3;
-        }
-    }
-
     if (value.isError()) {
         return value;
     }
@@ -96,6 +115,23 @@ function getTrimMode(arg?: FunctionVariantType) {
     }
     const mode = Number(value.getValue());
     return Number.isInteger(mode) && mode >= 0 && mode <= 3 ? mode : ErrorValueObject.create(ErrorType.VALUE);
+}
+
+function trimArrayArguments(rows?: BaseValueObject, columns?: BaseValueObject) {
+    const rowArg = rows ?? NumberValueObject.create(3);
+    const columnArg = columns ?? NumberValueObject.create(3);
+    const rowArray = rowArg.isArray() ? rowArg as ArrayValueObject : undefined;
+    const columnArray = columnArg.isArray() ? columnArg as ArrayValueObject : undefined;
+    const rowCount = Math.max(rowArray?.getRowCount() ?? 1, columnArray?.getRowCount() ?? 1);
+    const columnCount = Math.max(rowArray?.getColumnCount() ?? 1, columnArray?.getColumnCount() ?? 1);
+    const missing = ErrorValueObject.create(ErrorType.NA);
+    const expandedRows = expandArrayValueObject(rowCount, columnCount, rowArg, missing);
+    const expandedColumns = expandArrayValueObject(rowCount, columnCount, columnArg, missing);
+    const invalid = ErrorValueObject.create(ErrorType.VALUE);
+    return expandedRows.mapValue((row, rowIndex, columnIndex) => {
+        const column = expandedColumns.get(rowIndex, columnIndex);
+        return row?.isError() ? row : column?.isError() ? column : invalid;
+    });
 }
 
 function trimReference(reference: BaseReferenceObject, rowMode: number, columnMode: number) {
@@ -118,7 +154,13 @@ function trimReference(reference: BaseReferenceObject, rowMode: number, columnMo
         return ErrorValueObject.create(ErrorType.REF);
     }
 
-    const trimmed = new RangeReferenceObject(bounds, reference.getForcedSheetId(), reference.getForcedUnitId());
+    // Use the allocated grid to find data and preserve an open end for an untrimmed tail.
+    const raw = reference.getRangeData();
+    const trimmed = new RangeReferenceObject({
+        ...bounds,
+        endRow: !(rowMode & 2) && Number.isNaN(raw.endRow) ? Number.NaN : bounds.endRow,
+        endColumn: !(columnMode & 2) && Number.isNaN(raw.endColumn) ? Number.NaN : bounds.endColumn,
+    }, reference.getForcedSheetId(), reference.getForcedUnitId());
     copyReferenceContext(reference, trimmed);
     trimmed.setForcedSheetName(reference.getForcedSheetName());
     trimmed.setRefOffset(0, 0);

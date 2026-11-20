@@ -58,7 +58,7 @@ export class Rept extends BaseFunction {
                 return textObject;
             }
 
-            let textValue = textObject.getValue();
+            let textValue = this._textValue(textObject);
 
             if (textObject.isNull()) {
                 textValue = '';
@@ -81,7 +81,7 @@ export class Rept extends BaseFunction {
             const stringMaxLength = 32767;
             const numberTimesValue = Math.floor(+numberTimesObject.getValue());
 
-            if (numberTimesValue < 0 || numberTimesValue > stringMaxLength / (textValue as string).length) {
+            if (numberTimesValue < 0 || numberTimesValue > this._maxTimes(stringMaxLength, (textValue as string).length)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -95,5 +95,13 @@ export class Rept extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _textValue(value: BaseValueObject): string | number | boolean | null {
+        return value.getValue();
+    }
+
+    protected _maxTimes(stringMaxLength: number, textLength: number): number {
+        return stringMaxLength / textLength;
     }
 }

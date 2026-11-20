@@ -16,10 +16,9 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Subscription } from 'rxjs';
 import { RxDisposable } from '@univerjs/core';
-import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
-import { filter, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, defer, firstValueFrom, isObservable, Observable, of, Subject } from 'rxjs';
+import { filter, finalize, take, takeUntil, tap } from 'rxjs/operators';
 
 // TODO: change this parameter type to `Serializable`.
 
@@ -295,10 +294,12 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
 
     private _remoteSubscribe(channelName: string, method: string, args?: any): Observable<any> {
         return new Observable((subscriber) => {
-            let sequence: number = -1;
-
             const doSubscribe = () => {
-                sequence = ++this._lastRequestCounter;
+                if (subscriber.closed) {
+                    return;
+                }
+
+                const sequence = ++this._lastRequestCounter;
                 const type = RequestType.SUBSCRIBE;
                 const request: IRPCRequest = { seq: sequence, type, channelName, method, args };
 
@@ -324,6 +325,10 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
                 };
 
                 this._pendingRequests.set(sequence, responseHandler);
+                subscriber.add(() => {
+                    this._pendingRequests.delete(sequence);
+                    this._sendRequest({ type: RequestType.UNSUBSCRIBE, seq: sequence, channelName, method });
+                });
                 this._sendRequest(request);
             };
 
@@ -332,22 +337,8 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
             if (this._initialized.getValue()) {
                 doSubscribe();
             } else {
-                this._whenReady().then(doSubscribe);
+                this._whenReady().then(doSubscribe).catch((error: unknown) => subscriber.error(error));
             }
-
-            return () => {
-                if (sequence === -1) {
-                    return;
-                }
-
-                const cancelSubscriptionRequest: IRPCRequest = {
-                    type: RequestType.UNSUBSCRIBE,
-                    seq: sequence,
-                    channelName,
-                    method,
-                };
-                this._sendRequest(cancelSubscriptionRequest);
-            };
         });
     }
 
@@ -378,7 +369,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
 export class ChannelServer extends RxDisposable implements IChannelServer {
     private _channels = new Map<string, IChannel>();
 
-    private _subscriptions = new Map<number, Subscription>();
+    private _subscriptions = new Map<number, Subject<void>>();
 
     constructor(private readonly _protocol: IMessageProtocol) {
         super();
@@ -390,8 +381,8 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     override dispose(): void {
         super.dispose();
 
-        for (const subscription of this._subscriptions.values()) {
-            subscription.unsubscribe();
+        for (const cancel$ of this._subscriptions.values()) {
+            cancel$.next();
         }
         this._subscriptions.clear();
         this._channels.clear();
@@ -452,44 +443,43 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     }
 
     private _onSubscribe(request: IRPCRequest): void {
-        const { channelName, seq } = request;
-        const channel = this._channels.get(channelName);
+        const { channelName, seq, method, args } = request;
+        if (this._subscriptions.has(seq)) {
+            return;
+        }
 
-        try {
+        const cancel$ = new Subject<void>();
+        this._subscriptions.set(seq, cancel$);
+
+        defer(() => {
+            const channel = this._channels.get(channelName);
             if (!channel) {
                 throw new Error(`[ChannelServer]: Channel ${channelName} not found!`);
             }
 
-            const observable = channel.subscribe(request.method, request.args);
-            const subscription = observable.subscribe({
-                next: (data) => {
-                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_NEXT, data });
-                },
-                error: (err) => {
-                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });
-                    this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
-                },
+            return channel.subscribe(method, args);
+        }).pipe(
+            // Report completion from the source only, since cancellation also completes the pipeline.
+            tap({
                 complete: () => {
                     this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_COMPLETE });
                 },
-            });
-
-            this._subscriptions.set(request.seq, subscription);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_ERROR, data: err.message });
-            } else {
-                this._sendResponse({ seq: request.seq, type: ResponseType.SUBSCRIBE_ERROR, data: String(err) });
-            }
-        }
+            }),
+            takeUntil(cancel$),
+            finalize(() => this._subscriptions.delete(seq))
+        ).subscribe({
+            next: (data) => {
+                this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_NEXT, data });
+            },
+            error: (error: unknown) => {
+                const data = error instanceof Error ? error.message : String(error);
+                this._sendResponse({ seq, type: ResponseType.SUBSCRIBE_ERROR, data });
+            },
+        });
     }
 
     private _onUnsubscribe(request: IRPCRequest): void {
-        const subscription = this._subscriptions.get(request.seq);
-        if (subscription) {
-            subscription.unsubscribe();
-            this._subscriptions.delete(request.seq);
-        }
+        this._subscriptions.get(request.seq)?.next();
     }
 
     private _sendResponse(response: IRPCResponse): void {

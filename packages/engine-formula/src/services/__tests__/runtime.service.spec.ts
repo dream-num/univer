@@ -212,7 +212,7 @@ describe('FormulaRuntimeService', () => {
         }
     });
 
-    it('indexes scalar and spilled null results as blanks, consistently with reference scans', () => {
+    it('indexes scalar and spilled empty formula results as numeric zero', () => {
         const { injector, runtime } = createRuntimeService();
         const index = runtime.getCalculationCache()!.invertedIndex;
         try {
@@ -220,11 +220,13 @@ describe('FormulaRuntimeService', () => {
             runtime.setRuntimeData(NumberValueObject.create(7));
             index.setContinueBuildingCache('unit', 'sheet', 3, 0, 19);
             runtime.setRuntimeData(NullValueObject.create());
-            expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBeNull();
-            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2]);
+            expect(runtime.getUnitData().unit?.sheet?.getValue(2, 3)?.v).toBe(0);
+            expect(index.getCellPositions('unit', 'sheet', 3, 0, [[0, 19]])?.matchingRows).toEqual([2]);
             runtime.setCurrent(4, 3, 20, 20, 'sheet', 'unit');
             runtime.setRuntimeData(createNewArray([[NullValueObject.create()], [NumberValueObject.create(1)]], 2, 1));
-            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows).toEqual([2, 4]);
+            expect(index.getCellPositions('unit', 'sheet', 3, 0, [[0, 19]])?.matchingRows).toEqual([2, 4]);
+            expect(index.getCellPositions('unit', 'sheet', 3, '', [[0, 19]])?.matchingRows ?? []).toEqual([]);
+            expect(runtime.getRuntimeArrayFormulaCellData().unit?.sheet?.getValue(4, 3)?.v).toBe(0);
         } finally {
             index.clear();
             injector.dispose();

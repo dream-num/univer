@@ -80,7 +80,7 @@ function parseComplexPart(part: string, dateSystem: DateSystem): number | null {
  * Reads the coefficient of the imaginary unit. Excel accepts an empty
  * coefficient and a bare sign, e.g. `i`, `1+i` and `-i`.
  */
-function parseImaginaryCoefficient(part: string, dateSystem: DateSystem): number | null {
+function parseImaginaryCoefficient(part: string, dateSystem: DateSystem, parsePart: typeof parseComplexPart): number | null {
     const value = part.trim();
 
     if (value === '' || value === '+') {
@@ -91,7 +91,7 @@ function parseImaginaryCoefficient(part: string, dateSystem: DateSystem): number
         return -1;
     }
 
-    return parseComplexPart(value, dateSystem);
+    return parsePart(value, dateSystem);
 }
 
 /**
@@ -185,7 +185,11 @@ export class Complex {
 
     private _dateSystem: DateSystem = DateSystem.Date1900;
 
-    constructor(inumber: number | string, dateSystem: DateSystem = DateSystem.Date1900) {
+    constructor(
+        inumber: number | string,
+        dateSystem: DateSystem = DateSystem.Date1900,
+        private readonly _parsePart = parseComplexPart
+    ) {
         this._inumber = inumber;
         this._dateSystem = dateSystem;
         this._parseInumber();
@@ -198,6 +202,11 @@ export class Complex {
      * be read makes the whole number invalid.
      */
     private _parseInumber(): void {
+        if (this._parsePart !== parseComplexPart && typeof this._inumber === 'number') {
+            this._realNum = this._inumber;
+            this._isError = !Number.isFinite(this._inumber);
+            return;
+        }
         const inumberStr = `${this._inumber}`.trim();
 
         if (inumberStr === '') {
@@ -231,8 +240,8 @@ export class Complex {
             }
         }
 
-        const realNum = realText === '' ? 0 : parseComplexPart(realText, this._dateSystem);
-        const iNum = iText === null ? 0 : parseImaginaryCoefficient(iText, this._dateSystem);
+        const realNum = realText === '' ? 0 : this._parsePart(realText, this._dateSystem);
+        const iNum = iText === null ? 0 : parseImaginaryCoefficient(iText, this._dateSystem, this._parsePart);
         const iSign = separatorIndex >= 0 && body[separatorIndex] === '-' ? -1 : 1;
 
         if (realNum === null || iNum === null) {

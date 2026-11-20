@@ -22,7 +22,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import { getDaysInMonth } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { detectEtsPeriod, etsSlope, trainEts } from '../../../basics/ets-model';
+import { detectEtsPeriod, trainEts } from '../../../basics/ets-model';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -46,7 +46,6 @@ interface ITimeline {
 interface ISeries {
     first: number;
     values: number[];
-    irregular: boolean;
 }
 
 export abstract class EtsFunction extends BaseFunction {
@@ -78,6 +77,14 @@ export abstract class EtsFunction extends BaseFunction {
         const season = auto ? 1 : readInteger(args[optionIndex], 1, 0, 0x7FFFFFFF);
         const completion = readInteger(args[completionIndex], 1, 0, 1);
         const aggregation = readInteger(args[completionIndex + 1], 1, 1, 7);
+        let observedCount = 0;
+        if (!(history instanceof ErrorValueObject)) {
+            for (const samples of history.groups.values()) {
+                if (samples.length > 0) {
+                    observedCount++;
+                }
+            }
+        }
         let prepared: ISeries | ErrorType | undefined;
         let period = 0;
         let model: IEtsModel | undefined;
@@ -94,6 +101,9 @@ export abstract class EtsFunction extends BaseFunction {
             if (typeof completion !== 'number') return completion;
             if (typeof aggregation !== 'number') return aggregation;
             if (history instanceof ErrorValueObject) return history;
+            if (completion === 1 && observedCount < 2) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
 
             if (dataIndex === 1 && (!Number.isFinite(target) || target < history.first || (confidenceMode && target <= history.last))) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -106,17 +116,13 @@ export abstract class EtsFunction extends BaseFunction {
                 if (typeof prepared !== 'string') {
                     period = season === 1
                         ? detectEtsPeriod(prepared.values)
-                        : season <= 8760 && season * 2 <= prepared.values.length ? season : 0;
+                        : season <= 8760 && season < Math.floor(prepared.values.length * 7 / 10) ? season : 0;
                 }
             }
             if (typeof prepared === 'string') return ErrorValueObject.create(prepared);
             if (auto) return NumberValueObject.create(period);
 
-            const { values, first, irregular } = prepared;
-            if (irregular && period === 0 && values.length <= 10) {
-                if (this.mode !== 'forecast' || completion === 0) return ErrorValueObject.create(ErrorType.NUM);
-                return finiteNumber(values[values.length - 1] + (target - history.last) * etsSlope(values, [0]) / history.step);
-            }
+            const { values, first } = prepared;
             model ??= trainEts(values, period);
             if (statisticMode) return finiteNumber(model.statistic(target));
             const position = targetPosition(target, first, history, dateSystem);
@@ -130,7 +136,7 @@ export abstract class EtsFunction extends BaseFunction {
 }
 
 function projectAt(model: IEtsModel, position: number, length: number, confidence?: number): number {
-    if (!Number.isFinite(position) || position < 0 || position >= 2 ** 53) return NaN;
+    if (!Number.isFinite(position) || Math.abs(position) >= 2 ** 53) return NaN;
     const index = Math.floor(position);
     const fraction = position - index;
     const calculate = confidence === undefined
@@ -195,6 +201,7 @@ function readSamples(values: BaseValueObject, timeline: BaseValueObject): Sample
         if (time?.isError()) return time as ErrorValueObject;
         if (value?.isError()) return value as ErrorValueObject;
         if (!time?.isNumber()) continue;
+        if (value != null && !value.isNumber() && !value.isNull()) continue;
         const when = Number(time.getValue());
         if (!Number.isFinite(when)) return ErrorValueObject.create(ErrorType.NUM);
         const existing = groups.get(when) ?? [];
@@ -233,23 +240,35 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
 
 function fillTimeline(history: ITimeline, complete: boolean, aggregation: number): ISeries | ErrorType {
     let { groups, first, last } = history;
+    if (complete) {
+        const points = [...groups];
+        let start = 0;
+        let end = points.length;
+        while (start < end && points[start][1].length === 0) start++;
+        while (end > start && points[end - 1][1].length === 0) end--;
+        if (end - start < 2) return ErrorType.DIV_BY_ZERO;
+        groups = new Map(points.slice(start, end));
+        first = points[start][0];
+        last = points[end - 1][0];
+    }
     let irregular = false;
     const { step, monthly } = history;
     if (!monthly) {
-        const phases = new Map<number, { fraction: number; count: number }>();
+        const phases = new Map<number, { anchor: number; count: number }>();
         for (const time of groups.keys()) {
             const position = (time - first) / step;
             if (!Number.isFinite(position) || position >= MAX_POINTS) return ErrorType.NUM;
             const fraction = position - Math.round(position);
             irregular ||= Math.abs(fraction) > 1e-9;
             const key = Math.round(fraction * 1e8);
-            phases.set(key, { fraction, count: (phases.get(key)?.count ?? 0) + 1 });
+            phases.set(key, { anchor: phases.get(key)?.anchor ?? time, count: (phases.get(key)?.count ?? 0) + 1 });
         }
         if (irregular) {
             const candidates = [...phases].sort((a, b) => b[1].count - a[1].count || a[0] - b[0]);
             const phase = candidates[0][1];
             if (phase.count * 2 < groups.size) return ErrorType.NUM;
-            const origin = first + phase.fraction * step;
+            // Use an observed timestamp to keep exact half-step ties stable.
+            const origin = phase.anchor;
             const aligned: Samples = new Map();
             for (const [time, samples] of groups) {
                 const timestamp = origin + Math.floor((time - origin) / step + 0.5) * step;
@@ -271,7 +290,7 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
         const position = monthly ? index++ : (time - first) / step;
         const rounded = Math.round(position);
         if (Math.abs(position - rounded) > 1e-9) return ErrorType.NUM;
-        values[rounded] = aggregate(samples, aggregation);
+        values[rounded] = aggregate(samples.length === 0 && !complete ? [0] : samples, aggregation);
     }
     if (Number.isNaN(values[0]) || Number.isNaN(values[size - 1])) return ErrorType.NUM;
     for (let i = 1; i < size; i++) {
@@ -285,12 +304,12 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
         }
         i = end;
     }
-    return { first, values, irregular };
+    return { first, values };
 }
 
 function aggregate(values: number[], rule: number): number {
-    if (rule === 2 || rule === 3) return values.length;
     if (values.length === 0) return NaN;
+    if (rule === 2 || rule === 3) return values.length;
     if (rule === 4) return values.reduce((best, value) => Math.max(best, value), -Infinity);
     if (rule === 5) {
         const sorted = [...values].sort((a, b) => a - b);

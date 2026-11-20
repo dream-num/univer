@@ -1107,6 +1107,9 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 // Preserve the selected cell for reference operands; scalar expressions
                 // instead depend on the references inside their expression.
                 rangeList.push(...intersectionRanges ?? await this._getRangeListByNode({ node, refOffsetX, refOffsetY }));
+            } else if (node.nodeType === NodeType.SUFFIX && node.getToken() === suffixToken.POUND) {
+                // A missing spill anchor can become a formula on a later edit.
+                rangeList.push(...await this._getRangeListByNode({ node, refOffsetX, refOffsetY }));
             }
 
             node.setValue(null);
@@ -1340,9 +1343,21 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
+            const address = node.resolveAddressDependencyReferences((argument) => this._executeNode(argument, refOffsetX, refOffsetY));
+            if (address) {
+                for (const reference of await address) {
+                    rangeList.push(...reference.toUnitRanges());
+                }
+                continue;
+            }
             const value = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            if (value != null) {
+            const dependencies = node.getAddressDependencyReferences();
+            if (dependencies) {
+                for (const reference of dependencies) {
+                    rangeList.push(...reference.toUnitRanges());
+                }
+            } else if (value != null) {
                 rangeList.push(...value.toUnitRanges());
             }
 

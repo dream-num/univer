@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, Optional, Rectangle, RegionService } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type {
     ISetFormulaCalculationNotificationMutation,
@@ -53,7 +53,8 @@ export class FormulaCalculationTriggerService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Optional(RegionService) private readonly _regionService?: RegionService
     ) {
         super();
         this._registerGenericDirtyConversions();
@@ -162,9 +163,10 @@ export class FormulaCalculationTriggerService extends Disposable {
         this._hasPendingCalculation = false;
         this._executionInProgress = true;
         this._stopRequested = false;
+        const region = this._regionService?.getCurrentRegion();
         this._commandService.executeCommand(
             SetFormulaCalculationStartMutation.id,
-            { ...this._runningDirtyData },
+            { ...this._runningDirtyData, ...(region === undefined ? {} : { region }) },
             LOCAL_ONLY
         );
     }

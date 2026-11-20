@@ -33,11 +33,19 @@ import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../reference-object/range-reference-object';
 import { copyReferenceContext } from '../utils/three-dimensional-reference';
-import { ErrorValueObject } from '../value-object/base-value-object';
+import { arithmeticOperandError, ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
+
+const NUMERIC_OPERATORS = new Set<string>([
+    operatorToken.PLUS,
+    operatorToken.MINUS,
+    operatorToken.MULTIPLY,
+    operatorToken.DIVIDED,
+    operatorToken.POWER,
+]);
 
 class ReferenceIntersectionNode extends BaseAstNode {
     override get nodeType() {
@@ -92,10 +100,16 @@ class ReferenceIntersectionNode extends BaseAstNode {
     }
 }
 
+interface IFormulaResultOperator extends BaseFunction {
+    calculateAtFormulaRoot?(left: BaseValueObject, right: BaseValueObject): BaseValueObject;
+}
+
 export class OperatorNode extends BaseAstNode {
+    private declare _isFormulaResultOperator?: true;
+
     constructor(
         operatorString: string,
-        private _functionExecutor: BaseFunction,
+        private _functionExecutor: IFormulaResultOperator,
         private _runtimeService: IFormulaRuntimeService
     ) {
         super(operatorString);
@@ -103,6 +117,12 @@ export class OperatorNode extends BaseAstNode {
 
     override get nodeType() {
         return NodeType.OPERATOR;
+    }
+
+    setFormulaResultOperator() {
+        if (this._functionExecutor.calculateAtFormulaRoot) {
+            this._isFormulaResultOperator = true;
+        }
     }
 
     override execute(dateSystem: DateSystem = DateSystem.Date1900) {
@@ -142,17 +162,40 @@ export class OperatorNode extends BaseAstNode {
 
         object1 = object1.withDateSystem(dateSystem);
         object2 = object2.withDateSystem(dateSystem);
-        const result = this._functionExecutor.calculate(
-            object1 as BaseValueObject,
-            object2 as BaseValueObject
-        ) as FunctionVariantType;
+        let result: FunctionVariantType;
+        if (object1.isError() && object2.isArray()) {
+            result = (object2 as ArrayValueObject).mapValue(() => object1 as BaseValueObject);
+        } else if (object2.isError() && NUMERIC_OPERATORS.has(token)) {
+            const error = object2 as BaseValueObject;
+            result = object1.isArray()
+                ? (object1 as ArrayValueObject).mapValue((value) => value.isError() ? value : arithmeticOperandError(value) ?? error)
+                : object1.isError() ? object1 : arithmeticOperandError(object1 as BaseValueObject) ?? error;
+        } else if (object2.isError() && object1.isArray()) {
+            result = (object1 as ArrayValueObject).mapValue((value) => value?.isError() ? value : object2 as BaseValueObject);
+        } else {
+            result = this._calculateOperator(object1 as BaseValueObject, object2 as BaseValueObject);
+        }
+        if (result.isError() && object1.isArray() !== object2.isArray()) {
+            const error = result as BaseValueObject;
+            const array = (object1.isArray() ? object1 : object2) as ArrayValueObject;
+            result = array.mapValue((value) => value?.isError() ? value : error);
+        }
 
         this._setEmbeddedArrayFormulaToResult(result);
 
         this.setValue(result.withDateSystem(dateSystem));
     }
 
+    private _calculateOperator(left: BaseValueObject, right: BaseValueObject): FunctionVariantType {
+        return this._isFormulaResultOperator
+            ? this._functionExecutor.calculateAtFormulaRoot!(left, right)
+            : this._functionExecutor.calculate(left, right) as FunctionVariantType;
+    }
+
     private _referenceToOperatorValue(reference: BaseReferenceObject): BaseValueObject {
+        if (reference instanceof MultiAreaReferenceObject && reference.isArrayOfReferences()) {
+            return reference.toReferenceErrorGrid();
+        }
         const array = reference.toArrayValueObject();
         if (array.getRowCount() === 1 && array.getColumnCount() === 1) {
             return array.get(0, 0) as BaseValueObject;

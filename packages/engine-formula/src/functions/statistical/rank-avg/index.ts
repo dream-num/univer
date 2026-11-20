@@ -38,6 +38,8 @@ function isSameRankNumber(left: number, right: number): boolean {
 }
 
 export class RankAvg extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 3;
@@ -152,7 +154,7 @@ export class RankAvg extends BaseFunction {
                 return false;
             }
 
-            if (_refObject.isNull() || _refObject.isBoolean()) {
+            if (_refObject.isNull() || _refObject.isBoolean() || (this.numbersOnly && !_refObject.isNumber())) {
                 return true;
             }
 

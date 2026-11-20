@@ -17,6 +17,7 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { MAX_COLUMN_COUNT } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -33,8 +34,15 @@ export class Columns extends BaseFunction {
     override calculate(
         referenceInput: FunctionVariantType
     ) {
-        if (referenceInput instanceof MultiAreaReferenceObject && !referenceInput.isArrayOfReferences()) {
-            return ErrorValueObject.create(ErrorType.REF);
+        if (referenceInput instanceof MultiAreaReferenceObject) {
+            if (!referenceInput.isArrayOfReferences()) {
+                return ErrorValueObject.create(ErrorType.REF);
+            }
+        } else if (referenceInput.isReferenceObject()) {
+            const { startColumn, endColumn } = (referenceInput as BaseReferenceObject).getRangeData();
+            const start = Number.isNaN(startColumn) ? 0 : startColumn;
+            const limit = Number.isNaN(endColumn) ? MAX_COLUMN_COUNT : endColumn + 1;
+            return NumberValueObject.create(limit - start);
         }
         const reference = referenceInput.isReferenceObject()
             ? (referenceInput as BaseReferenceObject).toArrayValueObject()

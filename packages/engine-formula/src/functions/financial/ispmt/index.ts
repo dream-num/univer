@@ -70,9 +70,7 @@ export class Ispmt extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            const result = pvValue * rateValue * (perValue / nperValue - 1);
-
-            return NumberValueObject.create(result);
+            return this._calculateValue(rateValue, perValue, nperValue, pvValue);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -80,5 +78,9 @@ export class Ispmt extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    protected _calculateValue(rate: number, period: number, periods: number, presentValue: number): BaseValueObject {
+        return NumberValueObject.create(presentValue * rate * (period / periods - 1));
     }
 }

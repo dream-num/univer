@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, IRange } from '@univerjs/core';
+
 import type { BaseFunction } from '../../functions/base-function';
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
@@ -32,12 +34,16 @@ import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
 import { matchToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
+import { If } from '../../functions/logical/if';
+import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
+import { Indirect } from '../../functions/lookup/indirect';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISuperTableService } from '../../services/super-table.service';
 import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
 import { getFixedArrayResultRange, isExplicitDynamicArrayFormula } from '../utils/array-object';
 import { prefixHandler } from '../utils/prefix-handler';
@@ -48,6 +54,8 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class FunctionNode extends BaseAstNode {
+    private _addressDependencies?: readonly BaseReferenceObject[];
+
     constructor(
         token: string,
         private _functionExecutor: BaseFunction,
@@ -70,6 +78,7 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.needsLocale) {
             this._setLocale();
         }
+        this._functionExecutor.bindCalculationRegion?.(() => this._currentConfigService.getCalculationRegion());
 
         if (this._functionExecutor.needsFormulaDataModel) {
             this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
@@ -84,8 +93,63 @@ export class FunctionNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
+    getOmittedIfBranchResult(): BaseValueObject | undefined {
+        if (this._functionExecutor instanceof If) return this._functionExecutor.getOmittedBranchResult();
+    }
+
+    override isAddress(): boolean {
+        return super.isAddress() || this._functionExecutor.needsAddressDependencies?.(this.getChildren()) === true;
+    }
+
+    override resolveAddressDependencyReferences(
+        argument: (node: BaseAstNode) => Promise<BaseReferenceObject | null>
+    ): Promise<readonly BaseReferenceObject[]> | undefined {
+        if (!this._functionExecutor.resolveAddressDependencyReferences) {
+            return;
+        }
+        this._setRefInfo();
+        const children = this.getChildren();
+        return this._functionExecutor.resolveAddressDependencyReferences((index) =>
+            children[index] ? argument(children[index]) : Promise.resolve(null));
+    }
+
+    override getAddressDependencyReferences(): readonly BaseReferenceObject[] | undefined {
+        const value = this.getValue();
+        if (value == null) {
+            return;
+        }
+        const dependencies = this._addressDependencies;
+        if (!(this._functionExecutor instanceof Indirect)) {
+            return dependencies;
+        }
+        const parent = this.getParent();
+        const token = parent?.getToken();
+        if (parent?.nodeType === NodeType.FUNCTION &&
+            (token === FUNCTION_NAMES_LOOKUP.ROW || token === FUNCTION_NAMES_LOOKUP.ROWS ||
+                token === FUNCTION_NAMES_LOOKUP.COLUMN || token === FUNCTION_NAMES_LOOKUP.COLUMNS)) {
+            // Only a spill's changing extent makes the address target a value dependency.
+            return dependencies ?? [];
+        }
+        if (dependencies) {
+            if (!value.isReferenceObject()) {
+                return dependencies;
+            }
+            if ((value as BaseReferenceObject).isMultiArea()) {
+                return [value as BaseReferenceObject, ...dependencies];
+            }
+        }
+    }
+
+    override getImplicitIntersectionReference(child: BaseAstNode, reference: BaseReferenceObject, range: IRange): FunctionVariantType | undefined {
+        if (!this._functionExecutor.implicitIntersectionReferenceArguments.includes(this.getChildren().indexOf(child))) {
+            return;
+        }
+        return reference.isCell() ? reference : this._functionExecutor.createReferenceObject(reference, range);
+    }
+
     override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
-        return this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
+        return this._functionExecutor.evaluatesIfArgumentsAsArrays === true ||
+            this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
     }
 
     override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900) {
@@ -111,6 +175,7 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result);
+        this._captureAddressDependencies();
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
@@ -131,6 +196,15 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result as FunctionVariantType);
+        this._captureAddressDependencies();
+    }
+
+    private _captureAddressDependencies(): void {
+        if (this._functionExecutor instanceof Indirect) {
+            this._addressDependencies = this._functionExecutor.takeSpillAnchors();
+        } else if (this.isAddress()) {
+            this._addressDependencies = this._functionExecutor.takeAddressDependencyReferences();
+        }
     }
 
     private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem): BaseValueObject[] {
@@ -227,7 +301,13 @@ export class FunctionNode extends BaseAstNode {
         }
 
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
+        const anchor = this._currentConfigService.getUnitData()[currentUnitId]?.[currentSubUnitId]?.cellData.getValue(currentRow, currentColumn) as (ICellData & { ref?: string }) | undefined;
+        const declaredRange = this._currentConfigService.getArrayFormulaRange()[currentUnitId]?.[currentSubUnitId]?.[currentRow]?.[currentColumn];
+        // Older snapshots declare array results with ref before ft/fd metadata existed.
+        const hasLegacyArrayRange = anchor?.ft == null && typeof anchor?.ref === 'string' && anchor.ref.length > 0 &&
+            declaredRange != null && (declaredRange.endRow > currentRow || declaredRange.endColumn > currentColumn);
         if (
+            hasLegacyArrayRange ||
             isExplicitDynamicArrayFormula(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn) ||
             getFixedArrayResultRange(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)
         ) {
@@ -244,13 +324,6 @@ export class FunctionNode extends BaseAstNode {
         this._lookupCompatibility();
     }
 
-    /**
-     * The LOOKUP function follows the following rules when dealing with vectors of different sizes:
-     *    If the lookup_vector is larger than the result_vector,
-     *    the LOOKUP function will ignore the extra portion of the lookup_vector and only use the portion of the result_vector that is the same size as the lookup_vector for lookup and returning results.
-     *    If the lookup_vector is smaller than the result_vector,
-     *    the LOOKUP function will continue using the last value of the result_vector for lookup and returning results after the last value of the lookup_vector.
-     */
     private _lookupCompatibility() {
         const children = this.getChildren();
         const childrenCount = children.length;
@@ -424,7 +497,7 @@ export class FunctionNode extends BaseAstNode {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount } = this._runtimeService;
 
         const arrayFormulaRange = this._currentConfigService.getArrayFormulaRange()[currentUnitId]?.[currentSubUnitId]?.[currentRow]?.[currentColumn];
-        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount, arrayFormulaRange != null);
+        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount, arrayFormulaRange != null || this._isArrayIfArgument());
         this._functionExecutor.setDateSystem(this._currentConfigService.getDateSystem(currentUnitId));
 
         if (this._functionExecutor.needsSheetsInfo) {
@@ -436,6 +509,17 @@ export class FunctionNode extends BaseAstNode {
 
             this._functionExecutor.setSheetRowColumnCount(rowCount, columnCount);
         }
+    }
+
+    private _isArrayIfArgument(): boolean {
+        if (this.getToken() !== 'IF') {
+            return false;
+        }
+        let parent = this.getParent();
+        while (parent != null && parent.nodeType !== NodeType.FUNCTION) {
+            parent = parent.getParent();
+        }
+        return parent instanceof FunctionNode && parent._functionExecutor.evaluatesIfArgumentsAsArrays === true;
     }
 
     private _setRefData(variant: FunctionVariantType) {
@@ -454,22 +538,7 @@ export class FunctionNode extends BaseAstNode {
             }
         }
 
-        referenceObject.setForcedSheetId(this._currentConfigService.getSheetNameMap());
-
-        referenceObject.setUnitData(unitData);
-
-        referenceObject.setArrayFormulaCellData(this._currentConfigService.getArrayFormulaCellData());
-
-        referenceObject.setArrayFormulaRange(this._currentConfigService.getArrayFormulaRange());
-
-        referenceObject.setRuntimeData(this._runtimeService.getUnitData());
-        referenceObject.setCalculationCache(this._runtimeService.getCalculationCache?.());
-
-        referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
-
-        referenceObject.setRuntimeArrayFormulaRange(this._runtimeService.getUnitArrayFormula());
-
-        referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
+        initializeReferenceContext(referenceObject, this._currentConfigService, this._runtimeService);
     }
 
     private _setLocale() {
@@ -481,6 +550,14 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _setFilteredOutRows(referenceObject: BaseReferenceObject) {
+        if (referenceObject.isMultiArea()) {
+            for (const row of (referenceObject as MultiAreaReferenceObject).getAreas()) {
+                for (const area of row) {
+                    if (area.isReferenceObject()) this._setFilteredOutRows(area as BaseReferenceObject);
+                }
+            }
+            return;
+        }
         const { startRow, endRow } = referenceObject.getRangePosition();
         const filteredOutRows = this._currentConfigService.getFilteredOutRows(
             referenceObject.getUnitId(),
@@ -516,7 +593,27 @@ export class ErrorFunctionNode extends BaseAstNode {
     }
 }
 
+function initializeReferenceContext(
+    reference: BaseReferenceObject,
+    config: IFormulaCurrentConfigService,
+    runtime: IFormulaRuntimeService
+): void {
+    reference.setForcedSheetId(config.getSheetNameMap());
+    reference.setUnitData(config.getUnitData());
+    reference.setArrayFormulaCellData(config.getArrayFormulaCellData());
+    reference.setArrayFormulaRange(config.getArrayFormulaRange());
+    reference.setRuntimeData(runtime.getUnitData());
+    reference.setCalculationCache(runtime.getCalculationCache?.());
+    reference.setRuntimeArrayFormulaCellData(runtime.getRuntimeArrayFormulaCellData());
+    reference.setRuntimeArrayFormulaRange(runtime.getUnitArrayFormula());
+    reference.setRuntimeFeatureCellData(runtime.getRuntimeFeatureCellData());
+}
+
 export class FunctionNodeFactory extends BaseAstNodeFactory {
+    private readonly _initializeReference = (reference: BaseReferenceObject): void => {
+        initializeReferenceContext(reference, this._currentConfigService, this._runtimeService);
+    };
+
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -538,6 +635,13 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         if (!functionExecutor) {
             console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
+        }
+
+        if (functionExecutor instanceof Indirect) {
+            functionExecutor.setReferenceInitializer(this._initializeReference);
+            if (this._injector.has(ISuperTableService)) {
+                functionExecutor.setSuperTableService(this._injector.get(ISuperTableService));
+            }
         }
 
         return new FunctionNode(
@@ -567,7 +671,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         const tokenTrimUpper = normalizeFunctionToken(tokenTrim.toUpperCase());
 
-        if (isColon && COLUMN_LIKE_FUNCTION_NAMES.has(tokenTrimUpper)) {
+        if (isColon && param.getChildren().length === 0 && COLUMN_LIKE_FUNCTION_NAMES.has(tokenTrimUpper)) {
             return;
         }
 

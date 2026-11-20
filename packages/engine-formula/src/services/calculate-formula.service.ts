@@ -160,8 +160,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 const { startRow, endRow, startColumn, endColumn } = range.getRangePosition();
                 if (startRow !== endRow || startColumn !== endColumn) return;
                 scalar = range.getFirstCell();
-                if (scalar.isNull()) scalar = NumberValueObject.create(0);
             }
+            if (scalar.isNull()) scalar = NumberValueObject.create(0);
             if (!scalar.isCube() && !scalar.isHyperlink() && !scalar.isImage()) {
                 return objectValueToCellValue(scalar);
             }

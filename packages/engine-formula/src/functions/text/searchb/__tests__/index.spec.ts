@@ -143,5 +143,22 @@ describe('Test searchb function', () => {
             const result3 = testFunction.calculate(findText3, withinText3);
             expect(getObjectValue(result3)).toStrictEqual(7);
         });
+
+        it('Matches ? and * as wildcards and ~ as their escape, counting bytes', () => {
+            const cases: [string, string, number | string][] = [
+                ['b?d', '中abcd', 4],
+                ['欢*', '你好，欢迎', 7],
+                ['~?', '中?', 3],
+                ['~~', 'a~b', 2],
+                ['~~~*', 'a~*b', 2],
+                ['~x', 'a~xb', 3],
+                ['?b', '😀b', 1],
+                ['x?z', 'abc', ErrorType.VALUE],
+            ];
+            for (const [find, within, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
     });
 });

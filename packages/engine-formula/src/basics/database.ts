@@ -26,6 +26,8 @@ import { ErrorType } from './error-type';
 
 type DatabaseValueType = string | number | null;
 
+export type DatabaseCriterionEvaluator = (databaseRow: number, criteriaRow: number, criteriaColumn: number) => boolean | undefined;
+
 function toValue(value: FunctionVariantType): BaseValueObject {
     return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject;
 }
@@ -229,7 +231,8 @@ export function isCriteriaMatch(
     criteria: DatabaseValueType[][],
     database: DatabaseValueType[][],
     databaseRowIndex: number,
-    dateSystem: DateSystem
+    dateSystem: DateSystem,
+    evaluateCriterion?: DatabaseCriterionEvaluator
 ) {
     const rowCount = criteria.length;
     const columnCount = criteria[0].length;
@@ -242,6 +245,14 @@ export function isCriteriaMatch(
         let isRowMatch = true;
 
         for (let c = 0; c < columnCount; c++) {
+            const calculated = evaluateCriterion?.(databaseRowIndex, r, c);
+            if (calculated !== undefined) {
+                if (!calculated) {
+                    isRowMatch = false;
+                    break;
+                }
+                continue;
+            }
             const criteriaValue = criteria[r][c];
 
             if (criteriaValue === null) {

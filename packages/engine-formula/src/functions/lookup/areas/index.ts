@@ -29,6 +29,9 @@ export class Areas extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(reference: FunctionVariantType) {
+        if (reference.isError()) {
+            return reference as ErrorValueObject;
+        }
         if (reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()) {
             return NumberValueObject.create(reference.getAreas().reduce((count, areas) => count + areas.length, 0));
         }

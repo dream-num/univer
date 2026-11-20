@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DatabaseCriterionEvaluator } from '../../../basics/database';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
@@ -26,6 +27,10 @@ export class Dsum extends BaseFunction {
     override maxParams = 3;
 
     override calculate(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject) {
+        return this.calculateWithCriterion(database, field, criteria);
+    }
+
+    calculateWithCriterion(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject, evaluateCriterion?: DatabaseCriterionEvaluator) {
         const { isError: databaseIsError, errorObject: databaseErrorObject, databaseValues } = checkDatabase(database);
 
         if (databaseIsError) {
@@ -51,7 +56,7 @@ export class Dsum extends BaseFunction {
             if (!cell || (!cell.isNumber() && !cell.isError())) {
                 continue;
             }
-            if (!isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
+            if (!isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem(), evaluateCriterion)) {
                 continue;
             }
             if (cell.isError()) {

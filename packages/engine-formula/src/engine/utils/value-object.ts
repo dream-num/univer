@@ -23,12 +23,13 @@ import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
+import { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../reference-object/range-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
-import { expandArrayValueObject } from './array-object';
+import { createNewArray, expandArrayValueObject } from './array-object';
 import { isWildcard, normalizeTextForComparison } from './compare';
 import { stripErrorMargin } from './math-kit';
 import {
@@ -46,6 +47,56 @@ export function convertTonNumber(valueObject: BaseValueObject) {
         result = 1;
     }
     return NumberValueObject.create(result);
+}
+
+export function mapReferenceGridCriteria(
+    range: BaseReferenceObject,
+    criteria: BaseValueObject,
+    target: BaseReferenceObject | undefined,
+    evaluate: (range: BaseReferenceObject, criteria: BaseValueObject, target?: BaseReferenceObject) => BaseValueObject
+): BaseValueObject {
+    const missing = ErrorValueObject.create(ErrorType.NA);
+    const source = referenceGridReader(range, missing);
+    const destination = referenceGridReader(target, missing);
+    const criteriaGrid = criteria.isArray() ? criteria as ArrayValueObject : undefined;
+    const criteriaRows = criteriaGrid?.getRowCount() ?? 1;
+    const criteriaColumns = criteriaGrid?.getColumnCount() ?? 1;
+    const rows = Math.max(source.rows, destination.rows, criteriaRows);
+    const columns = Math.max(source.columns, destination.columns, criteriaColumns);
+    const cells: BaseValueObject[][] = [];
+    for (let row = 0; row < rows; row++) {
+        const values: BaseValueObject[] = [];
+        for (let column = 0; column < columns; column++) {
+            const rangeCell = source.read(row, column);
+            const targetCell = destination.read(row, column);
+            const criteriaCell = criteriaGrid
+                ? criteriaGrid.get(criteriaRows === 1 ? 0 : row, criteriaColumns === 1 ? 0 : column)
+                : criteria;
+            if (rangeCell instanceof ErrorValueObject) {
+                values.push(rangeCell);
+            } else if (targetCell instanceof ErrorValueObject) {
+                values.push(targetCell);
+            } else {
+                values.push(criteriaCell == null ? missing : evaluate(rangeCell, criteriaCell, targetCell));
+            }
+        }
+        cells.push(values);
+    }
+    return rows === 1 && columns === 1 ? cells[0][0] : createNewArray(cells, rows, columns);
+}
+
+function referenceGridReader<T extends BaseReferenceObject | undefined>(reference: T, missing: ErrorValueObject) {
+    if (!(reference instanceof MultiAreaReferenceObject) || !reference.isArrayOfReferences()) {
+        return { rows: 1, columns: 1, read: (_row: number, _column: number) => reference };
+    }
+    const entries = reference.getAreas();
+    const rows = entries.length;
+    const columns = reference.getColumnCount();
+    return {
+        rows,
+        columns,
+        read: (row: number, column: number) => entries[rows === 1 ? 0 : row]?.[columns === 1 ? 0 : column] ?? missing,
+    };
 }
 
 export function isSingleValueObject(valueObject: FunctionVariantType) {
@@ -105,6 +156,9 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             v: null,
             ...cellWithStyle,
         };
+    }
+    if (objectValue.isLambda()) {
+        return { v: ErrorType.CALC, t: CellValueType.STRING };
     }
     if (objectValue.isError()) {
         return {
@@ -319,7 +373,7 @@ export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject):
     return ArrayValueObject.createByArray([[valueObject.getValue()]]);
 }
 
-function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
+function getEqualityValueKeys(value: BaseValueObject, numberKey = stripErrorMargin): Array<string | number> {
     const keys: Array<string | number> = [];
     if (value.isString()) {
         keys.push(normalizeTextForComparison(String(value.getValue())));
@@ -329,7 +383,7 @@ function getEqualityValueKeys(value: BaseValueObject): Array<string | number> {
 
     const number = value.isNumber() ? value : createCriteriaValueObject(String(value.getValue()), value.getDateSystem());
     if (number.isNumber() && Number.isFinite(Number(number.getValue()))) {
-        keys.push(stripErrorMargin(Number(number.getValue())));
+        keys.push(numberKey(Number(number.getValue())));
     }
     return keys;
 }
@@ -345,44 +399,48 @@ type EqualityIndex = Map<string | number, Array<[number, number]>>;
  * which is also why no change tracking is needed.
  */
 const passEqualityIndexes = new WeakMap<FormulaCalculationCache, Map<ArrayValueObject, EqualityIndex>>();
+const passSingleCriterionIndexes = new WeakMap<FormulaCalculationCache, Map<ArrayValueObject, EqualityIndex>>();
 
 function getOrBuildEqualityIndex(
     range: ArrayValueObject,
-    localIndexes: Map<ArrayValueObject, EqualityIndex>
+    localIndexes: Map<ArrayValueObject, EqualityIndex>,
+    singleCriterion = false
 ): EqualityIndex {
+    const numberKey = singleCriterion ? singleCriterionNumberKey : stripErrorMargin;
+    const passIndexes = singleCriterion ? passSingleCriterionIndexes : passEqualityIndexes;
     const calculationCache = range.getCalculationCache();
     if (calculationCache == null || calculationCache.closed) {
         let index = localIndexes.get(range);
         if (index === undefined) {
-            index = buildEqualityIndex(range);
+            index = buildEqualityIndex(range, numberKey);
             localIndexes.set(range, index);
         }
         return index;
     }
 
-    let indexes = passEqualityIndexes.get(calculationCache);
+    let indexes = passIndexes.get(calculationCache);
     if (indexes === undefined) {
         indexes = new Map();
-        passEqualityIndexes.set(calculationCache, indexes);
+        passIndexes.set(calculationCache, indexes);
     }
 
     let index = indexes.get(range);
     if (index === undefined) {
-        index = buildEqualityIndex(range);
+        index = buildEqualityIndex(range, numberKey);
         indexes.set(range, index);
     }
 
     return index;
 }
 
-function buildEqualityIndex(range: ArrayValueObject): EqualityIndex {
+function buildEqualityIndex(range: ArrayValueObject, numberKey: (value: number) => number): EqualityIndex {
     const index: EqualityIndex = new Map();
     range.iterator((value, row, column) => {
         if (!value) {
             return;
         }
         const position: [number, number] = [row, column];
-        for (const key of getEqualityValueKeys(value)) {
+        for (const key of getEqualityValueKeys(value, numberKey)) {
             let matches = index.get(key);
             if (!matches) {
                 matches = [];
@@ -409,6 +467,19 @@ function getIndexedPositions(
         return buckets[0];
     }
     return Array.from(new Set(buckets.flat())).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
+
+export function createEqualityCandidateReader() {
+    const localIndexes = new Map<ArrayValueObject, EqualityIndex>();
+    return (range: ArrayValueObject, operand: BaseValueObject): Array<[number, number]> | undefined => {
+        const keys = getEqualityValueKeys(operand, singleCriterionNumberKey);
+        if (keys.length === 0) return;
+        return getIndexedPositions(getOrBuildEqualityIndex(range, localIndexes, true), keys, range);
+    };
+}
+
+export function singleCriterionNumberKey(value: number): number {
+    return Number.isInteger(value) && Math.abs(value) < 1e15 ? value : Number(value.toPrecision(15));
 }
 
 function pickRangePositions(range: ArrayValueObject, positions: Array<[number, number]>): ArrayValueObject {

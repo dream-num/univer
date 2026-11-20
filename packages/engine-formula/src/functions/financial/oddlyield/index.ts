@@ -19,6 +19,7 @@ import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCoupdays, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
+import { getExcelOddLastCouponPeriods, getExcelOddLastDateSerial } from '../../../basics/financial-odd-last';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -53,19 +54,19 @@ export class Oddlyield extends BaseFunction {
 
         const [settlementObject, maturityObject, lastInterestObject, rateObject, prObject, redemptionObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
+        const settlementSerialNumber = this._getDateSerial(settlementObject);
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
+        const maturitySerialNumber = this._getDateSerial(maturityObject);
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const lastInterestSerialNumber = getDateSerialNumberByObject(lastInterestObject, this.getDateSystem());
+        const lastInterestSerialNumber = this._getDateSerial(lastInterestObject);
 
         if (typeof lastInterestSerialNumber !== 'number') {
             return lastInterestSerialNumber;
@@ -87,17 +88,16 @@ export class Oddlyield extends BaseFunction {
             redemptionValue <= 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
-            basisValue > 4 ||
-            !this._validDate(maturitySerialNumber, settlementSerialNumber, lastInterestSerialNumber, frequencyValue)
+            basisValue > 4
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        // The odd coupon uses its actual length for all three actual-day bases.
-        const couponBasis = basisValue >= 1 && basisValue <= 3 ? 1 : basisValue;
-        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, couponBasis);
+        return this._getResult(settlementSerialNumber, maturitySerialNumber, lastInterestSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, basisValue);
+    }
 
-        return NumberValueObject.create(result);
+    protected _getDateSerial(value: BaseValueObject): number | ErrorValueObject {
+        return getDateSerialNumberByObject(value, this.getDateSystem());
     }
 
     private _validDate(maturitySerialNumber: number, settlementSerialNumber: number, lastInterestSerialNumber: number, frequencyValue: number): boolean {
@@ -110,7 +110,7 @@ export class Oddlyield extends BaseFunction {
             && validCouppcdIsGte0ByTwoDate(lastInterestSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
     }
 
-    private _getResult(
+    protected _getResult(
         settlementSerialNumber: number,
         maturitySerialNumber: number,
         lastInterestSerialNumber: number,
@@ -119,16 +119,21 @@ export class Oddlyield extends BaseFunction {
         redemption: number,
         frequency: number,
         basis: number
-    ): number {
+    ): BaseValueObject {
+        if (!this._validDate(maturitySerialNumber, settlementSerialNumber, lastInterestSerialNumber, frequency)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+        // The odd coupon uses its actual length for all three actual-day bases.
+        const couponBasis = basis >= 1 && basis <= 3 ? 1 : basis;
         const coupDateSerialNumber = this._getCoupDate(maturitySerialNumber, lastInterestSerialNumber, frequency);
 
-        const fAi = this._getFrac(lastInterestSerialNumber, settlementSerialNumber, coupDateSerialNumber, frequency, basis);
-        const fDCi = this._getFrac(lastInterestSerialNumber, maturitySerialNumber, coupDateSerialNumber, frequency, basis);
-        const fDSCi = this._getFrac(settlementSerialNumber, maturitySerialNumber, coupDateSerialNumber, frequency, basis);
+        const fAi = this._getFrac(lastInterestSerialNumber, settlementSerialNumber, coupDateSerialNumber, frequency, couponBasis);
+        const fDCi = this._getFrac(lastInterestSerialNumber, maturitySerialNumber, coupDateSerialNumber, frequency, couponBasis);
+        const fDSCi = this._getFrac(settlementSerialNumber, maturitySerialNumber, coupDateSerialNumber, frequency, couponBasis);
 
         const result = (frequency * (redemption - pr) + 100 * rate * (fDCi - fAi)) / (fDSCi * pr + 100 * rate * fAi * fDSCi / frequency);
 
-        return result;
+        return NumberValueObject.create(result);
     }
 
     private _getCoupDate(maturitySerialNumber: number, lastInterestSerialNumber: number, frequency: number): number {
@@ -202,5 +207,35 @@ export class Oddlyield extends BaseFunction {
         result += daysL / coupdaysL;
 
         return result;
+    }
+}
+
+export class ExcelOddlyield extends Oddlyield {
+    protected override _getDateSerial(value: BaseValueObject): number | ErrorValueObject {
+        return getExcelOddLastDateSerial(value, this.getDateSystem());
+    }
+
+    protected override _getResult(
+        settlement: number,
+        maturity: number,
+        lastInterest: number,
+        rate: number,
+        pr: number,
+        redemption: number,
+        frequency: number,
+        basis: number
+    ): BaseValueObject {
+        const periods = getExcelOddLastCouponPeriods(settlement, maturity, lastInterest, frequency, basis, this.getDateSystem());
+        if (periods === null) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+        if (periods.remaining === 0) {
+            return NumberValueObject.create(0);
+        }
+        const coupon = 100 * rate / frequency;
+        const outstanding = redemption + coupon * periods.total;
+        const dirtyPrice = pr + coupon * periods.accrued;
+        const yld = (outstanding / dirtyPrice - 1) * frequency / periods.remaining;
+        return Number.isFinite(yld) ? NumberValueObject.create(yld) : ErrorValueObject.create(ErrorType.NUM);
     }
 }

@@ -265,8 +265,8 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
         };
     }
 
-    const refStartString = refBody.substring(0, colonIndex);
-    const refEndString = refBody.substring(colonIndex + 1);
+    const refStartString = refBody.substring(0, colonIndex - Number(refBody[colonIndex - 1] === '.'));
+    const refEndString = refBody.substring(colonIndex + 1 + Number(refBody[colonIndex + 1] === '.'));
 
     const startGrid = singleReferenceToGrid(refStartString);
 

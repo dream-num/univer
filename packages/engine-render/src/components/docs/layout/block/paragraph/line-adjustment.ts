@@ -15,14 +15,6 @@
  */
 
 import type { IParagraphStyle } from '@univerjs/core';
-import type {
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import {
     BooleanNumber,
     characterSpacingControlType,
@@ -32,6 +24,15 @@ import {
     SpacingRule,
     WrapStrategy,
 } from '@univerjs/core';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import {
     isCjkLeftAlignedPunctuation,
@@ -84,15 +85,26 @@ function overhang(c: string): number {
 }
 
 function getJustifiables(divide: IDocumentSkeletonDivide): number {
-    const justifiables = divide.glyphGroup.filter((glyph) => glyph.isJustifiable).length;
+    const justifiables = divide.glyphGroup.filter((glyph) => isExtraJustifiable(glyph)).length;
     const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
 
     // CJK character at line end should not be adjusted.
-    if (cjk.hasCJK(lastGlyph.content)) {
+    if (cjk.hasCJK(lastGlyph.content) && isExtraJustifiable(lastGlyph)) {
         return justifiables - 1;
     }
 
     return justifiables;
+}
+
+/**
+ * Whether a glyph takes part in the extra space that fills a justified line.
+ *
+ * Word keeps East Asian punctuation at its shaped width and stretches the line between words and
+ * characters instead, so a Latin run that holds a few brackets or commas must not absorb the whole
+ * remainder into those glyphs.
+ */
+function isExtraJustifiable(glyph: IDocumentSkeletonGlyph): boolean {
+    return glyph.isJustifiable && !cjk.hasCJKPunctuation(glyph.content);
 }
 
 function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRatio: number, extraJustification: number) {
@@ -108,7 +120,7 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
         const justificationLeft = adjustabilityLeft * justificationRatio;
         let justificationRight = adjustabilityRight * justificationRatio;
 
-        if (glyph.isJustifiable && (glyph !== lastGlyph || !cjk.hasCJK(glyph.content))) {
+        if (isExtraJustifiable(glyph) && (glyph !== lastGlyph || !cjk.hasCJK(glyph.content))) {
             justificationRight += extraJustification;
         }
 

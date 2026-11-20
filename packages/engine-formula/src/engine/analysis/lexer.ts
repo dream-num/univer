@@ -70,7 +70,7 @@ export class Lexer extends Disposable {
         const pending = [node];
         while (pending.length > 0) {
             const current = pending.pop()!;
-            if (/^(?:_xlfn\.)?(?:LET|LAMBDA)$/iu.test(current.getToken().trim())) {
+            if (/^(?:@\s*)?(?:_xlfn\.)?(?:LET|LAMBDA)$/iu.test(current.getToken().trim())) {
                 return true;
             }
             for (const child of current.getChildren()) {

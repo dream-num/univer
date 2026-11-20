@@ -15,11 +15,11 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import { ICommandService, IContextService, Inject, ThemeService } from '@univerjs/core';
 import { Shape } from '@univerjs/engine-render';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
 import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { FilterButton } from './drawings';
+import { drawFilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
@@ -97,11 +97,7 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
             ? this._themeService.getColorFromTheme('gray.50')
             : 'rgba(255, 255, 255, 1.0)';
 
-        if (hasCriteria) {
-            FilterButton.drawHasCriteria(ctx, FILTER_ICON_SIZE, fgColor, bgColor);
-        } else {
-            FilterButton.drawNoCriteria(ctx, FILTER_ICON_SIZE, fgColor, bgColor);
-        }
+        drawFilterButton(ctx, FILTER_ICON_SIZE, fgColor, bgColor, hasCriteria);
 
         ctx.restore();
     }

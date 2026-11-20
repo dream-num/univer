@@ -26,16 +26,18 @@ import type { BaseValueObject } from '../value-object/base-value-object';
 import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FunctionNode } from '../ast-node/function-node';
 import { NodeType } from '../ast-node/node-type';
+import { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
+import { isExplicitDynamicArrayFormula } from '../utils/array-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NullValueObject } from '../value-object/primitive-object';
 
 type InterpreterRuntimeService = Pick<
     IFormulaRuntimeService,
-    'currentColumn' | 'currentRow' | 'currentUnitId' | 'isStopExecution'
+    'currentColumn' | 'currentRow' | 'currentUnitId' | 'currentSubUnitId' | 'isStopExecution'
 >;
 
 export class Interpreter extends Disposable {
@@ -145,12 +147,11 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            const token = item.getToken();
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
             if (
-                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                item.nodeType === NodeType.LAMBDA &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
                 item.execute(dateSystem);
@@ -188,12 +189,11 @@ export class Interpreter extends Disposable {
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            const token = item.getToken();
             /**
              * If the lambda expression has no parameters, then do not execute further.
              */
             if (
-                token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+                item.nodeType === NodeType.LAMBDA &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
                 item.execute(dateSystem);
@@ -396,9 +396,12 @@ export class Interpreter extends Disposable {
             return null;
         }
 
+        if (value instanceof MultiAreaReferenceObject && value.isArrayOfReferences()) {
+            return value.toReferenceErrorGrid();
+        }
         if (!value.isReferenceObject()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            return baseValue.isNull() ? NullValueObject.create() : baseValue;
         }
 
         const reference = value as BaseReferenceObject;
@@ -407,8 +410,8 @@ export class Interpreter extends Disposable {
             return reference.toArrayValueObject();
         }
 
-        const cellValue = reference.getCellByPosition();
-        return cellValue.isNull() ? NumberValueObject.create(0) : cellValue;
+        const { startRow, startColumn } = reference.getRangePosition();
+        return reference.isCellBlank(startRow, startColumn) ? NullValueObject.create() : reference.getCellByPosition();
     }
 
     private _toLazyIfSelectedValue(value: Nullable<FunctionVariantType>, node: BaseAstNode): FunctionVariantType {
@@ -419,8 +422,8 @@ export class Interpreter extends Disposable {
         const preserveArray = this._preserveLazyIfSelectedReferenceArray(node);
         if (value.isReferenceObject()) {
             const reference = value as BaseReferenceObject;
-            if (preserveArray) {
-                return reference.toArrayValueObject();
+            if (preserveArray || (reference.getRowCount() === 1 && reference.getColumnCount() === 1)) {
+                return reference;
             }
             value = reference.getImplicitIntersectionValue(this._runtimeService.currentRow || 0, this._runtimeService.currentColumn || 0);
         }
@@ -431,13 +434,21 @@ export class Interpreter extends Disposable {
 
         if (!value.isArray()) {
             const baseValue = value as BaseValueObject;
-            return baseValue.isNull() ? NumberValueObject.create(0) : baseValue;
+            if (!baseValue.isNull()) return baseValue;
+            if (baseValue instanceof NullValueObject && baseValue.isOmitted() && node instanceof FunctionNode) {
+                return node.getOmittedIfBranchResult() ?? NullValueObject.create();
+            }
+            return NullValueObject.create();
         }
 
         return value;
     }
 
     private _preserveLazyIfSelectedReferenceArray(node: BaseAstNode): boolean {
+        const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
+        if (isExplicitDynamicArrayFormula(this._currentConfigService, currentUnitId, currentSubUnitId, currentRow, currentColumn)) {
+            return true;
+        }
         let child: BaseAstNode = node;
         let parent = child.getParent();
 

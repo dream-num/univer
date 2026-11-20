@@ -197,12 +197,10 @@ function runPnpm(args: string[]) {
 
 for (const pkg of heavyPackages) {
     const args = [
-        '--dir',
-        pkg.dir,
-        'exec',
-        'vitest',
-        'run',
-        '--coverage',
+        'turbo',
+        'coverage',
+        `--filter=${pkg.name}`,
+        '--',
         `--shard=${shardIndex}/${shardTotal}`,
         '--passWithNoTests',
     ];

@@ -366,13 +366,13 @@ export function getFontStyleString(
     }
     let fontSize = originFontSize;
 
-    const authoredFamilies = normalizeFontFamily(textStyle.ff, defaultFont);
+    const authoredFamilies = textStyle.ff?.trim() || defaultFont;
     const family = authoredFamilies.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
     const classification = fontFamilyClasses?.[family];
     const fallback = classification && DOCUMENT_FONT_FAMILY_FALLBACKS[classification];
     const familyGroups = [authoredFamilies];
     if (textStyle.eastAsiaFontFamily?.trim()) {
-        familyGroups.push(normalizeFontFamily(textStyle.eastAsiaFontFamily, defaultFont));
+        familyGroups.push(textStyle.eastAsiaFontFamily);
     }
 
     const expanded: string[] = [];

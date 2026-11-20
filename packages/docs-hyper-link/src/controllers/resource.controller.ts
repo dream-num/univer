@@ -15,14 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
-import {
-    CustomRangeType,
-    Disposable,
-    Inject,
-    IResourceManagerService,
-    IUniverInstanceService,
-    UniverInstanceType,
-} from '@univerjs/core';
+import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export const DOC_HYPER_LINK_PLUGIN = 'DOC_HYPER_LINK_PLUGIN';
 

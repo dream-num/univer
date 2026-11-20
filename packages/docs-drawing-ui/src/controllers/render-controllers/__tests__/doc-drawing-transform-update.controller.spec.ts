@@ -16,11 +16,35 @@
 
 import type { IDrawingParam } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import { AlignTypeH, AlignTypeV, BooleanNumber, DocumentFlavor, DrawingTypeEnum, ICommandService, IImageIoService, ImageSourceType, IResourceManagerService, IURLImageService, JSONX, LocaleService, LocaleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, RedoCommand, UndoCommand } from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BooleanNumber,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    ICommandService,
+    IImageIoService,
+    ImageSourceType,
+    IResourceManagerService,
+    IURLImageService,
+    JSONX,
+    LocaleService,
+    LocaleType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    RedoCommand,
+    UndoCommand,
+} from '@univerjs/core';
 import { DocSkeletonManagerService, DocStateChangeManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { InsertDocDrawingCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, OleService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import {
+    getDrawingShapeKeyByDrawingSearch,
+    IDrawingManagerService,
+    OleService,
+    SetDrawingSelectedOperation,
+} from '@univerjs/drawing';
 import { DrawingImageClipService, DrawingRenderService, OleUIService } from '@univerjs/drawing-ui';
 import { DrawingUpdateController } from '@univerjs/drawing-ui/controllers/drawing-update.controller.ts';
 import { ImageUpdateController } from '@univerjs/drawing-ui/controllers/image-update.controller.ts';
@@ -52,7 +76,19 @@ import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transfor
 import { createDocDrawingTestBed } from '../../../__tests__/create-doc-drawing-test-bed';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
-import { DocDrawingPublicationTracker, DocDrawingTransformUpdateController, getDocsDrawingBehindText, getDocsDrawingClipPage, getDocsDrawingPageClipBounds, getDocsOverlayRuntimeDrawing, getDocsPageRelativeDrawingAnchorPage, getDocsPageRelativeDrawingLeft, getDocsPageRelativeDrawingTop, getDocsTableCellDrawingOffset, shouldRefreshDocDrawingTransform } from '../doc-drawing-transform-update.controller';
+import {
+    DocDrawingPublicationTracker,
+    DocDrawingTransformUpdateController,
+    getDocsDrawingBehindText,
+    getDocsDrawingClipPage,
+    getDocsDrawingPageClipBounds,
+    getDocsOverlayRuntimeDrawing,
+    getDocsPageRelativeDrawingAnchorPage,
+    getDocsPageRelativeDrawingLeft,
+    getDocsPageRelativeDrawingTop,
+    getDocsTableCellDrawingOffset,
+    shouldRefreshDocDrawingTransform,
+} from '../doc-drawing-transform-update.controller';
 
 async function createRepeatedImageTestBed(unitId: string, drawingType = DrawingTypeEnum.DRAWING_IMAGE) {
     const testBed = createDocDrawingTestBed(unitId);

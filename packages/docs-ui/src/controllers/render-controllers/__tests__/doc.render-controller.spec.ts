@@ -19,9 +19,42 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
-import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor, DrawingTypeEnum, HorizontalAlign, ICommandService, IUniverInstanceService, LocaleService, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, Univer, UniverInstanceType } from '@univerjs/core';
-import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation, SetHeadingCollapsedCommand, SetTextSelectionsOperation } from '@univerjs/docs';
-import { CanvasColorService, FontCache, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    NamedStyleType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetHeadingCollapsedCommand,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
+    FontCache,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';

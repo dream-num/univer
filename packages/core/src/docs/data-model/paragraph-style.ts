@@ -17,7 +17,12 @@
 import type { Nullable } from '../../shared/types';
 import type { IBullet, IDocStyles, IDocumentData, IDocumentStyle, INumberUnit, IParagraph, IParagraphStyle, ITextStyle } from '../../types/interfaces/i-document-data';
 import { Tools } from '../../shared/tools';
-import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, NAMED_STYLE_SPACE_MAP } from '../../types/const/const';
+import {
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
+    NAMED_STYLE_SPACE_MAP,
+} from '../../types/const/const';
 import { BooleanNumber } from '../../types/enum/text-style';
 import { DocStyleType, DocumentFlavor, NamedStyleType, NumberUnitType } from '../../types/interfaces/i-document-data';
 

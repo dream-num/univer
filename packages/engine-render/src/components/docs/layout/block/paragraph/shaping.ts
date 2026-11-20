@@ -15,7 +15,17 @@
  */
 
 import type { ICustomRangeForInterceptor, IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocxBreakType, GridType, PositionedObjectLayoutType, resolveDocumentParagraphStyle, TabStopAlignment } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    characterSpacingControlType,
+    DataStreamTreeTokenType,
+    DocxBreakType,
+    GridType,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphStyle,
+    TabStopAlignment,
+} from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
@@ -24,7 +34,16 @@ import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { ILayoutContext } from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
-import { graphemeSegmenter, hasArabic, hasThai, hasTibetan, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, startWithEmoji } from '../../../../../basics/tools';
+import {
+    graphemeSegmenter,
+    hasArabic,
+    hasThai,
+    hasTibetan,
+    isCjkCenterAlignedPunctuation,
+    isCjkLeftAlignedPunctuation,
+    isCjkRightAlignedPunctuation,
+    startWithEmoji,
+} from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy, getDocumentFontStyle, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { resolveHeaderFooterFieldGlyph } from '../../header-footer-field';
@@ -36,10 +55,24 @@ import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/who
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
-import { adjustAdjacentPunctuationSpacing, createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, createSkeletonWholeEntityGlyph, getTextHorizontalScale, isEastAsianFontCharacter } from '../../model/glyph';
+import {
+    adjustAdjacentPunctuationSpacing,
+    createSkeletonCustomBlockGlyph,
+    createSkeletonLetterGlyph,
+    createSkeletonTabGlyph,
+    createSkeletonWholeEntityGlyph,
+    getTextHorizontalScale,
+    isEastAsianFontCharacter,
+} from '../../model/glyph';
 import { getBoundingBox } from '../../model/line';
 import { FontCache } from '../../shaping-engine/font-cache';
-import { getCharSpaceApply, getCustomRangeGlyphMetrics, getCustomRangeGlyphMetricsFromRange, getFontCreateConfig, isMeasuredWholeEntityRange } from '../../tools';
+import {
+    getCharSpaceApply,
+    getCustomRangeGlyphMetrics,
+    getCustomRangeGlyphMetricsFromRange,
+    getFontCreateConfig,
+    isMeasuredWholeEntityRange,
+} from '../../tools';
 import { ArabicHandler, emojiHandler, otherHandler, ThaiHandler, TibetanHandler } from './language-ruler';
 // Add some spacing between Han characters and western characters.
 // See Requirements for Chinese Text Layout, Section 3.2.2 Mixed Text Composition in Horizontal

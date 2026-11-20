@@ -20,7 +20,12 @@ import type { IInsertAction, IRetainAction, TextXAction } from '../action-types'
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
-import { CustomDecorationType, CustomRangeType, DocumentBlockRangeType, SpecialCharacterKind } from '../../../../types/interfaces/i-document-data';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    DocumentBlockRangeType,
+    SpecialCharacterKind,
+} from '../../../../types/interfaces/i-document-data';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';

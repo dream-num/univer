@@ -15,22 +15,98 @@
  */
 
 import type { INumberUnit, IParagraphProperties, ITabStop, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocumentFlavor, FollowNumberWithType, GridType, HorizontalAlign, NAMED_STYLE_SPACE_MAP, NumberUnitType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, SpacingRule, TableTextWrapType, TabStopAlignment, WrapStrategy } from '@univerjs/core';
-import type { IDocumentSkeletonColumn, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonSection, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
+import {
+    BooleanNumber,
+    characterSpacingControlType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    FollowNumberWithType,
+    GridType,
+    HorizontalAlign,
+    NAMED_STYLE_SPACE_MAP,
+    NumberUnitType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SectionType,
+    SpacingRule,
+    TableTextWrapType,
+    TabStopAlignment,
+    WrapStrategy,
+} from '@univerjs/core';
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+} from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { IFloatObject, ILayoutContext } from '../../tools';
+import type {
+    IFloatObject,
+    ILayoutContext,
+} from '../../tools';
 import { cjk } from '../../../../../basics/cjk-regexp';
-import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
+import {
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+} from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation, isWesternHangingPunctuation, ptToPixel } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
-import { getDocumentCompatibilityPolicy, getNominalFontLineHeight, isTraditionalDocumentCompatibility, shouldAllowImportedTableMarginOverflow } from '../../../document-compatibility';
+import {
+    getDocumentCompatibilityPolicy,
+    getNominalFontLineHeight,
+    isTraditionalDocumentCompatibility,
+    shouldAllowImportedTableMarginOverflow,
+} from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
-import { addGlyphToDivide, applyGlyphKerning, createSkeletonBulletGlyph, getGlyphGroupFontBoundingBox, getGlyphGroupShrinkability, getGlyphGroupStretchability, getGlyphPairKerningAdjustment, getTextHorizontalScale, preserveLineStartPunctuationSpace } from '../../model/glyph';
-import { calculateLineTopByDrawings, collisionDetection, createAndUpdateBlockAnchor, createSkeletonLine, setLineMarginBottom, TRADITIONAL_TABLE_WRAP_MIN_WIDTH, updateDivideInfo } from '../../model/line';
+import {
+    addGlyphToDivide,
+    applyGlyphKerning,
+    createSkeletonBulletGlyph,
+    getGlyphGroupFontBoundingBox,
+    getGlyphGroupShrinkability,
+    getGlyphGroupStretchability,
+    getGlyphPairKerningAdjustment,
+    getTextHorizontalScale,
+    preserveLineStartPunctuationSpace,
+} from '../../model/glyph';
+import {
+    calculateLineTopByDrawings,
+    collisionDetection,
+    createAndUpdateBlockAnchor,
+    createSkeletonLine,
+    setLineMarginBottom,
+    TRADITIONAL_TABLE_WRAP_MIN_WIDTH,
+    updateDivideInfo,
+} from '../../model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { FontCache } from '../../shaping-engine/font-cache';
-import { FloatObjectType, getCharSpaceApply, getCharSpaceConfig, getDrawingMLLineBaseline, getLastLineByColumn, getLastNotFullColumnInfo, getLastNotFullDivideInfo, getLastPage, getLastSection, getLineHeightConfig, getNumberUnitValue, getPositionHorizon, getPositionVertical, isBlankColumn, isColumnFull, lineIterator, reachesNextDocumentGridLine, resolveParagraphCharacterIndents } from '../../tools';
+import {
+    FloatObjectType,
+    getCharSpaceApply,
+    getCharSpaceConfig,
+    getDrawingMLLineBaseline,
+    getLastLineByColumn,
+    getLastNotFullColumnInfo,
+    getLastNotFullDivideInfo,
+    getLastPage,
+    getLastSection,
+    getLineHeightConfig,
+    getNumberUnitValue,
+    getPositionHorizon,
+    getPositionVertical,
+    isBlankColumn,
+    isColumnFull,
+    lineIterator,
+    reachesNextDocumentGridLine,
+    resolveParagraphCharacterIndents,
+} from '../../tools';
 import { cachePrecomputedTableSkeleton, createTableSkeletons, getTableLeft } from '../table';
 
 const LINE_LAYOUT_OVERFLOW_TOLERANCE = 2;

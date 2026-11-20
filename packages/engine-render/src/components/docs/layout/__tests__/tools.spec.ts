@@ -15,7 +15,25 @@
  */
 
 import type { IDocumentData, IDocumentStyle, IParagraphBorder, ISectionBreak } from '@univerjs/core';
-import { AlignTypeH, AlignTypeV, BaselineOffset, BooleanNumber, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocStyleType, DocumentDataModel, DocumentFlavor, GridType, LocaleType, NumberUnitType, ObjectRelativeFromH, ObjectRelativeFromV, SectionType, SpacingRule } from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BaselineOffset,
+    BooleanNumber,
+    CustomRangeType,
+    DashStyleType,
+    DataStreamTreeTokenType,
+    DocStyleType,
+    DocumentDataModel,
+    DocumentFlavor,
+    GridType,
+    LocaleType,
+    NumberUnitType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    SectionType,
+    SpacingRule,
+} from '@univerjs/core';
 import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
@@ -23,7 +41,53 @@ import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { createSkeletonLetterGlyph } from '../model/glyph';
-import { clearFontCreateConfigCache, columnIterator, compareDocumentSkeletonNestedPagePathOrder, documentSkeletonLineIterator, documentSkeletonTableIterator, getCharSpaceApply, getCharSpaceConfig, getColumnByDivide, getDocumentSkeletonColumnPagePathInfo, getDocumentSkeletonNestedPageOffset, getFontConfigFromLastGlyph, getFontCreateConfig, getGlyphGroupWidth, getLastColumn, getLastLine, getLastLineByColumn, getLastNotFullColumnInfo, getLastNotFullDivideInfo, getLastPage, getLastRemainingDivide, getLastSection, getLastSpan, getLineHeightConfig, getNextDivide, getNullSkeleton, getNumberUnitValue, getPageContentWidth, getPageFromPath, getPositionHorizon, getPositionVertical, getPreLine, glyphIterator, hasSameParagraphBorderSet, isBlankColumn, isBlankPage, isColumnFull, lineIterator, mergeByV, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder, updateParagraphBorders, validationGrid } from '../tools';
+import {
+    clearFontCreateConfigCache,
+    columnIterator,
+    compareDocumentSkeletonNestedPagePathOrder,
+    documentSkeletonLineIterator,
+    documentSkeletonTableIterator,
+    getCharSpaceApply,
+    getCharSpaceConfig,
+    getColumnByDivide,
+    getDocumentSkeletonColumnPagePathInfo,
+    getDocumentSkeletonNestedPageOffset,
+    getFontConfigFromLastGlyph,
+    getFontCreateConfig,
+    getGlyphGroupWidth,
+    getLastColumn,
+    getLastLine,
+    getLastLineByColumn,
+    getLastNotFullColumnInfo,
+    getLastNotFullDivideInfo,
+    getLastPage,
+    getLastRemainingDivide,
+    getLastSection,
+    getLastSpan,
+    getLineHeightConfig,
+    getNextDivide,
+    getNullSkeleton,
+    getNumberUnitValue,
+    getPageContentWidth,
+    getPageFromPath,
+    getPositionHorizon,
+    getPositionVertical,
+    getPreLine,
+    glyphIterator,
+    hasSameParagraphBorderSet,
+    isBlankColumn,
+    isBlankPage,
+    isColumnFull,
+    lineIterator,
+    mergeByV,
+    prepareSectionBreakConfig,
+    resetContext,
+    setPageParent,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+    updateParagraphBorders,
+    validationGrid,
+} from '../tools';
 import wordDirectoryHyperlinks from './fixtures/word-directory-hyperlinks.json';
 
 function createSectionLayoutContext(documentStyle: IDocumentStyle, sections: Array<Omit<ISectionBreak, 'startIndex'>>) {

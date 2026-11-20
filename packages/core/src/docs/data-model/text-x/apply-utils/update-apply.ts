@@ -15,10 +15,42 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, ICustomTable, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../../types/interfaces';
+import type {
+    ICustomBlock,
+    ICustomColumnGroup,
+    ICustomDecoration,
+    ICustomRange,
+    ICustomTable,
+    IDocumentBody,
+    IParagraph,
+    ISectionBreak,
+    ITextRun,
+} from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { CustomDecorationType, CustomRangeType } from '../../../../types/interfaces';
-import { deleteBlockRanges, deleteColumnGroups, deleteCustomBlocks, deleteDocxRawCustomBlocks, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns, insertBlockRanges, insertColumnGroups, insertCustomBlocks, insertDocxRawCustomBlocks, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns, mergeContinuousDecorations, mergeContinuousRanges, normalizeTextRuns, splitCustomDecoratesByIndex, splitCustomRangesByIndex } from './common';
+import {
+    deleteBlockRanges,
+    deleteColumnGroups,
+    deleteCustomBlocks,
+    deleteDocxRawCustomBlocks,
+    deleteParagraphs,
+    deleteSectionBreaks,
+    deleteTables,
+    deleteTextRuns,
+    insertBlockRanges,
+    insertColumnGroups,
+    insertCustomBlocks,
+    insertDocxRawCustomBlocks,
+    insertParagraphs,
+    insertSectionBreaks,
+    insertTables,
+    insertTextRuns,
+    mergeContinuousDecorations,
+    mergeContinuousRanges,
+    normalizeTextRuns,
+    splitCustomDecoratesByIndex,
+    splitCustomRangesByIndex,
+} from './common';
 
 export function updateAttribute(
     body: IDocumentBody,

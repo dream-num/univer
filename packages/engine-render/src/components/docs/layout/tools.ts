@@ -14,13 +14,75 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IBullet, ICustomRangeForInterceptor, IDocDrawingBase, IDocStyles, IDocumentBody, IDocumentStyle, INumberUnit, IObjectPositionH, IObjectPositionV, IParagraphBorder, Nullable, PositionedObjectLayoutType } from '@univerjs/core';
-import { AlignTypeH, AlignTypeV, BooleanNumber, ColumnSeparatorType, CustomRangeType, DataStreamTreeTokenType, DocStyleType, DocumentFlavor, GridType, HorizontalAlign, mergeWith, MODERN_DOCUMENT_DEFAULT_MARGIN, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, NAMED_STYLE_MAP, NumberUnitType, ObjectMatrix, ObjectRelativeFromH, ObjectRelativeFromV, PageOrientType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle, resolveDocumentTextStyle, resolveSectionHeaderFooterReferences, SectionType, SpacingRule, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonDivide, IDocumentSkeletonFontStyle, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonParagraphBorders, IDocumentSkeletonRow, IDocumentSkeletonSection, IDocumentSkeletonTable, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
+import type {
+    DocumentDataModel,
+    IBullet,
+    ICustomRangeForInterceptor,
+    IDocDrawingBase,
+    IDocStyles,
+    IDocumentBody,
+    IDocumentStyle,
+    INumberUnit,
+    IObjectPositionH,
+    IObjectPositionV,
+    IParagraphBorder,
+    Nullable,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BooleanNumber,
+    ColumnSeparatorType,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocStyleType,
+    DocumentFlavor,
+    GridType,
+    HorizontalAlign,
+    mergeWith,
+    MODERN_DOCUMENT_DEFAULT_MARGIN,
+    MODERN_DOCUMENT_WIDTH,
+    ModernDocumentWidthMode,
+    NAMED_STYLE_MAP,
+    NumberUnitType,
+    ObjectMatrix,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PageOrientType,
+    resolveDocumentParagraphBullet,
+    resolveDocumentParagraphStyle,
+    resolveDocumentTextStyle,
+    resolveSectionHeaderFooterReferences,
+    SectionType,
+    SpacingRule,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonFontStyle,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonParagraphBorders,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+    ISkeletonResourceReference,
+} from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { IDocumentCompatibilityPolicy } from '../document-compatibility';
-import type { IDocumentLayoutParagraph, IDocumentLayoutParagraphStyle, IDocumentLayoutSectionBreak, IDocumentLayoutStyle, IDocumentLayoutTextStyle } from '../document-layout-presentation';
+import type {
+    IDocumentLayoutParagraph,
+    IDocumentLayoutParagraphStyle,
+    IDocumentLayoutSectionBreak,
+    IDocumentLayoutStyle,
+    IDocumentLayoutTextStyle,
+} from '../document-layout-presentation';
 import type { DocumentHeaderFooterReferenceResolver } from '../header-footer-reference';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
@@ -34,7 +96,11 @@ import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached'
 import { isFunction, ptToPixel, resolveDocumentDefaultFont, resolveTextStyleEastAsiaFont } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy, getDocumentFontStyle, isTraditionalDocumentCompatibility } from '../document-compatibility';
 import { getDocumentLayoutPresentation } from '../document-layout-presentation';
-import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from '../table-render-viewport';
+import {
+    getDocsTableRenderViewport,
+    getDocsTableViewportLeft,
+    hasDocsTableHorizontalViewport,
+} from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getGlyphGroupFontBoundingBox } from './model/glyph';
 import { getCustomDecorationStyle } from './style/custom-decoration';

@@ -14,11 +14,39 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CellValueType, CommandService, ConfigService, ContextService, createInternalEditorID, CustomRangeType, DesktopLogService, DOCS_COMMENT_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel, DocumentFlavor, ICommandService, IConfigService, IContextService, ILogService, Injector, IUniverInstanceService, LocaleService, SHEET_TEXT_LINE_GAP, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CellValueType,
+    CommandService,
+    ConfigService,
+    ContextService,
+    createInternalEditorID,
+    CustomRangeType,
+    DesktopLogService,
+    DOCS_COMMENT_EDITOR_UNIT_ID_KEY,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentDataModel,
+    DocumentFlavor,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    SHEET_TEXT_LINE_GAP,
+    UniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FontCache, registerDocumentHeaderFooterReferenceResolver, registerDocumentLayoutPresentation } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IDocLayoutExecutor } from '../doc-layout-executor.service';
-import { DocLayoutExecutorService, DocLayoutExecutorType, DocLayoutSessionStatus } from '../doc-layout-executor.service';
+import {
+    DocLayoutExecutorService,
+    DocLayoutExecutorType,
+    DocLayoutSessionStatus,
+} from '../doc-layout-executor.service';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 
 let testInjector: Injector;

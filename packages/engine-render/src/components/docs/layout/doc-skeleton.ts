@@ -15,19 +15,75 @@
  */
 
 import type { ColumnSeparatorType, IDocumentBody, IDocumentData, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DataStreamTreeTokenType, DisposableCollection, DocumentDataModel, DocumentFlavor, PositionedObjectLayoutType, PRESET_LIST_TYPE, resolveDocumentParagraphStyle, SectionType, Skeleton } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DisposableCollection,
+    DocumentDataModel,
+    DocumentFlavor,
+    PositionedObjectLayoutType,
+    PRESET_LIST_TYPE,
+    resolveDocumentParagraphStyle,
+    SectionType,
+    Skeleton,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
-import type { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonColumnGroup, IDocumentSkeletonColumnGroupColumn, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonSection, IDocumentSkeletonTable, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonDrawingAnchor,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+    ISkeletonResourceReference,
+} from '../../../basics/i-document-skeleton-cached';
+import type {
+    IDocsConfig,
+    INodeInfo,
+    INodePosition,
+    INodeSearch,
+    ISectionBreakConfig,
+} from '../../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
 import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
-import type { IDocumentLayoutBlockGeometryPublication, IDocumentLayoutDrawingAnchorPublication, IDocumentLayoutGeometryPublication, IDocumentLayoutPagePublication, IDocumentLayoutResourcePublication } from './document-layout-publication';
-import type { DocumentLayoutMode, DocumentLayoutReason, IDocumentLayoutApplyResult, IDocumentLayoutInvalidation, IDocumentLayoutPageRange, IDocumentLayoutProgress, IDocumentLayoutProtectedPageRange, IDocumentLayoutProtectedRange } from './document-layout-types';
+import type {
+    IDocumentLayoutBlockGeometryPublication,
+    IDocumentLayoutDrawingAnchorPublication,
+    IDocumentLayoutGeometryPublication,
+    IDocumentLayoutPagePublication,
+    IDocumentLayoutResourcePublication,
+} from './document-layout-publication';
+import type {
+    DocumentLayoutMode,
+    DocumentLayoutReason,
+    IDocumentLayoutApplyResult,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutPageRange,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedPageRange,
+    IDocumentLayoutProtectedRange,
+} from './document-layout-types';
 import type { IDocumentPaginationMetrics, IHeaderFooterFieldPageNumber, ILayoutContext } from './tools';
-import { BreakType, DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import {
+    BreakType,
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    PageLayoutType,
+} from '../../../basics/i-document-skeleton-cached';
 import { getDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { getDocumentReferenceLayoutResolver, hasDocumentReferenceLayout } from '../document-reference-layout';
@@ -37,8 +93,21 @@ import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../t
 import { DocumentEditArea, DocumentViewModel } from '../view-model/document-view-model';
 import { getHyphenationLanguage } from './block/paragraph/shaping';
 import { dealWithSection, rollbackSectionPages } from './block/section';
-import { cachePrecomputedSlicedTableSkeletons, cachePrecomputedTableSkeleton, getTableIdAndSliceIndex, startTableSkeletonBuild, startTableSkeletonsBuild, stepTableSkeletonBuild, stepTableSkeletonsBuild } from './block/table';
-import { applyDocumentSkeletonContinuousBlock, hydrateDocumentSkeletonPage, hydrateDocumentSkeletonPageMaterializationPlaceholder, serializeDocumentSkeletonPage } from './document-layout-page-patch';
+import {
+    cachePrecomputedSlicedTableSkeletons,
+    cachePrecomputedTableSkeleton,
+    getTableIdAndSliceIndex,
+    startTableSkeletonBuild,
+    startTableSkeletonsBuild,
+    stepTableSkeletonBuild,
+    stepTableSkeletonsBuild,
+} from './block/table';
+import {
+    applyDocumentSkeletonContinuousBlock,
+    hydrateDocumentSkeletonPage,
+    hydrateDocumentSkeletonPageMaterializationPlaceholder,
+    serializeDocumentSkeletonPage,
+} from './document-layout-page-patch';
 import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
 import { DocumentFootnoteLayout } from './footnote-layout';
 import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-projection';
@@ -51,7 +120,18 @@ import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
 import { layoutPagelessDocumentNotes } from './pageless-note-layout';
 import { projectDocumentReferenceLayout } from './reference-layout-projection';
 import { FontCache } from './shaping-engine/font-cache';
-import { getLastNotFullColumnInfo, getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoordsAndBorder, updateParagraphBorders } from './tools';
+import {
+    getLastNotFullColumnInfo,
+    getLastPage,
+    getNullSkeleton,
+    getPageFromPath,
+    prepareSectionBreakConfig,
+    resetContext,
+    setPageParent,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+    updateParagraphBorders,
+} from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
 

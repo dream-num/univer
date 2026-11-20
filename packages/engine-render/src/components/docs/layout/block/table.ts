@@ -15,8 +15,24 @@
  */
 
 import type { IDocumentData, INumberUnit, ITable, ITableCell, ITableCellBorder, ITableRow, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, NumberUnitType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableAlignmentType, TableRowHeightRule, TableSizeType, VerticalAlignmentType } from '@univerjs/core';
-import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList } from '../../../../basics/i-document-skeleton-cached';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    NumberUnitType,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    VerticalAlignmentType,
+} from '@univerjs/core';
+import type {
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonTable,
+    IParagraphList,
+} from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -24,8 +40,19 @@ import type { DocumentFootnoteLayout } from '../footnote-layout';
 import type { ICellSkeletonBuildState } from '../model/page';
 import type { ILayoutContext } from '../tools';
 import { DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
-import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility, shouldAllowImportedTableMarginOverflow } from '../../document-compatibility';
-import { createNullCellPage, createSkeletonCellPages, getRowBorderInset, getRowVerticalInset, startSkeletonCellPagesBuild, stepSkeletonCellPagesBuild } from '../model/page';
+import {
+    getDocumentCompatibilityPolicy,
+    isTraditionalDocumentCompatibility,
+    shouldAllowImportedTableMarginOverflow,
+} from '../../document-compatibility';
+import {
+    createNullCellPage,
+    createSkeletonCellPages,
+    getRowBorderInset,
+    getRowVerticalInset,
+    startSkeletonCellPagesBuild,
+    stepSkeletonCellPagesBuild,
+} from '../model/page';
 import { resolveTableAutoFitColumns } from '../table-auto-fit';
 import { getCellBorderWidth, getTableCellSpacing, getTableOuterBorder, hasTableCellSpacing, resolveTableCellSpacing } from '../table-cell-spacing';
 // Body, header and footer streams can share both table IDs and character offsets.

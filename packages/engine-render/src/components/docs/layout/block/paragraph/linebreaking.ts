@@ -14,9 +14,44 @@
  * limitations under the License.
  */
 
-import type { IBullet, IDocDrawingBase, IDocStyles, IDocumentBody, IDocumentData, IDocumentStyle, IDrawings, ILists, IParagraph, IParagraphStyle, LocaleService, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeNodeType, DataStreamTreeTokenType, DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DocumentBlockRangeType, DocxBreakType, GridType, ListGlyphType, PositionedObjectLayoutType, resolveDocumentParagraphBullet, resolveDocumentParagraphStyle, SpacingRule, TableTextWrapType } from '@univerjs/core';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonColumn, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
+import type {
+    IBullet,
+    IDocDrawingBase,
+    IDocStyles,
+    IDocumentBody,
+    IDocumentData,
+    IDocumentStyle,
+    IDrawings,
+    ILists,
+    IParagraph,
+    IParagraphStyle,
+    LocaleService,
+    Nullable,
+} from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeNodeType,
+    DataStreamTreeTokenType,
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DocumentBlockRangeType,
+    DocxBreakType,
+    GridType,
+    ListGlyphType,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphBullet,
+    resolveDocumentParagraphStyle,
+    SpacingRule,
+    TableTextWrapType,
+} from '@univerjs/core';
+import type {
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
+    IParagraphList,
+} from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';

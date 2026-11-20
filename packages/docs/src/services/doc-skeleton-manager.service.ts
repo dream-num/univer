@@ -16,7 +16,19 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IConfigService, Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, SHEET_TEXT_LINE_GAP, UniverInstanceType } from '@univerjs/core';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    IConfigService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    LocaleService,
+    RxDisposable,
+    SHEET_TEXT_LINE_GAP,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocumentSkeleton, DocumentViewModel, getDocumentLayoutPresentation, hasDocumentHeaderFooterReferenceLayout, hasDocumentReferenceLayout, SheetCellDocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocLayoutExecutorService } from './doc-layout-executor.service';

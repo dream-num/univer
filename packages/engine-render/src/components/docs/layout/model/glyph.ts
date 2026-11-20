@@ -16,14 +16,35 @@
 
 import type { ITextStyle } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
-import type { IAdjustability, IDocumentSkeletonBoundingBox, IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonFontStyle, IDocumentSkeletonGlyph } from '../../../../basics/i-document-skeleton-cached';
+import type {
+    IAdjustability,
+    IDocumentSkeletonBoundingBox,
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonFontStyle,
+    IDocumentSkeletonGlyph,
+} from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import type { IDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
-import { getFirstGrapheme, getTextWithCaps, hasArabic, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, resolveTextStyleEastAsiaFont } from '../../../../basics/tools';
+import {
+    getFirstGrapheme,
+    getTextWithCaps,
+    hasArabic,
+    isCjkCenterAlignedPunctuation,
+    isCjkLeftAlignedPunctuation,
+    isCjkRightAlignedPunctuation,
+    resolveTextStyleEastAsiaFont,
+} from '../../../../basics/tools';
 import { getCheckboxShapeSize, isCheckboxGlyph } from '../../../../shape/checkbox';
-import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy, getDocumentFontStyle, getSmallCapsFontStyle, isTraditionalDocumentCompatibility } from '../../document-compatibility';
+import {
+    applyFontMetricCompatibility,
+    getDocumentCompatibilityPolicy,
+    getDocumentFontStyle,
+    getSmallCapsFontStyle,
+    isTraditionalDocumentCompatibility,
+} from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
 

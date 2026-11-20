@@ -14,9 +14,38 @@
  * limitations under the License.
  */
 
-import { AlignTypeH, BooleanNumber, characterSpacingControlType, DataStreamTreeTokenType, DocumentFlavor, DrawingTypeEnum, FollowNumberWithType, GridType, HorizontalAlign, ListGlyphType, MODERN_DOCUMENT_DEFAULT_MARGIN, NumberUnitType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, resolveDocumentParagraphStyle, SectionType, SpacingRule, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TabStopAlignment, WrapTextType } from '@univerjs/core';
+import {
+    AlignTypeH,
+    BooleanNumber,
+    characterSpacingControlType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    FollowNumberWithType,
+    GridType,
+    HorizontalAlign,
+    ListGlyphType,
+    MODERN_DOCUMENT_DEFAULT_MARGIN,
+    NumberUnitType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphStyle,
+    SectionType,
+    SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    TableTextWrapType,
+    TabStopAlignment,
+    WrapTextType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+} from '../../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';

@@ -14,10 +14,37 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IParagraphBorder, ITextRangeParam } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    ICommand,
+    IDocumentBody,
+    IMutationInfo,
+    IParagraphBorder,
+    ITextRangeParam,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, DocumentFlavor, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, PresetListType, resolveDocumentParagraphBullet, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, generateParagraphs, RichTextEditingMutation, SetHeadingCollapsedCommand } from '@univerjs/docs';
+import {
+    BuildTextUtils,
+    CommandType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    getRichTextEditPath,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    PresetListType,
+    resolveDocumentParagraphBullet,
+    TextX,
+    TextXActionType,
+    UniverInstanceType,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
+import {
+    DocSelectionManagerService,
+    generateParagraphs,
+    RichTextEditingMutation,
+    SetHeadingCollapsedCommand,
+} from '@univerjs/docs';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { getTextRunAtPosition, isTopLevelStructuralGap } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';

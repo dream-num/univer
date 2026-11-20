@@ -15,7 +15,43 @@
  */
 
 import type { IDocumentData, IParagraph } from '@univerjs/core';
-import { BooleanNumber, ColumnLayoutType, ColumnResponsiveType, ColumnSeparatorType, createDocumentModelWithStyle, CustomRangeType, DashStyleType, DataStreamTreeTokenType, DocumentDataModel, DocumentFlavor, DrawingTypeEnum, GridType, HorizontalAlign, LocaleService, LocaleType, NamedStyleType, ObjectRelativeFromH, ObjectRelativeFromV, PageOrientType, PositionedObjectLayoutType, PresetListType, SectionType, SpacingRule, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, TabStopAlignment, TabStopLeader, TextX, Tools, Univer, VerticalAlignmentType, WrapStrategy, WrapTextType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ColumnLayoutType,
+    ColumnResponsiveType,
+    ColumnSeparatorType,
+    createDocumentModelWithStyle,
+    CustomRangeType,
+    DashStyleType,
+    DataStreamTreeTokenType,
+    DocumentDataModel,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    GridType,
+    HorizontalAlign,
+    LocaleService,
+    LocaleType,
+    NamedStyleType,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PageOrientType,
+    PositionedObjectLayoutType,
+    PresetListType,
+    SectionType,
+    SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
+    TableSizeType,
+    TableTextWrapType,
+    TabStopAlignment,
+    TabStopLeader,
+    TextX,
+    Tools,
+    Univer,
+    VerticalAlignmentType,
+    WrapStrategy,
+    WrapTextType,
+} from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { IDocumentLayoutSnapshot } from '../../document-layout-presentation';
 import type { IDocumentLayoutPageGeometryPublication } from '../document-layout-publication';

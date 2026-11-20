@@ -19,13 +19,30 @@ import { DependentOn, Disposable, IConfigService, Inject, Injector, merge, Plugi
 import { FontCache } from '@univerjs/engine-render';
 import { ChannelService, toModule } from '@univerjs/rpc';
 import { Observable, share } from 'rxjs';
-import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutExecutor, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
+import type {
+    IDocLayoutCancelRequest,
+    IDocLayoutCreateSessionRequest,
+    IDocLayoutDisposeMountRequest,
+    IDocLayoutDisposeSessionRequest,
+    IDocLayoutExecutor,
+    IDocLayoutPageRequest,
+    IDocLayoutPageResult,
+    IDocLayoutPerformanceMetrics,
+    IDocLayoutStartRequest,
+    IDocLayoutStartResult,
+    IDocLayoutStepRequest,
+    IDocLayoutStepResult,
+} from '../services/doc-layout-executor.service';
 import type { IDocsLayoutFontFace, IUniverDocsLayoutWorkerConfig } from './config/config';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import pkg from '../../package.json';
 import { UniverDocsPlugin } from '../plugin';
 import { DocLayoutExecutorService, DocLayoutExecutorType } from '../services/doc-layout-executor.service';
-import { DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS, defaultPluginDocsLayoutWorkerConfig, DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY } from './config/config';
+import {
+    DEFAULT_DOCS_LAYOUT_WORKER_REQUEST_TIMEOUT_MS,
+    defaultPluginDocsLayoutWorkerConfig,
+    DOCS_LAYOUT_WORKER_PLUGIN_CONFIG_KEY,
+} from './config/config';
 import { collectDocumentFontFamilies, measureDocumentFontFamilies } from './document-font-metrics';
 import { DocsLayoutFontLoader } from './font-loader';
 import { DocsLayoutWorkerPerformanceTracker } from './performance-tracker';

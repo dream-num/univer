@@ -18,6 +18,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import {
+    CustomCommandExecutionError,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
@@ -27,11 +28,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetPermissionCheckController } from '@univerjs/sheets';
 import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetOptionalPasteCommand } from '../../../commands/commands/clipboard.command';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
@@ -152,13 +154,19 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createClipboardPopupTestBed() {
+function createClipboardPopupTestBed(permissionCheckWithRanges = vi.fn(() => true)) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([ISheetClipboardService, { useClass: TestSheetClipboardService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
+    injector.add([SheetPermissionCheckController, { useValue: {
+        permissionCheckWithRanges,
+        blockExecuteWithoutPermission: () => {
+            throw new CustomCommandExecutionError('have no permission');
+        },
+    } as unknown as SheetPermissionCheckController }]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
@@ -166,7 +174,7 @@ function createClipboardPopupTestBed() {
     injector.get(LocaleService).setLocale(LocaleType.EN_US);
     injector.get(ICommandService).registerCommand(SheetOptionalPasteCommand);
 
-    return { univer, injector, workbook };
+    return { univer, injector, workbook, permissionCheckWithRanges };
 }
 
 function renderWithDependencies(element: ReactElement, injector: ReturnType<typeof createClipboardPopupTestBed>['injector']) {
@@ -270,5 +278,28 @@ describe('ClipboardPopupMenu', () => {
 
         await expect.poll(() => layoutService.focusCount).toBe(1);
         expect(layoutService.menuOpenWhenFocused).toBe(false);
+    });
+
+    it('does not replay the selected paste option when the target permission is denied', async () => {
+        currentBed = createClipboardPopupTestBed(vi.fn(() => false));
+        const clipboardService = currentBed.injector.get(ISheetClipboardService) as unknown as TestSheetClipboardService;
+        const rendered = renderWithDependencies(<ClipboardPopupMenu />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            clipboardService.setShowMenu(true);
+        });
+
+        const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
+        if (!(trigger instanceof HTMLElement)) {
+            throw new TypeError('Clipboard menu trigger not found');
+        }
+
+        await clickElement(trigger);
+        await clickElement(getByText('sheets-ui.rightClick.pasteColWidth'));
+
+        expect(currentBed.permissionCheckWithRanges).toHaveBeenCalled();
+        expect(clipboardService.selectedPasteTypes).toEqual([]);
     });
 });

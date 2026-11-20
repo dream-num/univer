@@ -18,11 +18,11 @@ import type { ICellRenderContext } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
-import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import type { IDropdownInfo } from './dropdown-widget';
 import { HorizontalAlign, ICommandService, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { CURSOR_TYPE, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
+import type { IDropdownInfo } from './dropdown-widget';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_ICON_COLOR } from '../../const';
 import { CELL_PADDING_H, CELL_PADDING_V, Dropdown, ICON_PLACE, layoutDropdowns, MARGIN_V } from './shape';
@@ -114,7 +114,6 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const vt = _vt ?? VerticalAlign.MIDDLE;
         const cellValue = getCellValueOrigin(data) ?? '';
         const items = validator.parseCellValue(cellValue);
-        const labelColorMap = validator.getListWithColorMap(rule);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
         this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, vt);
         ctx.save();
@@ -157,7 +156,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
                     ...fontStyle,
                     info: item,
                     color,
-                    fill: labelColorMap[item.text],
+                    fill: validator.getOptionColor(rule, item.text),
                 });
                 ctx.restore();
             });

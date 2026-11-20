@@ -27,6 +27,11 @@ import { RENDER_CLASS_TYPE } from '../../basics/const';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import { RenderComponent } from '../component';
 
+/** Paint-only physical clipping supplied by a host; never used to calculate document layout. */
+export interface IDocumentRenderBounds extends IViewportInfo {
+    glyphClipBound?: IBoundRectNoAngle;
+}
+
 export interface IPageMarginLayout {
     pageMarginLeft: number;
     pageMarginTop: number;
@@ -99,7 +104,7 @@ export abstract class DocComponent extends RenderComponent<
         }
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: Partial<IViewportInfo>) {
+    override render(mainCtx: UniverRenderingContext, bounds?: Partial<IDocumentRenderBounds>) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -163,5 +168,5 @@ export abstract class DocComponent extends RenderComponent<
         return false;
     }
 
-    protected abstract _draw(ctx: UniverRenderingContext, bounds?: Partial<IViewportInfo>): void;
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: Partial<IDocumentRenderBounds>): void;
 }

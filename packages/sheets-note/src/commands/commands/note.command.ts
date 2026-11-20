@@ -15,26 +15,49 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import type { IRemoveNoteMutationParams, IToggleNotePopupMutationParams, IUpdateNoteMutationParams } from '../mutations/note.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IRemoveNoteMutationParams, IToggleNotePopupMutationParams, IUpdateNoteMutationParams } from '../mutations/note.mutation';
 import { SheetsNoteModel } from '../../models/sheets-note.model';
 import { RemoveNoteMutation, ToggleNotePopupMutation, UpdateNoteMutation } from '../mutations/note.mutation';
 
-export const SheetDeleteNoteCommand: ICommand = {
+export interface ISheetDeleteNoteCommandParams {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    col: number;
+}
+
+export const SheetDeleteNoteCommand: ICommand<ISheetDeleteNoteCommandParams> = {
     id: 'sheet.command.delete-note',
     type: CommandType.COMMAND,
-    handler: (accessor) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
-        if (!target) return false;
+    handler: (accessor, params?: ISheetDeleteNoteCommandParams) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        let unitId: string;
+        let subUnitId: string;
+        let actualRow: number;
+        let actualColumn: number;
 
-        const sheetsSelectionsService = accessor.get(SheetsSelectionsService);
-        const selection = sheetsSelectionsService.getCurrentLastSelection();
-        if (!selection?.primary) return false;
+        if (params) {
+            const target = getSheetCommandTarget(univerInstanceService, { unitId: params.unitId, subUnitId: params.sheetId });
+            if (!target) return false;
+
+            ({ unitId, subUnitId } = target);
+            actualRow = params.row;
+            actualColumn = params.col;
+        } else {
+            const target = getSheetCommandTarget(univerInstanceService);
+            if (!target) return false;
+
+            const sheetsSelectionsService = accessor.get(SheetsSelectionsService);
+            const selection = sheetsSelectionsService.getCurrentLastSelection();
+            if (!selection?.primary) return false;
+
+            ({ unitId, subUnitId } = target);
+            ({ actualColumn, actualRow } = selection.primary);
+        }
 
         const sheetsNoteModel = accessor.get(SheetsNoteModel);
-        const { unitId, subUnitId } = target;
-        const { actualColumn, actualRow } = selection.primary;
         const note = sheetsNoteModel.getNote(unitId, subUnitId, { row: actualRow, col: actualColumn });
         if (!note) return false;
 
@@ -129,7 +152,7 @@ export const SheetUpdateNoteCommand: ICommand<IUpdateNoteMutationParams> = {
     id: 'sheet.command.update-note',
     type: CommandType.COMMAND,
     handler: (accessor, params: IUpdateNoteMutationParams) => {
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId: params.unitId, subUnitId: params.sheetId });
         if (!target) return false;
 
         const commandService = accessor.get(ICommandService);

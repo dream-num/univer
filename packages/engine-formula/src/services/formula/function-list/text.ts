@@ -1226,7 +1226,7 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
                 name: 'engine-formula.functionList.EUROCONVERT.functionParameter.fullPrecision.name',
                 detail: 'engine-formula.functionList.EUROCONVERT.functionParameter.fullPrecision.detail',
                 example: 'false',
-                require: 1,
+                require: 0,
                 repeat: 0,
             },
             {

@@ -103,6 +103,7 @@ export type { ICreateUnitOptions } from './services/instance/instance.service';
 export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService, LifecycleUnreachableError } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
+export { getCurrencySymbolByLocale } from './services/locale/currency-symbol';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export { MentionIOLocalService } from './services/mention-io/mention-io-local.service';

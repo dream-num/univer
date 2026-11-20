@@ -187,9 +187,9 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
                                 className={`
                                   univer-flex univer-size-4 univer-cursor-pointer univer-items-center
                                   univer-rounded-full univer-border-none univer-bg-transparent univer-p-1
-                                  univer-text-gray-400 univer-transition-colors univer-duration-200
+                                  univer-text-gray-400 univer-outline-none univer-transition-colors univer-duration-200
                                   hover:univer-text-gray-500
-                                  focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-600
+                                  focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                                 `}
                             >
                                 <CloseIcon aria-hidden="true" className="univer-size-3" />

@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Proveu un altre nom o esborreu la cerca.',
                 commonErr: 'L\'interval està protegit i no teniu permís per a aquesta operació. Per editar, contacteu amb el creador.',
                 editErr: 'L\'interval està protegit i no teniu permís d\'edició. Per editar, contacteu amb el creador.',
+                operatorSheetErr: 'No teniu permís per operar al full de càlcul. Per operar al full de càlcul, contacteu amb el creador.',
                 pasteErr: 'L\'interval està protegit i no teniu permís per enganxar. Per enganxar, contacteu amb el creador.',
                 setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
                 copyErr: 'L\'interval està protegit i no teniu permís per copiar. Per copiar, contacteu amb el creador.',

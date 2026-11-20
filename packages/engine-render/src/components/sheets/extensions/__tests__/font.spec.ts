@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, HorizontalAlign, Injector, LocaleType, ObjectMatrix, Univer, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { ICellData, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CellValueType,
+    HorizontalAlign,
+    Injector,
+    LocaleType,
+    ObjectMatrix,
+    Univer,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Documents } from '../../../docs/document';
 import { setupRenderTestEnv } from '../../../../__tests__/render-test-utils';
 import { VERTICAL_ROTATE_ANGLE } from '../../../../basics/text-rotation';
 import { UniverRenderingContext2D } from '../../../../context';
 import { Rect } from '../../../../shape/rect';
 import { Text } from '../../../../shape/text';
+import { SHEET_VIEWPORT_KEY } from '../../interfaces';
 import { SpreadsheetSkeleton } from '../../sheet.render-skeleton';
+import { Spreadsheet } from '../../spreadsheet';
 import { Font } from '../font';
 
 let injector: Injector;
@@ -1168,5 +1182,165 @@ describe('font extension', () => {
         } as any);
 
         expect(viewRanges).toEqual([{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }]);
+    });
+});
+
+describe('rich text outside a frozen viewport', () => {
+    it.each([
+        { name: 'wrapped text outside the clip at 100%', hidden: false, nativeText: true },
+        { name: 'wrapped text clipped in frozen rows at 100%', hidden: false, nativeText: false },
+        { name: 'unknown viewport bounds', hidden: true, unknownBound: true },
+        { name: 'printing', hidden: true, printing: true },
+        { name: 'overflowing text', hidden: true, style: { tb: WrapStrategy.OVERFLOW } },
+        { name: 'rotated text', hidden: true, style: { tr: { a: 45, v: BooleanNumber.FALSE } } },
+        { name: 'custom render bounds', hidden: true, customBounds: true },
+        { name: 'pending drawing resources', hidden: true, drawings: true },
+        { name: 'physical edge halo', hidden: true, edge: true },
+        { name: 'merged anchor outside the viewport', hidden: false, merged: true },
+    ])('preserves visible glyphs for $name', (test) => {
+        const environment = setupRenderTestEnv();
+        const rootInjector = new Injector([[Univer, {
+            useFactory: function createUniver(container: Injector) {
+                return container.createInstance(Univer, { locale: LocaleType.EN_US });
+            },
+            deps: [Injector],
+        }]]);
+        const univer = rootInjector.get(Univer);
+        const container = univer.__getInjector();
+        let targetColumn = 4;
+        if (test.merged) {
+            targetColumn = 6;
+        } else if (test.edge) {
+            targetColumn = 1;
+        }
+        const richCell = (glyph: string, style: IStyleData = {}): ICellData => ({
+            p: {
+                id: `rich-${glyph}`,
+                documentStyle: {},
+                ...(test.drawings && glyph === 'H' ? { drawingsOrder: ['pending-image'] } : {}),
+                body: {
+                    dataStream: `${glyph}\r\n`,
+                    paragraphs: [{ startIndex: 1, paragraphId: `paragraph-${glyph}` }],
+                    textRuns: [{ st: 0, ed: 1, ts: { bl: BooleanNumber.TRUE } }],
+                },
+            },
+            s: { tb: WrapStrategy.WRAP, ...style },
+        });
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'frozen-rich-text',
+            sheetOrder: ['sheet'],
+            sheets: {
+                sheet: {
+                    id: 'sheet',
+                    rowCount: 4,
+                    columnCount: 8,
+                    defaultRowHeight: 40,
+                    defaultColumnWidth: 40,
+                    rowHeader: { width: 46 },
+                    columnHeader: { height: 20 },
+                    mergeData: test.merged ? [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 4 }] : [],
+                    cellData: { 0: {
+                        0: richCell('V'),
+                        [targetColumn]: {
+                            ...richCell('H', test.style),
+                            ...(test.customBounds ? { fontRenderExtension: { rightOffset: -20 } } : {}),
+                        },
+                    } },
+                },
+            },
+        });
+        container.add([SpreadsheetSkeleton, {
+            useFactory: function createSkeleton() {
+                return container.createInstance(SpreadsheetSkeleton, workbook.getActiveSheet()!, workbook.getStyles());
+            },
+        }]);
+        container.add([Spreadsheet, {
+            useFactory: function createSpreadsheet() {
+                return container.createInstance(Spreadsheet, 'frozen-rich-sheet', container.get(SpreadsheetSkeleton));
+            },
+        }]);
+        container.add([Font, { useFactory: function getFont() {
+            return container.get(Spreadsheet).fontExtension;
+        } }]);
+        container.add([CanvasRenderingContext2D, { useValue: document.createElement('canvas').getContext('2d')! }]);
+        container.add([UniverRenderingContext2D, {
+            useFactory: function createContext(resolver: Injector, native: CanvasRenderingContext2D) {
+                return resolver.createInstance(UniverRenderingContext2D, native);
+            },
+            deps: [Injector, CanvasRenderingContext2D],
+        }]);
+        const fontsDescriptor = Object.getOwnPropertyDescriptor(document, 'fonts');
+        try {
+            const skeleton = container.get(SpreadsheetSkeleton);
+            const font = container.get(Font);
+            const ctx = container.get(UniverRenderingContext2D);
+            ctx.canvas.width = 1000;
+            ctx.canvas.height = 1000;
+            if (test.nativeText !== undefined) {
+                const fonts = Object.assign(document.createElement('span'), { status: 'loaded' });
+                Object.defineProperty(document, 'fonts', { configurable: true, value: fonts });
+                ctx.canvas.dir = 'ltr';
+                vi.spyOn(ctx._context, 'measureText').mockReturnValue({
+                    width: 10,
+                    actualBoundingBoxLeft: 0,
+                    actualBoundingBoxRight: 10,
+                    actualBoundingBoxAscent: 10,
+                    actualBoundingBoxDescent: 0,
+                } as TextMetrics);
+            }
+            if (test.printing) ctx.__mode = 'printing';
+            skeleton.calculate();
+            const worksheet = workbook.getActiveSheet()!;
+            for (const column of [0, targetColumn]) {
+                const cell = worksheet.getCellRaw(0, column)!;
+                skeleton._setFontStylesCache(0, column, cell, worksheet.getComposedCellStyleByCellData(0, column, cell));
+                expect(skeleton.stylesCache.fontMatrix.getValue(0, column)?.documentSkeleton).toBeTruthy();
+            }
+            const paints = [vi.spyOn(ctx._context, 'fillText')];
+            const getContext = vi.isMockFunction(HTMLCanvasElement.prototype.getContext)
+                ? vi.mocked(HTMLCanvasElement.prototype.getContext).getMockImplementation()!
+                : HTMLCanvasElement.prototype.getContext;
+            vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement, ...args) {
+                const native = Reflect.apply(getContext, this, args);
+                if (native && 'fillText' in native) paints.push(vi.spyOn(native, 'fillText'));
+                return native;
+            });
+            const documentPaint = vi.spyOn(font.getDocuments()! as Documents, 'render');
+            const viewColumn = test.merged ? 3 : 0;
+            const viewportKey = test.nativeText === false ? SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP : SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT;
+            font.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, [], {
+                viewRanges: [{ startRow: 0, endRow: 0, startColumn: viewColumn, endColumn: viewColumn }],
+                viewportKey,
+                viewBound: test.unknownBound
+                    ? undefined
+                    : {
+                        left: skeleton.rowHeaderWidthAndMarginLeft + viewColumn * 40,
+                        right: skeleton.rowHeaderWidthAndMarginLeft + (viewColumn + 1) * 40 - (test.edge ? 1 : 0),
+                        top: skeleton.columnHeaderHeightAndMarginTop,
+                        bottom: skeleton.columnHeaderHeightAndMarginTop + 40,
+                    },
+            });
+            const texts = paints.flatMap((paint) => paint.mock.calls.map(([text]) => text));
+            expect(texts).toContain('V');
+            expect(texts.includes('H')).toBe(test.hidden);
+            const clips = documentPaint.mock.calls.flatMap(([, bounds]) => bounds?.glyphClipBound ? [bounds.glyphClipBound] : []);
+            if (test.nativeText !== undefined) {
+                expect(paints[0].mock.calls.some(([text]) => text === 'V')).toBe(test.nativeText);
+                expect(clips.length).toBeGreaterThan(0);
+            }
+            for (const clip of clips) {
+                expect(clip.top).toBeGreaterThanOrEqual(0);
+                expect(clip.bottom).toBeLessThanOrEqual(40);
+            }
+        } finally {
+            rootInjector.dispose();
+            vi.restoreAllMocks();
+            if (fontsDescriptor) {
+                Object.defineProperty(document, 'fonts', fontsDescriptor);
+            } else {
+                Reflect.deleteProperty(document, 'fonts');
+            }
+            environment.restore();
+        }
     });
 });

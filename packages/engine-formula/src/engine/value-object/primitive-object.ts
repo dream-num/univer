@@ -1617,7 +1617,10 @@ export class StringValueObject extends BaseValueObject {
 
         const parseData = getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
 
-        if (parseData && parseData.z) {
+        // A parse result is authoritative even when the input carries no number
+        // format, e.g. "(5)" or "( 12.34 )": the value is a number, the pattern
+        // is optional information.
+        if (parseData) {
             return createNumberValueObjectByRawValue(parseData.v, parseData.z).withDateSystem(this.getDateSystem());
         }
 

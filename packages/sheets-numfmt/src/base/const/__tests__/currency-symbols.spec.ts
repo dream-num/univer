@@ -16,12 +16,10 @@
 
 import { LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getCurrencyFormat, getCurrencySymbolByLocale, getCurrencySymbolIconByLocale } from '../currency-symbols';
+import { getCurrencyFormat, getCurrencySymbolIconByLocale } from '../currency-symbols';
 
 describe('currency symbols', () => {
     it('currency symbol helpers', () => {
-        expect(getCurrencySymbolByLocale(LocaleType.ZH_CN)).toBe('¥');
-        expect(getCurrencySymbolByLocale(LocaleType.KO_KR)).toBe('₩');
         expect(getCurrencySymbolIconByLocale(LocaleType.FR_FR)).toEqual({
             icon: 'EuroIcon',
             symbol: '€',

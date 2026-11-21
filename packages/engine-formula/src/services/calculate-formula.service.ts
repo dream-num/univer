@@ -252,9 +252,10 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     if (!owners || !previous) {
                         continue;
                     }
-                    for (const [book, sheets] of Object.entries(previous.dirtyRanges)) {
-                        for (const [sheetId, ranges] of Object.entries(sheets ?? {})) {
-                            for (const range of ranges) {
+                    for (const [book, sheets] of Object.entries(previous.runtimeCellData)) {
+                        for (const [sheetId, matrix] of Object.entries(sheets ?? {})) {
+                            const range = matrix.getDataRange();
+                            if (range.endRow >= range.startRow && range.endColumn >= range.startColumn) {
                                 this._releasedFeatureRanges.add({ unitId: book, sheetId, range });
                             }
                         }
@@ -291,17 +292,23 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         }
         owners.set(JSON.stringify([unitId, sheetId]), output);
         this._publishFeatureOutput(id, owners);
+        const ranges: IFeatureDirtyRangeType = { ...this._runtimeService.getRuntimeFeatureRange()[id] };
+        for (const [book, sheets] of Object.entries(output.dirtyRanges)) {
+            const target: Record<string, IRange[]> = ranges[book] = { ...ranges[book] };
+            for (const [sheet, dirty] of Object.entries(sheets ?? {})) {
+                target[sheet] = [...target[sheet] ?? [], ...dirty];
+            }
+        }
+        this._runtimeService.setRuntimeFeatureRange(id, ranges);
     }
 
     private _publishFeatureOutput(id: string, owners: Map<string, IFeatureOutput>): void {
         if (owners.size === 1) {
             const [output] = owners.values();
             this._runtimeService.setRuntimeFeatureCellData(id, output.runtimeCellData);
-            this._runtimeService.setRuntimeFeatureRange(id, output.dirtyRanges);
             return;
         }
         const cells: IRuntimeUnitDataType = Object.create(null);
-        const ranges: IFeatureDirtyRangeType = Object.create(null);
         for (const output of owners.values()) {
             for (const [book, sheets] of Object.entries(output.runtimeCellData)) {
                 const target: Record<string, ObjectMatrix<Nullable<ICellData>>> = cells[book] ??= Object.create(null);
@@ -316,15 +323,8 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                     }
                 }
             }
-            for (const [book, sheets] of Object.entries(output.dirtyRanges)) {
-                const target: Record<string, IRange[]> = ranges[book] ??= Object.create(null);
-                for (const [sheet, dirty] of Object.entries(sheets ?? {})) {
-                    target[sheet] = [...target[sheet] ?? [], ...dirty];
-                }
-            }
         }
         this._runtimeService.setRuntimeFeatureCellData(id, cells);
-        this._runtimeService.setRuntimeFeatureRange(id, ranges);
     }
 
     override dispose() {
@@ -396,7 +396,16 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 this._runtimeService.completeCircularReferences();
                 this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
                 this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
+                const propagatedFeatureRanges = { ...this._runtimeService.getRuntimeFeatureRange() };
                 await this._completeExecution();
+                if (!this._runtimeService.isStopExecution()) {
+                    for (const [id, ranges] of Object.entries(propagatedFeatureRanges)) {
+                        // Retain cached cells and any changes published while writeback was pending.
+                        if (this._runtimeService.getRuntimeFeatureRange()[id] === ranges) {
+                            this._runtimeService.setRuntimeFeatureRange(id, {});
+                        }
+                    }
+                }
                 this._acknowledgeReleasedRanges(released);
             } finally {
                 this._runtimeService.clearInvertedIndexCache?.();

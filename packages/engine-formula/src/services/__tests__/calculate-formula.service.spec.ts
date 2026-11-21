@@ -78,6 +78,7 @@ function createService() {
         isCycleDependency: vi.fn(() => false),
         setRuntimeFeatureCellData: vi.fn(),
         setRuntimeFeatureRange: vi.fn(),
+        getRuntimeFeatureRange: vi.fn(() => ({})),
         stopExecution: vi.fn(),
         getAllRuntimeData: vi.fn(() => ({
             unitData: {},
@@ -156,6 +157,7 @@ function createService() {
         isCycleDependency = runtimeService.isCycleDependency;
         setRuntimeFeatureCellData = runtimeService.setRuntimeFeatureCellData;
         setRuntimeFeatureRange = runtimeService.setRuntimeFeatureRange;
+        getRuntimeFeatureRange = runtimeService.getRuntimeFeatureRange;
         stopExecution = runtimeService.stopExecution;
         getAllRuntimeData = runtimeService.getAllRuntimeData;
         getUnitData = runtimeService.getUnitData;
@@ -229,6 +231,104 @@ function createService() {
 }
 
 describe('CalculateFormulaService', () => {
+    it.each([false, true])('consumes feature change ranges after a calculation (forced: %s)', async (forced) => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const emitted: unknown[] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => {
+            emitted.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v);
+        });
+        const dataset: IFormulaDatasetConfig = {
+            formulaData: { test: { sheet1: { 0: { 0: { f: '=B1' } } } } },
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: forced,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: { test: { sheet1: { report: true } } },
+            dirtyUnitOtherFormulaMap: {},
+        };
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => ({
+                    runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: 31 } } }) } },
+                    dirtyRanges: { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } },
+                }),
+            });
+            await calculation.execute(dataset);
+            expect(emitted.pop()).toBe(31);
+            for (let edit = 0; edit < 2; edit++) {
+                await calculation.execute({ ...dataset, forceCalculate: false, dirtyUnitFeatureMap: {}, dirtyRanges: [
+                    { unitId: 'test', sheetId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 5, endColumn: 5 } },
+                ] });
+                expect(emitted.pop()).toBeUndefined();
+            }
+            await calculation.execute({ ...dataset, forceCalculate: false, dirtyUnitFeatureMap: {}, dirtyRanges: [
+                { unitId: 'test', sheetId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } },
+            ] });
+            expect(emitted.pop()).toBe(31);
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
+    it.each([null, 2])('invalidates unchanged feature output on removal and restores underlying value %s', async (underlying) => {
+        const client = createCommandTestBed({
+            id: 'test',
+            name: 'Feature output',
+            appVersion: '1.0',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['sheet1'],
+            sheets: { sheet1: { id: 'sheet1', name: 'Sheet1', cellData: { 0: { 1: { v: underlying } } } } },
+        });
+        const calculation = client.get(ICalculateFormulaService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const emitted: unknown[] = [];
+        let changed = true;
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => {
+            emitted.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v);
+        });
+        const dataset: IFormulaDatasetConfig = {
+            formulaData: { test: { sheet1: { 0: { 0: { f: '=B1' } } } } },
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: false,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: { test: { sheet1: { report: true } } },
+            dirtyUnitOtherFormulaMap: {},
+        };
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => ({
+                    runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: 31 } } }) } },
+                    dirtyRanges: changed ? { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } } : {},
+                }),
+            });
+            await calculation.execute(dataset);
+            expect(emitted.pop()).toBe(31);
+            changed = false;
+            await calculation.execute(dataset);
+            features.remove('test', 'sheet1', ['report']);
+            await calculation.execute({ ...dataset, dirtyUnitFeatureMap: {} });
+            expect(emitted.pop()).toBe(underlying ?? 0);
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
     it('releases one feature registration while another with the same ID still supplies cells on its sheet', async () => {
         const client = createCommandTestBed({
             id: 'test',
@@ -266,19 +366,19 @@ describe('CalculateFormulaService', () => {
                 formulaData: { test: { first: { 0: { 4: { f: '=C1' }, 5: { f: '=D1' } } } } },
                 arrayFormulaCellData: {},
                 arrayFormulaRange: {},
-                forceCalculate: true,
+                forceCalculate: false,
                 dirtyRanges: [],
                 dirtyNameMap: {},
                 dirtyDefinedNameMap: {},
-                dirtyUnitFeatureMap: {},
+                dirtyUnitFeatureMap: { test: { first: { report: true }, second: { report: true } } },
                 dirtyUnitOtherFormulaMap: {},
             };
             await calculation.execute(dataset);
             expect(values[values.length - 1]).toEqual([11, 12]);
             features.remove('test', 'first', ['report']);
-            await calculation.execute({ ...dataset, forceCalculate: false });
+            await calculation.execute({ ...dataset, dirtyUnitFeatureMap: {} });
             expect(values[values.length - 1][0]).toBe(0);
-            await calculation.execute(dataset);
+            await calculation.execute({ ...dataset, forceCalculate: true });
             expect(values[values.length - 1]).toEqual([0, 12]);
         } finally {
             subscription.unsubscribe();

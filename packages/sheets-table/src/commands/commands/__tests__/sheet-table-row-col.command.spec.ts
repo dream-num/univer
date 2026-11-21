@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Univer } from '@univerjs/core';
+import {
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    ObjectMatrix,
+    Univer,
+} from '@univerjs/core';
 import { MoveRangeMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetsTableController } from '../../../controllers/sheets-table.controller';
+import enUS from '../../../locale/en-US';
+import { Table } from '../../../models/table';
 import { TableManager } from '../../../models/table-manager';
 import {
     SheetTableInsertColCommand,
@@ -42,6 +52,11 @@ function createAccessor(pairs: Array<[unknown, unknown]>) {
         const injector = univer.__getInjector();
         injector.add([SheetInterceptorService]);
         map.set(SheetInterceptorService, injector.get(SheetInterceptorService));
+        const locale = injector.get(LocaleService);
+        locale.load({ enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        map.set(LocaleService, locale);
     }
     return {
         get(token: unknown) {
@@ -257,10 +272,7 @@ describe('sheet-table-row-col commands', () => {
 
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
-        const table = {
-            getId: () => 't1',
-            getRange: () => ({ startRow: 1, endRow: 4, startColumn: 1, endColumn: 5 }),
-        };
+        const table = new Table('t1', 'Table', { startRow: 1, endRow: 4, startColumn: 1, endColumn: 5 }, ['A', 'B', 'C', 'D', 'E']);
         const accessor = createAccessor([
             [IUniverInstanceService, univerInstanceService],
             [SheetsSelectionsService, { getCurrentSelections: () => [{ range }] }],
@@ -303,11 +315,8 @@ describe('sheet-table-row-col commands', () => {
         const { univerInstanceService } = createSheetContext();
         const syncExecuteCommand = vi.fn(() => false);
         const pushUndoRedo = vi.fn();
-        const table = {
-            getId: () => 't1',
-            getSubunitId: () => 's1',
-            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
-        };
+        const table = new Table('t1', 'Table', { startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }, ['A', 'B', 'C']);
+        table.setSubunitId('s1');
         const accessor = createAccessor([
             [IUniverInstanceService, univerInstanceService],
             [TableManager, { getTableById: () => table }],
@@ -338,11 +347,8 @@ describe('sheet-table-row-col commands', () => {
 
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
-        const table = {
-            getId: () => 't1',
-            getSubunitId: () => 's1',
-            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
-        };
+        const table = new Table('t1', 'Table', { startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }, ['A', 'B', 'C']);
+        table.setSubunitId('s1');
         const accessor = createAccessor([
             [IUniverInstanceService, univerInstanceService],
             [TableManager, { getTableById: () => table }],
@@ -401,11 +407,8 @@ describe('sheet-table-row-col commands', () => {
 
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
-        const table = {
-            getId: () => 't1',
-            getSubunitId: () => 's1',
-            getRange: () => ({ startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }),
-        };
+        const table = new Table('t1', 'Table', { startRow: 0, endRow: 4, startColumn: 1, endColumn: 3 }, ['A', 'B', 'C']);
+        table.setSubunitId('s1');
         const accessor = createAccessor([
             [IUniverInstanceService, univerInstanceService],
             [TableManager, { getTableById: () => table }],
@@ -425,7 +428,7 @@ describe('sheet-table-row-col commands', () => {
             'sheet.mutation.set-sheet-table',
             MoveRangeMutation.id,
         ]);
-        expect(calls[0][1].config.rowColOperation).toEqual({
+        expect(calls[0][1].config.rowColOperation).toMatchObject({
             operationType: 'insert',
             rowColType: 'column',
             index: 2,

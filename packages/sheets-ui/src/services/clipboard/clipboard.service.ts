@@ -21,6 +21,7 @@ import type {
     IMutationInfo,
     IRange,
     IRowAutoHeightInfo,
+    IUndoRedoItem,
     Nullable,
     Workbook,
     Worksheet,
@@ -55,6 +56,7 @@ import {
     LocaleService,
     ObjectMatrix,
     sequenceExecute,
+    sequenceExecuteAsync,
     SheetTypes,
     ThemeService,
     toDisposable,
@@ -63,7 +65,9 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
+    createSheetValueChangeContext,
     discreteRangeToRange,
+    executeSheetValueChangeEffects,
     getPrimaryForRange,
     MoveRangeCommand,
     rangeToDiscreteRange,
@@ -238,6 +242,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     // Record the parsed matrix and row and column attributes
     private _pasteOptionsCache$ = new BehaviorSubject<IPasteOptionCache | null>(null);
+    private _pasteHistoryItem: IUndoRedoItem | undefined;
     readonly pasteOptionsCache$ = this._pasteOptionsCache$.asObservable();
 
     //Control the visibility of the Paste Options menu
@@ -514,25 +519,37 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const undoRedoService = this._injector.get(IUndoRedoService);
         const element = undoRedoService.pitchTopUndoElement();
-        if (element) {
-            const result = sequenceExecute(element.undoMutations, this._commandService);
-            if (result.result) {
-                undoRedoService.popUndoToRedo();
+        if (!element || element !== this._pasteHistoryItem) {
+            return false;
+        }
+        const previousUndo = sequenceExecute(element.undoMutations, this._commandService);
+        if (!previousUndo.result) {
+            if ((previousUndo.index > 0 || previousUndo.error) && !sequenceExecute(element.redoMutations, this._commandService).result) {
+                throw new Error('[SheetClipboardService] Could not restore the previous paste.');
             }
+            return false;
         }
 
         const { cellMatrix, rowProperties = [], colProperties = [], source, target } = pasteOptionsCache;
 
-        this._pasteUSM({
-            cellMatrix,
-            colProperties,
-            rowProperties,
-        }, target, PREDEFINED_HOOK_NAME_PASTE[type], source);
-
-        return true;
+        let result: boolean;
+        try {
+            result = this._pasteUSM({ cellMatrix, colProperties, rowProperties }, target, PREDEFINED_HOOK_NAME_PASTE[type], source, element);
+        } catch (error) {
+            // A post-paste hook can throw after the replacement has already committed its history.
+            if (undoRedoService.pitchTopUndoElement() === element && !sequenceExecute(element.redoMutations, this._commandService).result) {
+                throw new Error('[SheetClipboardService] Could not restore the previous paste.');
+            }
+            throw error;
+        }
+        if (!result && !sequenceExecute(element.redoMutations, this._commandService).result) {
+            throw new Error('[SheetClipboardService] Could not restore the previous paste.');
+        }
+        return result;
     }
 
     updatePasteOptionsCache(cache: IPasteOptionCache | null): void {
+        if (!cache) this._pasteHistoryItem = undefined;
         this._pasteOptionsCache$.next(cache);
     }
 
@@ -772,14 +789,26 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 undoMutationsInfo.push(...contentReturn.undos);
             }
         });
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+        const context = worksheet && createSheetValueChangeContext(unitId, subUnitId, 'paste', worksheet, redoMutationsInfo);
+        const effects = context ? this._injector.get(SheetInterceptorService).onValueChange(context) : [];
+        const execution = await sequenceExecuteAsync(redoMutationsInfo, this._commandService);
+        const result = execution.result;
         if (result) {
+            const affiliated = executeSheetValueChangeEffects(effects, this._commandService);
+            redoMutationsInfo.push(...affiliated.redos);
+            undoMutationsInfo.unshift(...affiliated.undos);
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
+        } else {
+            if (!(await sequenceExecuteAsync(undoMutationsInfo, this._commandService)).result) {
+                throw new Error('[SheetClipboardService] Could not roll back the failed paste.');
+            }
+            if (execution.error) throw execution.error;
         }
 
         return result;
@@ -792,6 +821,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private async _pastePlainText(text: string, pasteType: IPasteHookValueType, target: ISheetRangeLocation): Promise<boolean> {
+        if (/[\n\t]/.test(text)) {
+            return this._pasteHTML(convertTextToTable(text), pasteType, undefined, target);
+        }
         return this._executePaste((h, payload) => {
             return h.onPastePlainText?.(payload, text, { pasteType });
         }, target, { pasteType });
@@ -1103,10 +1135,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         data: IUniverSheetCopyDataModel,
         target: IPasteTarget,
         pasteType: IPasteHookValueType,
-        source?: ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE; skipCellCopy?: boolean }
+        source?: ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE; skipCellCopy?: boolean },
+        replacingHistory?: IUndoRedoItem
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
         const objectOnly = source?.skipCellCopy === true;
         const payload: ICopyPastePayload = {
             copyType: source?.copyType || COPY_TYPE.COPY,
@@ -1214,8 +1251,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 redoMutationsInfo,
             });
 
-            const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
+            const context = !objectOnly && payload.copyType !== COPY_TYPE.CUT
+                ? createSheetValueChangeContext(unitId, subUnitId, 'paste', worksheet, redoMutationsInfo, [discreteRangeToRange(pastedRange)])
+                : undefined;
+            const effects = context ? this._injector.get(SheetInterceptorService).onValueChange(context) : [];
+            const execution = sequenceExecute(redoMutationsInfo, this._commandService);
+            const result = execution.result;
             if (result) {
+                const affiliated = executeSheetValueChangeEffects(effects, this._commandService);
+                redoMutationsInfo.push(...affiliated.redos);
+                undoMutationsInfo.unshift(...affiliated.undos);
                 // handle auto row height for pasted range
                 const autoHeightMutation = objectOnly
                     ? null
@@ -1231,11 +1276,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 }
 
                 // add to undo redo services
-                this._undoRedoService.pushUndoRedo({
+                const historyItem: IUndoRedoItem = {
                     unitID: unitId,
                     undoMutations: undoMutationsInfo,
                     redoMutations: redoMutationsInfo,
-                });
+                };
+                if (replacingHistory) this._undoRedoService.popUndoToRedo();
+                this._undoRedoService.pushUndoRedo(historyItem);
+                this._pasteHistoryItem = historyItem;
 
                 this.updatePasteOptionsCache({
                     target: {
@@ -1250,6 +1298,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     source,
                 });
                 this.setShowMenu(true);
+            } else {
+                if (!sequenceExecute(undoMutationsInfo, this._commandService).result) {
+                    throw new Error('[SheetClipboardService] Could not roll back the failed paste.');
+                }
+                if (execution.error) throw execution.error;
             }
 
             if (!objectOnly) {

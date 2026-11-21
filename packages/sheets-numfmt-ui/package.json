@@ -81,6 +81,7 @@
         "@univerjs/icons": "1.50.0",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-table": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

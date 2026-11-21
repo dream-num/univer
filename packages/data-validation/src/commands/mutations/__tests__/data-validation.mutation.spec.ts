@@ -63,6 +63,16 @@ describe('data validation mutations', () => {
         univer.dispose();
     });
 
+    it.each([null, [], 'Sheet', { sheet: 9 }].flatMap((formulaSheetNames) => ['add', 'update'].map((operation) => ({ formulaSheetNames, operation }))))('rejects invalid formula sheet metadata for $operation: $formulaSheetNames', ({ formulaSheetNames, operation }) => {
+        if (operation === 'update') commandService.syncExecuteCommand(AddDataValidationMutation.id, { unitId, subUnitId, rule: createRule('rule') });
+        const params = operation === 'add'
+            ? { unitId, subUnitId, rule: createRule('rule'), formulaSheetNames }
+            : { unitId, subUnitId, ruleId: 'rule', payload: { type: UpdateRuleType.SETTING, payload: { formula1: '99' } }, formulaSheetNames };
+        expect(commandService.syncExecuteCommand(operation === 'add' ? AddDataValidationMutation.id : UpdateDataValidationMutation.id, params)).toBe(false);
+        if (operation === 'add') expect(dataValidationModel.getRules(unitId, subUnitId)).toEqual([]);
+        else expect(dataValidationModel.getRuleById(unitId, subUnitId, 'rule')?.formula1).toBe('1');
+    });
+
     it('keeps validation rules in user-defined order while ignoring duplicate rule ids', async () => {
         await commandService.executeCommand(AddDataValidationMutation.id, {
             unitId,

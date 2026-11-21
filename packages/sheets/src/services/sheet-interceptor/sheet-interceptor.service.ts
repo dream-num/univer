@@ -31,7 +31,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 import {
     composeInterceptors,
     createInterceptorKey,
@@ -45,6 +44,8 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { ISheetValueChangeContext, ISheetValueChangeEffect } from './sheet-value-change';
+import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 import { INTERCEPTOR_POINT } from './interceptor-const';
 
 export interface IBeforeCommandInterceptor {
@@ -92,11 +93,13 @@ type IRowFilteredComposedInterceptor = ReturnType<IComposeInterceptors<boolean, 
 export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
 export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
 export const VALIDATE_CELL = createInterceptorKey<Promise<boolean>, ISheetLocation>('VALIDATE_CELL');
+export const CAPTURE_CELL_VALIDATION = createInterceptorKey<Record<string, unknown>, ISheetLocation>('CAPTURE_CELL_VALIDATION');
 
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
  */
 export class SheetInterceptorService extends Disposable {
+    private readonly _valueChangeInterceptors: Array<{ handler: (context: ISheetValueChangeContext) => ISheetValueChangeEffect[]; priority: number }> = [];
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
     private _rangeInterceptors: IRangeInterceptors[] = [];
@@ -115,6 +118,7 @@ export class SheetInterceptorService extends Disposable {
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
         VALIDATE_CELL,
+        CAPTURE_CELL_VALIDATION,
     });
 
     /** @ignore */
@@ -154,6 +158,10 @@ export class SheetInterceptorService extends Disposable {
             priority: -1,
             handler: (_value) => _value,
         }));
+        this.disposeWithMe(this.writeCellInterceptor.intercept(CAPTURE_CELL_VALIDATION, {
+            priority: -1,
+            handler: (value) => value,
+        }));
     }
 
     override dispose(): void {
@@ -169,6 +177,17 @@ export class SheetInterceptorService extends Disposable {
     }
 
     // #region intercept command execution
+
+    interceptValueChange(handler: (context: ISheetValueChangeContext) => ISheetValueChangeEffect[], priority = 0): IDisposable {
+        const entry = { handler, priority };
+        this._valueChangeInterceptors.push(entry);
+        this._valueChangeInterceptors.sort((a, b) => b.priority - a.priority);
+        return this.disposeWithMe(toDisposable(() => remove(this._valueChangeInterceptors, entry)));
+    }
+
+    onValueChange(context: ISheetValueChangeContext): ISheetValueChangeEffect[] {
+        return this._valueChangeInterceptors.flatMap(({ handler }) => handler(context));
+    }
 
     /**
      * Add a listener function to a specific command to add affiliated mutations. It should be called in controllers.
@@ -328,7 +347,18 @@ export class SheetInterceptorService extends Disposable {
 
     // #endregion
 
-    onValidateCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number) {
+    captureCellValidation(workbook: Workbook, worksheet: Worksheet, row: number, col: number): Record<string, unknown> {
+        return this.writeCellInterceptor.fetchThroughInterceptors(CAPTURE_CELL_VALIDATION)({}, {
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+            workbook,
+            worksheet,
+            row,
+            col,
+        }) ?? {};
+    }
+
+    onValidateCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, validationContext?: Readonly<Record<string, unknown>>) {
         const context: ISheetLocation = {
             subUnitId: worksheet.getSheetId(),
             unitId: workbook.getUnitId(),
@@ -336,6 +366,7 @@ export class SheetInterceptorService extends Disposable {
             worksheet,
             row,
             col,
+            validationContext,
         };
 
         return this.writeCellInterceptor.fetchThroughInterceptors(VALIDATE_CELL)(Promise.resolve(true), context);

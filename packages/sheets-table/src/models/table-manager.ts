@@ -15,10 +15,11 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
+import type { ITableAutoExpandState } from '../types/auto-expand';
 import type {
     ITableAddedEvent,
     ITableDeletedEvent,
@@ -297,10 +298,12 @@ export class TableManager extends Disposable {
 
                 for (let i = 0; i < count; i++) {
                     // There is no need to enforce column name uniqueness.
-                    const columnPrefix = this._localeService.t<LocaleKey>('sheets-table.columnPrefix');
-                    const column = new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1 + i, columnPrefix));
-                    if (columnsJson?.[i]) {
-                        column.fromJSON(columnsJson[i]);
+                    const snapshot = columnsJson?.[i];
+                    const column = snapshot
+                        ? new TableColumn(snapshot.id, snapshot.displayName)
+                        : new TableColumn(generateRandomId(), getColumnName(table.getColumnsCount() + 1 + i, this._localeService.t<LocaleKey>('sheets-table.columnPrefix')));
+                    if (snapshot) {
+                        column.fromJSON(snapshot);
                     }
                     const columnIndex = index + i - oldRange.startColumn;
                     table.insertColumn(columnIndex, column);
@@ -334,6 +337,10 @@ export class TableManager extends Disposable {
         if (!table) return;
         const oldRange = table.getRange();
         const newRange = config.newRange;
+        if (config.columns) {
+            this.setTableRangeAndColumns(unitId, tableId, { range: newRange, columns: config.columns });
+            return;
+        }
         if (newRange.startColumn < oldRange.startColumn) {
             const diff = oldRange.startColumn - newRange.startColumn;
             const columnPrefix = this._localeService.t<LocaleKey>('sheets-table.columnPrefix');
@@ -369,6 +376,23 @@ export class TableManager extends Disposable {
             tableId,
             range: newRange,
             oldRange,
+        });
+    }
+
+    setTableRangeAndColumns(unitId: string, tableId: string, state: ITableAutoExpandState): void {
+        const table = this.getTableById(unitId, tableId);
+        if (!table) {
+            return;
+        }
+        const oldRange = table.getRange();
+        table.setColumns(Tools.deepClone(state.columns));
+        table.setRange({ ...state.range });
+        this._tableRangeChanged$.next({
+            unitId,
+            subUnitId: table.getSubunitId(),
+            tableId,
+            oldRange,
+            range: table.getRange(),
         });
     }
 

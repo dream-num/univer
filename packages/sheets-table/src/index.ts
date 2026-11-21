@@ -35,8 +35,11 @@ export {
 } from './commands/commands/sheet-table-row-col.command';
 export { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
 export type { IAddSheetTableParams } from './commands/mutations/add-sheet-table.mutation';
+export { ApplyTableAutoExpandMutation } from './commands/mutations/apply-table-auto-expand.mutation';
+export type { IApplyTableAutoExpandMutationParams } from './commands/mutations/apply-table-auto-expand.mutation';
 export { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
 export type { IDeleteSheetTableParams } from './commands/mutations/delete-sheet-table.mutation';
+export { MoveSheetTableMutation } from './commands/mutations/move-sheet-table.mutation';
 export { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
 export type { ISetSheetTableMutationParams } from './commands/mutations/set-sheet-table.mutation';
 export { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
@@ -49,7 +52,9 @@ export { customEmptyThemeWithBorderStyle, processStyleWithBorderStyle } from './
 export { compileTableRecordFilter, getTableRecordValue } from './models/filter-util/record-filter';
 export { TableManager } from './models/table-manager';
 export { UniverSheetsTablePlugin } from './plugin';
+export { SheetTableAutoExpandService } from './services/table-auto-expand.service';
 export { SheetTableService } from './services/table.service';
+export type { ITableAutoExpandCandidate, ITableAutoExpandContribution, ITableAutoExpandPatch, ITableAutoExpandState } from './types/auto-expand';
 export {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -80,6 +85,7 @@ export type {
 } from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';
 export {
+    convertCellDataToString,
     getExistingNamesSet,
     isColorTableFilter,
     isConditionFilter,

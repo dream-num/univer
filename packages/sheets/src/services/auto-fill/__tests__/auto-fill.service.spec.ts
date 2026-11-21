@@ -15,12 +15,21 @@
  */
 
 import type { Injector, IRange, Univer, Workbook } from '@univerjs/core';
-import { Direction, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IAutoFillRule } from '../type';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from '../../__tests__/util';
+import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../../commands/operations/selection.operation';
 import { SheetsSelectionsService } from '../../selections/selection.service';
+import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 import { AutoFillService } from '../auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_DATA_TYPE, AUTO_FILL_HOOK_TYPE } from '../type';
 
@@ -36,6 +45,7 @@ describe('AutoFillService', () => {
         const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
             [SheetsSelectionsService],
             [AutoFillService],
+            [SheetInterceptorService],
         ]);
 
         univer = testBed.univer;
@@ -57,6 +67,119 @@ describe('AutoFillService', () => {
         const rules = service.getRules();
         expect(rules[0].type).toBe(AUTO_FILL_DATA_TYPE.DATE);
         expect(rules[rules.length - 1].type).toBe(AUTO_FILL_DATA_TYPE.OTHER);
+    });
+
+    it('prepares content-fill effects from the restored baseline and removes them when switching to format-only', () => {
+        commandService.registerCommand(SetRangeValuesMutation);
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        let prepares = 0;
+        get(SheetInterceptorService).interceptValueChange((context) => {
+            prepares++;
+            expect(context.beforeCells[4][1]?.v).not.toBe('Filled');
+            expect(sheet.getCellRaw(4, 2)?.v).not.toBe('Inherited');
+            return [{
+                redo: { id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 2: { v: 'Inherited' } } } } },
+                undo: { id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 2: null } } } },
+            }];
+        });
+        service.autoFillLocation = { unitId, subUnitId, source: { rows: [3], cols: [1] }, target: { rows: [4], cols: [1] } };
+        service.direction = Direction.DOWN;
+        service.addHook({ id: 'content', onFillData: (_location, _direction, type) => ({
+            redos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: type === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT ? { s: { bl: 1 } } : { v: 'Filled' } } } } }],
+            undos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: null } } } }],
+        }) });
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        expect(sheet.getCellRaw(4, 2)?.v).toBe('Inherited');
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toBe(true);
+        expect(prepares).toBe(2);
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.ONLY_FORMAT)).toBe(true);
+        expect(sheet.getCellRaw(4, 2)?.v).toBeFalsy();
+        expect(prepares).toBe(2);
+        expect(get(IUndoRedoService).getUndoRedoStatus(unitId).undos).toBe(1);
+    });
+
+    it('restores the previous fill and apply type when a replacement hook throws after baseline restoration', () => {
+        commandService.registerCommand(SetRangeValuesMutation);
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        service.autoFillLocation = { unitId, subUnitId, source: { rows: [3], cols: [1] }, target: { rows: [4], cols: [1] } };
+        service.direction = Direction.DOWN;
+        service.addHook({ id: 'replacement', onFillData: (_location, _direction, type) => {
+            if (type === AUTO_FILL_APPLY_TYPE.SERIES) throw new Error('Invalid replacement');
+            return {
+                redos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: { v: 'Previous' } } } } }],
+                undos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: null } } } }],
+            };
+        } });
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        expect(() => service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toThrow('Invalid replacement');
+        expect(sheet.getCellRaw(4, 1)?.v).toBe('Previous');
+        expect(service.applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+        expect(get(IUndoRedoService).getUndoRedoStatus(unitId).undos).toBe(1);
+    });
+
+    it('keeps the original fill and history when its previous inverse refuses execution', () => {
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand({ id: 'test.mutation.unavailable-inverse', type: CommandType.MUTATION, handler: () => false });
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        service.autoFillLocation = { unitId, subUnitId, source: { rows: [3], cols: [1] }, target: { rows: [4], cols: [1] } };
+        service.addHook({ id: 'owned', onFillData: (_location, _direction, type) => ({
+            redos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: { v: type === AUTO_FILL_APPLY_TYPE.COPY ? 'Owned' : 'Replacement' } } } } }],
+            undos: [{ id: 'test.mutation.unavailable-inverse', params: { unitId, subUnitId } }],
+        }) });
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        const history = get(IUndoRedoService).pitchTopUndoElement();
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toBe(false);
+        expect(sheet.getCellRaw(4, 1)?.v).toBe('Owned');
+        expect(service.applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+        expect(get(IUndoRedoService).pitchTopUndoElement()).toBe(history);
+    });
+
+    it.each(['false', 'throw'])('restores the previous fill after a replacement mutation fails with %s', (failure) => {
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand({ id: 'test.mutation.failed-replacement', type: CommandType.MUTATION, handler: () => {
+            if (failure === 'throw') throw new Error('Replacement mutation failed');
+            return false;
+        } });
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        service.autoFillLocation = { unitId, subUnitId, source: { rows: [3], cols: [1] }, target: { rows: [4], cols: [1] } };
+        service.addHook({ id: 'replacement-execution', onFillData: (_location, _direction, type) => ({
+            redos: [
+                { id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: { v: type === AUTO_FILL_APPLY_TYPE.COPY ? 'Previous' : 'Replacement' } } } } },
+                ...(type === AUTO_FILL_APPLY_TYPE.SERIES ? [{ id: 'test.mutation.failed-replacement', params: { unitId, subUnitId } }] : []),
+            ],
+            undos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: null } } } }],
+        }) });
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        const history = get(IUndoRedoService).pitchTopUndoElement();
+        if (failure === 'throw') expect(() => service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toThrow('Replacement mutation failed');
+        else expect(service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toBe(false);
+        expect(sheet.getCellRaw(4, 1)?.v).toBe('Previous');
+        expect(service.applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+        expect(get(IUndoRedoService).pitchTopUndoElement()).toBe(history);
+    });
+
+    it.each(['false', 'throw'])('restores a fill when a later previous inverse fails with %s', (failure) => {
+        commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand({ id: 'test.mutation.failed-fill-inverse', type: CommandType.MUTATION, handler: () => {
+            if (failure === 'throw') throw new Error('Previous inverse failed');
+            return false;
+        } });
+        const sheet = get(IUniverInstanceService).getUnit<Workbook>(unitId)!.getSheetBySheetId(subUnitId)!;
+        service.autoFillLocation = { unitId, subUnitId, source: { rows: [3], cols: [1] }, target: { rows: [4], cols: [1] } };
+        service.addHook({ id: 'inverse-execution', onFillData: () => ({
+            redos: [{ id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: { v: 'Previous' } } } } }],
+            undos: [
+                { id: SetRangeValuesMutation.id, params: { unitId, subUnitId, cellValue: { 4: { 1: null } } } },
+                { id: 'test.mutation.failed-fill-inverse', params: { unitId, subUnitId } },
+            ],
+        }) });
+        expect(service.fillData(AUTO_FILL_APPLY_TYPE.COPY)).toBe(true);
+        const history = get(IUndoRedoService).pitchTopUndoElement();
+        if (failure === 'throw') expect(() => service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toThrow('Previous inverse failed');
+        else expect(service.fillData(AUTO_FILL_APPLY_TYPE.SERIES)).toBe(false);
+        expect(sheet.getCellRaw(4, 1)?.v).toBe('Previous');
+        expect(service.applyType).toBe(AUTO_FILL_APPLY_TYPE.COPY);
+        expect(get(IUndoRedoService).pitchTopUndoElement()).toBe(history);
     });
 
     it('should register rule by priority and reject duplicate type', () => {
@@ -211,7 +334,7 @@ describe('AutoFillService', () => {
             unitId,
             subUnitId,
             selections: [{ range: prevRange, primary: null, style: null }],
-        });
+        }, undefined);
         expect((service as any)._prevUndos).toEqual([]);
     });
 

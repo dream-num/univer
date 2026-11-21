@@ -44,6 +44,7 @@ import {
     Tools,
     UndoCommand,
     UndoCommandId,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateChangeManagerService, DocStateEmitService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
@@ -56,6 +57,7 @@ import {
     SetSelectionsOperation,
     SheetInterceptorService,
     SheetsSelectionsService,
+    VALIDATE_CELL,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -390,10 +392,12 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         refreshEditCellPosition: vi.fn(),
         changeEditorDirty: vi.fn(),
     };
-    const sheetInterceptorService = {
-        onWriteCell: vi.fn((_workbook, _worksheet, _row, _column, cellData) => cellData),
-        onValidateCell: vi.fn(() => true),
-    };
+    const interceptorRuntime = new Univer();
+    const interceptorInjector = interceptorRuntime.__getInjector();
+    injectors.push(interceptorInjector);
+    interceptorInjector.add([SheetInterceptorService]);
+    const sheetInterceptorService = interceptorInjector.get(SheetInterceptorService);
+    vi.spyOn(sheetInterceptorService, 'onWriteCell');
     const univerInstanceService = {
         getCurrentTypeOfUnit$: vi.fn((type) => new BehaviorSubject(type === UniverInstanceType.UNIVER_DOC ? docModel : workbook)),
         getUnit: vi.fn((unitId: string) => {
@@ -588,7 +592,9 @@ describe('EditingRenderController business methods', () => {
 
     it('submits edited cell content and rolls back when validation rejects the value', async () => {
         const { controller } = createController();
-        controller._sheetInterceptorService.onValidateCell.mockResolvedValue(false);
+        controller._sheetInterceptorService.writeCellInterceptor.intercept(VALIDATE_CELL, {
+            handler: () => Promise.resolve(false),
+        });
 
         const result = await controller._submitEdit({
             body: { dataStream: 'new value\r\n' },

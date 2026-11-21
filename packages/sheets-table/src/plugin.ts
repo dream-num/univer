@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsTableConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -28,6 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsTableConfig } from './config/config';
 import pkg from '../package.json';
 import { AddSheetTableCommand } from './commands/commands/add-sheet-table.command';
 import { AddTableThemeCommand } from './commands/commands/add-table-theme.command';
@@ -46,12 +46,14 @@ import {
     SheetTableRemoveRowCommand,
 } from './commands/commands/sheet-table-row-col.command';
 import { AddSheetTableMutation } from './commands/mutations/add-sheet-table.mutation';
+import { ApplyTableAutoExpandMutation } from './commands/mutations/apply-table-auto-expand.mutation';
 import { DeleteSheetTableMutation } from './commands/mutations/delete-sheet-table.mutation';
 import { MoveSheetTableMutation } from './commands/mutations/move-sheet-table.mutation';
 import { SetSheetTableMutation } from './commands/mutations/set-sheet-table.mutation';
 import { SetSheetTableFilterMutation } from './commands/mutations/set-table-filter.mutation';
 import { defaultPluginConfig, SHEETS_TABLE_PLUGIN_CONFIG_KEY } from './config/config';
 import { PLUGIN_NAME } from './const';
+import { SheetTableAutoExpandController } from './controllers/sheet-table-auto-expand.controller';
 import { SheetTableFormulaController } from './controllers/sheet-table-formula.controller';
 import { SheetTableMoveController } from './controllers/sheet-table-move.controller';
 import { SheetTableRangeController } from './controllers/sheet-table-range.controller';
@@ -60,6 +62,7 @@ import { SheetsTableThemeController } from './controllers/sheet-table-theme.cont
 import { SheetsTableController } from './controllers/sheets-table.controller';
 import { TableFilterController } from './controllers/table-filter.controller';
 import { TableManager } from './models/table-manager';
+import { SheetTableAutoExpandService } from './services/table-auto-expand.service';
 import { SheetTableService } from './services/table.service';
 
 @DependentOn(UniverSheetsPlugin)
@@ -90,6 +93,8 @@ export class UniverSheetsTablePlugin extends Plugin {
     override onStarting(): void {
         registerDependencies(this._injector, [
             [TableManager],
+            [SheetTableAutoExpandService],
+            [SheetTableAutoExpandController],
             [SheetsTableThemeController],
             [SheetsTableController],
             [SheetTableService],
@@ -103,6 +108,7 @@ export class UniverSheetsTablePlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
+            [SheetTableAutoExpandController],
             [SheetTableFormulaController],
             [SheetTableRangeController],
             [SheetTableRefRangeController],
@@ -121,6 +127,7 @@ export class UniverSheetsTablePlugin extends Plugin {
     private _initRegisterCommand() {
         [
             AddSheetTableCommand,
+            ApplyTableAutoExpandMutation,
             AddSheetTableMutation,
             DeleteSheetTableCommand,
             DeleteSheetTableMutation,

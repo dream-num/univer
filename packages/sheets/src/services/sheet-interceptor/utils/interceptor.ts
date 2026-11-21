@@ -26,6 +26,8 @@ export interface ISheetLocationBase {
 export interface ISheetLocation extends ISheetLocationBase {
     workbook: Workbook;
     worksheet: Worksheet;
+    /** Plugin-owned snapshots captured before an interactive write. */
+    validationContext?: Readonly<Record<string, unknown>>;
 }
 
 export interface ISheetRowLocation {

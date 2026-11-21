@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -23,6 +22,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
+import type { IUniverSheetsDataValidationUIConfig } from './config/config';
 import pkg from '../package.json';
 import { ClearQuickSheetDataValidationCommand, InsertQuickSheetDataValidationCommand } from './commands/commands/data-validation-ui.command';
 import {
@@ -34,7 +34,9 @@ import { DataValidationAlertController } from './controllers/dv-alert.controller
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
+import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
+import { DataValidationTableAutoExpandController } from './controllers/dv-table-auto-expand.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SheetsDataValidationMobileRenderController } from './controllers/mobile/dv-render.controller';
 import { SheetsDataValidationUIController } from './controllers/ui.controller';
@@ -84,6 +86,8 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
             [SheetsDataValidationMobileRenderController],
             [DataValidationPermissionController],
             [DataValidationCopyPasteController],
+            [DataValidationTableAutoExpandController],
+            [DataValidationRejectInputController],
             [SheetsDataValidationUIController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
@@ -101,6 +105,8 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
 
     override onReady(): void {
         this._injector.get(DataValidationCopyPasteController);
+        this._injector.get(DataValidationTableAutoExpandController);
+        this._injector.get(DataValidationRejectInputController);
         this._injector.get(DataValidationPermissionController);
 
         const renderManager = this._injector.get(IRenderManagerService);

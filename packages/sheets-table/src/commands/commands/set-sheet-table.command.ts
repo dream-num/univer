@@ -16,8 +16,6 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableSetConfig } from '../../types/type';
 import {
     CommandType,
     ICommandService,
@@ -27,6 +25,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    Tools,
 } from '@univerjs/core';
 import { IDefinedNamesService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
@@ -36,12 +35,15 @@ import {
     SheetInterceptorService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableSetConfig } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
 import { validateSheetTableName } from '../../util/table-name';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../utils/calculated-column';
+import { createTableColumnSnapshots } from '../utils/table-columns';
 
 export interface ISetSheetTableCommandParams extends ITableSetConfig {
     unitId: string;
@@ -156,10 +158,18 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         }
 
         if (updateRange) {
+            const previous = table.getTableInfo();
             oldTableConfig.updateRange = {
-                newRange: table.getRange(),
+                newRange: { ...previous.range },
+                columns: Tools.deepClone(previous.columns),
             };
-            newTableConfig.updateRange = updateRange;
+            let created = 0;
+            const prefix = localeService.t<LocaleKey>('sheets-table.columnPrefix');
+            const columns = Array.from({ length: updateRange.newRange.endColumn - updateRange.newRange.startColumn + 1 }, (_, index) => {
+                const existing = previous.columns[updateRange.newRange.startColumn + index - previous.range.startColumn];
+                return existing ? Tools.deepClone(existing) : createTableColumnSnapshots(previous.columns.length + created++, 1, prefix)[0];
+            });
+            newTableConfig.updateRange = { newRange: { ...updateRange.newRange }, columns };
         }
 
         if (theme) {

@@ -150,7 +150,10 @@ export function getRangeValuesMergeable(m1: IMutationInfo<ISetRangeValuesMutatio
     return m1.id === m2.id
     && m1.params.unitId === m2.params.unitId
     && m1.params.subUnitId === m2.params.subUnitId
-    && Boolean(m1.params.isOverrideStyle) === Boolean(m2.params.isOverrideStyle);
+    && Boolean(m1.params.isOverrideStyle) === Boolean(m2.params.isOverrideStyle)
+    // A whole-cell clear followed by a field patch cannot be flattened into a single field patch.
+    && [m1, m2].every((mutation) => !Object.values(mutation.params.cellValue ?? {}).some((row) =>
+        Object.values(row ?? {}).some((cell) => cell === null)));
 }
 
 export function mergeSetRangeValues(mutations: IMutationInfo[]) {
@@ -292,7 +295,7 @@ export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRan
 }
 
 export function convertTextToTable(text: string): string {
-    const rows = text.trim().split('\n');
+    const rows = text.replace(/\r\n/g, '\n').split('\n');
 
     let html = '<table>';
 

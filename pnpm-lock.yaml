@@ -1693,6 +1693,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-table':
+        specifier: workspace:*
+        version: link:../sheets-table
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2246,6 +2249,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-table':
+        specifier: workspace:*
+        version: link:../sheets-table
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

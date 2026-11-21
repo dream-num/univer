@@ -36,6 +36,18 @@ describe('SetRangeValuesMutation preparation', () => {
     });
     afterEach(() => bed.univer.dispose());
 
+    it.each([null, [], 'Sheet', { sheet1: 9 }].map((formulaSheetNames) => ({ formulaSheetNames })))('rejects malformed formula sheet names before applying cell values: $formulaSheetNames', ({ formulaSheetNames }) => {
+        const sheet = bed.sheet.getActiveSheet()!;
+        const before = Tools.deepClone(sheet.getCellRaw(0, 0));
+        expect(bed.get(ICommandService).syncExecuteCommand(SetRangeValuesMutation.id, {
+            unitId: bed.sheet.getUnitId(),
+            subUnitId: sheet.getSheetId(),
+            cellValue: { 0: { 0: { v: 'Should not write' } } },
+            formulaSheetNames,
+        })).toBe(false);
+        expect(sheet.getCellRaw(0, 0)).toEqual(before);
+    });
+
     it.each<{
         name: string;
         cell: ICellData;

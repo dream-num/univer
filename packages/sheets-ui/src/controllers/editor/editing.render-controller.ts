@@ -880,16 +880,18 @@ export class EditingRenderController extends Disposable {
             };
 
         const redoUndoId = generateRandomId(6);
+        const validationContext = this._sheetInterceptorService.captureCellValidation(workbook, worksheet, row, column);
         const res = this._commandService.syncExecuteCommand<ISetRangeValuesCommandParams>(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
             range,
             value: Tools.deepClone(finalCell),
             redoUndoId,
+            valueChangeSource: 'editor',
         });
 
         if (res) {
-            const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column);
+            const isValid = await this._sheetInterceptorService.onValidateCell(workbook, worksheet, row, column, validationContext);
             if (isValid === false) {
                 this._undoRedoService.rollback(redoUndoId, unitId);
                 return false;

@@ -86,8 +86,13 @@ export class Nper extends BaseFunction {
             } else {
                 const num = pmtValue * (1 + rateValue * typeValue) - fvValue * rateValue;
                 const den = pvValue * rateValue + pmtValue * (1 + rateValue * typeValue);
+                // Avoid payment-term cancellation only when 1 + rate loses the rate; otherwise preserve Excel rounding.
+                const relativeChange = -rateValue * (pvValue + fvValue) / den;
+                const logRatio = 1 + rateValue === 1 && Number.isFinite(num) && Number.isFinite(den) && num / den > 0 && Math.abs(relativeChange) < 0.5
+                    ? Math.log1p(relativeChange)
+                    : Math.log(num / den);
 
-                result = Math.log(num / den) / Math.log(1 + rateValue);
+                result = logRatio / (1 + rateValue === 1 ? Math.log1p(rateValue) : Math.log(1 + rateValue));
             }
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {

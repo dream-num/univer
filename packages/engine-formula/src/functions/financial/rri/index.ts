@@ -70,9 +70,13 @@ export class Rri extends BaseFunction {
                 return NumberValueObject.create(0);
             }
 
+            if (pvValue === 0 || (fvValue !== 0 && (pvValue < 0) !== (fvValue < 0))) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
             const result = (fvValue / pvValue) ** (1 / nperValue) - 1;
 
-            if (Number.isNaN(result) || !Number.isFinite(result) || fvValue / pvValue < 0) {
+            if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

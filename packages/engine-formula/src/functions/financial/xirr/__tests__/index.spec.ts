@@ -223,3 +223,27 @@ describe('Test xirr function', () => {
         });
     });
 });
+
+describe('XIRR starting date', () => {
+    describe.each([false, true])('column vector: %s', (column) => {
+        const array = (values: (number | string)[]) => ArrayValueObject.create({
+            calculateValueList: transformToValueObject(column ? values.map((value) => [value]) : [values]),
+            rowCount: column ? values.length : 1,
+            columnCount: column ? 1 : values.length,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        });
+
+        it('retains XIRR support for payments before the starting date', () => {
+            // Office explicitly permits this for XIRR (MS-OI29500, 18.17.7.349).
+            // With t = 1 + rate, the independent equation is 10*t^2 + 100*t - 121 = 0.
+            const result = new Xirr(FUNCTION_NAMES_FINANCIAL.XIRR).calculate(
+                array([-100, 121, -10]),
+                array([1000, 1365, 635])
+            );
+            expect(result.getValue()).toBeCloseTo(0.09097693313642422, 9);
+        });
+    });
+});

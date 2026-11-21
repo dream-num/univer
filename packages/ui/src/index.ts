@@ -75,8 +75,9 @@ export {
 } from './services/clipboard/clipboard.command';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
+export { ContextMenuShortcutService, IContextMenuShortcutService } from './services/contextmenu/contextmenu-shortcut.service';
 export { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
-export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
+export type { ContextMenuEvent, IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export { MobileDialogService } from './services/dialog/mobile-dialog.service';
@@ -207,6 +208,7 @@ export { FontSize } from './views/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-size/interface';
 export * from './views/hooks/index';
 export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zoom';
+export { useContextMenuShortcutRef } from './views/hooks/use-context-menu-shortcut-ref';
 export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyboard-inset-context';

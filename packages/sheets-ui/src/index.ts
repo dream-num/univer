@@ -112,7 +112,7 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
-export { getCellRealRange, getViewportByCell } from './common/utils';
+export { getCellRealRange, getViewportByCell, transformPosition2Offset } from './common/utils';
 export type { IUniverSheetsUIConfig } from './config/config';
 export { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 export {

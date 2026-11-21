@@ -19,6 +19,8 @@ import type {
     IBullet,
     ICustomRangeForInterceptor,
     IDocDrawingBase,
+    IDocStyles,
+    IDocumentBody,
     IDocumentStyle,
     INumberUnit,
     IObjectPositionH,
@@ -32,8 +34,9 @@ import {
     AlignTypeV,
     BooleanNumber,
     ColumnSeparatorType,
+    CustomRangeType,
     DataStreamTreeTokenType,
-    DEFAULT_STYLES,
+    DocStyleType,
     DocumentFlavor,
     GridType,
     HorizontalAlign,
@@ -47,6 +50,9 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
+    resolveDocumentParagraphBullet,
+    resolveDocumentParagraphStyle,
+    resolveDocumentTextStyle,
     resolveSectionHeaderFooterReferences,
     SectionType,
     SpacingRule,
@@ -77,6 +83,7 @@ import type {
     IDocumentLayoutStyle,
     IDocumentLayoutTextStyle,
 } from '../document-layout-presentation';
+import type { DocumentHeaderFooterReferenceResolver } from '../header-footer-reference';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { DocumentEndnoteLayout } from './endnote-layout';
@@ -86,8 +93,8 @@ import type { LanguageDetector } from './hyphenation/language-detector';
 import type { INoteReferenceLayout } from './note-numbering';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
-import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
-import { getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { isFunction, ptToPixel, resolveDocumentDefaultFont, resolveTextStyleEastAsiaFont } from '../../../basics/tools';
+import { getDocumentCompatibilityPolicy, getDocumentFontStyle, isTraditionalDocumentCompatibility } from '../document-compatibility';
 import { getDocumentLayoutPresentation } from '../document-layout-presentation';
 import {
     getDocsTableRenderViewport,
@@ -293,7 +300,41 @@ export function getNumberUnitValue(unitValue: Nullable<INumberUnit>, benchMark: 
         return value;
     }
 
+    if ((unit === NumberUnitType.CHARACTER || unit === NumberUnitType.LINE) && value === 0 && Number.isFinite(unitValue.fallback)) {
+        return unitValue.fallback!;
+    }
+
     return value * benchMark;
+}
+
+export function resolveParagraphCharacterIndents(
+    ctx: ILayoutContext,
+    glyphs: IDocumentSkeletonGlyph[],
+    style: IDocumentLayoutParagraphStyle
+): IDocumentLayoutParagraphStyle {
+    const keys = ['indentStart', 'indentEnd', 'indentFirstLine', 'hanging'] as const;
+    if (!keys.some((key) => style[key]?.u === NumberUnitType.CHARACTER)) {
+        return style;
+    }
+    const snapshot = ctx.dataModel.getSnapshot();
+    const documentStyle = ctx.dataModel.documentStyle;
+    const normal = resolveDocumentTextStyle(snapshot.styles, documentStyle.defaultParagraphStyleId);
+    // Word uses Normal for side indents and the first body run for first-line indents.
+    const sideSize = ptToPixel(normal.fs ?? documentStyle.textStyle?.fs ?? 11);
+    const firstGlyph = glyphs.find((glyph) => glyph.glyphType !== GlyphType.LIST && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH);
+    const firstSize = ptToPixel(firstGlyph?.fontStyle?.originFontSize ?? style.textStyle?.fs ?? normal.fs ?? documentStyle.textStyle?.fs ?? 11);
+    const startIsCharacters = style.indentStart?.u === NumberUnitType.CHARACTER && style.indentStart.v !== 0;
+    const hangingIsCharacters = style.hanging?.u === NumberUnitType.CHARACTER && style.hanging.v !== 0;
+    const resolved = { ...style };
+    for (const key of keys) {
+        if (style[key]?.u === NumberUnitType.CHARACTER) {
+            resolved[key] = { v: getNumberUnitValue(style[key], key === 'indentStart' || key === 'indentEnd' ? sideSize : firstSize) };
+        }
+    }
+    if (hangingIsCharacters || (startIsCharacters && resolved.hanging?.v)) {
+        resolved.indentStart = { v: (startIsCharacters ? resolved.indentStart?.v ?? 0 : 0) + getNumberUnitValue(resolved.hanging, firstSize) };
+    }
+    return resolved;
 }
 
 // Return charSpaceApply, choose between grid or font to calculate the length of a tab, where one tab represents a length of 1 character.
@@ -606,6 +647,20 @@ export function updateBlockIndex(
                     );
                     line.asc = boundingBoxAscent;
                     line.dsc = boundingBoxDescent;
+                    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && lineHeight > 0 &&
+                        boundingBoxAscent + boundingBoxDescent === 0 &&
+                        divides.every((divide) => divide.glyphGroup.every((glyph) =>
+                            glyph.content === ' ' || glyph.content === '\t' || glyph.content === '\u3000' ||
+                            (glyph.width === 0 && (glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_START ||
+                                glyph.raw === DataStreamTreeTokenType.CUSTOM_RANGE_END))))) {
+                        // A completed whitespace line still needs a font baseline for decorations.
+                        for (const divide of divides) {
+                            for (const glyph of divide.glyphGroup) {
+                                line.asc = Math.max(line.asc, glyph.bBox.ba);
+                                line.dsc = Math.max(line.dsc, glyph.bBox.bd);
+                            }
+                        }
+                    }
                     if (line.drawingMLBaselineHeight != null) {
                         const lineBoxHeight = line.paddingTop + line.contentHeight + line.paddingBottom;
                         line.paddingTop = getDrawingMLLineBaseline(line.drawingMLBaselineHeight, boundingBoxAscent, boundingBoxDescent) - boundingBoxAscent;
@@ -617,7 +672,7 @@ export function updateBlockIndex(
                     preLineStartIndex = line.ed;
                 }
                 column.st = columStartIndex + 1;
-                column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
+                column.ed = preLineStartIndex;
                 const lastLine = lines[lines.length - 1];
                 if (lastLine?.drawingMLNormalLineHeight != null) {
                     // Automatic spacing is a baseline interval. Its trailing leading does not enlarge the text body.
@@ -639,7 +694,7 @@ export function updateBlockIndex(
             }
 
             section.st = sectionStartIndex + 1;
-            section.ed = preColumnStartIndex >= section.st ? preColumnStartIndex : section.st;
+            section.ed = preColumnStartIndex;
             section.height = maxSectionHeight;
             contentHeight += maxSectionHeight;
 
@@ -662,7 +717,7 @@ export function updateBlockIndex(
         }
 
         page.st = pageStartIndex + 1;
-        page.ed = preSectionStartIndex >= page.st ? preSectionStartIndex : page.st;
+        page.ed = preSectionStartIndex;
         page.height = contentHeight;
         page.width = maxContentWidth;
 
@@ -720,7 +775,8 @@ function isSameParagraphBorder(first?: IParagraphBorder, second?: IParagraphBord
         first.color.th === second.color.th &&
         first.width === second.width &&
         first.padding === second.padding &&
-        first.dashStyle === second.dashStyle;
+        first.dashStyle === second.dashStyle &&
+        first.style === second.style;
 }
 
 export function hasSameParagraphBorderSet(first: IDocumentSkeletonParagraphBorders, second: IDocumentSkeletonParagraphBorders) {
@@ -1685,6 +1741,7 @@ interface IFontCreateConfig {
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: IDocumentLayoutTextStyle;
+    eastAsiaFontScheme?: IDocumentStyle['eastAsiaFontScheme'];
     charSpace: number;
     gridType: GridType;
     snapToGrid: BooleanNumber;
@@ -1692,10 +1749,17 @@ interface IFontCreateConfig {
     balanceSingleByteDoubleByteWidth?: BooleanNumber;
 }
 
-const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
+interface IFontCreateConfigCache {
+    configs: ObjectMatrix<IFontCreateConfig>;
+    paragraphNode: DataStreamTreeNode;
+    paragraph: IDocumentLayoutParagraph;
+    sectionBreakConfig: ISectionBreakConfig;
+}
+
+let fontCreateConfigCache = new WeakMap<DocumentViewModel, IFontCreateConfigCache>();
 
 export function clearFontCreateConfigCache() {
-    fontCreateConfigCache.reset();
+    fontCreateConfigCache = new WeakMap();
 }
 
 export function getFontConfigFromLastGlyph(
@@ -1722,6 +1786,7 @@ export function getFontConfigFromLastGlyph(
         stackedText: sectionBreakConfig.renderConfig?.stackedText,
         fontStyle: fontStyle!,
         textStyle: ts!,
+        eastAsiaFontScheme: sectionBreakConfig.eastAsiaFontScheme,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
         gridType,
@@ -1740,6 +1805,23 @@ function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewMod
 }
 
 const DEFAULT_TEXT_RUN = { ts: {}, st: 0, ed: 0 };
+
+function isTocHyperlinkCharacterStyle(
+    index: number,
+    viewModel: DocumentViewModel,
+    style: IDocStyles[string] | undefined
+): boolean {
+    if (style?.type !== DocStyleType.character || !/^(?:followed)?hyperlink$/i.test(style.name ?? '')) {
+        return false;
+    }
+    const ranges = viewModel.getBody()?.customRanges ?? [];
+    // Word ignores the built-in link character style only in a TOC-owned hyperlink.
+    return ranges.some((link) => link.rangeType === CustomRangeType.HYPERLINK &&
+        link.startIndex <= index && index <= link.endIndex &&
+        ranges.some((field) => field.rangeType === CustomRangeType.FIELD &&
+            field.properties?.fieldType === 'TOC' &&
+            field.startIndex < link.startIndex && link.endIndex <= field.endIndex));
+}
 
 export function getFontCreateConfig(
     index: number,
@@ -1762,7 +1844,11 @@ export function getFontCreateConfig(
         // localeService,
         renderConfig = {},
     } = sectionBreakConfig;
-    const { paragraphStyle = {}, bullet } = paragraph;
+    const snapshot = viewModel.getSnapshot?.();
+    const bullet = resolveDocumentParagraphBullet(snapshot ?? {}, paragraph);
+    const paragraphStyle = snapshot
+        ? resolveDocumentParagraphStyle(snapshot.documentStyle, paragraph.paragraphStyle, { styles: snapshot.styles, paragraphStyleId: paragraph.styleId })
+        : paragraph.paragraphStyle ?? {};
     const { isRenderStyle } = renderConfig;
     const startIndex = paragraphNode.contentStartIndex;
     const originTextRun = viewModel.getTextRun(index + startIndex);
@@ -1770,44 +1856,69 @@ export function getFontCreateConfig(
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? DEFAULT_TEXT_RUN
         : originTextRun ?? DEFAULT_TEXT_RUN;
+    const characterStyleId = isRenderStyle === BooleanNumber.FALSE ? undefined : originTextRun?.sId;
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
     const customRange = includeCustomRangeStyle ? viewModel.getCustomRange(index + startIndex) : null;
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null || paragraphStyle?.paragraphMarkTextStyle != null;
+    const isNoteReference = customRange?.rangeType === CustomRangeType.FOOTNOTE || customRange?.rangeType === CustomRangeType.ENDNOTE;
+    const characterStyle = characterStyleId == null ? undefined : snapshot?.styles?.[characterStyleId];
+    const ignoreCharacterStyle = isTocHyperlinkCharacterStyle(index + startIndex, viewModel, characterStyle);
+    const canCache = originTextRun != null && !showCustomRange && !showCustomDecoration &&
+        !ignoreCharacterStyle && index + startIndex !== paragraph.startIndex;
     const { st, ed } = textRun;
     let textStyle: IDocumentLayoutTextStyle = textRun.ts ?? {};
-    const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !hasAddonStyle && originTextRun) {
+    let context = fontCreateConfigCache.get(viewModel);
+    if (context == null || context.paragraphNode !== paragraphNode ||
+        context.paragraph !== paragraph || context.sectionBreakConfig !== sectionBreakConfig) {
+        context = { configs: new ObjectMatrix(), paragraphNode, paragraph, sectionBreakConfig };
+        fontCreateConfigCache.set(viewModel, context);
+    }
+    const cache = context.configs.getValue(st, ed);
+    // A symbol font applies only at its encoded character, even inside a shared run.
+    if (canCache && cache && !cache.textStyle.symbol) {
         return cache;
     }
 
     const { snapToGrid = BooleanNumber.TRUE, namedStyleType, textStyle: paragraphTextStyle } = paragraphStyle;
     const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
     // Apply named style if it exists
-    // Imported Word styles are already resolved; the outline role does not imply an SDK preset.
+    // A named Word style owns its formatting; its outline role does not select an SDK preset.
     const namedStyle = namedStyleType && paragraph.styleId == null ? NAMED_STYLE_MAP[namedStyleType] : null;
+    const characterTextStyle = ignoreCharacterStyle
+        ? undefined
+        : resolveDocumentTextStyle(snapshot?.styles, characterStyleId);
 
     textStyle = {
+        // Note superscript is a default; imported and inherited marker formatting takes precedence.
+        ...(isNoteReference ? customRangeStyle : undefined),
         ...documentTextStyle,
         ...namedStyle,
         ...paragraphTextStyle,
+        ...characterTextStyle,
         ...textStyle,
         ...(index + startIndex === paragraph.startIndex ? paragraphStyle.paragraphMarkTextStyle : undefined),
         ...customDecorationStyle,
-        ...customRangeStyle,
+        ...(isNoteReference ? undefined : customRangeStyle),
         ...bulletTextStyle,
     };
 
-    const eastAsiaFontFamily = textStyle.eastAsiaFontFamily?.trim();
-    const fontStyle = getFontStyleString(eastAsiaFontFamily
-        ? {
-            ...textStyle,
-            ff: `${textStyle.ff || DEFAULT_STYLES.ff}, ${eastAsiaFontFamily}`,
-        }
-        : textStyle, sectionBreakConfig.fontFamilyFallbacks);
+    if (!textStyle.ff && snapshot?.documentStyle?.defaultFontTheme) {
+        textStyle = resolveDocumentDefaultFont(textStyle, snapshot.documentStyle, sectionBreakConfig.localeService.getCurrentLocale());
+    }
+    textStyle = resolveTextStyleEastAsiaFont(textStyle, sectionBreakConfig.eastAsiaFontScheme);
+    const symbol = textStyle.symbol;
+    if (symbol?.font && snapshot?.body?.dataStream.charCodeAt(index + startIndex) === symbol.code) {
+        textStyle = { ...textStyle, ff: symbol.font, fontHint: 'default' };
+    }
+    const fontStyle = getDocumentFontStyle(
+        textStyle,
+        sectionBreakConfig.fontFamilyFallbacks,
+        sectionBreakConfig.fontFamilyClasses,
+        sectionBreakConfig.documentCompatibilityPolicy
+    );
 
     const mixTextStyle: IDocumentLayoutTextStyle = {
         ...documentTextStyle,
@@ -1820,6 +1931,7 @@ export function getFontCreateConfig(
         fontStyle,
         stackedText: renderConfig.stackedText,
         textStyle: mixTextStyle,
+        eastAsiaFontScheme: sectionBreakConfig.eastAsiaFontScheme,
         balanceSingleByteDoubleByteWidth: sectionBreakConfig.balanceSingleByteDoubleByteWidth,
         charSpace,
         gridType,
@@ -1828,9 +1940,8 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!hasAddonStyle && originTextRun) {
-        // TODO: cache should more precisely, take custom-range, custom-decoration, paragraphStyle into considering.
-        fontCreateConfigCache.setValue(st, ed, result);
+    if (canCache) {
+        context.configs.setValue(st, ed, result);
     }
 
     return result;
@@ -1959,10 +2070,24 @@ export interface IDocumentPaginationMetrics {
     peakCheckpointLineCount: number;
 }
 
+export interface IHeaderFooterFieldPageNumber {
+    pageNumber: number;
+    pageNumberFormat?: string;
+}
+
 export interface ILayoutContext {
-    headerFooterFieldContext?: { pageNumber: number; pageCount?: number };
+    headerFooterReferenceResolver?: DocumentHeaderFooterReferenceResolver;
+    headerFooterReferenceBodies?: Map<string, IDocumentBody>;
+    headerFooterReferenceCandidates?: Set<string>;
+    headerFooterFieldContext?: {
+        pageNumber: number;
+        pageCount?: number;
+        pageNumberFormat?: string;
+        pageNumbers?: IHeaderFooterFieldPageNumber[];
+    };
+    headerFooterFieldPageNumbers?: Map<string, IHeaderFooterFieldPageNumber[]>;
     fieldPageCount?: number;
-    hasNumPagesFields?: boolean;
+    hasPageCountDependentFields?: boolean;
     fieldCountCandidates?: Set<number>;
     fieldCountCycle?: boolean;
     headerFooterMinimumMargins?: Map<string, number>;
@@ -2121,6 +2246,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
 
     const {
         pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
+        pageNumberFormat: globalPageNumberFormat,
         pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
         pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
         defaultHeaderId: global_defaultHeaderId,
@@ -2163,6 +2289,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         gridType = globalGridType, // gridType
 
         pageNumberStart = global_pageNumberStart,
+        pageNumberFormat = globalPageNumberFormat,
         pageSize = global_pageSize,
         pageOrient = global_pageOrient,
         marginTop = global_marginTop,
@@ -2208,12 +2335,15 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     const sectionBreakConfig: ISectionBreakConfig = {
         sectionId,
         fontFamilyFallbacks: documentStyle.fontFamilyFallbacks,
+        fontFamilyClasses: documentStyle.fontFamilyClasses,
+        eastAsiaFontScheme: documentStyle.eastAsiaFontScheme,
         balanceSingleByteDoubleByteWidth: documentStyle.balanceSingleByteDoubleByteWidth,
         charSpace,
         linePitch,
         gridType,
 
         pageNumberStart,
+        pageNumberFormat,
         pageSize,
         pageOrient,
         marginTop,

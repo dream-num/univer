@@ -792,6 +792,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private async _pastePlainText(text: string, pasteType: IPasteHookValueType, target: ISheetRangeLocation): Promise<boolean> {
+        if (pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
+            return false;
+        }
         return this._executePaste((h, payload) => {
             return h.onPastePlainText?.(payload, text, { pasteType });
         }, target, { pasteType });

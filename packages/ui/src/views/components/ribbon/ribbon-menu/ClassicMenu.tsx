@@ -55,9 +55,9 @@ export function ClassicMenu({
                         className={clsx(`
                           univer-flex univer-cursor-pointer univer-appearance-none univer-items-center univer-gap-1
                           univer-rounded-sm univer-border-none univer-px-2 univer-py-1 univer-text-sm
-                          univer-transition-colors
-                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-500
-                          dark:focus:!univer-ring-primary-300
+                          univer-outline-none univer-transition-colors
+                          focus-visible:univer-ring-2 focus-visible:univer-ring-primary-500
+                          dark:focus-visible:!univer-ring-primary-300
                         `, isActive
                             ? `
                               univer-bg-primary-50 univer-font-semibold univer-text-primary-600 univer-shadow-sm

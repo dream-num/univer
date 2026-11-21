@@ -28,6 +28,7 @@ export interface IFormLayoutProps {
     className?: string;
     contentStyle?: CSSProperties;
     error?: string;
+    errorId?: string;
     collapsable?: boolean;
     defaultCollapsed?: boolean;
 }
@@ -35,7 +36,7 @@ export interface IFormLayoutProps {
 export const FormLayoutContext = createContext(false);
 
 export const FormLayout = (props: IFormLayoutProps) => {
-    const { label, desc, children, style, className, error, contentStyle, collapsable = false, defaultCollapsed = false } = props;
+    const { label, desc, children, style, className, error, errorId, contentStyle, collapsable = false, defaultCollapsed = false } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
     return (
@@ -90,6 +91,7 @@ export const FormLayout = (props: IFormLayoutProps) => {
                                         {error
                                             ? (
                                                 <div
+                                                    id={errorId}
                                                     className="
                                                       univer-mt-1 univer-text-xs univer-text-red-600
                                                       dark:!univer-text-red-400

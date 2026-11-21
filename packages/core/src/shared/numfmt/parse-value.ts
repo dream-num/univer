@@ -220,6 +220,7 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
     let sign = 1;
     let format = '';
     let minus = false;
+    let plus = false;
     let openParen = false;
     let closeParen = false;
     let percent = false;
@@ -243,8 +244,15 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
             }
             currency = true;
             currencySymbol = char;
+        } else if (char === '+') {
+            // Excel treats "(+5)" as text: a parenthesis already carries the
+            // sign, so it cannot be combined with an explicit one.
+            if (openParen) {
+                return null;
+            }
+            plus = true;
         } else if (char === '(') {
-            if (openParen || minus) {
+            if (openParen || minus || plus) {
                 return null;
             }
             openParen = true;
@@ -324,6 +332,10 @@ export function parseNumber(value: string, options: ParseOptions = {}): ParseDat
     }
 
     if (index !== value.length) {
+        return null;
+    }
+
+    if (openParen && !closeParen) {
         return null;
     }
 

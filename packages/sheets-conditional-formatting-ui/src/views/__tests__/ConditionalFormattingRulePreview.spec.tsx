@@ -20,7 +20,6 @@ import {
     CFRuleType,
     CFSubRuleType,
     CFValueType,
-    iconMap,
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -119,10 +118,35 @@ describe('ConditionalFormattingRulePreview', () => {
             />
         );
 
-        expect(Array.from(container.querySelectorAll('img'), (image) => image.getAttribute('src'))).toEqual([
-            iconMap[IIconSetType.threeArrows][2],
-            iconMap[IIconSetType.threeArrowsGray][0],
-        ]);
+        const icons = Array.from(container.querySelectorAll('svg'));
+        expect(icons.map((icon) => icon.style.color)).toEqual(['#FE4B4B', '#999999']);
+        expect(icons[0].classList.contains('univerjs-icon-arrow-down-icon')).toBe(true);
+        expect(icons[1].classList.contains('univerjs-icon-arrow-up-icon')).toBe(true);
+    });
+
+    it('keeps the unfilled portion of each progress icon clear in the rule preview', () => {
+        const container = document.createElement('div');
+        container.innerHTML = renderToStaticMarkup(
+            <ConditionalFormattingRulePreview
+                rule={{
+                    type: CFRuleType.iconSet,
+                    isShowValue: true,
+                    config: [100, 75, 50, 25, 0].map((value, index) => ({
+                        iconType: IIconSetType.fiveQuarters,
+                        iconId: String(index),
+                        operator: CFNumberOperator.greaterThanOrEqual,
+                        value: { type: CFValueType.num, value },
+                    })),
+                }}
+            />
+        );
+
+        const icons = Array.from(container.querySelectorAll('svg'));
+        expect(icons.map((icon) => icon.querySelector('circle')?.getAttribute('fill')))
+            .toEqual(['currentColor', 'transparent', 'transparent', 'transparent', 'transparent']);
+        const sectors = icons.slice(1, 4).map((icon) => icon.querySelector('path[fill="currentColor"]')?.getAttribute('d'));
+        expect(sectors.every(Boolean)).toBe(true);
+        expect(new Set(sectors).size).toBe(3);
     });
 
     it('renders nothing while no rule is selected', () => {

@@ -22,7 +22,7 @@ import { Disposable, DrawingTypeEnum, Inject, toDisposable } from '@univerjs/cor
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { attachRangeWithCoord, discreteRangeToRange, SheetSkeletonService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition } from '@univerjs/sheets-drawing';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '@univerjs/sheets-ui';
 import { cloneGroupParams } from '../commands/commands/utils';
 
@@ -208,8 +208,7 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
                     unitId,
                     subUnitId,
                     transform: newTransform,
-                    sheetTransform: transformToDrawingPosition(newTransform, pasteToSkeleton) ?? origRootGroup.sheetTransform,
-                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, pasteToSkeleton) ?? origRootGroup.sheetTransform,
+                    axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, pasteToSkeleton) ?? origRootGroup.axisAlignSheetTransform,
                 } as ISheetDrawing;
             }),
         ];

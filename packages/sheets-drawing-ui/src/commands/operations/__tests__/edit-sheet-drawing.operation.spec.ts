@@ -31,21 +31,8 @@ function createSheetDrawing(drawingId: string): ISheetDrawing {
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: `https://example.com/${drawingId}.png`,
-        sheetTransform: {
-            angle: 0,
-            flipX: false,
-            flipY: false,
-            skewX: 0,
-            skewY: 0,
-            from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
-            to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
-        },
+        transform: { left: 10, top: 20, width: 100, height: 80 },
         axisAlignSheetTransform: {
-            angle: 0,
-            flipX: false,
-            flipY: false,
-            skewX: 0,
-            skewY: 0,
             from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
             to: { row: 4, column: 3, rowOffset: 0, columnOffset: 0 },
         },
@@ -53,12 +40,14 @@ function createSheetDrawing(drawingId: string): ISheetDrawing {
 }
 
 describe('EditSheetDrawingOperation', () => {
+    let testBed: ReturnType<typeof createSheetsDrawingUiTestBed>;
+
     afterEach(() => {
-        // each test disposes its own univer instance
+        testBed.univer.dispose();
     });
 
     it('keeps focus and sidebar unchanged when no drawing is provided', async () => {
-        const testBed = createSheetsDrawingUiTestBed();
+        testBed = createSheetsDrawingUiTestBed();
         const drawingManagerService = testBed.get(IDrawingManagerService);
         testBed.commandService.registerCommand(EditSheetDrawingOperation);
         testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
@@ -66,20 +55,18 @@ describe('EditSheetDrawingOperation', () => {
         expect(await testBed.commandService.executeCommand(EditSheetDrawingOperation.id, null as never)).toBe(false);
         expect(drawingManagerService.getFocusDrawings()).toEqual([]);
         expect(testBed.sidebarService.visible).toBe(false);
-
-        testBed.univer.dispose();
     });
 
     it('selects a drawing and opens the sheet drawing editor', async () => {
-        const testBed = createSheetsDrawingUiTestBed();
+        testBed = createSheetsDrawingUiTestBed();
         const drawingManagerService = testBed.get(IDrawingManagerService);
         testBed.commandService.registerCommand(EditSheetDrawingOperation);
         testBed.commandService.registerCommand(SidebarSheetDrawingOperation);
 
-        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        expect(await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId: testBed.unitId,
             drawings: [createSheetDrawing('drawing-1')],
-        });
+        })).toBe(true);
 
         expect(await testBed.commandService.executeCommand(EditSheetDrawingOperation.id, {
             unitId: testBed.unitId,
@@ -91,7 +78,5 @@ describe('EditSheetDrawingOperation', () => {
             drawingId: 'drawing-1',
         })]);
         expect(testBed.sidebarService.visible).toBe(true);
-
-        testBed.univer.dispose();
     });
 });

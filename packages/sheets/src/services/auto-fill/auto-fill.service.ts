@@ -19,13 +19,13 @@ import type {
     IDisposable,
     IMutationInfo,
     IRange,
-    IRowAutoHeightInfo,
     Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import {
+    BooleanNumber,
     createIdentifier,
     Direction,
     Disposable,
@@ -51,10 +51,7 @@ import { AutoClearContentCommand } from '../../commands/commands/auto-fill.comma
 import { AFFECT_LAYOUT_STYLES } from '../../commands/commands/set-style.command';
 import { getPrimaryForRange } from '../../commands/commands/utils/selection-utils';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
-import {
-    SetWorksheetRowAutoHeightMutation,
-    SetWorksheetRowAutoHeightMutationFactory,
-} from '../../commands/mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetRowAutoHeightMutation } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import AutoFillRules from './rules';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
@@ -518,8 +515,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             return { undos: [], redos: [] };
         }
 
-        const rowsAutoHeightInfo: IRowAutoHeightInfo[] = [];
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const expandedRowHeights = new Map<number, number>();
         const rowManager = worksheet.getRowManager();
 
         executedRedos.forEach((m) => {
@@ -529,29 +525,33 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                 matrix.forValue((row, col, value) => {
                     const style = Object.keys(workbook.getStyles().get(value?.s) || {});
                     if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
-                        const cellHeight = worksheet.getCellHeight(row, col);
                         const rowData = rowManager.getRow(row);
-                        if ((!rowData && cellHeight !== defaultRowHeight) || (rowData && cellHeight !== rowManager.getRowHeight(row))) {
-                            rowsAutoHeightInfo.push({
-                                row,
-                                autoHeight: cellHeight,
-                            });
+                        const hasFixedHeight = rowData?.h != null && rowData.ia == null && rowData.ah == null;
+                        if (rowData?.ia === BooleanNumber.FALSE || hasFixedHeight) {
+                            return;
+                        }
+                        const cellHeight = worksheet.getCellHeight(row, col);
+                        if (cellHeight > (expandedRowHeights.get(row) ?? rowManager.getRowHeight(row))) {
+                            expandedRowHeights.set(row, cellHeight);
                         }
                     }
                 });
             }
         });
 
-        if (rowsAutoHeightInfo.length === 0) {
+        if (expandedRowHeights.size === 0) {
             return { undos: [], redos: [] };
         }
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            rowsAutoHeightInfo,
+            rowsAutoHeightInfo: Array.from(expandedRowHeights, ([row, autoHeight]) => ({ row, autoHeight })),
         };
-        const undoParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);
+        const undoParams: ISetWorksheetRowAutoHeightMutationParams = {
+            ...redoParams,
+            rowsAutoHeightInfo: Array.from(expandedRowHeights.keys(), (row) => ({ row, autoHeight: rowManager.getRow(row)?.ah })),
+        };
 
         const redo = {
             id: SetWorksheetRowAutoHeightMutation.id,

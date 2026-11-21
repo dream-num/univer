@@ -17,7 +17,6 @@
 import type { DocumentDataModel, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
 import {
     Disposable,
     ICommandService,
@@ -25,6 +24,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
+import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -33,6 +33,8 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
     private _previousIMEContent: string = '';
 
     private _isCompositionStart: boolean = true;
+
+    private _compositionId = 0;
 
     private _onStartSubscription: Nullable<Subscription>;
 
@@ -74,6 +76,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
                 return;
             }
 
+            this._compositionId++;
             this._resetIME();
 
             const { activeRange, rangeList = [] } = config;
@@ -123,6 +126,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         const e = event as CompositionEvent;
 
         const content = e.data;
+        const compositionId = this._compositionId;
 
         if (isUpdate && content === '') {
             return;
@@ -139,7 +143,9 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
                     isCompositionCanceled: true,
                 });
             }
-            this._resetIME();
+            if (this._compositionId === compositionId) {
+                this._resetIME();
+            }
             return;
         }
 
@@ -157,21 +163,23 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             return;
         }
 
+        const oldTextLen = this._previousIMEContent.length;
+        const isCompositionStart = this._isCompositionStart;
+        // Native composition updates and end can arrive before the command promise settles.
+        if (isUpdate) {
+            this._isCompositionStart = false;
+            this._previousIMEContent = content;
+        }
+
         await this._commandService.executeCommand(IMEInputCommand.id, {
             unitId,
             newText: content,
-            oldTextLen: this._previousIMEContent.length,
-            isCompositionStart: this._isCompositionStart,
+            oldTextLen,
+            isCompositionStart,
             isCompositionEnd: !isUpdate,
         });
 
-        if (isUpdate) {
-            if (this._isCompositionStart) {
-                this._isCompositionStart = false;
-            }
-
-            this._previousIMEContent = content;
-        } else {
+        if (!isUpdate && this._compositionId === compositionId) {
             this._resetIME();
         }
     }

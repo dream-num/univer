@@ -21,8 +21,8 @@ import { OleObject } from '../ole-object';
 
 function context() {
     vi.stubGlobal('Path2D', class {});
-    return {
-        _context: { fillStyle: '', strokeStyle: '' },
+    const native = {
+        strokeStyle: '',
         save: vi.fn(),
         restore: vi.fn(),
         beginPath: vi.fn(),
@@ -42,6 +42,7 @@ function context() {
         textBaseline: '',
         globalAlpha: 1,
     };
+    return { ...native, _context: native };
 }
 
 afterEach(() => {

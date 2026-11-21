@@ -24,6 +24,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
+    BaselineOffset,
     BooleanNumber,
     CellValueType,
     ColumnSeparatorType,
@@ -50,11 +51,11 @@ import type {
     IDocumentSkeletonTable,
 } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extension';
-import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
+import type { IDocumentRenderBounds, IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { IDocumentLayoutRenderConfig } from './document-layout-presentation';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
@@ -69,15 +70,26 @@ import { DrawingGroupObject } from '../../drawing-group';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
+import { Background } from './extensions/background';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
+import { Border } from './extensions/border';
+import { FontAndBaseLine } from './extensions/font-and-base-line';
+import { Line } from './extensions/line';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
+import {
+    getCellBorderWidth,
+    getTableCellSpacing,
+    getTableCellSpacingInsets,
+    getTableOuterBorder,
+    hasTableCellSpacing,
+} from './layout/table-cell-spacing';
 import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
-import { drawPageBorders } from './page-borders';
+import { drawPageBorders, getDocumentBorderBands, getDocumentBorderWidth } from './page-borders';
 import {
     getDocsTableLayoutViewportWidth,
     getDocsTableRenderViewport,
@@ -85,7 +97,6 @@ import {
     hasDocsTableHorizontalViewport,
 } from './table-render-viewport';
 import { DocumentEditArea } from './view-model/document-view-model';
-import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     color: {
@@ -146,6 +157,7 @@ interface IHeaderFooterFieldContext {
     customRanges: ICustomRange[];
     pageNumber: number;
     pageCount: number;
+    pageNumberFormat?: string;
     viewModel?: DocumentViewModel;
 }
 
@@ -153,8 +165,8 @@ function resolveHeaderFooterFieldGlyphGroup(
     divide: IDocumentSkeletonDivide,
     context: IHeaderFooterFieldContext
 ): IDocumentSkeletonGlyph[] {
-    // Legacy skeletons and note stories resolve fields at draw time. New header/footer
-    // layouts already resolve their fields before wrapping and bypass this fallback.
+    // Shared page fields can reserve wider labels for fitting. Painting adjusts the
+    // current value and alignment while retaining those fitted line breaks.
     const { glyphGroup } = divide;
     let index = divide.st;
     const resolved = glyphGroup.map((glyph) => {
@@ -164,17 +176,18 @@ function resolveHeaderFooterFieldGlyphGroup(
             index + glyph.count - 1,
             context.customRanges,
             context.pageNumber,
-            context.pageCount
+            context.pageCount,
+            context.pageNumberFormat
         );
         index += glyph.count;
-        if (result === glyph) {
+        if (result === glyph && glyph.fieldLayoutContent == null) {
             return glyph;
         }
         const font = glyph.fontStyle?.fontString;
         let widthDelta = -glyph.width;
         if (result.content) {
             widthDelta = font
-                ? (FontCache.getMeasureText(result.content, font).width - FontCache.getMeasureText(glyph.content, font).width)
+                ? (FontCache.getMeasureText(result.content, font).width - FontCache.getMeasureText(glyph.fieldLayoutContent ?? glyph.content, font).width)
                 * getTextHorizontalScale(glyph.ts?.sa)
                 : 0;
         }
@@ -305,9 +318,11 @@ export class Documents extends DocComponent {
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
     private _inactiveAreaOpacity = 1;
+    private readonly _pageFieldContext?: IDocumentsConfig['pageFieldContext'];
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
+        this._pageFieldContext = config?.pageFieldContext;
 
         this._initialDefaultExtension();
 
@@ -430,11 +445,11 @@ export class Documents extends DocComponent {
         }
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IDocumentRenderBounds) {
         this.draw(ctx, bounds);
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    override draw(ctx: UniverRenderingContext, bounds?: IDocumentRenderBounds) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null || this._drawLiquid == null) {
@@ -447,6 +462,7 @@ export class Documents extends DocComponent {
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const isContinuousLayout = this.getSkeleton()?.getViewModel?.().getDataModel().documentStyle.documentFlavor === DocumentFlavor.MODERN;
         const isTraditionalLayout = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+        const bodyFieldContext = this._getEmbeddedPageFieldContext();
         const dataModel = this.getSkeleton()?.getViewModel?.().getDataModel();
         const sectionBorders = new Map((dataModel?.getBody?.()?.sectionBreaks ?? [])
             .map((section) => [section.sectionId, section.pageBorders]));
@@ -560,7 +576,8 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    bodyFieldContext
                 );
                 ctx.restore();
             }
@@ -724,7 +741,7 @@ export class Documents extends DocComponent {
         parentScale: IScale,
         isContinuousLayout: boolean,
         pageTop: number,
-        bounds?: IViewportInfo
+        bounds?: IDocumentRenderBounds
     ): void {
         if (this._drawLiquid == null) {
             return;
@@ -732,6 +749,19 @@ export class Documents extends DocComponent {
         const { sections, marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0 } = page;
         const { verticalAlign = VerticalAlign.TOP, wrapStrategy = WrapStrategy.UNSPECIFIED } = renderConfig;
         const isVertical = renderConfig.vertexAngle === VERTICAL_ROTATE_ANGLE && renderConfig.centerAngle === VERTICAL_ROTATE_ANGLE;
+        const fieldContext = this._getEmbeddedPageFieldContext();
+        const clip = bounds?.glyphClipBound;
+        const matrix = clip ? ctx.getTransform() : undefined;
+        // Unknown extensions and deferred streams must receive their original complete glyph sequence.
+        const canClipGlyphs = this.constructor === Documents && clip && matrix && matrix.a > 0 && matrix.d > 0 && !matrix.b && !matrix.c
+            && [clip.top, clip.bottom, matrix.d, matrix.f].every(Number.isFinite)
+            && !vertexAngle && !centerAngle && !renderConfig.stackedText && !this._glyphPaintSink
+            && renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
+            && !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY
+            && (!ctx.filter || ctx.filter === 'none') && ctx.globalCompositeOperation === 'source-over'
+            && extensions.every((extension) => [Background, Border, FontAndBaseLine, Line].some((type) => extension.constructor === type));
+        const glyphClipTop = canClipGlyphs ? (clip.top - 2 - matrix.f) / matrix.d : undefined;
+        const glyphClipBottom = canClipGlyphs ? (clip.bottom + 2 - matrix.f) / matrix.d : undefined;
 
         for (const [sectionIndex, section] of sections.entries()) {
             const { columns } = section;
@@ -819,10 +849,12 @@ export class Documents extends DocComponent {
                         this._drawLineBackground(ctx, page, line, column.width);
 
                         const divideLength = divides.length;
+                        const skipGlyphs = glyphClipTop !== undefined && glyphClipBottom !== undefined
+                            && this._isPlainLineOutsideClip(line, this._drawLiquid.y + alignOffset.y, glyphClipTop, glyphClipBottom);
 
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
-                            const { glyphGroup } = divide;
+                            const glyphGroup = fieldContext ? resolveHeaderFooterFieldGlyphGroup(divide, fieldContext) : divide.glyphGroup;
 
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
@@ -839,11 +871,22 @@ export class Documents extends DocComponent {
                                 preTextBackgroundExtensions
                             );
 
-                            // Draw text\border\lines etc.
+                            let textGlyphs = glyphGroup;
+                            if (skipGlyphs) {
+                                // Later unstyled glyphs inherit the final Canvas text state of this divide.
+                                // Dispatch one invisible glyph through the original extensions to retain that state.
+                                textGlyphs = [];
+                                for (let j = glyphGroup.length - 1; j >= 0; j--) {
+                                    if (glyphGroup[j].content) {
+                                        textGlyphs = [glyphGroup[j]];
+                                        break;
+                                    }
+                                }
+                            }
                             this._drawGlyphGroup(
                                 ctx,
                                 parentScale,
-                                glyphGroup,
+                                textGlyphs,
                                 line,
                                 alignOffset,
                                 centerAngle,
@@ -866,6 +909,33 @@ export class Documents extends DocComponent {
 
             this._drawLiquid.translateRestore();
         }
+    }
+
+    private _isPlainLineOutsideClip(line: IDocumentSkeletonLine, top: number, clipTop: number, clipBottom: number): boolean {
+        // Keep backgrounds and paragraph borders on their original path. Only ordinary text ink is culled.
+        const baseline = top + line.asc;
+        let ascent = Math.max(line.lineHeight, line.contentHeight);
+        let descent = ascent;
+        for (const divide of line.divides) {
+            for (const glyph of divide.glyphGroup) {
+                const style = glyph.ts;
+                const box = glyph.bBox;
+                if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
+                    || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
+                    || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
+                    || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
+                    || style.bbl || style.bd
+                    || style.textOutline || style.textFill || style.glow || style.outerShadow
+                    || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
+                    || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
+                    return false;
+                }
+                ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
+                descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
+            }
+        }
+        return [baseline, ascent, descent].every(Number.isFinite)
+            && (baseline + descent < clipTop || baseline - ascent > clipBottom);
     }
 
     private _getColumnDrawLayout(
@@ -1068,7 +1138,10 @@ export class Documents extends DocComponent {
         for (const [tableId, tableSkeleton] of skeTables) {
             const { top: tableTop, left: tableLeft, rows } = tableSkeleton;
             const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
-            const viewport = this._getTableViewport(page, tableSkeleton, renderUnitId, sourceTableId);
+            // Printed tables follow paper geometry, independently of editor scrolling and viewport registration.
+            const viewport = ctx.__mode === 'printing'
+                ? null
+                : this._getTableViewport(page, tableSkeleton, renderUnitId, sourceTableId);
             drawLiquid.translateSave();
             drawLiquid.translate(tableLeft, tableTop);
 
@@ -1089,6 +1162,7 @@ export class Documents extends DocComponent {
             }
 
             this._drawTableCellBackgrounds(ctx, page, tableSkeleton);
+            this._drawSpacedTableFrame(ctx, page, tableSkeleton);
 
             for (const row of rows) {
                 const { top: rowTop, cells } = row;
@@ -1096,29 +1170,31 @@ export class Documents extends DocComponent {
                 drawLiquid.translate(0, rowTop);
 
                 for (const cell of cells) {
-                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
-                        continue;
-                    }
-
                     const { left: cellLeft } = cell;
                     drawLiquid.translateSave();
                     drawLiquid.translate(cellLeft, 0);
 
-                    this._drawTableCell(
-                        ctx,
-                        page,
-                        cell,
-                        extensions,
-                        backgroundExtension,
-                        preTextBackgroundExtensions,
-                        glyphExtensionsExcludeBackground,
-                        alignOffsetNoAngle,
-                        centerAngle,
-                        vertexAngle,
-                        renderConfig,
-                        parentScale,
-                        fieldContext
-                    );
+                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                        // A covered cell paints no content of its own, but a page break can cut the merge
+                        // it belongs to; the side borders then have to be painted from this page.
+                        this._drawTableCellBordersAndBg(ctx, page, cell, false);
+                    } else {
+                        this._drawTableCell(
+                            ctx,
+                            page,
+                            cell,
+                            extensions,
+                            backgroundExtension,
+                            preTextBackgroundExtensions,
+                            glyphExtensionsExcludeBackground,
+                            alignOffsetNoAngle,
+                            centerAngle,
+                            vertexAngle,
+                            renderConfig,
+                            parentScale,
+                            fieldContext
+                        );
+                    }
 
                     drawLiquid.translateRestore();
                 }
@@ -1172,13 +1248,24 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    this._getEmbeddedPageFieldContext()
                 );
                 drawLiquid.translateRestore();
             }
 
             drawLiquid.translateRestore();
         }
+    }
+
+    private _getEmbeddedPageFieldContext(): IHeaderFooterFieldContext | undefined {
+        if (!this._pageFieldContext) {
+            return undefined;
+        }
+        const viewModel = this.getSkeleton()?.getViewModel();
+        return viewModel
+            ? { ...this._pageFieldContext, customRanges: viewModel.getBody()?.customRanges ?? [], viewModel }
+            : undefined;
     }
 
     private _drawTableCellBackgrounds(
@@ -1211,11 +1298,12 @@ export class Documents extends DocComponent {
                 }
 
                 const rects = backgrounds.get(color) ?? [];
+                const insets = getTableCellSpacingInsets(tableSkeleton.tableSource, row.index, index);
                 rects.push({
-                    x: tableX + cell.left,
-                    y: tableY + row.top,
-                    width: cell.pageWidth,
-                    height: cell.pageHeight,
+                    x: tableX + cell.left + insets.left,
+                    y: tableY + row.top + insets.top,
+                    width: Math.max(0, cell.pageWidth - insets.left - insets.right),
+                    height: Math.max(0, cell.pageHeight - insets.top - insets.bottom),
                 });
                 backgrounds.set(color, rects);
             });
@@ -1355,28 +1443,51 @@ export class Documents extends DocComponent {
         // Word adds 1.5pt of horizontal clearance, even for top/bottom-only paragraph borders.
         // Border spacing reaches the inner edge; Canvas strokes are centered on their path.
         const traditional = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
-        const leftWidth = line.borderLeft ? Math.max(0, line.borderLeft.width ?? 1) : 0;
-        const rightWidth = line.borderRight ? Math.max(0, line.borderRight.width ?? 1) : 0;
+        const leftWidth = getDocumentBorderWidth(line.borderLeft);
+        const rightWidth = getDocumentBorderWidth(line.borderRight);
         const leftOutset = traditional ? 2 + leftWidth / 2 : 0;
         const rightOutset = traditional ? 2 + rightWidth / 2 : 0;
-        const startX = x + (line.paragraphPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0) - leftOutset;
+        const borderPaddingLeft = traditional ? line.paragraphBorderPaddingLeft ?? line.paragraphPaddingLeft : line.paragraphPaddingLeft;
+        const startX = x + (borderPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0) - leftOutset;
         const endX = x + width - (line.paragraphPaddingRight ?? 0) + (line.borderRight?.padding ?? 0) + rightOutset;
-        const startY = y + line.marginTop + (line.borderTopSpace ?? 0) - (line.borderTop?.padding ?? 0);
-        const endY = y + line.lineHeight - line.marginBottom - (line.borderBottomSpace ?? 0) + (bottomBorder?.padding ?? 0);
+        const startY = y + line.marginTop + (line.borderTopSpace ?? 0) - (line.borderTop?.padding ?? 0) +
+            (traditional ? line.minimumLineLeading ?? 0 : 0);
+        const afterSpacing = traditional && line.borderBetween ? line.spaceBelowApply ?? 0 : 0;
+        const endY = y + line.lineHeight - line.marginBottom - (line.borderBottomSpace ?? 0) + (bottomBorder?.padding ?? 0) + afterSpacing;
         const drawBorder = (border: IParagraphBorder, type: BORDER_TYPE) => {
-            const lineWidth = border.width ?? 1;
-            // Explicit zero widths cancel inherited borders; Canvas ignores a zero lineWidth.
-            if (lineWidth <= 0) {
+            const stroke = {
+                width: { v: border.width ?? 1 },
+                color: { rgb: border.color.rgb === 'auto' ? COLOR_BLACK_RGB : getColorStyleForCanvas(border.color) ?? COLOR_BLACK_RGB },
+                dashStyle: border.dashStyle,
+            };
+            if (border.style == null) {
+                this._drawBorder(ctx, stroke, type, { startX, startY, endX, endY });
                 return;
             }
-            ctx.save();
-            ctx.setLineWidthByPrecision(lineWidth);
-            ctx.strokeStyle = border.color.rgb === 'auto'
-                ? COLOR_BLACK_RGB
-                : getColorStyleForCanvas(border.color) ?? COLOR_BLACK_RGB;
-            setDocsBorderDash(ctx, border.dashStyle);
-            drawLineByBorderType(ctx, type, 0, { startX, startY, endX, endY });
-            ctx.restore();
+            const bands = getDocumentBorderBands(border);
+            const extent = getDocumentBorderWidth(border);
+            const horizontal = type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM;
+            let offset = type === BORDER_TYPE.TOP ? startY - extent : endY;
+            if (!horizontal) {
+                offset = (type === BORDER_TYPE.LEFT ? startX : endX) - extent / 2;
+            }
+            for (const [index, width] of bands.entries()) {
+                if (index % 2 === 0) {
+                    const position = { startX, startY, endX, endY };
+                    const center = offset + width / 2;
+                    if (type === BORDER_TYPE.TOP) {
+                        position.startY = center;
+                    } else if (type === BORDER_TYPE.BOTTOM) {
+                        position.endY = center;
+                    } else if (type === BORDER_TYPE.LEFT) {
+                        position.startX = center;
+                    } else {
+                        position.endX = center;
+                    }
+                    this._drawBorder(ctx, { ...stroke, width: { v: width } }, type, position);
+                }
+                offset += width;
+            }
         };
 
         if (line.borderTop) {
@@ -1408,7 +1519,8 @@ export class Documents extends DocComponent {
             return;
         }
 
-        for (const glyph of glyphGroup) {
+        // Deferred paint streams retain their original glyph records, including empty background dispatches.
+        for (const glyph of preTextBackgroundExtensions.length || this._glyphPaintSink ? glyphGroup : []) {
             if (!glyph.content) {
                 continue;
             }
@@ -1707,7 +1819,7 @@ export class Documents extends DocComponent {
         const rowIndexInTable = tableSke?.rows.indexOf(rowSke);
         const rowIndex = rowIndexInTable == null || rowIndexInTable < 0 ? rowSke.index ?? 0 : rowIndexInTable;
 
-        if (!cellSource || cellSource.rowSpan === 0 || cellSource.columnSpan === 0) {
+        if (!cellSource || cellSource.columnSpan === 0) {
             return;
         }
 
@@ -1719,6 +1831,23 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
+        const position = {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        };
+
+        if (cellSource.rowSpan === 0) {
+            this._drawSplitMergedCellBorders(ctx, rowSke, tableSke, index, position, drawBackground, {
+                x,
+                y,
+                pageWidth,
+                pageHeight,
+            });
+            return;
+        }
+
         // Draw cell bg.
         if (drawBackground && cellSource.backgroundColor?.rgb) {
             ctx.save();
@@ -1727,26 +1856,37 @@ export class Documents extends DocComponent {
             ctx.restore();
         }
 
-        const position = {
-            startX: x,
-            startY: y,
-            endX: x + pageWidth,
-            endY: y + pageHeight,
-        };
+        if (tableSke?.tableSource && getTableCellSpacing(tableSke.tableSource, rowSke.index) != null) {
+            const insets = getTableCellSpacingInsets(tableSke.tableSource, rowSke.index, index);
+            position.startX += Math.min(pageWidth, insets.left);
+            position.endX = Math.max(position.startX, position.endX - insets.right);
+            position.startY += Math.min(pageHeight, insets.top);
+            position.endY = Math.max(position.startY, position.endY - insets.bottom);
+            for (const [edge, type] of [['borderTop', BORDER_TYPE.TOP], ['borderBottom', BORDER_TYPE.BOTTOM], ['borderLeft', BORDER_TYPE.LEFT], ['borderRight', BORDER_TYPE.RIGHT]] as const) {
+                this._drawBorder(ctx, cellSource[edge] ?? null, type, position);
+            }
+            return;
+        }
 
         const rightCellSource = this._getTableCellSource(rowSke, index + 1);
+        const rowSourceIndex = rowSke.index ?? 0;
+        const sourceRows = tableSke?.tableSource?.tableRows;
         const bottomCellSource = tableSke ? this._getTableCellSource(tableSke.rows[rowIndex + 1], index) : undefined;
+        // A table split across pages leaves the row that owns a shared horizontal edge on the other
+        // page, which would drop the border on the two fragment edges. Fall back to the source table.
+        const adjacentCellSource = bottomCellSource ?? sourceRows?.[rowSourceIndex + 1]?.tableCells[index];
         const bottom = cellSource.borderBottom;
         const bottomBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL && rowIndex === (tableSke?.rows.length ?? 1) - 1
             ? bottom?.tableBottomBorder ?? bottom
             : bottom;
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(bottomBorder, bottomCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
+        this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
+        this._drawBorder(ctx, this._resolveTableCellBorder(bottomBorder, adjacentCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
 
         if (rowIndex <= 0) {
             const top = cellSource.borderTop;
             const border = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL ? top?.tableTopBorder ?? top : top;
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(border), BORDER_TYPE.TOP, position);
+            const previousCellSource = rowSourceIndex > 0 ? sourceRows?.[rowSourceIndex - 1]?.tableCells[index] : undefined;
+            this._drawBorder(ctx, this._resolveTableCellBorder(border, previousCellSource?.borderBottom), BORDER_TYPE.TOP, position);
         } else if (tableSke) {
             // The preceding row owns shared horizontal edges, but omitted grid
             // columns can leave part of this cell's top without an owner.
@@ -1754,7 +1894,7 @@ export class Documents extends DocComponent {
             const right = cell.left + pageWidth;
             const drawExposedTop = (end: number) => {
                 if (end > left) {
-                    this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, {
+                    this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, {
                         ...position,
                         startX: x + left - cell.left,
                         endX: x + end - cell.left,
@@ -1777,12 +1917,127 @@ export class Documents extends DocComponent {
         }
 
         if (index <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_TYPE.LEFT, position);
+            this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_TYPE.LEFT, position);
+        }
+    }
+
+    private _drawSpacedTableFrame(ctx: UniverRenderingContext, page: IDocumentSkeletonPage, table: IDocumentSkeletonTable): void {
+        if (this._drawLiquid == null || !hasTableCellSpacing(table.tableSource)) {
+            return;
+        }
+        const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
+        const borders = {
+            top: getTableOuterBorder(source, 'top'),
+            bottom: getTableOuterBorder(source, 'bottom'),
+            left: getTableOuterBorder(source, 'left'),
+            right: getTableOuterBorder(source, 'right'),
+        };
+        const x = this._drawLiquid.x + page.marginLeft;
+        const y = this._drawLiquid.y + page.marginTop;
+        const position = {
+            startX: x + getCellBorderWidth(borders.left) / 2,
+            startY: y + getCellBorderWidth(borders.top) / 2,
+            endX: x + table.width - getCellBorderWidth(borders.right) / 2,
+            endY: y + table.height - getCellBorderWidth(borders.bottom) / 2,
+        };
+        for (const [edge, type] of [['top', BORDER_TYPE.TOP], ['bottom', BORDER_TYPE.BOTTOM], ['left', BORDER_TYPE.LEFT], ['right', BORDER_TYPE.RIGHT]] as const) {
+            this._drawBorder(ctx, borders[edge] ?? null, type, position);
         }
     }
 
     private _getTableCellSource(row: Nullable<IDocumentSkeletonRow>, column: number): Nullable<ITableCell> {
         return row?.rowSource.tableCells[column] ?? null;
+    }
+
+    /**
+     * A vertically merged cell is painted once, by the cell that starts the merge. A page break can
+     * cut that cell in two, and then the start cell only covers the first page: the covered cells on
+     * the following pages have to paint the merge's side borders (and its closing edge) themselves.
+     */
+    private _drawSplitMergedCellBorders(
+        ctx: UniverRenderingContext,
+        rowSke: IDocumentSkeletonRow,
+        tableSke: IDocumentSkeletonTable | undefined,
+        column: number,
+        position: { startX: number; startY: number; endX: number; endY: number },
+        drawBackground: boolean,
+        bounds: { x: number; y: number; pageWidth: number; pageHeight: number }
+    ) {
+        const tableRows = tableSke?.tableSource?.tableRows;
+        const cellSource = rowSke.rowSource.tableCells[column];
+        if (!tableRows || !cellSource) {
+            return;
+        }
+
+        const rowSourceIndex = rowSke.index ?? 0;
+        let startRowIndex = rowSourceIndex - 1;
+        while (startRowIndex >= 0 && tableRows[startRowIndex]?.tableCells[column]?.rowSpan === 0) {
+            startRowIndex -= 1;
+        }
+
+        const startCell = startRowIndex >= 0 ? tableRows[startRowIndex]?.tableCells[column] : undefined;
+        const rowSpan = startCell?.rowSpan ?? 0;
+        if (!startCell || rowSpan <= 1) {
+            return;
+        }
+
+        // The page that owns the merge start already paints the whole merged cell box. Repeated
+        // header rows are copied from row 0, so compare against the first body row of this page.
+        const pageRows = tableSke?.rows ?? [];
+        const firstBodyRow = pageRows.find((pageRow) => !pageRow.isRepeatRow) ?? pageRows[0];
+        const firstRowInPage = firstBodyRow?.index ?? 0;
+        if (startRowIndex >= firstRowInPage) {
+            return;
+        }
+
+        const { x, y, pageWidth, pageHeight } = bounds;
+
+        if (drawBackground && startCell.backgroundColor?.rgb) {
+            ctx.save();
+            ctx.fillStyle = startCell.backgroundColor.rgb;
+            fillRectByPrecisionBounds(ctx, x, y, pageWidth, pageHeight);
+            ctx.restore();
+        }
+
+        const nextCellSource = rowSke.rowSource.tableCells[column + 1];
+
+        // Word closes the fragment with the row edge at the page split, including across a merged
+        // cell that continues from the previous page, so the top line does not break off there.
+        if (rowSourceIndex === firstRowInPage) {
+            const top = cellSource.borderTop;
+            const topBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL
+                ? top?.tableTopBorder ?? top
+                : top;
+            const previousRowCellSource = tableRows[rowSourceIndex - 1]?.tableCells[column];
+            this._drawBorder(
+                ctx,
+                this._resolveTableCellBorder(topBorder, previousRowCellSource?.borderBottom),
+                BORDER_TYPE.TOP,
+                position
+            );
+        }
+
+        this._drawBorder(
+            ctx,
+            this._resolveTableCellBorder(startCell.borderRight, nextCellSource?.borderLeft),
+            BORDER_TYPE.RIGHT,
+            position
+        );
+
+        if (rowSourceIndex === startRowIndex + rowSpan - 1) {
+            const nextRowCellSource = tableRows[rowSourceIndex + 1]?.tableCells[column];
+            this._drawBorder(
+                ctx,
+                this._resolveTableCellBorder(startCell.borderBottom, nextRowCellSource?.borderTop),
+                BORDER_TYPE.BOTTOM,
+                position
+            );
+        }
+
+        // Interior vertical edges are owned by the preceding cell's right border.
+        if (column <= 0) {
+            this._drawBorder(ctx, this._resolveTableCellBorder(startCell.borderLeft), BORDER_TYPE.LEFT, position);
+        }
     }
 
     private _resolveTableCellBorder(primary?: ITableCellBorder, secondary?: ITableCellBorder): Nullable<ITableCellBorder> {
@@ -1811,7 +2066,7 @@ export class Documents extends DocComponent {
         return lineWidth > 0 && color !== 'transparent';
     }
 
-    private _drawTableCellBorder(
+    private _drawBorder(
         ctx: UniverRenderingContext,
         border: Nullable<ITableCellBorder>,
         type: BORDER_TYPE,
@@ -1898,7 +2153,7 @@ export class Documents extends DocComponent {
                 .getSelfOrHeaderFooterViewModel(page.segmentId)
             : undefined;
         const customRanges = page.fieldsResolved ? [] : customRangesOverride ?? viewModel?.getBody()?.customRanges ?? [];
-        const fieldContext = { customRanges, pageNumber: parentPage.pageNumber, pageCount, viewModel };
+        const fieldContext = { customRanges, pageNumber: parentPage.pageNumber, pageCount, pageNumberFormat: parentPage.pageNumberFormat, viewModel };
 
         ctx.save();
         ctx.globalAlpha *= opacity;
@@ -1943,6 +2198,8 @@ export class Documents extends DocComponent {
                 const linesCount = lines.length;
 
                 const alignOffset = alignOffsetNoAngle;
+                // Story alignment already includes its page offset; decoration helpers add marginTop themselves.
+                const decorationTop = alignOffset.y - page.marginTop;
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
@@ -1969,7 +2226,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         }
-                        this._drawLineBackground(ctx, page, line, column.width, parentPage.marginLeft);
+                        this._drawLineBackground(ctx, page, line, column.width, parentPage.marginLeft, decorationTop);
 
                         const divideLength = divides.length;
 
@@ -2008,7 +2265,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
 
-                        this._drawParagraphBorders(ctx, page, line, column.width, parentPage.marginLeft);
+                        this._drawParagraphBorders(ctx, page, line, column.width, parentPage.marginLeft, decorationTop);
 
                         this._drawLiquid.translateRestore();
                     }

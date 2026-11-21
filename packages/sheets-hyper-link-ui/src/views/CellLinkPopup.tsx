@@ -15,10 +15,9 @@
  */
 
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
-import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, Button, clsx, MessageType, Tooltip } from '@univerjs/design';
-import { AllBorderIcon, CopyIcon, LinkIcon, SheetsMultiIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
+import { MessageType } from '@univerjs/design';
+import { AllBorderIcon, LinkIcon, SheetsMultiIcon } from '@univerjs/icons';
 import {
     CancelHyperLinkCommand,
     CancelRichHyperLinkCommand,
@@ -26,7 +25,8 @@ import {
     SheetsHyperLinkParserService,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { HyperlinkPreview, IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { ISheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
@@ -69,141 +69,43 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
-        <div
-            className={clsx(`
-              univer-mb-1 univer-grid univer-max-w-80 univer-grid-cols-[minmax(0,1fr)_auto] univer-items-center
-              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-shadow-md
-              dark:!univer-bg-gray-900
-            `, borderClassName)}
-            onClick={() => popupService.hideCurrentPopup()}
-        >
-            <div
-                className={clsx(`
-                  univer-flex univer-h-6 univer-flex-1 univer-cursor-pointer univer-flex-row univer-items-center
-                  univer-gap-1 univer-truncate univer-text-sm univer-leading-5 univer-text-primary-600
-                `, { 'univer-text-red-500': isError })}
-                onClick={() => {
-                    if (isError) {
-                        return;
+        <HyperlinkPreview
+            title={linkObj.name}
+            icon={iconsMap[linkObj.type]}
+            description={typeof tooltip === 'string' ? tooltip : undefined}
+            invalid={isError}
+            copyDisabled={!copyPermission}
+            className="univer-mb-1 univer-p-2"
+            labels={{ copy: localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy'), edit: localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit'), remove: localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel') }}
+            onDismiss={() => popupService.hideCurrentPopup()}
+            onOpen={() => { resolverService.navigate(linkObj); }}
+            onCopy={async () => {
+                if (linkObj.type !== SheetHyperLinkType.URL) {
+                    const url = new URL(window.location.href);
+                    url.hash = linkObj.url.slice(1);
+                    await navigator.clipboard.writeText(url.href);
+                } else {
+                    await navigator.clipboard.writeText(linkObj.url);
+                }
+                messageService.show({ content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'), type: MessageType.Info });
+            }}
+            onEdit={editPermission ? () => commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, { unitId, subUnitId, row, col, customRangeId: customRange.rangeId, type }) : undefined}
+            onRemove={editPermission
+                ? () => {
+                    const commandId = type === HyperLinkEditSourceType.EDITING ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                    if (commandService.syncExecuteCommand(commandId, {
+                        unitId,
+                        subUnitId,
+                        id: customRange.rangeId,
+                        row,
+                        column: col,
+                        documentId: editorBridgeService.getCurrentEditorId(),
+                    })) {
+                        popupService.hideCurrentPopup(undefined, true);
                     }
-
-                    resolverService.navigate(linkObj);
-                }}
-            >
-                <div
-                    className={`
-                      univer-flex univer-size-5 univer-flex-none univer-items-center univer-justify-center
-                      univer-text-base univer-text-gray-900
-                      dark:!univer-text-gray-0
-                    `}
-                >
-                    {iconsMap[linkObj.type]}
-                </div>
-                <Tooltip showIfEllipsis title={linkObj.name} asChild>
-                    <span className="univer-flex-1 univer-truncate">{linkObj.name}</span>
-                </Tooltip>
-            </div>
-            <div
-                className={`
-                  univer-flex univer-h-6 univer-flex-none univer-flex-row univer-items-center univer-justify-center
-                  univer-gap-2
-                `}
-            >
-                <Button
-                    type="button"
-                    variant="text"
-                    size="small"
-                    data-u-comp="cell-link-popup-copy"
-                    aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
-                    className={clsx(`
-                      !univer-flex univer-size-6 !univer-rounded !univer-border-0 !univer-p-0 !univer-text-base
-                      !univer-font-normal
-                      disabled:!univer-pointer-events-auto
-                    `, { 'univer-text-red-500': isError })}
-                    disabled={!copyPermission || isError}
-                    onClick={async () => {
-                        if (linkObj.type !== SheetHyperLinkType.URL) {
-                            const url = new URL(window.location.href);
-                            url.hash = linkObj.url.slice(1);
-                            await navigator.clipboard.writeText(url.href);
-                        } else {
-                            await navigator.clipboard.writeText(linkObj.url);
-                        }
-                        messageService.show({
-                            content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
-                            type: MessageType.Info,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}>
-                        <CopyIcon className="dark:!univer-text-gray-0" />
-                    </Tooltip>
-                </Button>
-                {editPermission && (
-                    <>
-                        <div
-                            data-u-comp="cell-link-popup-edit"
-                            className={`
-                              univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
-                              univer-justify-center univer-rounded univer-text-base
-                              hover:univer-bg-gray-100
-                              dark:hover:!univer-bg-gray-700
-                            `}
-                            onClick={() => {
-                                return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
-                                    unitId,
-                                    subUnitId,
-                                    row,
-                                    col,
-                                    customRangeId: customRange.rangeId,
-                                    type,
-                                });
-                            }}
-                        >
-                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}>
-                                <WriteIcon className="dark:!univer-text-gray-0" />
-                            </Tooltip>
-                        </div>
-                        <div
-                            data-u-comp="cell-link-popup-remove"
-                            className={`
-                              univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
-                              univer-justify-center univer-rounded univer-text-base
-                              hover:univer-bg-gray-100
-                              dark:hover:!univer-bg-gray-700
-                            `}
-                            onClick={() => {
-                                const commandId = type === HyperLinkEditSourceType.EDITING ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
-                                if (commandService.syncExecuteCommand(commandId, {
-                                    unitId,
-                                    subUnitId,
-                                    id: customRange.rangeId,
-                                    row,
-                                    column: col,
-                                    documentId: editorBridgeService.getCurrentEditorId(),
-                                })) {
-                                    popupService.hideCurrentPopup(undefined, true);
-                                }
-                            }}
-                        >
-                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}>
-                                <UnlinkIcon className="dark:!univer-text-gray-0" />
-                            </Tooltip>
-                        </div>
-                    </>
-                )}
-            </div>
-            {typeof tooltip === 'string' && tooltip && (
-                <div
-                    className="
-                      univer-col-span-2 univer-max-h-32 univer-overflow-y-auto univer-whitespace-pre-wrap
-                      univer-break-words univer-text-sm univer-text-gray-500
-                    "
-                >
-                    {tooltip}
-                </div>
-            )}
-        </div>
+                }
+                : undefined}
+        />
     );
 };
 

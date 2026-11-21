@@ -48,8 +48,8 @@ import {
 export const menuSchema: MenuSchemaType = {
     [RibbonDataGroup.ORGANIZATION]: {
         [SHEETS_SORT_MENU_ID]: {
-            order: 3,
-            gridLayout: { row: 2, column: 2 },
+            order: 0,
+            gridLayout: { row: 1, column: 1 },
             menuItemFactory: sortRangeMenuFactory,
             [SortRangeAscCommand.id]: {
                 order: 0,

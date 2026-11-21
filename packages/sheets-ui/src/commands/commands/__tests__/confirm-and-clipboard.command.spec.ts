@@ -17,6 +17,7 @@
 import type { IAccessor, IRange, Workbook, Worksheet } from '@univerjs/core';
 import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
+    CustomCommandExecutionError,
     ICommandService,
     IConfirmService,
     Injector,
@@ -34,6 +35,7 @@ import {
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     MoveRangeMutation,
+    RangeProtectionPermissionEditPoint,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -41,11 +43,14 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
+    SheetPermissionCheckController,
     SheetsSelectionsService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
+    WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
 import * as sheets from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -466,5 +471,66 @@ describe('clipboard command branches', () => {
         expect(executeCommand).toHaveBeenCalledWith(SheetPasteCommand.id, {
             value: PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER,
         });
+    });
+
+    it('checks the cached target permission before replaying a floating paste option', async () => {
+        const permissionCheckWithRanges = vi.fn(() => true);
+        const rePaste = vi.fn(() => true);
+        const accessor = createAccessor([
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges,
+                blockExecuteWithoutPermission: vi.fn(),
+            }],
+            [ISheetClipboardService, {
+                getPasteOptionsCache: () => ({
+                    target: {
+                        unitId: 'unit-1',
+                        subUnitId: 'sheet-1',
+                        pastedRange: { rows: [1, 3], cols: [2, 4] },
+                    },
+                }),
+                rePasteWithPasteType: rePaste,
+            }],
+            [LocaleService, { t: (key: string) => key }],
+        ]);
+
+        expect(await SheetOptionalPasteCommand.handler(accessor, { type: 'SPECIAL_PASTE_COL_WIDTH' })).toBe(true);
+        expect(permissionCheckWithRanges).toHaveBeenCalledWith({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [
+                WorksheetEditPermission,
+                WorksheetSetCellValuePermission,
+                WorksheetSetCellStylePermission,
+                WorksheetSetColumnStylePermission,
+            ],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, [{ startRow: 1, endRow: 3, startColumn: 2, endColumn: 4 }], 'unit-1', 'sheet-1');
+        expect(rePaste).toHaveBeenCalledWith('SPECIAL_PASTE_COL_WIDTH');
+    });
+
+    it('blocks replaying a floating paste option when the cached target loses permission', async () => {
+        const rePaste = vi.fn(() => true);
+        const accessor = createAccessor([
+            [SheetPermissionCheckController, {
+                permissionCheckWithRanges: () => false,
+                blockExecuteWithoutPermission: () => {
+                    throw new CustomCommandExecutionError('have no permission');
+                },
+            }],
+            [ISheetClipboardService, {
+                getPasteOptionsCache: () => ({
+                    target: {
+                        unitId: 'unit-1',
+                        subUnitId: 'sheet-1',
+                        pastedRange: { rows: [1], cols: [2] },
+                    },
+                }),
+                rePasteWithPasteType: rePaste,
+            }],
+            [LocaleService, { t: (key: string) => key }],
+        ]);
+
+        await expect(SheetOptionalPasteCommand.handler(accessor, { type: 'SPECIAL_PASTE_COL_WIDTH' })).rejects.toThrow(CustomCommandExecutionError);
+        expect(rePaste).not.toHaveBeenCalled();
     });
 });

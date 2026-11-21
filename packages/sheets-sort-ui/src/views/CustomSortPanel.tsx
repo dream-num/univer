@@ -16,8 +16,6 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IOrderRule } from '@univerjs/sheets-sort';
-import type { LocaleKey } from '../locale/types';
-import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import {
     Button,
@@ -33,6 +31,8 @@ import { CheckMarkIcon, DeleteEmptyIcon, GripVerticalIcon, IncreaseIcon, MoreDow
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { LocaleKey } from '../locale/types';
+import type { ICustomSortState } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 export interface ICustomSortPanelProps {
@@ -252,8 +252,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             className={clsx(`
                               univer-my-0 univer-box-border univer-grid univer-max-h-[310px]
                               univer-w-[--radix-popper-anchor-width] univer-items-center univer-gap-1
-                              univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg univer-border
-                              univer-bg-gray-0 univer-p-1 univer-text-base univer-shadow-lg
+                              univer-overflow-y-auto univer-overflow-x-hidden univer-p-1 univer-text-base
                             `, scrollbarClassName)}
                         >
                             {availableMenu.map((menuItem) => (

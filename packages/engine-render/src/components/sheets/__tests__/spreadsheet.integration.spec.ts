@@ -2707,6 +2707,96 @@ describe('spreadsheet integration', () => {
     });
 
     it.each([
+        { dpr: 1, reuse: true, scenario: 'diagonal strips' },
+        { dpr: 2, reuse: true, scenario: 'diagonal strips' },
+        { dpr: 3, reuse: false, scenario: 'diagonal strips' },
+        { dpr: 3, reuse: false, scenario: 'scroll within the buffer', shouldCacheUpdate: 0 },
+        { dpr: 3, reuse: false, scenario: 'frozen-column copy', viewportKey: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, shouldCacheUpdate: 0 },
+        { dpr: 3, reuse: false, scenario: 'unmerged rich text', hasMerges: false, shouldCacheUpdate: 0 },
+        { dpr: 3, reuse: true, scenario: 'plain text only', hasMerges: false, documentText: false, shouldCacheUpdate: 0 },
+    ])('handles $scenario at unit scale and DPR $dpr', ({
+        dpr,
+        reuse,
+        viewportKey = SHEET_VIEWPORT_KEY.VIEW_MAIN,
+        shouldCacheUpdate = 1,
+        hasMerges = true,
+        documentText = true,
+    }) => {
+        const data = workbookDataFactory();
+        const sheet = data.sheets['sheet-1']!;
+        sheet.rowData = {};
+        sheet.columnData = {};
+        sheet.cellData = {
+            1: {
+                4: {
+                    v: 'First merge',
+                    p: documentText ? createDocumentModelWithStyle('First merge', {}).getSnapshot() : undefined,
+                    s: 'style-bg-border',
+                },
+            },
+            5: { 3: { v: 'Staggered merge', s: 'style-bg-border' } },
+        };
+        sheet.mergeData = hasMerges
+            ? [
+                { startRow: 1, endRow: 2, startColumn: 4, endColumn: 5 },
+                { startRow: 5, endRow: 6, startColumn: 3, endColumn: 4 },
+            ]
+            : [];
+        const extra = createFixture(data);
+        try {
+            const { spreadsheet, skeleton, viewport, scene, mainCanvas } = extra;
+            const canvas = viewport.canvas!;
+            canvas.setSize(700, 420, dpr);
+            const ctx = mainCanvas.getContext();
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const initial = createViewportInfo(scene, canvas, { cacheBound: createBound(0, 0, 400, 280), viewportKey });
+            skeleton.setStylesCache(initial);
+            spreadsheet.renderByViewports(ctx, initial, skeleton);
+            spreadsheet.makeDirty(false);
+            spreadsheet.makeForceDirty(false);
+
+            const paint = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+            const refresh = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+            const frozenColumn = viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT;
+            const horizontalStrip = createBound(20, 222, 414, 300);
+            const strips = frozenColumn ? [horizontalStrip] : [createBound(412, 20, 420, 300), horizontalStrip];
+            const diffX = frozenColumn ? 0 : -20;
+            const next = createViewportInfo(scene, canvas, {
+                cacheBound: createBound(20, 20, 420, 300),
+                diffBounds: strips,
+                diffCacheBounds: strips,
+                diffX,
+                diffY: -20,
+                isDirty: 0,
+                viewportKey,
+                shouldCacheUpdate,
+            });
+            skeleton.setStylesCache(next);
+            ctx.setTransform(dpr, 0, 0, dpr, diffX * dpr, -20 * dpr);
+            spreadsheet.renderByViewports(ctx, next, skeleton);
+
+            if (!reuse) {
+                expect(refresh).toHaveBeenCalledOnce();
+                expect(paint).not.toHaveBeenCalled();
+                return;
+            }
+            expect(refresh).not.toHaveBeenCalled();
+            expect(paint).toHaveBeenCalledOnce();
+            if (!hasMerges) {
+                return;
+            }
+            const repairs = paint.mock.calls[0][3]!;
+            const mergeLeft = skeleton.columnWidthAccumulation[2] + skeleton.rowHeaderWidthAndMarginLeft;
+            expect(repairs.map(({ bound }) => bound)).toEqual([
+                createBound(mergeLeft, 20, 420, 300),
+                createBound(20, 220, 420, 300),
+            ]);
+        } finally {
+            disposeFixture(extra);
+        }
+    });
+
+    it.each([
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32.16, full: true },
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, width: 32, full: false },
         { key: SHEET_VIEWPORT_KEY.VIEW_MAIN, width: 32.16, full: false },

@@ -16,9 +16,9 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
 import {
     DEFAULT_TEXT_FORMAT_EXCEL,
+    getCurrencySymbolByLocale,
     LocaleService,
     RegionService,
     UniverInstanceType,
@@ -32,7 +32,6 @@ import {
 import {
     AddDecimalCommand,
     CURRENCYFORMAT,
-    getCurrencySymbolByLocale,
     NUMBERFORMAT,
     SetCurrencyCommand,
     SetPercentCommand,
@@ -41,6 +40,7 @@ import {
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { LocaleKey } from '../locale/types';
 import { SetMobileNumfmtCommand } from '../commands/commands/set-mobile-numfmt.command';
 import { MENU_OPTIONS } from './number-format-options';
 import { getCurrentNumfmtPattern$, getNumberFormatLabelKey } from './numfmt-menu-util';

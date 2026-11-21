@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-drawing",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "private": false,
     "description": "Drawing model integration for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -82,7 +82,7 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "tsrs": "0.23.0-ts7.1.0-beta",
-        "vitest": "^5.1.0"
+        "tsrs": "7.1.0-beta.tsrs2",
+        "vitest": "^5.1.1"
     }
 }

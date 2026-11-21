@@ -46,6 +46,7 @@ function createMenuAccessor(options?: {
 
     const service = {
         focused$,
+        getUnitCreateOptions: () => null,
         getUnitType: vi.fn(() => unitType),
         getFocusedUnit: vi.fn(() => (focusedUnitId == null ? null : { getUnitId: () => focusedUnitId })),
         getUnit: vi.fn((unitId: string) => {

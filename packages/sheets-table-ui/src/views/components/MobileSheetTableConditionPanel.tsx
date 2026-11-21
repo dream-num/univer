@@ -140,10 +140,10 @@ export function MobileSheetTableConditionPanel(props: IMobileSheetTableCondition
                 <div
                     className={clsx(`
                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-between
-                      univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-transition-colors
-                      univer-duration-200
+                      univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-outline-none
+                      univer-transition-colors univer-duration-200
                       hover:univer-border-primary-600
-                      focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
+                      focus-visible:univer-border-primary-600 focus-visible:univer-ring-2
                       dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                     `, borderClassName)}
                 >

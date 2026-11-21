@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { ActionRow, Button, Input } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
@@ -26,6 +25,7 @@ import {
 } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 
 export interface ISheetTableRenameDialogProps {
     unitId: string;
@@ -83,9 +83,7 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
 
     return (
         <div
-            className={`
-              univer-box-border univer-flex univer-w-full univer-flex-col univer-gap-4 univer-pb-3 univer-pt-2
-            `}
+            className="univer-box-border univer-flex univer-w-full univer-flex-col univer-gap-4"
         >
             <Input
                 size="middle"

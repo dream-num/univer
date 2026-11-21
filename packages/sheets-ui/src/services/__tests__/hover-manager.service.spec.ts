@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign, Injector, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
+import { DocumentDataModel, DrawingTypeEnum, HorizontalAlign, Injector, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, VerticalAlign } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { HoverManagerService } from '../hover-manager.service';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -58,6 +58,13 @@ function createHoverManagerService(univerInstanceService: Partial<IUniverInstanc
 }
 
 describe('HoverManagerService', () => {
+    let documentInjector: Injector | undefined;
+
+    afterEach(() => {
+        documentInjector?.dispose();
+        documentInjector = undefined;
+    });
+
     it('emits row/col header hover and click positions based on active viewport', () => {
         const workbook = {
             getUnitId: () => 'u-1',
@@ -152,6 +159,25 @@ describe('HoverManagerService', () => {
     });
 
     it('emits cell hover/click/pointer events and supports header dbclick/pointer branches', () => {
+        documentInjector = new Injector();
+        const docModel = documentInjector.createInstance(DocumentDataModel, {
+            body: { dataStream: '\r\n', customRanges: [], paragraphs: [] },
+            drawings: {
+                'image-1': {
+                    unitId: 'u-1',
+                    subUnitId: 'sheet1',
+                    drawingId: 'image-1',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        size: { width: 86, height: 86 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.COLUMN },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH },
+                        angle: 0,
+                    },
+                },
+            },
+        });
         const workbook = {
             getUnitId: () => 'u-1',
             getActiveSheet: () => ({
@@ -217,16 +243,7 @@ describe('HoverManagerService', () => {
                         }],
                     }),
                     getViewModel: () => ({
-                        getDataModel: () => ({
-                            getBody: () => ({ customRanges: [], paragraphs: [] }),
-                            getDrawings: () => ({
-                                'image-1': {
-                                    docTransform: {
-                                        size: { width: 86, height: 86 },
-                                    },
-                                },
-                            }),
-                        }),
+                        getDataModel: () => docModel,
                     }),
                 },
             }),

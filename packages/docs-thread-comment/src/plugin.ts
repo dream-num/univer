@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverDocsThreadCommentConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -27,6 +26,7 @@ import {
 } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+import type { IUniverDocsThreadCommentConfig } from './config/config';
 import pkg from '../package.json';
 import {
     AddDocCommentDecorationMutation,
@@ -34,7 +34,9 @@ import {
 } from './commands/commands/create-doc-text-range-comment.command';
 import { DOCS_THREAD_COMMENT_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
+import { DocsThreadCommentPermissionController } from './controllers/docs-thread-comment-permission.controller';
 import { DocsThreadCommentResourceController } from './controllers/docs-thread-comment-resource.controller';
+import { DocsThreadCommentAuthz } from './services/docs-thread-comment-authz.service';
 
 @DependentOn(UniverDocsPlugin, UniverThreadCommentPlugin)
 export class UniverDocsThreadCommentPlugin extends Plugin {
@@ -62,6 +64,10 @@ export class UniverDocsThreadCommentPlugin extends Plugin {
     override onStarting(): void {
         this._injector.add([DocsThreadCommentResourceController]);
         this._injector.get(DocsThreadCommentResourceController);
+        this._injector.add([DocsThreadCommentAuthz]);
+        this._injector.get(DocsThreadCommentAuthz);
+        this._injector.add([DocsThreadCommentPermissionController]);
+        this._injector.get(DocsThreadCommentPermissionController);
         this.disposeWithMe(this._commandService.registerCommand(CreateDocTextRangeCommentCommand));
         this.disposeWithMe(this._commandService.registerCommand(AddDocCommentDecorationMutation));
     }

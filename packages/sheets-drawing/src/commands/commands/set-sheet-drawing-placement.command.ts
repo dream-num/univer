@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, JSON1, sequenceExecute } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import type { ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
@@ -66,7 +66,24 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
             id: SetSheetDrawingPlacementCommand.id,
             params,
         });
-        const { unitId, subUnitId, undo, redo, objects } = drawingService.getBatchUpdateOp(updatedDrawings);
+        const { unitId, subUnitId, objects, ...batch } = drawingService.getBatchUpdateOp(updatedDrawings);
+        let { undo, redo } = batch;
+        for (const drawing of updatedDrawings) {
+            const original = drawingService.getDrawingByParam(drawing)!;
+            if (original.anchorType === drawing.anchorType) continue;
+            // Changing mode reinterprets marker origins, even when an index
+            // such as zero happens to be numerically unchanged.
+            for (const endpoint of ['from', 'to'] as const) {
+                for (const axis of ['row', 'column'] as const) {
+                    const before = original.axisAlignSheetTransform?.[endpoint]?.[axis];
+                    const after = drawing.axisAlignSheetTransform?.[endpoint]?.[axis];
+                    if (before === undefined || after === undefined) continue;
+                    const path = [unitId, subUnitId, 'data', drawing.drawingId, 'axisAlignSheetTransform', endpoint, axis];
+                    redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
+                    undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
+                }
+            }
+        }
         const redoMutations = [
             ...(intercepted.preRedos ?? []),
             {

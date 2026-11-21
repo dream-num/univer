@@ -6,7 +6,7 @@
 
 <p align="center">오픈 소스 Sheets와 Docs로 시작해 자체 애플리케이션이나 에이전트를 연결하세요.</p>
 
-<p align="center"><a href="#quick-start">🚀 빠른 시작</a> · <a href="https://docs.univer.ai/">📚 문서</a> · <a href="https://univer.ai/compare/">⚖️ 기능 비교</a> · <a href="https://univer.ai/">🌐 웹사이트</a> · <a href="https://docs.univer.ai/showcase">🎮 쇼케이스</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 블로그</a></p>
+<p align="center"><a href="#quick-start">🚀 빠른 시작</a> · <a href="https://github.com/dream-num/univer-workspace">💼 Workspace</a> · <a href="https://docs.univer.ai/">📚 문서</a> · <a href="https://univer.ai/compare/">⚖️ 기능 비교</a> · <a href="https://univer.ai/">🌐 웹사이트</a> · <a href="https://docs.univer.ai/showcase">🎮 쇼케이스</a> · <a href="https://docs.univer.ai/reference/classes/univer">🔧 API Reference</a> · <a href="https://docs.univer.ai/blog">📝 블로그</a></p>
 
 <p align="center"><a href="../../README.md">English</a> · <a href="../../docs/readme/fr-FR.md">Français</a> · <a href="../../docs/readme/de-DE.md">Deutsch</a> · <a href="../../docs/readme/es-ES.md">Español</a> · <a href="../../docs/readme/zh-CN.md">简体中文</a> · <a href="../../docs/readme/zh-TW.md">繁體中文</a> · <a href="../../docs/readme/ja-JP.md">日本語</a> · <strong>한국어</strong></p>
 
@@ -68,6 +68,8 @@
 <p align="center"><img src="../../docs/img/readme/intro-banner.png" alt="Univer Office SDK: Web, Server, and AI SDKs" width="960" /></p>
 
 **Univer**는 자체 제품 안에 오피스 애플리케이션을 구축하기 위한 Office SDK입니다. 자체 데이터와 권한을 사용해 사용자와 기존 에이전트에 오피스 편집, 계산, 협업, 파일 처리 기능을 제공합니다. 제품군에는 스프레드시트, 문서, 프레젠테이션, 관계형 테이블, 캔버스, PDF가 포함됩니다.
+
+<p align="center"><a href="https://github.com/dream-num/univer-workspace"><img src="../../docs/img/readme/workspace-promo.png" alt="Univer Workspace: 바로 사용하고 확장할 수 있는 Univer Office SDK 기반 오픈 소스 앱. GitHub에서 별표로 응원해 주세요." width="720" /></a></p>
 
 Univer Office SDK는 세 부분으로 구성됩니다.
 

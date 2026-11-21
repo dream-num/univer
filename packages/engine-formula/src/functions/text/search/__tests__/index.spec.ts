@@ -138,5 +138,63 @@ describe('Test search function', () => {
                 [1, 4, 6, 8],
             ]);
         });
+
+        it('Matches ? and * as wildcards and ~ as their escape', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['a?c', 'xabc', 1, 2],
+                ['b*d', 'abcde', 1, 2],
+                ['*', 'abc', 2, 2],
+                ['B?D', 'abcbxd', 3, 4],
+                ['~?', 'a?b', 1, 2],
+                ['~*', 'a*b', 1, 2],
+                ['x?z', 'abc', 1, ErrorType.VALUE],
+                // The examples from #8198.
+                ['b*', 'abc', 1, 2],
+                ['?c', 'abc', 1, 2],
+                ['a*c', 'xabc', 1, 2],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
+
+        it('Reads the character after ~ literally, as Excel does', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['~~', 'a~b', 1, 2],
+                ['~~~*', 'a~*b', 1, 2],
+                ['~x', 'a~xb', 1, 3],
+                ['~', 'a~b', 1, 1],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
+
+        it('Matches a surrogate pair with a single ?', () => {
+            const result = testFunction.calculate(StringValueObject.create('?b'), StringValueObject.create('😀b'), NumberValueObject.create(1));
+            expect(getObjectValue(result)).toStrictEqual(1);
+        });
+
+        it('Returns the earliest match, counted in the original text', () => {
+            const cases: [string, string, number, number | string][] = [
+                ['b*', 'abcb', 1, 2],
+                ['*c', 'abc', 1, 1],
+                ['?B', 'ßB', 1, 1],
+                ['B', 'ßB', 1, 2],
+                ['c', 'ßßc', 3, 3],
+            ];
+            for (const [find, within, start, expected] of cases) {
+                const result = testFunction.calculate(StringValueObject.create(find), StringValueObject.create(within), NumberValueObject.create(start));
+                expect(getObjectValue(result)).toStrictEqual(expected);
+            }
+        });
+
+        it('Fails fast on a pattern with several * that does not match', () => {
+            // A backtracking matcher takes seconds here; the segment scan stays linear.
+            const result = testFunction.calculate(StringValueObject.create('a*a*a*a*b'), StringValueObject.create('a'.repeat(200)), NumberValueObject.create(1));
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
     });
 });

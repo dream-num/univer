@@ -30,11 +30,10 @@ function DrawerLayer(props: {
 }) {
     const layerRef = useRef<HTMLDivElement>(null);
 
-    return createElement('div', {
-        ref: layerRef,
-        'data-testid': `${props.label}-layer`,
-    }, createElement(MobileDrawer, {
+    return createElement('div', { ref: layerRef }, createElement(MobileDrawer, {
         layerRef,
+        role: 'dialog',
+        ariaLabel: props.label,
         snap: 'compact',
         expandLabel: props.label,
         collapseLabel: props.label,
@@ -159,8 +158,7 @@ describe('mobile drawer snap behavior', () => {
         expect(drawer?.style.bottom).toBe('');
         expect(drawer?.style.height).toBe('40vh');
         expect(drawer?.style.maxHeight).toBe('');
-        expect(drawer?.querySelector<HTMLElement>('.univer-overflow-y-auto')?.style.paddingBottom)
-            .toBe('calc(0.75rem + 320px)');
+        expect(screen.getByText('Drawer content').style.paddingBottom).toContain('+ 320px');
         expect(screen.getByRole('button', { name: 'Floating action' }).parentElement?.style.bottom)
             .toBe('calc(40vh + 12px)');
     });
@@ -287,9 +285,9 @@ describe('mobile drawer snap behavior', () => {
 
         expect(closeParent).toHaveBeenCalledOnce();
         expect(closeChild).toHaveBeenCalledOnce();
-        expect(screen.getByTestId('Parent drawer-layer')).toHaveProperty('hidden', true);
-        expect(screen.getByTestId('Child drawer-layer')).toHaveProperty('hidden', true);
-        expect(screen.getByTestId('Replacement drawer-layer')).toHaveProperty('hidden', false);
+        expect(screen.queryByRole('dialog', { name: 'Parent drawer' })).toBeNull();
+        expect(screen.queryByRole('dialog', { name: 'Child drawer' })).toBeNull();
+        expect(screen.queryByRole('dialog', { name: 'Replacement drawer' })).not.toBeNull();
     });
 
     it('restores a parent drawer after a pushed drawer closes', () => {
@@ -303,8 +301,8 @@ describe('mobile drawer snap behavior', () => {
         })));
 
         expect(closeParent).not.toHaveBeenCalled();
-        expect(screen.getByTestId('Parent drawer-layer')).toHaveProperty('hidden', true);
-        expect(screen.getByTestId('Child drawer-layer')).toHaveProperty('hidden', false);
+        expect(screen.queryByRole('dialog', { name: 'Parent drawer' })).toBeNull();
+        expect(screen.queryByRole('dialog', { name: 'Child drawer' })).not.toBeNull();
 
         const childHandle = screen.getByRole('button', { name: 'Child drawer' });
         fireEvent.pointerDown(childHandle, { pointerId: 1, clientY: 500 });
@@ -312,7 +310,7 @@ describe('mobile drawer snap behavior', () => {
         fireEvent.pointerUp(childHandle, { pointerId: 1, clientY: 650 });
 
         expect(closeChild).toHaveBeenCalledOnce();
-        expect(screen.getByTestId('Parent drawer-layer')).toHaveProperty('hidden', false);
-        expect(screen.getByTestId('Child drawer-layer')).toHaveProperty('hidden', true);
+        expect(screen.queryByRole('dialog', { name: 'Parent drawer' })).not.toBeNull();
+        expect(screen.queryByRole('dialog', { name: 'Child drawer' })).toBeNull();
     });
 });

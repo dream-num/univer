@@ -76,7 +76,7 @@ const DialogContent = forwardRef<
                       data-[state=closed]:univer-slide-out-to-top-[48%]
                       univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1080] univer-box-border univer-grid
                       univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                      univer-bg-gray-0 univer-p-4 univer-text-gray-500 univer-shadow-md univer-duration-200
+                      univer-bg-gray-0 univer-p-3 univer-text-gray-500 univer-shadow-md univer-duration-200
                       sm:!univer-rounded-lg
                       dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                     `,
@@ -90,12 +90,12 @@ const DialogContent = forwardRef<
                     <Close
                         data-slot="close"
                         className={`
-                          univer-absolute univer-right-4 univer-top-4 univer-size-6 univer-cursor-pointer
+                          univer-absolute univer-right-3 univer-top-3 univer-size-6 univer-cursor-pointer
                           univer-rounded-sm univer-border-none univer-bg-transparent univer-p-0
                           univer-transition-opacity
                           hover:univer-opacity-100
                           disabled:univer-pointer-events-none
-                          rtl:univer-left-4 rtl:univer-right-auto
+                          rtl:univer-left-3 rtl:univer-right-auto
                         `}
                         onClick={(event) => {
                             if (onClickClose) {

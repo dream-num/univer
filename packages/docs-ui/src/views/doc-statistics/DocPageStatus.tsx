@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IDocumentLayoutProgress, IDocumentSkeletonPage, IScrollObserverParam } from '@univerjs/engine-render';
-import type { LocaleKey } from '../../locale/types';
 import {
     DisposableCollection,
     DocumentFlavor,
@@ -30,6 +29,7 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { Documents, IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 
 const SCROLL_SETTLE_DELAY = 120;
@@ -256,7 +256,6 @@ export function DocPageStatus() {
             {state.dragTooltip && (
                 <Popup visible overflowVisible offset={[state.dragTooltip.left, state.dragTooltip.top]}>
                     <div
-                        data-testid="doc-scroll-page-tooltip"
                         className={`
                           univer-pointer-events-none univer-absolute univer-whitespace-nowrap univer-rounded
                           univer-border univer-border-gray-300 univer-bg-white univer-px-2 univer-py-1 univer-text-xs

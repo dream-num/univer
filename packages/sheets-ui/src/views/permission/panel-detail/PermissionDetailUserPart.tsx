@@ -23,10 +23,10 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { Avatar, borderClassName, Button, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
+import { borderClassName, Button, clsx, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { IDialogService, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { IDialogService, useDependency, useEvent, useObservable, UserInfo } from '@univerjs/ui';
 import { useEffect } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import {
@@ -82,7 +82,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
             title: { title: localeService.t<LocaleKey>('sheets-ui.permission.panel.addPerson') },
-            children: { label: UNIVER_SHEET_PERMISSION_USER_DIALOG },
+            children: { label: { name: UNIVER_SHEET_PERMISSION_USER_DIALOG, props: { unitId, objectId: permissionId } } },
             width: 'auto',
             closable: false,
             onClose: () => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID),
@@ -165,6 +165,8 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                     <div className="univer-flex univer-flex-1 univer-flex-col">
                         {selectUserList?.length > 0
                             ? selectUserList.map((item) => {
+                                const user = { userId: item.subject?.userID || item.id, name: item.subject?.name, avatar: item.subject?.avatar };
+                                const context = { scene: 'permission-member' as const, unitId, subUnitId: worksheet?.getSheetId(), objectId: permissionId };
                                 return (
                                     <div
                                         key={item.subject?.userID}
@@ -173,14 +175,14 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                           last:univer-mb-0
                                         `}
                                     >
-                                        <Avatar size={24} src={item.subject?.avatar} />
+                                        <UserInfo part="avatar" user={user} context={context} />
                                         <span
                                             className={`
                                               univer-ml-1.5 univer-w-[130px] univer-truncate univer-text-gray-900
                                               dark:!univer-text-gray-0
                                             `}
                                         >
-                                            {item.subject?.name}
+                                            <UserInfo part="name" user={user} context={context} />
                                         </span>
                                         <SelectComponent
                                             className="!univer-w-[90px] univer-min-w-0 univer-cursor-pointer"

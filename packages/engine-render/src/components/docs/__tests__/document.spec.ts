@@ -3875,7 +3875,7 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    function createContinuousTableFixture(frameOwner?: 'table' | 'row') {
+    function createContinuousTableFixture(frameOwner?: 'table' | 'row', frameEdge: 'top' | 'bottom' = 'bottom') {
         const T = DataStreamTreeTokenType;
         const wrapTable = (text: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
         const first = wrapTable('A');
@@ -3884,7 +3884,7 @@ describe('documents render', () => {
         const secondStart = first.length + gap.length;
         const dataStream = `${first}${gap}${second}\r\n`;
         const bottomBorder = { width: { v: 20 }, color: { rgb: '#a02030' } };
-        const frameBorder = { width: { v: 40 }, color: { rgb: '#dc4444' } };
+        const frameBorder = { width: { v: frameEdge === 'top' ? 160 : 40 }, color: { rgb: '#dc4444' } };
         const cellBorder = { width: { v: 1 }, color: { rgb: '#000000' } };
         const tableSource = Object.fromEntries(['first', 'second'].map((tableId): [string, ITable] => [tableId, {
             tableId,
@@ -3896,12 +3896,16 @@ describe('documents render', () => {
             dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
             cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
             ...(tableId === 'first' && frameOwner ? { cellSpacing: { v: 2 } } : {}),
-            ...(tableId === 'first' && frameOwner === 'table' ? { borderDefaults: { bottom: frameBorder } } : {}),
+            ...(tableId === 'first' && frameOwner === 'table' ? { borderDefaults: { [frameEdge]: frameBorder } } : {}),
             tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
             tableRows: [{
                 trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
-                ...(tableId === 'first' && frameOwner === 'row' ? { borderDefaults: { bottom: frameBorder } } : {}),
-                tableCells: [tableId === 'first' ? { borderBottom: frameOwner ? cellBorder : bottomBorder } : {}],
+                ...(tableId === 'first' && frameOwner === 'row' ? { borderDefaults: { [frameEdge]: frameBorder } } : {}),
+                tableCells: [tableId === 'first'
+                    ? {
+                        ...(frameOwner ? { borderTop: cellBorder, borderBottom: cellBorder } : { borderBottom: bottomBorder }),
+                    }
+                    : {}],
             }],
         }]));
         const bed = createParagraphLayoutTestBed('', {
@@ -4001,6 +4005,32 @@ describe('documents render', () => {
             viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: tableBottom + 10 });
             viewport.render(ctx, [documents]);
             expect(strokes).toContain(frameBorder.color.rgb);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('draws the top frame past the table bottom at 200% zoom', () => {
+        const { documents, viewport, page, firstTable, frameBorder, dispose } = createContinuousTableFixture('table', 'top');
+        try {
+            scene.transformByState({ scaleX: 2, scaleY: 2 });
+            const ctx = canvas.getContext();
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const tableBottom = documents.top + page.marginTop + firstTable.top + firstTable.height;
+            const renderAt = (top: number) => {
+                strokes.length = 0;
+                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: top });
+                viewport.render(ctx, [documents]);
+            };
+            renderAt(tableBottom + 45);
+            expect(strokes.filter((color) => color === frameBorder.color.rgb)).toHaveLength(1);
+            renderAt(tableBottom + frameBorder.width.v);
+            expect(strokes).not.toContain(frameBorder.color.rgb);
         } finally {
             dispose();
         }

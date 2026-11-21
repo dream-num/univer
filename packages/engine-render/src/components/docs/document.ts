@@ -121,16 +121,25 @@ function isBuiltInDocumentExtension(extension: object): boolean {
     return type === Background || type === Border || type === FontAndBaseLine || type === Line;
 }
 
-function getSpacedTableFrameBorders(table: IDocumentSkeletonTable) {
+function getSpacedTableFrame(table: IDocumentSkeletonTable) {
     if (!hasTableCellSpacing(table.tableSource)) {
         return;
     }
     const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
-    return {
+    const borders = {
         top: getTableOuterBorder(source, 'top'),
         bottom: getTableOuterBorder(source, 'bottom'),
         left: getTableOuterBorder(source, 'left'),
         right: getTableOuterBorder(source, 'right'),
+    };
+    return {
+        borders,
+        position: {
+            startX: getCellBorderWidth(borders.left) / 2,
+            startY: getCellBorderWidth(borders.top) / 2,
+            endX: table.width - getCellBorderWidth(borders.right) / 2,
+            endY: table.height - getCellBorderWidth(borders.bottom) / 2,
+        },
     };
 }
 
@@ -157,9 +166,13 @@ function getTablePaintExtent(table: IDocumentSkeletonTable): ITablePaintExtent |
         maxBorderWidth = getMaxTableBorderWidth(row.tableCells, maxBorderWidth);
     }
 
-    const frame = getSpacedTableFrameBorders(table);
+    const frame = getSpacedTableFrame(table);
     if (frame != null) {
-        maxBorderWidth = Math.max(maxBorderWidth, ...Object.values(frame).map(getCellBorderWidth));
+        const { startY, endY } = frame.position;
+        // A thick frame can place its stroke center beyond the table box.
+        top = Math.min(top, startY, endY);
+        bottom = Math.max(bottom, startY, endY);
+        maxBorderWidth = Math.max(maxBorderWidth, ...Object.values(frame.borders).map(getCellBorderWidth));
     }
 
     return [top, bottom, maxBorderWidth].every(Number.isFinite) ? { top, bottom, maxBorderWidth } : null;
@@ -854,8 +867,7 @@ export class Documents extends DocComponent {
                 continue;
             }
 
-            // The stroke is centered on the cell edge. Allow two device pixels for
-            // precision-rounded bounds and antialiasing at a fractional viewport edge.
+            // Expand the stroke center range for line width, rounding and antialiasing.
             const padding = (extent.maxBorderWidth / 2 + 2) / d;
             const overlaps = rangesOverlap(
                 tableY + extent.top - padding,
@@ -2067,17 +2079,18 @@ export class Documents extends DocComponent {
     }
 
     private _drawSpacedTableFrame(ctx: UniverRenderingContext, page: IDocumentSkeletonPage, table: IDocumentSkeletonTable): void {
-        const borders = getSpacedTableFrameBorders(table);
-        if (this._drawLiquid == null || borders == null) {
+        const frame = getSpacedTableFrame(table);
+        if (this._drawLiquid == null || frame == null) {
             return;
         }
+        const { borders, position: local } = frame;
         const x = this._drawLiquid.x + page.marginLeft;
         const y = this._drawLiquid.y + page.marginTop;
         const position = {
-            startX: x + getCellBorderWidth(borders.left) / 2,
-            startY: y + getCellBorderWidth(borders.top) / 2,
-            endX: x + table.width - getCellBorderWidth(borders.right) / 2,
-            endY: y + table.height - getCellBorderWidth(borders.bottom) / 2,
+            startX: x + local.startX,
+            startY: y + local.startY,
+            endX: x + local.endX,
+            endY: y + local.endY,
         };
         for (const [edge, type] of [['top', BORDER_TYPE.TOP], ['bottom', BORDER_TYPE.BOTTOM], ['left', BORDER_TYPE.LEFT], ['right', BORDER_TYPE.RIGHT]] as const) {
             this._drawBorder(ctx, borders[edge] ?? null, type, position);

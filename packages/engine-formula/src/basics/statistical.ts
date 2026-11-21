@@ -25,7 +25,7 @@ import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../functions/math/function-names';
-import { erf, erfcINV } from './engineering';
+import { erfc, erfcINV } from './engineering';
 import { ErrorType } from './error-type';
 import {
     calculateCombin,
@@ -659,7 +659,7 @@ export function lognormalCDF(x: number, mean: number, standardDev: number): numb
         return 0;
     }
 
-    return 0.5 + 0.5 * erf((Math.log(x) - mean) / Math.sqrt(2 * standardDev * standardDev));
+    return 0.5 * erfc((mean - Math.log(x)) / Math.sqrt(2 * standardDev * standardDev));
 }
 
 export function lognormalPDF(x: number, mean: number, standardDev: number): number {
@@ -697,7 +697,7 @@ export function negbinomialPDF(numberF: number, numberS: number, probabilityS: n
 }
 
 export function normalCDF(x: number, mean: number, standardDev: number): number {
-    return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
+    return 0.5 * erfc((mean - x) / Math.sqrt(2 * standardDev * standardDev));
 }
 
 export function normalPDF(x: number, mean: number, standardDev: number): number {

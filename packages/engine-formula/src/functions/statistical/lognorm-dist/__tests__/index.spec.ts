@@ -127,3 +127,37 @@ describe('Test lognormDist function', () => {
         });
     });
 });
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    const zero = NumberValueObject.create(0);
+    const one = NumberValueObject.create(1);
+    const cumulative = BooleanValueObject.create(true);
+    function expectRelative(actual: number, expected: number) {
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-12);
+    }
+
+    it('lognormal CDF formulas retain lower tails through array evaluation', () => {
+        const x = ArrayValueObject.createByArray([[1e-4, 1e-10]]);
+        const expected = [1.6254621050168804e-20, 1.2841756306435309e-117];
+        const results = [
+            new LognormDist(FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST).calculate(x, zero, one, cumulative),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            for (let i = 0; i < expected.length; i++) expectRelative(actual[0][i], expected[i]);
+        }
+    });
+
+    it('lognormal CDF formulas flush subnormal results in both aliases', () => {
+        const x = ArrayValueObject.createByArray([[Math.exp(-37.5), Math.exp(-37.52), Math.exp(-38)]]);
+        const results = [
+            new LognormDist(FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST).calculate(x, zero, one, cumulative),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            expectRelative(actual[0][0], 4.605353009581955e-308);
+            expect(actual[0].slice(1)).toEqual([0, 0]);
+        }
+    });
+});

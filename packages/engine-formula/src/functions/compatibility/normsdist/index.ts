@@ -53,6 +53,7 @@ export class Normsdist extends BaseFunction {
 
         const result = normalCDF(zValue, 0, 1);
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal cumulative probabilities to positive zero.
+        return NumberValueObject.create(Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

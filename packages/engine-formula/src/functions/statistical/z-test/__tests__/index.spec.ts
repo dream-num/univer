@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_COMPATIBILITY } from '../../../compatibility/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { ZTest } from '../index';
@@ -129,9 +130,41 @@ describe('Test zTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array, x);
-            expect(getObjectValue(result, true)).toStrictEqual([
-                [0, 1, 0.000396501827548, 3.11074947579e-7, 2.82543988206e-10, 2.82543988206e-10, ErrorType.VALUE, ErrorType.NAME],
-            ]);
+            const actual = getObjectValue(result) as (number | string)[][];
+            // References evaluated with 120-digit mpmath arithmetic.
+            const expected = [9.533391944037187e-29, 1, 0.0003965018275480201, 3.110749476542048e-7, 2.82543931389519e-10, 2.82543931389519e-10];
+            for (let i = 0; i < expected.length; i++) {
+                expect(Math.abs((actual[0][i] as number) / expected[i] - 1)).toBeLessThan(1e-12);
+            }
+            expect(actual[0].slice(expected.length)).toEqual([ErrorType.VALUE, ErrorType.NAME]);
+        });
+
+        it('retains upper tails with estimated and supplied standard deviations', () => {
+            const functions = [testFunction, new ZTest(FUNCTION_NAMES_COMPATIBILITY.ZTEST)];
+            const cases = [[10, 7.619853024160525e-24], [37, 5.725571222524577e-300]];
+            for (const fn of functions) {
+                for (const [z, expected] of cases) {
+                    const array = ArrayValueObject.createByArray([[z - 1, z + 1]]);
+                    const x = NumberValueObject.create(0);
+                    for (const sigma of [undefined, NumberValueObject.create(Math.SQRT2)]) {
+                        const result = getObjectValue(fn.calculate(array, x, sigma)) as number;
+                        expect(Math.abs(result / expected - 1)).toBeLessThan(1e-12);
+                    }
+                }
+            }
+        });
+
+        it('flushes subnormal upper-tail results at the worksheet boundary', () => {
+            const array = ArrayValueObject.createByArray([[-1], [0], [1]]);
+            const x = ArrayValueObject.createByArray([[-37.5, -37.52, -38]]);
+            for (const fn of [testFunction, new ZTest(FUNCTION_NAMES_COMPATIBILITY.ZTEST)]) {
+                const actual = getObjectValue(fn.calculate(array, x, NumberValueObject.create(Math.sqrt(3)))) as number[][];
+                expect(Math.abs(actual[0][0] / 4.605353009581955e-308 - 1)).toBeLessThan(1e-12);
+                expect(actual[0].slice(1)).toEqual([0, 0]);
+
+                const estimated = fn.calculate(ArrayValueObject.createByArray([[37, 39]]), NumberValueObject.create(0));
+                expect(getObjectValue(estimated)).toBe(0);
+            }
         });
 
         it('Sigma value test', () => {

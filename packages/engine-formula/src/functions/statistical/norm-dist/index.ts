@@ -116,6 +116,7 @@ export class NormDist extends BaseFunction {
             result = normalPDF(xValue, meanValue, standardDevValue);
         }
 
-        return NumberValueObject.create(result);
+        // Normalize the final worksheet CDF, keeping full precision in the helper.
+        return NumberValueObject.create(cumulativeValue && Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

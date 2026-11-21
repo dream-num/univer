@@ -395,8 +395,12 @@ export function isValidHexadecimalNumber(number: string): boolean {
 }
 
 export function erf(x: number): number {
+    return x < 0 ? erfc(-x) - 1 : 1 - erfc(x);
+}
+
+export function erfc(x: number): number {
     if (x === 0) {
-        return 0;
+        return 1;
     }
 
     const cof = [
@@ -454,12 +458,8 @@ export function erf(x: number): number {
 
     const res = t * Math.exp(-_x * _x + 0.5 * (cof[0] + ty * d) - dd);
 
-    return isNeg ? res - 1 : 1 - res;
+    return isNeg ? 2 - res : res;
 };
-
-export function erfc(x: number): number {
-    return 1 - erf(x);
-}
 
 export function erfcINV(p: number): number {
     if (p >= 2) {

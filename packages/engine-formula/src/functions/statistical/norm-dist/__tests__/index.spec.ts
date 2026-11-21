@@ -19,6 +19,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_COMPATIBILITY } from '../../../compatibility/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { NormDist } from '../index';
@@ -125,5 +126,51 @@ describe('Test normDist function', () => {
                 [0.0668072012689, 1, 0.180095815063, ErrorType.VALUE, 0.012224472655, ErrorType.NAME],
             ]);
         });
+    });
+});
+
+describe('Distribution tail formulas', () => {
+    // References evaluated with 120-digit mpmath arithmetic.
+    const zero = NumberValueObject.create(0);
+    const one = NumberValueObject.create(1);
+    const cumulative = BooleanValueObject.create(true);
+    function expectRelative(actual: number, expected: number) {
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-12);
+    }
+
+    it('normal CDF formulas retain lower tails through array evaluation', () => {
+        const x = ArrayValueObject.createByArray([[-8, -10, -20, -37]]);
+        const expected = [6.220960574271784e-16, 7.619853024160525e-24, 2.7536241186062337e-89, 5.725571222524577e-300];
+        const results = [
+            new NormDist(FUNCTION_NAMES_STATISTICAL.NORM_DIST).calculate(x, zero, one, cumulative),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            for (let i = 0; i < expected.length; i++) expectRelative(actual[0][i], expected[i]);
+        }
+    });
+
+    it('normal CDF formulas flush only final results below the normal boundary', () => {
+        const x = ArrayValueObject.createByArray([[-37.5, -37.51, -37.52, -38]]);
+        const results = [
+            new NormDist(FUNCTION_NAMES_STATISTICAL.NORM_DIST).calculate(x, zero, one, cumulative),
+            new NormDist(FUNCTION_NAMES_COMPATIBILITY.NORMDIST).calculate(x, zero, one, cumulative),
+        ];
+        for (const result of results) {
+            const actual = getObjectValue(result) as number[][];
+            expectRelative(actual[0][0], 4.605353009581955e-308);
+            expectRelative(actual[0][1], 3.1642088986155016e-308);
+            expect(actual[0].slice(2)).toEqual([0, 0]);
+        }
+    });
+
+    it('preserves normal density results after scaling a small tail', () => {
+        const result = new NormDist(FUNCTION_NAMES_STATISTICAL.NORM_DIST).calculate(
+            NumberValueObject.create(38e-150),
+            zero,
+            NumberValueObject.create(1e-150),
+            BooleanValueObject.create(false)
+        );
+        expectRelative(getObjectValue(result) as number, 1.0972210520075816e-164);
     });
 });

@@ -2024,6 +2024,154 @@ describe('worker document layout session', () => {
     });
 
     it.each([
+        { embedded: 'prefix drawing', publishesTail: true },
+        { embedded: 'rotated drawing overlapping the tail', publishesTail: false },
+        { embedded: 'prefix column group', publishesTail: true },
+    ])('handles protected foreground progress with a $embedded', ({ embedded, publishesTail }) => {
+        mockWorkerCanvas();
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        const T = DataStreamTreeTokenType;
+        const columnGroup = embedded === 'prefix column group';
+        const overlapsTail = embedded === 'rotated drawing overlapping the tail';
+        const prefix = columnGroup
+            ? [T.COLUMN_GROUP_START, T.COLUMN_START, 'Left', T.PARAGRAPH, T.COLUMN_END, T.COLUMN_START, 'Right', T.PARAGRAPH, T.COLUMN_END, T.COLUMN_GROUP_END].join('')
+            : `Introduction ${T.CUSTOM_BLOCK} before the edit.\r`;
+        const content = `${prefix}Lead.\r${Array.from({ length: 90 }, (_, index) =>
+            `Paragraph ${index} renders the text following the embedded block.\r`).join('')}`;
+        const seedModel = createDocumentModelWithStyle(content, {});
+        const snapshot = seedModel.getSnapshot();
+        if (columnGroup) {
+            snapshot.body!.columnGroups = [{
+                startIndex: 0,
+                endIndex: prefix.length,
+                columnGroupId: 'early-columns',
+                gap: { v: 12 },
+                layout: ColumnLayoutType.FIXED,
+                responsive: ColumnResponsiveType.SHRINK,
+                columns: [
+                    { columnId: 'left', widthRatio: 1, minWidth: { v: 40 } },
+                    { columnId: 'right', widthRatio: 1, minWidth: { v: 40 } },
+                ],
+            }];
+        } else {
+            const drawingId = 'early-picture';
+            snapshot.body!.customBlocks = [{ startIndex: content.indexOf(T.CUSTOM_BLOCK), blockId: drawingId }];
+            snapshot.drawings = {
+                [drawingId]: {
+                    drawingId,
+                    drawingType: DrawingTypeEnum.DRAWING_BLOCK,
+                    unitId: snapshot.id,
+                    subUnitId: snapshot.id,
+                    layoutType: overlapsTail ? PositionedObjectLayoutType.WRAP_NONE : PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        angle: overlapsTail ? 90 : 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        size: { width: overlapsTail ? 5_000 : 24, height: 14 },
+                    },
+                },
+            };
+        }
+        const workerModel = new DocumentDataModel(snapshot);
+        workerModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        workerModel.updateDocumentDataPageSize(450, Number.POSITIVE_INFINITY);
+        const mainModel = new DocumentDataModel(structuredClone(workerModel.getSnapshot()));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const worker = new DocumentLayoutSession(workerModel, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const visiblePage = () => main.getSkeletonData()!.pages[0];
+        const visibleLines = () => visiblePage().sections.flatMap((section) => section.columns.flatMap((column) => column.lines));
+        try {
+            const initial = worker.step(worker.start({ reason: 'initial', continuousLayoutVersion: 'v1' }), Number.POSITIVE_INFINITY);
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(initial.publication!), initial.progress);
+            const baselinePage = visiblePage();
+            const baseline = main.getAppliedContinuousLayoutVersion();
+            expect(baseline).toBe('v1');
+
+            const anchor = content.indexOf('Paragraph 15') + 'Paragraph '.length;
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            workerModel.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(workerModel);
+            main.getViewModel().reset(mainModel);
+
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+            const foregroundGeneration = main.startIncrementalLayout({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor + 1,
+                invalidation,
+                preserveInteractionWindow: true,
+                reuseUnaffectedTail: false,
+            });
+            let foregroundProgress = main.stepIncrementalLayout(foregroundGeneration, 0, 1);
+            for (let step = 0; step < 110 && !foregroundProgress.didPublishAnchor; step++) {
+                foregroundProgress = main.stepIncrementalLayout(foregroundGeneration, 0, 1);
+            }
+            expect(foregroundProgress.didPublishAnchor).toBe(true);
+            expect(foregroundProgress.complete).toBe(false);
+            expect(visiblePage()).not.toBe(baselinePage);
+            const foregroundElement = columnGroup
+                ? visiblePage().skeColumnGroups.get('early-columns')
+                : visiblePage().skeDrawings.get('early-picture');
+            expect(foregroundElement).toBeDefined();
+            const initialLineCount = visibleLines().length;
+            const protectedEnd = foregroundProgress.stableLaidOutThrough;
+            const protectedLines = visibleLines().filter((line) => line.ed <= protectedEnd);
+            main.beginExternalLayout({ reason: 'edit', protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: protectedEnd } });
+            const generation = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                appliedLayoutVersion: baseline,
+                continuousLayoutVersion: 'v2',
+            });
+            let intermediateCount = 0;
+            let publishedTail = false;
+            for (let step = 0; step < 130; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication?.kind === 'block') {
+                    if (intermediateCount === 0) {
+                        expect(result.publication.block.baseLayoutVersion).toBe('v1');
+                    }
+                    expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
+                    if (!result.progress.complete) {
+                        intermediateCount++;
+                        publishedTail ||= visibleLines().length > initialLineCount;
+                        expect(visibleLines().slice(0, protectedLines.length)).toEqual(protectedLines);
+                        expect(columnGroup
+                            ? visiblePage().skeColumnGroups.get('early-columns')
+                            : visiblePage().skeDrawings.get('early-picture')).toBe(foregroundElement);
+                    }
+                }
+                if (result.progress.complete) {
+                    break;
+                }
+            }
+            expect(intermediateCount).toBeGreaterThan(1);
+            expect(publishedTail).toBe(publishesTail);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('v2');
+            const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, workerModel.getSnapshot());
+            expect(normalizeSkeleton(visiblePage())).toEqual(normalizeSkeleton(expected));
+        } finally {
+            clock.mockRestore();
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            workerModel.dispose();
+            seedModel.dispose();
+            univer.dispose();
+        }
+    });
+
+    it.each([
         { interruption: 'waiting batch', pendingWork: 14, editedParagraph: 12, serialized: false },
         { interruption: 'serialized but unapplied patch', pendingWork: 24, editedParagraph: 15, serialized: true },
     ])('keeps all Modern paragraphs when a remote edit interrupts a $interruption', ({

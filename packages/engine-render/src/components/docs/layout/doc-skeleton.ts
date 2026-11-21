@@ -24,6 +24,7 @@ import {
     DisposableCollection,
     DocumentDataModel,
     DocumentFlavor,
+    DrawingTypeEnum,
     PositionedObjectLayoutType,
     PRESET_LIST_TYPE,
     resolveDocumentParagraphStyle,
@@ -117,6 +118,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
+import { getBoundingBox } from './model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
@@ -137,6 +139,51 @@ import {
 } from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
+
+function getFlowSuffixTop(page: IDocumentSkeletonPage, sectionIndex: number, columnIndex: number, lineIndex: number): number {
+    let top = Number.POSITIVE_INFINITY;
+    // The replaced tail can continue in another column further up the page.
+    for (let section = sectionIndex; section < page.sections.length; section++) {
+        const { top: sectionTop, columns } = page.sections[section];
+        for (let column = section === sectionIndex ? columnIndex : 0; column < columns.length; column++) {
+            const first = columns[column].lines[section === sectionIndex && column === columnIndex ? lineIndex : 0];
+            if (first != null) {
+                const marginTop = first.marginTop ?? 0;
+                const offset = Math.min(0, marginTop, marginTop + (first.paddingTop ?? 0));
+                top = Math.min(top, sectionTop + first.top + offset);
+            }
+        }
+    }
+    return top;
+}
+
+function hasEmbeddedGeometryInFlowSuffix(page: IDocumentSkeletonPage, startOffset: number, startTop: number): boolean {
+    for (const table of page.skeTables.values()) {
+        if (table.ed >= startOffset) {
+            return true;
+        }
+    }
+    for (const group of page.skeColumnGroups.values()) {
+        if (group.ed >= startOffset || group.columnGroupSource.clipContent === BooleanNumber.FALSE || !(group.top + group.height < startTop)) {
+            return true;
+        }
+    }
+    for (const drawing of page.skeDrawings.values()) {
+        const { aTop, aLeft, height, width, angle, drawingOrigin, blockAnchorTop, lineTop } = drawing;
+        // Layout bounds do not cover transforms or child overflow for these objects.
+        if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
+            drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
+            return true;
+        }
+        const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
+        const bottomPadding = Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
+        const bottom = Math.max((bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding, blockAnchorTop, lineTop);
+        if (!Number.isFinite(bottom) || bottom >= startTop) {
+            return true;
+        }
+    }
+    return false;
+}
 
 function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
     return sectionType == null || sectionType === SectionType.SECTION_TYPE_UNSPECIFIED
@@ -3211,14 +3258,18 @@ export class DocumentSkeleton extends Skeleton {
         if (continuation == null) {
             return false;
         }
-        // Stage embedded geometry on the Worker result. A foreground splice can
-        // preserve it only when the new suffix doesn't pass any embedded object.
-        const start = continuation.block.flow.lines[0].st;
-        for (const candidate of [page, workerPage]) {
-            if (candidate.skeDrawings.size > 0 || candidate.skeColumnGroups.size > 0 ||
-                Array.from(candidate.skeTables.values()).some((table) => table.ed >= start)) {
-                return false;
-            }
+        // The visible splice leaves embedded geometry in place. Check the tail
+        // it actually replaces and the incoming tail, in page body coordinates.
+        const { lineIndex, lines } = continuation.block.flow;
+        const sourceLineIndex = flow.lineIndex + flow.lines.length - lines.length;
+        const top = Math.min(
+            getFlowSuffixTop(page, flow.sectionIndex, flow.columnIndex, lineIndex),
+            getFlowSuffixTop(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
+        );
+        const start = lines[0].st;
+        if (!Number.isFinite(top) || hasEmbeddedGeometryInFlowSuffix(page, start, top) ||
+            hasEmbeddedGeometryInFlowSuffix(workerPage, start, top)) {
+            return false;
         }
         applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { preserveEmbeddedGeometry: true });
         return true;

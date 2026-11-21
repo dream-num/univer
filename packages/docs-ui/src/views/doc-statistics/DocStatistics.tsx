@@ -72,7 +72,7 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
 
     return (
         <div className="univer-w-full" dir={direction}>
-            <header className="univer-flex univer-items-center univer-gap-3 univer-p-4">
+            <header className="univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3">
                 <div
                     className={`
                       univer-min-w-0 univer-flex-1
@@ -99,7 +99,7 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
                 )}
             </header>
             <Separator />
-            <dl className="univer-m-0 univer-p-2 univer-pb-4">
+            <dl className="univer-m-0 univer-p-2">
                 {statisticGroups.map((rows, groupIndex) => (
                     <div key={rows[0].key}>
                         {groupIndex > 0 && <Separator className="univer-my-1" />}

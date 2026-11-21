@@ -75,6 +75,7 @@ export {
 } from './services/clipboard/clipboard.command';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
+export { IContextMenuShortcutService } from './services/contextmenu/contextmenu-shortcut.service';
 export { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';

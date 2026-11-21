@@ -49,7 +49,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ILayoutService, UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { IContextMenuShortcutService, ILayoutService, UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { LocaleKey } from '../../../locale/types';
@@ -339,7 +339,10 @@ export function SheetBarTabs() {
         return () => observer.disconnect();
     }, [syncScrollButtonState]);
 
-    const openContextMenu = useCallback((anchorRect: IContextMenuAnchorRect) => {
+    const contextMenuShortcutService = useDependency(IContextMenuShortcutService);
+    const [keyboardContextMenu, setKeyboardContextMenu] = useState(false);
+
+    const openContextMenu = useCallback((anchorRect: IContextMenuAnchorRect, keyboard = false) => {
         if (!showContextMenu) {
             return;
         }
@@ -349,6 +352,7 @@ export function SheetBarTabs() {
         }
 
         setContextMenuAnchorRect(anchorRect);
+        setKeyboardContextMenu(keyboard);
         setContextMenuVisible(true);
     }, [editorBridgeService, showContextMenu]);
 
@@ -394,14 +398,12 @@ export function SheetBarTabs() {
         };
     }, [contextMenuVisible, getActiveTabRect]);
 
-    const onTabListContextMenu = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-        event.preventDefault();
-
+    const openTabContextMenu = useCallback((target: HTMLElement, keyboard = false) => {
         if (slideTabBarRef.current?.getActiveItem()?.isEditMode()) {
             return;
         }
 
-        const triggerItem = (event.target as HTMLElement).closest<HTMLElement>('[data-u-comp=slide-tab-item]');
+        const triggerItem = target.closest<HTMLElement>('[data-u-comp=slide-tab-item]');
         const targetSheetId = triggerItem?.dataset.id;
 
         if (!targetSheetId || !triggerItem) {
@@ -416,7 +418,7 @@ export function SheetBarTabs() {
         };
 
         if (targetSheetId === activeSheetId) {
-            openContextMenu(anchorRect);
+            openContextMenu(anchorRect, keyboard);
             return;
         }
 
@@ -426,9 +428,27 @@ export function SheetBarTabs() {
                 subUnitId: targetSheetId,
             })
             .finally(() => {
-                openContextMenu(anchorRect);
+                openContextMenu(anchorRect, keyboard);
             });
     }, [activeSheetId, commandService, openContextMenu, workbook]);
+
+    useEffect(() => {
+        if (!showContextMenu) {
+            return;
+        }
+
+        const registration = contextMenuShortcutService.register((target) => {
+            if (!target.matches('[data-u-comp=slide-tab-item]') || !slideTabBarContainerRef.current?.contains(target)
+                || target.isContentEditable || slideTabBarRef.current?.getActiveItem()?.isEditMode() || editorBridgeService?.isForceKeepVisible()) {
+                return;
+            }
+            return () => {
+                openTabContextMenu(target, true);
+                return true;
+            };
+        });
+        return () => registration.dispose();
+    }, [contextMenuShortcutService, editorBridgeService, openTabContextMenu, showContextMenu]);
 
     const onTabListKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
         const target = event.target as HTMLElement;
@@ -626,6 +646,7 @@ export function SheetBarTabs() {
             showContextMenu={showContextMenu}
             visible={contextMenuVisible}
             anchorRect={contextMenuAnchorRect}
+            autoFocus={keyboardContextMenu}
             onVisibleChange={onContextMenuVisibleChange}
             onCommandSelect={onContextMenuCommandSelect}
         >
@@ -633,7 +654,10 @@ export function SheetBarTabs() {
                 className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
                 onDragStart={(event) => event.preventDefault()}
-                onContextMenu={onTabListContextMenu}
+                onContextMenu={(event: ReactMouseEvent<HTMLDivElement>) => {
+                    event.preventDefault();
+                    openTabContextMenu(event.target as HTMLElement);
+                }}
             >
                 <div
                     data-u-comp="slide-tab-bar"

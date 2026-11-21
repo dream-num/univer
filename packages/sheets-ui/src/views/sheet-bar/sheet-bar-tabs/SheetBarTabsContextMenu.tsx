@@ -24,6 +24,7 @@ interface ISheetBarTabsContextMenuProps {
     children: ReactElement;
     anchorRect: IContextMenuAnchorRect | null;
     showContextMenu: boolean;
+    autoFocus: boolean;
     visible: boolean;
     onCommandSelect: (commandId: string, value?: string | number) => void;
     onVisibleChange: (visible: boolean) => void;
@@ -32,7 +33,7 @@ interface ISheetBarTabsContextMenuProps {
 const MENU_OFFSET = 6;
 
 export function SheetBarTabsContextMenu(props: ISheetBarTabsContextMenuProps) {
-    const { children, anchorRect, showContextMenu, visible, onCommandSelect, onVisibleChange } = props;
+    const { children, anchorRect, showContextMenu, autoFocus, visible, onCommandSelect, onVisibleChange } = props;
     const hostIdRef = useRef(`sheetbar-tabs-context-menu-${generateRandomId(6)}`);
 
     if (!showContextMenu) {
@@ -46,6 +47,7 @@ export function SheetBarTabsContextMenu(props: ISheetBarTabsContextMenuProps) {
                 hostId={hostIdRef.current}
                 visible={visible}
                 anchorRect={anchorRect}
+                autoFocus={autoFocus}
                 menuType={ContextMenuPosition.FOOTER_TABS}
                 anchorVertical="top"
                 menuOffset={MENU_OFFSET}

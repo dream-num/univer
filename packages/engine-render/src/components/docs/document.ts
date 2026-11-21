@@ -64,6 +64,7 @@ import type { DocumentViewModel } from './view-model/document-view-model';
 import { BORDER_TYPE, COLOR_BLACK_RGB, RENDER_CLASS_TYPE } from '../../basics/const';
 import { calculateRectRotate, drawLineByBorderType, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-document-skeleton-cached';
+import { rangesOverlap } from '../../basics/range-overlap';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
@@ -820,7 +821,12 @@ export class Documents extends DocComponent {
             // The stroke is centered on the cell edge. Allow two device pixels for
             // precision-rounded bounds and antialiasing at a fractional viewport edge.
             const padding = (extent.maxBorderWidth / 2 + 2) / d;
-            const overlaps = tableY + extent.bottom + padding >= viewportTop && tableY + extent.top - padding <= viewportBottom;
+            const overlaps = rangesOverlap(
+                tableY + extent.top - padding,
+                tableY + extent.bottom + padding,
+                viewportTop,
+                viewportBottom
+            );
             // Custom ranges can trigger render work such as formula preparation even
             // outside the viewport. Let their table keep the original glyph dispatch.
             if (overlaps || customRanges?.some((range) => range.startIndex <= table.ed && range.endIndex >= table.st)) {

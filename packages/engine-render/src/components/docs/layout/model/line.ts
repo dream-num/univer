@@ -15,7 +15,7 @@
  */
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
-import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
@@ -27,6 +27,7 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../basics/interfaces';
 import type { IFloatObject } from '../tools';
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
@@ -230,7 +231,7 @@ export function calculateLineTopByDrawings(
             }
             const split = _getTableWrapSplit(table, maxTop, lineHeight, columnLeft, columnWidth, minimumTableWrapWidth);
             if (split && split.left <= 0 && split.left + split.width >= columnWidth) {
-                maxTop = Math.max(maxTop, table.top + table.height + (table.tableSource.dist?.distB ?? 0));
+                maxTop = Math.max(maxTop, getTableWrapBounds(table).bottom);
             }
         }
         if (maxTop === previousTop) {
@@ -241,6 +242,17 @@ export function calculateLineTopByDrawings(
     return maxTop - sectionTop;
 }
 
+export function getTableWrapBounds(table: IDocumentSkeletonTable) {
+    const { left, top, width, height, tableSource } = table;
+    const { distL = 0, distR = 0, distT = 0, distB = 0 } = tableSource.dist ?? {};
+    return {
+        left: left - distL,
+        right: left + width + distR,
+        top: top - distT,
+        bottom: top + height + distB,
+    };
+}
+
 function _getTableWrapSplit(
     table: IDocumentSkeletonTable,
     lineTop: number,
@@ -249,20 +261,26 @@ function _getTableWrapSplit(
     columnWidth: number,
     minimumWidth: number
 ) {
-    const { left, top, width, height, tableSource } = table;
-    const split = __getSplitWidthNoAngle(top, height, left - columnLeft, width, lineTop, lineHeight, columnWidth, tableSource.dist ?? {});
-    if (!split || split.left >= columnWidth || split.left + split.width <= 0) {
+    const bounds = getTableWrapBounds(table);
+    let left = bounds.left - columnLeft;
+    let right = bounds.right - columnLeft;
+    if (bounds.bottom <= lineTop || bounds.top >= lineTop + lineHeight || left >= columnWidth || right <= 0) {
         return;
     }
-    let right = split.left + split.width;
-    if (split.left <= minimumWidth) {
-        split.left = 0;
+    if (left <= minimumWidth) {
+        left = 0;
     }
     if (columnWidth - right <= minimumWidth) {
         right = columnWidth;
     }
-    split.width = right - split.left;
-    return split;
+    return { left, width: right - left };
+}
+
+export function usesDrawingBoundsForTextWrap(layoutType: PositionedObjectLayoutType): boolean {
+    return layoutType === PositionedObjectLayoutType.WRAP_SQUARE ||
+        layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM ||
+        layoutType === PositionedObjectLayoutType.WRAP_TIGHT ||
+        layoutType === PositionedObjectLayoutType.WRAP_THROUGH;
 }
 
 function _getDrawingWrapBounds(drawing: IDocumentSkeletonDrawing) {
@@ -582,6 +600,33 @@ function _calculateSplit(
 
     // wrapThrough | wrapTight
     return __getCrossPoint(boundingBox.points, lineTop, lineHeight, columnWidth);
+}
+
+export function getPlainTextLineInkBounds(line: IDocumentSkeletonLine, top: number): { top: number; bottom: number } | undefined {
+    const baseline = top + line.asc;
+    let ascent = Math.max(line.lineHeight, line.contentHeight);
+    let descent = ascent;
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            const style = glyph.ts;
+            const box = glyph.bBox;
+            if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
+                || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
+                || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
+                || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
+                || style.bbl || style.bd
+                || style.textOutline || style.textFill || style.glow || style.outerShadow
+                || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
+                || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
+                return;
+            }
+            ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
+            descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
+        }
+    }
+    if (Number.isFinite(baseline) && Number.isFinite(ascent) && Number.isFinite(descent)) {
+        return { top: baseline - ascent, bottom: baseline + descent };
+    }
 }
 
 export function getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {

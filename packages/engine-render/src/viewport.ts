@@ -30,6 +30,8 @@ import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
+import { MAIN_VIEW_PORT_KEY } from './scene';
+import { getViewportClipInDevicePixels, setViewportRenderClip, viewportRenderClips } from './viewport-render-clip';
 
 interface ILimitedScrollResult {
     viewportScrollX: number;
@@ -773,31 +775,39 @@ export class Viewport {
         const tm = sceneTrans.getMatrix();
         mainCtx.save();// At this time, mainCtx transform is (dpr, 0, 0, dpr, 0, 0)
 
-        if (this._clipViewport) {
-            mainCtx.beginPath();
-            // DEPT: left is set by upper views but width and height is not
-            // this.left has handle scale already, no need to `this.width * scale`
-            // const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
-            mainCtx.rect(this.left, this.top, (this.width || 0), (this.height || 0));
-            mainCtx.clip();
+        const previousClip = viewportRenderClips.get(mainCtx);
+        try {
+            const top = this.top;
+            const height = this.height || 0;
+            const clip = this._clipViewport && this.viewportKey === MAIN_VIEW_PORT_KEY
+                ? getViewportClipInDevicePixels(mainCtx, top, height)
+                : undefined;
+            if (this._clipViewport) {
+                mainCtx.beginPath();
+                mainCtx.rect(this.left, top, this.width || 0, height);
+                mainCtx.clip();
+            }
+
+            // The Canvas clip is fixed in device pixels before the scroll transform.
+            mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
+            const viewPortInfo = viewportInfo ?? this.calcViewportInfo();
+            setViewportRenderClip(mainCtx, clip);
+
+            for (let i = 0, length = objects.length; i < length; i++) {
+                objects[i].render(mainCtx, viewPortInfo);
+            }
+
+            this.markDirty(false);
+            this.markForceDirty(false);
+
+            this._preViewBound = this._viewBound;
+            if (viewPortInfo.shouldCacheUpdate) {
+                this.preCacheBound = this._cacheBound;
+            }
+        } finally {
+            setViewportRenderClip(mainCtx, previousClip);
+            mainCtx.restore();
         }
-
-        // set scrolling state for mainCtx,
-        mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
-        const viewPortInfo = viewportInfo ?? this.calcViewportInfo();
-
-        for (let i = 0, length = objects.length; i < length; i++) {
-            objects[i].render(mainCtx, viewPortInfo);
-        }
-
-        this.markDirty(false);
-        this.markForceDirty(false);
-
-        this._preViewBound = this._viewBound;
-        if (viewPortInfo.shouldCacheUpdate) {
-            this.preCacheBound = this._cacheBound;
-        }
-        mainCtx.restore();
 
         if (this._scrollBar && isMaxLayer) {
             mainCtx.save();

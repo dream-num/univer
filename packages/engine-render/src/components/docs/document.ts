@@ -24,7 +24,6 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
-    BaselineOffset,
     BooleanNumber,
     CellValueType,
     ColumnSeparatorType,
@@ -39,6 +38,7 @@ import {
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type {
+    IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
@@ -60,13 +60,15 @@ import type { IDocumentLayoutRenderConfig } from './document-layout-presentation
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import type { DocumentViewModel } from './view-model/document-view-model';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, RENDER_CLASS_TYPE } from '../../basics/const';
 import { calculateRectRotate, drawLineByBorderType, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-document-skeleton-cached';
+import { rangesOverlap } from '../../basics/range-overlap';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
 import { DrawingGroupObject } from '../../drawing-group';
+import { viewportRenderClips } from '../../viewport-render-clip';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
@@ -78,6 +80,7 @@ import { Line } from './extensions/line';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
+import { getPlainTextLineInkBounds } from './layout/model/line';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
 import {
@@ -106,6 +109,88 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
 const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
 const TABLE_OVERFLOW_INTERACTION_PADDING = 24;
 const CONTINUOUS_LAYOUT_LINE_OVERSCAN = 240;
+
+interface ITablePaintExtent {
+    top: number;
+    bottom: number;
+    maxBorderWidth: number;
+}
+
+function isBuiltInDocumentExtension(extension: object): boolean {
+    const type = extension.constructor;
+    return type === Background || type === Border || type === FontAndBaseLine || type === Line;
+}
+
+function getSpacedTableFrame(table: IDocumentSkeletonTable) {
+    if (!hasTableCellSpacing(table.tableSource)) {
+        return;
+    }
+    const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
+    const borders = {
+        top: getTableOuterBorder(source, 'top'),
+        bottom: getTableOuterBorder(source, 'bottom'),
+        left: getTableOuterBorder(source, 'left'),
+        right: getTableOuterBorder(source, 'right'),
+    };
+    return {
+        borders,
+        position: {
+            startX: getCellBorderWidth(borders.left) / 2,
+            startY: getCellBorderWidth(borders.top) / 2,
+            endX: table.width - getCellBorderWidth(borders.right) / 2,
+            endY: table.height - getCellBorderWidth(borders.bottom) / 2,
+        },
+    };
+}
+
+function getTablePaintExtent(table: IDocumentSkeletonTable): ITablePaintExtent | null {
+    let top = 0;
+    let bottom = table.height;
+    let maxBorderWidth = 1;
+
+    for (const row of table.rows) {
+        // A merged cell can extend past the row that owns its content and borders.
+        top = Math.min(top, row.top);
+        for (const cell of row.cells) {
+            if (!shouldClipNestedPageContent(cell) || ![cell.pageHeight, cell.pageWidth].every(Number.isFinite) ||
+                cell.pageHeight < 0 || cell.pageWidth < 0) {
+                return null;
+            }
+            bottom = Math.max(bottom, row.top + cell.pageHeight);
+        }
+        maxBorderWidth = getMaxTableBorderWidth(row.rowSource.tableCells, maxBorderWidth);
+    }
+
+    // Shared edges can use a neighbor's border from the source table.
+    for (const row of table.tableSource.tableRows ?? []) {
+        maxBorderWidth = getMaxTableBorderWidth(row.tableCells, maxBorderWidth);
+    }
+
+    const frame = getSpacedTableFrame(table);
+    if (frame != null) {
+        const { startY, endY } = frame.position;
+        // A thick frame can place its stroke center beyond the table box.
+        top = Math.min(top, startY, endY);
+        bottom = Math.max(bottom, startY, endY);
+        maxBorderWidth = Math.max(maxBorderWidth, ...Object.values(frame.borders).map(getCellBorderWidth));
+    }
+
+    return [top, bottom, maxBorderWidth].every(Number.isFinite) ? { top, bottom, maxBorderWidth } : null;
+}
+
+function getMaxTableBorderWidth(cells: readonly ITableCell[], initialWidth: number): number {
+    let max = initialWidth;
+    for (const cell of cells) {
+        max = Math.max(
+            max,
+            cell.borderTop?.width?.v ?? 1,
+            cell.borderBottom?.width?.v ?? 1,
+            cell.borderLeft?.width?.v ?? 1,
+            cell.borderRight?.width?.v ?? 1
+        );
+    }
+    return max;
+}
 
 function getLineTop(line: IDocumentSkeletonLine): number {
     return line.top + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
@@ -292,6 +377,7 @@ export interface IDocumentGlyphPaint {
 export class Documents extends DocComponent {
     private _glyphPaintSink?: (paints: readonly IDocumentGlyphPaint[]) => void;
     private _glyphPaints: IDocumentGlyphPaint[] = [];
+    private readonly _tablePaintExtents = new WeakMap<IDocumentSkeletonCached, WeakMap<IDocumentSkeletonTable, ITablePaintExtent | null>>();
 
     /** Route actual Docs glyph painters into a host's ordered compositor. */
     setGlyphPaintSink(sink: (paints: readonly IDocumentGlyphPaint[]) => void): IDisposable {
@@ -480,6 +566,8 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
+        // Extensions can use offscreen glyph callbacks for their own render state.
+        const canClipTables = isContinuousLayout && !this._glyphPaintSink && extensions.every(isBuiltInDocumentExtension);
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
         const preTextBackgroundExtensions = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.BACKGROUND);
         const glyphExtensionsExcludeBackground = extensions
@@ -562,12 +650,16 @@ export class Documents extends DocComponent {
             }
 
             if (skeTables.size > 0) {
+                const tables = canClipTables && centerAngle === 0 && vertexAngle === 0 && !renderConfig.stackedText &&
+                    renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
+                    ? this._getTablesInViewport(ctx, page, skeletonData, dataModel?.getBody?.()?.customRanges)
+                    : skeTables;
                 ctx.save();
                 ctx.globalAlpha *= bodyOpacity;
                 this._drawTable(
                     ctx,
                     page,
-                    skeTables,
+                    tables,
                     extensions,
                     backgroundExtension,
                     preTextBackgroundExtensions,
@@ -727,6 +819,71 @@ export class Documents extends DocComponent {
         this._glyphPaintSink?.(this._glyphPaints);
     }
 
+    private _getTablesInViewport(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        skeletonData: IDocumentSkeletonCached,
+        customRanges: readonly ICustomRange[] | undefined
+    ): Iterable<[string, IDocumentSkeletonTable]> {
+        const tables = page.skeTables;
+        const clip = viewportRenderClips.get(ctx);
+        if (!clip || this.parent?.classType !== RENDER_CLASS_TYPE.SCENE ||
+            ctx.globalCompositeOperation !== 'source-over' || ctx.shadowBlur || ctx.shadowOffsetX || ctx.shadowOffsetY ||
+            (ctx.filter && ctx.filter !== 'none')) {
+            return tables;
+        }
+
+        const { b, c, d, f } = ctx.getTransform();
+        if (b !== 0 || c !== 0 || d <= 0) {
+            return tables;
+        }
+
+        // Translate the current Canvas clip through the document transform.
+        const viewportTop = (clip.top - f) / d;
+        const viewportBottom = (clip.bottom - f) / d;
+        const originY = this._drawLiquid!.y + page.marginTop;
+        if (![viewportTop, viewportBottom, originY, d].every(Number.isFinite) || viewportTop >= viewportBottom) {
+            return tables;
+        }
+
+        // A new layout publication can change cell extents even when it reuses a table.
+        let extents = this._tablePaintExtents.get(skeletonData);
+        if (!extents) {
+            extents = new WeakMap();
+            this._tablePaintExtents.set(skeletonData, extents);
+        }
+
+        const visibleTables: Array<[string, IDocumentSkeletonTable]> = [];
+        for (const entry of tables) {
+            const [, table] = entry;
+            let extent = extents.get(table);
+            if (extent === undefined) {
+                extent = getTablePaintExtent(table);
+                extents.set(table, extent);
+            }
+            const tableY = originY + table.top;
+            if (extent == null || !Number.isFinite(tableY)) {
+                visibleTables.push(entry);
+                continue;
+            }
+
+            // Expand the stroke center range for line width, rounding and antialiasing.
+            const padding = (extent.maxBorderWidth / 2 + 2) / d;
+            const overlaps = rangesOverlap(
+                tableY + extent.top - padding,
+                tableY + extent.bottom + padding,
+                viewportTop,
+                viewportBottom
+            );
+            // Custom ranges can trigger render work such as formula preparation even
+            // outside the viewport. Let their table keep the original glyph dispatch.
+            if (overlaps || customRanges?.some((range) => range.startIndex <= table.ed && range.endIndex >= table.st)) {
+                visibleTables.push(entry);
+            }
+        }
+        return visibleTables;
+    }
+
     private _drawBodySections(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
@@ -759,7 +916,7 @@ export class Documents extends DocComponent {
             && renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
             && !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY
             && (!ctx.filter || ctx.filter === 'none') && ctx.globalCompositeOperation === 'source-over'
-            && extensions.every((extension) => [Background, Border, FontAndBaseLine, Line].some((type) => extension.constructor === type));
+            && extensions.every(isBuiltInDocumentExtension);
         const glyphClipTop = canClipGlyphs ? (clip.top - 2 - matrix.f) / matrix.d : undefined;
         const glyphClipBottom = canClipGlyphs ? (clip.bottom + 2 - matrix.f) / matrix.d : undefined;
 
@@ -913,29 +1070,8 @@ export class Documents extends DocComponent {
 
     private _isPlainLineOutsideClip(line: IDocumentSkeletonLine, top: number, clipTop: number, clipBottom: number): boolean {
         // Keep backgrounds and paragraph borders on their original path. Only ordinary text ink is culled.
-        const baseline = top + line.asc;
-        let ascent = Math.max(line.lineHeight, line.contentHeight);
-        let descent = ascent;
-        for (const divide of line.divides) {
-            for (const glyph of divide.glyphGroup) {
-                const style = glyph.ts;
-                const box = glyph.bBox;
-                if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
-                    || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
-                    || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
-                    || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
-                    || style.bbl || style.bd
-                    || style.textOutline || style.textFill || style.glow || style.outerShadow
-                    || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
-                    || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
-                    return false;
-                }
-                ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
-                descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
-            }
-        }
-        return [baseline, ascent, descent].every(Number.isFinite)
-            && (baseline + descent < clipTop || baseline - ascent > clipBottom);
+        const ink = getPlainTextLineInkBounds(line, top);
+        return ink != null && (ink.bottom < clipTop || ink.top > clipBottom);
     }
 
     private _getColumnDrawLayout(
@@ -1116,7 +1252,7 @@ export class Documents extends DocComponent {
     private _drawTable(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
-        skeTables: Map<string, IDocumentSkeletonTable>,
+        skeTables: Iterable<[string, IDocumentSkeletonTable]>,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
         preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
@@ -1922,23 +2058,18 @@ export class Documents extends DocComponent {
     }
 
     private _drawSpacedTableFrame(ctx: UniverRenderingContext, page: IDocumentSkeletonPage, table: IDocumentSkeletonTable): void {
-        if (this._drawLiquid == null || !hasTableCellSpacing(table.tableSource)) {
+        const frame = getSpacedTableFrame(table);
+        if (this._drawLiquid == null || frame == null) {
             return;
         }
-        const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
-        const borders = {
-            top: getTableOuterBorder(source, 'top'),
-            bottom: getTableOuterBorder(source, 'bottom'),
-            left: getTableOuterBorder(source, 'left'),
-            right: getTableOuterBorder(source, 'right'),
-        };
+        const { borders, position: local } = frame;
         const x = this._drawLiquid.x + page.marginLeft;
         const y = this._drawLiquid.y + page.marginTop;
         const position = {
-            startX: x + getCellBorderWidth(borders.left) / 2,
-            startY: y + getCellBorderWidth(borders.top) / 2,
-            endX: x + table.width - getCellBorderWidth(borders.right) / 2,
-            endY: y + table.height - getCellBorderWidth(borders.bottom) / 2,
+            startX: x + local.startX,
+            startY: y + local.startY,
+            endX: x + local.endX,
+            endY: y + local.endY,
         };
         for (const [edge, type] of [['top', BORDER_TYPE.TOP], ['bottom', BORDER_TYPE.BOTTOM], ['left', BORDER_TYPE.LEFT], ['right', BORDER_TYPE.RIGHT]] as const) {
             this._drawBorder(ctx, borders[edge] ?? null, type, position);

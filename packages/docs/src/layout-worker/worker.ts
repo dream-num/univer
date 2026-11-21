@@ -250,6 +250,11 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             invalidation: request.invalidation,
             modernPageWidth: request.modernPageWidth,
             modernHorizontalMargin: request.modernHorizontalMargin,
+            acknowledgedLayoutVersion: request.acknowledgedLayoutVersion,
+            appliedLayoutVersion: request.appliedLayoutVersion,
+            continuousLayoutVersion: request.supportsAppliedLayoutVersion
+                ? JSON.stringify([session.sessionEpoch, request.mountId, request.mountEpoch, request.viewportEpoch, request.metricsRevision])
+                : undefined,
         });
         mount.activeGeneration = generation;
         mount.cancelledGeneration = null;

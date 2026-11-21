@@ -23,6 +23,7 @@ import {
     DocumentDataModel,
     DocumentFlavor,
     LocaleService,
+    LocaleType,
     TableRowHeightRule,
     Univer,
 } from '@univerjs/core';
@@ -31,7 +32,12 @@ import { DocumentViewModel } from '../../view-model/document-view-model';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { cachePrecomputedTableSkeleton, createTableSkeleton } from '../block/table';
 import { DocumentSkeleton } from '../doc-skeleton';
-import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
+import {
+    applyDocumentSkeletonContinuousBlock,
+    hydrateDocumentSkeletonPage,
+    serializeDocumentSkeletonContinuousBlock,
+    serializeDocumentSkeletonPage,
+} from '../document-layout-page-patch';
 
 function normalizeSkeleton(value: unknown): unknown {
     if (value instanceof Map) {
@@ -54,6 +60,98 @@ function normalizeSkeleton(value: unknown): unknown {
 }
 
 describe('document layout page patch', () => {
+    it('serializes and applies a continuous replacement with 150,000 flow lines', () => {
+        const model = createDocumentModelWithStyle('Old', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const viewModel = new DocumentViewModel(model);
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const skeleton = DocumentSkeleton.create(viewModel, locale);
+        try {
+            skeleton.calculate();
+            const source = skeleton.getSkeletonData()!;
+            const page = source.pages[0];
+            const column = page.sections[0].columns[0];
+            const initial = serializeDocumentSkeletonContinuousBlock(page, null);
+            const target = { ...source, pages: [] };
+            applyDocumentSkeletonContinuousBlock(target, initial.block, model.getSnapshot());
+            const line = column.lines[0];
+            const lineCount = 150_000;
+            column.lines = Array.from({ length: lineCount }, (_, offset) => ({
+                ...line,
+                st: offset,
+                ed: offset,
+                divides: [],
+            }));
+
+            const replacement = serializeDocumentSkeletonContinuousBlock(page, initial.snapshot);
+            const applied = applyDocumentSkeletonContinuousBlock(target, replacement.block, model.getSnapshot());
+            const appliedColumn = applied.sections[0].columns[0];
+
+            expect(appliedColumn.lines).toHaveLength(lineCount);
+            expect(appliedColumn.lines[0].st).toBe(0);
+            expect(appliedColumn.lines[75_000].ed).toBe(75_000);
+            expect(appliedColumn.lines[lineCount - 1].ed).toBe(lineCount - 1);
+            expect(appliedColumn.lines[lineCount - 1].parent).toBe(appliedColumn);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('retains geometry from earlier continuous sections and columns when the final column changes', () => {
+        const model = createDocumentModelWithStyle('One\rTwo\rThree\r', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), locale);
+        try {
+            skeleton.calculate();
+            const data = skeleton.getSkeletonData()!;
+            const page = data.pages[0];
+            const section = page.sections[0];
+            const column = section.columns[0];
+            const [one, two, three] = column.lines;
+            page.sections = [
+                { ...section, columns: [{ ...column, lines: [one] }] },
+                { ...section, columns: [{ ...column, lines: [two] }, { ...column, lines: [three] }] },
+            ];
+            for (const bodySection of page.sections) {
+                bodySection.parent = page;
+                for (const bodyColumn of bodySection.columns) {
+                    bodyColumn.parent = bodySection;
+                    for (const line of bodyColumn.lines) {
+                        line.parent = bodyColumn;
+                    }
+                }
+            }
+            const initial = serializeDocumentSkeletonContinuousBlock(page, null, false, { trackBaseline: true, complete: true });
+            const target = { ...data, pages: [] };
+            const applied = applyDocumentSkeletonContinuousBlock(target, initial.block, model.getSnapshot());
+            const retainedSection = applied.sections[0];
+            const retainedColumn = applied.sections[1].columns[0];
+            const { height, baselineSections, tables } = initial.snapshot;
+            page.sections[1].columns[1].lines[0] = { ...three, top: three.top + 10 };
+
+            const { block } = serializeDocumentSkeletonContinuousBlock(page, null, false, {
+                base: { version: 'previous', height, sections: baselineSections!, tables: tables! },
+            });
+
+            expect(block.flow).toMatchObject({ sectionIndex: 1, columnIndex: 1 });
+            applyDocumentSkeletonContinuousBlock(target, block, model.getSnapshot());
+            expect(applied.sections[0]).toBe(retainedSection);
+            expect(applied.sections[1].columns[0]).toBe(retainedColumn);
+            expect(applied.sections[1].columns[1].lines[0].top).toBe(three.top + 10);
+        } finally {
+            skeleton.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
     it.each((['header', 'footer'] as const).flatMap((kind) => [undefined, 0, 3].map((cellSpacing) => ({ kind, cellSpacing }))))('keeps precomputed body tables out of a $kind at the same stream offset (cell spacing: $cellSpacing)', ({ kind, cellSpacing }) => {
         const T = DataStreamTreeTokenType;
         const story = (text: string, rowCount: number, rowHeight: number): Required<Pick<IDocumentData, 'body' | 'tableSource'>> => {

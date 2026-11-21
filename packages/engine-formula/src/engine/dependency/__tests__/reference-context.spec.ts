@@ -26,7 +26,7 @@ import { ICalculateFormulaService } from '../../../services/calculate-formula.se
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
 import { IFunctionService } from '../../../services/function.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { FormulaExecuteStageType, IFormulaRuntimeService } from '../../../services/runtime.service';
 import { createCommandTestBed } from '../../analysis/__tests__/create-command-test-bed';
 import { Lexer } from '../../analysis/lexer';
 import { AstTreeBuilder } from '../../analysis/parser';
@@ -98,30 +98,73 @@ it('selects order and size sensitive references while retaining ordinary formula
     } finally { bed.univer.dispose(); }
 });
 
-it('executes opaque features without parsing an empty formula or recalculating unrelated cells', async () => {
+it('executes explicitly dirty opaque features once while propagating their output to formulas and chained features', async () => {
     const bed = createCommandTestBed({ id: 'test', name: 'test', appVersion: '1.3.1', locale: LocaleType.EN_US, styles: {}, sheetOrder: ['s'], sheets: { s: { id: 's', name: 'Sheet', rowCount: 10, columnCount: 10 } } });
     const service = bed.get(ICalculateFormulaService);
     let featureValue = 41;
+    const executions: FormulaExecuteStageType[] = [];
+    const chainedExecutions: FormulaExecuteStageType[] = [];
     const observed: unknown[][] = [];
     const subscription = service.executionCompleteListener$.subscribe((data) => {
-        observed.push([data.unitData.test?.s?.getValue(0, 0)?.v, data.unitData.test?.s?.getValue(0, 2)?.v]);
+        observed.push([
+            data.unitData.test?.s?.getValue(0, 0)?.v,
+            data.unitData.test?.s?.getValue(0, 2)?.v,
+            data.unitData.test?.s?.getValue(0, 4)?.v,
+        ]);
     });
     try {
         bed.get(IFeatureCalculationManagerService).register('test', 's', 'feature', {
             unitId: 'test',
             subUnitId: 's',
             dependencyRanges: [],
-            getDirtyData: (dirty) => ({
-                runtimeCellData: { test: { s: new ObjectMatrix({ 0: { 1: { v: featureValue } } }) } },
-                dirtyRanges: dirty.forceCalculation ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } } : {},
-            }),
+            getDirtyData: (dirty) => {
+                const stage = bed.get(IFormulaRuntimeService).getFormulaExecuteStage();
+                if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING
+                    || stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                    executions.push(stage);
+                }
+                return {
+                    runtimeCellData: { test: { s: new ObjectMatrix({ 0: { 1: { v: featureValue } } }) } },
+                    dirtyRanges: dirty.forceCalculation || dirty.dirtyUnitFeatureMap.test?.s?.feature
+                        ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } }
+                        : {},
+                };
+            },
         });
-        const config = { formulaData: { test: { s: { 0: { 0: { f: '=B1' }, 2: { f: '=5' } } } } }, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: true, dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {} };
+        bed.get(IFeatureCalculationManagerService).register('test', 's', 'chained', {
+            unitId: 'test',
+            subUnitId: 's',
+            dependencyRanges: [{ unitId: 'test', sheetId: 's', range: { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 } }],
+            getDirtyData: (dirty, runtime) => {
+                const stage = bed.get(IFormulaRuntimeService).getFormulaExecuteStage();
+                if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING
+                    || stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                    chainedExecutions.push(stage);
+                }
+                const input = runtime.runtimeFeatureCellData.feature?.test?.s?.getValue(0, 1)?.v;
+                return {
+                    runtimeCellData: { test: { s: new ObjectMatrix({ 0: { 3: { v: Number(input ?? 0) * 2 } } }) } },
+                    dirtyRanges: dirty.forceCalculation || dirty.dirtyRanges.some(({ range }) =>
+                        range.startRow === 0 && range.endRow === 0 && range.startColumn === 1 && range.endColumn === 1)
+                        ? { test: { s: [{ startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 }] } }
+                        : {},
+                };
+            },
+        });
+        const config = { formulaData: { test: { s: { 0: { 0: { f: '=B1' }, 2: { f: '=5' }, 4: { f: '=D1' } } } } }, arrayFormulaCellData: {}, arrayFormulaRange: {}, forceCalculate: true, dirtyRanges: [], dirtyNameMap: {}, dirtyDefinedNameMap: {}, dirtyUnitFeatureMap: {}, dirtyUnitOtherFormulaMap: {} };
         await service.execute(config);
         featureValue = 42;
         bed.get(IUniverInstanceService).getUnit<Workbook>(bed.unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(bed.sheetId)!.setRowCount(11);
         await service.execute({ ...config, forceCalculate: false, dirtyReferenceUnits: ['test'] });
-        expect(observed).toEqual([[41, 5], [42, undefined]]);
+        featureValue = 43;
+        executions.length = 0;
+        chainedExecutions.length = 0;
+        const dirtyUnitFeatureMap = { test: { s: { feature: true } } };
+        await service.execute({ ...config, forceCalculate: false, dirtyUnitFeatureMap });
+        expect(observed).toEqual([[41, 5, 82], [42, undefined, 84], [43, undefined, 86]]);
+        expect(executions).toHaveLength(1);
+        expect(chainedExecutions).toContain(FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA);
+        expect(dirtyUnitFeatureMap).toEqual({ test: { s: { feature: true } } });
         expect(bed.get(IFormulaCurrentConfigService).isForceCalculate()).toBe(false);
     } finally {
         subscription.unsubscribe();

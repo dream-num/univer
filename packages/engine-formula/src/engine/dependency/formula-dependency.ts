@@ -257,7 +257,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         FDtree.unitId = unitId;
         FDtree.subUnitId = subUnitId;
-        FDtree.rangeList = dependencyRanges;
+        // Tree ranges are cleared after selection; preserve the feature's registered inputs.
+        FDtree.rangeList = [...dependencyRanges];
         FDtree.getDirtyData = getDirtyData;
 
         const allDependency = getDirtyData(this._currentConfigService.getDirtyData(true) as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
@@ -827,9 +828,10 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            // After entering the pivot table, no calculation is required if there is no formula
+            // Feature nodes have no formula text but can be marked dirty by their owner.
             if (!tree.formula) {
-                tree.isDirty = referenceContextChanged && tree.type === FormulaDependencyTreeType.FEATURE_FORMULA;
+                tree.isDirty = tree.type === FormulaDependencyTreeType.FEATURE_FORMULA
+                    && (referenceContextChanged || this._includeTreeFeature(tree as FormulaDependencyTree));
                 continue;
             }
 

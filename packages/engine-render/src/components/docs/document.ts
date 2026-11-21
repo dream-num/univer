@@ -554,8 +554,7 @@ export class Documents extends DocComponent {
         }
 
         // Extensions can use offscreen glyph callbacks for their own render state.
-        const canClipTables = isContinuousLayout && this.constructor === Documents &&
-            !this._glyphPaintSink && extensions.every(isBuiltInDocumentExtension);
+        const canClipTables = isContinuousLayout && !this._glyphPaintSink && extensions.every(isBuiltInDocumentExtension);
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
         const preTextBackgroundExtensions = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.BACKGROUND);
         const glyphExtensionsExcludeBackground = extensions

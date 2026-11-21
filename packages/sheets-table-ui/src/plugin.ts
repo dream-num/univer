@@ -15,12 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsTableUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsTableUIConfig } from './config/config';
 import pkg from '../package.json';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
@@ -39,6 +40,7 @@ import { SheetsTableUiService } from './services/sheets-table-ui.service';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
+    UniverSheetsSortPlugin,
     UniverSheetsTablePlugin,
     UniverSheetsUIPlugin
 )

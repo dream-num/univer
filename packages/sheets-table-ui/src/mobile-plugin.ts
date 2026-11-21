@@ -15,7 +15,6 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsTableUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -30,9 +29,11 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
+import type { IUniverSheetsTableUIConfig } from './config/config';
 import pkg from '../package.json';
 import { OpenTableFilterPanelMobileOperation } from './commands/operations/mobile/open-table-filter-dialog.operation';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
@@ -51,6 +52,7 @@ import { SheetsTableUiService } from './services/sheets-table-ui.service';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
+    UniverSheetsSortPlugin,
     UniverSheetsTablePlugin,
     UniverSheetsMobileUIPlugin,
     UniverMobileUIPlugin

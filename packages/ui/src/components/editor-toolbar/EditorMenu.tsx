@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { clsx, Separator } from '@univerjs/design';
+import { clsx } from '@univerjs/design';
 import { scan } from 'rxjs';
 import type { IMenuSchema } from '../../services/menu/menu-manager.service';
 import type { FloatingObjectToolbarPosition } from '../../services/menu/types';
@@ -24,18 +24,8 @@ import { IconManager } from '../../common/icon-manager';
 import { MenuItemType } from '../../services/menu/menu';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../utils/di';
-import { EditorToolbarButton } from './EditorFloatingToolbar';
+import { EditorToolbarButton, EditorToolbarGroup } from './EditorFloatingToolbar';
 import { keepFloatingToolbarPanelInteraction, preventFloatingToolbarPanelBlur } from './floating-toolbar-interaction';
-
-function ToolbarGroup(props: { children: ReactNode }) {
-    const { children } = props;
-
-    return (
-        <div className="univer-flex univer-h-7 univer-items-center univer-gap-1 univer-px-1">
-            {children}
-        </div>
-    );
-}
 
 function FloatingObjectToolbarMenuAction(props: { menuSchema: IMenuSchema }) {
     const { menuSchema } = props;
@@ -58,14 +48,11 @@ function FloatingObjectToolbarMenuAction(props: { menuSchema: IMenuSchema }) {
     };
 
     return (
-        <>
-            <Separator orientation="vertical" />
-            <ToolbarGroup>
-                <EditorToolbarButton title={title} disabled={disabled} onClick={execute}>
-                    <Icon />
-                </EditorToolbarButton>
-            </ToolbarGroup>
-        </>
+        <EditorToolbarGroup>
+            <EditorToolbarButton title={title} disabled={disabled} onClick={execute}>
+                <Icon />
+            </EditorToolbarButton>
+        </EditorToolbarGroup>
     );
 }
 

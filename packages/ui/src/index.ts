@@ -22,7 +22,16 @@ export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { objectPermissionMenuItemFactory } from './common/object-permission-menu';
-export { EditorDropdown, EditorDropdownTrigger, EditorFloatingToolbar, EditorToolbarButton, EditorToolbarIcon, EditorToolbarTooltip, resolveEditorDropdownSide } from './components/editor-toolbar/EditorFloatingToolbar';
+export {
+    EditorDropdown,
+    EditorDropdownTrigger,
+    EditorFloatingToolbar,
+    EditorToolbarButton,
+    EditorToolbarGroup,
+    EditorToolbarIcon,
+    EditorToolbarTooltip,
+    resolveEditorDropdownSide,
+} from './components/editor-toolbar/EditorFloatingToolbar';
 export { EditorMenuActions, EditorMenuItem, EditorMenuPanel } from './components/editor-toolbar/EditorMenu';
 export { keepFloatingToolbarPanelInteraction, preventFloatingToolbarPanelBlur, shouldKeepFloatingToolbarMouseDownDefault } from './components/editor-toolbar/floating-toolbar-interaction';
 export { HyperlinkEditor } from './components/hyperlink/HyperlinkEditor';

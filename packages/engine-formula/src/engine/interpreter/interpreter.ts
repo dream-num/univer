@@ -15,6 +15,7 @@
  */
 
 import type { DateSystem, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
@@ -23,12 +24,12 @@ import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { LambdaCallNode } from '../ast-node/lambda-parameter-node';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
@@ -100,33 +101,20 @@ export class Interpreter extends Disposable {
     }
 
     checkAsyncNode(node: Nullable<BaseAstNode>) {
-        if (node == null) {
+        return this._checkAsyncNode(node, new Set());
+    }
+
+    private _checkAsyncNode(node: Nullable<BaseAstNode>, visited: Set<BaseAstNode>): boolean {
+        if (node == null || visited.has(node)) {
             return false;
         }
+        visited.add(node);
         if (node.isAsync()) {
             return true;
         }
-        const result: boolean[] = [];
-        this._checkAsyncNode(node, result);
-
-        for (let i = 0, len = result.length; i < len; i++) {
-            const item = result[i];
-            if (item === true) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private _checkAsyncNode(node: BaseAstNode, resultList: boolean[]) {
-        const children = node.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            resultList.push(item.isAsync());
-            this._checkAsyncNode(item, resultList);
-        }
+        // A scoped call may read its implementation from a different branch of the tree.
+        const binding = node instanceof LambdaCallNode ? node.getExecutionDependency() : null;
+        return this._checkAsyncNode(binding, visited) || node.getChildren().some((child) => this._checkAsyncNode(child, visited));
     }
 
     private async _executeAsync(
@@ -163,7 +151,7 @@ export class Interpreter extends Disposable {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        if (node.isAsync()) {
+        if (node.isAsync() || node instanceof LambdaCallNode) {
             await node.executeAsync(dateSystem);
         } else {
             node.execute(dateSystem);

@@ -15,12 +15,15 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-
 import type { LambdaPrivacyVarType } from './base-ast-node';
+import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_CALL, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
+import { AsyncObject } from '../reference-object/base-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
+import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -81,6 +84,39 @@ export class LambdaParameterNode extends BaseAstNode {
     }
 }
 
+export class LambdaCallNode extends BaseAstNode {
+    getExecutionDependency(): Nullable<BaseAstNode> {
+        const [callee] = this.getChildren();
+        if (!(callee instanceof LambdaParameterNode)) {
+            return;
+        }
+        const binding = getRootLexerNode(callee.getCurrentLambdaPrivacyVar().get(callee.getLambdaParameter()));
+        const value = binding ? binding.getValue() : callee.getValue();
+        return value instanceof LambdaValueObjectObject ? value.getBodyNode() : binding;
+    }
+
+    private _invoke() {
+        const [callee, ...args] = this.getChildren();
+        const lambda = callee?.getValue();
+        if (!(lambda instanceof LambdaValueObjectObject)) {
+            return lambda?.isError() ? lambda : ErrorValueObject.create(ErrorType.NAME);
+        }
+
+        return lambda.execute(...args.map((arg) => arg.getValue() ?? NullValueObject.create()));
+    }
+
+    override execute() {
+        const value = this._invoke();
+        this.setValue(value instanceof AsyncObject ? ErrorValueObject.create(ErrorType.VALUE) : value);
+    }
+
+    override async executeAsync() {
+        const value = this._invoke();
+        this.setValue(value instanceof AsyncObject ? await value.getValue() : value);
+        return AstNodePromiseType.SUCCESS;
+    }
+}
+
 export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
     override get zIndex() {
         return NODE_ORDER_MAP.get(NodeType.LAMBDA_PARAMETER) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
@@ -104,6 +140,9 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
         }
 
         const token = param.getToken().trim();
+        if (token === DEFAULT_TOKEN_TYPE_LAMBDA_CALL && param.getLambdaId() != null) {
+            return new LambdaCallNode(token);
+        }
         if (token !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
             return;
         }

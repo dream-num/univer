@@ -54,7 +54,10 @@ export class Sqrtpi extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = Math.sqrt(numberValue * Math.PI);
+        const product = numberValue * Math.PI;
+        const result = Number.isFinite(product)
+            ? Math.sqrt(product)
+            : Math.sqrt(numberValue) * Math.sqrt(Math.PI);
 
         return NumberValueObject.create(result);
     }

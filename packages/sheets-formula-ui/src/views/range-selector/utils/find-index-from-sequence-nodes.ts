@@ -19,7 +19,7 @@ import { sequenceNodeType } from '@univerjs/engine-formula';
 
 export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode)[], targetIndex: number, isEqual = true) => {
     let result = -1;
-    sequenceNode.reduce((pre, cur, index) => {
+    const finalPre = sequenceNode.reduce((pre, cur, index) => {
         if (pre.isFinish) {
             return pre;
         }
@@ -37,6 +37,11 @@ export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode
         }
         return pre;
     }, { currentIndex: 0, isFinish: false });
+
+    if (!isEqual && result === -1 && sequenceNode.length > 0 && targetIndex > finalPre.currentIndex) {
+        return sequenceNode.length - 1;
+    }
+
     return result;
 };
 

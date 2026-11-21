@@ -75,6 +75,7 @@ interface IEmojiPickerPopupProps {
 
 export interface IEmojiPickerProps {
     embedded?: boolean;
+    horizontalPadding?: boolean;
     onChange?: (emoji: string) => void;
     popup?: IPopup<IEmojiPickerPopupProps>;
     DropdownComponent?: typeof Dropdown;
@@ -88,7 +89,8 @@ type EmojiVirtualRow =
     | { items: IEmojiItem[]; key: string; type: 'emojis' };
 
 export function EmojiPicker(props: IEmojiPickerProps) {
-    const { DropdownComponent = Dropdown } = props;
+    const { DropdownComponent = Dropdown, horizontalPadding = true } = props;
+    const contentInset = horizontalPadding && 'univer-px-2.5';
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     const localStorageService = useDependency(ILocalStorageService);
@@ -289,7 +291,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 `
             )}
         >
-            <div className="univer-flex univer-items-center univer-gap-1 univer-px-2.5 univer-pb-2 univer-pt-2.5">
+            <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-pb-2 univer-pt-2.5', contentInset)}>
                 <Input
                     aria-label={localeService.t<LocaleKey>('ui.emojiPicker.search')}
                     placeholder={localeService.t<LocaleKey>('ui.emojiPicker.search')}
@@ -330,7 +332,8 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             <div
                 ref={scrollRef}
                 className={clsx(
-                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-2.5',
+                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto',
+                    contentInset,
                     scrollbarClassName
                 )}
                 onScroll={handleScroll}
@@ -379,10 +382,10 @@ export function EmojiPicker(props: IEmojiPickerProps) {
 
             <div
                 className={clsx(`
-                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200 univer-px-2.5
+                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200
                   dark:!univer-border-gray-600
                   [&_svg]:univer-size-5
-                `, borderTopClassName)}
+                `, borderTopClassName, contentInset)}
             >
                 <CategoryButton
                     selected={!isSearching && activeTab === 'recent'}

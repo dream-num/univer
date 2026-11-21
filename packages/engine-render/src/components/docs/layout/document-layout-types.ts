@@ -49,6 +49,7 @@ export type IDocumentLayoutProtectedRange =
 
 export interface IDocumentLayoutApplyResult {
     didReplaceProtectedPages: boolean;
+    requiresFullPublication?: true;
 }
 
 export interface IDocumentLayoutProgress {

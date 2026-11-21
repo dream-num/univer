@@ -122,6 +122,8 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     metricsRevision: number;
     baseRevision: number;
     modelRevision: number;
+    supportsAppliedLayoutVersion?: boolean;
+    appliedLayoutVersion?: string;
     mutations: IDocLayoutMutationProjection[];
     reason: 'initial' | 'edit';
     anchor?: number;
@@ -375,6 +377,7 @@ export interface IDocLayoutStartOptions {
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
     modernPageWidth?: number;
     modernHorizontalMargin?: number;
+    appliedLayoutVersion?: string;
 }
 
 export class DocLayoutExecutorService extends Disposable {
@@ -770,6 +773,9 @@ export class DocLayoutExecutorService extends Disposable {
                 metricsRevision: startId,
                 baseRevision: session.workerRevision,
                 modelRevision: session.modelRevision,
+                ...(currentModel.documentStyle.documentFlavor === DocumentFlavor.MODERN
+                    ? { supportsAppliedLayoutVersion: true }
+                    : {}),
                 mutations,
                 ...projections.request,
                 budgetMs,

@@ -27,6 +27,7 @@ import {
     JSONX,
     LocaleService,
     LocaleType,
+    NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -50,7 +51,7 @@ import { DocumentLayoutSession } from '../worker-layout';
 
 type LayoutPublication = ReturnType<DocumentLayoutSession['step']>['publication'];
 
-function mockWorkerCanvas(): void {
+function mockWorkerCanvas(beforeMeasureText?: (content: string) => void): void {
     vi.stubGlobal('document', undefined);
     vi.stubGlobal('OffscreenCanvas', class {
         getContext() {
@@ -58,6 +59,7 @@ function mockWorkerCanvas(): void {
                 font: '',
                 textBaseline: 'alphabetic',
                 measureText(this: { font: string }, content: string) {
+                    beforeMeasureText?.(content);
                     const size = this.font.match(/([\d.]+)(px|pt)/);
                     const points = size ? Number(size[1]) * (size[2] === 'px' ? 0.75 : 1) : 11;
                     return {
@@ -1686,6 +1688,237 @@ describe('worker document layout session', () => {
             session.dispose();
             model.dispose();
             locale.dispose();
+        }
+    });
+
+    it('applies an acknowledged Worker tail edit without retransmitting an unchanged table', () => {
+        mockWorkerCanvas();
+        const T = DataStreamTreeTokenType;
+        const table = (text: string) => T.TABLE_START + T.TABLE_ROW_START + T.TABLE_CELL_START + text +
+            T.PARAGRAPH + T.SECTION_BREAK + T.TABLE_CELL_END + T.TABLE_ROW_END + T.TABLE_END;
+        const prefix = 'One\rTwo\rThree\r';
+        const first = table('First table');
+        const gap = '\rBefore the last table\r';
+        const second = table('Second table');
+        const secondStart = prefix.length + first.length + gap.length;
+        const dataStream = `${prefix}${first}${gap}${second}\rTail\rAfter the anchor\r${T.SECTION_BREAK}`;
+        const tableSource = Object.fromEntries(['first', 'last'].map((tableId) => [tableId, {
+            tableId,
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            position: {
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+            },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            size: { type: TableSizeType.SPECIFIED, width: { v: 160 } },
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 160 } } }],
+            tableRows: [{
+                trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                tableCells: [{}],
+            }],
+        }]));
+        const workerModel = new DocumentDataModel({
+            id: 'applied-worker-table-baseline',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({
+                    startIndex: match.index,
+                    paragraphId: `p-${index}`,
+                })),
+                sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({
+                    startIndex: match.index,
+                    sectionId: `s-${index}`,
+                })),
+                tables: [
+                    { tableId: 'first', startIndex: prefix.length, endIndex: prefix.length + first.length },
+                    { tableId: 'last', startIndex: secondStart, endIndex: secondStart + second.length },
+                ],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            tableSource,
+        });
+        const mainModel = new DocumentDataModel(structuredClone(workerModel.getSnapshot()));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const worker = new DocumentLayoutSession(workerModel, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const restartedMain = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        try {
+            main.beginExternalLayout({ reason: 'initial' });
+            const initial = worker.start({ reason: 'initial', continuousLayoutVersion: 'initial-complete' });
+            const complete = worker.step(initial, Number.POSITIVE_INFINITY);
+            if (complete.publication == null) {
+                throw new Error('Expected the complete initial Worker layout.');
+            }
+            expect(main.getAppliedContinuousLayoutVersion()).toBeUndefined();
+            main.applyLayoutPublication(structuredClone(complete.publication), complete.progress);
+            const initialPage = main.getSkeletonData()!.pages[0];
+            const retainedTable = initialPage.skeTables.get('first');
+            expect(retainedTable).toBeDefined();
+            expect(initialPage.skeTables.has('last')).toBe(true);
+
+            const anchor = dataStream.indexOf('Second table') + 2;
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            workerModel.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(workerModel);
+            main.getViewModel().reset(mainModel);
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+
+            // Main can finish its own tail layout before the Worker. A complete
+            // Worker reply that it skips must not evict the last applied version.
+            const skipped = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                appliedLayoutVersion: main.getAppliedContinuousLayoutVersion(),
+                continuousLayoutVersion: 'unapplied-worker-reply',
+            });
+            expect(worker.step(skipped, Number.POSITIVE_INFINITY).progress.complete).toBe(true);
+            main.beginExternalLayout({ reason: 'edit' });
+            const generation = worker.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation,
+                appliedLayoutVersion: main.getAppliedContinuousLayoutVersion(),
+                continuousLayoutVersion: 'edit-complete',
+            });
+            let firstPublication: LayoutPublication | undefined;
+            let completed = false;
+            for (let step = 0; step < 150; step++) {
+                const result = worker.step(generation, 0, 1);
+                if (result.publication != null) {
+                    if (firstPublication == null) {
+                        firstPublication = result.publication;
+                        restartedMain.beginExternalLayout({ reason: 'edit' });
+                        const before = restartedMain.getSkeletonData();
+                        expect(restartedMain.applyLayoutPublication(
+                            structuredClone(result.publication),
+                            result.progress
+                        ).requiresFullPublication).toBe(true);
+                        expect(restartedMain.getSkeletonData()).toBe(before);
+                    }
+                    main.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                }
+                if (result.progress.complete) {
+                    completed = true;
+                    break;
+                }
+            }
+            expect(completed).toBe(true);
+            if (firstPublication?.kind !== 'block') {
+                throw new Error('Expected a continuous edit patch.');
+            }
+            expect(firstPublication.block.baseLayoutVersion).toBe('initial-complete');
+            expect(firstPublication.block.flow.lineIndex).toBeGreaterThan(0);
+            expect(firstPublication.block.skeTables.map(([id]) => id)).toEqual(['last']);
+            expect(main.getAppliedContinuousLayoutVersion()).toBe('edit-complete');
+            expect(main.getSkeletonData()!.pages[0].skeTables.get('first')).toBe(retainedTable);
+            const page = worker.getPage(0);
+            expect(page).not.toBeNull();
+            const expectedGeometry = normalizeSkeleton(DocumentLayoutSession.hydratePage(page!, workerModel.getSnapshot()));
+            expect(normalizeSkeleton(main.getSkeletonData()!.pages[0])).toEqual(expectedGeometry);
+
+            const retry = worker.start({ reason: 'edit', anchor, priorityAnchor: anchor, invalidation });
+            const fallback = worker.step(retry, Number.POSITIVE_INFINITY);
+            expect(fallback.progress.complete).toBe(true);
+            if (fallback.publication?.kind !== 'block') {
+                throw new Error('Expected complete recovery geometry.');
+            }
+            expect(fallback.publication.block.baseLayoutVersion).toBeUndefined();
+            restartedMain.applyLayoutPublication(structuredClone(fallback.publication), fallback.progress);
+            expect(normalizeSkeleton(restartedMain.getSkeletonData()!.pages[0])).toEqual(expectedGeometry);
+        } finally {
+            restartedMain.dispose();
+            main.dispose();
+            worker.dispose();
+            mainModel.dispose();
+            workerModel.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('publishes a pending Modern batch after a slow later block in the same slice', () => {
+        let now = 0;
+        let slowMeasurement = false;
+        mockWorkerCanvas((content) => {
+            if (!slowMeasurement && content.includes('☃')) {
+                now += 300;
+                slowMeasurement = true;
+            }
+        });
+        const model = createDocumentModelWithStyle('Before\rFirst pending\r☃\rAfter\rLast\r', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const session = new DocumentLayoutSession(model, locale);
+        const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+        try {
+            const generation = session.start({ reason: 'initial' });
+            expect(session.step(generation, 0, 1).publication?.kind).toBe('block');
+
+            const result = session.step(generation, Number.POSITIVE_INFINITY, 2);
+
+            expect(slowMeasurement).toBe(true);
+            expect(result.progress.complete).toBe(false);
+            expect(result.publication?.kind).toBe('block');
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            model.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('publishes a tail edit anchor promptly when an unchanged collapsed heading hides earlier paragraphs', () => {
+        mockWorkerCanvas();
+        const paragraphs = Array.from({ length: 100 }, (_, index) => `Paragraph ${index}`);
+        const content = `${['Collapsed', 'Hidden', 'Visible', ...paragraphs].join('\r')}\r`;
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const body = model.getBody()!;
+        body.paragraphs = Array.from(content.matchAll(/\r/g), (match, index) => ({
+            startIndex: match.index,
+            paragraphId: `paragraph-${index}`,
+            ...(index === 0 || index === 2 ? { paragraphStyle: { namedStyleType: NamedStyleType.HEADING_1 } } : {}),
+            ...(index === 0 ? { headingCollapsed: true } : {}),
+        }));
+        const univer = new Univer({ locale: LocaleType.EN_US });
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.setDirection('ltr');
+        const session = new DocumentLayoutSession(model, locale);
+        try {
+            const initial = session.start();
+            expect(session.step(initial, Number.POSITIVE_INFINITY).progress.complete).toBe(true);
+            const anchor = content.lastIndexOf('Paragraph 99') + 'Paragraph '.length;
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: '!' } });
+            model.apply(JSONX.getInstance().editOp(edit.serialize(), ['body']));
+            session.resetDataModel(model);
+            const generation = session.start({
+                reason: 'edit',
+                anchor,
+                priorityAnchor: anchor,
+                invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 },
+            });
+
+            const results = Array.from({ length: 3 }, () => session.step(generation, 0, 1));
+
+            expect(results.some(({ progress }) => progress.didPublishAnchor)).toBe(true);
+        } finally {
+            session.dispose();
+            model.dispose();
+            univer.dispose();
         }
     });
 

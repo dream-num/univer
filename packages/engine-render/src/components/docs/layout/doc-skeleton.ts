@@ -1234,6 +1234,7 @@ export class DocumentSkeleton extends Skeleton {
         publishedPageIndexes: Set<number>;
     }> = null;
 
+    private _appliedContinuousWorkerLayout: { version: string; skeleton: IDocumentSkeletonCached } | null = null;
     private _externalProtectedContinuousLayout: Nullable<{
         range: Extract<IDocumentLayoutProtectedRange, { mode: 'continuous' }>;
         pendingPublications: IDocumentLayoutBlockGeometryPublication[];
@@ -1279,6 +1280,7 @@ export class DocumentSkeleton extends Skeleton {
         this._layoutPageMaterialized$.complete();
         this._skeletonData = null;
         this._lastCompleteSkeletonData = null;
+        this._appliedContinuousWorkerLayout = null;
         this._completedPageCount = undefined;
         this._pendingInvalidationAnchor = null;
         this._externalLayoutProgress = null;
@@ -1915,7 +1917,7 @@ export class DocumentSkeleton extends Skeleton {
             if (line.ed >= anchorBlock.startIndex) {
                 break;
             }
-            if (line.st > retainedEnd + 1) {
+            if (!this._isContinuousPrefixGapCollapsed(retainedEnd + 1, line.st)) {
                 return null;
             }
             prefixLines.push(line);
@@ -1923,7 +1925,7 @@ export class DocumentSkeleton extends Skeleton {
         }
         // An interrupted first layout may have a published prefix that ends
         // before the edit. Resuming at the edit would skip the unpublished gap.
-        if (prefixLines.length === 0 || retainedEnd !== anchorBlock.startIndex - 1) {
+        if (prefixLines.length === 0 || !this._isContinuousPrefixGapCollapsed(retainedEnd + 1, anchorBlock.startIndex)) {
             return null;
         }
 
@@ -1986,6 +1988,18 @@ export class DocumentSkeleton extends Skeleton {
             processedBlockCount: anchorBlockIndex,
             interactionPageTail: null,
         };
+    }
+
+    private _isContinuousPrefixGapCollapsed(start: number, end: number): boolean {
+        let offset = start;
+        while (offset < end) {
+            const hidden = this._docViewModel.getCollapsedHeadingAtOffset(offset);
+            if (hidden == null) {
+                return false;
+            }
+            offset = hidden.endOffset;
+        }
+        return true;
     }
 
     private _findBodyPageIndex(pages: IDocumentSkeletonPage[], charIndex: number): number {
@@ -2134,7 +2148,11 @@ export class DocumentSkeleton extends Skeleton {
             while (!state.complete && !state.cancelled) {
                 const blockStartedAt = getLayoutNow();
                 this._advanceIncrementalLayout(state);
-                const blockDuration = getLayoutNow() - blockStartedAt;
+                const blockFinishedAt = getLayoutNow();
+                if (state.processedBlockCount > state.lastPublishedBlockCount) {
+                    state.continuousPublicationScheduler?.markPending(blockFinishedAt);
+                }
+                const blockDuration = blockFinishedAt - blockStartedAt;
                 state.maxBlockDuration = Math.max(state.maxBlockDuration, blockDuration);
                 blocksProcessed++;
                 if (state.pendingHyphenation != null) {
@@ -2702,10 +2720,17 @@ export class DocumentSkeleton extends Skeleton {
             };
         }
         if (updates.length > 0) {
+            if (this._appliedContinuousWorkerLayout?.skeleton === skeletonData) {
+                this._appliedContinuousWorkerLayout = null;
+            }
             this._dirty$.next(true);
         }
 
         return { didRefresh: updates.length > 0, requiresLayout };
+    }
+
+    getAppliedContinuousLayoutVersion(): string | undefined {
+        return this._appliedContinuousWorkerLayout?.version;
     }
 
     applyLayoutPublication(
@@ -2713,15 +2738,30 @@ export class DocumentSkeleton extends Skeleton {
         progress: IDocumentLayoutProgress,
         materializedPageRange?: IDocumentLayoutPageRange
     ): IDocumentLayoutApplyResult {
-        const skeletonData: IDocumentSkeletonCached = this._skeletonData ?? {
-            pages: [],
-            left: publication.left,
-            top: publication.top,
-            st: publication.st,
-            ...(publication.ed == null ? {} : { ed: publication.ed }),
-            skeHeaders: new Map(),
-            skeFooters: new Map(),
-        };
+        const baseVersion = publication.kind === 'block' ? publication.block.baseLayoutVersion : undefined;
+        const applied = this._appliedContinuousWorkerLayout;
+        if (baseVersion != null && (applied?.version !== baseVersion || this._externalProtectedContinuousLayout != null)) {
+            this._appliedContinuousWorkerLayout = null;
+            return { didReplaceProtectedPages: false, requiresFullPublication: true };
+        }
+
+        const skeletonData: IDocumentSkeletonCached =
+            (baseVersion == null ? this._skeletonData : applied?.skeleton) ?? {
+                pages: [],
+                left: publication.left,
+                top: publication.top,
+                st: publication.st,
+                ...(publication.ed == null ? {} : { ed: publication.ed }),
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            };
+        if (applied?.skeleton === skeletonData) {
+            // Consuming the complete layout for a patch invalidates its old version.
+            this._appliedContinuousWorkerLayout = null;
+            if (!progress.complete && this._lastCompleteSkeletonData === skeletonData) {
+                this._lastCompleteSkeletonData = null;
+            }
+        }
         const protectedContinuousLayout = publication.kind === 'block'
             ? this._externalProtectedContinuousLayout
             : null;
@@ -2896,6 +2936,10 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
             setPageParent(skeletonData.pages, skeletonData);
+            const completedVersion = publication.kind === 'block' ? publication.block.completedLayoutVersion : undefined;
+            this._appliedContinuousWorkerLayout = completedVersion == null
+                ? null
+                : { version: completedVersion, skeleton: skeletonData };
             this._lastCompleteSkeletonData = skeletonData;
             this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
             this._completedPageCount = skeletonData?.pages.length;

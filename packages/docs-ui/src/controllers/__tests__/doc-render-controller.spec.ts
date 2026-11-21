@@ -18,6 +18,7 @@
 
 import type { ICommandInfo, IDocumentData, IExecutionOptions } from '@univerjs/core';
 import type { IDocLayoutMountIdentity } from '@univerjs/docs';
+import type { DocumentSkeleton } from '@univerjs/engine-render';
 import {
     CustomDecorationType,
     CustomRangeType,
@@ -183,6 +184,7 @@ function createControllerFixture(options?: {
     initialSkeletonDataMissing?: boolean;
     useWorker?: boolean;
     workerCompletes?: boolean;
+    workerFirstPublicationIsPartial?: boolean;
     workerCompletionPromise?: Promise<void>;
     workerReplacesProtectedPages?: boolean;
     focusedUnitId?: string;
@@ -249,7 +251,8 @@ function createControllerFixture(options?: {
         cancelIncrementalLayout: vi.fn(),
         beginExternalLayout: vi.fn(),
         cancelExternalLayout: vi.fn(),
-        applyLayoutPublication: vi.fn(() => {
+        getAppliedContinuousLayoutVersion: vi.fn<() => string | undefined>(() => undefined),
+        applyLayoutPublication: vi.fn((): ReturnType<DocumentSkeleton['applyLayoutPublication']> => {
             publicationApplied = true;
             return { didReplaceProtectedPages: options?.workerReplacesProtectedPages ?? false };
         }),
@@ -423,7 +426,7 @@ function createControllerFixture(options?: {
                         publishedPageCount: 20,
                         reason: 'edit',
                         mode: 'paginated',
-                        complete: true,
+                        complete: !options.workerFirstPublicationIsPartial || layoutExecutorService.startLayout.mock.calls.length > 1,
                         cancelled: false,
                         anchorReady: true,
                         laidOutThrough: 20_000,
@@ -1249,6 +1252,7 @@ describe('doc render controller', () => {
             })),
         });
         const skeleton = skeletonManager.getSkeleton();
+        skeleton.getAppliedContinuousLayoutVersion.mockReturnValue('complete-worker-layout');
 
         commandCallbacks[0]({
             id: RichTextEditingMutation.id,
@@ -1270,6 +1274,7 @@ describe('doc render controller', () => {
             });
         });
         expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
+        expect(layoutExecutorService.startLayout.mock.calls[0][1]).not.toHaveProperty('appliedLayoutVersion');
 
         controller.dispose();
     });
@@ -1657,6 +1662,58 @@ describe('doc render controller', () => {
 
             expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
 
+            controller.dispose();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('retries a rejected Worker baseline without composing the same edit twice', async () => {
+        vi.useFakeTimers();
+        try {
+            const { commandCallbacks, controller, layoutExecutorService, skeletonManager } = createControllerFixture({
+                documentFlavor: DocumentFlavor.MODERN,
+                useWorker: true,
+                workerCompletes: true,
+                workerFirstPublicationIsPartial: true,
+                layoutProgress: [{
+                    complete: false,
+                    anchorReady: true,
+                    didPublishAnchor: true,
+                    interactionWindowComplete: true,
+                    stableLaidOutThrough: -1,
+                    elapsedTime: 1,
+                }],
+            });
+            const skeleton = skeletonManager.getSkeleton();
+            skeleton.getAppliedContinuousLayoutVersion.mockReturnValue('applied-version');
+            skeleton.applyLayoutPublication.mockReturnValueOnce({
+                didReplaceProtectedPages: false,
+                requiresFullPublication: true,
+            });
+
+            commandCallbacks[0]({
+                id: RichTextEditingMutation.id,
+                params: {
+                    unitId: 'doc-unit',
+                    actions: ['body', {
+                        et: 'text-x',
+                        e: [
+                            { t: 'r', len: 10 },
+                            { t: 'i', len: 1, body: { dataStream: 'X' } },
+                        ],
+                    }],
+                },
+            } satisfies ICommandInfo);
+            await vi.advanceTimersByTimeAsync(500);
+
+            const starts = layoutExecutorService.startLayout.mock.calls;
+            expect(starts).toHaveLength(2);
+            expect(starts[0][1]).toMatchObject({ appliedLayoutVersion: 'applied-version' });
+            expect(starts[1][1]).not.toHaveProperty('appliedLayoutVersion');
+            expect(starts[1][1]).toMatchObject({ invalidation: { oldStart: 10, oldEnd: 10, newEnd: 11 } });
+            expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(1);
+            expect(layoutExecutorService.recoverExecutor).not.toHaveBeenCalled();
             controller.dispose();
         } finally {
             vi.useRealTimers();

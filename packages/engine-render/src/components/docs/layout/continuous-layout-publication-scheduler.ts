@@ -26,15 +26,15 @@ const CONTINUOUS_PUBLICATION_MAX_WAIT_MS = 250;
 export class ContinuousLayoutPublicationScheduler {
     private _firstPendingAt: number | null = null;
 
-    /**
-     * Called at layout and backlog step boundaries with at least one stable
-     * unpublished block. The next such check flushes an expired batch even if
-     * the current step did not finish another block.
-     */
-    isReady(pendingBlockCount: number, now: number): boolean {
+    /** Record readiness immediately, before a later block in the same slice can run. */
+    markPending(now: number): void {
         this._firstPendingAt ??= now;
+    }
+
+    /** Check at layout and backlog boundaries, even when no new block finished. */
+    isReady(pendingBlockCount: number, now: number): boolean {
         return pendingBlockCount >= CONTINUOUS_PUBLICATION_BLOCK_THRESHOLD ||
-            now - this._firstPendingAt >= CONTINUOUS_PUBLICATION_MAX_WAIT_MS;
+            (this._firstPendingAt != null && now - this._firstPendingAt >= CONTINUOUS_PUBLICATION_MAX_WAIT_MS);
     }
 
     reset(): void {

@@ -15,12 +15,14 @@
  */
 
 import type { ICommand, IDataValidationRule } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import type { DataValidationChangeSource } from '../../models/data-validation-model';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
-import { CommandType } from '@univerjs/core';
 import { DataValidationModel } from '../../models/data-validation-model';
 
 export interface IAddDataValidationMutationParams {
+    /** Captured names for model-free qualified-reference rebasing. */
+    formulaSheetNames?: Record<string, string>;
     rule: IDataValidationRule | IDataValidationRule[];
     index?: number;
     source?: DataValidationChangeSource;
@@ -35,6 +37,7 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
         if (!params) {
             return false;
         }
+        if (!validFormulaSheetNames(params.formulaSheetNames)) return false;
         const { unitId, subUnitId, rule, index, source = 'command' } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
         dataValidationModel.addRule(unitId, subUnitId, rule, source, index);
@@ -73,6 +76,8 @@ export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutatio
 };
 
 export interface IUpdateDataValidationMutationParams {
+    /** Captured names for model-free qualified-reference rebasing. */
+    formulaSheetNames?: Record<string, string>;
     payload: IUpdateRulePayload;
     ruleId: string;
     source?: DataValidationChangeSource;
@@ -88,9 +93,15 @@ export const UpdateDataValidationMutation: ICommand<IUpdateDataValidationMutatio
             return false;
         }
 
+        if (!validFormulaSheetNames(params.formulaSheetNames)) return false;
         const { unitId, subUnitId, ruleId, payload, source = 'command' } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
         dataValidationModel.updateRule(unitId, subUnitId, ruleId, payload, source);
         return true;
     },
 };
+
+function validFormulaSheetNames(names: unknown): boolean {
+    return names === undefined || (!!names && typeof names === 'object' && !Array.isArray(names)
+        && Object.values(names).every((name) => typeof name === 'string'));
+}

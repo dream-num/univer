@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import type { FilterSelectionMode, IRange, IStyleData, Nullable, RecordValue } from '@univerjs/core';
+import type {
+    FilterSelectionMode,
+    IRange,
+    ISheetDataValidationRule,
+    IStyleData,
+    Nullable,
+    RecordValue,
+} from '@univerjs/core';
 import type {
     SheetsTableButtonStateEnum,
     SheetsTableSortStateEnum,
@@ -153,6 +160,8 @@ export interface ITableAddedEvent {
 
 export interface ITableRangeUpdate {
     newRange: IRange;
+    /** Command-prepared column state for deterministic structural replay. */
+    columns?: ITableColumnJson[];
 };
 
 export enum IRangeOperationTypeEnum {
@@ -233,6 +242,8 @@ export interface ITableFilterChangedEvent {
     oldSubUnitId?: string;
 }
 export interface ITableColumnJson {
+    /** Explicit column validation, anchored at the first data cell. */
+    dataValidation?: Omit<ISheetDataValidationRule, 'uid' | 'ranges'>;
     dataType: TableColumnDataTypeEnum;
     id: string;
     displayName: string;

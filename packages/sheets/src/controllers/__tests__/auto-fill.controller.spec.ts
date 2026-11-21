@@ -42,6 +42,7 @@ import { createTestBase } from '../../services/__tests__/util';
 import { AutoFillService, IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { AutoFillController } from '../auto-fill.controller';
 
 const SOURCE_STYLE: IStyleData = {
@@ -100,6 +101,7 @@ describe('AutoFillController copy-fill shortcuts', () => {
     beforeEach(() => {
         const testBed = createTestBase(Tools.deepClone(WORKBOOK_DATA), [
             [SheetsSelectionsService],
+            [SheetInterceptorService],
             [IAutoFillService, { useClass: AutoFillService }],
             [AutoFillController],
         ]);

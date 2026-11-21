@@ -37,10 +37,14 @@ import {
 import { AstRootNodeFactory, AstTreeBuilder, CalculateFormulaService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaResultService, FormulaRuntimeService, FormulaUnitReferenceResolver, functionMath, FunctionNodeFactory, generateExecuteAstNodeData, getObjectValue, ICalculateFormulaService, IFormulaCurrentConfigService, IFormulaDependencyGenerator, IFormulaExternalReferenceDataLoader, IFormulaRuntimeService, IFormulaUnitReferenceResolver, IFunctionService, Interpreter, IOtherFormulaManagerService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerNode, LexerTreeBuilder, NoopFormulaExternalReferenceDataLoader, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, RemoveSuperTableMutation, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetSuperTableMutation, SuffixNodeFactory, UnionNodeFactory, UniverFormulaEnginePlugin, ValueNodeFactory } from '@univerjs/engine-formula';
 import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
+    ExclusiveRangeService,
+    IExclusiveRangeService,
     InsertColMutation,
     InsertRowMutation,
+    INumfmtService,
     MoveRangeCommand,
     MoveRangeMutation,
+    NumfmtService,
     RangeProtectionRuleModel,
     RefRangeService,
     RemoveColByRangeCommand,
@@ -71,12 +75,15 @@ import {
     SheetTableRemoveColumnAtCommand,
 } from '../../commands/commands/sheet-table-row-col.command';
 import { AddSheetTableMutation } from '../../commands/mutations/add-sheet-table.mutation';
+import { ApplyTableAutoExpandMutation } from '../../commands/mutations/apply-table-auto-expand.mutation';
 import { DeleteSheetTableMutation } from '../../commands/mutations/delete-sheet-table.mutation';
 import { MoveSheetTableMutation } from '../../commands/mutations/move-sheet-table.mutation';
 import { SetSheetTableMutation } from '../../commands/mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../../commands/utils/calculated-column';
 import { TableManager } from '../../models/table-manager';
+import { SheetTableAutoExpandService } from '../../services/table-auto-expand.service';
 import { SheetTableService } from '../../services/table.service';
+import { SheetTableAutoExpandController } from '../sheet-table-auto-expand.controller';
 import { SheetTableFormulaController } from '../sheet-table-formula.controller';
 import { SheetTableMoveController } from '../sheet-table-move.controller';
 import { SheetTableRefRangeController } from '../sheet-table-ref-range.controller';
@@ -241,6 +248,10 @@ function createControllerTestBed() {
         [UnionNodeFactory],
         [ValueNodeFactory],
         [TableManager],
+        [INumfmtService, { useClass: NumfmtService }],
+        [IExclusiveRangeService, { useClass: ExclusiveRangeService }],
+        [SheetTableAutoExpandService],
+        [SheetTableAutoExpandController],
         [SheetTableService],
         [SheetTableFormulaController],
         [SheetTableMoveController],
@@ -395,6 +406,63 @@ describe('Sheet table formula integration', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         testBed?.univer.dispose();
+    });
+
+    function enableAutoExpansion() {
+        commandService.registerCommand(ApplyTableAutoExpandMutation);
+        testBed.injector.get(SheetTableAutoExpandController);
+    }
+
+    it('preserves an existing structured reference when an appended header has the same name', async () => {
+        enableAutoExpansion();
+        expect(calculate('=SUM(Orders[amount])')).toBe(60);
+        expect(await commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 },
+            value: { v: 'amount' },
+            valueChangeSource: 'editor',
+        })).toBe(true);
+        const table = testBed.injector.get(TableManager).getTable('test', 'orders-table')!;
+        expect(table.getRange().endColumn).toBe(3);
+        expect(table.getTableInfo().columns.map((column) => column.displayName)).toEqual(['product', 'amount', 'tax', 'amount']);
+        expect(calculate('=SUM(Orders[amount])')).toBe(60);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(calculate('=SUM(Orders[amount])')).toBe(60);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(calculate('=SUM(Orders[amount])')).toBe(60);
+    });
+
+    it('retains input and skips calculated-column expansion over a spill whose anchor is outside the table', async () => {
+        enableAutoExpansion();
+        const manager = testBed.injector.get(TableManager);
+        manager.deleteTable('test', 'orders-table');
+        manager.addTable('test', 'sheet1', 'Totals', { startRow: 0, endRow: 3, startColumn: 2, endColumn: 3 }, ['Total', 'Amount'], 'totals');
+        manager.getTable('test', 'totals')!.getTableColumnByIndex(0)!.formula = '=D2*2';
+        const sheet = testBed.injector.get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        sheet.getCellMatrix().setValue(0, 6, { v: 11 });
+        sheet.getCellMatrix().setValue(0, 7, { v: 22 });
+        sheet.getCellMatrix().setValue(0, 8, { v: 33 });
+        sheet.getCellMatrix().setValue(4, 0, { f: '=G1:I1' });
+        expect(calculate('=G1:I1', 4, 0)).toEqual([[11, 22, 33]]);
+        formulaDataModel.setArrayFormulaRange({ test: { sheet1: { 4: { 0: { startRow: 4, endRow: 4, startColumn: 0, endColumn: 2 } } } } });
+        formulaDataModel.setArrayFormulaCellData({ test: { sheet1: { 4: { 0: { v: 11 }, 1: { v: 22 }, 2: { v: 33 } } } } });
+        expect(await commandService.executeCommand(SetRangeValuesCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 4, endRow: 4, startColumn: 3, endColumn: 3 },
+            value: { v: 4 },
+            valueChangeSource: 'editor',
+        })).toBe(true);
+        expect(sheet.getCellRaw(4, 3)?.v).toBe(4);
+        expect(sheet.getCellRaw(4, 2)?.f).toBeFalsy();
+        expect(manager.getTable('test', 'totals')!.getRange().endRow).toBe(3);
+        expect(formulaDataModel.getArrayFormulaCellData().test?.sheet1?.[4]?.[2]?.v).toBe(33);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheet.getCellRaw(4, 3)?.v).toBeFalsy();
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheet.getCellRaw(4, 3)?.v).toBe(4);
+        expect(sheet.getCellRaw(4, 2)?.f).toBeFalsy();
     });
 
     it.each(['sheet1', 'sheet2'])('preserves structured references and calculated column anchors when moving to %s', async (sheetId) => {

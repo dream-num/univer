@@ -85,6 +85,7 @@
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-table": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

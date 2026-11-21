@@ -52,6 +52,7 @@ import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
+import { DataValidationTableAutoExpandController } from './controllers/dv-table-auto-expand.controller';
 import { SheetsDataValidationUIController } from './controllers/ui.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
@@ -97,6 +98,7 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
             [DataValidationDropdownManagerService],
             [DataValidationAlertController],
             [DataValidationAutoFillController],
+            [DataValidationTableAutoExpandController],
             [SheetsDataValidationRenderController],
             [DataValidationCopyPasteController],
             [DataValidationRejectInputController],
@@ -120,6 +122,7 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
     }
 
     override onReady(): void {
+        this._injector.get(DataValidationTableAutoExpandController);
         this._injector.get(DataValidationCopyPasteController);
         this._injector.get(DataValidationRejectInputController);
         this._injector.get(DataValidationAlertController);

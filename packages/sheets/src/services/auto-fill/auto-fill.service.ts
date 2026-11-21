@@ -19,6 +19,7 @@ import type {
     IDisposable,
     IMutationInfo,
     IRange,
+    IUndoRedoItem,
     Nullable,
     Workbook,
     Worksheet,
@@ -37,6 +38,7 @@ import {
     ObjectMatrix,
     RANGE_TYPE,
     Rectangle,
+    sequenceExecute,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -54,6 +56,8 @@ import { SetRangeValuesMutation } from '../../commands/mutations/set-range-value
 import { SetWorksheetRowAutoHeightMutation } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
+import { createSheetValueChangeContext, executeSheetValueChangeEffects } from '../sheet-interceptor/sheet-value-change';
 import AutoFillRules from './rules';
 import { AUTO_FILL_APPLY_TYPE, AUTO_FILL_HOOK_TYPE } from './type';
 
@@ -112,6 +116,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     private _isFillingStyle: boolean = true;
 
     private _prevUndos: IMutationInfo[] = [];
+    private _prevRedos: IMutationInfo[] = [];
+    private _prevHistoryItem: IUndoRedoItem | undefined;
 
     private readonly _autoFillLocation$: BehaviorSubject<Nullable<IAutoFillLocation>> = new BehaviorSubject<
         Nullable<IAutoFillLocation>
@@ -192,6 +198,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     // a cache to undo commands of last apply-type
     private _initPrevUndo() {
         this._prevUndos = [];
+        this._prevRedos = [];
+        this._prevHistoryItem = undefined;
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -452,6 +460,9 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         }
 
         const direction = this.direction;
+        if (this._prevHistoryItem && this._undoRedoService.pitchTopUndoElement() !== this._prevHistoryItem) {
+            return false;
+        }
         const activeHooks = this.getActiveHooks(applyType);
         // Prepare and validate before updating the apply type, undoing a previous fill or changing the selection.
         const fillCallbacks = activeHooks.map((hook) => hook.onPrepareFillData?.(
@@ -459,14 +470,18 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             direction,
             applyType
         ) ?? (() => hook.onFillData?.({ source, target, unitId, subUnitId }, direction, applyType)));
+        const previousApplyType = this.applyType;
         this.applyType = applyType;
 
-        if (this._prevUndos.length > 0) {
-            this._prevUndos.forEach((undo) => {
-                this._commandService.syncExecuteCommand(undo.id, undo.params);
-            });
+        const previousUndo = sequenceExecute(this._prevUndos, this._commandService);
+        if (!previousUndo.result) {
+            this.applyType = previousApplyType;
+            if ((previousUndo.index > 0 || previousUndo.error) && !sequenceExecute(this._prevRedos, this._commandService).result) {
+                throw new Error('[AutoFillService]: Failed to restore the previous fill.');
+            }
+            if (previousUndo.error) throw previousUndo.error;
+            return false;
         }
-        this._prevUndos = [];
 
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
 
@@ -494,16 +509,30 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
-        fillCallbacks.forEach((fill) => {
-            const { undos: hookUndos, redos: hookRedos } = fill() || {};
-            if (hookUndos) {
-                undos.push(...hookUndos);
+        let effects: ReturnType<SheetInterceptorService['onValueChange']>;
+        try {
+            fillCallbacks.forEach((fill) => {
+                const { undos: hookUndos, redos: hookRedos } = fill() || {};
+                if (hookUndos) {
+                    undos.push(...hookUndos);
+                }
+                if (hookRedos) {
+                    redos.push(...hookRedos);
+                }
+            });
+            const context = applyType !== AUTO_FILL_APPLY_TYPE.ONLY_FORMAT
+                ? createSheetValueChangeContext(unitId, subUnitId, 'fill', worksheet, redos, [discreteRangeToRange(target)])
+                : undefined;
+            effects = context ? this._injector.get(SheetInterceptorService).onValueChange(context) : [];
+        } catch (error) {
+            this.applyType = previousApplyType;
+            if (!this._prevRedos.every((mutation) => this._commandService.syncExecuteCommand(mutation.id, mutation.params))) {
+                throw new Error('[AutoFillService]: Failed to restore the previous fill.');
             }
-            if (hookRedos) {
-                redos.push(...hookRedos);
-            }
-        });
-        const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
+            throw error;
+        }
+        const execution = sequenceExecute(redos, this._commandService);
+        const result = execution.result;
 
         // deal with auto-height
         const { redos: autoHeightRedos, undos: autoHeightUndos } = this._getAutoHeightUndoRedos(redos, workbook, worksheet);
@@ -511,13 +540,31 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         undos.push(...autoHeightUndos);
 
         if (result) {
+            const affiliated = executeSheetValueChangeEffects(effects, this._commandService);
+            redos.push(...affiliated.redos);
+            undos.unshift(...affiliated.undos);
             this._prevUndos = undos;
+            this._prevRedos = redos;
+            if (this._prevHistoryItem) {
+                this._undoRedoService.popUndoToRedo();
+            }
             // add to undo redo services
-            this._undoRedoService.pushUndoRedo({
+            const historyItem: IUndoRedoItem = {
                 unitID: unitId,
                 undoMutations: undos,
                 redoMutations: redos,
-            });
+            };
+            this._undoRedoService.pushUndoRedo(historyItem);
+            this._prevHistoryItem = historyItem;
+        } else {
+            this.applyType = previousApplyType;
+            const rollback = sequenceExecute(undos, this._commandService);
+            const restored = sequenceExecute(this._prevRedos, this._commandService);
+            if (!rollback.result || !restored.result) {
+                throw new Error('[AutoFillService]: Failed to restore the previous fill.');
+            }
+            if (execution.error) throw execution.error;
+            return false;
         }
         activeHooks.forEach((hook) => {
             hook.onAfterFillData?.({ source, target, unitId, subUnitId }, direction, applyType);

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IMultiCommand } from '../command.service';
 import { Injector } from '../../../common/di';
 import { CustomCommandExecutionError } from '../../../common/error';
 import { ConfigService, IConfigService } from '../../config/config.service';
@@ -310,6 +310,15 @@ describe('Test CommandService', () => {
             commandService.syncExecuteCommand(mutationID);
             expect(regular).not.toHaveBeenCalled();
             expect(collab).not.toHaveBeenCalled();
+        });
+
+        it('does not forward rejected mutations to collaboration in either execution mode', async () => {
+            const received: string[] = [];
+            commandService.onMutationExecutedForCollab((command) => received.push(command.id));
+            commandService.registerCommand({ id: 'rejected', type: CommandType.MUTATION, handler: () => false });
+            expect(commandService.syncExecuteCommand('rejected')).toBe(false);
+            expect(await commandService.executeCommand('rejected')).toBe(false);
+            expect(received).toEqual([]);
         });
 
         it('Should attach the triggering command id to nested synchronous mutations', () => {

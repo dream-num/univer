@@ -647,10 +647,14 @@ export { InterceptCellContentPriority, INTERCEPTOR_POINT, RangeThemeInterceptorI
 export {
     AFTER_CELL_EDIT,
     BEFORE_CELL_EDIT,
+    CAPTURE_CELL_VALIDATION,
     SheetInterceptorService,
     VALIDATE_CELL,
 } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { IAutoHeightContext } from './services/sheet-interceptor/sheet-interceptor.service';
+export type { ISheetValueChangeContext } from './services/sheet-interceptor/sheet-value-change';
+export type { ISheetValueChangeEffect } from './services/sheet-interceptor/sheet-value-change';
+export { createSheetValueChangeContext, executeSheetValueChangeEffects } from './services/sheet-interceptor/sheet-value-change';
 export type {
     ISheetLocation,
     ISheetLocationBase,

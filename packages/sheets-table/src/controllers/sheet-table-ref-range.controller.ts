@@ -23,6 +23,7 @@ import type {
 } from '@univerjs/sheets';
 import {
     Disposable,
+    generateRandomId,
     ICommandService,
     Inject,
     Injector,
@@ -51,6 +52,7 @@ import { AddSheetTableMutation } from '../commands/mutations/add-sheet-table.mut
 import { DeleteSheetTableMutation } from '../commands/mutations/delete-sheet-table.mutation';
 import { SetSheetTableMutation } from '../commands/mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../commands/utils/calculated-column';
+import { TableColumn } from '../models/table-column';
 import { hasTableDxfStyles } from '../models/table-dxf';
 import { TableManager } from '../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../types/type';
@@ -197,6 +199,10 @@ export class SheetTableRefRangeController extends Disposable {
                                 rowColType: IRowColTypeEnum.Col,
                                 index: range.startColumn,
                                 count: insertColCount,
+                                columnsJson: Array.from({ length: insertColCount }, (_, index) => new TableColumn(
+                                    generateRandomId(),
+                                    getColumnName(table.getColumnsCount() + index + 1, this._localeService.t<LocaleKey>('sheets-table.columnPrefix'))
+                                ).toJSON()),
                             },
                         },
                     },
@@ -573,7 +579,7 @@ export class SheetTableRefRangeController extends Disposable {
     }
 
     private _initCommandListener() {
-        this._commandService.onCommandExecuted((commandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === InsertRowMutation.id) {
                 const params = commandInfo.params as IInsertRowMutationParams;
                 const { unitId, subUnitId, range } = params;
@@ -645,6 +651,6 @@ export class SheetTableRefRangeController extends Disposable {
                     }
                 });
             }
-        });
+        }));
     }
 }

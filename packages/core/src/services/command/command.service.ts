@@ -215,6 +215,8 @@ export interface ICommandService {
      * @returns If the command is registered, return `true`, otherwise return `false`.
      */
     hasCommand(commandId: string): boolean;
+    /** Inspect the registered command kind without executing it. */
+    getCommandType(commandId: string): CommandType | undefined;
     /**
      * Register a command to the command service.
      * @param command The command to register.
@@ -361,6 +363,10 @@ export class CommandService extends Disposable implements ICommandService {
         return this._commandRegistry.hasCommand(commandId);
     }
 
+    getCommandType(commandId: string): CommandType | undefined {
+        return this._commandRegistry.getCommandType(commandId);
+    }
+
     registerCommand(command: ICommand): IDisposable {
         return this._commandRegistry.registerCommand(command);
     }
@@ -448,12 +454,12 @@ export class CommandService extends Disposable implements ICommandService {
                 const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {
-                    if (command.type === CommandType.MUTATION) {
+                    if (command.type === CommandType.MUTATION && result !== false) {
                         this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
                     }
                 } else {
                     this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (command.type === CommandType.MUTATION) {
+                    if (command.type === CommandType.MUTATION && result !== false) {
                         this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
                     }
                 }
@@ -509,12 +515,12 @@ export class CommandService extends Disposable implements ICommandService {
                 const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {
-                    if (command.type === CommandType.MUTATION) {
+                    if (command.type === CommandType.MUTATION && result !== false) {
                         this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
                     }
                 } else {
                     this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (command.type === CommandType.MUTATION) {
+                    if (command.type === CommandType.MUTATION && result !== false) {
                         this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
                     }
                 }

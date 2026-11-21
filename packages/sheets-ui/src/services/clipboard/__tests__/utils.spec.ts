@@ -372,6 +372,14 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
 });
 
 describe('test convertTextToTable', () => {
+    it.each(['\n', '\r\n', '\r'])('ignores a terminal row delimiter (%j)', (newline) => {
+        expect(convertTextToTable(`Alice\t7${newline}`)).toBe('<table><tr><td>Alice</td><td>7</td></tr></table>');
+    });
+
+    it('escapes literal HTML entities before constructing table markup', () => {
+        expect(convertTextToTable('A&amp;B\t7\n')).toBe('<table><tr><td>A&amp;amp;B</td><td>7</td></tr></table>');
+    });
+
     it('keeps quoted multiline TSV cells inside a single table cell', () => {
         const tsv = '"line1\nline2"\t"say ""hi"""\r\nrow2\t<tag>';
 

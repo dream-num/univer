@@ -18,15 +18,23 @@
 
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ITableColumnJson } from '../../types/type';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    sequenceExecute,
+} from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getMoveRangeCommandMutations, getMoveRangeUndoRedoMutations, getSheetCommandTarget, InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ITableColumnJson } from '../../types/type';
 import { SheetsTableController } from '../../controllers/sheets-table.controller';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../types/type';
 import { SetSheetTableMutation } from '../mutations/set-sheet-table.mutation';
 import { getCalculatedColumnFillMutation } from '../utils/calculated-column';
+import { createTableColumnSnapshots } from '../utils/table-columns';
 
 interface ISheetTableRowColOperationCommandParams {
     tableId: string;
@@ -395,6 +403,7 @@ export const SheetTableInsertColCommand: ICommand<ISheetTableRowColOperationComm
                             rowColType: IRowColTypeEnum.Col,
                             index: range.startColumn,
                             count: insertColCount,
+                            columnsJson: createTableColumnSnapshots(table.getColumnsCount(), insertColCount, accessor.get(LocaleService).t('sheets-table.columnPrefix')),
                         },
                     },
                 },
@@ -437,6 +446,7 @@ export const SheetTableInsertColCommand: ICommand<ISheetTableRowColOperationComm
                             rowColType: IRowColTypeEnum.Col,
                             index: range.startColumn,
                             count: insertColCount,
+                            columnsJson: createTableColumnSnapshots(table.getColumnsCount(), insertColCount, accessor.get(LocaleService).t('sheets-table.columnPrefix')),
                         },
                     },
                 },
@@ -544,6 +554,7 @@ export const SheetTableInsertColumnAtCommand: ICommand<ISheetTableInsertAtComman
                         rowColType: IRowColTypeEnum.Col,
                         index,
                         count,
+                        columnsJson: createTableColumnSnapshots(table.getColumnsCount(), count, accessor.get(LocaleService).t('sheets-table.columnPrefix')),
                     },
                 },
             },

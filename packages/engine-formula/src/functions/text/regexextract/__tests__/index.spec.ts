@@ -105,6 +105,20 @@ describe('Test regexextract function', () => {
             ]);
         });
 
+        it.each([
+            { text: 'b', pattern: '(a)?b', expected: ErrorType.NA },
+            { text: 'b', pattern: '(a*)b', expected: '' },
+            { text: 'b', pattern: '(a)?(b)', expected: [[ErrorType.NA, 'b']] },
+            { text: 'b', pattern: '(a*)(b)', expected: [['', 'b']] },
+            { text: 'a', pattern: '(a)|(b)', expected: [['a', ErrorType.NA]] },
+            { text: 'ab', pattern: '(a)?(b)', expected: [['a', 'b']] },
+            { text: '', pattern: '(a*)', expected: '' },
+            { text: 'b', pattern: '(a)?(b)(c*)', expected: [[ErrorType.NA, 'b', '']] },
+        ])('distinguishes nonparticipating and empty captures in $text with $pattern', ({ text, pattern, expected }) => {
+            const result = testFunction.calculate(StringValueObject.create(text), StringValueObject.create(pattern));
+            expect(getObjectValue(result)).toStrictEqual(expected);
+        });
+
         it('Is not valid or safe RegExp', () => {
             let text = StringValueObject.create('');
             let regularExpression = StringValueObject.create('[a-Z]+');

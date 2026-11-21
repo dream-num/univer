@@ -286,11 +286,10 @@ function ToolbarDropdownButton<T extends string | number>(props: {
             }}
             overlay={(
                 <div
-                    className={`
-                      univer-min-w-32 univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-                      univer-bg-gray-0 univer-p-1 univer-shadow-lg
-                      dark:!univer-border-gray-700 dark:!univer-bg-gray-900
-                    `}
+                    className="
+                      univer-min-w-32 univer-p-1
+                      dark:!univer-bg-gray-900
+                    "
                 >
                     {props.options.map((option) => (
                         <button

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, LocaleService, LocaleType, ObjectMatrix, Plugin } from '@univerjs/core';
+import { ConfigService, ICommandService, IConfigService, Inject, Injector, LocaleService, LocaleType, ObjectMatrix, Plugin } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
@@ -25,6 +25,7 @@ import {
     SetFormulaCalculationResultMutation,
     SetFormulaDependencyCalculationResultMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CalculateController } from '../../controllers/calculate.controller';
 import { createCommandTestBed } from '../../engine/analysis/__tests__/create-command-test-bed';
 import { Lexer } from '../../engine/analysis/lexer';
@@ -40,7 +41,11 @@ import { Minus } from '../../functions/meta/minus';
 import { ICalculateFormulaService } from '../calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../current-data.service';
 import { IDefinedNamesService } from '../defined-names.service';
-import { FormulaCacheService } from '../formula-cache.service';
+import {
+    DEFAULT_FORMULA_AST_CACHE_LIMIT,
+    DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT,
+    FormulaCacheService,
+} from '../formula-cache.service';
 import { DescriptionService, IDescriptionService } from '../formula/description.service';
 import { IRegisterFunctionService, RegisterFunctionService } from '../formula/register-function.service';
 import { IFunctionService } from '../function.service';
@@ -430,5 +435,73 @@ describe('FormulaCacheService lifecycle', () => {
             subscription.unsubscribe();
             replacement.univer.dispose();
         }
+    });
+
+    describe('FormulaCacheService capacity and configuration (#7936)', () => {
+        it('uses default capacity limits when no config is provided', () => {
+            const cache = new FormulaCacheService();
+            expect(cache.astLimit).toBe(DEFAULT_FORMULA_AST_CACHE_LIMIT);
+            expect(cache.lexerTreeLimit).toBe(DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT);
+        });
+
+        it('reads custom astCacheSize and lexerTreeCacheSize from IConfigService', () => {
+            const injector = new Injector([[IConfigService, { useClass: ConfigService }]]);
+            const configService = injector.get(IConfigService);
+            configService.setConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY, {
+                astCacheSize: 20000,
+                lexerTreeCacheSize: 8000,
+            });
+            const cache = injector.createInstance(FormulaCacheService);
+            expect(cache.astLimit).toBe(20000);
+            expect(cache.lexerTreeLimit).toBe(8000);
+        });
+
+        it('dynamically expands AST cache capacity via ensureAstCapacity to prevent eviction cliff (#7936)', () => {
+            const cache = new FormulaCacheService();
+            cache.setAstLimit(5);
+            expect(cache.astLimit).toBe(5);
+
+            for (let i = 0; i < 5; i++) {
+                cache.setAst(`key_${i}`, 'unit1', new AstRootNode(`node_${i}`));
+            }
+
+            // Expanding capacity before adding more entries preserves earlier entries
+            cache.ensureAstCapacity(10);
+            expect(cache.astLimit).toBe(10);
+
+            for (let i = 5; i < 9; i++) {
+                cache.setAst(`key_${i}`, 'unit1', new AstRootNode(`node_${i}`));
+            }
+
+            // Key 0 must still be present because limit was raised to 10
+            expect(cache.getAst('key_0')).toBeDefined();
+            expect(cache.getAst('key_8')).toBeDefined();
+        });
+
+        it('shrinks and purges oldest entries when setAstLimit is lowered', () => {
+            const cache = new FormulaCacheService();
+            cache.setAstLimit(5);
+            for (let i = 0; i < 5; i++) {
+                cache.setAst(`k_${i}`, 'unit1', new AstRootNode(`n_${i}`));
+            }
+
+            cache.setAstLimit(3);
+            expect(cache.astLimit).toBe(3);
+            // Oldest two (k_0, k_1) should have been purged
+            expect(cache.getAst('k_0')).toBeUndefined();
+            expect(cache.getAst('k_1')).toBeUndefined();
+            expect(cache.getAst('k_2')).toBeDefined();
+            expect(cache.getAst('k_4')).toBeDefined();
+        });
+
+        it('expands lexer tree cache capacity via ensureLexerTreeCapacity', () => {
+            const cache = new FormulaCacheService();
+            expect(cache.lexerTreeLimit).toBe(DEFAULT_FORMULA_LEXER_TREE_CACHE_LIMIT);
+            cache.ensureLexerTreeCapacity(5000);
+            expect(cache.lexerTreeLimit).toBe(5000);
+            // Calling with smaller capacity does not reduce limit
+            cache.ensureLexerTreeCapacity(3000);
+            expect(cache.lexerTreeLimit).toBe(5000);
+        });
     });
 });

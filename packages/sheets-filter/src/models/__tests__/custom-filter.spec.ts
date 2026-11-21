@@ -126,5 +126,24 @@ describe('Test custom filter functions', () => {
             expect(textMatch.fn('hello111\r\n'.trimEnd(), '*hello?*')).toBeTruthy();
             expect(textMatch.fn('hello', '*hello?*')).toBeFalsy();
         });
+
+        it('should read "~" before a wild card as the literal character', () => {
+            expect(textMatch.fn('fy06?', 'fy06~?')).toBeTruthy();
+            expect(textMatch.fn('fy06x', 'fy06~?')).toBeFalsy();
+            expect(textMatch.fn('5*3 = 15', '*~**')).toBeTruthy();
+            expect(textMatch.fn('5x3 = 15', '*~**')).toBeFalsy();
+
+            expect(notEquals.fn('fy06?', 'fy06~?')).toBeFalsy();
+            expect(notEquals.fn('fy06x', 'fy06~?')).toBeTruthy();
+        });
+
+        it('should compare a text without wild cards as written, "~" included', () => {
+            expect(textMatch.fn('a~~b', 'a~~b')).toBeTruthy();
+            expect(textMatch.fn('a~b', 'a~~b')).toBeFalsy();
+            expect(textMatch.fn('a~b', '*a~~b*')).toBeTruthy();
+
+            expect(notEquals.fn('a~~b', 'a~~b')).toBeFalsy();
+            expect(notEquals.fn('a~b', 'a~~b')).toBeTruthy();
+        });
     });
 });

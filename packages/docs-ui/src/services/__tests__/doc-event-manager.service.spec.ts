@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IDocumentData } from '@univerjs/core';
 import type { IPointerEvent, RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
@@ -23,7 +23,10 @@ import {
     EventState,
     EventSubject,
     Injector,
+    JSONX,
     PresetListType,
+    TextX,
+    TextXActionType,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -35,12 +38,14 @@ import {
     ICanvasColorService,
     IRenderManagerService,
     RenderManagerService,
+    ScrollBar,
     setDocsTableRenderViewportProvider,
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
     Viewport,
 } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { genEmptyTable, genTableSource } from '../../commands/commands/table/table';
 import {
     calcDocGlyphPosition,
     DocEventManagerService,
@@ -178,6 +183,181 @@ describe('custom-range hit testing with real document layout', () => {
             subscription.unsubscribe();
         } finally {
             univer.dispose();
+        }
+    });
+
+    it('keeps hover rectangles while scrolling within the buffer and rebuilds after a jump or layout change', () => {
+        vi.useFakeTimers();
+        const paragraphs = Array.from({ length: 24 }, (_, index) => `Link ${index} example text\r`);
+        const dataStream = `${paragraphs.join('')}\n`;
+        const customRanges: ICustomRange[] = [];
+        let startIndex = 0;
+        for (const [index, paragraph] of paragraphs.entries()) {
+            customRanges.push({ startIndex, endIndex: startIndex + 'Link'.length - 1, rangeId: `link-${index}`, rangeType: CustomRangeType.HYPERLINK });
+            startIndex += paragraph.length;
+        }
+        const snapshot: IDocumentData = {
+            id: 'hover-scroll-window',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'body' }],
+                customRanges,
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 320, height: Number.POSITIVE_INFINITY },
+                marginTop: 8,
+                marginLeft: 12,
+            },
+        };
+
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, snapshot);
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const manager = render.with(DocSkeletonManagerService);
+            const skeleton = manager.recalculate();
+            const documents = injector.createInstance(Documents, 'hover-document', skeleton);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.scene.transformByState({ width: 320, height: 1600 });
+            const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 240, height: 100 });
+            const scrollBar = new ScrollBar(viewport);
+            render.addRenderDependencies([[DocEventManagerService]]);
+            const service = render.with(DocEventManagerService);
+            let hovered: Array<{ range: { rangeId: string }; rects: unknown }> = [];
+            service.hoverCustomRangesRealTime$.subscribe((value) => hovered = value);
+            const expected = service.getCustomRangeBounds();
+            const lookup = vi.spyOn(skeleton, 'findNodePositionByCharIndex');
+            const hover = (index: number, scrollTop: number, bounds = expected) => {
+                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollTop });
+                expect(Math.abs(viewport.viewportScrollY - scrollTop)).toBeLessThan(1);
+                const range = bounds[index];
+                const rect = range.rects[0];
+                render.scene.onPointerMove$.emitEvent({
+                    buttons: 0,
+                    offsetX: (rect.left + rect.right) / 2,
+                    offsetY: (rect.top + rect.bottom) / 2 - viewport.viewportScrollY,
+                    target: documents,
+                } as unknown as IPointerEvent);
+                vi.advanceTimersByTime(31);
+                expect(hovered.map(({ range, rects }) => ({ rangeId: range.rangeId, rects }))).toEqual([
+                    { rangeId: range.customRange.rangeId, rects: range.rects },
+                ]);
+            };
+
+            hover(0, 0);
+            expect(lookup.mock.calls.length).toBeGreaterThan(0);
+            expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(false);
+
+            lookup.mockClear();
+            hover(1, 12);
+            hover(0, 0);
+            expect(lookup).not.toHaveBeenCalled();
+
+            const scrollTop = expected[20].rects[0].top - 16;
+            hover(20, scrollTop);
+            expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(true);
+
+            const inserted = 'Inserted paragraph\r';
+            const edit = new TextX();
+            edit.push({
+                t: TextXActionType.INSERT,
+                len: inserted.length,
+                body: { dataStream: inserted, paragraphs: [{ startIndex: inserted.length - 1, paragraphId: 'inserted' }] },
+            });
+            model.apply(JSONX.getInstance().editOp(edit.serialize(), ['body']));
+            manager.getViewModel().reset(model);
+            manager.recalculate();
+            const updatedBounds = service.getCustomRangeBounds();
+            expect(updatedBounds[20].rects[0].top).toBeGreaterThan(expected[20].rects[0].top);
+            lookup.mockClear();
+            hover(20, updatedBounds[20].rects[0].top - 16, updatedBounds);
+            expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(true);
+            scrollBar.dispose();
+        } finally {
+            univer.dispose();
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps table links aligned when a cell scrolls into the same viewport', () => {
+        vi.useFakeTimers();
+        const stream = genEmptyTable(1, 2).dataStream.replace('\r', 'First link\r');
+        const rowEnd = stream.lastIndexOf('\r');
+        const tableStream = `${stream.slice(0, rowEnd)}Second link${stream.slice(rowEnd)}`;
+        const dataStream = `${tableStream}\r\n`;
+        const snapshot: IDocumentData = {
+            id: 'hover-table-viewport',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'table' }],
+                customRanges: ['First link', 'Second link'].map((label) => ({
+                    startIndex: dataStream.indexOf(label),
+                    endIndex: dataStream.indexOf(label) + label.length - 1,
+                    rangeId: label,
+                    rangeType: CustomRangeType.HYPERLINK,
+                })),
+            },
+            tableSource: { table: { ...genTableSource(1, 2, 160), tableId: 'table' } },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 300, height: Number.POSITIVE_INFINITY },
+            },
+        };
+        const univer = new Univer();
+        let tableViewport: { contentWidth: number; scrollLeft: number; viewportWidth: number } | null = null;
+        setDocsTableRenderViewportProvider((_unitId, tableId) => tableId === 'table' ? tableViewport : null);
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, snapshot);
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const skeleton = render.with(DocSkeletonManagerService).recalculate();
+            const documents = injector.createInstance(Documents, 'hover-table-document', skeleton);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.scene.transformByState({ width: 320, height: 200 });
+            injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 300, height: 150 });
+            render.addRenderDependencies([[DocEventManagerService]]);
+            const service = render.with(DocEventManagerService);
+            const [first, second] = service.getCustomRangeBounds().map(({ rects }) => rects[0]);
+            const cellDistance = second.left - first.left;
+            expect(cellDistance).toBeGreaterThan(0);
+            tableViewport = { contentWidth: cellDistance * 2, scrollLeft: 0, viewportWidth: cellDistance };
+            let hovered: string[] = [];
+            service.hoverCustomRangesRealTime$.subscribe((value) => hovered = value.map(({ range }) => range.rangeId));
+            const hover = () => {
+                render.scene.onPointerMove$.emitEvent({
+                    buttons: 0,
+                    offsetX: first.left + 4,
+                    offsetY: (first.top + first.bottom) / 2,
+                    target: documents,
+                } as unknown as IPointerEvent);
+                vi.advanceTimersByTime(31);
+            };
+            hover();
+            expect(hovered).toEqual(['First link']);
+            tableViewport.scrollLeft = cellDistance;
+            hover();
+            expect(hovered).toEqual(['Second link']);
+        } finally {
+            univer.dispose();
+            setDocsTableRenderViewportProvider(null);
+            vi.useRealTimers();
         }
     });
 });

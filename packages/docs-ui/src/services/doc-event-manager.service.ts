@@ -28,7 +28,7 @@ import type {
     IRenderContext,
     IRenderModule,
 } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, fromEventSubject, Inject, PresetListType, resolveDocumentParagraphBullet } from '@univerjs/core';
+import { CustomRangeType, Disposable, DocumentFlavor, fromEventSubject, Inject, PresetListType, resolveDocumentParagraphBullet } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CURSOR_TYPE,
@@ -40,7 +40,10 @@ import {
     TRANSFORM_CHANGE_OBSERVABLE_TYPE,
 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
+import type { IDocHoverRangeGeometry } from './doc-hover-range-geometry';
+import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
+import { buildDocHoverRangeGeometry, findDocHoverRangeCandidates } from './doc-hover-range-geometry';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
@@ -343,8 +346,13 @@ interface ITableCellGeometryEntry {
     segmentId?: string;
 }
 
+const HOVER_SCROLL_BUFFER_RATIO = 0.5;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_LEFT = 72;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_TOP = 42;
+
+function hasStoryCustomRanges(unit: DocumentDataModel, segmentId?: string): boolean {
+    return Boolean(segmentId && unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.length);
+}
 
 function isPointInRect(x: number, y: number, rect: IBoundRectNoAngle) {
     const { left, right, top, bottom } = rect;
@@ -458,6 +466,16 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _customRangeDirty = true;
     private _customRangeCount = -1;
     private _customRangeSkeletonSignature = '';
+    private _hoverRangeGeometry: { page: IDocumentSkeletonPage; endIndex: number; index: IDocHoverRangeGeometry } | null = null;
+    private _hoverRangeWindow: {
+        top: number;
+        bottom: number;
+        modelRevision: number;
+        tableIds: ReadonlySet<string>;
+        tableViewports: string;
+        bounds: ICustomRangeBound[];
+    } | null = null;
+
     private _bulletDirty = true;
     private _paragraphDirty = true;
     private _tableBoundsDirty = true;
@@ -533,39 +551,25 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _initResetDirty() {
-        this.disposeWithMe(this._documents.onTransformChange$.subscribeEvent(() => {
+        const invalidateBounds = () => {
             this._customRangeDirty = true;
+            this._hoverRangeGeometry = null;
+            this._hoverRangeWindow = null;
             this._bulletDirty = true;
             this._paragraphDirty = true;
             this._tableBoundsDirty = true;
-        }));
-        this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
-            this._customRangeDirty = true;
-            this._bulletDirty = true;
-            this._paragraphDirty = true;
-            this._tableBoundsDirty = true;
-        }));
-
+        };
+        this.disposeWithMe(this._documents.onTransformChange$.subscribeEvent(invalidateBounds));
+        this.disposeWithMe(this._skeleton.dirty$.subscribe(invalidateBounds));
         this.disposeWithMe(
             fromEventSubject(this._context.engine.onTransformChange$).pipe(
                 filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize)
-            ).subscribe(() => {
-                this._customRangeDirty = true;
-                this._bulletDirty = true;
-                this._paragraphDirty = true;
-                this._tableBoundsDirty = true;
-            })
+            ).subscribe(invalidateBounds)
         );
-
         this.disposeWithMe(
             fromEventSubject(this._context.scene.onTransformChange$).pipe(
                 filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale)
-            ).subscribe(() => {
-                this._customRangeDirty = true;
-                this._bulletDirty = true;
-                this._paragraphDirty = true;
-                this._tableBoundsDirty = true;
-            })
+            ).subscribe(invalidateBounds)
         );
     }
 
@@ -584,7 +588,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
             const { x, y } = transformOffset2Bound(evt.offsetX, evt.offsetY, this._context.scene);
             this._hoverCustomRanges$.next(
-                this._calcActiveRanges({ x, y })
+                this._calcHoveredRanges({ x, y })
             );
             this._hoverParagraph$.next(
                 this._calcActiveParagraph({ x, y })
@@ -688,8 +692,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return this._calcActiveBullet(point) ?? this._calcActiveListParagraph(point);
     }
 
-    private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
-        const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
+    private _buildCustomRangeBoundsBySegment(
+        segmentId?: string,
+        segmentPage = -1,
+        customRanges: readonly ICustomRange[] = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? []
+    ) {
         const layouts: ICustomRangeBound[] = [];
         customRanges.forEach((range) => {
             const textRange: ITextRangeParam = {
@@ -750,11 +757,88 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._customRangeBounds = customRangeBounds;
     }
 
-    private _calcActiveRanges(evt: { x: number; y: number }) {
-        this._buildCustomRangeBounds();
+    private _calcHoveredRanges(point: { x: number; y: number }): ICustomRangeActive[] {
+        const { scene, unit } = this._context;
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN || viewport?.isActive !== true) {
+            return this._calcActiveRanges(point);
+        }
 
-        const { x, y } = evt;
-        const matchedRanges = this._customRangeBounds.filter((layout) => {
+        const pages = this._skeleton.getSkeletonData()?.pages ?? [];
+        if (pages.length === 0) {
+            return [];
+        }
+        const [page] = pages;
+        const height = viewport.viewBound.bottom - viewport.viewBound.top;
+        const { y: top } = transformOffset2Bound(0, viewport.top, scene);
+        const bottom = top + height;
+        if (
+            pages.length !== 1 || !Number.isFinite(top) || !Number.isFinite(bottom) || height <= 0 ||
+            point.y < top || point.y > bottom ||
+            hasStoryCustomRanges(unit, page.headerId) || hasStoryCustomRanges(unit, page.footerId)
+        ) {
+            return this._calcActiveRanges(point);
+        }
+
+        const ranges = unit.getBody()?.customRanges;
+        return ranges?.length ? this._hitCustomRangeBounds(point, this._getHoverRangeBounds(page, ranges, top, bottom)) : [];
+    }
+
+    private _getHoverRangeBounds(
+        page: IDocumentSkeletonPage,
+        ranges: readonly ICustomRange[],
+        top: number,
+        bottom: number
+    ): ICustomRangeBound[] {
+        if (this._hoverRangeGeometry?.page !== page || this._hoverRangeGeometry.endIndex !== page.ed) {
+            this._hoverRangeGeometry = {
+                page,
+                endIndex: page.ed,
+                index: buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop),
+            };
+            this._hoverRangeWindow = null;
+        }
+        const geometry = this._hoverRangeGeometry.index;
+        const modelRevision = this._context.unit.getMutationRevision();
+        const window = this._hoverRangeWindow;
+        if (window != null && top >= window.top && bottom <= window.bottom &&
+            window.modelRevision === modelRevision && window.tableViewports === this._getHoverTableViewportSignature(window.tableIds)) {
+            return window.bounds;
+        }
+
+        const buffer = (bottom - top) * HOVER_SCROLL_BUFFER_RATIO;
+        const windowTop = top - buffer;
+        const windowBottom = bottom + buffer;
+        const { candidates, tableIds } = findDocHoverRangeCandidates(geometry, ranges, windowTop, windowBottom);
+        const bounds = this._buildCustomRangeBoundsBySegment(undefined, -1, candidates)
+            .filter((layout) => layout.rects.some((rect) => rect.top <= windowBottom && rect.bottom >= windowTop));
+        this._hoverRangeWindow = {
+            top: windowTop,
+            bottom: windowBottom,
+            modelRevision,
+            tableIds,
+            tableViewports: this._getHoverTableViewportSignature(tableIds),
+            bounds,
+        };
+        return bounds;
+    }
+
+    private _getHoverTableViewportSignature(tableIds: ReadonlySet<string>): string {
+        return Array.from(tableIds, (id) => {
+            const table = getDocsTableRenderViewport(this._context.unitId, id);
+            return table == null
+                ? ''
+                : [table.scrollLeft, table.viewportWidth, table.contentWidth, table.leadingInsetLeft, table.trailingInsetRight].join(':');
+        }).join('|');
+    }
+
+    private _calcActiveRanges(point: { x: number; y: number }): ICustomRangeActive[] {
+        this._buildCustomRangeBounds();
+        return this._hitCustomRangeBounds(point, this._customRangeBounds);
+    }
+
+    private _hitCustomRangeBounds({ x, y }: { x: number; y: number }, bounds: ICustomRangeBound[]): ICustomRangeActive[] {
+        const matchedRanges = bounds.filter((layout) => {
             return layout.rects.some((rect) => isPointInRect(x, y, rect));
         });
         return matchedRanges.map(

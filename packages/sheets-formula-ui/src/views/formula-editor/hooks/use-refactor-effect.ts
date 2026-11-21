@@ -35,7 +35,6 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, 
     useLayoutEffect(() => {
         if (isNeed) {
             contextService.setContextValue(EDITOR_ACTIVATED, true);
-            disableContextMenu && contextMenuService.disable();
 
             return () => {
                 const currentDoc = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)!;
@@ -43,11 +42,20 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, 
                     contextService.setContextValue(EDITOR_ACTIVATED, false);
                 }
 
-                disableContextMenu && contextMenuService.enable();
                 refSelectionsService.clear();
             };
         }
-    }, [contextService, isNeed, refSelectionsService, disableContextMenu, editorId]);
+    }, [contextService, isNeed, refSelectionsService, editorId, univerInstanceService]);
+
+    useLayoutEffect(() => {
+        if (isNeed && Boolean(selecting) && disableContextMenu) {
+            contextMenuService.disable();
+
+            return () => {
+                contextMenuService.enable();
+            };
+        }
+    }, [contextMenuService, disableContextMenu, isNeed, selecting]);
 
     useLayoutEffect(() => {
         if (isNeed && Boolean(selecting)) {

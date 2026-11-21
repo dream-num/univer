@@ -64,6 +64,25 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(afterField, TextX.transform(bookmark, field))).toEqual(expected);
     });
 
+    it.each(['left', 'right'] as const)('converges for two bookmarks on the same text (%s)', (priority) => {
+        const createBookmark = (rangeId: string): TextXAction[] => [{
+            t: TextXActionType.RETAIN,
+            len: 0,
+            rangeUpdates: [{
+                rangeId,
+                nextRangeId: null,
+                range: { rangeId, rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 3, properties: { bookmarkId: rangeId } },
+            }],
+        }];
+        const original: IDocumentBody = { dataStream: 'Body\r\n' };
+        const left = createBookmark('alpha');
+        const right = createBookmark('beta');
+        const alice = TextX.apply(TextX.apply({ ...original }, left), TextX.transform(right, left, priority));
+        const bob = TextX.apply(TextX.apply({ ...original }, right), TextX.transform(left, right, priority === 'left' ? 'right' : 'left'));
+        expect(alice).toEqual(bob);
+        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['alpha', 'beta']);
+    });
+
     it.each([false, true])('preserves newly inserted field boundaries through a composed refresh (nested=%s)', (nested) => {
         const original: IDocumentBody = {
             dataStream: '\u001FOld\u001E\r\n',

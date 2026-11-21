@@ -209,8 +209,22 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         }
     }
     if (hasBookmarkUpdate) {
-        // Text insertion also orders ranges by position. A stable sort preserves coincident range nesting.
-        ranges.sort((left, right) => left.startIndex - right.startIndex);
+        // Bookmarks at the same position have no delimiter order. Other coincident ranges retain their nesting.
+        ranges.sort((left, right) => {
+            const position = left.startIndex - right.startIndex;
+            if (position) {
+                return position;
+            }
+            const leftBookmark = left.rangeType === CustomRangeType.BOOKMARK;
+            const rightBookmark = right.rangeType === CustomRangeType.BOOKMARK;
+            if (leftBookmark && rightBookmark) {
+                if (left.rangeId < right.rangeId) {
+                    return -1;
+                }
+                return Number(left.rangeId > right.rangeId);
+            }
+            return Number(leftBookmark) - Number(rightBookmark);
+        });
     }
     doc.customRanges = ranges;
 }

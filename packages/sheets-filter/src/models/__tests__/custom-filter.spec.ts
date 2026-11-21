@@ -94,6 +94,15 @@ describe('Test custom filter functions', () => {
             expect(notEquals.fn(123, '*123*')).toBeFalsy();
             expect(notEquals.fn('12', '*123*')).toBeTruthy();
         });
+
+        it('should "notEquals" exclude exactly the strings "equals" keeps, ignoring case', () => {
+            for (const [value, compare] of [['Apple', 'apple'], ['APPLE PIE', 'apple*'], ['Pear', 'apple'], ['', 'apple']]) {
+                expect(notEquals.fn(value, compare)).toBe(!textMatch.fn(value, compare));
+            }
+            expect(notEquals.fn('Apple', 'apple')).toBeFalsy();
+            expect(notEquals.fn(null, 'apple')).toBeTruthy();
+            expect(notEquals.fn(true, 'apple')).toBeTruthy();
+        });
     });
 
     describe('Test text match operator', () => {

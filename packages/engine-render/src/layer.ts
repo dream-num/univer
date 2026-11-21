@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
+import type { Engine } from './engine';
 import type { Scene } from './scene';
 import type { SceneViewer } from './scene-viewer';
 import { BaseObject } from './base-object';
@@ -140,6 +141,9 @@ export class Layer extends Disposable {
     }
 
     enableCache() {
+        if (this._allowCache && this._cacheCanvas) {
+            return;
+        }
         this._allowCache = true;
         this._initialCacheCanvas();
     }
@@ -331,6 +335,8 @@ export class Layer extends Disposable {
         if (mainCtx) {
             const { dirtyBounds, preserveCache = false, viewportInfos } = options;
             if (this._allowCache && this._cacheCanvas) {
+                this._ensureCacheCanvasSize(this._scene.getEngine());
+
                 if (preserveCache && dirtyBounds) {
                     mainCtx.save();
                     clipContextToBounds(mainCtx, dirtyBounds);
@@ -414,6 +420,9 @@ export class Layer extends Disposable {
         }
 
         this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
+        if (engine && engine.width > 0 && engine.height > 0) {
+            this._cacheCanvas.setSize(engine.width, engine.height);
+        }
         this._cacheValid = false;
         this._retainedCacheValid = false;
         this._resizeCacheCanvas();
@@ -442,8 +451,22 @@ export class Layer extends Disposable {
         const width = this._cacheCanvas.getWidth();
         const height = this._cacheCanvas.getHeight();
         // it throw an error if canvas size is zero, and canvas size is zero when viewport isActive is false.
-        if (width !== 0 && height !== 0) {
+        if (typeof width === 'number' && typeof height === 'number' && width > 0 && height > 0) {
             ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+        }
+    }
+
+    private _ensureCacheCanvasSize(engine?: Nullable<Engine>) {
+        if (!engine || !this._cacheCanvas || engine.width <= 0 || engine.height <= 0) {
+            return;
+        }
+        if (
+            this._cacheCanvas.getWidth() === 0 ||
+            this._cacheCanvas.getHeight() === 0 ||
+            this._cacheCanvas.getWidth() !== engine.width ||
+            this._cacheCanvas.getHeight() !== engine.height
+        ) {
+            this._resizeCacheCanvas();
         }
     }
 

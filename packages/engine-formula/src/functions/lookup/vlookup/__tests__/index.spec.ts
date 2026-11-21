@@ -424,3 +424,14 @@ describe('Excel lookup error precedence', () => {
         }
     });
 });
+
+describe('VLOOKUP numeric-looking text in binary search', () => {
+    it('uses the same text ordering for sorted keys and lookup values', () => {
+        const lookup = new Vlookup(FUNCTION_NAMES_LOOKUP.VLOOKUP);
+        const table = ArrayValueObject.create('{"10",100;"2",200;"9",900}');
+        for (const [key, expected] of [['10', 100], ['11', 100], ['2', 200], ['02', ErrorType.NA], ['9', 900]] as const) {
+            const result = lookup.calculate(StringValueObject.create(key), table, NumberValueObject.create(2)) as BaseValueObject;
+            expect(getObjectValue(result)).toStrictEqual([[expected]]);
+        }
+    });
+});

@@ -22,6 +22,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
 import { getObjectValue } from '../../../functions/util';
 import { FormulaCacheService } from '../../../services/formula-cache.service';
+import { ArrayBinarySearchType, ArrayOrderSearchType } from '../../utils/compare';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
 import { ErrorValueObject } from '../base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../primitive-object';
@@ -667,5 +668,18 @@ describe('arrayValueObject test', () => {
             const arrayValueObject = ArrayValueObject.createByArray([['cell1', 2, null], ['1', false, true]]);
             expect(arrayValueObject.toValue()).toStrictEqual([['cell1', 2, 0], [1, false, true]]);
         });
+    });
+});
+
+describe('binary-search comparison domains', () => {
+    it('preserves value types and original positions when flattening mixed input', () => {
+        const values = ArrayValueObject.createByArray([[10, '"9"', null, 9, '"2"', ErrorType.REF, 2, '"10"']]);
+        const searchType = ArrayBinarySearchType.MAX;
+        const matchType = ArrayOrderSearchType.NORMAL;
+        expect(values.binarySearch(NumberValueObject.create(10), searchType, matchType)).toBe(0);
+        expect(values.binarySearch(NumberValueObject.create(2), searchType, matchType)).toBe(6);
+        expect(values.binarySearch(StringValueObject.create('10'), searchType, matchType)).toBe(7);
+        expect(values.binarySearch(StringValueObject.create('02'), searchType, matchType)).toBeUndefined();
+        expect(values.binarySearch(ErrorValueObject.create(ErrorType.REF), searchType, matchType)).toBeUndefined();
     });
 });

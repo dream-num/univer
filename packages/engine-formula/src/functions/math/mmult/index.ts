@@ -16,7 +16,7 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateMmult } from '../../../basics/math';
+import { calculateMmult, calculateMmultByRows } from '../../../basics/math';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -48,7 +48,7 @@ export class Mmult extends BaseFunction {
             return matrix2;
         }
 
-        const result = calculateMmult(matrix1, matrix2);
+        const result = array2ColumnCount > 1 ? calculateMmultByRows(matrix1, matrix2) : calculateMmult(matrix1, matrix2);
 
         return ArrayValueObject.createByArray(result);
     }

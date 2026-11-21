@@ -27,6 +27,41 @@ describe('Test textsplit function', () => {
     const testFunction = new Textsplit(FUNCTION_NAMES_TEXT.TEXTSPLIT);
 
     describe('Textsplit', () => {
+        it.each([undefined, NullValueObject.create()])('does not invent a row delimiter when the argument is %s', (rowDelimiter) => {
+            const result = testFunction.calculate(
+                StringValueObject.create('C:\\src\\one.ts,D:\\src\\two.ts'),
+                StringValueObject.create(','),
+                rowDelimiter
+            );
+            expect(getObjectValue(result)).toStrictEqual([['C:\\src\\one.ts', 'D:\\src\\two.ts']]);
+        });
+
+        it.each([undefined, NullValueObject.create()])('preserves literal backslash-s with array column delimiters and omitted rows: %s', (rowDelimiter) => {
+            const result = testFunction.calculate(
+                StringValueObject.create('a\\sb,b\\sc;c\\sd'),
+                ArrayValueObject.create({
+                    calculateValueList: transformToValueObject([[',', ';']]),
+                    rowCount: 1,
+                    columnCount: 2,
+                    unitId: '',
+                    sheetId: '',
+                    row: 0,
+                    column: 0,
+                }),
+                rowDelimiter
+            );
+            expect(getObjectValue(result)).toStrictEqual([['a\\sb', 'b\\sc', 'c\\sd']]);
+        });
+
+        it('still uses an explicitly supplied backslash-s row delimiter', () => {
+            const result = testFunction.calculate(
+                StringValueObject.create('a,b\\sc,d'),
+                StringValueObject.create(','),
+                StringValueObject.create('\\s')
+            );
+            expect(getObjectValue(result)).toStrictEqual([['a', 'b'], ['c', 'd']]);
+        });
+
         it('value is normal', () => {
             const text = StringValueObject.create('Dakota Lennon Sanchez');
             const colDelimiter = StringValueObject.create(' ');

@@ -39,9 +39,9 @@ export interface IBaseSheetBarProps {
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { sheetId, label, color, selected, className, onKeyDown, onClick, tabIndex } = props;
+    const { sheetId, label, color, selected, className, onKeyDown, onClick, openTabMenu, tabIndex } = props;
 
-    const bindShortcut = useContextMenuShortcutRef();
+    const shortcutRef = useContextMenuShortcutRef(sheetId && openTabMenu ? (tab) => openTabMenu(sheetId, tab, true) : undefined);
     const themeService = useDependency(ThemeService);
 
     const getTextColor = (color: string) => {
@@ -56,11 +56,10 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
     return (
         <div
             data-u-comp="slide-tab-item"
-            ref={sheetId && props.openTabMenu ? bindShortcut((tab) => props.openTabMenu?.(sheetId, tab, true)) : undefined}
+            ref={shortcutRef}
             onContextMenu={(event) => {
-                event.preventDefault();
                 if (sheetId) {
-                    props.openTabMenu?.(sheetId, event.currentTarget, false);
+                    openTabMenu?.(sheetId, event.currentTarget, false);
                 }
             }}
             key={sheetId}

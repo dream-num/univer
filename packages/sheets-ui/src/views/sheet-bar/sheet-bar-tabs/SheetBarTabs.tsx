@@ -595,6 +595,7 @@ export function SheetBarTabs() {
                 className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
                 onDragStart={(event) => event.preventDefault()}
+                onContextMenu={(event) => event.preventDefault()}
             >
                 <div
                     data-u-comp="slide-tab-bar"

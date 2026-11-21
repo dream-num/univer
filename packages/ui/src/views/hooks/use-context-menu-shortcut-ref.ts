@@ -16,27 +16,34 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { Quantity } from '@univerjs/core';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import type { ContextMenuEvent } from '../../services/contextmenu/contextmenu.service';
 import { IContextMenuShortcutService } from '../../services/contextmenu/contextmenu-shortcut.service';
 import { useDependency } from '../../utils/di';
 
 /** Binds a component's keyboard menu to its mounted element and focusable descendants. */
-export function useContextMenuShortcutRef() {
+export function useContextMenuShortcutRef(open?: (element: HTMLElement, anchor: ContextMenuEvent) => void) {
     const service = useDependency(IContextMenuShortcutService, Quantity.OPTIONAL);
-    return (open: (element: HTMLElement, anchor: ContextMenuEvent) => void) => {
-        let registration: IDisposable | undefined;
-        return (element: HTMLElement | null) => {
-            registration?.dispose();
-            if (element && service) {
-                registration = service.registerElement(element, () => {
-                    const rect = element.getBoundingClientRect();
-                    open(element, {
-                        clientX: rect.left + Math.min(8, rect.width / 2),
-                        clientY: rect.top + Math.min(8, rect.height / 2),
-                        stopPropagation() {},
-                    });
+    const openRef = useRef(open);
+    const registrationRef = useRef<IDisposable | undefined>(undefined);
+    useLayoutEffect(() => {
+        openRef.current = open;
+    }, [open]);
+
+    const ref = useCallback((element: HTMLElement | null) => {
+        registrationRef.current?.dispose();
+        registrationRef.current = undefined;
+        if (element && service) {
+            registrationRef.current = service.registerElement(element, () => {
+                const rect = element.getBoundingClientRect();
+                openRef.current?.(element, {
+                    clientX: rect.left + Math.min(8, rect.width / 2),
+                    clientY: rect.top + Math.min(8, rect.height / 2),
+                    stopPropagation() {},
                 });
-            }
-        };
-    };
+            });
+        }
+    }, [service]);
+
+    return open ? ref : undefined;
 }

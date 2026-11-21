@@ -33,7 +33,7 @@ import { IPlatformService, PlatformService } from '../../platform/platform.servi
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../../shortcut/keycode';
 import { IShortcutService, ShortcutService } from '../../shortcut/shortcut.service';
-import { ContextMenuShortcutService } from '../contextmenu-shortcut.service';
+import { ContextMenuShortcutService, IContextMenuShortcutService } from '../contextmenu-shortcut.service';
 import { ContextMenuService, IContextMenuService } from '../contextmenu.service';
 
 it('opens only for the focused surface and preserves higher-priority shortcuts and shortcut suspension', () => {
@@ -46,7 +46,7 @@ it('opens only for the focused surface and preserves higher-priority shortcuts a
         [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
         [IShortcutService, { useClass: ShortcutService }],
         [IContextMenuService, { useClass: ContextMenuService }],
-        [ContextMenuShortcutService],
+        [IContextMenuShortcutService, { useClass: ContextMenuShortcutService }],
     ]);
     const canvas = document.body.appendChild(document.createElement('canvas'));
     canvas.tabIndex = 0;
@@ -56,7 +56,7 @@ it('opens only for the focused surface and preserves higher-priority shortcuts a
 
     try {
         const shortcut = injector.get(IShortcutService);
-        const contextMenu = injector.get(ContextMenuShortcutService);
+        const contextMenu = injector.get(IContextMenuShortcutService);
         const openMenu = vi.fn(() => true);
         const registration = contextMenu.register((target) => target === canvas ? openMenu : undefined);
 
@@ -97,16 +97,21 @@ it('opens only for the focused surface and preserves higher-priority shortcuts a
         table.dispose();
 
         const field = document.createElement('label');
-        field.setAttribute('data-u-context-menu-trigger', '');
         input.before(field);
         field.appendChild(input);
-        const openFieldMenu = vi.fn((event: MouseEvent) => event.preventDefault());
-        field.addEventListener('contextmenu', openFieldMenu);
+        const openFieldMenu = vi.fn();
+        const fieldRegistration = contextMenu.registerElement(field, openFieldMenu);
         input.focus();
         expect(press('F10', KeyCode.F10, true)).toBe(true);
         input.type = 'checkbox';
         expect(press('F10', KeyCode.F10, true)).toBe(false);
         expect(openFieldMenu).toHaveBeenCalledOnce();
+        const replacement = contextMenu.registerElement(field, openTableCell);
+        fieldRegistration.dispose();
+        expect(press('F10', KeyCode.F10, true)).toBe(false);
+        expect(openTableCell).toHaveBeenCalledTimes(2);
+        replacement.dispose();
+        expect(press('F10', KeyCode.F10, true)).toBe(true);
         field.replaceWith(input);
         canvas.focus();
 

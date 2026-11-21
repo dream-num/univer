@@ -17,6 +17,8 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { IPointerEvent } from '@univerjs/engine-render';
 import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR,
     ICommandService,
@@ -51,6 +53,7 @@ import {
     ContextMenuService,
     ContextMenuShortcutService,
     IContextMenuService,
+    IContextMenuShortcutService,
     IPlatformService,
     IShortcutService,
     IUIRuntimeScopeService,
@@ -165,7 +168,7 @@ describe('SheetContextMenuRenderController pointer gestures', () => {
     });
 
     it('opens the selected row and column menus from the focused sheet shortcut', () => {
-        univer.__getInjector().add([ContextMenuShortcutService]);
+        univer.__getInjector().add([IContextMenuShortcutService, { useClass: ContextMenuShortcutService }]);
         const { injector, render, rowHeader, columnHeader, triggerMenu, eventAt, click } = createContextMenuTestBed(false);
         injector.get(IUniverInstanceService).focusUnit(render.unitId);
         const context = injector.get(IContextService);
@@ -174,9 +177,11 @@ describe('SheetContextMenuRenderController pointer gestures', () => {
         const canvas = render.engine.getCanvasElement();
         document.body.appendChild(canvas);
         canvas.tabIndex = 0;
+        const idleInput = document.body.appendChild(document.createElement('textarea'));
+        idleInput.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
         try {
             canvas.focus();
-            const press = () => canvas.dispatchEvent(new KeyboardEvent('keydown', {
+            const press = () => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', {
                 keyCode: KeyCode.F10,
                 shiftKey: true,
                 bubbles: true,
@@ -185,10 +190,21 @@ describe('SheetContextMenuRenderController pointer gestures', () => {
             click(rowHeader, eventAt(4, 0));
             expect(press()).toBe(false);
             expect(triggerMenu.mock.lastCall?.[1]).toBe(ContextMenuPosition.ROW_HEADER);
+            idleInput.focus();
             click(columnHeader, eventAt(0, 3));
             expect(press()).toBe(false);
             expect(triggerMenu.mock.lastCall?.[1]).toBe(ContextMenuPosition.COL_HEADER);
+            for (const guard of [EDITOR_ACTIVATED, REF_SELECTIONS_ENABLED]) {
+                context.setContextValue(guard, true);
+                expect(press()).toBe(true);
+                context.setContextValue(guard, false);
+            }
+            const workbook = injector.get(IUniverInstanceService).getUnit<Workbook>(render.unitId)!;
+            workbook.addWorksheet('chart', 1, { id: 'chart', type: SheetTypes.CHART });
+            workbook.setActiveSheet(workbook.getSheetBySheetId('chart')!);
+            expect(press()).toBe(true);
         } finally {
+            idleInput.remove();
             canvas.remove();
         }
     });

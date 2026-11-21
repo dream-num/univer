@@ -32,7 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { ContextMenuPosition, ContextMenuShortcutService, IContextMenuService } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService, IContextMenuShortcutService } from '@univerjs/ui';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const SKIP_UNIT_IDS = [
@@ -54,7 +54,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @Optional(ContextMenuShortcutService) shortcutService?: ContextMenuShortcutService
+        @Optional(IContextMenuShortcutService) shortcutService?: IContextMenuShortcutService
     ) {
         super();
 

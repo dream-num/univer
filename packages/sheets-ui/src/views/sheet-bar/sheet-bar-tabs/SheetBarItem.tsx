@@ -15,10 +15,10 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import type { CSSProperties, KeyboardEventHandler, MouseEventHandler, ReactNode } from 'react';
+import type { CSSProperties, KeyboardEventHandler, MouseEventHandler, PointerEventHandler, ReactNode } from 'react';
 import { ColorKit, ThemeService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { useDependency } from '@univerjs/ui';
+import { useContextMenuShortcutRef, useDependency } from '@univerjs/ui';
 
 export interface IBaseSheetBarProps {
     label?: ReactNode;
@@ -30,9 +30,10 @@ export interface IBaseSheetBarProps {
     hidden?: BooleanNumber;
     selected?: boolean;
     menuOverlay?: ReactNode;
-    showContextMenu?: boolean;
+    openTabMenu?: (sheetId: string, tab: HTMLElement, keyboard: boolean) => void;
     className?: string;
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+    onPointerDownCapture?: PointerEventHandler<HTMLDivElement>;
     onClick?: MouseEventHandler<HTMLDivElement>;
     tabIndex?: number;
 }
@@ -40,6 +41,7 @@ export interface IBaseSheetBarProps {
 export function SheetBarItem(props: IBaseSheetBarProps) {
     const { sheetId, label, color, selected, className, onKeyDown, onClick, tabIndex } = props;
 
+    const bindShortcut = useContextMenuShortcutRef();
     const themeService = useDependency(ThemeService);
 
     const getTextColor = (color: string) => {
@@ -54,12 +56,19 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
     return (
         <div
             data-u-comp="slide-tab-item"
-            data-u-context-menu-trigger={props.showContextMenu || undefined}
+            ref={sheetId && props.openTabMenu ? bindShortcut((tab) => props.openTabMenu?.(sheetId, tab, true)) : undefined}
+            onContextMenu={(event) => {
+                event.preventDefault();
+                if (sheetId) {
+                    props.openTabMenu?.(sheetId, event.currentTarget, false);
+                }
+            }}
             key={sheetId}
             data-id={sheetId}
             role="tab"
             aria-selected={currentSelected}
             tabIndex={tabIndex ?? (currentSelected ? 0 : -1)}
+            onPointerDownCapture={props.onPointerDownCapture}
             onKeyDown={onKeyDown}
             onClick={onClick}
             className={clsx(`

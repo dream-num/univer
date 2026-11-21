@@ -45,7 +45,34 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { DesktopConfirmService, DesktopLayoutService, ILayoutService, IUIPartsService, RediContext, UI_PLUGIN_CONFIG_KEY, UIPartsService } from '@univerjs/ui';
+import {
+    ComponentManager,
+    ContextMenuHostService,
+    ContextMenuPosition,
+    ContextMenuService,
+    ContextMenuShortcutService,
+    DesktopConfirmService,
+    DesktopLayoutService,
+    IconManager,
+    IContextMenuHostService,
+    IContextMenuService,
+    IContextMenuShortcutService,
+    ILayoutService,
+    IMenuManagerService,
+    IPlatformService,
+    IShortcutService,
+    IUIPartsService,
+    IUIRuntimeScopeService,
+    KeyCode,
+    MenuItemType,
+    MenuManagerService,
+    PlatformService,
+    RediContext,
+    ShortcutService,
+    UI_PLUGIN_CONFIG_KEY,
+    UIPartsService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -65,7 +92,7 @@ beforeEach(() => {
     });
 });
 
-function renderSheetTabs() {
+function renderSheetTabs(contextMenu = false) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([ISheetBarService, { useClass: SheetBarService }]);
@@ -75,7 +102,27 @@ function renderSheetTabs() {
     injector.add([RangeProtectionRuleModel]);
     injector.add([WorksheetProtectionRuleModel]);
     injector.add([SheetInterceptorService]);
-    injector.get(IConfigService).setConfig(UI_PLUGIN_CONFIG_KEY, { contextMenu: false });
+    injector.get(IConfigService).setConfig(UI_PLUGIN_CONFIG_KEY, { contextMenu });
+    if (contextMenu) {
+        const providers: Dependency[] = [
+            [IContextMenuHostService, { useClass: ContextMenuHostService }],
+            [IContextMenuService, { useClass: ContextMenuService }],
+            [IContextMenuShortcutService, { useClass: ContextMenuShortcutService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [IMenuManagerService, { useClass: MenuManagerService }],
+            [ComponentManager],
+            [IconManager],
+        ];
+        providers.forEach((provider) => injector.add(provider));
+        injector.get(ILayoutService).registerRootContainerElement(document.body);
+        injector.get(IMenuManagerService).appendRootMenu({
+            [ContextMenuPosition.FOOTER_TABS]: {
+                rename: { menuItemFactory: () => ({ id: 'rename', type: MenuItemType.BUTTON, title: 'Rename sheet' }) },
+            },
+        });
+    }
     const localeService = injector.get(LocaleService);
     localeService.load({ [LocaleType.EN_US]: enUS });
     localeService.setLocale(LocaleType.EN_US);
@@ -109,6 +156,18 @@ afterEach(() => {
     window.getSelection()?.removeAllRanges();
     vi.useRealTimers();
     vi.unstubAllGlobals();
+});
+
+it('moves focus from the inactive sheet tab to its menu item when Shift+F10 opens the menu', async () => {
+    const { container, workbook } = renderSheetTabs(true);
+    const tab = container.querySelector<HTMLElement>('[role=tab][data-id=second]')!;
+    tab.focus();
+    await act(async () => {
+        tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'F10', keyCode: KeyCode.F10, shiftKey: true, bubbles: true, cancelable: true }));
+    });
+    await vi.waitFor(() => expect(document.activeElement?.textContent).toBe('Rename sheet'));
+    expect(document.activeElement?.tagName).toBe('BUTTON');
+    expect(workbook.getActiveSheet().getSheetId()).toBe('second');
 });
 
 describe('SheetBarTabs name validation', () => {

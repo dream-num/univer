@@ -35,7 +35,7 @@ import {
     SheetTypes,
 } from '@univerjs/core';
 import { attachSelectionWithCoord, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
-import { ContextMenuPosition, ContextMenuShortcutService, IContextMenuService, IPlatformService } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService, IContextMenuShortcutService, IPlatformService } from '@univerjs/ui';
 import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
 import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import { SHEET_VIEW_KEY } from '../../common/keys';
@@ -60,7 +60,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         @IPlatformService private readonly _platformService: IPlatformService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
-        @Optional(ContextMenuShortcutService) shortcutService?: ContextMenuShortcutService
+        @Optional(IContextMenuShortcutService) shortcutService?: IContextMenuShortcutService
     ) {
         super();
 
@@ -158,6 +158,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const canvas = this._context.engine.getCanvasElement();
         const worksheet = this._context.unit.getActiveSheet();
         const selection = this._selectionManagerService.getCurrentLastSelection();
+        // The idle sheet input owns DOM focus between cell edits.
         if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART || !selection
             || this._instanceService.getFocusedUnit() !== this._context.unit
             || this._contextMenuService.disabled || this._shouldSuppressHostContextMenu()

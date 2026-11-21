@@ -15,15 +15,24 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { CommandType, Disposable, ICommandService, toDisposable } from '@univerjs/core';
+import { CommandType, createIdentifier, Disposable, ICommandService, toDisposable } from '@univerjs/core';
+import type { ContextMenuEvent } from './contextmenu.service';
 import { KeyCode, MetaKeys } from '../shortcut/keycode';
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { IContextMenuService } from './contextmenu.service';
 
-type ContextMenuShortcutResolver = (target: HTMLElement) => ((event: MouseEvent) => boolean) | undefined;
+type ContextMenuShortcutResolver = (target: HTMLElement) => ((event: ContextMenuEvent) => boolean) | undefined;
+
+export interface IContextMenuShortcutService {
+    register(resolve: ContextMenuShortcutResolver, priority?: number): IDisposable;
+    registerElement(element: HTMLElement, open: () => void): IDisposable;
+}
+
+export const IContextMenuShortcutService = createIdentifier<IContextMenuShortcutService>('ui.contextmenu-shortcut.service');
 
 /** Registers the focused editing surface that owns the keyboard context menu. */
-export class ContextMenuShortcutService extends Disposable {
+export class ContextMenuShortcutService extends Disposable implements IContextMenuShortcutService {
+    private readonly _elements = new WeakMap<HTMLElement, () => void>();
     private readonly _resolvers = new Map<ContextMenuShortcutResolver, number>();
 
     constructor(
@@ -37,22 +46,7 @@ export class ContextMenuShortcutService extends Disposable {
         this.disposeWithMe(commandService.registerCommand({
             id,
             type: CommandType.OPERATION,
-            handler: () => {
-                const target = document.activeElement;
-                const open = this._resolve(target);
-                if (!open || !target) {
-                    return false;
-                }
-                const rect = target.getBoundingClientRect();
-                const offset = target.closest('[data-u-context-menu-trigger]') ? 8 : Infinity;
-                return open(new MouseEvent('contextmenu', {
-                    bubbles: true,
-                    cancelable: true,
-                    button: 2,
-                    clientX: rect.left + Math.min(offset, rect.width / 2),
-                    clientY: rect.top + Math.min(offset, rect.height / 2),
-                }));
-            },
+            handler: () => this._resolve(document.activeElement)?.() ?? false,
         }));
 
         this.disposeWithMe(shortcutService.registerShortcut({
@@ -71,20 +65,39 @@ export class ContextMenuShortcutService extends Disposable {
         return toDisposable(() => this._resolvers.delete(resolve));
     }
 
-    private _resolve(target: Element | null): ReturnType<ContextMenuShortcutResolver> {
+    registerElement(element: HTMLElement, open: () => void): IDisposable {
+        this._elements.set(element, open);
+        return toDisposable(() => {
+            if (this._elements.get(element) === open) {
+                this._elements.delete(element);
+            }
+        });
+    }
+
+    private _resolve(target: Element | null): (() => boolean) | undefined {
         if (this._contextMenuService.disabled || !(target instanceof HTMLElement)) {
             return;
         }
 
-        if (target.closest('[data-u-context-menu-trigger]') && !target.isContentEditable
-            && !target.matches('input:not([type="checkbox"]), textarea, select')) {
-            return (event) => !target.dispatchEvent(event);
+        if (!target.isContentEditable && !target.matches('input:not([type="checkbox"]), textarea, select')) {
+            for (let element: HTMLElement | null = target; element; element = element.parentElement) {
+                const open = this._elements.get(element);
+                if (open) {
+                    return () => {
+                        open();
+                        return true;
+                    };
+                }
+            }
         }
 
         for (const [resolve] of [...this._resolvers].sort((a, b) => b[1] - a[1])) {
             const open = resolve(target);
             if (open) {
-                return open;
+                return () => {
+                    const rect = target.getBoundingClientRect();
+                    return open({ clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, stopPropagation() {} });
+                };
             }
         }
     }

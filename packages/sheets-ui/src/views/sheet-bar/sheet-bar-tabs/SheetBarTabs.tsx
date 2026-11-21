@@ -15,7 +15,7 @@
  */
 
 import type { IUniverUIConfig } from '@univerjs/ui';
-import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
     ICommandService,
     IConfirmService,
@@ -104,10 +104,12 @@ export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeSheetId, setActiveSheetId] = useState('');
     const [scrollShadow, setScrollShadow] = useState('');
+    const [autoFocusMenu, setAutoFocusMenu] = useState(false);
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuAnchorRect, setContextMenuAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
 
     const slideTabBarRef = useRef<SlideTabBar | null>(null);
+    const tabsRef = useRef<HTMLDivElement>(null);
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
     const commandService = useDependency(ICommandService);
@@ -326,7 +328,7 @@ export function SheetBarTabs() {
     }, [activeSheetId, commandService, layoutService, workbook]);
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
-        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
+        const slideTabBarContainer = tabsRef.current;
         if (!slideTabBarContainer) {
             return undefined;
         }
@@ -339,7 +341,7 @@ export function SheetBarTabs() {
         return () => observer.disconnect();
     }, [syncScrollButtonState]);
 
-    const openContextMenu = useCallback((anchorRect: IContextMenuAnchorRect) => {
+    const openContextMenu = useCallback((anchorRect: IContextMenuAnchorRect, keyboard = false) => {
         if (!showContextMenu) {
             return;
         }
@@ -349,6 +351,7 @@ export function SheetBarTabs() {
         }
 
         setContextMenuAnchorRect(anchorRect);
+        setAutoFocusMenu(keyboard);
         setContextMenuVisible(true);
     }, [editorBridgeService, showContextMenu]);
 
@@ -394,17 +397,8 @@ export function SheetBarTabs() {
         };
     }, [contextMenuVisible, getActiveTabRect]);
 
-    const onTabListContextMenu = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-        event.preventDefault();
-
+    const openTabMenu = useCallback((targetSheetId: string, triggerItem: HTMLElement, keyboard: boolean) => {
         if (slideTabBarRef.current?.getActiveItem()?.isEditMode()) {
-            return;
-        }
-
-        const triggerItem = (event.target as HTMLElement).closest<HTMLElement>('[data-u-comp=slide-tab-item]');
-        const targetSheetId = triggerItem?.dataset.id;
-
-        if (!targetSheetId || !triggerItem) {
             return;
         }
 
@@ -416,7 +410,7 @@ export function SheetBarTabs() {
         };
 
         if (targetSheetId === activeSheetId) {
-            openContextMenu(anchorRect);
+            openContextMenu(anchorRect, keyboard);
             return;
         }
 
@@ -426,22 +420,14 @@ export function SheetBarTabs() {
                 subUnitId: targetSheetId,
             })
             .finally(() => {
-                openContextMenu(anchorRect);
+                openContextMenu(anchorRect, keyboard);
             });
     }, [activeSheetId, commandService, openContextMenu, workbook]);
 
-    const onTabListKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
-        const target = event.target as HTMLElement;
-        if (target.closest('[contenteditable=true]')) {
+    const onTabKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>, currentSheetId?: string) => {
+        if (!currentSheetId || event.target !== event.currentTarget) {
             return;
         }
-
-        const currentTab = target.closest<HTMLElement>('[data-u-comp=slide-tab-item]');
-        const currentSheetId = currentTab?.dataset.id;
-        if (!currentSheetId) {
-            return;
-        }
-
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
             activateSheetTab(currentSheetId);
@@ -452,10 +438,8 @@ export function SheetBarTabs() {
             return;
         }
 
-        const tabItems = Array.from(
-            slideTabBarContainerRef.current?.querySelectorAll<HTMLElement>('[data-u-comp=slide-tab-item]') ?? []
-        );
-        const currentIndex = tabItems.findIndex((tabItem) => tabItem.dataset.id === currentSheetId);
+        const tabItems = slideTabBarRef.current?.getSlideTabItems() ?? [];
+        const currentIndex = tabItems.findIndex((tab) => tab.getSlideTabItem() === event.currentTarget);
         if (currentIndex < 0) {
             return;
         }
@@ -466,13 +450,10 @@ export function SheetBarTabs() {
             ? Math.min(tabItems.length - 1, currentIndex + 1)
             : Math.max(0, currentIndex - 1);
         const nextTab = tabItems[nextIndex];
-        const nextSheetId = nextTab?.dataset.id;
-        if (!nextTab || !nextSheetId) {
-            return;
+        if (nextTab) {
+            nextTab.getSlideTabItem().focus();
+            activateSheetTab(nextTab.getId());
         }
-
-        nextTab.focus();
-        activateSheetTab(nextSheetId);
     }, [activateSheetTab]);
 
     const initializeSlideTabBar = useCallback(() => {
@@ -585,26 +566,6 @@ export function SheetBarTabs() {
     }, [activeSheetId, sheetList]);
 
     useEffect(() => {
-        const handlePointerDownCapture = (event: PointerEvent) => {
-            const container = slideTabBarContainerRef.current;
-            const target = event.target;
-            if (!container || !(target instanceof Element)) {
-                return;
-            }
-
-            const tabElement = target.closest<HTMLElement>('[data-u-comp=slide-tab-item]');
-            if (!tabElement || !container.contains(tabElement)) {
-                return;
-            }
-
-            activateSheetTab(tabElement.getAttribute('data-id') ?? undefined);
-        };
-
-        document.addEventListener('pointerdown', handlePointerDownCapture, true);
-        return () => document.removeEventListener('pointerdown', handlePointerDownCapture, true);
-    }, [activateSheetTab]);
-
-    useEffect(() => {
         const subscription = merge(
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$
@@ -625,6 +586,7 @@ export function SheetBarTabs() {
         <SheetBarTabsContextMenu
             showContextMenu={showContextMenu}
             visible={contextMenuVisible}
+            autoFocus={autoFocusMenu}
             anchorRect={contextMenuAnchorRect}
             onVisibleChange={onContextMenuVisibleChange}
             onCommandSelect={onContextMenuCommandSelect}
@@ -633,13 +595,12 @@ export function SheetBarTabs() {
                 className="univer-max-w-[calc(100%-112px)] univer-overflow-hidden"
                 ref={slideTabBarContainerRef}
                 onDragStart={(event) => event.preventDefault()}
-                onContextMenu={onTabListContextMenu}
             >
                 <div
                     data-u-comp="slide-tab-bar"
                     role="tablist"
                     aria-label={localeService.t<LocaleKey>('sheets-ui.sheetConfig.sheetTabs')}
-                    onKeyDown={onTabListKeyDown}
+                    ref={tabsRef}
                     className={`
                       univer-flex univer-select-none univer-flex-row univer-items-center univer-overflow-hidden
                       univer-px-1.5 univer-py-1
@@ -650,7 +611,9 @@ export function SheetBarTabs() {
                         <SheetBarItem
                             key={item.sheetId}
                             {...item}
-                            showContextMenu={showContextMenu}
+                            onPointerDownCapture={() => activateSheetTab(item.sheetId)}
+                            onKeyDown={(event) => onTabKeyDown(event, item.sheetId)}
+                            openTabMenu={showContextMenu ? openTabMenu : undefined}
                             selected={activeSheetId === item.sheetId}
                         />
                     ))}

@@ -251,6 +251,20 @@ export class NullValueObject extends BaseValueObject {
     }
 }
 
+/**
+ * The value of a LAMBDA argument left empty in a call, such as `y` in `=LAMBDA(x,y,...)(1,)`.
+ * It behaves like a blank value everywhere, but ISOMITTED can tell it apart from a blank cell.
+ * https://github.com/dream-num/univer/issues/8267
+ */
+export class OmittedValueObject extends NullValueObject {
+    private static _omittedInstance: OmittedValueObject;
+
+    static override create() {
+        this._omittedInstance = this._omittedInstance || new OmittedValueObject();
+        return this._omittedInstance;
+    }
+}
+
 export class BooleanValueObject extends BaseValueObject {
     private _value: boolean = false;
 

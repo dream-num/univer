@@ -30,6 +30,7 @@ import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
+import { clippedViewportRenders } from './viewport-render-clip';
 
 interface ILimitedScrollResult {
     viewportScrollX: number;
@@ -786,8 +787,18 @@ export class Viewport {
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
         const viewPortInfo = viewportInfo ?? this.calcViewportInfo();
 
-        for (let i = 0, length = objects.length; i < length; i++) {
-            objects[i].render(mainCtx, viewPortInfo);
+        const ownsClip = this._clipViewport && !clippedViewportRenders.has(viewPortInfo);
+        if (ownsClip) {
+            clippedViewportRenders.add(viewPortInfo);
+        }
+        try {
+            for (let i = 0, length = objects.length; i < length; i++) {
+                objects[i].render(mainCtx, viewPortInfo);
+            }
+        } finally {
+            if (ownsClip) {
+                clippedViewportRenders.delete(viewPortInfo);
+            }
         }
 
         this.markDirty(false);

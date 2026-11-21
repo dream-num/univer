@@ -2029,6 +2029,12 @@ describe('worker document layout session', () => {
         { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
         { embedded: 'square-wrapped drawing below the splice after a page break', drawing: 'suffix', wrap: 'below', publishesTail: true },
         { embedded: 'top-and-bottom wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, publishesTail: true },
+        { embedded: 'tight-wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_TIGHT, publishesTail: true },
+        { embedded: 'through-wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_THROUGH, publishesTail: true },
+        { embedded: 'square-wrapped drawing crossing subsequent splices', drawing: 'suffix', wrap: 'later', publishesTail: true },
+        { embedded: 'square-wrapped drawing resuming after a deferred drawing change', drawing: 'suffix', wrap: 'later', deferOnce: 'drawing', publishesTail: true },
+        { embedded: 'square-wrapped drawing resuming after a deferred column change', drawing: 'suffix', wrap: 'later', deferOnce: 'column', publishesTail: true },
+        { embedded: 'top-and-bottom wrapped drawing crossing subsequent splices', drawing: 'suffix', wrap: 'later', wrapLayout: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, publishesTail: true },
         { embedded: 'square-wrapped drawing whose text distance reaches the retained lines', drawing: 'suffix', wrap: 'crossing', publishesTail: false },
         { embedded: 'progressively published drawing interrupted by a remote edit', drawing: 'suffix', publishesTail: true, interrupt: true },
         { embedded: 'margin-relative prefix drawing after a page break', drawing: 'prefix', publishesTail: true },
@@ -2036,7 +2042,7 @@ describe('worker document layout session', () => {
         { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
         { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
         { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
-    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout }) => {
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce }) => {
         mockWorkerCanvas();
         const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
         const T = DataStreamTreeTokenType;
@@ -2112,7 +2118,7 @@ describe('worker document layout session', () => {
                         positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
                         positionV: {
                             relativeFrom: afterPageBreak && !wrap ? ObjectRelativeFromV.MARGIN : ObjectRelativeFromV.PARAGRAPH,
-                            posOffset: wrap ? 300 : 0,
+                            posOffset: wrap ? (wrap === 'later' ? 1_700 : 300) : 0,
                         },
                         size: { width: drawing === 'rotated' ? 5_000 : 24, height: 14 },
                     },
@@ -2134,6 +2140,7 @@ describe('worker document layout session', () => {
             ? visiblePage().skeColumnGroups.get(groupId)
             : visiblePage().skeDrawings.get(drawingId);
         const tailOffset = content.indexOf('Paragraph 35') + 1;
+        const laterTailOffset = content.indexOf('Paragraph 72') + 1;
         const isOffsetVisible = (offset: number) => visibleLines().some((line) => line.st <= offset && offset <= line.ed);
         const insertText = (offset: number, text: string) => {
             const edit = new TextX();
@@ -2191,8 +2198,10 @@ describe('worker document layout session', () => {
             });
             let intermediateCount = 0;
             let publishedTail = false;
+            let publishedLaterTail = false;
             let publishedDrawingWithAnchor = false;
             let checkedWrapBoundary = false;
+            let deferredPublication = false;
             let publishedLaterGroup = false;
             let stoppedBeforeCompletion = false;
             for (let step = 0; step < 180; step++) {
@@ -2201,10 +2210,26 @@ describe('worker document layout session', () => {
                     if (intermediateCount === 0) {
                         expect(result.publication.block.baseLayoutVersion).toBe('v1');
                     }
-                    expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
+                    const transferred = structuredClone(result.publication);
+                    if (deferOnce && publishedDrawingWithAnchor && !deferredPublication && !result.progress.complete) {
+                        // The next publication restores compatible geometry,
+                        // but its wire delta starts after this hidden batch.
+                        if (deferOnce === 'drawing') {
+                            transferred.block.skeDrawings.find(([id]) => id === drawingId)![1].aTop += 20;
+                        } else {
+                            transferred.block.flow.column.width += 20;
+                        }
+                        const visibleEnd = visiblePage().ed;
+                        expect(main.applyLayoutPublication(transferred, result.progress).requiresFullPublication).toBeFalsy();
+                        expect(visiblePage().ed).toBe(visibleEnd);
+                        deferredPublication = true;
+                        continue;
+                    }
+                    expect(main.applyLayoutPublication(transferred, result.progress).requiresFullPublication).toBeFalsy();
                     if (!result.progress.complete) {
                         intermediateCount++;
                         publishedTail ||= isOffsetVisible(tailOffset);
+                        publishedLaterTail ||= isOffsetVisible(laterTailOffset);
                         expect(normalizeSkeleton(visibleLines().slice(0, protectedLines.length))).toEqual(protectedGeometry);
                         if (drawing === 'suffix') {
                             const workerDrawing = result.publication.block.skeDrawings.find(([id]) => id === drawingId)?.[1];
@@ -2213,7 +2238,7 @@ describe('worker document layout session', () => {
                                 const first = flow.lines.find((line) => line.st > protectedEnd)!;
                                 const spliceTop = flow.section.top + first.top;
                                 expect(workerDrawing.aTop).toBeGreaterThan(spliceTop);
-                                expect(workerDrawing.aTop - (snapshot.drawings?.[drawingId].distT ?? 0) > spliceTop).toBe(wrap === 'below');
+                                expect(workerDrawing.aTop - (snapshot.drawings?.[drawingId].distT ?? 0) > spliceTop).toBe(wrap !== 'crossing');
                                 checkedWrapBoundary = true;
                             }
                             const drawingGeometry = visiblePage().skeDrawings.get(drawingId);
@@ -2244,6 +2269,12 @@ describe('worker document layout session', () => {
             }
             expect(intermediateCount).toBeGreaterThan(1);
             expect(publishedTail).toBe(publishesTail);
+            if (wrap === 'later') {
+                expect(publishedLaterTail).toBe(true);
+            }
+            if (deferOnce) {
+                expect(deferredPublication).toBe(true);
+            }
             if (drawing === 'suffix') {
                 expect(publishedDrawingWithAnchor).toBe(publishesTail);
             }

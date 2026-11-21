@@ -266,6 +266,13 @@ function _getTableWrapSplit(
     return split;
 }
 
+export function usesDrawingBoundsForTextWrap(layoutType: PositionedObjectLayoutType): boolean {
+    return layoutType === PositionedObjectLayoutType.WRAP_SQUARE ||
+        layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM ||
+        layoutType === PositionedObjectLayoutType.WRAP_TIGHT ||
+        layoutType === PositionedObjectLayoutType.WRAP_THROUGH;
+}
+
 function _getDrawingWrapBounds(drawing: IDocumentSkeletonDrawing) {
     const { angle = 0, aLeft, width, aTop, height, drawingOrigin } = drawing;
     const bounds = getBoundingBox(angle, aLeft, width, aTop, height);

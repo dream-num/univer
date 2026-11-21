@@ -61,7 +61,7 @@ import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../../basics/
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
-import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
+import type { IDocumentSkeletonFlowCursor, IDocumentSkeletonPagePatch } from './document-layout-page-patch';
 import type {
     IDocumentLayoutBlockGeometryPublication,
     IDocumentLayoutDrawingAnchorPublication,
@@ -109,9 +109,11 @@ import { ContinuousLayoutPublicationScheduler } from './continuous-layout-public
 import {
     applyDocumentSkeletonContinuousBlock,
     attachContinuousLayoutGeometry,
+    compareLayoutGeometry,
     forkContinuousLayoutSkeleton,
     hydrateDocumentSkeletonPage,
     hydrateDocumentSkeletonPageMaterializationPlaceholder,
+    serializeContinuousFlow,
     serializeDocumentSkeletonPage,
 } from './document-layout-page-patch';
 import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
@@ -120,7 +122,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
-import { getBoundingBox, getPlainTextLineInkBounds } from './model/line';
+import { getBoundingBox, getPlainTextLineInkBounds, usesDrawingBoundsForTextWrap } from './model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
@@ -141,6 +143,32 @@ import {
 } from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
+
+function compareFlowCursors(left: IDocumentSkeletonFlowCursor, right: IDocumentSkeletonFlowCursor): number {
+    return (left.sectionIndex - right.sectionIndex) || (left.columnIndex - right.columnIndex) || (left.lineIndex - right.lineIndex);
+}
+
+function findUnprotectedFlowCursor(
+    page: IDocumentSkeletonPage,
+    from: IDocumentSkeletonFlowCursor,
+    protectedEndOffset: number
+): IDocumentSkeletonFlowCursor | null {
+    for (let sectionIndex = from.sectionIndex; sectionIndex < page.sections.length; sectionIndex++) {
+        const { columns } = page.sections[sectionIndex];
+        const firstColumn = sectionIndex === from.sectionIndex ? from.columnIndex : 0;
+        for (let columnIndex = firstColumn; columnIndex < columns.length; columnIndex++) {
+            const { lines } = columns[columnIndex];
+            let lineIndex = sectionIndex === from.sectionIndex && columnIndex === from.columnIndex ? from.lineIndex : 0;
+            while (lineIndex < lines.length && lines[lineIndex].st <= protectedEndOffset) {
+                lineIndex++;
+            }
+            if (lineIndex < lines.length) {
+                return { sectionIndex, columnIndex, lineIndex };
+            }
+        }
+    }
+    return null;
+}
 
 function getFlowSuffixTop(page: IDocumentSkeletonPage, sectionIndex: number, columnIndex: number, lineIndex: number): number {
     let top = Number.POSITIVE_INFINITY;
@@ -314,32 +342,37 @@ function mergeProtectedForegroundGeometry(
         return false;
     });
     let retainedBottom: number | undefined;
-    const skeDrawings = mergeForegroundObjects(page.skeDrawings, workerPage.skeDrawings, (drawing, id) => {
+    const skeDrawings = mergeForegroundObjects(page.skeDrawings, workerPage.skeDrawings, (drawing, id, incoming) => {
         // Anchor offsets determine ownership. After an explicit page break the
         // drawing's lineTop and blockAnchorTop are still fragment-local.
         const anchorOffset = drawingAnchorOffsets.get(id);
         if (anchorOffset == null) {
             return null;
         }
-        if (anchorOffset >= startOffset) {
-            const layout = drawing.drawingOrigin.layoutType;
-            if (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE) {
-                return true;
-            }
-            if (layout === PositionedObjectLayoutType.WRAP_SQUARE || layout === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
-                // Match the rectangular wrap bands used by line layout, allowing
-                // for rotation, effect extents and the distance from text.
-                const bounds = getDrawingVerticalBounds(drawing);
-                if (bounds == null) {
-                    return null;
-                }
-                retainedBottom ??= getRetainedBottom();
-                return bounds.top > retainedBottom ? true : null;
-            }
-            return null;
+        const layout = drawing.drawingOrigin.layoutType;
+        const inTail = anchorOffset >= startOffset;
+        if (inTail && (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE)) {
+            return true;
         }
         const bounds = getDrawingVerticalBounds(drawing);
-        return bounds != null && bounds.bottom < startTop ? false : null;
+        if (bounds == null) {
+            return null;
+        }
+        if (inTail) {
+            // Polygon coordinates are supplied independently of the drawing box.
+            if (!usesDrawingBoundsForTextWrap(layout)) {
+                return null;
+            }
+            retainedBottom ??= getRetainedBottom();
+            return bounds.top > retainedBottom ? true : null;
+        }
+        if (bounds.bottom < startTop) {
+            return false;
+        }
+        // Once the anchor is retained, both sides may still use the same wrap
+        // geometry. Keep the visible object only if its full geometry agrees.
+        const counterpart = incoming ? page.skeDrawings.get(id) : workerPage.skeDrawings.get(id);
+        return usesDrawingBoundsForTextWrap(layout) && compareLayoutGeometry(drawing, counterpart) ? false : null;
     });
     return skeTables == null || skeColumnGroups == null || skeDrawings == null
         ? null
@@ -569,6 +602,12 @@ interface IDocumentSkeletonOptions {
     isolateIncrementalPublications?: boolean;
     batchContinuousPublications?: boolean;
     lineGap?: number;
+}
+
+interface IProtectedContinuousWorkerLayout {
+    baseline: IDocumentSkeletonCached;
+    draft: IDocumentSkeletonCached;
+    pendingForegroundFrom?: IDocumentSkeletonFlowCursor;
 }
 
 interface IIncrementalLayoutState {
@@ -1486,7 +1525,7 @@ export class DocumentSkeleton extends Skeleton {
         range: Extract<IDocumentLayoutProtectedRange, { mode: 'continuous' }>;
         pendingPublications: IDocumentLayoutBlockGeometryPublication[];
         drawingAnchorOffsets: ReadonlyMap<string, number | undefined>;
-        workerLayout?: { baseline: IDocumentSkeletonCached; draft: IDocumentSkeletonCached };
+        workerLayout?: IProtectedContinuousWorkerLayout;
     }> = null;
 
     private _topLevelBlockSections: DataStreamTreeNode[] | null = null;
@@ -3097,7 +3136,7 @@ export class DocumentSkeleton extends Skeleton {
                 const foregroundUpdate = this._publishProtectedWorkerFlow(
                     publication,
                     page,
-                    baseline,
+                    stagedWorkerLayout,
                     protectedContinuousLayout.range.endOffset,
                     protectedContinuousLayout.drawingAnchorOffsets
                 );
@@ -3407,60 +3446,85 @@ export class DocumentSkeleton extends Skeleton {
     private _publishProtectedWorkerFlow(
         publication: IDocumentLayoutBlockGeometryPublication,
         workerPage: IDocumentSkeletonPage,
-        baseline: IDocumentSkeletonCached,
+        workerLayout: IProtectedContinuousWorkerLayout,
         protectedEndOffset: number,
         drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
     ): Pick<IDocumentLayoutProgress, 'didPublishEmbeddedGeometry'> | null {
         const foreground = this._skeletonData;
         const { pageIndex, flow } = publication.block;
+        const pending = workerLayout.pendingForegroundFrom;
+        const from = pending != null && compareFlowCursors(pending, flow) < 0 ? pending : flow;
+        const cursor = findUnprotectedFlowCursor(workerPage, from, protectedEndOffset);
+        if (cursor == null) {
+            return null;
+        }
+        // The draft can advance while the screen stays at this splice point.
+        // Keep the cursor until this tail is visible or the generation ends.
+        workerLayout.pendingForegroundFrom = cursor;
+        const { sectionIndex, columnIndex, lineIndex: sourceLineIndex } = cursor;
         const page = foreground?.pages[pageIndex];
-        const baselinePage = baseline.pages[pageIndex];
-        const section = page?.sections[flow.sectionIndex];
-        const column = section?.columns[flow.columnIndex];
-        const baselineSection = baselinePage?.sections[flow.sectionIndex];
+        const baselinePage = workerLayout.baseline.pages[pageIndex];
+        const section = page?.sections[sectionIndex];
+        const column = section?.columns[columnIndex];
+        const baselineSection = baselinePage?.sections[sectionIndex];
         if (foreground == null || page == null || page === baselinePage ||
-            section == null || section === baselineSection || column == null || column === baselineSection?.columns[flow.columnIndex]) {
+            section == null || section === baselineSection || column == null || column === baselineSection?.columns[columnIndex]) {
             return null;
         }
-        const workerSection = workerPage.sections[flow.sectionIndex];
-        const workerColumn = workerSection?.columns[flow.columnIndex];
-        if (section.top !== workerSection?.top || column.left !== workerColumn?.left || column.width !== workerColumn?.width) {
+        const workerSection = workerPage.sections[sectionIndex];
+        const workerColumn = workerSection?.columns[columnIndex];
+        if (workerColumn == null || section.top !== workerSection.top ||
+            column.left !== workerColumn.left || column.width !== workerColumn.width) {
             return null;
         }
-        const continuation = this._resolveProtectedContinuousPublication(foreground, publication, protectedEndOffset, workerPage);
-        if (continuation == null) {
+
+        const start = workerColumn.lines[sourceLineIndex].st;
+        const matchingLineIndex = column.lines.findIndex((line) => line.st >= start);
+        const lineIndex = matchingLineIndex < 0 ? column.lines.length : matchingLineIndex;
+        const mainBoundary = column.lines[lineIndex - 1];
+        const workerBoundary = workerColumn.lines[sourceLineIndex - 1];
+        if (mainBoundary == null || workerBoundary == null || mainBoundary.st !== workerBoundary.st || mainBoundary.ed !== workerBoundary.ed ||
+            mainBoundary.top !== workerBoundary.top || mainBoundary.lineHeight !== workerBoundary.lineHeight ||
+            mainBoundary.width !== workerBoundary.width) {
+            // A divergent interaction window stays visible until the canonical
+            // Worker layout can replace it without joining incompatible lines.
             return null;
         }
-        // Select the objects owned by the same tail as the new lines. Use the
-        // merged page coordinates to guard the retained side of the splice.
-        const { lineIndex, lines } = continuation.block.flow;
-        const sourceLineIndex = flow.lineIndex + flow.lines.length - lines.length;
+
         const top = Math.min(
-            getFlowSuffixTop(page, flow.sectionIndex, flow.columnIndex, lineIndex),
-            getFlowSuffixTop(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
+            getFlowSuffixTop(page, sectionIndex, columnIndex, lineIndex),
+            getFlowSuffixTop(workerPage, sectionIndex, columnIndex, sourceLineIndex)
         );
-        const start = lines[0].st;
         if (!Number.isFinite(top)) {
             return null;
         }
         const foregroundGeometry = mergeProtectedForegroundGeometry(page, workerPage, start, top, drawingAnchorOffsets, () => Math.max(
-            getFlowPrefixBottom(page, flow.sectionIndex, flow.columnIndex, lineIndex),
-            getFlowPrefixBottom(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
+            getFlowPrefixBottom(page, sectionIndex, columnIndex, lineIndex),
+            getFlowPrefixBottom(workerPage, sectionIndex, columnIndex, sourceLineIndex)
         ));
         if (foregroundGeometry == null) {
             return null;
         }
         const didPublishEmbeddedGeometry = foregroundGeometry.skeDrawings !== page.skeDrawings ||
             foregroundGeometry.skeTables !== page.skeTables || foregroundGeometry.skeColumnGroups !== page.skeColumnGroups;
-        applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { foregroundGeometry });
+        const startsInPacket = sectionIndex === flow.sectionIndex && columnIndex === flow.columnIndex && sourceLineIndex >= flow.lineIndex;
+        const replacement = startsInPacket
+            ? { ...flow, lines: flow.lines.slice(sourceLineIndex - flow.lineIndex) }
+            : serializeContinuousFlow(workerPage, cursor);
+        applyDocumentSkeletonContinuousBlock(
+            foreground,
+            { ...publication.block, flow: { ...replacement, lineIndex } },
+            this._docViewModel.getSnapshot(),
+            { foregroundGeometry }
+        );
+        workerLayout.pendingForegroundFrom = undefined;
         return { didPublishEmbeddedGeometry };
     }
 
     private _resolveProtectedContinuousPublication(
         skeletonData: IDocumentSkeletonCached,
         publication: IDocumentLayoutBlockGeometryPublication,
-        protectedEndOffset: number,
-        workerPage?: IDocumentSkeletonPage
+        protectedEndOffset: number
     ): IDocumentLayoutBlockGeometryPublication | null {
         const { flow } = publication.block;
         const firstUnprotectedLineOffset = flow.lines.findIndex((line) => line.st > protectedEndOffset);
@@ -3485,11 +3549,9 @@ export class DocumentSkeleton extends Skeleton {
             ? existingColumn.lines.length
             : matchingTailLineIndex;
 
-        if (firstUnprotectedLineOffset > 0 || workerPage != null) {
+        if (firstUnprotectedLineOffset > 0) {
             const mainBoundaryLine = existingColumn.lines[targetLineIndex - 1];
-            const workerBoundaryLine = workerPage == null
-                ? flow.lines[firstUnprotectedLineOffset - 1]
-                : workerPage.sections[flow.sectionIndex]?.columns[flow.columnIndex]?.lines[flow.lineIndex + firstUnprotectedLineOffset - 1];
+            const workerBoundaryLine = flow.lines[firstUnprotectedLineOffset - 1];
             if (
                 mainBoundaryLine == null || workerBoundaryLine == null ||
                 mainBoundaryLine.st !== workerBoundaryLine.st ||

@@ -545,7 +545,7 @@ function hydrateDocumentSkeletonPageInternal(
     return page;
 }
 
-interface IDocumentSkeletonFlowCursor {
+export interface IDocumentSkeletonFlowCursor {
     sectionIndex: number;
     columnIndex: number;
     lineIndex: number;
@@ -603,11 +603,11 @@ const MAX_PUBLICATION_COMPARISON_DEPTH = 64;
 // Compare skeleton geometry before serialization so unchanged tables never
 // allocate a second tree of wire objects. Only actual owner back-references
 // are omitted. Rendering inputs such as table and row sources still compare.
-function compareLayoutGeometry(
+export function compareLayoutGeometry(
     left: unknown,
     right: unknown,
-    leftOwner: unknown,
-    rightOwner: unknown,
+    leftOwner?: unknown,
+    rightOwner?: unknown,
     depth = 0
 ): boolean {
     if (Object.is(left, right)) {
@@ -751,7 +751,7 @@ function collectContinuousTables(
     return { tables: canTrackTables ? tables : undefined, patches };
 }
 
-function serializeContinuousFlow(
+export function serializeContinuousFlow(
     currentPage: IDocumentSkeletonPage,
     cursor: IDocumentSkeletonFlowCursor
 ): IDocumentSkeletonContinuousFlowPatch {

@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NullValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Frequency } from '../index';
@@ -27,6 +27,62 @@ describe('Test frequency function', () => {
     const testFunction = new Frequency(FUNCTION_NAMES_STATISTICAL.FREQUENCY);
 
     describe('Frequency', () => {
+        it('Keeps unsorted duplicate bins in their original output positions', () => {
+            const data = ArrayValueObject.createByArray([[-5, 0, 0, 1, 3, 3, 4, 6, 8, 9, 10]]);
+            const bins = ArrayValueObject.createByArray([[6, 0, 6, 3]]);
+            expect(getObjectValue(testFunction.calculate(data, bins))).toStrictEqual([[2], [3], [0], [3], [3]]);
+        });
+
+        it('Matches bucket counts across different bin orders, duplicates and boundaries', () => {
+            for (let seed = 0; seed < 64; seed++) {
+                const dataValues = Array.from({ length: 31 }, (_, i) => (i * 7 + seed) % 29 - 14);
+                const binValues = Array.from({ length: 13 }, (_, i) => (i * (seed + 3) + seed) % 23 - 11);
+                const boundaries = [...new Set(binValues)].sort((a, b) => a - b);
+                const expected = Array.from({ length: binValues.length + 1 }, () => [0]);
+                for (const value of dataValues) {
+                    const upperBound = boundaries.find((bound) => value <= bound);
+                    const index = upperBound === undefined ? binValues.length : binValues.indexOf(upperBound);
+                    expected[index][0]++;
+                }
+                const data = ArrayValueObject.createByArray([dataValues]);
+                const bins = ArrayValueObject.createByArray([binValues]);
+                expect(getObjectValue(testFunction.calculate(data, bins))).toStrictEqual(expected);
+            }
+        });
+
+        it('Counts a large data array against descending bins', () => {
+            const data = ArrayValueObject.createByArray([Array.from({ length: 8192 }, (_, i) => i)]);
+            const bins = ArrayValueObject.createByArray([Array.from({ length: 4096 }, (_, i) => (4095 - i) * 2 + 1)]);
+            const expected = [...Array.from({ length: 4096 }, () => [2]), [0]];
+            expect(getObjectValue(testFunction.calculate(data, bins))).toStrictEqual(expected);
+        });
+
+        it('Retains existing NaN, infinite endpoint and numeric error handling', () => {
+            const zero = NumberValueObject.create(0);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(Number.NaN), zero))).toStrictEqual([[0], [0]]);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(-Infinity), zero))).toStrictEqual([[0], [0]]);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(Infinity), zero))).toStrictEqual([[0], [1]]);
+            expect(getObjectValue(testFunction.calculate(zero, NumberValueObject.create(Infinity)))).toStrictEqual([[1], [0]]);
+            expect(getObjectValue(testFunction.calculate(zero, NumberValueObject.create(-Infinity)))).toStrictEqual([[0], [1]]);
+            expect(getObjectValue(testFunction.calculate(zero, NumberValueObject.create(Number.NaN)))).toStrictEqual([[1], [0]]);
+            for (const value of [Number.NaN, -Infinity, Infinity]) {
+                const data = ArrayValueObject.createByArray([[value]]);
+                expect(getObjectValue(testFunction.calculate(data, zero))).toBe(ErrorType.NUM);
+            }
+        });
+
+        it('Ignores holes converted to blank array cells', () => {
+            const dataValues = new Array<number | null>(7);
+            dataValues[1] = -1;
+            dataValues[5] = 3;
+            const binValues = new Array<number | null>(6);
+            binValues[2] = 0;
+            binValues[4] = 4;
+            const data = ArrayValueObject.createByArray([dataValues]);
+            const bins = ArrayValueObject.createByArray([binValues]);
+            expect(getObjectValue(testFunction.calculate(data, bins))).toStrictEqual([[1], [1], [0]]);
+        });
+
         it('Value is normal', () => {
             const dataArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

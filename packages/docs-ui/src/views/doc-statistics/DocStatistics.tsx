@@ -15,12 +15,12 @@
  */
 
 import type { IDocumentStatistics } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
 import { LOCALE_META, LocaleService, RegionService } from '@univerjs/core';
 import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
 import { ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { DocPageStatus } from './DocPageStatus';
 import { useDocStatistics } from './use-doc-statistics';
 

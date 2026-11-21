@@ -16,14 +16,14 @@
 
 import type { IBorderData, Nullable } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { IBorderPanelProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { clsx, ColorPicker, ConfigContext, Dropdown, Separator } from '@univerjs/design';
 import { MoreDownIcon, PaintBucketDoubleIcon } from '@univerjs/icons';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IconManager, useDependency } from '@univerjs/ui';
 import { useContext } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IBorderPanelProps } from './interface';
 import { BorderLine } from './border-line/BorderLine';
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from './interface';
 
@@ -103,7 +103,7 @@ export function BorderPanel(props: IResponsiveBorderPanelProps) {
                 <div>
                     <DropdownComponent
                         overlay={(
-                            <div className="univer-rounded-lg univer-p-4">
+                            <div className="univer-p-2">
                                 <ColorPickerComponent value={color} onChange={(value) => handleClick(value, 'color')} />
                             </div>
                         )}

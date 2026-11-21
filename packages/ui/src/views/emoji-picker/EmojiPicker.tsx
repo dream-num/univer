@@ -286,7 +286,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 `
             )}
         >
-            <div className="univer-flex univer-items-center univer-gap-1 univer-px-3 univer-pb-2 univer-pt-3">
+            <div className="univer-flex univer-items-center univer-gap-1 univer-px-4 univer-pb-2 univer-pt-4">
                 <Input
                     aria-label={localeService.t<LocaleKey>('ui.emojiPicker.search')}
                     placeholder={localeService.t<LocaleKey>('ui.emojiPicker.search')}
@@ -327,7 +327,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             <div
                 ref={scrollRef}
                 className={clsx(
-                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-3',
+                    'univer-relative univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-px-4',
                     scrollbarClassName
                 )}
                 onScroll={handleScroll}
@@ -376,7 +376,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
 
             <div
                 className={clsx(`
-                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200 univer-px-2.5
+                  univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-border-gray-200 univer-px-4
                   dark:!univer-border-gray-600
                   [&_svg]:univer-size-5
                 `, borderTopClassName)}

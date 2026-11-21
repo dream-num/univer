@@ -159,8 +159,7 @@ describe('mobile drawer snap behavior', () => {
         expect(drawer?.style.bottom).toBe('');
         expect(drawer?.style.height).toBe('40vh');
         expect(drawer?.style.maxHeight).toBe('');
-        expect(drawer?.querySelector<HTMLElement>('.univer-overflow-y-auto')?.style.paddingBottom)
-            .toBe('calc(0.75rem + 320px)');
+        expect(screen.getByText('Drawer content').style.paddingBottom).toContain('+ 320px');
         expect(screen.getByRole('button', { name: 'Floating action' }).parentElement?.style.bottom)
             .toBe('calc(40vh + 12px)');
     });

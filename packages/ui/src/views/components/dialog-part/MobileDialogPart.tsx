@@ -130,7 +130,7 @@ export function MobileDialogPart() {
                       univer-bg-gray-0 univer-text-gray-900
                       dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                     "
-                contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                contentClassName="univer-min-h-0"
                 header={(
                     <header
                         className="

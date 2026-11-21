@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../../locale/types';
-import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
-import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
-import type { IRenderedSidebarOptions, ISidebarMethodOptions } from './Sidebar';
 import { LocaleService } from '@univerjs/core';
 import { MobileActionRowGroup } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { LocaleKey } from '../../../locale/types';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
+import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
+import type { IRenderedSidebarOptions, ISidebarMethodOptions } from './Sidebar';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { MobileDrawer } from '../mobile-drawer/MobileDrawer';
@@ -99,7 +99,7 @@ export function MobileSidebar() {
                   univer-bg-gray-0 univer-text-gray-900
                   dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                 "
-                contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                contentClassName="univer-min-h-0"
                 header={(
                     <header
                         className="

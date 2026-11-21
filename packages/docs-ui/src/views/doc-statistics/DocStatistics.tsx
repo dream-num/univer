@@ -15,12 +15,12 @@
  */
 
 import type { IDocumentStatistics } from '@univerjs/core';
-import type { LocaleKey } from '../../locale/types';
 import { LOCALE_META, LocaleService, RegionService } from '@univerjs/core';
 import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
 import { ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { DocPageStatus } from './DocPageStatus';
 import { useDocStatistics } from './use-doc-statistics';
 
@@ -72,7 +72,7 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
 
     return (
         <div className="univer-w-full" dir={direction}>
-            <header className="univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3">
+            <header className="univer-flex univer-items-center univer-gap-3 univer-p-4">
                 <div
                     className={`
                       univer-min-w-0 univer-flex-1
@@ -99,7 +99,7 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
                 )}
             </header>
             <Separator />
-            <dl className="univer-m-0 univer-p-2">
+            <dl className="univer-m-0 univer-p-2 univer-pb-4">
                 {statisticGroups.map((rows, groupIndex) => (
                     <div key={rows[0].key}>
                         {groupIndex > 0 && <Separator className="univer-my-1" />}

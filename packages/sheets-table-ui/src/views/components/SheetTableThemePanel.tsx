@@ -206,7 +206,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     ];
 
     return (
-        <div dir={direction} className="univer-flex univer-flex-col univer-gap-5 univer-pb-4">
+        <div dir={direction} className="univer-flex univer-flex-col univer-gap-5">
             <section className="univer-flex univer-flex-col univer-gap-2">
                 <h5
                     className="

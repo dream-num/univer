@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, LocaleService, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from './basics/i-document-skeleton-cached';
 import type {
     IDocumentSkeletonContinuousSnapshot,
@@ -30,7 +31,6 @@ import type {
     IDocumentLayoutInvalidation,
     IDocumentLayoutProgress,
 } from './components/docs/layout/document-layout-types';
-import { Disposable } from '@univerjs/core';
 import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 import {
     hydrateDocumentSkeletonPage,
@@ -75,7 +75,6 @@ export class DocumentLayoutSession extends Disposable {
     private _layoutReason: DocumentLayoutReason = 'initial';
     private _didPublishEditAnchor = false;
     private _continuousPageSnapshot: IDocumentSkeletonContinuousSnapshot | null = null;
-    private _continuousReplacementOffset: number | undefined;
     private readonly _publishedHeaderPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
     private readonly _publishedFooterPages = new Map<string, Map<number | string, IDocumentSkeletonPage>>();
     private _resetPublishedResources = true;
@@ -86,6 +85,7 @@ export class DocumentLayoutSession extends Disposable {
         this._viewModel = new DocumentViewModel(dataModel);
         this._skeleton = DocumentSkeleton.create(this._viewModel, localeService, {
             isolateIncrementalPublications: false,
+            batchContinuousPublications: true,
         });
     }
 
@@ -98,12 +98,9 @@ export class DocumentLayoutSession extends Disposable {
         this._publishedFooterPages.clear();
         this._resetPublishedResources = true;
         this._pendingPaginatedCompletion = null;
-        if (options?.reason !== 'edit') {
-            this._continuousPageSnapshot = null;
-        }
-        this._continuousReplacementOffset = options?.reason === 'edit'
-            ? options.invalidation?.oldStart ?? options.anchor
-            : undefined;
+        // Main may have discarded the preceding generation's last serialized patch.
+        // The first publication establishes a complete prefix before this generation sends deltas.
+        this._continuousPageSnapshot = null;
         const generation = this._skeleton.startIncrementalLayout({
             ...options,
             reuseUnaffectedTail: true,
@@ -186,7 +183,7 @@ export class DocumentLayoutSession extends Disposable {
         this._viewModel.reset(dataModel);
         this._skeleton.makeDirty(true);
         this._lastPublishedPageCount = 0;
-        this._continuousReplacementOffset = undefined;
+        this._continuousPageSnapshot = null;
         this._pendingPaginatedCompletion = null;
     }
 
@@ -286,11 +283,9 @@ export class DocumentLayoutSession extends Disposable {
             const { block, snapshot } = serializeDocumentSkeletonContinuousBlock(
                 page,
                 this._continuousPageSnapshot,
-                this._continuousReplacementOffset,
                 true
             );
             this._continuousPageSnapshot = snapshot;
-            this._continuousReplacementOffset = undefined;
             return {
                 progress,
                 publication: {

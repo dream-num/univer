@@ -213,9 +213,11 @@ export function serializeDocumentSkeletonPage(
     return {
         ...geometry,
         sections: source.sections.map(serializeSection),
-        ...(noteDecorations == null ? {} : {
-            noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
-        }),
+        ...(noteDecorations == null
+            ? {}
+            : {
+                noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
+            }),
         ...(notes == null
             ? {}
             : {
@@ -463,18 +465,22 @@ function hydrateDocumentSkeletonPageInternal(
     const page: IDocumentSkeletonPage = {
         ...geometry,
         sections: [],
-        ...(noteDecorations == null ? {} : {
-            noteDecorations: noteDecorations.map((decoration) => ({
-                ...decoration,
-                page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
-            })),
-        }),
-        ...(notes == null ? {} : {
-            notes: notes.map((note) => ({
-                ...note,
-                page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
-            })),
-        }),
+        ...(noteDecorations == null
+            ? {}
+            : {
+                noteDecorations: noteDecorations.map((decoration) => ({
+                    ...decoration,
+                    page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
+                })),
+            }),
+        ...(notes == null
+            ? {}
+            : {
+                notes: notes.map((note) => ({
+                    ...note,
+                    page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
+                })),
+            }),
         skeDrawings: new Map(source.skeDrawings.map(([drawingId, drawing]) => [
             drawingId,
             hydrateDrawing(drawing, snapshot, resourceSegmentId),
@@ -548,11 +554,6 @@ function collectFlowLineEndsFromCursor(
     return lineEnds;
 }
 
-function findFlowLineIndex(lineEnds: number[], offset: number): number {
-    const index = lineEnds.findIndex((lineEnd) => lineEnd >= offset);
-    return index < 0 ? lineEnds.length : index;
-}
-
 function resolveFlowCursor(page: IDocumentSkeletonPage, flowLineIndex: number): IDocumentSkeletonFlowCursor {
     let remaining = flowLineIndex;
     for (let sectionIndex = 0; sectionIndex < page.sections.length; sectionIndex++) {
@@ -591,22 +592,19 @@ function serializePageGeometry(source: IDocumentSkeletonPage): IDocumentSkeleton
 }
 
 /**
- * Serializes only the changed suffix of a continuous document's logical page.
- * The boundary line is deliberately republished because paragraph spacing can
- * alter it when the next block is appended.
+ * Serializes the first prefix of a continuous layout generation, then its
+ * changed suffix. The boundary line is deliberately republished because
+ * paragraph spacing can alter it when the next block is appended.
  */
 export function serializeDocumentSkeletonContinuousBlock(
     currentPage: IDocumentSkeletonPage,
     previousSnapshot: IDocumentSkeletonContinuousSnapshot | null,
-    replacementOffset?: number,
     omitResourceSources = false
 ): { block: IDocumentSkeletonContinuousBlockPatch; snapshot: IDocumentSkeletonContinuousSnapshot } {
-    const previousLineCount = previousSnapshot?.lineEnds.length ?? 0;
     let currentLineEnds: number[];
-    let replacementLineIndex: number;
     let cursor: IDocumentSkeletonFlowCursor;
-    if (previousSnapshot != null && replacementOffset == null) {
-        replacementLineIndex = Math.max(0, Math.min(previousLineCount, countFlowLines(currentPage)) - 1);
+    if (previousSnapshot != null) {
+        const replacementLineIndex = Math.max(0, Math.min(previousSnapshot.lineEnds.length, countFlowLines(currentPage)) - 1);
         cursor = resolveFlowCursor(currentPage, replacementLineIndex);
         const appendedLineEnds = collectFlowLineEndsFromCursor(currentPage, cursor);
         currentLineEnds = previousSnapshot.lineEnds;
@@ -617,14 +615,7 @@ export function serializeDocumentSkeletonContinuousBlock(
         );
     } else {
         currentLineEnds = collectFlowLineEnds(currentPage);
-        const replacementStart = replacementOffset ?? 0;
-        replacementLineIndex = previousSnapshot == null
-            ? 0
-            : Math.min(
-                findFlowLineIndex(previousSnapshot.lineEnds, replacementStart),
-                findFlowLineIndex(currentLineEnds, replacementStart)
-            );
-        cursor = resolveFlowCursor(currentPage, replacementLineIndex);
+        cursor = resolveFlowCursor(currentPage, 0);
     }
     const section = currentPage.sections[cursor.sectionIndex];
     const column = section?.columns[cursor.columnIndex];

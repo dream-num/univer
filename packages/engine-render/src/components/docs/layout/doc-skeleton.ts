@@ -98,6 +98,7 @@ import {
     stepTableSkeletonBuild,
     stepTableSkeletonsBuild,
 } from './block/table';
+import { ContinuousLayoutPublicationScheduler } from './continuous-layout-publication-scheduler';
 import {
     applyDocumentSkeletonContinuousBlock,
     hydrateDocumentSkeletonPage,
@@ -325,6 +326,12 @@ export interface IDocumentCustomBlockPresentationRefreshResult {
     requiresLayout: boolean;
 }
 
+interface IDocumentSkeletonOptions {
+    isolateIncrementalPublications?: boolean;
+    batchContinuousPublications?: boolean;
+    lineGap?: number;
+}
+
 interface IIncrementalLayoutState {
     generation: number;
     reason: DocumentLayoutReason;
@@ -359,6 +366,7 @@ interface IIncrementalLayoutState {
     stablePageCount: number;
     finalizedPageCount: number;
     anchorPublished: boolean;
+    continuousPublicationScheduler: ContinuousLayoutPublicationScheduler | null;
     lastPublishedPageCount: number;
     lastPublishedBlockCount: number;
     publicationRevision: number;
@@ -1237,6 +1245,8 @@ export class DocumentSkeleton extends Skeleton {
 
     private readonly _isolateIncrementalPublications: boolean;
 
+    private readonly _batchContinuousPublications: boolean;
+
     private _modernPageWidth: number | undefined;
 
     private _modernHorizontalMargin: number | undefined;
@@ -1246,17 +1256,18 @@ export class DocumentSkeleton extends Skeleton {
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean; lineGap?: number } = {}
+        options: IDocumentSkeletonOptions = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
+        this._batchContinuousPublications = options.batchContinuousPublications === true;
         this._lineGap = options.lineGap ?? 0;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean; lineGap?: number }
+        options?: IDocumentSkeletonOptions
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -1445,6 +1456,9 @@ export class DocumentSkeleton extends Skeleton {
             stablePageCount: Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1),
             finalizedPageCount: Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1),
             anchorPublished: false,
+            continuousPublicationScheduler: mode === 'continuous' && this._batchContinuousPublications
+                ? new ContinuousLayoutPublicationScheduler()
+                : null,
             lastPublishedPageCount: incrementalStart.ctx.skeleton.pages.length > 0
                 ? Math.max(0, incrementalStart.ctx.skeleton.pages.length - 1)
                 : 0,
@@ -1895,20 +1909,31 @@ export class DocumentSkeleton extends Skeleton {
             return null;
         }
 
-        const retainedLines = previousColumn.lines
-            .filter((line) => line.ed < anchorBlock.startIndex)
-            .map((line) => cloneLineFlowForPublish(line));
-        if (retainedLines.length === 0) {
+        const prefixLines: IDocumentSkeletonLine[] = [];
+        let retainedEnd = -1;
+        for (const line of previousColumn.lines) {
+            if (line.ed >= anchorBlock.startIndex) {
+                break;
+            }
+            if (line.st > retainedEnd + 1) {
+                return null;
+            }
+            prefixLines.push(line);
+            retainedEnd = Math.max(retainedEnd, line.ed);
+        }
+        // An interrupted first layout may have a published prefix that ends
+        // before the edit. Resuming at the edit would skip the unpublished gap.
+        if (prefixLines.length === 0 || retainedEnd !== anchorBlock.startIndex - 1) {
             return null;
         }
 
+        const retainedLines = prefixLines.map((line) => cloneLineFlowForPublish(line));
         const lastRetainedLine = retainedLines[retainedLines.length - 1];
         // The following paragraph applied its collapsed top/bottom spacing to this
         // line during the previous layout. Undo that one boundary contribution so
         // laying the anchor paragraph applies it exactly once again.
         lastRetainedLine.lineHeight = Math.max(0, lastRetainedLine.lineHeight - lastRetainedLine.marginBottom);
         lastRetainedLine.marginBottom = 0;
-        const retainedEnd = retainedLines[retainedLines.length - 1].ed;
         const retainedHeight = retainedLines.reduce(
             (height, line) => Math.max(height, line.top + line.lineHeight),
             0
@@ -2050,12 +2075,16 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     /**
-     * Publishes at most one page that a previous layout slice has already
-     * completed. It never advances shaping or pagination work.
+     * Publishes one completed page or a ready batch of continuous layout.
+     * It never advances shaping or pagination work.
      */
     publishIncrementalLayoutBacklog(generation: number): IDocumentLayoutProgress {
         const state = this._activeLayout;
-        if (state?.generation === generation && state.mode === 'continuous') {
+        if (
+            state?.generation === generation &&
+            state.mode === 'continuous' &&
+            state.continuousPublicationScheduler == null
+        ) {
             const progress = this._getLayoutProgress(state);
             this._layoutProgress$.next(progress);
             return progress;
@@ -2163,14 +2192,15 @@ export class DocumentSkeleton extends Skeleton {
                 Math.max(0, pageCount - 1),
                 state.interactionPageComplete ? state.priorityPageIndex + 1 : 0
             );
-        const hasStablePageToPublish = stableComputedPageCount > state.lastPublishedPageCount;
+        // Continuous layout merges its internal page fragments into a single published page.
+        const hasStablePageToPublish = state.mode === 'paginated' &&
+            stableComputedPageCount > state.lastPublishedPageCount;
         const hasStableBlockToPublish = state.mode === 'continuous' &&
             state.processedBlockCount > state.lastPublishedBlockCount;
         const suppressPreAnchorPublication =
             state.reason === 'edit' &&
             state.priorityAnchor != null &&
             !state.anchorPublished;
-        const canPublish = shouldPublishPriority || hasStablePageToPublish || hasStableBlockToPublish || state.complete;
         const publishedPageCount = state.mode === 'continuous'
             ? pageCount
             : state.complete
@@ -2186,10 +2216,12 @@ export class DocumentSkeleton extends Skeleton {
         let didPublishAnchor = false;
         if (
             !state.cancelled &&
-            canPublish &&
             // A NUMPAGES retry is provisional until its pagination converges.
             (state.ctx.fieldCountCandidates == null || state.complete) &&
-            (!suppressPreAnchorPublication || shouldPublishPriority || state.complete)
+            (!suppressPreAnchorPublication || shouldPublishPriority || state.complete) &&
+            (shouldPublishPriority || state.complete || hasStablePageToPublish || (
+                hasStableBlockToPublish && this._isContinuousPublicationReady(state)
+            ))
         ) {
             if (state.mode === 'paginated') {
                 this._finalizePaginatedPagesForPublication(state, publishedPageCount);
@@ -2217,6 +2249,7 @@ export class DocumentSkeleton extends Skeleton {
                 ? Math.min(1, publishedPageCount)
                 : publishedPageCount;
             state.lastPublishedBlockCount = state.processedBlockCount;
+            state.continuousPublicationScheduler?.reset();
         }
 
         const progress = this._getLayoutProgress(state, didPublish, didPublishAnchor);
@@ -2227,6 +2260,13 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         return progress;
+    }
+
+    private _isContinuousPublicationReady(state: IIncrementalLayoutState): boolean {
+        const scheduler = state.continuousPublicationScheduler;
+        // The initial output starts rendering immediately. Only later stable blocks are batched.
+        return scheduler == null || state.publicationRevision === 0 ||
+            scheduler.isReady(state.processedBlockCount - state.lastPublishedBlockCount, getLayoutNow());
     }
 
     private _createPublishablePartialSkeleton(
@@ -5121,6 +5161,7 @@ export class DocumentSkeleton extends Skeleton {
         state.finalizedPageCount = Math.min(state.finalizedPageCount, stablePrefixCount);
         state.lastPublishedPageCount = Math.min(state.lastPublishedPageCount, stablePrefixCount);
         state.lastPublishedBlockCount = Math.min(state.lastPublishedBlockCount, state.processedBlockCount);
+        state.continuousPublicationScheduler?.reset();
         if (state.priorityPageIndex >= stablePrefixCount) {
             state.anchorPublished = false;
         }
@@ -5179,6 +5220,7 @@ export class DocumentSkeleton extends Skeleton {
             state.finalizedPageCount = 0;
             state.lastPublishedPageCount = 0;
             state.lastPublishedBlockCount = 0;
+            state.continuousPublicationScheduler?.reset();
             state.anchorPublished = false;
             state.reuseUnaffectedTail = false;
             state.reusedTail = false;

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -42,7 +40,9 @@ import {
     Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
+import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
@@ -1474,7 +1474,7 @@ describe('worker document layout session', () => {
         const content = [
             `First ${T.CUSTOM_BLOCK} page${T.PARAGRAPH}${T.PAGE_BREAK}`,
             `Second ${T.CUSTOM_BLOCK} page${T.PARAGRAPH}${T.PAGE_BREAK}`,
-            ...Array.from({ length: 20 }, (_, index) => `Trailing paragraph ${index}${T.PARAGRAPH}`),
+            ...Array.from({ length: 60 }, (_, index) => `Trailing paragraph ${index}${T.PARAGRAPH}`),
         ].join('');
         const sourceModel = createDocumentModelWithStyle(content, {});
         const snapshot = sourceModel.getSnapshot();
@@ -1539,6 +1539,254 @@ describe('worker document layout session', () => {
         session.dispose();
         dataModel.dispose();
         sourceModel.dispose();
+    });
+
+    it('publishes a Modern table when its layout is ready without resending the unchanged prefix during table layout', () => {
+        mockWorkerCanvas();
+        const T = DataStreamTreeTokenType;
+        const tableId = 'continuous-table';
+        const cellContents = ['First row', 'Second row', 'Third row'];
+        const prefix = ['First', 'Second', 'Third'].join(`${T.PARAGRAPH}${T.PAGE_BREAK}`) + T.PARAGRAPH;
+        const tableStream = T.TABLE_START + cellContents.map((content) =>
+            `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${content}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`
+        ).join('') + T.TABLE_END;
+        const tableEnd = prefix.length + tableStream.length;
+        const dataStream = `${prefix}${tableStream}${T.PARAGRAPH}After the table${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const model = new DocumentDataModel({
+            id: 'worker-continuous-table',
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(new RegExp(T.PARAGRAPH, 'g'))].map((match, index) => ({
+                    startIndex: match.index,
+                    paragraphId: `paragraph-${index}`,
+                })),
+                sectionBreaks: [...dataStream.matchAll(new RegExp(T.SECTION_BREAK, 'g'))].map((match, index) => ({
+                    startIndex: match.index,
+                    sectionId: `section-${index}`,
+                })),
+                tables: [{ startIndex: prefix.length, endIndex: tableEnd, tableId }],
+            },
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 280, height: 220 } },
+            tableSource: {
+                [tableId]: {
+                    tableId,
+                    align: TableAlignmentType.START,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 160 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 160 } } }],
+                    tableRows: cellContents.map(() => ({
+                        trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                        tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+                    })),
+                },
+            },
+        });
+        const targetModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const locale = new LocaleService();
+        const target = DocumentSkeleton.create(new DocumentViewModel(targetModel), locale);
+        const session = new DocumentLayoutSession(model, locale);
+        let now = 0;
+        const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+        try {
+            target.beginExternalLayout({ reason: 'initial' });
+            const generation = session.start({ reason: 'initial' });
+            let previousBlockCount = 0;
+            let sawTableInProgress = false;
+            let publishedTableBeforeCompletion = false;
+            let complete = false;
+            for (let step = 0; step < 100 && !complete; step++) {
+                const { progress, publication } = session.step(generation, 0, 1);
+                if (
+                    !progress.complete &&
+                    !publishedTableBeforeCompletion &&
+                    progress.laidOutThrough >= prefix.lastIndexOf(T.PARAGRAPH) &&
+                    progress.processedBlockCount === previousBlockCount
+                ) {
+                    sawTableInProgress = true;
+                    expect(publication?.kind).toBeUndefined();
+                }
+                if (publication != null) {
+                    target.applyLayoutPublication(structuredClone(publication), progress);
+                }
+                if (!progress.complete) {
+                    // Drain any stable output before the next slice enters or advances the table.
+                    now += 250;
+                    const backlog = session.publishBacklog(generation);
+                    if (backlog.publication != null) {
+                        target.applyLayoutPublication(structuredClone(backlog.publication), backlog.progress);
+                    }
+                }
+                if (!progress.complete && !publishedTableBeforeCompletion && progress.laidOutThrough >= tableEnd) {
+                    expect(target.getSkeletonData()?.pages[0].skeTables.has(tableId)).toBe(true);
+                    publishedTableBeforeCompletion = true;
+                }
+                previousBlockCount = progress.processedBlockCount;
+                complete = progress.complete;
+            }
+
+            expect(sawTableInProgress).toBe(true);
+            expect(publishedTableBeforeCompletion).toBe(true);
+            expect(complete).toBe(true);
+            const published = target.getSkeletonData();
+            target.calculate();
+            expect(normalizeSkeleton(published)).toEqual(normalizeSkeleton(target.getSkeletonData()));
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            target.dispose();
+            targetModel.dispose();
+            model.dispose();
+            locale.dispose();
+        }
+    });
+
+    it('flushes stable Modern Worker blocks at the first count or time limit and flushes the remainder at completion', () => {
+        mockWorkerCanvas();
+        const content = Array.from({ length: 40 }, (_, index) => `Paragraph ${index}\r`).join('');
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const locale = new LocaleService();
+        const session = new DocumentLayoutSession(model, locale);
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        try {
+            const generation = session.start({ reason: 'initial' });
+            const first = session.step(generation, 0);
+            expect(first.publication?.kind).toBe('block');
+
+            expect(session.step(generation, Number.POSITIVE_INFINITY, 7).publication).toBeNull();
+            clock.mockReturnValue(249);
+            const pending = session.step(generation, Number.POSITIVE_INFINITY, 3);
+            expect(pending.publication).toBeNull();
+
+            // The three newer blocks join the earlier batch without resetting its deadline.
+            clock.mockReturnValue(250);
+            const timed = session.publishBacklog(generation);
+            expect(timed.publication?.kind).toBe('block');
+            expect(timed.progress.processedBlockCount).toBe(pending.progress.processedBlockCount);
+            expect(session.publishBacklog(generation).publication).toBeNull();
+
+            expect(session.step(generation, Number.POSITIVE_INFINITY, 23).publication).toBeNull();
+            const counted = session.step(generation, 0);
+            expect(counted.publication?.kind).toBe('block');
+            expect(counted.progress.complete).toBe(false);
+            expect(counted.progress.processedBlockCount - timed.progress.processedBlockCount).toBe(24);
+
+            const final = session.step(generation, Number.POSITIVE_INFINITY);
+            expect(final.publication?.kind).toBe('block');
+            expect(final.progress.complete).toBe(true);
+            expect(final.progress.processedBlockCount).toBe(final.progress.totalBlockCount);
+        } finally {
+            clock.mockRestore();
+            session.dispose();
+            model.dispose();
+            locale.dispose();
+        }
+    });
+
+    it.each([
+        { interruption: 'waiting batch', pendingWork: 14, editedParagraph: 12, serialized: false },
+        { interruption: 'serialized but unapplied patch', pendingWork: 24, editedParagraph: 15, serialized: true },
+    ])('keeps all Modern paragraphs when a remote edit interrupts a $interruption', ({
+        pendingWork,
+        editedParagraph,
+        serialized,
+    }) => {
+        mockWorkerCanvas();
+        const content = Array.from({ length: 72 }, (_, index) => `Paragraph ${index} has a unique label.\r`).join('');
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(420, Number.POSITIVE_INFINITY);
+        const mainModel = new DocumentDataModel(structuredClone(model.getSnapshot()));
+        const locale = new LocaleService();
+        const worker = new DocumentLayoutSession(model, locale);
+        const main = DocumentSkeleton.create(new DocumentViewModel(mainModel), locale);
+        const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+        try {
+            const initial = worker.start({ reason: 'initial' });
+            const first = worker.step(initial, 0);
+            if (first.publication == null) {
+                throw new Error('Expected initial Worker geometry.');
+            }
+            main.beginExternalLayout({ reason: 'initial' });
+            main.applyLayoutPublication(structuredClone(first.publication), first.progress);
+            const interrupted = worker.step(initial, Number.POSITIVE_INFINITY, pendingWork);
+            expect(interrupted.publication?.kind).toBe(serialized ? 'block' : undefined);
+
+            const anchor = content.indexOf(`Paragraph ${editedParagraph} has`) + 'Paragraph '.length;
+            expect(interrupted.progress.laidOutThrough).toBeGreaterThan(anchor);
+            worker.cancel(initial);
+            main.cancelExternalLayout();
+
+            const inserted = 'remote ';
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: anchor });
+            edit.push({ t: TextXActionType.INSERT, len: inserted.length, body: { dataStream: inserted } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            model.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(model);
+            main.getViewModel().reset(mainModel);
+
+            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + inserted.length };
+            // Main protects the local caret at the start while the Worker lays out the remote edit.
+            const foreground = main.startIncrementalLayout({
+                reason: 'edit',
+                anchor: 0,
+                priorityAnchor: 0,
+                invalidation,
+                preserveInteractionWindow: true,
+                reuseUnaffectedTail: false,
+            });
+            const foregroundProgress = main.stepIncrementalLayout(foreground, Number.POSITIVE_INFINITY, 5);
+            expect(foregroundProgress.didPublishAnchor).toBe(true);
+            expect(foregroundProgress.stableLaidOutThrough).toBeGreaterThanOrEqual(0);
+            expect(foregroundProgress.laidOutThrough).toBeLessThan(anchor);
+            main.beginExternalLayout({
+                reason: 'edit',
+                protectedRange: { mode: 'continuous', startOffset: 0, endOffset: foregroundProgress.stableLaidOutThrough },
+            });
+
+            const resumed = worker.start({ reason: 'edit', anchor, priorityAnchor: anchor, invalidation });
+            let result = worker.step(resumed, 0);
+            for (let step = 0; step < 100; step++) {
+                if (result.publication != null) {
+                    main.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                }
+                if (result.progress.complete) {
+                    break;
+                }
+                result = worker.step(resumed, 0);
+            }
+            expect(result.progress.complete).toBe(true);
+            const received = main.getSkeletonData();
+            const page = worker.getPage(0);
+            if (page == null) {
+                throw new Error('Expected the final Worker page.');
+            }
+            const workerPage = DocumentLayoutSession.hydratePage(page, model.getSnapshot());
+            main.makeDirty(true);
+            main.calculate();
+            const expected = main.getSkeletonData();
+            const lines = (page: IDocumentSkeletonPage | undefined) =>
+                page?.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)) ?? [];
+            expect(lines(workerPage)).toHaveLength(lines(expected?.pages[0]).length);
+            expect(lines(received?.pages[0])).toHaveLength(lines(expected?.pages[0]).length);
+            expect(normalizeSkeleton(workerPage)).toEqual(normalizeSkeleton(expected?.pages[0]));
+            expect(normalizeSkeleton(received)).toEqual(normalizeSkeleton(expected));
+        } finally {
+            clock.mockRestore();
+            worker.dispose();
+            main.dispose();
+            model.dispose();
+            mainModel.dispose();
+            locale.dispose();
+        }
     });
 
     it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('preserves rich elements with bounded deferred snapshots across Worker transport (%s)', (flavor) => {
@@ -2003,7 +2251,7 @@ describe('worker document layout session', () => {
         });
 
         const content = Array.from(
-            { length: 24 },
+            { length: 72 },
             (_, index) => `Modern paragraph ${index} is laid out independently.\r`
         ).join('');
         const dataModel = createDocumentModelWithStyle(content, {});
@@ -2046,7 +2294,7 @@ describe('worker document layout session', () => {
             (section) => section.columns
         ).flatMap((column) => column.lines).length ?? 0;
         expect(result.progress).toMatchObject({ mode: 'continuous', complete: true, pageCount: 1 });
-        expect(publications.length).toBeGreaterThan(10);
+        expect(publications.length).toBeGreaterThan(2);
         expect(Math.max(...blockLineCounts.slice(1))).toBeLessThan(finalLineCount);
         expect(() => structuredClone(publications)).not.toThrow();
         expectBoundedPatchTransfer(transferDurations);
@@ -2225,8 +2473,8 @@ describe('worker document layout session', () => {
             editResult = session.step(editGeneration, 0);
         }
 
-        expect(firstEditBlockLineIndex).not.toBeNull();
-        expect(firstEditBlockLineIndex).toBeGreaterThan(0);
+        // An edit generation starts with a complete prefix, independent of the previous transport cursor.
+        expect(firstEditBlockLineIndex).toBe(0);
         expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
         expectBoundedPatchTransfer(editTransferDurations);
         expect(normalizeSkeleton(targetSkeleton.getSkeletonData())).toEqual(

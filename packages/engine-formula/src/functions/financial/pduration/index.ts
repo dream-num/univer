@@ -61,7 +61,7 @@ export class Pduration extends BaseFunction {
             const pvValue = +_pvObject.getValue();
             const fvValue = +_fvObject.getValue();
 
-            if (rateValue <= -1) {
+            if (rateValue <= 0 || pvValue <= 0 || fvValue <= 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

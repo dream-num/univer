@@ -35,6 +35,54 @@ import { TextX } from '../text-x';
 import { composeBody, getBodySlice } from '../utils';
 
 describe('test TextX methods and branches', () => {
+    it('keeps a bookmark and inserted field in document order across batching and rebasing', () => {
+        const original: IDocumentBody = { dataStream: 'Reference target\rBody\r\n' };
+        const bookmark: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 0,
+            rangeUpdates: [{
+                rangeId: 'target',
+                nextRangeId: null,
+                range: { rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 15, properties: { bookmarkId: 'target' } },
+            }],
+        }];
+        const field: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 21 },
+            {
+                t: TextXActionType.INSERT,
+                len: 3,
+                body: {
+                    dataStream: '\u001F1\u001E',
+                    customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { instruction: 'REF target' } }],
+                },
+            },
+        ];
+        const expected = TextX.apply(TextX.apply(Tools.deepClone(original), bookmark), field);
+        expect(expected.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['target', 'ref']);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(bookmark, field))).toEqual(expected);
+        const afterField = TextX.apply(Tools.deepClone(original), field);
+        expect(TextX.apply(afterField, TextX.transform(bookmark, field))).toEqual(expected);
+    });
+
+    it.each(['left', 'right'] as const)('converges for two bookmarks on the same text (%s)', (priority) => {
+        const createBookmark = (rangeId: string): TextXAction[] => [{
+            t: TextXActionType.RETAIN,
+            len: 0,
+            rangeUpdates: [{
+                rangeId,
+                nextRangeId: null,
+                range: { rangeId, rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 3, properties: { bookmarkId: rangeId } },
+            }],
+        }];
+        const original: IDocumentBody = { dataStream: 'Body\r\n' };
+        const left = createBookmark('alpha');
+        const right = createBookmark('beta');
+        const alice = TextX.apply(TextX.apply({ ...original }, left), TextX.transform(right, left, priority));
+        const bob = TextX.apply(TextX.apply({ ...original }, right), TextX.transform(left, right, priority === 'left' ? 'right' : 'left'));
+        expect(alice).toEqual(bob);
+        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['alpha', 'beta']);
+    });
+
     it.each([false, true])('preserves newly inserted field boundaries through a composed refresh (nested=%s)', (nested) => {
         const original: IDocumentBody = {
             dataStream: '\u001FOld\u001E\r\n',

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
-import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import {
     BooleanNumber,
     ColumnLayoutType,
@@ -42,7 +40,9 @@ import {
     Univer,
     VerticalAlignmentType,
 } from '@univerjs/core';
+import { cpuUsage, memoryUsage, stdout } from 'node:process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { IDocumentSkeletonPage } from '../basics/i-document-skeleton-cached';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
@@ -2312,6 +2312,60 @@ describe('worker document layout session', () => {
             normalizeSkeleton(synchronousSkeleton.getSkeletonData())
         );
 
+        const partialModel = new DocumentDataModel(structuredClone(dataModel.getSnapshot()));
+        const partialSession = new DocumentLayoutSession(partialModel, localeService);
+        const partialTarget = DocumentSkeleton.create(new DocumentViewModel(partialModel), localeService);
+        partialTarget.beginExternalLayout({ reason: 'initial' });
+        const partialGeneration = partialSession.start({ reason: 'initial' });
+        let partialResult = partialSession.step(partialGeneration, 0, 1);
+        for (let step = 0; step < 100 && partialResult.publication == null; step++) {
+            partialResult = partialSession.step(partialGeneration, 0, 1);
+        }
+        expect(partialResult.progress.complete).toBe(false);
+        expect(partialResult.progress.laidOutThrough).toBeLessThan(transformedCaret);
+        expect(partialResult.publication?.kind).toBe('block');
+        if (partialResult.publication != null) {
+            partialTarget.applyLayoutPublication(structuredClone(partialResult.publication), partialResult.progress);
+        }
+
+        const tailText = 'TAIL EDIT ';
+        const tailTextX = new TextX();
+        tailTextX.push({ t: TextXActionType.RETAIN, len: transformedCaret });
+        tailTextX.push({ t: TextXActionType.INSERT, len: tailText.length, body: { dataStream: tailText } });
+        partialModel.apply(JSONX.getInstance().editOp(tailTextX.serialize(), ['body']));
+        partialSession.resetDataModel(partialModel);
+        partialTarget.getViewModel().reset(partialModel);
+        partialTarget.beginExternalLayout({ reason: 'edit' });
+        const tailGeneration = partialSession.start({
+            reason: 'edit',
+            anchor: transformedCaret,
+            invalidation: { oldStart: transformedCaret, oldEnd: transformedCaret, newEnd: transformedCaret + tailText.length },
+        });
+        let firstTailPatch = true;
+        for (let step = 0; step < 1_000; step++) {
+            const { publication, progress } = partialSession.step(tailGeneration, 0);
+            if (publication?.kind === 'block') {
+                if (firstTailPatch) {
+                    expect(publication.block.flow.lineIndex).toBe(0);
+                    expect(publication.block.previousHeight).toBe(0);
+                    firstTailPatch = false;
+                }
+                partialTarget.applyLayoutPublication(structuredClone(publication), progress);
+            }
+            if (progress.complete) {
+                break;
+            }
+        }
+        expect(firstTailPatch).toBe(false);
+        expect(partialTarget.isCurrentLayoutComplete()).toBe(true);
+        const tailReference = DocumentSkeleton.create(new DocumentViewModel(partialModel), localeService);
+        tailReference.calculate();
+        expect(normalizeSkeleton(partialTarget.getSkeletonData())).toEqual(normalizeSkeleton(tailReference.getSkeletonData()));
+
+        tailReference.dispose();
+        partialTarget.dispose();
+        partialSession.dispose();
+        partialModel.dispose();
         session.dispose();
         targetSkeleton.dispose();
         synchronousSkeleton.dispose();

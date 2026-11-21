@@ -224,3 +224,53 @@ describe('document footnote segments', () => {
         document.dispose();
     });
 });
+
+describe('document layout mutation revision', () => {
+    it('preserves layout revision for title, zoom and disabled changes while advancing the general revision', () => {
+        const document = createDocument();
+        try {
+            const layoutRevision = document.getLayoutMutationRevision();
+            let revision = document.getMutationRevision();
+            for (const update of [
+                () => document.setName('Renamed document'),
+                () => document.setZoomRatio(1.5),
+                () => document.setDisabled(true),
+            ]) {
+                update();
+                expect(document.getMutationRevision()).toBe(++revision);
+                expect(document.getLayoutMutationRevision()).toBe(layoutRevision);
+            }
+            expect(document.getTitle()).toBe('Renamed document');
+            expect(document.zoomRatio).toBe(1.5);
+            expect(document.getDisabled()).toBe(true);
+        } finally {
+            document.dispose();
+        }
+    });
+
+    it('advances both revisions for content, style, dimensions, drawings and snapshot replacement', () => {
+        const document = createDocument();
+        try {
+            const edit = JSONX.getInstance().editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['body']);
+            const updates = [
+                () => document.apply(edit),
+                () => document.updateDocumentStyle({ textStyle: { fs: 18 } }),
+                () => document.updateDocumentDataMargin({ t: 20, l: 20, b: 20, r: 20 }),
+                () => document.updateDocumentDataPageSize(600, 800),
+                () => document.updateDocumentDataPageSize(500, 700),
+                () => document.resetDrawing({}, []),
+                () => document.reset({ id: document.getUnitId(), body: body('Replaced') }),
+            ];
+            for (const update of updates) {
+                const revision = document.getMutationRevision();
+                const layoutRevision = document.getLayoutMutationRevision();
+                update();
+                expect(document.getMutationRevision()).toBe(revision + 1);
+                expect(document.getLayoutMutationRevision()).toBe(layoutRevision + 1);
+            }
+            expect(document.getBody()?.dataStream).toBe('Replaced\r\n');
+        } finally {
+            document.dispose();
+        }
+    });
+});

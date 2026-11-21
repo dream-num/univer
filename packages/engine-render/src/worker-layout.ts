@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, LocaleService, Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from './basics/i-document-skeleton-cached';
 import type {
     IDocumentSkeletonContinuousSnapshot,
@@ -30,7 +31,6 @@ import type {
     IDocumentLayoutInvalidation,
     IDocumentLayoutProgress,
 } from './components/docs/layout/document-layout-types';
-import { Disposable } from '@univerjs/core';
 import { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 import {
     hydrateDocumentSkeletonPage,
@@ -98,17 +98,19 @@ export class DocumentLayoutSession extends Disposable {
         this._publishedFooterPages.clear();
         this._resetPublishedResources = true;
         this._pendingPaginatedCompletion = null;
-        if (options?.reason !== 'edit') {
-            this._continuousPageSnapshot = null;
-        }
-        this._continuousReplacementOffset = options?.reason === 'edit'
-            ? options.invalidation?.oldStart ?? options.anchor
-            : undefined;
         const generation = this._skeleton.startIncrementalLayout({
             ...options,
             reuseUnaffectedTail: true,
         });
         const progress = this._skeleton.getLayoutProgress();
+        if (options?.reason === 'edit' && progress?.mode === 'continuous' && progress.processedBlockCount > 0) {
+            this._continuousReplacementOffset = options.invalidation?.oldStart ?? options.anchor;
+        } else {
+            // When layout restarts at block zero, publish from the start of the page
+            // rather than merging the rebuilt content with an earlier partial snapshot.
+            this._continuousPageSnapshot = null;
+            this._continuousReplacementOffset = undefined;
+        }
         this._lastPublishedPageCount = progress?.mode === 'paginated'
             ? progress.publishedPageCount
             : 0;

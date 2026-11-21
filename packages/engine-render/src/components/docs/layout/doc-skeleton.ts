@@ -354,8 +354,15 @@ export interface IDocumentCustomBlockPresentationRefreshResult {
     requiresLayout: boolean;
 }
 
+interface IDocumentLayoutVersionStamp {
+    model: DocumentDataModel;
+    revision: number;
+    epoch: number;
+}
+
 interface IIncrementalLayoutState {
     generation: number;
+    layoutVersionStamp: IDocumentLayoutVersionStamp;
     reason: DocumentLayoutReason;
     mode: DocumentLayoutMode;
     publicationBaseSkeleton: Nullable<IDocumentSkeletonCached>;
@@ -1241,6 +1248,10 @@ export class DocumentSkeleton extends Skeleton {
 
     private _completedPageCount: number | undefined;
     private _lastCompleteSkeletonData: Nullable<IDocumentSkeletonCached> = null;
+    private _completedLayoutStamp: IDocumentLayoutVersionStamp | null = null;
+    private _externalLayoutStamp: IDocumentLayoutVersionStamp | null = null;
+    private _layoutValidationEpoch = 0;
+    private _completedLayoutVersion = 0;
     private _completedHeadingCollapseSignature = '[]';
     private _publishedHeadingCollapseSignature = '[]';
 
@@ -1306,6 +1317,8 @@ export class DocumentSkeleton extends Skeleton {
         this._skeletonData = null;
         this._referenceLayoutSnapshot = undefined;
         this._lastCompleteSkeletonData = null;
+        this._completedLayoutStamp = null;
+        this._externalLayoutStamp = null;
         this._completedPageCount = undefined;
         this._pendingInvalidationAnchor = null;
         this._externalLayoutProgress = null;
@@ -1332,6 +1345,9 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
+        this._invalidateCompletedLayout();
+        this._externalLayoutStamp = null;
+        const layoutVersionStamp = this._captureLayoutVersionStamp();
         this.cancelIncrementalLayout();
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
@@ -1349,6 +1365,7 @@ export class DocumentSkeleton extends Skeleton {
             this._skeletonData = this._projectReferenceLayout(this._skeletonData);
         }
         this._lastCompleteSkeletonData = this._skeletonData;
+        this._recordLayoutCompletion(layoutVersionStamp);
         this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
         this._publishedHeadingCollapseSignature = this._completedHeadingCollapseSignature;
         this._completedPageCount = this._skeletonData?.pages.length;
@@ -1458,6 +1475,8 @@ export class DocumentSkeleton extends Skeleton {
             : options;
         this._modernPageWidth = layoutOptions?.modernPageWidth;
         this._modernHorizontalMargin = layoutOptions?.modernHorizontalMargin;
+        this._invalidateCompletedLayout();
+        this._externalLayoutStamp = null;
         this.cancelIncrementalLayout();
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
@@ -1523,6 +1542,7 @@ export class DocumentSkeleton extends Skeleton {
 
         this._activeLayout = {
             generation,
+            layoutVersionStamp: this._captureLayoutVersionStamp(),
             reason,
             mode,
             publicationBaseSkeleton: previousSkeleton,
@@ -1596,7 +1616,9 @@ export class DocumentSkeleton extends Skeleton {
         // Canonical suffix recovery starts from the last complete skeleton. Main's
         // protected interaction page may instead advance from the preceding edit's
         // published page so each typing generation maps only one mutation delta.
-        const previousSkeleton = this._lastCompleteSkeletonData ?? this._skeletonData;
+        // A continuous display snapshot can have only the first few paragraphs
+        // of the single logical page. It cannot justify skipping to a later edit.
+        const previousSkeleton = this._lastCompleteSkeletonData ?? (mode === 'paginated' ? this._skeletonData : null);
         const interactionSkeleton = reuseInteractionPagePrefix
             ? this._skeletonData ?? previousSkeleton
             : previousSkeleton;
@@ -2310,6 +2332,7 @@ export class DocumentSkeleton extends Skeleton {
             const isFinalPublication = state.complete && publishedPageCount >= pageCount;
             if (isFinalPublication) {
                 this._lastCompleteSkeletonData = state.ctx.skeleton;
+                this._recordLayoutCompletion(state.layoutVersionStamp);
                 this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
                 this._completedPageCount = state.ctx.skeleton?.pages.length;
                 this._pendingInvalidationAnchor = null;
@@ -2610,6 +2633,8 @@ export class DocumentSkeleton extends Skeleton {
         reason: DocumentLayoutReason;
         protectedRange?: IDocumentLayoutProtectedRange;
     }): void {
+        this._invalidateCompletedLayout();
+        this._externalLayoutStamp = this._captureLayoutVersionStamp();
         this.cancelIncrementalLayout();
         const pages = this._skeletonData?.pages ?? [];
         const protectedRange = options.protectedRange;
@@ -2686,6 +2711,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     cancelExternalLayout(): void {
+        this._externalLayoutStamp = null;
         this._externalLayoutProgress = null;
         this._externalProtectedPages = null;
         this._externalProtectedContinuousLayout = null;
@@ -2699,12 +2725,55 @@ export class DocumentSkeleton extends Skeleton {
         return this._lastCompleteSkeletonData != null;
     }
 
+    /** A stable geometry version for consumers that prepare output across async boundaries. */
+    getCompletedLayoutVersion(): number | null {
+        return this.isCurrentLayoutComplete() ? this._completedLayoutVersion : null;
+    }
+
+    private _invalidateCompletedLayout(): void {
+        this._completedLayoutStamp = null;
+        this._layoutValidationEpoch++;
+    }
+
+    private _captureLayoutVersionStamp(): IDocumentLayoutVersionStamp {
+        const model = this.getViewModel().getDataModel();
+        return { model, revision: model.getLayoutMutationRevision(), epoch: this._layoutValidationEpoch };
+    }
+
+    private _recordLayoutCompletion(stamp: IDocumentLayoutVersionStamp): void {
+        this._completedLayoutVersion++;
+        this._completedLayoutStamp = stamp.epoch === this._layoutValidationEpoch ? stamp : null;
+    }
+
+    private _recordExternalLayoutCompletion(progress: IDocumentLayoutProgress): void {
+        if (progress.cancelled) {
+            this._completedLayoutStamp = null;
+        } else if (this._externalLayoutStamp != null) {
+            this._recordLayoutCompletion(this._externalLayoutStamp);
+        }
+        this._externalLayoutStamp = null;
+    }
+
+    /**
+     * Complete geometry for this model revision, not a retained snapshot from a cancelled layout.
+     * Paginated Worker layouts may still use placeholders for off-screen page contents.
+     */
+    isCurrentLayoutComplete(): boolean {
+        const progress = this.getLayoutProgress();
+        const stamp = this._completedLayoutStamp;
+        const model = this.getViewModel().getDataModel();
+        return stamp?.model === model && stamp.revision === model.getLayoutMutationRevision() &&
+            (progress == null || (progress.complete && !progress.cancelled)) &&
+            this._lastCompleteSkeletonData != null;
+    }
+
     getSkeletonData() {
         return this._skeletonData;
     }
 
     /** Invalidate measurements captured before the requested fonts finished loading. */
     invalidateFontMetrics(fontStyles: readonly string[]): void {
+        this._invalidateCompletedLayout();
         for (const fontStyle of new Set(fontStyles)) {
             FontCache.clearFontMeasureCache(fontStyle);
         }
@@ -2778,6 +2847,9 @@ export class DocumentSkeleton extends Skeleton {
             this._dirty$.next(true);
         }
 
+        if (requiresLayout) {
+            this._invalidateCompletedLayout();
+        }
         return { didRefresh: updates.length > 0, requiresLayout };
     }
 
@@ -2824,6 +2896,7 @@ export class DocumentSkeleton extends Skeleton {
             if (progress.complete) {
                 setPageParent(skeletonData.pages, skeletonData);
                 this._lastCompleteSkeletonData = skeletonData;
+                this._recordExternalLayoutCompletion(progress);
                 this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
                 this._completedPageCount = skeletonData?.pages.length;
                 this._pendingInvalidationAnchor = null;
@@ -2970,6 +3043,7 @@ export class DocumentSkeleton extends Skeleton {
             }
             setPageParent(skeletonData.pages, skeletonData);
             this._lastCompleteSkeletonData = skeletonData;
+            this._recordExternalLayoutCompletion(progress);
             this._completedHeadingCollapseSignature = this._getHeadingCollapseSignature();
             this._completedPageCount = skeletonData?.pages.length;
             this._pendingInvalidationAnchor = null;

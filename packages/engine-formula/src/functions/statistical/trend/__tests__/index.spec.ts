@@ -86,14 +86,11 @@ describe('Test trend function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(knownYs);
-            expect(getObjectValue(result, true)).toStrictEqual([
-                [12452.380952381],
-                [48898.0952380952],
-                [85343.8095238095],
-                [121789.523809524],
-                [158235.238095238],
-                [194680.952380952],
-            ]);
+            const actual = getObjectValue(result) as number[][];
+            // Independent 100-digit least-squares reference.
+            const expected = [12452.380952380952, 48898.09523809524, 85343.80952380953, 121789.52380952382, 158235.2380952381, 194680.95238095237];
+            expect(actual.map((row) => row.length)).toEqual(new Array(expected.length).fill(1));
+            for (let i = 0; i < expected.length; i++) expect(Math.abs(actual[i][0] / expected[i] - 1)).toBeLessThan(1e-12);
 
             const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -620,5 +617,103 @@ describe('Test trend function', () => {
             const result6 = testFunction.calculate(knownYs4, knownXs4, newXs5);
             expect(getObjectValue(result6)).toBe(ErrorType.NA);
         });
+    });
+});
+
+function regressionArray(values: number[], column: boolean) {
+    return ArrayValueObject.createByArray(column ? values.map((value) => [value]) : [values]);
+}
+
+describe('TREND single-predictor stability', () => {
+    const trend = new Trend(FUNCTION_NAMES_STATISTICAL.TREND);
+
+    it('predicts around adjacent translated predictors without reconstructing their mean', () => {
+        for (const xOffset of [0, 2 ** 52, -(2 ** 52)]) {
+            for (const yOffset of [0, 2 ** 52]) {
+                for (const column of [false, true]) {
+                    const xs = regressionArray([xOffset, xOffset + 1], column);
+                    const ys = regressionArray([yOffset + 1, yOffset + 3], column);
+                    const newXs = regressionArray([-1, 0, 1, 2].map((value) => value + xOffset), column);
+                    const expected = [-1, 1, 3, 5].map((value) => value + yOffset);
+                    expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? expected.map((value) => [value]) : [expected]);
+                    expect(getObjectValue(trend.calculate(ys, xs))).toEqual(getObjectValue(ys));
+                }
+            }
+        }
+    });
+
+    it('preserves non-exact fits when only the predictor origin changes', () => {
+        for (const offset of [0, 2 ** 52, -(2 ** 52)]) {
+            const xs = regressionArray([0, 1, 2, 4].map((value) => value + offset), false);
+            const ys = regressionArray([1, 3, 4, 8], false);
+            const newXs = regressionArray([-1, 0, 1, 2, 3, 4, 5].map((value) => value + offset), false);
+            const result = getObjectValue(trend.calculate(ys, xs, newXs)) as number[][];
+            for (let index = 0; index < result[0].length; index++) {
+                expect(result[0][index]).toBeCloseTo(1 + 12 / 7 * (index - 1), 13);
+            }
+        }
+    });
+
+    it('retains zero-slope predictions far from large known predictors', () => {
+        const xs = regressionArray([Number.MAX_VALUE, Number.MAX_VALUE - 2 ** 971], false);
+        const ys = regressionArray([2, 2], false);
+        expect(getObjectValue(trend.calculate(ys, xs, NumberValueObject.create(-Number.MAX_VALUE)))).toEqual([[2]]);
+    });
+
+    it('retains finite predictions when anchored coefficients need an overflow fallback', () => {
+        const cases = [
+            { x: [1e308, -1e307, -1e307], y: [2, 2, 2], expected: 2 },
+            { x: [1, 2, 3], y: [1e308, -1e307, -1e307], expected: 1.3666666666666667e308 },
+            { x: [2, 3, 4], y: [1e308, 4e307, 2e307], expected: 1.7333333333333333e308 },
+        ];
+        for (const { x, y, expected } of cases) {
+            for (const column of [false, true]) {
+                const result = getObjectValue(trend.calculate(regressionArray(y, column), regressionArray(x, column), NumberValueObject.create(0))) as number[][];
+                expect(Math.abs(result[0][0] / expected - 1)).toBeLessThan(1e-14);
+            }
+        }
+    });
+
+    it('predicts new values with translated row and column input arrays', () => {
+        const offset = 1e9;
+        for (const column of [false, true]) {
+            const xs = regressionArray([offset, offset + 1, offset + 2, offset + 3], column);
+            const ys = regressionArray([7, 9, 11, 13], column);
+            const newXs = regressionArray([offset - 1, offset + 4], column);
+            expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[5], [15]] : [[5, 15]]);
+        }
+    });
+
+    it('returns the constant response for a rounded constant predictor mean', () => {
+        for (const column of [false, true]) {
+            const values = regressionArray([0.1, 0.1, 0.1], column);
+            expect(getObjectValue(trend.calculate(values, values, NumberValueObject.create(1)))).toEqual([[0.1]]);
+        }
+    });
+
+    it.each([false, true])('predicts from adjacent predictors whose mean is not representable (column=%s)', (column) => {
+        const offset = 2 ** 52;
+        const xs = regressionArray([offset, offset + 1], column);
+        const ys = regressionArray([1, 3], column);
+        const newXs = regressionArray([offset, offset + 1, offset + 2], column);
+        expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[1], [3], [5]] : [[1, 3, 5]]);
+    });
+
+    it('predicts the response mean independently of new predictors', () => {
+        for (const x of [0, 0.1, -0.1, 2 ** 40, Number.MAX_VALUE]) {
+            for (const column of [false, true]) {
+                const xs = regressionArray([x, x, x], column);
+                const ys = regressionArray([1, 2, 3], column);
+                const newXs = regressionArray([-1, 0, 1], column);
+                expect(getObjectValue(trend.calculate(ys, xs, newXs))).toEqual(column ? [[2], [2], [2]] : [[2, 2, 2]]);
+            }
+        }
+    });
+
+    it('retains the fit through the origin when an intercept is disabled', () => {
+        const xs = regressionArray([0.1, 0.1, 0.1], false);
+        const ys = regressionArray([0.2, 0.2, 0.2], false);
+        const newXs = regressionArray([0, 1, 2], false);
+        expect(getObjectValue(trend.calculate(ys, xs, newXs, BooleanValueObject.create(false)), true)).toEqual([[0, 2, 4]]);
     });
 });

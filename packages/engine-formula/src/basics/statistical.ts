@@ -15,12 +15,12 @@
  */
 
 import type { ICellData, IObjectArrayPrimitiveType, IRowData, Nullable, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { MultiAreaReferenceObject } from '../engine/reference-object/multi-area-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
-import { BooleanNumber, isRealNum } from '@univerjs/core';
 import { createNewArray } from '../engine/utils/array-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject } from '../engine/value-object/primitive-object';
@@ -900,9 +900,11 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
     }
 
     let slope, intercept;
+    let isConstantPredictor = false;
+    let centered;
 
     if (constb) {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
+        ({ slope, intercept, isConstantPredictor, centered } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
     } else {
         ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, Y));
     }
@@ -916,31 +918,69 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
         slope = 0;
     }
 
-    return { slope, intercept, Y };
+    return { slope, intercept, Y, isConstantPredictor, centered };
 }
 
 function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {
     const n = knownYsValues.length;
+    const firstX = knownXsValues[0];
 
-    let sumX = 0;
-    let sumY = 0;
+    // A constant predictor is redundant with the intercept. Test the inputs
+    // directly: their computed mean can round away from the repeated value.
+    if (n > 1 && Number.isFinite(firstX) && knownXsValues.every((value) => value === firstX) && knownYsValues.every(Number.isFinite)) {
+        const firstY = knownYsValues[0];
+        const intercept = knownYsValues.every((value) => value === firstY)
+            ? firstY
+            : knownYsValues.reduce((sum, value) => sum + value, 0) / n;
+
+        return { slope: 0, intercept, isConstantPredictor: true, centered: undefined };
+    }
+
+    // Keep the means as offsets from observed values. Reconstructing a large
+    // absolute mean can discard half a unit between adjacent predictors.
+    // Fall back to an absolute mean if accumulating the offsets overflows.
+    const firstY = knownYsValues[0];
+    let xAnchor = firstX;
+    let yAnchor = firstY;
+    let sumXOffset = 0;
+    let sumYOffset = 0;
+
+    for (let i = 0; i < n; i++) {
+        sumXOffset += knownXsValues[i] - xAnchor;
+        sumYOffset += knownYsValues[i] - yAnchor;
+    }
+
+    if (!Number.isFinite(sumXOffset)) {
+        xAnchor = 0;
+        sumXOffset = knownXsValues.reduce((sum, value) => sum + value, 0);
+    }
+    if (!Number.isFinite(sumYOffset)) {
+        yAnchor = 0;
+        sumYOffset = knownYsValues.reduce((sum, value) => sum + value, 0);
+    }
+
+    const meanXOffset = sumXOffset / n;
+    const meanYOffset = sumYOffset / n;
     let sumX2 = 0;
     let sumXY = 0;
 
     for (let i = 0; i < n; i++) {
-        sumX += knownXsValues[i];
-        sumY += knownYsValues[i];
-        sumX2 += knownXsValues[i] * knownXsValues[i];
-        sumXY += knownXsValues[i] * knownYsValues[i];
+        const centeredX = (knownXsValues[i] - xAnchor) - meanXOffset;
+        sumX2 += centeredX * centeredX;
+        sumXY += centeredX * ((knownYsValues[i] - yAnchor) - meanYOffset);
     }
 
-    const temp = n * sumXY - sumX * sumY;
-    const slope = temp / (n * sumX2 - sumX * sumX);
-    const intercept = 1 / n * sumY - slope * (1 / n) * sumX;
+    const slope = sumXY / sumX2;
+    let intercept = (yAnchor - slope * xAnchor) + (meanYOffset - slope * meanXOffset);
+    if (!Number.isFinite(intercept)) {
+        intercept = (yAnchor + meanYOffset) - slope * (xAnchor + meanXOffset);
+    }
 
     return {
         slope,
         intercept,
+        isConstantPredictor: false,
+        centered: { xAnchor, yAnchor, meanXOffset, meanYOffset, slope },
     };
 }
 

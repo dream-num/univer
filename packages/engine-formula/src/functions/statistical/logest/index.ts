@@ -187,7 +187,7 @@ export class Logest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b, Y } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const { slope: m, intercept: b, Y, isConstantPredictor, centered } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -203,17 +203,9 @@ export class Logest extends BaseFunction {
             let df = n - 1;
 
             if (constb) {
-                let sumY = 0;
-                let sumX = 0;
-
-                for (let i = 0; i < n; i++) {
-                    sumY += Y[i];
-                    sumX += knownXsValuesFlat[i];
-                }
-
-                meanY = sumY / n;
-                meanX = sumX / n;
-                df = n - 2;
+                meanY = centered ? centered.yAnchor + centered.meanYOffset : Y.every((value) => value === Y[0]) ? Y[0] : Y.reduce((sum, value) => sum + value, 0) / n;
+                meanX = centered ? centered.xAnchor + centered.meanXOffset : knownXsValuesFlat[0];
+                df = isConstantPredictor ? n - 1 : n - 2;
             }
 
             let sstotal = 0;
@@ -221,9 +213,11 @@ export class Logest extends BaseFunction {
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (Y[i] - meanY) ** 2;
-                ssresid += (Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
-                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+                const dy = centered ? (Y[i] - centered.yAnchor) - centered.meanYOffset : Y[i] - meanY;
+                const dx = centered ? (knownXsValuesFlat[i] - centered.xAnchor) - centered.meanXOffset : knownXsValuesFlat[i] - meanX;
+                sstotal += dy ** 2;
+                ssresid += (centered ? dy - centered.slope * dx : Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
+                ssx += dx ** 2;
             }
 
             const ssreg = sstotal - ssresid;
@@ -232,16 +226,18 @@ export class Logest extends BaseFunction {
             let se = 0;
             let seb: number | ErrorType = 0;
             let sey = 0;
-            let F = 0;
+            let F: number | ErrorType = isConstantPredictor ? ErrorType.NUM : 0;
 
             if (df > 0) {
-                if (ssx > 0) {
+                if (isConstantPredictor) {
+                    seb = Math.sqrt(ssresid / df / n);
+                } else if (ssx > 0) {
                     se = Math.sqrt(ssresid / df / ssx);
                     seb = Math.sqrt(ssresid / df * (1 / n + meanX ** 2 / ssx));
                 }
 
                 sey = Math.sqrt(ssresid / df);
-                F = (ssreg / 1) / (ssresid / df);
+                F = isConstantPredictor ? ErrorType.NUM : (ssreg / 1) / (ssresid / df);
             }
 
             // seb = #N/A when const is FALSE
@@ -257,9 +253,7 @@ export class Logest extends BaseFunction {
                 [ssreg, ssresid], // [ssreg, ssresid]
             ];
         } else {
-            result = [
-                [m, b], // [m, b]
-            ];
+            result = [[m, b]];
         }
 
         return ArrayValueObject.createByArray(result);

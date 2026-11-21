@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter",
-    "version": "1.5.2",
+    "version": "1.6.0",
     "private": false,
     "description": "Filtering model, commands, and services for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

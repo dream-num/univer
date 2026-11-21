@@ -27,6 +27,64 @@ describe('Test nominal function', () => {
     const testFunction = new Nominal(FUNCTION_NAMES_FINANCIAL.NOMINAL);
 
     describe('Nominal', () => {
+        it.each([1, 2, 12, 365])('Preserves zero rounding for small rates with %i periods', (periods) => {
+            const result = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(periods));
+            expect(result.getValue()).toBe(0);
+        });
+
+        it.each([1, 2, 12, 365])('Preserves per-period rounding boundaries with %i periods', (periods) => {
+            const rounded = testFunction.calculate(NumberValueObject.create(Number.EPSILON * periods / 2), NumberValueObject.create(periods));
+            expect(rounded.getValue()).toBe(0);
+
+            const nonzero = testFunction.calculate(NumberValueObject.create(Number.EPSILON * periods), NumberValueObject.create(periods));
+            expect(nonzero.getValue()).toBe(Number.EPSILON * periods);
+        });
+
+        it.each([12, 365])('Preserves zero after per-period rounding with %i periods', (periods) => {
+            const numeric = testFunction.calculate(NumberValueObject.create(1e-15), NumberValueObject.create(periods));
+            const numericString = testFunction.calculate(StringValueObject.create('1e-15'), StringValueObject.create(String(periods)));
+            expect(numeric.getValue()).toBe(0);
+            expect(numericString.getValue()).toBe(0);
+        });
+
+        it('Preserves a nonzero rounded result for one annual period', () => {
+            const result = testFunction.calculate(NumberValueObject.create(0.1), NumberValueObject.create(1));
+            expect(result.getValue()).toBe(0.10000000000000009);
+            expect(Number(result.getValue()) > 0.1).toBe(true);
+        });
+
+        it.each([1, 12])('Preserves zero rounding for a numeric string with %i periods', (periods) => {
+            const result = testFunction.calculate(StringValueObject.create('1e-20'), NumberValueObject.create(periods));
+            expect(result.getValue()).toBe(0);
+        });
+
+        it('Validates arguments before rounding tiny rates', () => {
+            const negative = testFunction.calculate(NumberValueObject.create(-1e-20), NumberValueObject.create(1));
+            expect(negative.getValue()).toBe(ErrorType.NUM);
+
+            const noPeriods = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(0));
+            expect(noPeriods.getValue()).toBe(ErrorType.NUM);
+
+            const unboundedPeriods = testFunction.calculate(NumberValueObject.create(1e-20), NumberValueObject.create(Number.POSITIVE_INFINITY));
+            expect(unboundedPeriods.getValue()).toBeNaN();
+        });
+
+        it('Keeps large period counts and truncates fractional periods', () => {
+            const large = testFunction.calculate(NumberValueObject.create(0.05), NumberValueObject.create(1e21));
+            expect(large.getValue()).toBe(0);
+
+            const numericString = testFunction.calculate(NumberValueObject.create(0.05), StringValueObject.create('2e21'));
+            expect(numericString.getValue()).toBe(0);
+
+            const fractional = testFunction.calculate(NumberValueObject.create(0.5625), NumberValueObject.create(2.9));
+            expect(fractional.getValue()).toBe(0.5);
+        });
+
+        it('Preserves the rate for a single annual period', () => {
+            const result = testFunction.calculate(NumberValueObject.create(1e300), NumberValueObject.create(1));
+            expect(result.getValue()).toBe(1e300);
+        });
+
         it('Value is normal', () => {
             const effectRate = NumberValueObject.create(0.053543);
             const npery = NumberValueObject.create(4);

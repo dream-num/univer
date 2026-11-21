@@ -120,6 +120,11 @@ export interface IDocumentSkeletonContinuousBlockPatch {
     /** The first patch may extend a complete layout previously applied by Main. */
     baseLayoutVersion?: string;
     completedLayoutVersion?: string;
+    /** Complete note geometry. Older continuous packets omit these fields. */
+    notes?: IDocumentSkeletonPagePatch['notes'];
+    noteDecorations?: IDocumentSkeletonPagePatch['noteDecorations'];
+    /** Earliest resent body offset when layout rewinds behind the append cursor. */
+    rewoundFrom?: number;
     /** Present for a table delta. The listed IDs are the exact resulting order. */
     tableOrder?: string[];
 }
@@ -128,7 +133,6 @@ export interface IDocumentSkeletonContinuousSnapshot {
     height: number;
     lineCount: number;
     tables?: Map<string, IDocumentSkeletonTable>;
-    usesTableDelta: boolean;
     baselineSections?: IDocumentSkeletonSectionPatch[];
 }
 
@@ -141,6 +145,7 @@ export interface IDocumentSkeletonContinuousBaseline {
 
 interface IContinuousBlockOptions {
     base?: IDocumentSkeletonContinuousBaseline;
+    invalidatedOffset?: number;
     trackBaseline?: boolean;
     complete?: boolean;
     /** Detached comparison geometry usable for the new snapshot, independent of wire deltas. */
@@ -241,6 +246,27 @@ function serializeColumnGroup(
     };
 }
 
+function serializePageNotes(
+    notes: IDocumentSkeletonPage['notes'],
+    decorations: IDocumentSkeletonPage['noteDecorations'],
+    omitResourceSources: boolean
+): Pick<IDocumentSkeletonPagePatch, 'notes' | 'noteDecorations'> {
+    const patch: Pick<IDocumentSkeletonPagePatch, 'notes' | 'noteDecorations'> = {};
+    if (notes != null) {
+        patch.notes = notes.map((note) => ({
+            ...withoutParent(note),
+            page: serializeDocumentSkeletonPage(note.page, omitResourceSources),
+        }));
+    }
+    if (decorations != null) {
+        patch.noteDecorations = decorations.map((decoration) => ({
+            ...decoration,
+            page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources),
+        }));
+    }
+    return patch;
+}
+
 export function serializeDocumentSkeletonPage(
     source: IDocumentSkeletonPage,
     omitResourceSources = false
@@ -249,16 +275,7 @@ export function serializeDocumentSkeletonPage(
     return {
         ...geometry,
         sections: source.sections.map(serializeSection),
-        ...(noteDecorations == null
-            ? {}
-            : {
-                noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
-            }),
-        ...(notes == null
-            ? {}
-            : {
-                notes: notes.map((note) => ({ ...withoutParent(note), page: serializeDocumentSkeletonPage(note.page, omitResourceSources) })),
-            }),
+        ...serializePageNotes(notes, noteDecorations, omitResourceSources),
         skeDrawings: [...source.skeDrawings].map(([drawingId, drawing]) => [
             drawingId,
             serializeDrawing(drawing, omitResourceSources),
@@ -505,22 +522,6 @@ function hydrateDocumentSkeletonPageInternal(
     const page: IDocumentSkeletonPage = {
         ...geometry,
         sections: [],
-        ...(noteDecorations == null
-            ? {}
-            : {
-                noteDecorations: noteDecorations.map((decoration) => ({
-                    ...decoration,
-                    page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
-                })),
-            }),
-        ...(notes == null
-            ? {}
-            : {
-                notes: notes.map((note) => ({
-                    ...note,
-                    page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
-                })),
-            }),
         skeDrawings: new Map(source.skeDrawings.map(([drawingId, drawing]) => [
             drawingId,
             hydrateDrawing(drawing, snapshot, resourceSegmentId),
@@ -530,10 +531,7 @@ function hydrateDocumentSkeletonPageInternal(
         parent,
     };
     page.sections = source.sections.map((section) => hydrateSection(section, page));
-    for (const note of page.notes ?? []) {
-        note.parent = page;
-        note.page.parent = note;
-    }
+    applyPageNotes(page, notes, noteDecorations, snapshot);
     page.skeTables = new Map(source.skeTables.map(([tableId, table]) => [
         tableId,
         hydrateTable(table, page, snapshot, resourceSegmentId),
@@ -543,6 +541,28 @@ function hydrateDocumentSkeletonPageInternal(
         hydrateColumnGroup(group, page, snapshot, resourceSegmentId),
     ]));
     return page;
+}
+
+function applyPageNotes(
+    page: IDocumentSkeletonPage,
+    notes: IDocumentSkeletonPagePatch['notes'],
+    decorations: IDocumentSkeletonPagePatch['noteDecorations'],
+    snapshot: IDocumentData | undefined
+): void {
+    if (notes != null) {
+        page.notes = notes.map((note) => {
+            const notePage = hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId);
+            const geometry = { ...note, page: notePage, parent: page };
+            notePage.parent = geometry;
+            return geometry;
+        });
+    }
+    if (decorations != null) {
+        page.noteDecorations = decorations.map((decoration) => ({
+            ...decoration,
+            page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
+        }));
+    }
 }
 
 export interface IDocumentSkeletonFlowCursor {
@@ -582,6 +602,21 @@ function resolveFlowCursor(page: IDocumentSkeletonPage, flowLineIndex: number): 
         columnIndex,
         lineIndex: section?.columns[columnIndex]?.lines.length ?? 0,
     };
+}
+
+function findContinuousLineIndex(page: IDocumentSkeletonPage, offset: number): number {
+    let index = 0;
+    for (const section of page.sections) {
+        for (const column of section.columns) {
+            for (const line of column.lines) {
+                if (line.ed >= offset) {
+                    return index;
+                }
+                index++;
+            }
+        }
+    }
+    return index;
 }
 
 function serializePageGeometry(source: IDocumentSkeletonPage): IDocumentSkeletonPageGeometryPatch {
@@ -664,20 +699,20 @@ export function compareLayoutGeometry(
 }
 
 function getContinuousPrefixCursor(
-    baseline: IDocumentSkeletonContinuousBaseline,
+    previousSections: IDocumentSkeletonContinuousBaseline['sections'],
     current: IDocumentSkeletonPage
 ): IDocumentSkeletonFlowCursor {
     // Anything before the selected section or column is retained verbatim, so
     // compare the full geometry there. The patch updates the selected section
     // and column metadata even if all of their leading lines can be reused.
     const firstChangedSection = current.sections.findIndex((section, index) =>
-        !compareLayoutGeometry(baseline.sections[index], section, baseline, current)
+        !compareLayoutGeometry(previousSections[index], section, undefined, current)
     );
     const sectionIndex = firstChangedSection < 0 ? Math.max(0, current.sections.length - 1) : firstChangedSection;
     const columns = current.sections[sectionIndex]?.columns ?? [];
-    const previousColumns = baseline.sections[sectionIndex]?.columns ?? [];
+    const previousColumns = previousSections[sectionIndex]?.columns ?? [];
     const firstChangedColumn = columns.findIndex((column, index) =>
-        !compareLayoutGeometry(previousColumns[index], column, baseline.sections[sectionIndex], current.sections[sectionIndex])
+        !compareLayoutGeometry(previousColumns[index], column, previousSections[sectionIndex], current.sections[sectionIndex])
     );
     const columnIndex = firstChangedColumn < 0 ? Math.max(0, columns.length - 1) : firstChangedColumn;
     const lines = columns[columnIndex]?.lines ?? [];
@@ -715,8 +750,7 @@ function collectContinuousTables(
     page: IDocumentSkeletonPage,
     previous: Map<string, IDocumentSkeletonTable> | undefined,
     omitResourceSources: boolean,
-    usesTableDelta: boolean,
-    validateBaseline: boolean
+    usesTableDelta: boolean
 ): {
     tables: Map<string, IDocumentSkeletonTable> | undefined;
     patches: IDocumentSkeletonContinuousBlockPatch['skeTables'];
@@ -726,9 +760,7 @@ function collectContinuousTables(
     let canTrackTables = true;
     for (const [key, table] of page.skeTables) {
         const prior = previous?.get(key);
-        // Full intermediate packets still serialize the current table. The
-        // private draft can reuse its first copy until final validation.
-        const unchanged = prior != null && (!validateBaseline || compareLayoutGeometry(prior, table, prior.parent, page));
+        const unchanged = prior != null && compareLayoutGeometry(prior, table, prior.parent, page);
         if (unchanged) {
             tables.set(key, prior);
         } else if (canTrackTables) {
@@ -791,23 +823,39 @@ export function serializeDocumentSkeletonContinuousBlock(
 ): { block: IDocumentSkeletonContinuousBlockPatch; snapshot: IDocumentSkeletonContinuousSnapshot } {
     const baseline = options.base;
     const lineCount = countFlowLines(currentPage);
-    const cursor = previousSnapshot == null && baseline != null
-        ? getContinuousPrefixCursor(baseline, currentPage)
+    const normalCursor = previousSnapshot == null && baseline != null
+        ? getContinuousPrefixCursor(baseline.sections, currentPage)
         : resolveFlowCursor(currentPage, Math.max(0, Math.min(previousSnapshot?.lineCount ?? 0, lineCount) - 1));
+    let cursor = normalCursor;
+    if (options.invalidatedOffset != null && previousSnapshot != null) {
+        // A rewind invalidates the append cursor. When we have the previous wire
+        // geometry, prove the unchanged prefix before sending it again.
+        const previousSections = previousSnapshot.baselineSections;
+        const rewind = previousSections == null
+            ? resolveFlowCursor(currentPage, Math.max(0, findContinuousLineIndex(currentPage, options.invalidatedOffset) - 1))
+            : getContinuousPrefixCursor(previousSections, currentPage);
+        if (rewind.sectionIndex < cursor.sectionIndex ||
+            (rewind.sectionIndex === cursor.sectionIndex && rewind.columnIndex < cursor.columnIndex) ||
+            (rewind.sectionIndex === cursor.sectionIndex && rewind.columnIndex === cursor.columnIndex && rewind.lineIndex < cursor.lineIndex)) {
+            cursor = rewind;
+        }
+    }
     const flow = serializeContinuousFlow(currentPage, cursor);
     const wantsBaseline = options.trackBaseline && typeof structuredClone === 'function' &&
         (previousSnapshot == null || previousSnapshot.baselineSections != null);
     const captureBase = wantsBaseline && previousSnapshot == null ? baseline ?? options.captureFrom : undefined;
     const previousTables = previousSnapshot?.tables ?? baseline?.tables ?? captureBase?.tables;
-    const usesTableDelta = previousTables != null && (baseline != null || previousSnapshot?.usesTableDelta === true);
+    // The receiver has the first full packet's tables even when it did not
+    // start from an acknowledged layout. Later packets can use the same delta.
+    const usesTableDelta = previousTables != null && (baseline != null || previousSnapshot?.tables != null);
     const tableHistory = wantsBaseline || usesTableDelta
-        ? collectContinuousTables(currentPage, previousTables, omitResourceSources, usesTableDelta, usesTableDelta || options.complete === true)
+        ? collectContinuousTables(currentPage, previousTables, omitResourceSources, usesTableDelta)
         : undefined;
     let baselineSections: IDocumentSkeletonSectionPatch[] | undefined;
     if (wantsBaseline && tableHistory?.tables != null) {
         try {
             const captureFlow = captureBase != null && captureBase !== baseline
-                ? serializeContinuousFlow(currentPage, getContinuousPrefixCursor(captureBase, currentPage))
+                ? serializeContinuousFlow(currentPage, getContinuousPrefixCursor(captureBase.sections, currentPage))
                 : flow;
             baselineSections = recordContinuousBaselineFlow(captureFlow, previousSnapshot?.baselineSections, captureBase);
         } catch (error) {
@@ -821,7 +869,6 @@ export function serializeDocumentSkeletonContinuousBlock(
         height: currentPage.height,
         lineCount,
         tables: tableHistory?.tables,
-        usesTableDelta,
         baselineSections,
     };
 
@@ -831,6 +878,7 @@ export function serializeDocumentSkeletonContinuousBlock(
             pageIndex: 0,
             page: serializePageGeometry(currentPage),
             flow,
+            ...(cursor === normalCursor ? {} : { rewoundFrom: flow.lines[0]?.st ?? options.invalidatedOffset }),
             skeDrawings: [...currentPage.skeDrawings].map(([drawingId, drawing]) => [
                 drawingId,
                 serializeDrawing(drawing, omitResourceSources),
@@ -846,6 +894,7 @@ export function serializeDocumentSkeletonContinuousBlock(
                 groupId,
                 serializeColumnGroup(group, omitResourceSources),
             ]),
+            ...(options.complete ? serializePageNotes(currentPage.notes ?? [], currentPage.noteDecorations ?? [], omitResourceSources) : {}),
             previousHeight,
             heightDelta: currentPage.height - previousHeight,
         },
@@ -855,9 +904,21 @@ export function serializeDocumentSkeletonContinuousBlock(
 function applyContinuousTablePatch(
     page: IDocumentSkeletonPage,
     patch: IDocumentSkeletonContinuousBlockPatch,
-    snapshot: IDocumentData | undefined
+    snapshot: IDocumentData | undefined,
+    tablePatches: IContinuousBlockApplyOptions['tablePatches']
 ): Map<string, IDocumentSkeletonTable> {
-    const changedTables = new Map(patch.skeTables.map(([key, table]) => [key, hydrateTable(table, page, snapshot, page.segmentId)]));
+    const retainedPatches = patch.tableOrder == null ? tablePatches : undefined;
+    const changedTables = new Map<string, IDocumentSkeletonTable>();
+    for (const [key, source] of patch.skeTables) {
+        const previous = page.skeTables.get(key);
+        if (previous != null && compareLayoutGeometry(retainedPatches?.get(previous), source)) {
+            changedTables.set(key, previous);
+            continue;
+        }
+        const table = hydrateTable(source, page, snapshot, page.segmentId);
+        retainedPatches?.set(table, source);
+        changedTables.set(key, table);
+    }
     if (patch.tableOrder == null) {
         return changedTables;
     }
@@ -919,6 +980,8 @@ export function attachContinuousLayoutGeometry(page: IDocumentSkeletonPage): voi
 
 interface IContinuousBlockApplyOptions {
     staging?: boolean;
+    // Compare wire inputs within one draft and model revision before hydrating again.
+    tablePatches?: WeakMap<IDocumentSkeletonTable, IDocumentSkeletonTablePatch>;
     foregroundGeometry?: Pick<IDocumentSkeletonPage, 'skeTables' | 'skeColumnGroups' | 'skeDrawings'>;
 }
 
@@ -946,8 +1009,15 @@ export function applyDocumentSkeletonContinuousBlock(
             skeDrawings: patch.skeDrawings,
             skeTables: patch.skeTables,
             skeColumnGroups: patch.skeColumnGroups,
+            notes: patch.notes?.length ? patch.notes : undefined,
+            noteDecorations: patch.noteDecorations?.length ? patch.noteDecorations : undefined,
         }, target, snapshot);
         target.pages[patch.pageIndex] = page;
+        if (options.tablePatches != null) {
+            for (const [key, source] of patch.skeTables) {
+                options.tablePatches.set(page.skeTables.get(key)!, source);
+            }
+        }
         return page;
     }
 
@@ -955,6 +1025,11 @@ export function applyDocumentSkeletonContinuousBlock(
     // Foreground maps can combine retained Main objects and new Worker objects.
     // Give incoming containers their own parent chains before the visible splice.
     if (foregroundGeometry != null) {
+        for (const [id, drawing] of foregroundGeometry.skeDrawings) {
+            if (drawing !== page.skeDrawings.get(id)) {
+                foregroundGeometry.skeDrawings.set(id, { ...drawing });
+            }
+        }
         for (const [id, table] of foregroundGeometry.skeTables) {
             if (table.parent !== page) {
                 foregroundGeometry.skeTables.set(id, hydrateTable(serializeTable(table, false), page, snapshot, page.segmentId));
@@ -967,7 +1042,7 @@ export function applyDocumentSkeletonContinuousBlock(
         }
     }
     const geometry = foregroundGeometry ?? {
-        skeTables: applyContinuousTablePatch(page, patch, snapshot),
+        skeTables: applyContinuousTablePatch(page, patch, snapshot, options.tablePatches),
         skeDrawings: new Map(
             patch.skeDrawings.map(([id, drawing]) => [id, hydrateDrawing(drawing, snapshot, page.segmentId)])
         ),
@@ -1023,6 +1098,30 @@ export function applyDocumentSkeletonContinuousBlock(
         );
     }
 
+    applyPageNotes(
+        page,
+        patch.notes?.length ? patch.notes : undefined,
+        patch.noteDecorations?.length ? patch.noteDecorations : undefined,
+        snapshot
+    );
+    if (patch.notes?.length === 0) {
+        delete page.notes;
+    }
+    if (patch.noteDecorations?.length === 0) {
+        delete page.noteDecorations;
+    }
+    // Page geometry is a complete snapshot. An omitted resource key or layout
+    // flag must not survive a later packet that has returned to its default.
+    const pageGeometry: Partial<IDocumentSkeletonPageGeometryPatch> = page;
+    for (const key of Object.keys(page) as Array<keyof IDocumentSkeletonPage>) {
+        if (key === 'sections' || key === 'skeTables' || key === 'skeDrawings' || key === 'skeColumnGroups' ||
+            key === 'parent' || key === 'notes' || key === 'noteDecorations') {
+            continue;
+        }
+        if (!Object.prototype.hasOwnProperty.call(patch.page, key)) {
+            delete pageGeometry[key];
+        }
+    }
     Object.assign(page, patch.page, {
         sections,
         ...geometry,

@@ -231,7 +231,7 @@ export function calculateLineTopByDrawings(
             }
             const split = _getTableWrapSplit(table, maxTop, lineHeight, columnLeft, columnWidth, minimumTableWrapWidth);
             if (split && split.left <= 0 && split.left + split.width >= columnWidth) {
-                maxTop = Math.max(maxTop, table.top + table.height + (table.tableSource.dist?.distB ?? 0));
+                maxTop = Math.max(maxTop, getTableWrapBounds(table).bottom);
             }
         }
         if (maxTop === previousTop) {
@@ -242,6 +242,17 @@ export function calculateLineTopByDrawings(
     return maxTop - sectionTop;
 }
 
+export function getTableWrapBounds(table: IDocumentSkeletonTable) {
+    const { left, top, width, height, tableSource } = table;
+    const { distL = 0, distR = 0, distT = 0, distB = 0 } = tableSource.dist ?? {};
+    return {
+        left: left - distL,
+        right: left + width + distR,
+        top: top - distT,
+        bottom: top + height + distB,
+    };
+}
+
 function _getTableWrapSplit(
     table: IDocumentSkeletonTable,
     lineTop: number,
@@ -250,20 +261,19 @@ function _getTableWrapSplit(
     columnWidth: number,
     minimumWidth: number
 ) {
-    const { left, top, width, height, tableSource } = table;
-    const split = __getSplitWidthNoAngle(top, height, left - columnLeft, width, lineTop, lineHeight, columnWidth, tableSource.dist ?? {});
-    if (!split || split.left >= columnWidth || split.left + split.width <= 0) {
+    const bounds = getTableWrapBounds(table);
+    let left = bounds.left - columnLeft;
+    let right = bounds.right - columnLeft;
+    if (bounds.bottom <= lineTop || bounds.top >= lineTop + lineHeight || left >= columnWidth || right <= 0) {
         return;
     }
-    let right = split.left + split.width;
-    if (split.left <= minimumWidth) {
-        split.left = 0;
+    if (left <= minimumWidth) {
+        left = 0;
     }
     if (columnWidth - right <= minimumWidth) {
         right = columnWidth;
     }
-    split.width = right - split.left;
-    return split;
+    return { left, width: right - left };
 }
 
 export function usesDrawingBoundsForTextWrap(layoutType: PositionedObjectLayoutType): boolean {

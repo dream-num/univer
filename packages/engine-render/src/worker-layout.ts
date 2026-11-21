@@ -81,6 +81,7 @@ export class DocumentLayoutSession extends Disposable {
     private _layoutReason: DocumentLayoutReason = 'initial';
     private _didPublishEditAnchor = false;
     private _continuousPageSnapshot: IDocumentSkeletonContinuousSnapshot | null = null;
+    private _continuousInvalidatedOffset: number | undefined;
     private _completedContinuousLayout: IDocumentSkeletonContinuousBaseline | undefined;
     private _acknowledgedContinuousLayout: IDocumentSkeletonContinuousBaseline | undefined;
     private _continuousEditBase: IDocumentSkeletonContinuousBaseline | undefined;
@@ -96,6 +97,9 @@ export class DocumentLayoutSession extends Disposable {
         this._skeleton = DocumentSkeleton.create(this._viewModel, localeService, {
             isolateIncrementalPublications: false,
             batchContinuousPublications: true,
+            onContinuousLayoutInvalidated: (offset) => {
+                this._continuousInvalidatedOffset = Math.min(this._continuousInvalidatedOffset ?? offset, offset);
+            },
         });
     }
 
@@ -124,6 +128,7 @@ export class DocumentLayoutSession extends Disposable {
             ? base
             : undefined;
         this._continuousLayoutVersion = options?.continuousLayoutVersion;
+        this._continuousInvalidatedOffset = undefined;
         this._continuousPageSnapshot = null;
         const generation = this._skeleton.startIncrementalLayout({
             ...options,
@@ -207,6 +212,7 @@ export class DocumentLayoutSession extends Disposable {
         if (generation == null || this._skeleton.getLayoutProgress()?.generation === generation) {
             this._continuousEditBase = undefined;
             this._continuousPageSnapshot = null;
+            this._continuousInvalidatedOffset = undefined;
         }
         this._skeleton.cancelIncrementalLayout(generation);
     }
@@ -245,6 +251,9 @@ export class DocumentLayoutSession extends Disposable {
         // A total-page field can restart pagination within the same generation.
         if ((progress.paginationRevision ?? 0) !== this._paginationRevision) {
             this._paginationRevision = progress.paginationRevision ?? 0;
+            if (progress.mode === 'continuous') {
+                this._continuousInvalidatedOffset = 0;
+            }
             this._lastPublishedPageCount = 0;
             this._didPublishEditAnchor = false;
         }
@@ -323,6 +332,7 @@ export class DocumentLayoutSession extends Disposable {
                 true,
                 {
                     base: this._continuousEditBase,
+                    invalidatedOffset: this._continuousInvalidatedOffset,
                     trackBaseline: this._continuousLayoutVersion != null,
                     complete: progress.complete,
                     captureFrom: this._completedContinuousLayout ?? this._acknowledgedContinuousLayout,
@@ -339,6 +349,7 @@ export class DocumentLayoutSession extends Disposable {
             }
             this._continuousEditBase = undefined;
             this._continuousPageSnapshot = progress.complete ? null : snapshot;
+            this._continuousInvalidatedOffset = undefined;
             return {
                 progress,
                 publication: {

@@ -15,14 +15,19 @@
  */
 
 import type { IPermissionTypes } from '@univerjs/core';
-import { WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 
 export const PLUGIN_NAME = 'SHEET_NOTE_PLUGIN';
+
+export const SHEET_NOTE_TOGGLE_PERMISSIONS: IPermissionTypes = {
+    workbookTypes: [WorkbookEditablePermission],
+    worksheetTypes: [WorksheetEditPermission],
+};
 
 /**
  * Notes have no permission point of their own; they follow the cell edit points.
  */
 export const SHEET_NOTE_EDIT_PERMISSIONS: IPermissionTypes = {
-    workbookTypes: [WorkbookEditablePermission],
-    worksheetTypes: [WorksheetEditPermission],
+    ...SHEET_NOTE_TOGGLE_PERMISSIONS,
+    rangeTypes: [RangeProtectionPermissionEditPoint],
 };

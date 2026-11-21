@@ -987,7 +987,10 @@ export interface IParagraph {
     /** Optional stable named-style reference. Direct paragraph style has higher precedence. */
     styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
-    /** Direct numbering overrides. Omitted properties inherit from the named style; null disables numbering. */
+    /**
+     * Direct numbering overrides. Omitted properties inherit from the named style and null disables numbering.
+     * Use `resolveDocumentParagraphBullet(document, paragraph)` to read the effective list and nesting level.
+     */
     bullet?: Partial<IBullet> | null;
     /** Imported resolved numbering, used to distinguish later edits from unchanged inheritance. */
     sourceBullet?: IBullet | null;

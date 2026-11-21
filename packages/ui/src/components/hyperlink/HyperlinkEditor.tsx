@@ -60,7 +60,7 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
                         aria-describedby={labelError ? `${id}-label-error` : undefined}
                         value={label}
                         onChange={onLabelChange}
-                        autoFocus
+                        autoFocus={mobile}
                         size={mobile ? 'small' : undefined}
                     />
                 </FormLayout>
@@ -72,7 +72,7 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
                     aria-describedby={urlError ? `${id}-url-error` : undefined}
                     value={url}
                     onChange={onUrlChange}
-                    autoFocus={!hasLabel}
+                    autoFocus={!mobile || !hasLabel}
                     size={mobile ? 'small' : undefined}
                 />
             </FormLayout>

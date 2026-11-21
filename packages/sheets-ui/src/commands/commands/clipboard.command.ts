@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMultiCommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IMultiCommand, IPermissionTypes, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import { CommandType, ICommandService, IPermissionService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+} from '@univerjs/core';
 import {
     getSheetCommandTarget,
     RangeProtectionPermissionEditPoint,
@@ -30,7 +36,13 @@ import {
     WorksheetSetCellValuePermission,
     WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
-import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
+import {
+    CopyCommand,
+    CutCommand,
+    IClipboardInterfaceService,
+    PasteCommand,
+    SheetPasteShortKeyCommandName,
+} from '@univerjs/ui';
 import type { LocaleKey } from '../../locale/types';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
@@ -169,7 +181,12 @@ function checkSheetClipboardPermission(accessor: IAccessor, commandId: string, p
             errorKey = 'sheets-ui.permission.dialog.cutErr';
             break;
         case PasteCommand.id:
-            permission = checkSheetPastePermission(permissionCheckController, params);
+            permission = permissionCheckController.permissionCheckWithRanges(
+                getSheetPastePermissions(params?.value),
+                params?.target && [params.target.range],
+                params?.target?.unitId,
+                params?.target?.subUnitId
+            );
             errorKey = 'sheets-ui.permission.dialog.pasteErr';
             break;
     }
@@ -195,42 +212,28 @@ function checkSheetClipboardPermission(accessor: IAccessor, commandId: string, p
     permissionCheckController.blockExecuteWithoutPermission(errorMsg);
 }
 
-function checkSheetPastePermission(
-    permissionCheckController: SheetPermissionCheckController,
-    params?: ISheetPasteParams
-): boolean {
-    const target = params?.target;
-    const ranges = target ? [target.range] : undefined;
-    if (
-        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE ||
-        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA ||
-        params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT
-    ) {
-        return permissionCheckController.permissionCheckWithRanges({
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, ranges, target?.unitId, target?.subUnitId);
-    }
-
-    if (params?.value === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
-        return permissionCheckController.permissionCheckWithRanges({
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [
-                WorksheetEditPermission,
-                WorksheetSetCellValuePermission,
-                WorksheetSetCellStylePermission,
-                WorksheetSetColumnStylePermission,
-            ],
-            rangeTypes: [RangeProtectionPermissionEditPoint],
-        }, ranges, target?.unitId, target?.subUnitId);
-    }
-
-    return permissionCheckController.permissionCheckWithRanges({
+export function getSheetPastePermissions(pasteType?: string): Required<IPermissionTypes> {
+    const permissions: Required<IPermissionTypes> = {
         workbookTypes: [WorkbookEditablePermission],
-        worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
+        worksheetTypes: [WorksheetEditPermission],
         rangeTypes: [RangeProtectionPermissionEditPoint],
-    }, ranges, target?.unitId, target?.subUnitId);
+    };
+
+    switch (pasteType) {
+        case PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_VALUE:
+        case PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMULA:
+            permissions.worksheetTypes.push(WorksheetSetCellValuePermission);
+            break;
+        case PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT:
+            permissions.worksheetTypes.push(WorksheetSetCellStylePermission);
+            break;
+        default:
+            permissions.worksheetTypes.push(WorksheetSetCellValuePermission, WorksheetSetCellStylePermission);
+            if (pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
+                permissions.worksheetTypes.push(WorksheetSetColumnStylePermission);
+            }
+    }
+    return permissions;
 }
 
 export const SheetPasteValueCommand: ICommand = {
@@ -295,20 +298,22 @@ export const SheetOptionalPasteCommand: ICommand = {
             return false;
         }
 
-        // Replaying a floating paste option bypasses SheetPasteCommand, so check the cached target here.
-        checkSheetClipboardPermission(accessor, PasteCommand.id, {
-            value: PREDEFINED_HOOK_NAME_PASTE[type],
-            target: {
-                unitId,
-                subUnitId,
-                range: {
-                    startRow: rows[0],
-                    endRow: rows[rows.length - 1],
-                    startColumn: cols[0],
-                    endColumn: cols[cols.length - 1],
-                },
+        const target = {
+            unitId,
+            subUnitId,
+            range: {
+                startRow: rows[0],
+                endRow: rows[rows.length - 1],
+                startColumn: cols[0],
+                endColumn: cols[cols.length - 1],
             },
-        });
+        };
+        const value = PREDEFINED_HOOK_NAME_PASTE[type];
+        checkSheetClipboardPermission(accessor, PasteCommand.id, { value, target });
+        // Replay first undoes the previous paste, which may have changed different cell properties.
+        if (cache.pasteType !== value) {
+            checkSheetClipboardPermission(accessor, PasteCommand.id, { value: cache.pasteType, target });
+        }
 
         return clipboardService.rePasteWithPasteType(type);
     },

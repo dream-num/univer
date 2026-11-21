@@ -31,16 +31,6 @@ import type {
     ISetRangeValuesMutationParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { LocaleKey } from '../../locale/types';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyPastePayload,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-} from '../../services/clipboard/type';
-import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import {
     createDocumentModelWithStyle,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -85,6 +75,16 @@ import {
 } from '@univerjs/sheets';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
+import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyPastePayload,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '../../services/clipboard/type';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -599,19 +599,12 @@ export class SheetClipboardController extends RxDisposable {
             } else {
                 const pattern = getNumfmtParseValueFilter(text, parseOptions);
                 if (pattern?.z) {
-                    cellValue = {
-                        [range.rows[0]]: {
-                            [range.cols[0]]: {
-                                v: pattern.v,
-                                s: {
-                                    n: {
-                                        pattern: pattern.z,
-                                    },
-                                },
-                                f: null,
-                            },
-                        },
-                    };
+                    const cell: ICellData = { v: pattern.v, f: null };
+                    if (payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE ||
+                        payload.pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_BESIDES_BORDER) {
+                        cell.s = { n: { pattern: pattern.z } };
+                    }
+                    cellValue = { [range.rows[0]]: { [range.cols[0]]: cell } };
                 } else {
                     cellValue = {
                         [range.rows[0]]: {

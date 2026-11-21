@@ -105,6 +105,8 @@ import {
 import { ContinuousLayoutPublicationScheduler } from './continuous-layout-publication-scheduler';
 import {
     applyDocumentSkeletonContinuousBlock,
+    attachContinuousLayoutGeometry,
+    forkContinuousLayoutSkeleton,
     hydrateDocumentSkeletonPage,
     hydrateDocumentSkeletonPageMaterializationPlaceholder,
     serializeDocumentSkeletonPage,
@@ -1275,6 +1277,7 @@ export class DocumentSkeleton extends Skeleton {
     private _externalProtectedContinuousLayout: Nullable<{
         range: Extract<IDocumentLayoutProtectedRange, { mode: 'continuous' }>;
         pendingPublications: IDocumentLayoutBlockGeometryPublication[];
+        workerLayout?: { baseline: IDocumentSkeletonCached; draft: IDocumentSkeletonCached };
     }> = null;
 
     private _topLevelBlockSections: DataStreamTreeNode[] | null = null;
@@ -2851,15 +2854,50 @@ export class DocumentSkeleton extends Skeleton {
         progress: IDocumentLayoutProgress,
         materializedPageRange?: IDocumentLayoutPageRange
     ): IDocumentLayoutApplyResult {
+        const protectedContinuousLayout = publication.kind === 'block'
+            ? this._externalProtectedContinuousLayout
+            : null;
         const baseVersion = publication.kind === 'block' ? publication.block.baseLayoutVersion : undefined;
         const applied = this._appliedContinuousWorkerLayout;
-        if (baseVersion != null && (applied?.version !== baseVersion || this._externalProtectedContinuousLayout != null)) {
+        if (baseVersion != null && applied?.version !== baseVersion) {
             this._appliedContinuousWorkerLayout = null;
             return { didReplaceProtectedPages: false, requiresFullPublication: true };
         }
 
+        if (protectedContinuousLayout != null && publication.kind === 'block' && baseVersion != null && applied != null) {
+            const { pageIndex } = publication.block;
+            if (applied.skeleton.pages[pageIndex] == null) {
+                return { didReplaceProtectedPages: false, requiresFullPublication: true };
+            }
+            protectedContinuousLayout.workerLayout = {
+                baseline: applied.skeleton,
+                draft: forkContinuousLayoutSkeleton(applied.skeleton, pageIndex),
+            };
+        }
+        const stagedWorkerLayout = protectedContinuousLayout?.workerLayout;
+        if (stagedWorkerLayout != null && protectedContinuousLayout != null && publication.kind === 'block') {
+            const { draft, baseline } = stagedWorkerLayout;
+            if (applied?.skeleton !== baseline) {
+                protectedContinuousLayout.workerLayout = undefined;
+                return { didReplaceProtectedPages: false, requiresFullPublication: true };
+            }
+            this._applyExternalLayoutResources(draft, publication.resources);
+            const page = applyDocumentSkeletonContinuousBlock(draft, publication.block, this._docViewModel.getSnapshot(), { staging: true });
+            if (!progress.complete) {
+                const didUpdateForeground = this._publishProtectedWorkerFlow(publication, page, baseline, protectedContinuousLayout.range.endOffset);
+                this._externalLayoutProgress = progress;
+                if (didUpdateForeground) {
+                    this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
+                    this._dirty$.next(true);
+                }
+                this._layoutProgress$.next(progress);
+                return { didReplaceProtectedPages: false };
+            }
+            attachContinuousLayoutGeometry(page);
+        }
+
         const skeletonData: IDocumentSkeletonCached =
-            (baseVersion == null ? this._skeletonData : applied?.skeleton) ?? {
+            stagedWorkerLayout?.draft ?? (baseVersion == null ? this._skeletonData : applied?.skeleton) ?? {
                 pages: [],
                 left: publication.left,
                 top: publication.top,
@@ -2875,10 +2913,7 @@ export class DocumentSkeleton extends Skeleton {
                 this._lastCompleteSkeletonData = null;
             }
         }
-        const protectedContinuousLayout = publication.kind === 'block'
-            ? this._externalProtectedContinuousLayout
-            : null;
-        if (publication.kind === 'block' && protectedContinuousLayout != null) {
+        if (publication.kind === 'block' && protectedContinuousLayout != null && stagedWorkerLayout == null) {
             // Flow patches are deltas, but embedded objects are a full snapshot
             // on every publication. Retaining every table snapshot while Main's
             // interaction window is protected grows quadratically with layout
@@ -2923,9 +2958,11 @@ export class DocumentSkeleton extends Skeleton {
             skeletonData.ed = publicationToApply.ed;
         }
         if (publicationToApply.kind === 'block') {
-            const publications = commitsProtectedContinuousLayout
-                ? protectedContinuousLayout.pendingPublications
-                : [publicationToApply];
+            const publications = stagedWorkerLayout != null
+                ? []
+                : commitsProtectedContinuousLayout
+                    ? protectedContinuousLayout.pendingPublications
+                    : [publicationToApply];
             for (const pendingPublication of publications) {
                 this._applyExternalLayoutResources(skeletonData, pendingPublication.resources);
                 applyDocumentSkeletonContinuousBlock(
@@ -3010,7 +3047,7 @@ export class DocumentSkeleton extends Skeleton {
         const protectedPages = this._externalProtectedPages;
         const didReplaceProtectedPages = progress.complete && (
             protectedPages?.divergenceStartPageIndex != null ||
-            (commitsProtectedContinuousLayout && protectedContinuousLayout.pendingPublications.length > 0)
+            (commitsProtectedContinuousLayout && (stagedWorkerLayout != null || protectedContinuousLayout.pendingPublications.length > 0))
         );
         if (progress.complete) {
             if (protectedPages?.divergenceStartPageIndex != null) {
@@ -3148,10 +3185,50 @@ export class DocumentSkeleton extends Skeleton {
         }
     }
 
+    private _publishProtectedWorkerFlow(
+        publication: IDocumentLayoutBlockGeometryPublication,
+        workerPage: IDocumentSkeletonPage,
+        baseline: IDocumentSkeletonCached,
+        protectedEndOffset: number
+    ): boolean {
+        const foreground = this._skeletonData;
+        const { pageIndex, flow } = publication.block;
+        const page = foreground?.pages[pageIndex];
+        const baselinePage = baseline.pages[pageIndex];
+        const section = page?.sections[flow.sectionIndex];
+        const column = section?.columns[flow.columnIndex];
+        const baselineSection = baselinePage?.sections[flow.sectionIndex];
+        if (foreground == null || page == null || page === baselinePage ||
+            section == null || section === baselineSection || column == null || column === baselineSection?.columns[flow.columnIndex]) {
+            return false;
+        }
+        const workerSection = workerPage.sections[flow.sectionIndex];
+        const workerColumn = workerSection?.columns[flow.columnIndex];
+        if (section.top !== workerSection?.top || column.left !== workerColumn?.left || column.width !== workerColumn?.width) {
+            return false;
+        }
+        const continuation = this._resolveProtectedContinuousPublication(foreground, publication, protectedEndOffset, workerPage);
+        if (continuation == null) {
+            return false;
+        }
+        // Stage embedded geometry on the Worker result. A foreground splice can
+        // preserve it only when the new suffix doesn't pass any embedded object.
+        const start = continuation.block.flow.lines[0].st;
+        for (const candidate of [page, workerPage]) {
+            if (candidate.skeDrawings.size > 0 || candidate.skeColumnGroups.size > 0 ||
+                Array.from(candidate.skeTables.values()).some((table) => table.ed >= start)) {
+                return false;
+            }
+        }
+        applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { preserveEmbeddedGeometry: true });
+        return true;
+    }
+
     private _resolveProtectedContinuousPublication(
         skeletonData: IDocumentSkeletonCached,
         publication: IDocumentLayoutBlockGeometryPublication,
-        protectedEndOffset: number
+        protectedEndOffset: number,
+        workerPage?: IDocumentSkeletonPage
     ): IDocumentLayoutBlockGeometryPublication | null {
         const { flow } = publication.block;
         const firstUnprotectedLineOffset = flow.lines.findIndex((line) => line.st > protectedEndOffset);
@@ -3176,11 +3253,13 @@ export class DocumentSkeleton extends Skeleton {
             ? existingColumn.lines.length
             : matchingTailLineIndex;
 
-        if (firstUnprotectedLineOffset > 0) {
+        if (firstUnprotectedLineOffset > 0 || workerPage != null) {
             const mainBoundaryLine = existingColumn.lines[targetLineIndex - 1];
-            const workerBoundaryLine = flow.lines[firstUnprotectedLineOffset - 1];
+            const workerBoundaryLine = workerPage == null
+                ? flow.lines[firstUnprotectedLineOffset - 1]
+                : workerPage.sections[flow.sectionIndex]?.columns[flow.columnIndex]?.lines[flow.lineIndex + firstUnprotectedLineOffset - 1];
             if (
-                mainBoundaryLine == null ||
+                mainBoundaryLine == null || workerBoundaryLine == null ||
                 mainBoundaryLine.st !== workerBoundaryLine.st ||
                 mainBoundaryLine.ed !== workerBoundaryLine.ed
             ) {

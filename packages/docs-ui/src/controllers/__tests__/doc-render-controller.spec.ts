@@ -1276,8 +1276,8 @@ describe('doc render controller', () => {
         expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
         expect(layoutExecutorService.startLayout.mock.calls[0][1]).toMatchObject({
             acknowledgedLayoutVersion: 'complete-worker-layout',
+            appliedLayoutVersion: 'complete-worker-layout',
         });
-        expect(layoutExecutorService.startLayout.mock.calls[0][1]).not.toHaveProperty('appliedLayoutVersion');
 
         controller.dispose();
     });

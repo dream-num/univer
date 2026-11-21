@@ -873,10 +873,60 @@ function applyContinuousTablePatch(
     return tables;
 }
 
+/**
+ * The foreground layout can stay live while Worker patches advance a separate
+ * result. Own the containers we write and borrow untouched geometry until commit.
+ */
+export function forkContinuousLayoutSkeleton(
+    baseline: IDocumentSkeletonCached,
+    pageIndex: number
+): IDocumentSkeletonCached {
+    const skeleton = {
+        ...baseline,
+        pages: baseline.pages.slice(),
+        skeHeaders: new Map([...baseline.skeHeaders].map(([segmentId, pages]) => [segmentId, new Map(pages)])),
+        skeFooters: new Map([...baseline.skeFooters].map(([segmentId, pages]) => [segmentId, new Map(pages)])),
+    };
+    const page = baseline.pages[pageIndex];
+    skeleton.pages[pageIndex] = { ...page, sections: page.sections.slice(), parent: skeleton };
+    return skeleton;
+}
+
+/** Commit ownership of the geometry that the draft borrowed from the baseline. */
+export function attachContinuousLayoutGeometry(page: IDocumentSkeletonPage): void {
+    for (const section of page.sections) {
+        if (section.parent !== page) {
+            section.parent = page;
+            continue;
+        }
+        for (const column of section.columns) {
+            if (column.parent !== section) {
+                column.parent = section;
+                continue;
+            }
+            for (const line of column.lines) {
+                line.parent = column;
+            }
+        }
+    }
+    for (const table of page.skeTables.values()) {
+        table.parent = page;
+    }
+    for (const group of page.skeColumnGroups.values()) {
+        group.parent = page;
+    }
+}
+
+interface IContinuousBlockApplyOptions {
+    staging?: boolean;
+    preserveEmbeddedGeometry?: boolean;
+}
+
 export function applyDocumentSkeletonContinuousBlock(
     target: IDocumentSkeletonCached,
     patch: IDocumentSkeletonContinuousBlockPatch,
-    snapshot?: IDocumentData
+    snapshot?: IDocumentData,
+    options: IContinuousBlockApplyOptions = {}
 ): IDocumentSkeletonPage {
     const { flow } = patch;
     let page = target.pages[patch.pageIndex];
@@ -901,9 +951,13 @@ export function applyDocumentSkeletonContinuousBlock(
         return page;
     }
 
-    const tables = applyContinuousTablePatch(page, patch, snapshot);
+    const tables = options.preserveEmbeddedGeometry ? undefined : applyContinuousTablePatch(page, patch, snapshot);
     const sections = page.sections;
-    const existingSection = sections[flow.sectionIndex];
+    let existingSection = sections[flow.sectionIndex];
+    if (options.staging && existingSection != null && existingSection.parent !== page) {
+        existingSection = { ...existingSection, columns: existingSection.columns.slice(), parent: page };
+        sections[flow.sectionIndex] = existingSection;
+    }
     if (existingSection == null) {
         replaceArrayTail(sections, flow.sectionIndex, [hydrateSection({
             ...flow.section,
@@ -914,7 +968,11 @@ export function applyDocumentSkeletonContinuousBlock(
         }, page), ...flow.trailingSections.map((section) => hydrateSection(section, page))]);
     } else {
         const columns = existingSection.columns;
-        const existingColumn = columns[flow.columnIndex];
+        let existingColumn = columns[flow.columnIndex];
+        if (options.staging && existingColumn != null && existingColumn.parent !== existingSection) {
+            existingColumn = { ...existingColumn, lines: existingColumn.lines.slice(), parent: existingSection };
+            columns[flow.columnIndex] = existingColumn;
+        }
         Object.assign(existingSection, flow.section, { columns, parent: page });
         if (existingColumn == null) {
             replaceArrayTail(columns, flow.columnIndex, [hydrateColumn({
@@ -944,17 +1002,21 @@ export function applyDocumentSkeletonContinuousBlock(
 
     Object.assign(page, patch.page, {
         sections,
-        skeDrawings: new Map(patch.skeDrawings.map(([drawingId, drawing]) => [
-            drawingId,
-            hydrateDrawing(drawing, snapshot, page.segmentId),
-        ])),
-        skeTables: tables,
-        skeColumnGroups: new Map(
-            patch.skeColumnGroups.map(([groupId, group]) => [
-                groupId,
-                hydrateColumnGroup(group, page, snapshot, page.segmentId),
-            ])
-        ),
+        ...(!options.preserveEmbeddedGeometry
+            ? {
+                skeDrawings: new Map(patch.skeDrawings.map(([drawingId, drawing]) => [
+                    drawingId,
+                    hydrateDrawing(drawing, snapshot, page.segmentId),
+                ])),
+                skeTables: tables,
+                skeColumnGroups: new Map(
+                    patch.skeColumnGroups.map(([groupId, group]) => [
+                        groupId,
+                        hydrateColumnGroup(group, page, snapshot, page.segmentId),
+                    ])
+                ),
+            }
+            : {}),
         parent: target,
     });
     return page;

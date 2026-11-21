@@ -650,6 +650,7 @@ export function SheetBarTabs() {
                         <SheetBarItem
                             key={item.sheetId}
                             {...item}
+                            showContextMenu={showContextMenu}
                             selected={activeSheetId === item.sheetId}
                         />
                     ))}

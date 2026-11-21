@@ -30,6 +30,7 @@ export interface IBaseSheetBarProps {
     hidden?: BooleanNumber;
     selected?: boolean;
     menuOverlay?: ReactNode;
+    showContextMenu?: boolean;
     className?: string;
     onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
     onClick?: MouseEventHandler<HTMLDivElement>;
@@ -53,6 +54,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
     return (
         <div
             data-u-comp="slide-tab-item"
+            data-u-context-menu-trigger={props.showContextMenu || undefined}
             key={sheetId}
             data-id={sheetId}
             role="tab"

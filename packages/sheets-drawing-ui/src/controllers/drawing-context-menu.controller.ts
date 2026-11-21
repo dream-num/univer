@@ -15,10 +15,10 @@
  */
 
 import type { DrawingTypeEnum, IDrawingParam, Nullable, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { ContextMenuPosition, ContextMenuShortcutService, IContextMenuService } from '@univerjs/ui';
 import { IDrawingContextMenuService } from '../services/drawing-context-menu.service';
 
 export class DrawingContextMenuController extends RxDisposable {
@@ -27,11 +27,33 @@ export class DrawingContextMenuController extends RxDisposable {
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IDrawingContextMenuService private readonly _drawingContextMenuService: IDrawingContextMenuService
+        @IDrawingContextMenuService private readonly _drawingContextMenuService: IDrawingContextMenuService,
+        @Optional(ContextMenuShortcutService) shortcutService?: ContextMenuShortcutService
     ) {
         super();
 
         this._init();
+        if (shortcutService) {
+            this.disposeWithMe(shortcutService.register((target) => {
+                const unit = this._univerInstanceService.getFocusedUnit();
+                if (unit?.type !== UniverInstanceType.UNIVER_SHEET || this._contextMenuService.disabled) {
+                    return;
+                }
+                const render = this._renderManagerService.getRenderUnitById(unit.getUnitId());
+                if (!render || (target !== render.engine.getCanvasElement() && target.id !== `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`)) {
+                    return;
+                }
+                const transformer = render.scene.getTransformer();
+                const position = transformer && this._getSelectedMenuPosition(transformer.getSelectedObjectMap().values());
+                if (!position) {
+                    return;
+                }
+                return (event) => {
+                    this._contextMenuService.triggerContextMenu(event, position, { autoFocus: true, unitId: unit.getUnitId() });
+                    return true;
+                };
+            }, 100));
+        }
     }
 
     private _init(): void {
@@ -57,24 +79,26 @@ export class DrawingContextMenuController extends RxDisposable {
             const { event } = params;
             if (event.button !== 2) return;
 
-            const selectedObjects = transformer.getSelectedObjectMap();
-            if (selectedObjects.size === 0) return;
-
-            const drawings: IDrawingParam[] = [];
-            for (const object of selectedObjects.values()) {
-                const oKey = object.oKey;
-                const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-
-                if (!drawingParam) return;
-
-                drawings.push(drawingParam);
+            const position = this._getSelectedMenuPosition(transformer.getSelectedObjectMap().values());
+            if (position) {
+                this._contextMenuService.triggerContextMenu(event, position);
             }
-
-            this._contextMenuService.triggerContextMenu(event, this._getContextMenuPosition(drawings));
         }));
     }
 
-    private _getContextMenuPosition(drawings: IDrawingParam[]): string {
+    private _getSelectedMenuPosition(objects: Iterable<{ oKey: string }>): string | undefined {
+        const drawings: IDrawingParam[] = [];
+        for (const object of objects) {
+            const drawing = this._drawingManagerService.getDrawingOKey(object.oKey);
+            if (!drawing) {
+                return;
+            }
+            drawings.push(drawing);
+        }
+        if (!drawings.length) {
+            return;
+        }
+
         if (drawings.length !== 1) {
             return ContextMenuPosition.DRAWING;
         }

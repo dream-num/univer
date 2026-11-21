@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ITextRangeParam } from '@univerjs/core';
 import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -26,11 +26,13 @@ import {
     ICommandService,
     IContextService,
     Inject,
+    isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { ContextMenuPosition, ContextMenuShortcutService, IContextMenuService } from '@univerjs/ui';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 const SKIP_UNIT_IDS = [
@@ -45,20 +47,50 @@ const SKIP_UNIT_IDS = [
  */
 export class DocContextMenuRenderController extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Optional(ContextMenuShortcutService) shortcutService?: ContextMenuShortcutService
     ) {
         super();
 
         if (!SKIP_UNIT_IDS.includes(this._context.unitId)) {
             this._initPointerDown();
             this._initEditChange();
+            if (shortcutService && !isInternalEditorID(this._context.unitId)) {
+                this.disposeWithMe(shortcutService.register((target) => this._resolveKeyboardMenu(target)));
+            }
         }
+    }
+
+    private _resolveKeyboardMenu(target: HTMLElement): (() => boolean) | undefined {
+        const canvas = this._context.engine.getCanvasElement();
+        if (this._contextMenuService.disabled || this._univerInstanceService.getFocusedUnit() !== this._context.unit
+            || (target !== canvas && target.id !== `__editor_${this._context.unitId}`)
+            || this._isSelectionInCodeBlock()) {
+            return;
+        }
+
+        return () => {
+            const rect = target.getBoundingClientRect();
+            const clientX = target === canvas ? rect.left + rect.width / 2 : rect.left;
+            const clientY = target === canvas ? rect.top + rect.height / 2 : rect.bottom;
+            const range = this._docSelectionManagerService.getActiveTextRange();
+            const segmentId = range?.segmentId ?? '';
+            const paragraph = range && this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs?.find((item) => item.startIndex >= range.startOffset);
+            this._docEventManagerService.contextMenuParagraph = paragraph?.paragraphId
+                ? { unitId: this._context.unitId, segmentId, paragraphId: paragraph.paragraphId }
+                : null;
+            const position = this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
+                ? ContextMenuPosition.DRAWING
+                : ContextMenuPosition.MAIN_AREA;
+            this._contextMenuService.triggerContextMenu({ clientX, clientY, stopPropagation() {} }, position, { autoFocus: true, unitId: this._context.unitId });
+            return true;
+        };
     }
 
     private _initPointerDown(): void {

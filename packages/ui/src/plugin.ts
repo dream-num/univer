@@ -48,6 +48,7 @@ import { DesktopBeforeCloseService, IBeforeCloseService } from './services/befor
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 import { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
+import { ContextMenuShortcutService } from './services/contextmenu/contextmenu-shortcut.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
@@ -139,6 +140,7 @@ export class UniverUIPlugin extends Plugin {
             [IUnitPresenceUIAdapterRegistry, { useClass: UnitPresenceUIAdapterRegistry }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuHostService, { useClass: ContextMenuHostService }],
+            [ContextMenuShortcutService],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
@@ -179,6 +181,7 @@ export class UniverUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SharedController],
+            [ContextMenuShortcutService],
             [FormatPainterController],
             [FeatureSearchController],
         ]);

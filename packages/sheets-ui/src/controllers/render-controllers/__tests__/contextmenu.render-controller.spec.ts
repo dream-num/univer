@@ -17,6 +17,8 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { IPointerEvent } from '@univerjs/engine-render';
 import {
+    FOCUSING_SHEET,
+    FOCUSING_UNIVER_EDITOR,
     ICommandService,
     IContextService,
     IUniverInstanceService,
@@ -47,10 +49,12 @@ import {
 import {
     ContextMenuPosition,
     ContextMenuService,
+    ContextMenuShortcutService,
     IContextMenuService,
     IPlatformService,
     IShortcutService,
     IUIRuntimeScopeService,
+    KeyCode,
     PlatformService,
     ShortcutService,
     UIRuntimeScopeService,
@@ -158,6 +162,35 @@ describe('SheetContextMenuRenderController pointer gestures', () => {
             selections: gridSelections,
         });
         expect(() => click(spreadsheet, eventAt(1, 1, { button: 2 }))).not.toThrow();
+    });
+
+    it('opens the selected row and column menus from the focused sheet shortcut', () => {
+        univer.__getInjector().add([ContextMenuShortcutService]);
+        const { injector, render, rowHeader, columnHeader, triggerMenu, eventAt, click } = createContextMenuTestBed(false);
+        injector.get(IUniverInstanceService).focusUnit(render.unitId);
+        const context = injector.get(IContextService);
+        context.setContextValue(FOCUSING_SHEET, true);
+        context.setContextValue(FOCUSING_UNIVER_EDITOR, true);
+        const canvas = render.engine.getCanvasElement();
+        document.body.appendChild(canvas);
+        canvas.tabIndex = 0;
+        try {
+            canvas.focus();
+            const press = () => canvas.dispatchEvent(new KeyboardEvent('keydown', {
+                keyCode: KeyCode.F10,
+                shiftKey: true,
+                bubbles: true,
+                cancelable: true,
+            }));
+            click(rowHeader, eventAt(4, 0));
+            expect(press()).toBe(false);
+            expect(triggerMenu.mock.lastCall?.[1]).toBe(ContextMenuPosition.ROW_HEADER);
+            click(columnHeader, eventAt(0, 3));
+            expect(press()).toBe(false);
+            expect(triggerMenu.mock.lastCall?.[1]).toBe(ContextMenuPosition.COL_HEADER);
+        } finally {
+            canvas.remove();
+        }
     });
 
     it.each([false, true])('opens cell and header menus with real right clicks on Mac %s', (isMac) => {

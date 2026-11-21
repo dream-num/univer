@@ -25,21 +25,26 @@ import type {
 } from '@univerjs/engine-render';
 import {
     Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IContextService,
     Inject,
     Injector,
+    IUniverInstanceService,
+    Optional,
     RANGE_TYPE,
     SheetTypes,
 } from '@univerjs/core';
 import { attachSelectionWithCoord, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
-import { ContextMenuPosition, IContextMenuService, IPlatformService } from '@univerjs/ui';
+import { ContextMenuPosition, ContextMenuShortcutService, IContextMenuService, IPlatformService } from '@univerjs/ui';
 import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
 import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { isSheetContextMenuGesture } from '../../common/selection-input';
+import { transformPosition2Offset } from '../../common/utils';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
+import { whenSheetEditorFocused } from '../shortcuts/utils';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -53,12 +58,17 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(Injector) private readonly _injector: Injector,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
+        @Optional(ContextMenuShortcutService) shortcutService?: ContextMenuShortcutService
     ) {
         super();
 
         this._init();
         this._initEmbedRuntimeSessionListener();
+        if (shortcutService) {
+            this.disposeWithMe(shortcutService.register((target) => this._resolveKeyboardMenu(target)));
+        }
     }
 
     private _getSheetType(): SheetTypes | undefined {
@@ -142,6 +152,39 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
             }
         });
         this.disposeWithMe(colHeaderObserver);
+    }
+
+    private _resolveKeyboardMenu(target: HTMLElement): (() => boolean) | undefined {
+        const canvas = this._context.engine.getCanvasElement();
+        const worksheet = this._context.unit.getActiveSheet();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
+        if (!worksheet || worksheet.getConfig().type === SheetTypes.CHART || !selection
+            || this._instanceService.getFocusedUnit() !== this._context.unit
+            || this._contextMenuService.disabled || this._shouldSuppressHostContextMenu()
+            || this._contextService.getContextValue(REF_SELECTIONS_ENABLED)
+            || (target !== canvas && target.id !== `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`) || !whenSheetEditorFocused(this._contextService)) {
+            return;
+        }
+
+        return () => {
+            const { rangeType, startRow, startColumn } = selection.range;
+            const row = selection.primary?.actualRow ?? startRow;
+            const column = selection.primary?.actualColumn ?? startColumn;
+            const skeleton = this._selectionRenderService.getSkeleton();
+            const cell = skeleton.getCellWithCoordByIndex(row, column);
+            const point = transformPosition2Offset(cell.endX, cell.endY, this._context.scene, skeleton, worksheet);
+            const rect = canvas.getBoundingClientRect();
+            let position = ContextMenuPosition.MAIN_AREA;
+            if (rangeType === RANGE_TYPE.ROW) {
+                position = ContextMenuPosition.ROW_HEADER;
+            } else if (rangeType === RANGE_TYPE.COLUMN) {
+                position = ContextMenuPosition.COL_HEADER;
+            }
+            const clientX = rect.left + Math.max(0, Math.min(rect.width, rangeType === RANGE_TYPE.ROW ? skeleton.rowHeaderWidth : point.x));
+            const clientY = rect.top + Math.max(0, Math.min(rect.height, rangeType === RANGE_TYPE.COLUMN ? skeleton.columnHeaderHeight : point.y));
+            this._contextMenuService.triggerContextMenu({ clientX, clientY, stopPropagation() {} }, position, { autoFocus: true, unitId: this._context.unitId });
+            return true;
+        };
     }
 
     private _isContextMenuGesture(event: IMouseEvent): boolean {

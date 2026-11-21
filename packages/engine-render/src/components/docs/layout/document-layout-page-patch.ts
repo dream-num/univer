@@ -126,7 +126,7 @@ export interface IDocumentSkeletonContinuousBlockPatch {
 
 export interface IDocumentSkeletonContinuousSnapshot {
     height: number;
-    lineEnds: number[];
+    lineCount: number;
     tables?: Map<string, IDocumentSkeletonTable>;
     usesTableDelta: boolean;
     baselineSections?: IDocumentSkeletonSectionPatch[];
@@ -551,18 +551,6 @@ interface IDocumentSkeletonFlowCursor {
     lineIndex: number;
 }
 
-function collectFlowLineEnds(page: IDocumentSkeletonPage): number[] {
-    const lineEnds: number[] = [];
-    for (const section of page.sections) {
-        for (const column of section.columns) {
-            for (const line of column.lines) {
-                lineEnds.push(line.ed);
-            }
-        }
-    }
-    return lineEnds;
-}
-
 function countFlowLines(page: IDocumentSkeletonPage): number {
     let lineCount = 0;
     for (const section of page.sections) {
@@ -571,27 +559,6 @@ function countFlowLines(page: IDocumentSkeletonPage): number {
         }
     }
     return lineCount;
-}
-
-function collectFlowLineEndsFromCursor(
-    page: IDocumentSkeletonPage,
-    cursor: IDocumentSkeletonFlowCursor
-): number[] {
-    const lineEnds: number[] = [];
-    for (let sectionIndex = cursor.sectionIndex; sectionIndex < page.sections.length; sectionIndex++) {
-        const section = page.sections[sectionIndex];
-        const firstColumnIndex = sectionIndex === cursor.sectionIndex ? cursor.columnIndex : 0;
-        for (let columnIndex = firstColumnIndex; columnIndex < section.columns.length; columnIndex++) {
-            const column = section.columns[columnIndex];
-            const firstLineIndex = sectionIndex === cursor.sectionIndex && columnIndex === cursor.columnIndex
-                ? cursor.lineIndex
-                : 0;
-            for (let lineIndex = firstLineIndex; lineIndex < column.lines.length; lineIndex++) {
-                lineEnds.push(column.lines[lineIndex].ed);
-            }
-        }
-    }
-    return lineEnds;
 }
 
 function resolveFlowCursor(page: IDocumentSkeletonPage, flowLineIndex: number): IDocumentSkeletonFlowCursor {
@@ -823,20 +790,10 @@ export function serializeDocumentSkeletonContinuousBlock(
     options: IContinuousBlockOptions = {}
 ): { block: IDocumentSkeletonContinuousBlockPatch; snapshot: IDocumentSkeletonContinuousSnapshot } {
     const baseline = options.base;
-    let currentLineEnds: number[];
-    let cursor: IDocumentSkeletonFlowCursor;
-    if (previousSnapshot != null) {
-        const replacementLineIndex = Math.max(0, Math.min(previousSnapshot.lineEnds.length, countFlowLines(currentPage)) - 1);
-        cursor = resolveFlowCursor(currentPage, replacementLineIndex);
-        const appendedLineEnds = collectFlowLineEndsFromCursor(currentPage, cursor);
-        currentLineEnds = previousSnapshot.lineEnds;
-        replaceArrayTail(currentLineEnds, replacementLineIndex, appendedLineEnds);
-    } else {
-        currentLineEnds = collectFlowLineEnds(currentPage);
-        cursor = baseline == null
-            ? resolveFlowCursor(currentPage, 0)
-            : getContinuousPrefixCursor(baseline, currentPage);
-    }
+    const lineCount = countFlowLines(currentPage);
+    const cursor = previousSnapshot == null && baseline != null
+        ? getContinuousPrefixCursor(baseline, currentPage)
+        : resolveFlowCursor(currentPage, Math.max(0, Math.min(previousSnapshot?.lineCount ?? 0, lineCount) - 1));
     const flow = serializeContinuousFlow(currentPage, cursor);
     const wantsBaseline = options.trackBaseline && typeof structuredClone === 'function' &&
         (previousSnapshot == null || previousSnapshot.baselineSections != null);
@@ -862,7 +819,7 @@ export function serializeDocumentSkeletonContinuousBlock(
     const previousHeight = previousSnapshot?.height ?? baseline?.height ?? 0;
     const snapshot: IDocumentSkeletonContinuousSnapshot = {
         height: currentPage.height,
-        lineEnds: currentLineEnds,
+        lineCount,
         tables: tableHistory?.tables,
         usesTableDelta,
         baselineSections,

@@ -126,4 +126,56 @@ describe('Test normDist function', () => {
             ]);
         });
     });
+
+    describe('CDF scale normalization and PDF compatibility', () => {
+        const number = (value: number) => NumberValueObject.create(value);
+        // Independent references from Python math.erfc and math.exp.
+        const standardValues = [
+            { z: -1, cdf: 0.15865525393145707, pdf: 0.24197072451914337 },
+            { z: 0, cdf: 0.5, pdf: 0.3989422804014327 },
+            { z: 1, cdf: 0.8413447460685429, pdf: 0.24197072451914337 },
+        ];
+
+        describe.each([1e-200, 1e200, 1])('with standard deviation %s', (scale) => {
+            it.each(standardValues)('evaluates the CDF at z=$z', ({ z, cdf }) => {
+                const result = testFunction.calculate(number(z * scale), number(0), number(scale), number(1));
+                expect(result.getValue()).toBeCloseTo(cdf, 13);
+            });
+        });
+
+        it.each(standardValues)('retains the ordinary PDF at z=$z', ({ z, pdf }) => {
+            const result = testFunction.calculate(number(z), number(0), number(1), number(0));
+            expect(result.getValue()).toBeCloseTo(pdf, 13);
+        });
+
+        it.each([0, -1])('retains the invalid-scale error for %s', (scale) => {
+            expect(testFunction.calculate(number(1), number(0), number(scale), number(1)).getValue()).toBe(ErrorType.NUM);
+        });
+
+        it.each([
+            { x: -1e308, mean: 1e308, cdf: 0.02275013194817922 },
+            { x: 1e308, mean: -1e308, cdf: 0.9772498680518208 },
+        ])('standardizes opposite-sign finite locations in the CDF at x=$x', ({ x, mean, cdf }) => {
+            const result = testFunction.calculate(number(x), number(mean), number(1e308), number(1));
+            expect(result.getValue()).toBeCloseTo(cdf, 13);
+        });
+
+        it.each([-1, 1])('retains the existing nonfinite PDF for overflowing differences (sign=%s)', (sign) => {
+            const result = testFunction.calculate(number(sign * 1e308), number(-sign * 1e308), number(1e308), number(0));
+            expect(result.getValue()).toBeNaN();
+        });
+
+        it('evaluates array-valued scales and cumulative flags independently', () => {
+            const result = testFunction.calculate(
+                ArrayValueObject.createByArray([[-1e-200, 1e200, 0]]),
+                number(0),
+                ArrayValueObject.createByArray([[1e-200, 1e200, 1]]),
+                ArrayValueObject.createByArray([[1, 1, 0]])
+            );
+            const values = getObjectValue(result) as number[][];
+            expect(values[0][0]).toBeCloseTo(standardValues[0].cdf, 13);
+            expect(values[0][1]).toBeCloseTo(standardValues[2].cdf, 13);
+            expect(values[0][2]).toBeCloseTo(standardValues[1].pdf, 13);
+        });
+    });
 });

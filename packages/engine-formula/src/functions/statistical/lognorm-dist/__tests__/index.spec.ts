@@ -126,4 +126,35 @@ describe('Test lognormDist function', () => {
             ]);
         });
     });
+
+    describe('CDF scale normalization and PDF compatibility', () => {
+        const number = (value: number) => NumberValueObject.create(value);
+        // Independent references from Python math.erfc and math.exp.
+        const standardValues = [
+            { z: -1, cdf: 0.15865525393145707, pdf: 0.24197072451914337 },
+            { z: 0, cdf: 0.5, pdf: 0.3989422804014327 },
+            { z: 1, cdf: 0.8413447460685429, pdf: 0.24197072451914337 },
+        ];
+
+        describe.each([1e-200, 1e200, 1])('with standard deviation %s', (scale) => {
+            it.each(standardValues)('evaluates the CDF at z=$z', ({ z, cdf }) => {
+                const result = testFunction.calculate(number(1), number(-z * scale), number(scale), number(1));
+                expect(result.getValue()).toBeCloseTo(cdf, 13);
+            });
+        });
+
+        it.each(standardValues)('retains the ordinary PDF at z=$z', ({ z, pdf }) => {
+            const result = testFunction.calculate(number(1), number(-z), number(1), number(0));
+            expect(result.getValue()).toBeCloseTo(pdf, 13);
+        });
+
+        it.each([0, -1])('retains the invalid-scale error for %s', (scale) => {
+            expect(testFunction.calculate(number(1), number(0), number(scale), number(1)).getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('retains the existing nonfinite PDF when its squared scale underflows', () => {
+            const result = testFunction.calculate(number(1), number(0), number(1e-200), number(0));
+            expect(result.getValue()).toBeNaN();
+        });
+    });
 });

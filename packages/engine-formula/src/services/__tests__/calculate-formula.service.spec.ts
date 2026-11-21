@@ -18,6 +18,7 @@ import type { ICellData, IWorkbookData } from '@univerjs/core';
 import { CellValueType, IConfigService, Inject, Injector, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { IFormulaDatasetConfig } from '../../basics/common';
+import type { IFeatureCalculationManagerParam } from '../feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../runtime.service';
 import { ErrorType } from '../../basics/error-type';
 import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -230,7 +231,270 @@ function createService() {
     };
 }
 
+function createFeatureDataset(): IFormulaDatasetConfig {
+    return {
+        formulaData: { test: { sheet1: { 0: { 0: { f: '=B1' } } } } },
+        arrayFormulaCellData: {},
+        arrayFormulaRange: {},
+        forceCalculate: false,
+        dirtyRanges: [],
+        dirtyNameMap: {},
+        dirtyDefinedNameMap: {},
+        dirtyUnitFeatureMap: { test: { sheet1: { report: true } } },
+        dirtyUnitOtherFormulaMap: {},
+    };
+}
+
 describe('CalculateFormulaService', () => {
+    it.each(['inside', 'after'])('releases feature output when the calculation service is disposed %s its callback', async (when) => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService) as CalculateFormulaService;
+        const runtime = client.get(IFormulaRuntimeService);
+        const features = client.get(IFeatureCalculationManagerService);
+        let disposed = false;
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => {
+                    if (when === 'inside' && runtime.getFormulaExecuteStage() === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                        disposed = true;
+                        calculation.dispose();
+                    }
+                    return {
+                        runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: 31 } } }) } },
+                        dirtyRanges: { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } },
+                    };
+                },
+            });
+            await calculation.execute({
+                formulaData: { test: { sheet1: { 0: { 0: { f: '=B1' } } } } },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: { test: { sheet1: { report: true } } },
+                dirtyUnitOtherFormulaMap: {},
+            });
+            if (when === 'after') {
+                disposed = true;
+                calculation.dispose();
+            }
+            expect(disposed).toBe(true);
+            expect(runtime.getRuntimeFeatureCellData()).not.toHaveProperty('report');
+        } finally {
+            client.univer.dispose();
+        }
+    });
+
+    it.each(['other-id', 'other-sheet'])('accepts output when the callback changes an unrelated registration: %s', async (scope) => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService);
+        const runtime = client.get(IFormulaRuntimeService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const values: unknown[] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => values.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v));
+        let changed = false;
+        const config = createFeatureDataset();
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => {
+                    if (!changed && runtime.getFormulaExecuteStage() === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                        changed = true;
+                        const sheet = scope === 'other-sheet' ? 'other-sheet' : 'sheet1';
+                        features.register('test', sheet, scope === 'other-id' ? 'other' : 'report', {
+                            unitId: 'test',
+                            subUnitId: sheet,
+                            dependencyRanges: [],
+                            getDirtyData: () => ({ runtimeCellData: {}, dirtyRanges: {} }),
+                        });
+                    }
+                    return {
+                        runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: 31 } } }) } },
+                        dirtyRanges: { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } },
+                    };
+                },
+            });
+            await calculation.execute(config);
+            expect(changed).toBe(true);
+            expect(values.pop()).toBe(31);
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
+    it('recovers after an executing feature callback throws and its registration is replaced', async () => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService);
+        const runtime = client.get(IFormulaRuntimeService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const values: unknown[] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => values.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v));
+        const output = (value: number) => ({
+            runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: value } } }) } },
+            dirtyRanges: { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } },
+        });
+        const config = createFeatureDataset();
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => {
+                    if (runtime.getFormulaExecuteStage() === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                        throw new Error('Feature failed');
+                    }
+                    return output(31);
+                },
+            });
+            await expect(calculation.execute(config)).rejects.toThrow('Feature failed');
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => output(42),
+            });
+            await calculation.execute(config);
+            expect(values).toEqual([42]);
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
+    it.each(['update', 'remove'])('preserves a newer feature %s while result writeback is pending', async (operation) => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const result = client.get(FormulaResultService);
+        const apply = result.applyResult.bind(result);
+        let release!: () => void;
+        let entered!: () => void;
+        const gate = new Promise<void>((resolve) => {
+            release = resolve;
+        });
+        const ready = new Promise<void>((resolve) => {
+            entered = resolve;
+        });
+        const writeback = vi.spyOn(result, 'applyResult').mockImplementationOnce(async (data) => {
+            entered();
+            await gate;
+            await apply(data);
+        });
+        let value = 31;
+        const cells = () => ({ test: { sheet1: new ObjectMatrix({ 0: { 1: { v: value } } }) } });
+        const ranges = () => ({ test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } });
+        const values: unknown[] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => values.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v));
+        const config = createFeatureDataset();
+        let pending: Promise<unknown> | undefined;
+        try {
+            features.register('test', 'sheet1', 'report', {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                dependencyRanges: [],
+                getDirtyData: () => ({ runtimeCellData: cells(), dirtyRanges: ranges() }),
+            });
+            pending = calculation.execute(config);
+            await ready;
+            if (operation === 'remove') {
+                features.remove('test', 'sheet1', ['report']);
+            } else {
+                value = 42;
+                calculation.setRuntimeFeatureCellData('report', cells());
+                calculation.setRuntimeFeatureRange('report', ranges());
+            }
+            release();
+            await pending;
+            expect(values.pop()).toBe(31);
+            await calculation.execute({ ...config, dirtyUnitFeatureMap: {}, dirtyRanges: [
+                { unitId: 'test', sheetId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 5, endColumn: 5 } },
+            ] });
+            expect(values.pop()).toBe(operation === 'remove' ? 2 : 42);
+        } finally {
+            release();
+            await pending;
+            writeback.mockRestore();
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
+    it.each([
+        { phase: 'dependency', operation: 'remove' },
+        { phase: 'dependency', operation: 'replace' },
+        { phase: 'dependency', operation: 'replace-same-callback' },
+        { phase: 'dependency', operation: 'replace-same-registration' },
+        { phase: 'execution', operation: 'remove' },
+        { phase: 'execution', operation: 'replace' },
+        { phase: 'execution', operation: 'replace-same-callback' },
+        { phase: 'execution', operation: 'replace-same-registration' },
+    ])('discards an invalidated feature result during $phase ($operation)', async ({ phase, operation }) => {
+        const client = createCommandTestBed();
+        const calculation = client.get(ICalculateFormulaService);
+        const runtime = client.get(IFormulaRuntimeService);
+        const features = client.get(IFeatureCalculationManagerService);
+        const values: unknown[] = [];
+        const subscription = calculation.executionCompleteListener$.subscribe((data) => {
+            values.push(data.unitData.test?.sheet1?.getValue(0, 0)?.v);
+        });
+        const output = (value: number) => ({
+            runtimeCellData: { test: { sheet1: new ObjectMatrix({ 0: { 1: { v: value } } }) } },
+            dirtyRanges: { test: { sheet1: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }] } },
+        });
+        const config = createFeatureDataset();
+        let invalidated = false;
+        let registration: IFeatureCalculationManagerParam;
+        const getDirtyData = () => {
+            const value = invalidated ? 42 : 31;
+            const stage = phase === 'dependency' ? FormulaExecuteStageType.START_DEPENDENCY : FormulaExecuteStageType.CURRENTLY_CALCULATING;
+            if (!invalidated && runtime.getFormulaExecuteStage() === stage) {
+                invalidated = true;
+                if (operation === 'remove') {
+                    features.remove('test', 'sheet1', ['report']);
+                } else if (operation === 'replace-same-registration') {
+                    features.remove('test', 'sheet1', ['report']);
+                    features.register('test', 'sheet1', 'report', registration);
+                } else {
+                    features.register('test', 'sheet1', 'report', {
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
+                        dependencyRanges: [],
+                        getDirtyData: operation === 'replace-same-callback' ? getDirtyData : () => output(42),
+                    });
+                }
+            }
+            return output(value);
+        };
+        registration = { unitId: 'test', subUnitId: 'sheet1', dependencyRanges: [], getDirtyData };
+        try {
+            features.register('test', 'sheet1', 'report', registration);
+            await calculation.execute(config);
+            expect(invalidated).toBe(true);
+            expect(values).not.toContain(31);
+            await calculation.execute({ ...config, dirtyUnitFeatureMap: {}, dirtyRanges: [
+                { unitId: 'test', sheetId: 'sheet1', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } },
+            ] });
+            expect(values).not.toContain(31);
+            if (operation !== 'remove') {
+                await calculation.execute(config);
+                expect(values.pop()).toBe(42);
+            } else {
+                expect(values.pop()).toBe(2);
+            }
+        } finally {
+            subscription.unsubscribe();
+            client.univer.dispose();
+        }
+    });
+
     it.each([false, true])('consumes feature change ranges after a calculation (forced: %s)', async (forced) => {
         const client = createCommandTestBed();
         const calculation = client.get(ICalculateFormulaService);
@@ -345,6 +609,7 @@ describe('CalculateFormulaService', () => {
         const features = client.get(IFeatureCalculationManagerService);
         const calculation = client.get(ICalculateFormulaService);
         const values: unknown[][] = [];
+        let secondValue = 12;
         const subscription = calculation.executionCompleteListener$.subscribe((data) => {
             const cells = data.unitData.test?.first;
             values.push([cells?.getValue(0, 4)?.v, cells?.getValue(0, 5)?.v]);
@@ -357,7 +622,7 @@ describe('CalculateFormulaService', () => {
                     subUnitId: owner,
                     dependencyRanges: [],
                     getDirtyData: () => ({
-                        runtimeCellData: { test: { first: new ObjectMatrix({ 0: { [column]: { v: 11 + index } } }) } },
+                        runtimeCellData: { test: { first: new ObjectMatrix({ 0: { [column]: { v: index === 0 ? 11 : secondValue } } }) } },
                         dirtyRanges: { test: { first: [{ startRow: 0, endRow: 0, startColumn: column, endColumn: column }] } },
                     }),
                 });
@@ -375,11 +640,14 @@ describe('CalculateFormulaService', () => {
             };
             await calculation.execute(dataset);
             expect(values[values.length - 1]).toEqual([11, 12]);
+            secondValue = 13;
+            await calculation.execute({ ...dataset, dirtyUnitFeatureMap: { test: { second: { report: true } } } });
+            expect(values[values.length - 1]).toEqual([undefined, 13]);
             features.remove('test', 'first', ['report']);
             await calculation.execute({ ...dataset, dirtyUnitFeatureMap: {} });
             expect(values[values.length - 1][0]).toBe(0);
             await calculation.execute({ ...dataset, forceCalculate: true });
-            expect(values[values.length - 1]).toEqual([0, 12]);
+            expect(values[values.length - 1]).toEqual([0, 13]);
         } finally {
             subscription.unsubscribe();
             client.univer.dispose();

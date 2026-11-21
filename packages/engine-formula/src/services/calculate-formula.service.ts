@@ -110,6 +110,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
 
     private readonly _featureOutputs = new Map<string, Map<string, IFeatureOutput>>();
     private readonly _releasedFeatureRanges = new Set<IUnitRange>();
+    private _activeFeatureCalculation?: { unitId: string; subUnitId: string; featureId: string; invalidated: boolean };
 
     protected _executeLock = new AsyncLock();
 
@@ -245,6 +246,10 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         super();
         if (_features) {
             this.disposeWithMe(_features.onChanged$.subscribe(({ unitId, subUnitId, featureIds }) => {
+                const active = this._activeFeatureCalculation;
+                if (active?.unitId === unitId && active.subUnitId === subUnitId && featureIds.includes(active.featureId)) {
+                    active.invalidated = true;
+                }
                 for (const id of featureIds) {
                     const owners = this._featureOutputs.get(id);
                     const owner = JSON.stringify([unitId, subUnitId]);
@@ -335,6 +340,10 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._runtimeService.releaseCalculationCache?.();
         super.dispose();
 
+        for (const id of this._featureOutputs.keys()) {
+            this._runtimeService.setRuntimeFeatureCellData(id, {});
+            this._runtimeService.setRuntimeFeatureRange(id, {});
+        }
         this._featureOutputs.clear();
         this._releasedFeatureRanges.clear();
         this._executionInProgressListener$.complete();
@@ -625,13 +634,27 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                  * and return the dirty area marked by the feature,
                  * so as to allow the formulas depending on the dirty area to continue the calculation.
                  */
-                if (this._features && this._features.get(tree.unitId, tree.subUnitId, tree.featureId)?.getDirtyData !== getDirtyData) {
+                const registration = this._features?.get(tree.unitId, tree.subUnitId, tree.featureId);
+                if (this._features && registration?.getDirtyData !== getDirtyData) {
                     i++;
                     continue;
                 }
-                const { runtimeCellData, dirtyRanges } = getDirtyData(this._currentConfigService.getDirtyData(true), this._runtimeService.getAllRuntimeData());
+                const active = { unitId: tree.unitId, subUnitId: tree.subUnitId, featureId: tree.featureId, invalidated: false };
+                this._activeFeatureCalculation = active;
+                let output: IFeatureOutput;
+                try {
+                    output = getDirtyData(this._currentConfigService.getDirtyData(true), this._runtimeService.getAllRuntimeData());
+                } finally {
+                    this._activeFeatureCalculation = undefined;
+                }
 
-                this._setFeatureOutput(tree.featureId, tree.unitId, tree.subUnitId, { runtimeCellData, dirtyRanges });
+                // Even re-registering the same object invalidates work from its previous lifetime.
+                if (this._disposed || active.invalidated || (this._features && this._features.get(tree.unitId, tree.subUnitId, tree.featureId) !== registration)) {
+                    i++;
+                    continue;
+                }
+
+                this._setFeatureOutput(tree.featureId, tree.unitId, tree.subUnitId, output);
             } else {
                 const node = generateAstNode(
                     tree.unitId,

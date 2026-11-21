@@ -2027,13 +2027,16 @@ describe('worker document layout session', () => {
         { embedded: 'prefix drawing', drawing: 'inline', publishesTail: true },
         { embedded: 'rotated drawing overlapping the tail', drawing: 'rotated', publishesTail: false },
         { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
+        { embedded: 'square-wrapped drawing below the splice after a page break', drawing: 'suffix', wrap: 'below', publishesTail: true },
+        { embedded: 'top-and-bottom wrapped drawing below the splice', drawing: 'suffix', wrap: 'below', wrapLayout: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM, publishesTail: true },
+        { embedded: 'square-wrapped drawing whose text distance reaches the retained lines', drawing: 'suffix', wrap: 'crossing', publishesTail: false },
         { embedded: 'progressively published drawing interrupted by a remote edit', drawing: 'suffix', publishesTail: true, interrupt: true },
         { embedded: 'margin-relative prefix drawing after a page break', drawing: 'prefix', publishesTail: true },
         { embedded: 'clipped prefix column group', columns: 'clipped', publishesTail: true },
         { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
         { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
         { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
-    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt }) => {
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout }) => {
         mockWorkerCanvas();
         const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
         const T = DataStreamTreeTokenType;
@@ -2090,17 +2093,27 @@ describe('worker document layout session', () => {
             }
         } else {
             snapshot.body!.customBlocks = [{ startIndex: content.indexOf(T.CUSTOM_BLOCK), blockId: drawingId }];
+            let layoutType = PositionedObjectLayoutType.WRAP_NONE;
+            if (wrap) {
+                layoutType = wrapLayout ?? PositionedObjectLayoutType.WRAP_SQUARE;
+            } else if (drawing === 'inline') {
+                layoutType = PositionedObjectLayoutType.INLINE;
+            }
             snapshot.drawings = {
                 [drawingId]: {
                     drawingId,
                     drawingType: DrawingTypeEnum.DRAWING_BLOCK,
                     unitId: snapshot.id,
                     subUnitId: snapshot.id,
-                    layoutType: drawing === 'inline' ? PositionedObjectLayoutType.INLINE : PositionedObjectLayoutType.WRAP_NONE,
+                    layoutType,
+                    ...(wrap === 'crossing' ? { distT: 1_200 } : {}),
                     docTransform: {
                         angle: drawing === 'rotated' ? 90 : 0,
                         positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
-                        positionV: { relativeFrom: afterPageBreak ? ObjectRelativeFromV.MARGIN : ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                        positionV: {
+                            relativeFrom: afterPageBreak && !wrap ? ObjectRelativeFromV.MARGIN : ObjectRelativeFromV.PARAGRAPH,
+                            posOffset: wrap ? 300 : 0,
+                        },
                         size: { width: drawing === 'rotated' ? 5_000 : 24, height: 14 },
                     },
                 },
@@ -2179,6 +2192,7 @@ describe('worker document layout session', () => {
             let intermediateCount = 0;
             let publishedTail = false;
             let publishedDrawingWithAnchor = false;
+            let checkedWrapBoundary = false;
             let publishedLaterGroup = false;
             let stoppedBeforeCompletion = false;
             for (let step = 0; step < 180; step++) {
@@ -2193,10 +2207,18 @@ describe('worker document layout session', () => {
                         publishedTail ||= isOffsetVisible(tailOffset);
                         expect(normalizeSkeleton(visibleLines().slice(0, protectedLines.length))).toEqual(protectedGeometry);
                         if (drawing === 'suffix') {
+                            const workerDrawing = result.publication.block.skeDrawings.find(([id]) => id === drawingId)?.[1];
+                            if (wrap && workerDrawing != null && !checkedWrapBoundary) {
+                                const { flow } = result.publication.block;
+                                const first = flow.lines.find((line) => line.st > protectedEnd)!;
+                                const spliceTop = flow.section.top + first.top;
+                                expect(workerDrawing.aTop).toBeGreaterThan(spliceTop);
+                                expect(workerDrawing.aTop - (snapshot.drawings?.[drawingId].distT ?? 0) > spliceTop).toBe(wrap === 'below');
+                                checkedWrapBoundary = true;
+                            }
                             const drawingGeometry = visiblePage().skeDrawings.get(drawingId);
                             expect(drawingGeometry != null).toBe(isOffsetVisible(drawingOffset));
                             if (drawingGeometry != null) {
-                                const workerDrawing = result.publication.block.skeDrawings.find(([id]) => id === drawingId)?.[1];
                                 expect(workerDrawing).toBeDefined();
                                 expect(drawingGeometry.aTop).toBe(workerDrawing?.aTop);
                                 publishedDrawingWithAnchor = true;
@@ -2223,7 +2245,10 @@ describe('worker document layout session', () => {
             expect(intermediateCount).toBeGreaterThan(1);
             expect(publishedTail).toBe(publishesTail);
             if (drawing === 'suffix') {
-                expect(publishedDrawingWithAnchor).toBe(true);
+                expect(publishedDrawingWithAnchor).toBe(publishesTail);
+            }
+            if (wrap) {
+                expect(checkedWrapBoundary).toBe(true);
             }
             if (laterColumns) {
                 expect(publishedLaterGroup).toBe(true);

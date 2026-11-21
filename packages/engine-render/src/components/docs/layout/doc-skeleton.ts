@@ -159,6 +159,25 @@ function getFlowSuffixTop(page: IDocumentSkeletonPage, sectionIndex: number, col
     return top;
 }
 
+function getFlowPrefixBottom(page: IDocumentSkeletonPage, sectionIndex: number, columnIndex: number, lineIndex: number): number {
+    let bottom = 0;
+    for (let index = 0; index < sectionIndex; index++) {
+        const section = page.sections[index];
+        bottom = Math.max(bottom, section.top + section.height);
+    }
+    const section = page.sections[sectionIndex];
+    // Earlier columns are retained in full, and may end below the splice.
+    for (let index = 0; index <= columnIndex; index++) {
+        const lines = section.columns[index].lines;
+        const last = lines[(index === columnIndex ? lineIndex : lines.length) - 1];
+        if (last != null) {
+            const margin = Math.max(0, last.marginTop, last.marginTop + last.paddingTop);
+            bottom = Math.max(bottom, section.top + last.top + last.lineHeight + margin);
+        }
+    }
+    return bottom;
+}
+
 function indexDrawingAnchorOffsets(body: IDocumentBody | undefined): Map<string, number | undefined> {
     const offsets = new Map<string, number | undefined>();
     if (body != null) {
@@ -210,16 +229,19 @@ function getUnclippedColumnGroupBottom(group: IDocumentSkeletonColumnGroup, page
     return bottom;
 }
 
-function getDrawingBottom(drawing: IDocumentSkeletonDrawing): number {
+function getDrawingVerticalBounds(drawing: IDocumentSkeletonDrawing): { top: number; bottom: number } | null {
     const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
     // Layout bounds do not cover transforms or child overflow for these objects.
     if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
         drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
-        return Number.POSITIVE_INFINITY;
+        return null;
     }
     const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
-    const bottomPadding = Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
-    return (bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding;
+    const boxTop = bounds.top ?? aTop;
+    const top = boxTop - Math.max(0, drawingOrigin.effectExtent?.top ?? 0) - Math.max(0, drawingOrigin.distT ?? 0);
+    const bottom = boxTop + (bounds.height ?? height) +
+        Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
+    return Number.isFinite(top) && Number.isFinite(bottom) ? { top, bottom } : null;
 }
 
 function mergeForegroundObjects<T>(
@@ -267,7 +289,8 @@ function mergeProtectedForegroundGeometry(
     workerPage: IDocumentSkeletonPage,
     startOffset: number,
     startTop: number,
-    drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
+    drawingAnchorOffsets: ReadonlyMap<string, number | undefined>,
+    getRetainedBottom: () => number
 ): Pick<IDocumentSkeletonPage, 'skeTables' | 'skeColumnGroups' | 'skeDrawings'> | null {
     const skeTables = mergeForegroundObjects(page.skeTables, workerPage.skeTables, (table) => {
         if (table.st >= startOffset) {
@@ -290,6 +313,7 @@ function mergeProtectedForegroundGeometry(
         }
         return false;
     });
+    let retainedBottom: number | undefined;
     const skeDrawings = mergeForegroundObjects(page.skeDrawings, workerPage.skeDrawings, (drawing, id) => {
         // Anchor offsets determine ownership. After an explicit page break the
         // drawing's lineTop and blockAnchorTop are still fragment-local.
@@ -298,12 +322,24 @@ function mergeProtectedForegroundGeometry(
             return null;
         }
         if (anchorOffset >= startOffset) {
-            // A non-wrapping float can paint above its anchor without changing the
-            // retained lines. Wrapping drawings may have reflowed the retained side.
             const layout = drawing.drawingOrigin.layoutType;
-            return layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE ? true : null;
+            if (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE) {
+                return true;
+            }
+            if (layout === PositionedObjectLayoutType.WRAP_SQUARE || layout === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
+                // Match the rectangular wrap bands used by line layout, allowing
+                // for rotation, effect extents and the distance from text.
+                const bounds = getDrawingVerticalBounds(drawing);
+                if (bounds == null) {
+                    return null;
+                }
+                retainedBottom ??= getRetainedBottom();
+                return bounds.top > retainedBottom ? true : null;
+            }
+            return null;
         }
-        return getDrawingBottom(drawing) < startTop ? false : null;
+        const bounds = getDrawingVerticalBounds(drawing);
+        return bounds != null && bounds.bottom < startTop ? false : null;
     });
     return skeTables == null || skeColumnGroups == null || skeDrawings == null
         ? null
@@ -3407,7 +3443,10 @@ export class DocumentSkeleton extends Skeleton {
         if (!Number.isFinite(top)) {
             return null;
         }
-        const foregroundGeometry = mergeProtectedForegroundGeometry(page, workerPage, start, top, drawingAnchorOffsets);
+        const foregroundGeometry = mergeProtectedForegroundGeometry(page, workerPage, start, top, drawingAnchorOffsets, () => Math.max(
+            getFlowPrefixBottom(page, flow.sectionIndex, flow.columnIndex, lineIndex),
+            getFlowPrefixBottom(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
+        ));
         if (foregroundGeometry == null) {
             return null;
         }

@@ -40,7 +40,7 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
             {colorPresets.map((row) => (
                 <div
                     key={row[0]}
-                    className="univer-grid univer-grid-flow-col univer-items-center univer-justify-between"
+                    className="univer-flex univer-min-w-0 univer-items-center univer-justify-between"
                 >
                     {row.map((color) => (
                         <button
@@ -50,9 +50,9 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
                             aria-pressed={color.toUpperCase() === currentColor.toUpperCase()}
                             title={color}
                             className={clsx(`
-                              univer-box-border univer-flex univer-size-8 univer-cursor-pointer univer-items-center
-                              univer-justify-center univer-rounded-md univer-border-0 univer-bg-transparent univer-p-1
-                              univer-transition-colors
+                              univer-box-border univer-flex univer-size-8 univer-min-w-0 univer-cursor-pointer
+                              univer-items-center univer-justify-center univer-rounded-md univer-border-0
+                              univer-bg-transparent univer-p-0 univer-transition-colors
                               hover:univer-bg-gray-100
                               focus-visible:univer-outline focus-visible:univer-outline-2
                               focus-visible:univer-outline-primary-600

@@ -1530,6 +1530,76 @@ describe('docs layout tools extra', () => {
         }
     });
 
+    it('keeps resolved paragraph styles isolated between paragraphs and documents', () => {
+        clearFontCreateConfigCache();
+        onTestFinished(clearFontCreateConfigCache);
+        const paragraphs = [
+            { startIndex: 1, paragraphId: 'first', paragraphStyle: { textStyle: { fs: 12 } } },
+            { startIndex: 3, paragraphId: 'second', paragraphStyle: { textStyle: { fs: 18 } } },
+        ];
+        const first = createParagraphLayoutTestBed('A\rB', { body: { paragraphs } });
+        const nodes = first.viewModel.getChildren()[0].children;
+        const second = createParagraphLayoutTestBed('A', {
+            body: { paragraphs: [{ ...paragraphs[0], paragraphStyle: { textStyle: { fs: 24 } } }] },
+        });
+        expect(getFontCreateConfig(0, first.viewModel, nodes[0], first.sectionBreakConfig, paragraphs[0]).textStyle.fs).toBe(12);
+        expect(getFontCreateConfig(0, first.viewModel, nodes[1], first.sectionBreakConfig, paragraphs[1]).textStyle.fs).toBe(18);
+        expect(getFontCreateConfig(0, second.viewModel, second.paragraphNode, second.sectionBreakConfig, { ...paragraphs[0], paragraphStyle: { textStyle: { fs: 24 } } }).textStyle.fs).toBe(24);
+    });
+
+    it('does not expose cached paragraph style objects through different font runs', () => {
+        clearFontCreateConfigCache();
+        onTestFinished(clearFontCreateConfigCache);
+        const paragraph = { startIndex: 5, paragraphId: 'isolated', paragraphStyle: { textStyle: { fs: 14, cl: { rgb: '#123456' } } } };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello', {
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: {} }, { st: 1, ed: 5, ts: {} }] },
+        });
+        const before = JSON.stringify(dataModel.getSnapshot());
+        const first = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        first.textStyle.cl!.rgb = '#abcdef';
+        first.textStyle.fs = 99;
+        const second = getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(second.textStyle).toMatchObject({ fs: 14, cl: { rgb: '#123456' } });
+        expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+    });
+
+    it('resolves a paragraph once per pass and refreshes defaults, named styles and lists on the next pass', () => {
+        clearFontCreateConfigCache();
+        onTestFinished(clearFontCreateConfigCache);
+        const paragraph = { startIndex: 5, paragraphId: 'passes', styleId: 'named' };
+        const { dataModel, viewModel, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello', {
+            documentStyle: { textStyle: { fs: 11 } },
+            styles: { named: { name: 'Named', type: DocStyleType.paragraph, textStyle: { cl: { rgb: '#123456' } }, bullet: { listId: 'counter' } } },
+            lists: { custom: { counterIds: ['counter'], nestingLevel: [{ paragraphProperties: { textStyle: { bl: 1 } } }] } },
+            body: { paragraphs: [paragraph], textRuns: [{ st: 0, ed: 1, ts: {} }, { st: 1, ed: 5, ts: {} }] },
+        });
+        const style = vi.fn(() => ({}));
+        Object.defineProperty(paragraph, 'paragraphStyle', { get: style });
+        const first = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        getFontCreateConfig(1, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(first.textStyle).toMatchObject({ fs: 11, cl: { rgb: '#123456' }, bl: 1 });
+        expect(style).toHaveBeenCalledTimes(1);
+
+        dataModel.documentStyle.textStyle!.fs = 17;
+        dataModel.getSnapshot().styles!.named.textStyle!.cl!.rgb = '#654321';
+        const list = dataModel.getSnapshot().lists!.custom;
+        list.counterIds = [];
+        dataModel.getSnapshot().lists!.replacement = {
+            ...list,
+            counterIds: ['counter'],
+            nestingLevel: [{ ...list.nestingLevel[0], paragraphProperties: { textStyle: { bl: 0 } } }],
+        };
+        clearFontCreateConfigCache();
+        const next = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        expect(next.textStyle).toMatchObject({ fs: 17, cl: { rgb: '#654321' }, bl: 0 });
+        expect(style).toHaveBeenCalledTimes(2);
+
+        style.mockReturnValue({ textStyle: { fs: 23 } });
+        clearFontCreateConfigCache();
+        expect(getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph).textStyle.fs).toBe(23);
+        expect(style).toHaveBeenCalledTimes(3);
+    });
+
     it.each([10, 18])('uses current named paragraph and character styles in the font path (%s)', (size) => {
         clearFontCreateConfigCache();
         const paragraph = { startIndex: 5, paragraphId: 'named-font', styleId: 'quote', paragraphStyle: {} };

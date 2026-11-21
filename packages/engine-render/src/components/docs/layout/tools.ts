@@ -56,6 +56,7 @@ import {
     resolveSectionHeaderFooterReferences,
     SectionType,
     SpacingRule,
+    Tools,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -1754,6 +1755,8 @@ interface IFontCreateConfigCache {
     paragraphNode: DataStreamTreeNode;
     paragraph: IDocumentLayoutParagraph;
     sectionBreakConfig: ISectionBreakConfig;
+    bullet: ReturnType<typeof resolveDocumentParagraphBullet>;
+    paragraphStyle: ReturnType<typeof resolveDocumentParagraphStyle>;
 }
 
 let fontCreateConfigCache = new WeakMap<DocumentViewModel, IFontCreateConfigCache>();
@@ -1845,10 +1848,21 @@ export function getFontCreateConfig(
         renderConfig = {},
     } = sectionBreakConfig;
     const snapshot = viewModel.getSnapshot?.();
-    const bullet = resolveDocumentParagraphBullet(snapshot ?? {}, paragraph);
-    const paragraphStyle = snapshot
-        ? resolveDocumentParagraphStyle(snapshot.documentStyle, paragraph.paragraphStyle, { styles: snapshot.styles, paragraphStyleId: paragraph.styleId })
-        : paragraph.paragraphStyle ?? {};
+    let context = fontCreateConfigCache.get(viewModel);
+    if (context == null || context.paragraphNode !== paragraphNode ||
+        context.paragraph !== paragraph || context.sectionBreakConfig !== sectionBreakConfig) {
+        context = {
+            configs: new ObjectMatrix(),
+            paragraphNode,
+            paragraph,
+            sectionBreakConfig,
+            bullet: resolveDocumentParagraphBullet(snapshot ?? {}, paragraph),
+            paragraphStyle: snapshot
+                ? resolveDocumentParagraphStyle(snapshot.documentStyle, paragraph.paragraphStyle, { styles: snapshot.styles, paragraphStyleId: paragraph.styleId })
+                : paragraph.paragraphStyle ?? {},
+        };
+        fontCreateConfigCache.set(viewModel, context);
+    }
     const { isRenderStyle } = renderConfig;
     const startIndex = paragraphNode.contentStartIndex;
     const originTextRun = viewModel.getTextRun(index + startIndex);
@@ -1870,20 +1884,15 @@ export function getFontCreateConfig(
         !ignoreCharacterStyle && index + startIndex !== paragraph.startIndex;
     const { st, ed } = textRun;
     let textStyle: IDocumentLayoutTextStyle = textRun.ts ?? {};
-    let context = fontCreateConfigCache.get(viewModel);
-    if (context == null || context.paragraphNode !== paragraphNode ||
-        context.paragraph !== paragraph || context.sectionBreakConfig !== sectionBreakConfig) {
-        context = { configs: new ObjectMatrix(), paragraphNode, paragraph, sectionBreakConfig };
-        fontCreateConfigCache.set(viewModel, context);
-    }
     const cache = context.configs.getValue(st, ed);
     // A symbol font applies only at its encoded character, even inside a shared run.
     if (canCache && cache && !cache.textStyle.symbol) {
         return cache;
     }
 
+    const paragraphStyle = Tools.deepClone(context.paragraphStyle);
     const { snapToGrid = BooleanNumber.TRUE, namedStyleType, textStyle: paragraphTextStyle } = paragraphStyle;
-    const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
+    const bulletTextStyle = context.bullet ? Tools.deepClone(getBulletParagraphTextStyle(context.bullet, viewModel)) : null;
     // Apply named style if it exists
     // A named Word style owns its formatting; its outline role does not select an SDK preset.
     const namedStyle = namedStyleType && paragraph.styleId == null ? NAMED_STYLE_MAP[namedStyleType] : null;

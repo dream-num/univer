@@ -69,6 +69,7 @@ export class Mdeterm extends BaseFunction {
 
         const result = calculateMdeterm(matrix);
 
-        return NumberValueObject.create(result);
+        // Excel worksheet results do not support subnormal numbers.
+        return NumberValueObject.create(result !== 0 && Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

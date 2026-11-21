@@ -82,7 +82,7 @@ export function calculateMdeterm(matrix: number[][]): number {
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
     }
 
-    const { rowSwap, smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix);
+    const { rowSwap, smallPivotDetected, uncertainPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix, true, 0, true);
 
     if (smallPivotDetected) {
         return 0; // Matrix is irreversible
@@ -94,7 +94,80 @@ export function calculateMdeterm(matrix: number[][]): number {
         det *= luMatrix[i][i];
     }
 
-    return det === 0 ? 0 : det; // deal with -0 case
+    // Exact rank cannot change a zero product. Normalize -0 without that pass.
+    if (det === 0) {
+        return 0;
+    }
+
+    // A small elimination residual may be a rounded zero or a genuine pivot.
+    // Only an exact rank check may turn that uncertainty into a zero result.
+    if (uncertainPivotDetected && isExactlySingular(matrix)) {
+        return 0;
+    }
+
+    return det;
+}
+
+function decomposeBinary64Row(row: number[]) {
+    const view = new DataView(new ArrayBuffer(8));
+    return row.map((value) => {
+        if (value === 0) {
+            return { significand: 0n, exponent: 0 };
+        }
+        view.setFloat64(0, value);
+        const bits = view.getBigUint64(0);
+        const encodedExponent = Number((bits >> 52n) & 0x7FFn);
+        let significand = (bits & ((1n << 52n) - 1n)) + (encodedExponent === 0 ? 0n : 1n << 52n);
+        let exponent = encodedExponent === 0 ? -1074 : encodedExponent - 1075;
+        while ((significand & 1n) === 0n) {
+            significand >>= 1n;
+            exponent++;
+        }
+        return { significand: bits >> 63n ? -significand : significand, exponent };
+    });
+}
+
+function scaleMatrixToIntegers(matrix: number[][]): bigint[][] {
+    const parts = matrix.map(decomposeBinary64Row);
+    const rowExponents = parts.map((row) => row.reduce((minimum, { significand, exponent }) =>
+        significand === 0n ? minimum : Math.min(minimum, exponent), Infinity));
+    const columnExponents = matrix[0].map((_, column) => parts.reduce((minimum, row, index) =>
+        row[column].significand === 0n ? minimum : Math.min(minimum, row[column].exponent - rowExponents[index]), Infinity));
+    return parts.map((row, index) => row.map(({ significand, exponent }, column) =>
+        significand === 0n ? 0n : significand << BigInt(exponent - rowExponents[index] - columnExponents[column])));
+}
+
+function isExactlySingular(matrix: number[][]): boolean {
+    if (!matrix.every((row) => row.every(Number.isFinite))) {
+        return false;
+    }
+    // Row and column scaling by powers of two preserves rank and represents
+    // each binary64 value exactly without retaining common large factors.
+    // Bareiss elimination keeps every division exact.
+    const integers = scaleMatrixToIntegers(matrix);
+    const size = integers.length;
+    let previousPivot = 1n;
+    for (let column = 0; column < size - 1; column++) {
+        let pivotRow = column;
+        while (pivotRow < size && integers[pivotRow][column] === 0n) {
+            pivotRow++;
+        }
+        if (pivotRow === size) {
+            return true;
+        }
+        if (pivotRow !== column) {
+            [integers[column], integers[pivotRow]] = [integers[pivotRow], integers[column]];
+        }
+        const pivot = integers[column][column];
+        for (let row = column + 1; row < size; row++) {
+            for (let next = column + 1; next < size; next++) {
+                integers[row][next] = (integers[row][next] * pivot - integers[row][column] * integers[column][next]) / previousPivot;
+            }
+            integers[row][column] = 0n;
+        }
+        previousPivot = pivot;
+    }
+    return integers[size - 1][size - 1] === 0n;
 }
 
 export function calculateMinverse(matrix: number[][]): number[][] | null {
@@ -127,14 +200,26 @@ export function inverseMatrixByLUD(matrix: number[][]) {
     return transformMatrix(luMatrix, permutation);
 }
 
-function performLUDecomposition(matrix: number[][], transpose: boolean = true, minimumPivot: number = 1e-11) {
+function hasUncertainPivot(matrix: number[][], luMatrix: number[][], column: number, columnMagnitude: number): boolean {
+    let magnitude = Math.abs(matrix[column][column]);
+    for (let k = 0; k < column; k++) {
+        magnitude += Math.abs(luMatrix[column][k] * luMatrix[k][column]);
+    }
+    return Math.abs(luMatrix[column][column]) <= Math.max(magnitude, columnMagnitude) * Number.EPSILON * matrix.length;
+}
+
+function performLUDecomposition(matrix: number[][], transpose: boolean = true, minimumPivot: number = 1e-11, checkCancellation: boolean = false) {
     const decomposedMatrix = transpose ? matrixTranspose(matrix) : matrix.map((row) => [...row]);
     const numRows = decomposedMatrix.length;
     const numCols = decomposedMatrix[0].length;
     let isRowSwap = true;
     let smallPivotDetected = false;
+    let uncertainPivotDetected = false;
     const luMatrix = createMatrix(numRows, numCols, 0);
     const permutation = new Array(numCols).fill(0).map((_, index) => index);
+    const columnMagnitudes = checkCancellation
+        ? decomposedMatrix[0].map((_, column) => decomposedMatrix.reduce((scale, row) => Math.max(scale, Math.abs(row[column])), 0))
+        : [];
 
     for (let c = 0; c < numCols; c++) {
         for (let i = 0; i < c; i++) {
@@ -183,6 +268,8 @@ function performLUDecomposition(matrix: number[][], transpose: boolean = true, m
 
         const pivotElement = luMatrix[c][c];
 
+        uncertainPivotDetected ||= checkCancellation && hasUncertainPivot(decomposedMatrix, luMatrix, c, columnMagnitudes[c]);
+
         for (let r = c + 1; r < numRows; r++) {
             luMatrix[r][c] /= pivotElement;
         }
@@ -191,6 +278,7 @@ function performLUDecomposition(matrix: number[][], transpose: boolean = true, m
     return {
         rowSwap: isRowSwap,
         smallPivotDetected,
+        uncertainPivotDetected,
         luMatrix,
         permutation,
     };

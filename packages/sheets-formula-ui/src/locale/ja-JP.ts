@@ -35,6 +35,10 @@ const locale: typeof enUS = {
 
         shortcut: {
             'quick-sum': 'クイック合計',
+            'toggle-show-formulas': '数式の表示',
+        },
+        showFormulas: {
+            tooltip: '数式の表示',
         },
 
         insert: {

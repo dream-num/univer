@@ -25,6 +25,8 @@ import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
@@ -424,5 +426,35 @@ describe('Test aggregate', () => {
             const result = calculate('=AGGREGATE(19,,A1:B2,2)');
             expect(result).toBe(2.5);
         });
+    });
+});
+
+function createArray(values: number[]) {
+    return ArrayValueObject.create({
+        calculateValueList: transformToValueObject([values]),
+        rowCount: 1,
+        columnCount: values.length,
+        unitId: '',
+        sheetId: '',
+        row: 0,
+        column: 0,
+    });
+}
+
+describe('Aggregate finite percentile interpolation', () => {
+    it.each([
+        { name: 'PERCENTILE.INC', parameter: 0.5, aggregate: 16 },
+        { name: 'PERCENTILE.EXC', parameter: 0.5, aggregate: 18 },
+        { name: 'QUARTILE.INC', parameter: 2, aggregate: 17 },
+        { name: 'QUARTILE.EXC', parameter: 2, aggregate: 19 },
+    ])('preserves finite results through $name', ({ parameter, aggregate }) => {
+        const aggregateFunction = new Aggregate(FUNCTION_NAMES_MATH.AGGREGATE);
+        const result = aggregateFunction.calculate(
+            NumberValueObject.create(aggregate),
+            NumberValueObject.create(6),
+            createArray([-1e308, 1e308]),
+            NumberValueObject.create(parameter)
+        );
+        expect(result.getValue()).toBe(0);
     });
 });

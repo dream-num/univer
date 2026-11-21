@@ -39,6 +39,30 @@ describe('Test fisherinv function', () => {
             expect(getObjectValue(result)).toBe(1);
         });
 
+        it.each([1e-12, -1e-12, 2 ** -53, -(2 ** -54)])('Preserves nonzero small input %s', (value) => {
+            const result = testFunction.calculate(NumberValueObject.create(value));
+            expect(getObjectValue(result)).toBe(value);
+        });
+
+        it.each([1e-20, -1e-20, 2 ** -55, -(2 ** -55)])('Preserves rounding to zero for input %s', (value) => {
+            const result = testFunction.calculate(NumberValueObject.create(value));
+            expect(getObjectValue(result)).toBe(0);
+        });
+
+        it('Preserves zero rounding and nonzero values in arrays and numeric strings', () => {
+            const values = [1e-20, '-1e-20', 1e-12, '-1e-12', 1000, -1000];
+            const input = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([values]),
+                rowCount: 1,
+                columnCount: values.length,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            expect(getObjectValue(testFunction.calculate(input))).toStrictEqual([[0, 0, 1e-12, -1e-12, 1, -1]]);
+        });
+
         it('Value is number string', () => {
             const x = StringValueObject.create('0.5');
             const result = testFunction.calculate(x);

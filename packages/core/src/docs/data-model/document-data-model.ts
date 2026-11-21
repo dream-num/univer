@@ -135,6 +135,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     protected snapshot: IDocumentData;
     private _mutationRevision = 0;
+    private _layoutMutationRevision = 0;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();
@@ -157,7 +158,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     setName(name: string) {
         this.snapshot.title = name;
-        this._markMutation();
+        this._markMutation(false);
         this._name$.next(name);
     }
 
@@ -310,12 +311,12 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         } else {
             this.snapshot.settings.zoomRatio = zoomRatio;
         }
-        this._markMutation();
+        this._markMutation(false);
     }
 
     setDisabled(disabled: boolean) {
         this.snapshot.disabled = disabled;
-        this._markMutation();
+        this._markMutation(false);
     }
 
     getDisabled() {
@@ -330,8 +331,16 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         return this._mutationRevision;
     }
 
-    protected _markMutation(): void {
+    /** Model changes that can invalidate document layout, excluding presentation-only metadata. */
+    getLayoutMutationRevision(): number {
+        return this._layoutMutationRevision;
+    }
+
+    protected _markMutation(layoutRelevant = true): void {
         this._mutationRevision++;
+        if (layoutRelevant) {
+            this._layoutMutationRevision++;
+        }
     }
 }
 

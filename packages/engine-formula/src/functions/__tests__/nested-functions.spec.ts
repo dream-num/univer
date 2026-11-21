@@ -81,6 +81,7 @@ import { Max } from '../statistical/max';
 import { Median } from '../statistical/median';
 import { Min } from '../statistical/min';
 import { Concatenate } from '../text/concatenate';
+import { Euroconvert } from '../text/euroconvert';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
 import { Left } from '../text/left';
 import { Len } from '../text/len';
@@ -670,6 +671,7 @@ describe('Test nested functions', () => {
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
+            testBed.univer.__getInjector().createInstance(Euroconvert, FUNCTION_NAMES_TEXT.EUROCONVERT),
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Sumproduct(FUNCTION_NAMES_MATH.SUMPRODUCT),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
@@ -731,6 +733,10 @@ describe('Test nested functions', () => {
     });
 
     describe('Normal', () => {
+        it('EUROCONVERT writes #VALUE! for a referenced error', () => {
+            expect(calculateByRuntime('=EUROCONVERT(D14,"DEM","EUR")')?.v).toBe(ErrorType.VALUE);
+        });
+
         it('LET combines unique values and counts before descending sort', () => {
             const result = calculate('=LET(u,UNIQUE(data[]),SORT(CHOOSE({1,2},u,COUNTIF(data[],u)),2,-1))');
 

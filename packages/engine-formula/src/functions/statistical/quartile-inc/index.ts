@@ -29,7 +29,12 @@ export class QuartileInc extends BaseFunction {
         const arrayValues = getArrayValuesByAggregateIgnoreOptions(array);
 
         if (quart.isArray()) {
-            const resultArray = (quart as ArrayValueObject).mapValue((quartObject) => this._handleSingleObject(arrayValues, quartObject));
+            let alreadySorted = false;
+            const resultArray = (quart as ArrayValueObject).mapValue((quartObject) => {
+                const result = this._handleSingleObject(arrayValues, quartObject, alreadySorted);
+                alreadySorted ||= result.isNumber();
+                return result;
+            });
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -41,7 +46,7 @@ export class QuartileInc extends BaseFunction {
         return this._handleSingleObject(arrayValues, quart);
     }
 
-    private _handleSingleObject(array: number[] | ErrorValueObject, quart: BaseValueObject): BaseValueObject {
+    private _handleSingleObject(array: number[] | ErrorValueObject, quart: BaseValueObject, alreadySorted = false): BaseValueObject {
         if (!Array.isArray(array)) {
             return array as ErrorValueObject;
         }
@@ -55,6 +60,6 @@ export class QuartileInc extends BaseFunction {
         const [quartObject] = variants as BaseValueObject[];
         const quartValue = Math.floor(+quartObject.getValue());
 
-        return getQuartileIncResult(array, quartValue);
+        return getQuartileIncResult(array, quartValue, alreadySorted);
     }
 }

@@ -123,3 +123,24 @@ describe('Test quartileInc function', () => {
         });
     });
 });
+
+describe('Order statistics with array-valued queries', () => {
+    it('QUARTILE_INC preserves mixed query results and recalculates each input independently', () => {
+        const queries = [-1, ErrorType.NA, 2, 0, 4, 5, 'bad'] as const;
+        const expected = [ErrorType.NUM, ErrorType.NA, 2, -4, 9, ErrorType.NUM, ErrorType.VALUE] as const;
+        const testFunction = new QuartileInc(FUNCTION_NAMES_STATISTICAL.QUARTILE_INC);
+        const source = [[9, null, 'ignored', -4], [2, true, 8, 2]];
+        const queryArray = ArrayValueObject.createByArray([[...queries]]);
+
+        for (const offset of [0, 100]) {
+            const values = source.map((row) => row.map((value) => typeof value === 'number' ? value + offset : value));
+            const array = ArrayValueObject.createByArray(values);
+            const original = getObjectValue(array);
+            const result = testFunction.calculate(array, queryArray);
+
+            expect(getObjectValue(result)).toStrictEqual([expected.map((value) => typeof value === 'number' ? value + offset : value)]);
+            expect(getObjectValue(array)).toStrictEqual(original);
+            expect(getObjectValue(queryArray)).toStrictEqual([[...queries]]);
+        }
+    });
+});

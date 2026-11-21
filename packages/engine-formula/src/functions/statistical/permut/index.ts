@@ -72,10 +72,9 @@ export class Permut extends BaseFunction {
 
             for (let i = numberValue - numberChosenValue + 1; i <= numberValue; i++) {
                 result *= i;
-            }
-
-            if (!Number.isFinite(result)) {
-                return ErrorValueObject.create(ErrorType.NUM);
+                if (!Number.isFinite(result)) {
+                    return ErrorValueObject.create(ErrorType.NUM);
+                }
             }
 
             return NumberValueObject.create(result);

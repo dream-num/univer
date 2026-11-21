@@ -27,6 +27,20 @@ describe('Test permut function', () => {
     const testFunction = new Permut(FUNCTION_NAMES_STATISTICAL.PERMUT);
 
     describe('Permut', () => {
+        it('Preserves the finite factorial boundary', () => {
+            const finite = testFunction.calculate(NumberValueObject.create(170), NumberValueObject.create(170));
+            expect(Number(finite.getValue()) / 7.257415615307999e306).toBeCloseTo(1, 14);
+            const overflow = testFunction.calculate(NumberValueObject.create(171), NumberValueObject.create(171));
+            expect(overflow.getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Handles large selections and empty permutations', () => {
+            const number = NumberValueObject.create(2_147_483_646);
+            expect(testFunction.calculate(number, number).getValue()).toBe(ErrorType.NUM);
+            expect(testFunction.calculate(number, NumberValueObject.create(0)).getValue()).toBe(1);
+            expect(testFunction.calculate(number, NumberValueObject.create(1)).getValue()).toBe(2_147_483_646);
+        });
+
         it('Value is normal number', () => {
             const number = NumberValueObject.create(8);
             const numberChosen = NumberValueObject.create(2);

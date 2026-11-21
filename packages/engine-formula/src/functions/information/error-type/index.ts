@@ -15,7 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorType as ErrorTypeBase } from '../../../basics/error-type';
+import { ERROR_TYPE_NUMBER, ErrorType as ErrorTypeBase } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -34,8 +34,7 @@ export class ErrorType extends BaseFunction {
     }
 
     private _handleSingleObject(errorVal: BaseValueObject) {
-        const errorValValue = errorVal.getValue();
-        const result = this._errorTypeValueMap.get(errorValValue as ErrorTypeBase);
+        const result = errorVal.isError() ? ERROR_TYPE_NUMBER.get(errorVal.getValue() as ErrorTypeBase) : undefined;
 
         if (result) {
             return NumberValueObject.create(result);
@@ -43,16 +42,4 @@ export class ErrorType extends BaseFunction {
 
         return ErrorValueObject.create(ErrorTypeBase.NA);
     }
-
-    private _errorTypeValueMap = new Map([
-        [ErrorTypeBase.NULL, 1],
-        [ErrorTypeBase.DIV_BY_ZERO, 2],
-        [ErrorTypeBase.VALUE, 3],
-        [ErrorTypeBase.REF, 4],
-        [ErrorTypeBase.NAME, 5],
-        [ErrorTypeBase.NUM, 6],
-        [ErrorTypeBase.NA, 7],
-        [ErrorTypeBase.CONNECT, 8],
-        [ErrorTypeBase.CALC, 14],
-    ]);
 }

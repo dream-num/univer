@@ -56,7 +56,7 @@ export class Sum extends BaseFunction {
         return accumulatorAll;
     }
 
-    private _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
+    protected _legacyImplicitDerivedArray(variant: BaseValueObject): BaseValueObject {
         if (!variant.isArray()) {
             return variant;
         }

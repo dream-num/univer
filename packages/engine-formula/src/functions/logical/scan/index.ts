@@ -25,6 +25,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Scan extends BaseFunction {
+    protected readonly excelCompatibility: boolean = false;
+
     override minParams = 3;
 
     override maxParams = 3;
@@ -52,7 +54,7 @@ export class Scan extends BaseFunction {
 
         _array = _array as BaseValueObject;
 
-        if (_initialValue.isError()) {
+        if (!this.excelCompatibility && _initialValue.isError()) {
             return _initialValue;
         }
 
@@ -68,7 +70,7 @@ export class Scan extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (_initialValue.isArray()) {
+        if (!this.excelCompatibility && _initialValue.isArray()) {
             const rowCount = (_initialValue as ArrayValueObject).getRowCount();
             const columnCount = (_initialValue as ArrayValueObject).getColumnCount();
 
@@ -105,14 +107,14 @@ export class Scan extends BaseFunction {
             const row: BaseValueObject[] = [];
 
             for (let c = 0; c < columnCount; c++) {
-                if (accumulator.isError()) {
+                if (!this.excelCompatibility && accumulator.isError()) {
                     row.push(accumulator as BaseValueObject);
                     continue;
                 }
 
                 let valueObject: FunctionVariantType = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
 
-                if (valueObject.isError()) {
+                if (!this.excelCompatibility && valueObject.isError()) {
                     accumulator = valueObject;
                     row.push(valueObject);
                     continue;
@@ -155,7 +157,7 @@ export class Scan extends BaseFunction {
             resultArray.push(row);
         }
 
-        if (rowCount === 1 && columnCount === 1) {
+        if (!this.excelCompatibility && rowCount === 1 && columnCount === 1) {
             return resultArray[0][0];
         }
 

@@ -20,13 +20,17 @@ import { BooleanValue } from '../../../basics/common';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 3;
+
+    getOmittedBranchResult(): BaseValueObject {
+        return NullValueObject.create();
+    }
 
     override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
         let _logicalTest = logicalTest;
@@ -77,7 +81,8 @@ export class If extends BaseFunction {
             const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex) as BaseValueObject;
             const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            return this._handleSingleObject(logicalTestValue, valueIfTrueValue, valueIfFalseValue, false);
+            const value = this._handleSingleObject(logicalTestValue, valueIfTrueValue, valueIfFalseValue, false);
+            return value.isNull() ? NumberValueObject.create(0) : value;
         });
     }
 
@@ -101,7 +106,8 @@ export class If extends BaseFunction {
     }
 
     private _coerceSelectedValue(value: BaseValueObject): BaseValueObject {
-        return value.isNull() ? NumberValueObject.create(0) : value;
+        if (value instanceof NullValueObject && value.isOmitted()) return this.getOmittedBranchResult();
+        return value.isNull() ? NullValueObject.create() : value;
     }
 
     private _coerceLogicalTest(logicalTest: BaseValueObject): BaseValueObject {
@@ -183,6 +189,6 @@ export class If extends BaseFunction {
     }
 
     private _isCurrentArrayFormula(): boolean {
-        return this.currentFormulaRowCount > 1 || this.currentFormulaColumnCount > 1;
+        return this.currentArrayFormula || this.currentFormulaRowCount > 1 || this.currentFormulaColumnCount > 1;
     }
 }

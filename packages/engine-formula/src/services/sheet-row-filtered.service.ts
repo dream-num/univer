@@ -17,7 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
-type CallbackFunction = (unitId: string, subUnitId: string, row: number) => boolean;
+type CallbackFunction = (unitId: string, subUnitId: string, row: number, forSubtotal?: boolean) => boolean;
 
 /**
  * The service that gets the row filter status
@@ -25,7 +25,7 @@ type CallbackFunction = (unitId: string, subUnitId: string, row: number) => bool
 export interface ISheetRowFilteredService {
     register(callback: CallbackFunction): IDisposable;
 
-    getRowFiltered(unitId: string, subUnitId: string, row: number): boolean;
+    getRowFiltered(unitId: string, subUnitId: string, row: number, forSubtotal?: boolean): boolean;
 }
 
 export class SheetRowFilteredService extends Disposable implements ISheetRowFilteredService {
@@ -36,9 +36,9 @@ export class SheetRowFilteredService extends Disposable implements ISheetRowFilt
         return toDisposable(() => this._getRowFilteredCallbacks.delete(callback));
     }
 
-    getRowFiltered(unitId: string, subUnitId: string, row: number): boolean {
+    getRowFiltered(unitId: string, subUnitId: string, row: number, forSubtotal?: boolean): boolean {
         for (const callback of this._getRowFilteredCallbacks) {
-            if (callback(unitId, subUnitId, row)) {
+            if (callback(unitId, subUnitId, row, forSubtotal)) {
                 return true;
             }
         }

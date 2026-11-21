@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -26,9 +28,20 @@ export class Sumproduct extends BaseFunction {
 
     override maxParams = 255;
 
+    override needsReferenceObject = true;
+
     override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
-    override calculate(array1: BaseValueObject, ...variants: BaseValueObject[]) {
+    override calculate(primary: FunctionVariantType, ...inputs: FunctionVariantType[]) {
+        const [array1, ...variants] = [primary, ...inputs].map((input) => {
+            if (!input.isReferenceObject()) {
+                return input as BaseValueObject;
+            }
+            if (input instanceof MultiAreaReferenceObject && !input.isArrayOfReferences()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+            return (input as BaseReferenceObject).toArrayValueObject();
+        });
         // 1. Early error from array1
         if (array1.isError()) {
             return array1;

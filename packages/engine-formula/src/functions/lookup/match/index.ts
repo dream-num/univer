@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -27,13 +28,28 @@ export class Match extends BaseFunction {
 
     override maxParams = 3;
 
+    override needsReferenceObject = true;
+
     override lazyIfReferenceArrayArgumentIndexes = [1];
 
     override calculate(
-        lookupValue: BaseValueObject,
-        lookupArray: ArrayValueObject,
-        matchType?: BaseValueObject
+        lookupValueInput: FunctionVariantType,
+        lookupArrayInput: FunctionVariantType,
+        matchTypeInput?: FunctionVariantType
     ) {
+        let lookupValue = lookupValueInput as BaseValueObject;
+        if (lookupValueInput.isReferenceObject()) {
+            const lookupReference = lookupValueInput as BaseReferenceObject;
+            const isSingleCell = !lookupReference.isMultiArea() && lookupReference.getRowCount() === 1 && lookupReference.getColumnCount() === 1;
+            lookupValue = isSingleCell ? lookupReference.getFirstCell() : lookupReference.toArrayValueObject();
+        }
+        const lookupArray = lookupArrayInput.isReferenceObject()
+            ? (lookupArrayInput as BaseReferenceObject).toArrayValueObject()
+            : lookupArrayInput as ArrayValueObject;
+        const matchType = matchTypeInput?.isReferenceObject()
+            ? (matchTypeInput as BaseReferenceObject).toArrayValueObject()
+            : matchTypeInput as BaseValueObject | undefined;
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

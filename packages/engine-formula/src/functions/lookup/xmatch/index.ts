@@ -116,7 +116,11 @@ export class Xmatch extends BaseFunction {
         const matchModeValue = (_matchMode as NumberValueObject).getValue();
         const searchModeValue = (_searchMode as NumberValueObject).getValue();
 
-        if (![-1, 0, 1, 2].includes(matchModeValue) || ![-1, 1, 2].includes(searchModeValue)) {
+        if (![-1, 0, 1, 2].includes(matchModeValue) || ![-2, -1, 1, 2].includes(searchModeValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (matchModeValue === 2 && Math.abs(searchModeValue) === 2) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

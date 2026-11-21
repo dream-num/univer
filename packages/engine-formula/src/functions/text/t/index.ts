@@ -32,7 +32,7 @@ export class T extends BaseFunction {
 
         // If the parameter is a reference object, get the first value from the reference object
         if (value.isReferenceObject()) {
-            _value = (value as BaseReferenceObject).toArrayValueObject().get(0, 0) as BaseValueObject;
+            _value = this._resolveReference(value as BaseReferenceObject);
         }
 
         // If the parameter is an array, return an array result
@@ -41,6 +41,10 @@ export class T extends BaseFunction {
         }
 
         return this._handleSingleObject(_value as BaseValueObject);
+    }
+
+    protected _resolveReference(value: BaseReferenceObject): BaseValueObject {
+        return value.toArrayValueObject().getFirstCell();
     }
 
     private _handleSingleObject(value: BaseValueObject): BaseValueObject {

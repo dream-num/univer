@@ -15,14 +15,16 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { getCompare } from '../../../engine/utils/compare';
+import { createSortCompare } from '../../../engine/utils/sort-compare';
+import { compareSortValues, getSortIndices } from '../../../engine/utils/sort-order';
 import { calculateMaxDimensions } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Sortby extends BaseFunction {
@@ -30,7 +32,11 @@ export class Sortby extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(array: BaseValueObject, ...variants: BaseValueObject[]) {
+    override needsReferenceObject = true;
+
+    override calculate(arrayInput: FunctionVariantType, ...variantInputs: FunctionVariantType[]) {
+        const array = this._resolveReference(arrayInput);
+        const variants = variantInputs.map((value) => this._resolveReference(value));
         // if has byArray1 no sortOrder, sortOrder default 1. but has multiple byArray, sortOrder length must be equal to byArray length
         if (variants.length === 1) {
             variants.push(NumberValueObject.create(1));
@@ -39,6 +45,7 @@ export class Sortby extends BaseFunction {
         const variantsError = this._getVariantsError(array, ...variants);
 
         const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
+        const lifted = variants.some((variant, index) => index % 2 === 1 && variant.isArray());
 
         if (variantsError.isError()) {
             const expandArray = expandArrayValueObject(maxRowLength, maxColumnLength, variantsError);
@@ -55,14 +62,14 @@ export class Sortby extends BaseFunction {
                 return variant;
             }
 
-            const variantArray = expandArrayValueObject(maxRowLength, maxColumnLength, variant, ErrorValueObject.create(ErrorType.NA));
+            const variantArray = expandArrayValueObject(maxRowLength, maxColumnLength, variant.isNull() ? NumberValueObject.create(1) : variant, ErrorValueObject.create(ErrorType.NA));
 
             return variantArray;
         });
 
-        const resultArray = this._getResultArray(array, _variants, maxRowLength, maxColumnLength);
+        const resultArray = this._getResultArray(array, _variants, maxRowLength, maxColumnLength, lifted);
 
-        if (maxRowLength === 1 && maxColumnLength === 1) {
+        if (maxRowLength === 1 && maxColumnLength === 1 && !lifted) {
             return resultArray[0][0] as ArrayValueObject;
         }
 
@@ -77,7 +84,14 @@ export class Sortby extends BaseFunction {
         });
     }
 
-    // eslint-disable-next-line complexity
+    private _resolveReference(input: FunctionVariantType): BaseValueObject {
+        if (!input.isReferenceObject()) return input as BaseValueObject;
+        const array = (input as BaseReferenceObject).toArrayValueObject();
+        if (array.getRowCount() !== 1 || array.getColumnCount() !== 1) return array;
+        const value = array.getFirstCell();
+        return value.isNull() ? NumberValueObject.create(0) : value;
+    }
+
     private _getVariantsError(array: BaseValueObject, ...variants: BaseValueObject[]): ErrorValueObject | BooleanValueObject {
         if (array.isError()) {
             return array as ErrorValueObject;
@@ -102,18 +116,10 @@ export class Sortby extends BaseFunction {
         const byArray1RowCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getRowCount() : 1;
         const byArray1ColumnCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getColumnCount() : 1;
 
-        if (byArray1RowCount > 1 || byArray1ColumnCount > 1) {
-            if (byArray1RowCount > 1 && byArray1ColumnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (byArray1RowCount === 1 && byArray1ColumnCount !== arrayColumnCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (byArray1ColumnCount === 1 && byArray1RowCount !== arrayRowCount) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
+        const byColumn = byArray1RowCount === 1 && byArray1ColumnCount === arrayColumnCount;
+        const byRow = byArray1ColumnCount === 1 && byArray1RowCount === arrayRowCount;
+        if (!byColumn && !byRow) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         for (let i = 2; i < variants.length; i++) {
@@ -132,7 +138,7 @@ export class Sortby extends BaseFunction {
         return BooleanValueObject.create(true);
     }
 
-    private _getResultArray(array: BaseValueObject, variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number): Array<Array<BaseValueObject>> {
+    private _getResultArray(array: BaseValueObject, variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number, lifted: boolean): Array<Array<BaseValueObject>> {
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
@@ -140,36 +146,53 @@ export class Sortby extends BaseFunction {
         const byArray1ColumnCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getColumnCount() : 1;
 
         const resultArray: Array<Array<BaseValueObject>> = [];
+        let consumed = false;
 
         for (let r = 0; r < maxRowLength; r++) {
             resultArray[r] = [] as BaseValueObject[];
 
             for (let c = 0; c < maxColumnLength; c++) {
-                const { isError, errorObject, byArrays, sortOrders } = this._getByArraysAndSortOrders(variants, r, c, byArray1ColumnCount);
+                // Excel retains the shapes of multiple key arrays after moving their cells.
+                if (consumed && variants.length > 2 && (byArray1RowCount > 1 || byArray1ColumnCount > 1)) {
+                    resultArray[r].push(ErrorValueObject.create(ErrorType.VALUE));
+                    continue;
+                }
+                const { isError, errorObject, byArrays, sortOrders } = this._getByArraysAndSortOrders(variants, r, c, byArray1ColumnCount, !consumed);
 
                 if (isError) {
                     resultArray[r].push(errorObject as ErrorValueObject);
                     continue;
                 }
 
+                if (consumed) {
+                    resultArray[r].push(NullValueObject.create());
+                    continue;
+                }
+
                 if (!array.isArray() || (arrayRowCount === 1 && arrayColumnCount === 1)) {
-                    resultArray[r].push(array);
+                    resultArray[r].push(lifted && array.isArray() ? (array as ArrayValueObject).get(0, 0) as BaseValueObject : array);
+                    consumed = true;
                     continue;
                 }
 
                 let arrayValue = array.getArrayValue();
+                const simple = byArrays.every((values) => values[0]?.isNumber()
+                    ? values.every((value) => value?.isNumber())
+                    : values.every((value) => value?.isString() && !/[^a-z0-9]/i.test(String(value.getValue()))));
 
                 if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
                     if (byArray1RowCount === 1) {
                         arrayValue = arrayValue.concat(byArrays);
                         arrayValue = this._transposeArray(arrayValue);
-                        arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
+                        const compare = this._sort(arrayRowCount, sortOrders as Array<1 | -1>);
+                        arrayValue = simple ? arrayValue.sort(compare) : getSortIndices(arrayValue.length, (left, right) => compare(arrayValue[left], arrayValue[right])).map((index) => arrayValue[index]);
                         arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
                     } else if (byArray1ColumnCount === 1) {
                         arrayValue = this._transposeArray(arrayValue);
                         arrayValue = arrayValue.concat(byArrays);
                         arrayValue = this._transposeArray(arrayValue);
-                        arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
+                        const compare = this._sort(arrayColumnCount, sortOrders as Array<1 | -1>);
+                        arrayValue = simple ? arrayValue.sort(compare) : getSortIndices(arrayValue.length, (left, right) => compare(arrayValue[left], arrayValue[right])).map((index) => arrayValue[index]);
                         arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
                     }
                 }
@@ -184,7 +207,8 @@ export class Sortby extends BaseFunction {
                     column: this.column,
                 });
 
-                if (maxRowLength > 1 || maxColumnLength > 1) {
+                consumed = true;
+                if (lifted) {
                     resultArray[r].push(result.get(0, 0) as BaseValueObject);
                     continue;
                 }
@@ -196,7 +220,7 @@ export class Sortby extends BaseFunction {
         return resultArray;
     }
 
-    private _getByArraysAndSortOrders(variants: BaseValueObject[], r: number, c: number, byArray1ColumnCount: number) {
+    private _getByArraysAndSortOrders(variants: BaseValueObject[], r: number, c: number, byArray1ColumnCount: number, readArrays: boolean) {
         const byArrays = [];
         const sortOrders = [];
 
@@ -231,6 +255,8 @@ export class Sortby extends BaseFunction {
             }
 
             sortOrders.push(sortOrderValue);
+
+            if (!readArrays) continue;
 
             if (byArray.isArray()) {
                 let byArrayValue = byArray.getArrayValue();
@@ -275,18 +301,18 @@ export class Sortby extends BaseFunction {
     }
 
     private _sort(sortIndex: number, sortOrders: Array<1 | -1>) {
-        const compare = getCompare();
+        const compare = createSortCompare();
 
         return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
             let columnA = a[sortIndex] as BaseValueObject;
             let columnB = b[sortIndex] as BaseValueObject;
-            let result = this._compare(columnA, columnB, sortOrders[0], compare);
+            let result = compareSortValues(columnA, columnB, sortOrders[0], compare);
 
             if (result === 0 && sortOrders.length > 1) {
                 for (let i = 1; i < sortOrders.length; i++) {
                     columnA = a[sortIndex + i] as BaseValueObject;
                     columnB = b[sortIndex + i] as BaseValueObject;
-                    result = this._compare(columnA, columnB, sortOrders[i], compare);
+                    result = compareSortValues(columnA, columnB, sortOrders[i], compare);
 
                     if (result !== 0) {
                         return result;
@@ -296,113 +322,5 @@ export class Sortby extends BaseFunction {
 
             return result;
         };
-    }
-
-    private _compare(columnA: BaseValueObject, columnB: BaseValueObject, sortOrder: 1 | -1, compare: Function): number {
-        if (sortOrder === 1) {
-            return this._asc(columnA, columnB, compare);
-        } else {
-            return this._desc(columnA, columnB, compare);
-        }
-    }
-
-    private _asc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
-        if (columnA == null || columnA.isNull()) {
-            return 1;
-        }
-
-        if (columnB == null || columnB.isNull()) {
-            return -1;
-        }
-
-        if (columnA.isError() && columnB.isError()) {
-            return 0;
-        }
-
-        if (columnA.isError()) {
-            return 1;
-        }
-
-        if (columnB.isError()) {
-            return -1;
-        }
-
-        const columnAValue = (columnA as BaseValueObject).getValue();
-        const columnBValue = (columnB as BaseValueObject).getValue();
-
-        if (columnA.isBoolean() && columnAValue === true) {
-            return 1;
-        }
-
-        if (columnB.isBoolean() && columnBValue === true) {
-            return -1;
-        }
-
-        if (columnA.isBoolean() && columnAValue === false) {
-            return 1;
-        }
-
-        if (columnB.isBoolean() && columnBValue === false) {
-            return -1;
-        }
-
-        if (columnA.isNumber() && columnB.isNumber()) {
-            return (+columnAValue) - (+columnBValue);
-        }
-
-        return compare(
-            columnAValue as string,
-            columnBValue as string
-        );
-    }
-
-    private _desc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
-        if (columnA == null || columnA.isNull()) {
-            return 1;
-        }
-
-        if (columnB == null || columnB.isNull()) {
-            return -1;
-        }
-
-        if (columnA.isError() && columnB.isError()) {
-            return 0;
-        }
-
-        if (columnA.isError()) {
-            return -1;
-        }
-
-        if (columnB.isError()) {
-            return 1;
-        }
-
-        const columnAValue = (columnA as BaseValueObject).getValue();
-        const columnBValue = (columnB as BaseValueObject).getValue();
-
-        if (columnA.isBoolean() && columnAValue === true) {
-            return -1;
-        }
-
-        if (columnB.isBoolean() && columnBValue === true) {
-            return 1;
-        }
-
-        if (columnA.isBoolean() && columnAValue === false) {
-            return -1;
-        }
-
-        if (columnB.isBoolean() && columnBValue === false) {
-            return 1;
-        }
-
-        if (columnA.isNumber() && columnB.isNumber()) {
-            return (+columnBValue) - (+columnAValue);
-        }
-
-        return compare(
-            columnBValue as string,
-            columnAValue as string
-        );
     }
 }

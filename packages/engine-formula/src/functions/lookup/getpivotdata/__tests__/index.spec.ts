@@ -15,11 +15,12 @@
  */
 
 import type { ICellData, IWorkbookData, Nullable } from '@univerjs/core';
-import { CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, Injector, LocaleType, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import type { IUnitData } from '../../../../basics/common';
 import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
+import type { IPivotFormulaReportLookup } from '../index';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
@@ -114,6 +115,59 @@ describe('GETPIVOTDATA', () => {
         ) as BaseValueObject;
 
         expect(getObjectValue(result)).toBe(2);
+    });
+
+    it('uses registered report bounds and column totals when provided by the host', () => {
+        const range = { startRow: 2, endRow: 5, startColumn: 0, endColumn: 3 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: (_unit, _sheet, candidate) => Rectangle.intersects(range, candidate)
+                        ? {
+                            ranges: [range],
+                            fields: ['Region', 'Year', 'Category'],
+                            columnFields: ['Year'],
+                            dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
+                            layout: { firstDataRow: 4, pageFields: [{ names: ['Category'], value: 'X' }] },
+                        }
+                        : undefined,
+                };
+            }
+        }
+        const injector = new Injector();
+        const fn = injector.createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        const cells: Array<[number, number, ICellData]> = [
+            [2, 0, text('Sum of Amount')],
+            [2, 1, text('Column Labels')],
+            [3, 0, text('Row Labels')],
+            [3, 1, number(2025)],
+            [3, 2, number(2026)],
+            [3, 3, text('Grand Total')],
+            [4, 0, text('North')],
+            [4, 1, number(80)],
+            [4, 2, number(34)],
+            [4, 3, number(114)],
+            [5, 0, text('Grand Total')],
+            [5, 1, number(80)],
+            [5, 2, number(34)],
+            [5, 3, number(114)],
+        ];
+        cells.push(...cells.map(([row, col, cell]): [number, number, ICellData] => [row, col + 7, cell]));
+        const lookup = (reference: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg('Amount'), anchor(cells, reference), ...pairs.map(textArg)));
+        try {
+            expect(lookup('B5', 'Region', 'North')).toBe(114);
+            expect(lookup('A3', 'Region', 'North', 'Year', '2025')).toBe(80);
+            expect(lookup('A3', 'Year', '2025')).toBe(80);
+            expect(lookup('A3', 'Region', 'North', 'Year', '2025', 'Category', 'X')).toBe(80);
+            expect(lookup('A3', 'Region', 'North', 'Category', 'Y')).toBe(ErrorType.REF);
+            expect(lookup('A3', 'Region', 'North', 'Year', 'Missing')).toBe(ErrorType.REF);
+            expect(lookup('A3', 'Unknown', 'North')).toBe(ErrorType.REF);
+            expect(lookup('H3', 'Region', 'North')).toBe(ErrorType.REF);
+            range.endColumn = 2;
+            expect(lookup('A3', 'Region', 'North')).toBe(ErrorType.REF);
+        } finally {
+            injector.dispose();
+        }
     });
 
     it('accepts the source field name of an aggregated caption', () => {

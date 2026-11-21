@@ -16,9 +16,11 @@
 
 import type { DateSystem } from '@univerjs/core';
 import { excelSerialToDate } from '@univerjs/core';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { getDateSerialNumberByObject, getDaysInMonth, isLeapYear } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -30,6 +32,37 @@ export class Amordegrc extends BaseFunction {
     override maxParams = 7;
 
     override calculate(
+        cost: BaseValueObject,
+        datePurchased: BaseValueObject,
+        firstPeriod: BaseValueObject,
+        salvage: BaseValueObject,
+        period: BaseValueObject,
+        rate: BaseValueObject,
+        basis: BaseValueObject = NumberValueObject.create(0)
+    ): BaseValueObject {
+        const args = [cost, datePurchased, firstPeriod, salvage, period, rate, basis] as const;
+        const arrays = args.filter((item): item is ArrayValueObject => item.isArray());
+        if (arrays.length === 0) {
+            return this._calculateSingle(...args);
+        }
+
+        const rowCount = Math.max(...arrays.map((item) => item.getRowCount()));
+        const columnCount = Math.max(...arrays.map((item) => item.getColumnCount()));
+        const missing = ErrorValueObject.create(ErrorType.NA);
+        const [costs, purchases, ends, salvages, periods, rates, bases] = args.map((item) => expandArrayValueObject(rowCount, columnCount, item, missing));
+        const result = costs.map((item, row, column) => this._calculateSingle(
+            item ?? missing,
+            purchases.get(row, column) ?? missing,
+            ends.get(row, column) ?? missing,
+            salvages.get(row, column) ?? missing,
+            periods.get(row, column) ?? missing,
+            rates.get(row, column) ?? missing,
+            bases.get(row, column) ?? missing
+        ));
+        return rowCount === 1 && columnCount === 1 ? (result as ArrayValueObject).getFirstCell() : result;
+    }
+
+    private _calculateSingle(
         cost: BaseValueObject,
         datePurchased: BaseValueObject,
         firstPeriod: BaseValueObject,

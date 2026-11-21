@@ -29,20 +29,20 @@ describe('Test concatenate function', () => {
             const text1 = StringValueObject.create('Start ');
             const text2 = StringValueObject.create('End');
             const result = testFunction.calculate(text1, text2);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([['Start End']]);
+            expect(result.getValue()).toBe('Start End');
         });
 
         it('Text is single cell with quotation marks', () => {
             const text1 = StringValueObject.create('"Hello ""World"');
             const result = testFunction.calculate(text1);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([['"Hello ""World"']]);
+            expect(result.getValue()).toBe('"Hello ""World"');
         });
 
         it('Formats floating point numbers as formula text', () => {
             const text1 = NumberValueObject.create(2790.222849999999);
             const text2 = StringValueObject.create(' (Eff)');
             const result = testFunction.calculate(text1, text2);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([['2790.22285 (Eff)']]);
+            expect(result.getValue()).toBe('2790.22285 (Eff)');
         });
 
         it('Text1 is single cell, text2 is array', () => {

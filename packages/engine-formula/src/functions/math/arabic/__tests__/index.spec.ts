@@ -78,8 +78,8 @@ describe('Test arabic function', () => {
             });
             const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.VALUE, ErrorType.VALUE, 1997, ErrorType.VALUE, ErrorType.VALUE, 0],
-                [ErrorType.VALUE, ErrorType.VALUE, 57, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.VALUE, 0, 1997, ErrorType.VALUE, ErrorType.VALUE, 0],
+                [ErrorType.VALUE, 200, 57, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
             ]);
 
             const text2 = ArrayValueObject.create({

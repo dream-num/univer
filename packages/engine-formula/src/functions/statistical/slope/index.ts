@@ -23,6 +23,8 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Slope extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 2;
@@ -54,7 +56,8 @@ export class Slope extends BaseFunction {
             return _knownXs;
         }
 
-        if (knownYsRowCount * knownYsColumnCount === 1 || knownXsRowCount * knownXsColumnCount === 1) {
+        const singletonSize = this.numbersOnly ? Math.max : Math.min;
+        if (singletonSize(knownYsRowCount * knownYsColumnCount, knownXsRowCount * knownXsColumnCount) === 1) {
             if (_knownYs.isNull() || _knownXs.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
@@ -77,7 +80,8 @@ export class Slope extends BaseFunction {
             knownXs,
             knownYsRowCount * knownYsColumnCount,
             knownYsColumnCount,
-            knownXsColumnCount
+            knownXsColumnCount,
+            this.numbersOnly
         );
 
         if (isError) {

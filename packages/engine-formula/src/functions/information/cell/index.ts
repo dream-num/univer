@@ -65,7 +65,7 @@ export class Cell extends BaseFunction {
         return this._handleSingleObject(_infoType as BaseValueObject, reference);
     }
 
-    private _handleSingleObject(infoType: BaseValueObject, reference: FunctionVariantType, infoTypeIsArray: boolean = false) {
+    protected _handleSingleObject(infoType: BaseValueObject, reference: FunctionVariantType, infoTypeIsArray: boolean = false) {
         let _reference = reference;
 
         if (_reference.isError()) {

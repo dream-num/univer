@@ -18,6 +18,7 @@ import type { FunctionVariantType } from '../reference-object/base-reference-obj
 import type { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
+import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
@@ -41,6 +42,12 @@ export class UnionNode extends BaseAstNode {
 
     override get nodeType() {
         return NodeType.UNION;
+    }
+
+    override isAddress() {
+        return this.getToken() === matchToken.COLON && this.getChildren().some((child) =>
+            child.nodeType === NodeType.FUNCTION && child.getToken() === FUNCTION_NAMES_LOOKUP.XLOOKUP
+        );
     }
 
     override execute() {

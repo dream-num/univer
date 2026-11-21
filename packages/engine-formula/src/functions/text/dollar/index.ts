@@ -33,11 +33,7 @@ export class Dollar extends BaseFunction {
     override needsLocale = true;
 
     override calculate(number: BaseValueObject, decimals?: BaseValueObject): BaseValueObject {
-        let _decimals = decimals ?? NumberValueObject.create(2);
-
-        if (_decimals.isNull()) {
-            _decimals = NumberValueObject.create(2);
-        }
+        const _decimals = decimals ?? NumberValueObject.create(2);
 
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
@@ -99,7 +95,7 @@ export class Dollar extends BaseFunction {
             decimalsValue = 0;
         }
 
-        const result = applyCurrencyFormat(this.getLocale(), numberValue, decimalsValue);
+        const result = applyCurrencyFormat(this.getLocale(), numberValue, decimalsValue).trimEnd();
 
         return StringValueObject.create(result);
     }

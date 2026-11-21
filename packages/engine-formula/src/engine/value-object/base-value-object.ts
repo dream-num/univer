@@ -504,6 +504,14 @@ export class BaseValueObject extends ObjectClassType {
     }
 }
 
+export function arithmeticOperandError(value: BaseValueObject): BaseValueObject | undefined {
+    if (!value.isString()) {
+        return;
+    }
+    const converted = value.convertToNumberObjectValue();
+    return converted.isError() ? converted : undefined;
+}
+
 export function formatValueForFormulaText(value: string | number | boolean | null): string {
     if (typeof value === 'number') {
         return formatNumberForFormulaText(value);

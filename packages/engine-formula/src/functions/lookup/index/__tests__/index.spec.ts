@@ -24,7 +24,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
-import { MultiAreaReferenceObject } from '../../../../engine/reference-object/multi-area-reference-object';
+import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../../../../engine/reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../../../../engine/reference-object/range-reference-object';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
@@ -158,7 +158,7 @@ describe('Test index', () => {
             different === 'another-sheet' ? 's2' : 's1',
             different === 'another-workbook' ? 'other' : 'book'
         );
-        const reference = new MultiAreaReferenceObject('(A1:A2,A1:A2)', [[first, second]]);
+        const reference = new MultiAreaReferenceObject('(A1:A2,A1:A2)', [[first, second]], MultiAreaArrayMode.STACK_AREAS);
         const result = new Index(FUNCTION_NAMES_LOOKUP.INDEX).calculate(
             reference,
             NumberValueObject.create(1),

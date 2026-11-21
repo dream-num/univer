@@ -28,6 +28,8 @@ type valueMapType = Record<number, {
 }>;
 
 export class ModeMult extends BaseFunction {
+    protected readonly validateStringArguments: boolean = true;
+
     override minParams = 1;
 
     override maxParams = 255;
@@ -45,7 +47,7 @@ export class ModeMult extends BaseFunction {
                 return variant;
             }
 
-            if (variant.isString()) {
+            if (this.validateStringArguments && variant.isString()) {
                 const _variant = variant.convertToNumberObjectValue();
 
                 if (_variant.isError()) {

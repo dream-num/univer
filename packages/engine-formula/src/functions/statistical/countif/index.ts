@@ -18,8 +18,9 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { MultiAreaReferenceObject } from '../../../engine/reference-object/multi-area-reference-object';
 import { valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult } from '../../../engine/utils/value-object';
+import { filterSameValueObjectResult, getPairedRangeAndCriteriaResult, mapReferenceGridCriteria } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -32,7 +33,7 @@ export class Countif extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(range: FunctionVariantType, criteria: FunctionVariantType): BaseValueObject {
-        if (!range.isReferenceObject()) {
+        if (!range.isReferenceObject() || (range instanceof MultiAreaReferenceObject && !range.isArrayOfReferences())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -44,6 +45,16 @@ export class Countif extends BaseFunction {
                 const firstCriteria = (_criteria as ArrayValueObject).get(0, 0) as BaseValueObject;
                 _criteria = firstCriteria.isNull() ? NumberValueObject.create(0) : firstCriteria;
             }
+        }
+
+        if (range instanceof MultiAreaReferenceObject && range.isArrayOfReferences()) {
+            return mapReferenceGridCriteria(range, _criteria as BaseValueObject, undefined, (area, condition) => {
+                if (condition.isError()) {
+                    return NumberValueObject.create(0);
+                }
+                const normalized = criteria.isReferenceObject() && condition.isNull() ? NumberValueObject.create(0) : condition;
+                return this._handleSingleObject(area, normalized);
+            });
         }
 
         if (_criteria.isArray()) {

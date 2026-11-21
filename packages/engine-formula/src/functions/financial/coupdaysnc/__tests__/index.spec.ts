@@ -139,7 +139,7 @@ describe('Test coupdaysnc function', () => {
             expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
-        it('Value is array', () => {
+        it('coerces each settlement date in the array', () => {
             const settlement = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['2012-3-29', 'test', true, false, ErrorType.NAME],
@@ -155,7 +155,10 @@ describe('Test coupdaysnc function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, frequency, basis);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(result.isArray()).toBe(true);
+            const array = result as ArrayValueObject;
+            expect(Array.from({ length: array.getColumnCount() }, (_, col) => array.get(0, col)?.getValue()))
+                .toStrictEqual([ErrorType.NUM, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]);
         });
     });
 });

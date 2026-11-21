@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { CeilingPrecise } from '../ceiling-precise';
 
-/**
- * ISO.CEILING rounds a number up to the nearest multiple of the significance's absolute value, whatever the
- * signs, and returns 0 when either argument is 0. Excel defines it with the same result as CEILING.PRECISE.
- */
-export class IsoCeiling extends CeilingPrecise {}
+export class IsoCeiling extends CeilingPrecise {
+    override needsReferenceObject = true;
+
+    override calculate(number: FunctionVariantType, significance?: FunctionVariantType) {
+        const value = number.isReferenceObject() ? (number as BaseReferenceObject).toArrayValueObject() : number as BaseValueObject;
+        if (significance?.isReferenceObject()) {
+            return super.calculate(value, (significance as BaseReferenceObject).toArrayValueObject());
+        }
+        const optionalSignificance = significance as BaseValueObject | undefined;
+        return super.calculate(value, optionalSignificance?.isNull() ? undefined : optionalSignificance);
+    }
+}

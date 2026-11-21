@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData } from '@univerjs/core';
+import type { IFormulaDatasetConfig } from '../../../basics/common';
+import type { IDefinedNameMapItem } from '../../../services/defined-names.service';
+import type { IAllRuntimeData } from '../../../services/runtime.service';
 import type { BaseAstNode } from '../../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import type { BaseValueObject } from '../../value-object/base-value-object';
 import type { LexerNode } from '../lexer-node';
-import { ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, FormulaType, ILogService, LocaleType, LogLevel, ObjectMatrix, Univer, UniverInstanceType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { AsyncCustomFunction } from '../../../functions/custom-function';
 import { FUNCTION_NAMES_INFORMATION } from '../../../functions/information/function-names';
 import { Isblank } from '../../../functions/information/isblank';
 import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
@@ -51,7 +55,11 @@ import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/funct
 import { StdevP } from '../../../functions/statistical/stdev-p';
 import { FUNCTION_NAMES_TEXT } from '../../../functions/text/function-names';
 import { Regexmatch } from '../../../functions/text/regexmatch';
+import { FormulaDataModel } from '../../../models/formula-data.model';
+import { UniverFormulaEnginePlugin } from '../../../plugin';
+import { ICalculateFormulaService } from '../../../services/calculate-formula.service';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IDefinedNamesService } from '../../../services/defined-names.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { ISuperTableService } from '../../../services/super-table.service';
@@ -574,7 +582,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
 
         it('normalizes xlfn REGEXTEST to REGEXMATCH during formula execution', async () => {
@@ -903,14 +911,18 @@ describe('Test indirect', () => {
             expect((result as BaseValueObject).getValue()).toStrictEqual(3);
         });
 
-        it('resolves blank current-row cells with normalized line-break column names', async () => {
+        it.each([[0, false], [1, true]])('checks a blank current-row cell with a line-break header on row %i', (row, expected) => {
+            const runtime = get(IFormulaRuntimeService);
+            runtime.setCurrent(row, 5, runtime.currentRowCount, runtime.currentColumnCount, runtime.currentSubUnitId, runtime.currentUnitId);
             const lexerNode = lexer.treeBuilder('=ISBLANK(Table1[[#This Row],[Blank\r\nColumn]])') as LexerNode;
             const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
-            expect((result as BaseValueObject).getValue()).toBe(true);
+            expect((result as BaseValueObject).getValue()).toBe(expected);
         });
 
         it('calculates FMEA current-row formulas with parenthesized column names', () => {
+            const runtime = get(IFormulaRuntimeService);
+            runtime.setCurrent(1, 5, runtime.currentRowCount, runtime.currentColumnCount, runtime.currentSubUnitId, runtime.currentUnitId);
             const lexerNode = lexer.treeBuilder(
                 '=IF(OR(ISBLANK(Table_FMEA[[#This Row],[F\r\n(1-5)]]),ISBLANK(Table_FMEA[[#This Row],[S\r\n(1-5)]]))," - ",Table_FMEA[[#This Row],[F\r\n(1-5)]]*Table_FMEA[[#This Row],[S\r\n(1-5)]])'
             ) as LexerNode;
@@ -949,5 +961,498 @@ describe('Test indirect', () => {
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
+    });
+});
+
+function createNamedLambdaTestBed(definedNames: IDefinedNameMapItem, singleCellArray = false) {
+    const data: IWorkbookData = {
+        id: 'named-lambda',
+        name: 'Named lambdas',
+        appVersion: '1.0.0',
+        locale: LocaleType.EN_US,
+        styles: {},
+        sheetOrder: ['sheet'],
+        sheets: { sheet: { id: 'sheet', name: 'Sheet1', rowCount: 100, columnCount: 10, cellData: {} } },
+    };
+    if (singleCellArray) {
+        data.sheets.sheet.cellData = { 0: { 0: { f: '=SUM(IF(B1:B4,1,8))', ref: 'A1', ft: FormulaType.ARRAY } } };
+    }
+    const univer = new Univer();
+    univer.registerPlugin(UniverFormulaEnginePlugin);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
+    const injector = univer.__getInjector();
+    injector.get(ILogService).setLogLevel(LogLevel.SILENT);
+    const names = injector.get(IDefinedNamesService);
+    names.registerDefinedNames(data.id, definedNames);
+    const service = injector.get(ICalculateFormulaService);
+    return {
+        univer,
+        names,
+        injector,
+        async calculate(formula: string, options: {
+            dirtyDefinedNameMap?: IFormulaDatasetConfig['dirtyDefinedNameMap'];
+            forceCalculate?: boolean;
+            input?: number | string;
+            arrayFormula?: boolean;
+        } = {}) {
+            let complete!: (result: IAllRuntimeData) => void;
+            const completed = new Promise<IAllRuntimeData>((resolve) => {
+                complete = resolve;
+            });
+            const listener = service.executionCompleteListener$.subscribe(complete);
+            try {
+                await service.execute({
+                    formulaData: { [data.id]: { sheet: { 0: { 0: { f: formula } } } } },
+                    arrayFormulaCellData: {},
+                    arrayFormulaRange: options.arrayFormula
+                        ? {
+                            [data.id]: { sheet: { 0: { 0: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 } } } },
+                        }
+                        : {},
+                    forceCalculate: options.forceCalculate ?? true,
+                    dirtyRanges: [{ unitId: data.id, sheetId: 'sheet', range: { startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 } }],
+                    dirtyNameMap: {},
+                    dirtyDefinedNameMap: options.dirtyDefinedNameMap ?? {},
+                    dirtySuperTableMap: {},
+                    dirtyUnitFeatureMap: {},
+                    dirtyUnitOtherFormulaMap: {},
+                    clearDependencyTreeCache: {},
+                    excludedCell: {},
+                    allUnitData: { [data.id]: { sheet: { cellData: new ObjectMatrix<ICellData>({ 0: { 0: { f: formula }, 1: { v: options.input ?? 1 } } }), rowCount: 100, columnCount: 10, rowData: {}, columnData: {} } } },
+                    unitSheetNameMap: { [data.id]: { Sheet1: 'sheet' } },
+                    unitStylesData: {},
+                    unitNameMap: { [data.id]: { name: data.name, unitType: UniverInstanceType.UNIVER_SHEET } },
+                    calculationSettings: { [data.id]: { iterativeCalculation: false, maxIterations: 100, maxChange: 0.001 } },
+                });
+                const result = await completed;
+                return result.unitData[data.id]?.sheet?.getValue(0, 0);
+            } finally {
+                listener.unsubscribe();
+            }
+        },
+    };
+}
+
+describe('Worksheet trigonometric range', () => {
+    it.each(['SIN', 'COS', 'TAN', 'COT', 'SEC', 'CSC'])('checks the Excel limit for %s', async (name) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(`=${name}(134217727)`))?.t).toBe(CellValueType.NUMBER);
+            expect((await bed.calculate(`=${name}(-134217728)`))?.v).toBe(ErrorType.NUM);
+            expect((await bed.calculate(`=${name}(134217728)`))?.v).toBe(ErrorType.NUM);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Database field arguments', () => {
+    it.each([
+        ['=DCOUNT({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},,{"Tree";"Apple"})', 2],
+        ['=DCOUNT({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},2,{"Tree";"Apple"})', 1],
+        ['=DCOUNTA({"Tree","Yield";"Apple",7;"Apple","9";"Pear",2},,{"Tree";"Apple"})', 2],
+        ['=DCOUNT({"Tree","Yield";"Apple",7},C1,{"Tree";"Apple"})', ErrorType.VALUE],
+        ['=DSUM({"Tree","Yield";"Apple",7},"2",{"Tree";"Apple"})', ErrorType.VALUE],
+        ['=DSUM({"Tree","Yield";"Apple",7;"Apple",#N/A},2,{"Tree";"Apple"})', ErrorType.NA],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('ETS dependency recalculation', () => {
+    it('recalculates the forecast after changing and restoring an observation', async () => {
+        const bed = createNamedLambdaTestBed({});
+        const formula = '=FORECAST.ETS(5,HSTACK(B1,14,11,20),{1,2,3,4},0)';
+        try {
+            expect((await bed.calculate(formula, { input: 8 }))?.v).toBeCloseTo(21.716830212285714, 10);
+            expect((await bed.calculate(formula, { input: 9, forceCalculate: false }))?.v).toBeCloseTo(21.56827976442857, 10);
+            expect((await bed.calculate(formula, { input: 8, forceCalculate: false }))?.v).toBeCloseTo(21.716830212285714, 10);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Linear forecasts and scalar arguments', () => {
+    it.each([
+        ['=ADDRESS(2,3,1,TRUE,"[Book.xlsx]Sheet1")', '[Book.xlsx]Sheet1!$C$2'],
+        ['=ADDRESS(2,3,1,TRUE,"")', '!$C$2'],
+        ['=ADDRESS(0,0,4,FALSE)', 'RC'],
+        ['=ADDRESS(-1,-2,4,FALSE)', 'R[-1]C[-2]'],
+        ['=ADDRESS(1048577,1)', ErrorType.VALUE],
+        ['=ADDRESS(2,3,1,"abc")', ErrorType.VALUE],
+        ['=PROB({0,1,2,3,4},{0.1,0.2,0.4,0.2,0.1},2)', 0.4],
+        ['=PROB({0,1},{1.5,-0.5},1)', -0.5],
+        ['=PROB({0,1},{0.5,0.500000000001},1)', ErrorType.NUM],
+        ['=PROB({0,1},{0.2,0.3,0.5},1)', ErrorType.NA],
+        ['=PROB({0,1,TRUE},{0.2,0.3,0.5},1)', ErrorType.NUM],
+        ['=SUM(PROB({0,1,2},{0.2,0.3,0.5},0,{0,1,2}))', 1.7],
+        ['=ACCRINT(DATE(2023,11,15),DATE(2024,5,15),DATE(2024,3,15),0.0575,1000,2,2)', 19.32638888888889],
+        ['=ACCRINT(DATE(2023,11,15),DATE(2024,5,15),DATE(2025,2,1),0.0575,1000,2,1,FALSE)', 70.13736263736264],
+        ['=XNPV(0.09,{-10000,11000},{44927.9,45292.1})', 91.74311926605515],
+        ['=XNPV(0,{-1000,1100},{44927,45292})', ErrorType.NUM],
+        ['=XIRR({-1000,900},{44927,45292})', -0.10000000335276127],
+        ['=XIRR({-1000,1100},{44927,45292},0)', 0.0999999951171875],
+        ['=DECIMAL("  FF",16)', 255],
+        ['=DECIMAL("FF  ",16)', ErrorType.NUM],
+        ['=VDB(2400,300,10,2.25,7.75)', 1028.8644096],
+        ['=VDB(2400,300,10,0,5,,TRUE)', 0],
+        ['=VDB(2400,300,10,0,5,,FALSE)', 1050],
+        ['=DECIMAL(REPT("0",256),16)', ErrorType.VALUE],
+        ['=VDB(2400,300,10,0,5,0)', 1050],
+        ['=VDB(2400,300,10,8,10,2,"TRUE")', 102.653184],
+        ['=FORECAST.ETS(5,{8,14,11,20},{1,2,3,4},0)', 21.716830212285714],
+        ['=FORECAST.ETS.STAT({8,14,11,20},{1,2,3,4},2,0)', 0.001],
+        ['=FORECAST.ETS(200,{1.5,2,3.25,4,5.5,8,13,21,34,55},{12,18,24,30,36,42,7,5,9,60},0,0)', 51.65917288045224],
+        ['=FORECAST.ETS.STAT({1.5,2,3.25,4,5.5,8,13,21,34,55},{12,18,24,30,36,42,7,5,9,60},1,0)', 0.998],
+        ['=FORECAST.ETS.SEASONALITY({18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8})', 2],
+        ['=FORECAST.ETS.CONFINT(9,{18,7,12,6,18,7,12,6},{1,2,3,4,5,6,7,8},0.95,4)', 0],
+        ['=FORECAST.ETS(NA(),{8,14,11,20},{1,2,3,4})', ErrorType.NA],
+        ['=FORECAST(5,{2,4,"100",8},{1,2,3,4})', 10],
+        ['=SUM(COUPDAYS(DATE(2024,3,15),DATE(2030,11,15),2,{0,1,2,3,4}))', 904.5],
+        ['=COUPDAYBS(DATE(2024,3,15)+0.99,DATE(2030,11,15)+0.9,2,1)', 121],
+        ['=COUPNUM(DATE(2024,3,15),DATE(2030,11,15),2,5)', ErrorType.NUM],
+        ['=FORECAST.LINEAR(5,{2,4,"100",8},{1,2,3,4})', 10],
+        ['=FORECAST(5,{"2","4","8"},{1,2,4})', ErrorType.DIV_BY_ZERO],
+        ['=DOLLAR(1234.567,)', '¥1,235'],
+        ['=DOLLAR(-0.00001,2)', '(¥0.00)'],
+        ['=XMATCH(20,{30;20;10},0,-2)', 2],
+        ['=XMATCH("a*",{"a","b","c"},2,2)', ErrorType.VALUE],
+        ['=OFFSET(A1,0.9,1.9)', 2],
+        ['=OFFSET(B1,0,0,C1,1)', ErrorType.REF],
+        ['=OFFSET(B1,0,0,NA(),1)', ErrorType.NA],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            const actual = (await bed.calculate(formula as string, { input: 2 }))?.v;
+            if (typeof expected === 'number' && !Number.isInteger(expected)) {
+                expect(actual).toBeCloseTo(expected, 10);
+            } else {
+                expect(actual).toBe(expected);
+            }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Excel array arguments and sheet references', () => {
+    it.each([
+        ['=TEXTJOIN("|",FALSE,FREQUENCY({-1,0,"2",8,11,TRUE},{10,0,10,0}))', '1|2|0|0|1'],
+        ['=TEXTJOIN("|",FALSE,FREQUENCY({-1,0,2,8,11},C1))', '2|3'],
+        ['=FREQUENCY(1/0,NA())', ErrorType.DIV_BY_ZERO],
+        ['=EXPAND({1,2},2,3,{8,9})', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(EXPAND({1,2},2,3,),1)', '{1,2,0;0,0,0}'],
+        ['=EXPAND({1,2},-2,3,9)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(SORT({2,9;1,8;2,7},{1,2}),1)', '{1,8;2,7;2,9}'],
+        ['=SORT(1,2,1)', ErrorType.VALUE],
+        ['=SHEETS(B1)', 1],
+        ['=SHEETS(INDIRECT("nope"))', ErrorType.REF],
+    ])('calculates %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+const RECURSIVE_DEFINED_NAMES: IDefinedNameMapItem = {
+    fact: { id: 'fact', name: 'FACTREC', formulaOrRefString: '=LAMBDA(n,IF(n<=1,1,n*FACTREC(n-1)))' },
+    fib: { id: 'fib', name: 'FIB', formulaOrRefString: '=LAMBDA(n,IF(n<2,n,FIB(n-1)+FIB(n-2)))' },
+    even: { id: 'even', name: 'EVEN_N', formulaOrRefString: '=LAMBDA(n,IF(n=0,TRUE,ODD_N(n-1)))' },
+    odd: { id: 'odd', name: 'ODD_N', formulaOrRefString: '=LAMBDA(n,IF(n=0,FALSE,EVEN_N(n-1)))' },
+};
+
+describe('Recursive named lambda calculation', () => {
+    it.each([
+        ['=FACTREC(1)', 1],
+        ['=FACTREC(10)', 3628800],
+        ['=factrec(5)', 120],
+        ['=FACTREC(100000)', ErrorType.NUM],
+        ['=FACTREC(3,4)', ErrorType.VALUE],
+        ['=FACTREC(NA())', ErrorType.NA],
+        ['=IF(TRUE,7,FACTREC(100000))', 7],
+        ['=FACTREC(4)+FACTREC(5)', 144],
+        ['=SUM(MAP({1;2;3;4},LAMBDA(v,FACTREC(v))))', 33],
+        ['=SUM(MAP({1;2;3;4},FACTREC))', 33],
+        ['=FIB(10)', 55],
+        ['=IF(EVEN_N(10),7,9)', 7],
+        ['=IF(ODD_N(10),7,9)', 9],
+    ])('calculates %s without expanding recursive names indefinitely', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({ ...RECURSIVE_DEFINED_NAMES });
+        try {
+            expect(await bed.calculate(formula as string)).toMatchObject({
+                v: expected,
+                t: typeof expected === 'number' ? CellValueType.NUMBER : CellValueType.STRING,
+            });
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('uses independent parameter bindings after a recursion error and after a definition changes', async () => {
+        const bed = createNamedLambdaTestBed({ ...RECURSIVE_DEFINED_NAMES });
+        try {
+            expect((await bed.calculate('=FACTREC(100000)'))?.v).toBe(ErrorType.NUM);
+            expect((await bed.calculate('=FACTREC(5)'))?.v).toBe(120);
+            const formula = '=LAMBDA(n,IF(n<=1,2,n*FACTREC(n-1)))';
+            bed.names.registerDefinedName('named-lambda', { id: 'fact', name: 'FACTREC', formulaOrRefString: formula });
+            expect((await bed.calculate('=FACTREC(5)', { dirtyDefinedNameMap: { 'named-lambda': { [formula]: 'FACTREC' } } }))?.v).toBe(240);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        '=_xlfn.LAMBDA(_xlpm.n,IF(_xlpm.n<=1,1,_xlpm.n*FACTREC(_xlpm.n-1)))',
+        '_xlfn.LAMBDA(_xlpm.n,IF(_xlpm.n<=1,1,_xlpm.n*FACTREC(_xlpm.n-1)))',
+        'LAMBDA(n,IF(n<=1,1,n*FACTREC(n-1)))',
+    ])('handles imported recursive definitions %s and preserves ordinary names', async (formulaOrRefString) => {
+        const bed = createNamedLambdaTestBed({
+            fact: { id: 'fact', name: 'FACTREC', localSheetId: 'AllDefaultWorkbook', formulaOrRefString },
+            rate: { id: 'rate', name: 'Rate', formulaOrRefString: '=4' },
+            alias: { id: 'alias', name: 'Multiplier', formulaOrRefString: '=Rate' },
+        });
+        try {
+            expect((await bed.calculate('=FACTREC(5)*Multiplier'))?.v).toBe(480);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('reports a circular non-lambda name without aborting subsequent calculations', async () => {
+        const bed = createNamedLambdaTestBed({
+            first: { id: 'first', name: 'FirstName', formulaOrRefString: '=SecondName' },
+            second: { id: 'second', name: 'SecondName', formulaOrRefString: '=FirstName' },
+        });
+        try {
+            expect((await bed.calculate('=FirstName'))?.v).toBe(ErrorType.NAME);
+            expect((await bed.calculate('=1+1'))?.v).toBe(2);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('tracks recursive body references for incremental recalculation', async () => {
+        const bed = createNamedLambdaTestBed({
+            sum: { id: 'sum', name: 'RECURSUM', formulaOrRefString: '=LAMBDA(n,IF(n<=0,0,B1+RECURSUM(n-1)))' },
+        });
+        try {
+            expect((await bed.calculate('=B1', { input: 2 }))?.v).toBe(2);
+            expect((await bed.calculate('=RECURSUM(3)', { input: 2 }))?.v).toBe(6);
+            expect((await bed.calculate('=RECURSUM(3)', { input: 4, forceCalculate: false }))?.v).toBe(12);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('uses sheet-local definitions and preserves registered function precedence', async () => {
+        const bed = createNamedLambdaTestBed({
+            ...RECURSIVE_DEFINED_NAMES,
+            local: { id: 'local', name: 'FACTREC', localSheetId: 'sheet', formulaOrRefString: '=LAMBDA(n,IF(n<=1,2,n*FACTREC(n-1)))' },
+            sum: { id: 'sum', name: 'SUM', formulaOrRefString: '=LAMBDA(n,SUM(n))' },
+        });
+        try {
+            expect((await bed.calculate('=FACTREC(5)+SUM(1,2)'))?.v).toBe(243);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('limits non-terminating recursion and releases the call depth', async () => {
+        const bed = createNamedLambdaTestBed({
+            spin: { id: 'spin', name: 'SPIN', formulaOrRefString: '=LAMBDA(n,SPIN(n))' },
+            ...RECURSIVE_DEFINED_NAMES,
+        });
+        try {
+            expect((await bed.calculate('=SPIN(1)'))?.v).toBe(ErrorType.NUM);
+            expect((await bed.calculate('=FACTREC(10)'))?.v).toBe(3628800);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('awaits asynchronous recursive bodies and releases their call depth', async () => {
+        class AsyncIdentity extends AsyncCustomFunction {
+            constructor() {
+                super('ASYNC_IDENTITY');
+            }
+
+            override async calculateCustom(...variants: Parameters<AsyncCustomFunction['calculateCustom']>): Promise<number> {
+                return Number(variants[0]);
+            }
+        }
+        const bed = createNamedLambdaTestBed({
+            fact: { id: 'fact', name: 'FACTASYNC', formulaOrRefString: '=LAMBDA(n,IF(n<=1,ASYNC_IDENTITY(1),n*FACTASYNC(n-1)))' },
+        });
+        try {
+            bed.injector.add([AsyncIdentity]);
+            bed.injector.get(IFunctionService).registerExecutors(bed.injector.get(AsyncIdentity));
+            expect((await bed.calculate('=ASYNC_IDENTITY(1)'))?.v).toBe(1);
+            expect((await bed.calculate('=FACTASYNC(1)'))?.v).toBe(1);
+            expect((await bed.calculate('=FACTASYNC(2)'))?.v).toBe(2);
+            expect((await bed.calculate('=FACTASYNC(5)'))?.v).toBe(120);
+            expect((await bed.calculate('=FACTASYNC(100000)'))?.v).toBe(ErrorType.NUM);
+            expect((await bed.calculate('=FACTASYNC(5)'))?.v).toBe(120);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('INDIRECT reference validation', () => {
+    it.each([
+        '=SUM(INDIRECT("Sheet1!B4:B5,Sheet1!B7"))',
+        '=SUM(INDIRECT("Sheet1!B1:B2,Sheet1!B1"))',
+        '=INDIRECT("XFE1")',
+        '=INDIRECT("A1048577")',
+    ])('rejects malformed or out-of-bounds cell addresses in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula))?.v).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each(['=SUM(INDIRECT("Sheet1!B1"))', '=SUM(INDIRECT("Sheet1!B1:B2"))', '=SUM(INDIRECT("Sheet1!B:B"))'])('preserves valid references in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula, { input: 2 }))?.v).toBe(2);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Quoted array constants in formulas', () => {
+    it.each([
+        ['=TEXTBEFORE("a,b;c",{",",";"})', 'a'],
+        ['=TEXTBEFORE("a,b;c",{",",";"},2)', 'a,b'],
+        ['=TEXTAFTER("a,b;c",{",",";"})', 'b;c'],
+        ['=TEXTJOIN("|",FALSE,{"a,b","c;d";"e""f",""})', 'a,b|c;d|e"f|'],
+        ['=TEXTJOIN("|",FALSE,{"e""f";"g"},FACTREC(1))', 'e"f|g|1'],
+        ['=ROWS({"a;b","c,d"})', 1],
+        ['=COLUMNS({"a;b","c,d"})', 2],
+        ['=ARRAYTOTEXT(TEXTSPLIT("a,b;c",{",",";"}),1)', '{"a","b","c"}'],
+    ])('keeps quoted separators as data in %s', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({ ...RECURSIVE_DEFINED_NAMES });
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('Supported formula Excel compatibility', () => {
+    it.each([
+        '=FACTDOUBLE(INDIRECT("Missing!B1:B4"))',
+        '=MROUND(INDIRECT("Missing!B1:B4"),5)',
+        '=QUOTIENT(INDIRECT("Missing!B1:B4"),2)',
+        '=SQRTPI(INDIRECT("Missing!B1:B4"))',
+    ])('preserves missing-sheet errors in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula))?.v).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        '=FACTDOUBLE(B1:B4)',
+        '=MROUND(B1:B4,5)',
+        '=QUOTIENT(B1:B4,2)',
+        '=SQRTPI(B1:B4)',
+    ])('rejects valid multi-cell references with first-cell errors in %s', async (formula) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula, { input: ErrorType.NA }))?.v).toBe(ErrorType.VALUE);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([true, false])('preserves one-cell array formula context: %s', async (arrayFormula) => {
+        const bed = createNamedLambdaTestBed({}, arrayFormula);
+        try {
+            const model = bed.injector.get(FormulaDataModel);
+            model.getFormulaData();
+            expect(model.getArrayFormulaRange()['named-lambda']?.sheet?.[0]?.[0] != null).toBe(arrayFormula);
+            await bed.calculate('=1', { arrayFormula });
+            const runtime = bed.injector.get(IFormulaRuntimeService);
+            runtime.setCurrent(0, 0, 1, 1, 'sheet', 'named-lambda');
+            const lexer = bed.injector.get(Lexer);
+            const ast = bed.injector.get(AstTreeBuilder).parse(lexer.treeBuilder('=SUM(IF(B1:B4,1,8))', true, 'named-lambda') as LexerNode);
+            const result = bed.injector.get(Interpreter).execute(generateExecuteAstNodeData(ast as BaseAstNode));
+            expect((result as BaseValueObject).getValue()).toBe(arrayFormula ? 25 : 1);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        ['=BASE(1,2,255)', `${'0'.repeat(254)}1`],
+        ['=SUM(FACTDOUBLE({4,5,6}))', 71],
+        ['=SUM(FACTDOUBLE(B1:B4))', ErrorType.VALUE],
+        ['=SUM(FACTDOUBLE(B1:B4+4))', 39],
+        ['=SUM(MROUND(B1:B4,5))', ErrorType.VALUE],
+        ['=SUM(MROUND(B1:B4+7,5))', 25],
+        ['=SUM(QUOTIENT(B1:B4,2))', ErrorType.VALUE],
+        ['=SUM(QUOTIENT(B1:B4+7,2))', 13],
+        ['=SUM(SQRTPI(B1:B4))', ErrorType.VALUE],
+        ['=ROUND(SUM(SQRTPI(B1:B4+0)),6)', 1.772454],
+        ['=SUM(MROUND({7,8,13},5))', 30],
+        ['=ARRAYTOTEXT(MROUND({7,8,13},{5;10}),1)', '{5,10,15;10,10,10}'],
+        ['=SUM(QUOTIENT({5,7,9},2))', 9],
+        ['=ARRAYTOTEXT(QUOTIENT({5,7,9},{2;0}),1)', '{2,3,4;#DIV/0!,#DIV/0!,#DIV/0!}'],
+        ['=ROUND(SUM(SQRTPI({1,2,3})),6)', 7.349062],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{1,3}),1)', '{1,3;4,6}'],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{1;3}),1)', '{1,3;4,6}'],
+        ['=ARRAYTOTEXT(CHOOSECOLS({1,2,3;4,5,6},{-1,1},2),1)', '{3,1,2;6,4,5}'],
+        ['=CHOOSECOLS({1,2,3;4,5,6},{1,0})', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{1,3}),1)', '{1,2;5,6}'],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{1;3}),1)', '{1,2;5,6}'],
+        ['=ARRAYTOTEXT(CHOOSEROWS({1,2;3,4;5,6},{-1,1},2),1)', '{5,6;1,2;3,4}'],
+        ['=CHOOSEROWS({1,2;3,4;5,6},{1,0})', ErrorType.VALUE],
+        ['=BASE(1,2,256)', ErrorType.NUM],
+        ['=BASE(1,2,255.9)', `${'0'.repeat(254)}1`],
+        ['=BASE(1,2,256.1)', ErrorType.NUM],
+        ['=MAKEARRAY(0,2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(2,0,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(-1,2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY("a",2,LAMBDA(r,c,1))', ErrorType.VALUE],
+        ['=MAKEARRAY(NA(),2,LAMBDA(r,c,1))', ErrorType.NA],
+        ['=SUM(MAKEARRAY(2.9,2,LAMBDA(r,c,r*c)))', 9],
+        ['=CEILING.MATH(-5.5,,1)', -6],
+        ['=FLOOR.MATH(-5.5,,1)', -5],
+        ['=CEILING.MATH(-5.5,0,1)', 0],
+        ['=CEILING.MATH(-5.5,B10,1)', 0],
+        ['=CEILING.MATH(-5.5,CHOOSE(1,,99),1)', -6],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},),6))', '2|1'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},FALSE),6))', '2.428571|0'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LINEST({3;5;7},{1;2;3},CHOOSE(1,,99)),6))', '2|1'],
+        ['=TEXTJOIN("|",FALSE,ROUND(LOGEST({3;6;12},{1;2;3},),6))', '2|1.5'],
+        ['=ARRAYTOTEXT(UNIQUE({1;"1";1}),1)', '{1;"1"}'],
+        ['=ARRAYTOTEXT({1,2},2)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT({1,2},-1)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT({1,2},0.5)', ErrorType.VALUE],
+        ['=ARRAYTOTEXT(UNIQUE({"a";"A";"b"}),1)', '{"a";"b"}'],
+        ['=ARRAYTOTEXT(UNIQUE({1,"1",TRUE,"TRUE"},TRUE),1)', '{1,"1",TRUE,"TRUE"}'],
+    ])('calculates %s through the real formula service', async (formula, expected) => {
+        const bed = createNamedLambdaTestBed({});
+        try {
+            expect((await bed.calculate(formula as string))?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
     });
 });

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { isNonCharacterCodePoint, isSurrogateCodePoint } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -56,6 +56,10 @@ export class Char extends BaseFunction {
         return this._handleSingleObject(number);
     }
 
+    protected _getMaximumCode(): number {
+        return 0x10FFFF;
+    }
+
     private _handleSingleObject(number: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(number);
 
@@ -67,7 +71,7 @@ export class Char extends BaseFunction {
 
         const numberValue = Math.floor(+numberObject.getValue());
 
-        if (numberValue < 1 || numberValue > 1114111) {
+        if (numberValue < 1 || numberValue > this._getMaximumCode()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -86,5 +90,11 @@ export class Char extends BaseFunction {
         }
 
         return StringValueObject.create(result);
+    }
+}
+
+export class ExcelChar extends Char {
+    protected override _getMaximumCode(): number {
+        return 255;
     }
 }

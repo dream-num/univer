@@ -38,6 +38,8 @@ function isSameRankNumber(left: number, right: number): boolean {
 }
 
 export class RankAvg extends BaseFunction {
+    protected readonly numbersOnly: boolean = false;
+
     override minParams = 2;
 
     override maxParams = 3;
@@ -92,7 +94,7 @@ export class RankAvg extends BaseFunction {
             const numberValue = +numberObject.getValue();
             const orderValue = +orderObject.getValue();
 
-            if (Number.isNaN(numberValue) || Number.isNaN(orderValue)) {
+            if (orderObject.isString() || Number.isNaN(numberValue) || Number.isNaN(orderValue)) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -152,7 +154,7 @@ export class RankAvg extends BaseFunction {
                 return false;
             }
 
-            if (_refObject.isNull() || _refObject.isBoolean()) {
+            if (_refObject.isNull() || _refObject.isBoolean() || (this.numbersOnly && !_refObject.isNumber())) {
                 return true;
             }
 

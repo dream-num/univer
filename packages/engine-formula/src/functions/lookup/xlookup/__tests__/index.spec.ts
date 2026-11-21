@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { Injector } from '@univerjs/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -24,6 +25,37 @@ import { FUNCTION_NAMES_TEXT } from '../../../text/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xlookup } from '../index';
+
+describe('XLOOKUP Excel regex and option validation', () => {
+    let injector: Injector;
+    let testFunction: Xlookup;
+    beforeEach(() => {
+        injector = new Injector([[Xlookup, { useFactory: () => injector.createInstance(Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP) }]]);
+        testFunction = injector.get(Xlookup);
+    });
+    afterEach(() => injector.dispose());
+
+    it.each([
+        { pattern: '^G', match: 3, search: 1, expected: 1 },
+        { pattern: '^G', match: 3, search: -1, expected: 3 },
+        { pattern: '^g', match: 3, search: 1, expected: 2 },
+        { pattern: '(?i)^g', match: 3, search: -1, expected: 3 },
+        { pattern: '[', match: 3, search: 1, expected: ErrorType.VALUE },
+        { pattern: '^G', match: 3, search: 2, expected: ErrorType.VALUE },
+        { pattern: 'Gizmo', match: 5, search: 1, expected: ErrorType.VALUE },
+        { pattern: 'Gizmo', match: 0, search: 5, expected: ErrorType.VALUE },
+    ])('matches Excel for $pattern / $match / $search', ({ pattern, match, search, expected }) => {
+        const result = testFunction.calculate(
+            StringValueObject.create(pattern),
+            ArrayValueObject.create('{"Gizmo";"gadget";"GADGET"}'),
+            ArrayValueObject.create('{1;2;3}'),
+            NullValueObject.create(),
+            NumberValueObject.create(match),
+            NumberValueObject.create(search)
+        );
+        expect(getObjectValue(result)).toBe(expected);
+    });
+});
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;

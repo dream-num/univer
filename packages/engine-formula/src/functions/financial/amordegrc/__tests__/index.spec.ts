@@ -167,7 +167,7 @@ describe('Test amordegrc function', () => {
             expect(amordegrc({ period: 1, basis: 4 })).toBe(777);
         });
 
-        it('Value is array', () => {
+        it('evaluates each array cost', () => {
             const cost = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['2012-3-29', 'test', true, false, ErrorType.NAME],
@@ -188,7 +188,7 @@ describe('Test amordegrc function', () => {
                 NumberValueObject.create(0.15),
                 NumberValueObject.create(1)
             );
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toEqual([[13263, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME]]);
         });
     });
 });

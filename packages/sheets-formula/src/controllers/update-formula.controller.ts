@@ -227,17 +227,20 @@ export class UpdateFormulaController extends Disposable {
             }
         );
 
-        this._commandService.executeCommand(
-            SetArrayFormulaDataMutation.id,
-            {
-                arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
-                arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
-            },
-            {
-                onlyLocal: true,
-                remove: true, // remove array formula range shape
-            }
-        );
+        // The maps cover every array formula in every workbook, so notify only when this edit changed them.
+        if (arrayFormulaCellDataChanged || arrayFormulaRangeChanged) {
+            this._commandService.executeCommand(
+                SetArrayFormulaDataMutation.id,
+                {
+                    arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
+                    arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                },
+                {
+                    onlyLocal: true,
+                    remove: true, // remove array formula range shape
+                }
+            );
+        }
     }
 
     private _handleWorkbookDisposed(unitId: string, sheetId?: string) {

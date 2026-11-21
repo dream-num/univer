@@ -919,7 +919,7 @@ export function attachContinuousLayoutGeometry(page: IDocumentSkeletonPage): voi
 
 interface IContinuousBlockApplyOptions {
     staging?: boolean;
-    preserveEmbeddedGeometry?: boolean;
+    foregroundGeometry?: Pick<IDocumentSkeletonPage, 'skeTables' | 'skeColumnGroups' | 'skeDrawings'>;
 }
 
 export function applyDocumentSkeletonContinuousBlock(
@@ -951,7 +951,30 @@ export function applyDocumentSkeletonContinuousBlock(
         return page;
     }
 
-    const tables = options.preserveEmbeddedGeometry ? undefined : applyContinuousTablePatch(page, patch, snapshot);
+    const { foregroundGeometry } = options;
+    // Foreground maps can combine retained Main objects and new Worker objects.
+    // Give incoming containers their own parent chains before the visible splice.
+    if (foregroundGeometry != null) {
+        for (const [id, table] of foregroundGeometry.skeTables) {
+            if (table.parent !== page) {
+                foregroundGeometry.skeTables.set(id, hydrateTable(serializeTable(table, false), page, snapshot, page.segmentId));
+            }
+        }
+        for (const [id, group] of foregroundGeometry.skeColumnGroups) {
+            if (group.parent !== page) {
+                foregroundGeometry.skeColumnGroups.set(id, hydrateColumnGroup(serializeColumnGroup(group, false), page, snapshot, page.segmentId));
+            }
+        }
+    }
+    const geometry = foregroundGeometry ?? {
+        skeTables: applyContinuousTablePatch(page, patch, snapshot),
+        skeDrawings: new Map(
+            patch.skeDrawings.map(([id, drawing]) => [id, hydrateDrawing(drawing, snapshot, page.segmentId)])
+        ),
+        skeColumnGroups: new Map(
+            patch.skeColumnGroups.map(([id, group]) => [id, hydrateColumnGroup(group, page, snapshot, page.segmentId)])
+        ),
+    };
     const sections = page.sections;
     let existingSection = sections[flow.sectionIndex];
     if (options.staging && existingSection != null && existingSection.parent !== page) {
@@ -1002,21 +1025,7 @@ export function applyDocumentSkeletonContinuousBlock(
 
     Object.assign(page, patch.page, {
         sections,
-        ...(!options.preserveEmbeddedGeometry
-            ? {
-                skeDrawings: new Map(patch.skeDrawings.map(([drawingId, drawing]) => [
-                    drawingId,
-                    hydrateDrawing(drawing, snapshot, page.segmentId),
-                ])),
-                skeTables: tables,
-                skeColumnGroups: new Map(
-                    patch.skeColumnGroups.map(([groupId, group]) => [
-                        groupId,
-                        hydrateColumnGroup(group, page, snapshot, page.segmentId),
-                    ])
-                ),
-            }
-            : {}),
+        ...geometry,
         parent: target,
     });
     return page;

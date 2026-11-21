@@ -2026,30 +2026,37 @@ describe('worker document layout session', () => {
     it.each([
         { embedded: 'prefix drawing', drawing: 'inline', publishesTail: true },
         { embedded: 'rotated drawing overlapping the tail', drawing: 'rotated', publishesTail: false },
-        { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: false },
+        { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
+        { embedded: 'progressively published drawing interrupted by a remote edit', drawing: 'suffix', publishesTail: true, interrupt: true },
         { embedded: 'margin-relative prefix drawing after a page break', drawing: 'prefix', publishesTail: true },
         { embedded: 'clipped prefix column group', columns: 'clipped', publishesTail: true },
         { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
+        { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
         { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
-    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail }) => {
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt }) => {
         mockWorkerCanvas();
         const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
         const T = DataStreamTreeTokenType;
         const afterPageBreak = drawing === 'prefix' || drawing === 'suffix';
+        const columnStream = (left: string, right: string) =>
+            [T.COLUMN_GROUP_START, T.COLUMN_START, left, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_START, right, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_GROUP_END].join('');
+        const laterColumns = columns === 'two' ? columnStream('Later left', 'Later right') : '';
         const prefix = columns != null
-            ? [T.COLUMN_GROUP_START, T.COLUMN_START, 'Left', T.PARAGRAPH, T.COLUMN_END, T.COLUMN_START, 'Right', T.PARAGRAPH, T.COLUMN_END, T.COLUMN_GROUP_END].join('')
+            ? columnStream('Left', 'Right')
             : afterPageBreak
                 ? Array.from({ length: 68 }, (_, index) => `Before break ${index} on the first page.\r`).join('') + T.PAGE_BREAK
                 : `Introduction ${T.CUSTOM_BLOCK} before the edit.\r`;
         const lead = drawing === 'prefix' ? `Lead ${T.CUSTOM_BLOCK}.\r` : 'Lead.\r';
         const content = prefix + lead + Array.from({ length: 90 }, (_, index) => {
             const marker = drawing === 'suffix' && index === 24 ? T.CUSTOM_BLOCK : '';
-            return `Paragraph ${index} renders the text following the embedded block.${marker}\r`;
+            const nextGroup = index === 24 ? laterColumns : '';
+            return `Paragraph ${index} renders the text following the embedded block.${marker}\r${nextGroup}`;
         }).join('');
         const seedModel = createDocumentModelWithStyle(content, {});
         const snapshot = seedModel.getSnapshot();
         const drawingId = 'picture';
         const groupId = 'early-columns';
+        const laterGroupId = 'later-columns';
         if (columns != null) {
             snapshot.body!.columnGroups = [{
                 startIndex: 0,
@@ -2064,6 +2071,15 @@ describe('worker document layout session', () => {
                     { columnId: 'right', widthRatio: 1, minWidth: { v: 40 } },
                 ],
             }];
+            if (laterColumns) {
+                const startIndex = content.indexOf(laterColumns);
+                snapshot.body!.columnGroups.push({
+                    ...snapshot.body!.columnGroups[0],
+                    startIndex,
+                    endIndex: startIndex + laterColumns.length,
+                    columnGroupId: laterGroupId,
+                });
+            }
             if (columns === 'shadow') {
                 const start = content.indexOf('Left');
                 snapshot.body!.textRuns = [{
@@ -2105,7 +2121,18 @@ describe('worker document layout session', () => {
             ? visiblePage().skeColumnGroups.get(groupId)
             : visiblePage().skeDrawings.get(drawingId);
         const tailOffset = content.indexOf('Paragraph 35') + 1;
-        const isTailVisible = () => visibleLines().some((line) => line.st <= tailOffset && tailOffset <= line.ed);
+        const isOffsetVisible = (offset: number) => visibleLines().some((line) => line.st <= offset && offset <= line.ed);
+        const insertText = (offset: number, text: string) => {
+            const edit = new TextX();
+            edit.push({ t: TextXActionType.RETAIN, len: offset });
+            edit.push({ t: TextXActionType.INSERT, len: text.length, body: { dataStream: text } });
+            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
+            workerModel.apply(actions);
+            mainModel.apply(actions);
+            worker.resetDataModel(workerModel);
+            main.getViewModel().reset(mainModel);
+            return { oldStart: offset, oldEnd: offset, newEnd: offset + text.length };
+        };
         try {
             const initial = worker.step(worker.start({ reason: 'initial', continuousLayoutVersion: 'v1' }), Number.POSITIVE_INFINITY);
             main.beginExternalLayout({ reason: 'initial' });
@@ -2114,16 +2141,8 @@ describe('worker document layout session', () => {
             expect(baseline).toBe('v1');
 
             const anchor = content.indexOf('Paragraph 15') + 'Paragraph '.length;
-            const edit = new TextX();
-            edit.push({ t: TextXActionType.RETAIN, len: anchor });
-            edit.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
-            const actions = JSONX.getInstance().editOp(edit.serialize(), ['body']);
-            workerModel.apply(actions);
-            mainModel.apply(actions);
-            worker.resetDataModel(workerModel);
-            main.getViewModel().reset(mainModel);
-
-            const invalidation = { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 };
+            const invalidation = insertText(anchor, 'X');
+            const drawingOffset = content.indexOf(T.CUSTOM_BLOCK) + 1; // The edit inserts one character before the suffix anchor.
             const foregroundGeneration = main.startIncrementalLayout({
                 reason: 'edit',
                 anchor,
@@ -2138,7 +2157,7 @@ describe('worker document layout session', () => {
             }
             expect(foregroundProgress.didPublishAnchor).toBe(true);
             expect(foregroundProgress.complete).toBe(false);
-            expect(isTailVisible()).toBe(false);
+            expect(isOffsetVisible(tailOffset)).toBe(false);
             const foregroundElement = normalizeSkeleton(visibleElement());
             if (drawing === 'suffix') {
                 expect(foregroundElement).toBeUndefined();
@@ -2159,7 +2178,9 @@ describe('worker document layout session', () => {
             });
             let intermediateCount = 0;
             let publishedTail = false;
-            let workerPublishedDrawing = false;
+            let publishedDrawingWithAnchor = false;
+            let publishedLaterGroup = false;
+            let stoppedBeforeCompletion = false;
             for (let step = 0; step < 180; step++) {
                 const result = worker.step(generation, 0, 1);
                 if (result.publication?.kind === 'block') {
@@ -2169,10 +2190,30 @@ describe('worker document layout session', () => {
                     expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
                     if (!result.progress.complete) {
                         intermediateCount++;
-                        workerPublishedDrawing ||= result.publication.block.skeDrawings.some(([id]) => id === drawingId);
-                        publishedTail ||= isTailVisible();
+                        publishedTail ||= isOffsetVisible(tailOffset);
                         expect(normalizeSkeleton(visibleLines().slice(0, protectedLines.length))).toEqual(protectedGeometry);
-                        expect(normalizeSkeleton(visibleElement())).toEqual(foregroundElement);
+                        if (drawing === 'suffix') {
+                            const drawingGeometry = visiblePage().skeDrawings.get(drawingId);
+                            expect(drawingGeometry != null).toBe(isOffsetVisible(drawingOffset));
+                            if (drawingGeometry != null) {
+                                const workerDrawing = result.publication.block.skeDrawings.find(([id]) => id === drawingId)?.[1];
+                                expect(workerDrawing).toBeDefined();
+                                expect(drawingGeometry.aTop).toBe(workerDrawing?.aTop);
+                                publishedDrawingWithAnchor = true;
+                            }
+                        } else {
+                            expect(normalizeSkeleton(visibleElement())).toEqual(foregroundElement);
+                            const laterGroup = visiblePage().skeColumnGroups.get(laterGroupId);
+                            if (laterGroup != null) {
+                                expect(isOffsetVisible(laterGroup.st)).toBe(true);
+                                expect(laterGroup.parent).toBe(visiblePage());
+                                publishedLaterGroup = true;
+                            }
+                        }
+                        if (interrupt && publishedDrawingWithAnchor && publishedTail) {
+                            stoppedBeforeCompletion = true;
+                            break;
+                        }
                     }
                 }
                 if (result.progress.complete) {
@@ -2182,13 +2223,72 @@ describe('worker document layout session', () => {
             expect(intermediateCount).toBeGreaterThan(1);
             expect(publishedTail).toBe(publishesTail);
             if (drawing === 'suffix') {
-                expect(workerPublishedDrawing).toBe(true);
+                expect(publishedDrawingWithAnchor).toBe(true);
             }
-            expect(isTailVisible()).toBe(true);
+            if (laterColumns) {
+                expect(publishedLaterGroup).toBe(true);
+            }
+            if (interrupt) {
+                expect(stoppedBeforeCompletion).toBe(true);
+                const discarded = worker.step(generation, Number.POSITIVE_INFINITY, 24);
+                expect(discarded.publication?.kind).toBe('block');
+                expect(discarded.progress.complete).toBe(false);
+                worker.cancel(generation);
+                main.cancelExternalLayout();
+                expect(main.getAppliedContinuousLayoutVersion()).toBe(baseline);
+
+                // The remote edit changes a line in the now-visible Worker tail
+                // while another serialized publication is still in flight.
+                const remoteAnchor = tailOffset + 'Paragraph '.length;
+                const remoteInvalidation = insertText(remoteAnchor, 'remote ');
+                const localWindow = main.startIncrementalLayout({
+                    reason: 'edit',
+                    anchor,
+                    priorityAnchor: anchor,
+                    invalidation: remoteInvalidation,
+                    preserveInteractionWindow: true,
+                    reuseUnaffectedTail: false,
+                });
+                let localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
+                for (let step = 0; step < 180 && !localProgress.didPublishAnchor; step++) {
+                    localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
+                }
+                expect(localProgress.didPublishAnchor).toBe(true);
+                main.beginExternalLayout({
+                    reason: 'edit',
+                    protectedRange: { mode: 'continuous', startOffset: anchor, endOffset: localProgress.stableLaidOutThrough },
+                });
+                const resumed = worker.start({
+                    reason: 'edit',
+                    anchor: remoteAnchor,
+                    priorityAnchor: anchor,
+                    invalidation: remoteInvalidation,
+                    appliedLayoutVersion: baseline,
+                    continuousLayoutVersion: 'v3',
+                });
+                let result = worker.step(resumed, 0, 1);
+                for (let step = 0; step < 180; step++) {
+                    if (result.publication != null) {
+                        expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
+                    }
+                    if (result.progress.complete) {
+                        break;
+                    }
+                    result = worker.step(resumed, 0, 1);
+                }
+                expect(result.progress.complete).toBe(true);
+            }
+            expect(isOffsetVisible(tailOffset)).toBe(true);
             expect(visibleElement()).toBeDefined();
-            expect(main.getAppliedContinuousLayoutVersion()).toBe('v2');
+            expect(main.getAppliedContinuousLayoutVersion()).toBe(interrupt ? 'v3' : 'v2');
             const expected = DocumentLayoutSession.hydratePage(worker.getPage(0)!, workerModel.getSnapshot());
-            expect(normalizeSkeleton(visiblePage())).toEqual(normalizeSkeleton(expected));
+            const visibleGeometry = normalizeSkeleton(visiblePage());
+            expect(visibleGeometry).toEqual(normalizeSkeleton(expected));
+            if (interrupt) {
+                main.makeDirty(true);
+                main.calculate();
+                expect(visibleGeometry).toEqual(normalizeSkeleton(visiblePage()));
+            }
         } finally {
             clock.mockRestore();
             main.dispose();

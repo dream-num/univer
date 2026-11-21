@@ -30,6 +30,7 @@ import {
     resolveDocumentParagraphStyle,
     SectionType,
     Skeleton,
+    TableTextWrapType,
     VerticalAlign,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
@@ -209,45 +210,104 @@ function getUnclippedColumnGroupBottom(group: IDocumentSkeletonColumnGroup, page
     return bottom;
 }
 
-function hasEmbeddedGeometryInFlowSuffix(
+function getDrawingBottom(drawing: IDocumentSkeletonDrawing): number {
+    const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
+    // Layout bounds do not cover transforms or child overflow for these objects.
+    if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
+        drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
+        return Number.POSITIVE_INFINITY;
+    }
+    const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
+    const bottomPadding = Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
+    return (bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding;
+}
+
+function mergeForegroundObjects<T>(
+    foreground: Map<string, T>,
+    worker: ReadonlyMap<string, T>,
+    isInTail: (object: T, id: string, incoming: boolean) => boolean | null
+): Map<string, T> | null {
+    let merged = foreground;
+    for (const [id, object] of foreground) {
+        const inTail = isInTail(object, id, false);
+        if (inTail == null) {
+            return null;
+        }
+        if (inTail) {
+            if (merged === foreground) {
+                merged = new Map(foreground);
+            }
+            merged.delete(id);
+        }
+    }
+    for (const [id, object] of worker) {
+        const inTail = isInTail(object, id, true);
+        if (inTail == null) {
+            return null;
+        }
+        if (inTail) {
+            // The same object must not move from the retained side into the
+            // incoming side of a partial splice (or the other way round).
+            if (merged.has(id)) {
+                return null;
+            }
+            if (merged === foreground) {
+                merged = new Map(foreground);
+            }
+            merged.set(id, object);
+        } else if (foreground.has(id) && !merged.has(id)) {
+            return null;
+        }
+    }
+    return merged;
+}
+
+function mergeProtectedForegroundGeometry(
     page: IDocumentSkeletonPage,
+    workerPage: IDocumentSkeletonPage,
     startOffset: number,
     startTop: number,
     drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
-): boolean {
-    for (const table of page.skeTables.values()) {
-        if (table.ed >= startOffset) {
+): Pick<IDocumentSkeletonPage, 'skeTables' | 'skeColumnGroups' | 'skeDrawings'> | null {
+    const skeTables = mergeForegroundObjects(page.skeTables, workerPage.skeTables, (table) => {
+        if (table.st >= startOffset) {
+            return table.tableSource.textWrap !== TableTextWrapType.WRAP || table.top >= startTop ? true : null;
+        }
+        if (table.ed >= startOffset ||
+            (table.tableSource.textWrap === TableTextWrapType.WRAP && table.top + table.height >= startTop)) {
+            return null;
+        }
+        return false;
+    });
+    const skeColumnGroups = mergeForegroundObjects(page.skeColumnGroups, workerPage.skeColumnGroups, (group, _id, incoming) => {
+        if (group.st >= startOffset) {
             return true;
         }
-    }
-    for (const group of page.skeColumnGroups.values()) {
         if (group.ed >= startOffset || !(group.top + group.height < startTop) ||
-            (group.columnGroupSource.clipContent === BooleanNumber.FALSE && !(getUnclippedColumnGroupBottom(group, page) < startTop))) {
-            return true;
+            (group.columnGroupSource.clipContent === BooleanNumber.FALSE &&
+                !(getUnclippedColumnGroupBottom(group, incoming ? workerPage : page) < startTop))) {
+            return null;
         }
-    }
-    for (const [drawingId, drawing] of page.skeDrawings) {
-        const anchorOffset = drawingAnchorOffsets.get(drawingId);
-        // Floating drawings can paint before their anchors. Use the body offset
-        // because anchor geometry is still fragment-local after a continuous merge.
-        if (anchorOffset == null || anchorOffset >= startOffset) {
-            return true;
+        return false;
+    });
+    const skeDrawings = mergeForegroundObjects(page.skeDrawings, workerPage.skeDrawings, (drawing, id) => {
+        // Anchor offsets determine ownership. After an explicit page break the
+        // drawing's lineTop and blockAnchorTop are still fragment-local.
+        const anchorOffset = drawingAnchorOffsets.get(id);
+        if (anchorOffset == null) {
+            return null;
         }
-
-        const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
-        // Layout bounds do not cover transforms or child overflow for these objects.
-        if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
-            drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
-            return true;
+        if (anchorOffset >= startOffset) {
+            // A non-wrapping float can paint above its anchor without changing the
+            // retained lines. Wrapping drawings may have reflowed the retained side.
+            const layout = drawing.drawingOrigin.layoutType;
+            return layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE ? true : null;
         }
-        const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
-        const bottomPadding = Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
-        const bottom = (bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding;
-        if (!Number.isFinite(bottom) || bottom >= startTop) {
-            return true;
-        }
-    }
-    return false;
+        return getDrawingBottom(drawing) < startTop ? false : null;
+    });
+    return skeTables == null || skeColumnGroups == null || skeDrawings == null
+        ? null
+        : { skeTables, skeColumnGroups, skeDrawings };
 }
 
 function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
@@ -2998,19 +3058,22 @@ export class DocumentSkeleton extends Skeleton {
             this._applyExternalLayoutResources(draft, publication.resources);
             const page = applyDocumentSkeletonContinuousBlock(draft, publication.block, this._docViewModel.getSnapshot(), { staging: true });
             if (!progress.complete) {
-                const didUpdateForeground = this._publishProtectedWorkerFlow(
+                const foregroundUpdate = this._publishProtectedWorkerFlow(
                     publication,
                     page,
                     baseline,
                     protectedContinuousLayout.range.endOffset,
                     protectedContinuousLayout.drawingAnchorOffsets
                 );
-                this._externalLayoutProgress = progress;
-                if (didUpdateForeground) {
+                const visibleProgress = foregroundUpdate?.didPublishEmbeddedGeometry
+                    ? { ...progress, didPublishEmbeddedGeometry: true }
+                    : progress;
+                this._externalLayoutProgress = visibleProgress;
+                if (foregroundUpdate != null) {
                     this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
                     this._dirty$.next(true);
                 }
-                this._layoutProgress$.next(progress);
+                this._layoutProgress$.next(visibleProgress);
                 return { didReplaceProtectedPages: false };
             }
             attachContinuousLayoutGeometry(page);
@@ -3311,7 +3374,7 @@ export class DocumentSkeleton extends Skeleton {
         baseline: IDocumentSkeletonCached,
         protectedEndOffset: number,
         drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
-    ): boolean {
+    ): Pick<IDocumentLayoutProgress, 'didPublishEmbeddedGeometry'> | null {
         const foreground = this._skeletonData;
         const { pageIndex, flow } = publication.block;
         const page = foreground?.pages[pageIndex];
@@ -3321,19 +3384,19 @@ export class DocumentSkeleton extends Skeleton {
         const baselineSection = baselinePage?.sections[flow.sectionIndex];
         if (foreground == null || page == null || page === baselinePage ||
             section == null || section === baselineSection || column == null || column === baselineSection?.columns[flow.columnIndex]) {
-            return false;
+            return null;
         }
         const workerSection = workerPage.sections[flow.sectionIndex];
         const workerColumn = workerSection?.columns[flow.columnIndex];
         if (section.top !== workerSection?.top || column.left !== workerColumn?.left || column.width !== workerColumn?.width) {
-            return false;
+            return null;
         }
         const continuation = this._resolveProtectedContinuousPublication(foreground, publication, protectedEndOffset, workerPage);
         if (continuation == null) {
-            return false;
+            return null;
         }
-        // The visible splice leaves embedded geometry in place. Check the tail
-        // it actually replaces and the incoming tail, in page body coordinates.
+        // Select the objects owned by the same tail as the new lines. Use the
+        // merged page coordinates to guard the retained side of the splice.
         const { lineIndex, lines } = continuation.block.flow;
         const sourceLineIndex = flow.lineIndex + flow.lines.length - lines.length;
         const top = Math.min(
@@ -3341,12 +3404,17 @@ export class DocumentSkeleton extends Skeleton {
             getFlowSuffixTop(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
         );
         const start = lines[0].st;
-        if (!Number.isFinite(top) || hasEmbeddedGeometryInFlowSuffix(page, start, top, drawingAnchorOffsets) ||
-            hasEmbeddedGeometryInFlowSuffix(workerPage, start, top, drawingAnchorOffsets)) {
-            return false;
+        if (!Number.isFinite(top)) {
+            return null;
         }
-        applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { preserveEmbeddedGeometry: true });
-        return true;
+        const foregroundGeometry = mergeProtectedForegroundGeometry(page, workerPage, start, top, drawingAnchorOffsets);
+        if (foregroundGeometry == null) {
+            return null;
+        }
+        const didPublishEmbeddedGeometry = foregroundGeometry.skeDrawings !== page.skeDrawings ||
+            foregroundGeometry.skeTables !== page.skeTables || foregroundGeometry.skeColumnGroups !== page.skeColumnGroups;
+        applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { foregroundGeometry });
+        return { didPublishEmbeddedGeometry };
     }
 
     private _resolveProtectedContinuousPublication(

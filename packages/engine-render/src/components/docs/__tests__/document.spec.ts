@@ -61,6 +61,7 @@ import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Image } from '../../../shape/image';
 import { Path } from '../../../shape/path';
 import { Rect } from '../../../shape/rect';
+import { ScrollBar } from '../../../shape/scroll-bar';
 import { Viewport } from '../../../viewport';
 import { SheetCellDocumentViewModel } from '../../sheets/sheet-cell-document-view-model';
 import { DocBackground } from '../doc-background';
@@ -3385,6 +3386,89 @@ describe('documents render', () => {
         expect(fillRect).toHaveBeenCalled();
 
         documents.dispose();
+    });
+
+    it('draws the tables at the destination of a continuous viewport jump and reverse', () => {
+        const T = DataStreamTreeTokenType;
+        const wrapTable = (text: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const first = wrapTable('A');
+        const second = wrapTable('B');
+        const gap = 'gap\r'.repeat(70);
+        const secondStart = first.length + gap.length;
+        const dataStream = `${first}${gap}${second}\r\n`;
+        const bottomBorder = { width: { v: 20 }, color: { rgb: '#a02030' } };
+        const tableSource = Object.fromEntries(['first', 'second'].map((tableId): [string, ITable] => [tableId, {
+            tableId,
+            align: TableAlignmentType.START,
+            indent: { v: 0 },
+            textWrap: TableTextWrapType.NONE,
+            size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+            position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+            tableRows: [{
+                trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+                tableCells: [tableId === 'first' ? { borderBottom: bottomBorder } : {}],
+            }],
+        }]));
+        const bed = createParagraphLayoutTestBed('', {
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index!, sectionId: `s-${index}` })),
+                tables: [
+                    { tableId: 'first', startIndex: 0, endIndex: first.length },
+                    { tableId: 'second', startIndex: secondStart, endIndex: secondStart + second.length },
+                ],
+            },
+            tableSource,
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        skeleton.calculate();
+        const documents = Documents.create('continuous-scroll-tables', skeleton);
+        scene.addObject(documents, 1);
+        documents.transformByState({ top: 36 });
+        scene.transformByState({ height: 10_000 });
+        const viewport = scene.getMainViewport();
+        const scrollbar = new ScrollBar(viewport);
+        const ctx = canvas.getContext();
+        const text = vi.spyOn(ctx, 'fillText');
+        try {
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const [firstTable, secondTable] = [...page.skeTables.values()];
+            expect(secondTable.top).toBeGreaterThan(viewport.height!);
+            for (const [scrollY, expected] of [[0, 'A'], [secondTable.top, 'B'], [0, 'A']] as const) {
+                text.mockClear();
+                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+                viewport.render(ctx, [documents]);
+                const tableText = text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B');
+                expect(tableText).toEqual([expected]);
+            }
+
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const cellBottom = documents.top + page.marginTop + firstTable.top + firstTable.rows[0].cells[0].pageHeight;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: cellBottom + bottomBorder.width.v / 4 });
+            viewport.render(ctx, [documents]);
+            expect(strokes).toContain(bottomBorder.color.rgb);
+
+            viewport.closeClip();
+            text.mockClear();
+            viewport.render(ctx, [documents]);
+            expect(text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B')).toEqual(['A', 'B']);
+        } finally {
+            scrollbar.dispose();
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
     });
 
     it('visits only viewport-adjacent lines when imported modern geometry keeps a finite page height', () => {

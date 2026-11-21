@@ -39,6 +39,7 @@ import {
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type {
+    IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
@@ -60,13 +61,15 @@ import type { IDocumentLayoutRenderConfig } from './document-layout-presentation
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import type { DocumentViewModel } from './view-model/document-view-model';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../basics/const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, RENDER_CLASS_TYPE } from '../../basics/const';
 import { calculateRectRotate, drawLineByBorderType, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { DocumentSkeletonPageType, GlyphType, LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
 import { DrawingGroupObject } from '../../drawing-group';
+import { MAIN_VIEW_PORT_KEY } from '../../scene';
+import { clippedViewportRenders } from '../../viewport-render-clip';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
@@ -99,6 +102,52 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
 const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
 const TABLE_OVERFLOW_INTERACTION_PADDING = 24;
 const CONTINUOUS_LAYOUT_LINE_OVERSCAN = 240;
+
+interface ITablePaintExtent {
+    top: number;
+    bottom: number;
+    maxBorderWidth: number;
+}
+
+function getTablePaintExtent(table: IDocumentSkeletonTable): ITablePaintExtent | null {
+    let top = 0;
+    let bottom = table.height;
+    let maxBorderWidth = 1;
+
+    for (const row of table.rows) {
+        // A merged cell can extend past the row that owns its content and borders.
+        top = Math.min(top, row.top);
+        for (const cell of row.cells) {
+            if (!shouldClipNestedPageContent(cell) || ![cell.pageHeight, cell.pageWidth].every(Number.isFinite) ||
+                cell.pageHeight < 0 || cell.pageWidth < 0) {
+                return null;
+            }
+            bottom = Math.max(bottom, row.top + cell.pageHeight);
+        }
+        maxBorderWidth = getMaxTableBorderWidth(row.rowSource.tableCells, maxBorderWidth);
+    }
+
+    // Shared edges can use a neighbor's border from the source table.
+    for (const row of table.tableSource.tableRows ?? []) {
+        maxBorderWidth = getMaxTableBorderWidth(row.tableCells, maxBorderWidth);
+    }
+
+    return [top, bottom, maxBorderWidth].every(Number.isFinite) ? { top, bottom, maxBorderWidth } : null;
+}
+
+function getMaxTableBorderWidth(cells: readonly ITableCell[], initialWidth: number): number {
+    let max = initialWidth;
+    for (const cell of cells) {
+        max = Math.max(
+            max,
+            cell.borderTop?.width?.v ?? 1,
+            cell.borderBottom?.width?.v ?? 1,
+            cell.borderLeft?.width?.v ?? 1,
+            cell.borderRight?.width?.v ?? 1
+        );
+    }
+    return max;
+}
 
 function getLineTop(line: IDocumentSkeletonLine): number {
     return line.top + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
@@ -283,6 +332,7 @@ export interface IDocumentGlyphPaint {
 export class Documents extends DocComponent {
     private _glyphPaintSink?: (paints: readonly IDocumentGlyphPaint[]) => void;
     private _glyphPaints: IDocumentGlyphPaint[] = [];
+    private readonly _tablePaintExtents = new WeakMap<IDocumentSkeletonCached, WeakMap<IDocumentSkeletonTable, ITablePaintExtent | null>>();
 
     /** Route actual Docs glyph painters into a host's ordered compositor. */
     setGlyphPaintSink(sink: (paints: readonly IDocumentGlyphPaint[]) => void): IDisposable {
@@ -550,12 +600,15 @@ export class Documents extends DocComponent {
             }
 
             if (skeTables.size > 0) {
+                const tables = isContinuousLayout && centerAngle === 0 && vertexAngle === 0
+                    ? this._getTablesInViewport(ctx, bounds, page, skeletonData, dataModel?.getBody?.()?.customRanges)
+                    : skeTables;
                 ctx.save();
                 ctx.globalAlpha *= bodyOpacity;
                 this._drawTable(
                     ctx,
                     page,
-                    skeTables,
+                    tables,
                     extensions,
                     backgroundExtension,
                     preTextBackgroundExtensions,
@@ -712,6 +765,69 @@ export class Documents extends DocComponent {
             pageTop += y;
         }
         this._glyphPaintSink?.(this._glyphPaints);
+    }
+
+    private _getTablesInViewport(
+        ctx: UniverRenderingContext,
+        bounds: IDocumentRenderBounds | undefined,
+        page: IDocumentSkeletonPage,
+        skeletonData: IDocumentSkeletonCached,
+        customRanges: readonly ICustomRange[] | undefined
+    ): Iterable<[string, IDocumentSkeletonTable]> {
+        const tables = page.skeTables;
+        if (bounds?.viewportKey !== MAIN_VIEW_PORT_KEY || !clippedViewportRenders.has(bounds) ||
+            this.parent?.classType !== RENDER_CLASS_TYPE.SCENE || this._glyphPaintSink ||
+            ctx.globalCompositeOperation !== 'source-over' || ctx.shadowBlur || ctx.shadowOffsetX || ctx.shadowOffsetY ||
+            (ctx.filter && ctx.filter !== 'none')) {
+            return tables;
+        }
+
+        const { b, c, d } = ctx.getTransform();
+        const [, skewY, skewX, scaleY, , offsetY] = this.transform.getMatrix();
+        if (b !== 0 || c !== 0 || skewY !== 0 || skewX !== 0 || d <= 0 || scaleY <= 0) {
+            return tables;
+        }
+
+        // Viewport bounds are in scene coordinates; the table origin is document-local.
+        const viewportTop = (bounds.viewBound.top - offsetY) / scaleY;
+        const viewportBottom = (bounds.viewBound.bottom - offsetY) / scaleY;
+        const originY = this._drawLiquid!.y + page.marginTop;
+        if (![viewportTop, viewportBottom, originY, d].every(Number.isFinite) || viewportTop >= viewportBottom) {
+            return tables;
+        }
+
+        // A new layout publication can change cell extents even when it reuses a table.
+        let extents = this._tablePaintExtents.get(skeletonData);
+        if (!extents) {
+            extents = new WeakMap();
+            this._tablePaintExtents.set(skeletonData, extents);
+        }
+
+        const visibleTables: Array<[string, IDocumentSkeletonTable]> = [];
+        for (const entry of tables) {
+            const [, table] = entry;
+            let extent = extents.get(table);
+            if (extent === undefined) {
+                extent = getTablePaintExtent(table);
+                extents.set(table, extent);
+            }
+            const tableY = originY + table.top;
+            if (extent == null || !Number.isFinite(tableY)) {
+                visibleTables.push(entry);
+                continue;
+            }
+
+            // The stroke is centered on the cell edge. Allow two device pixels for
+            // precision-rounded bounds and antialiasing at a fractional viewport edge.
+            const padding = (extent.maxBorderWidth / 2 + 2) / d;
+            const overlaps = tableY + extent.bottom + padding >= viewportTop && tableY + extent.top - padding <= viewportBottom;
+            // Custom ranges can trigger render work such as formula preparation even
+            // outside the viewport. Let their table keep the original glyph dispatch.
+            if (overlaps || customRanges?.some((range) => range.startIndex <= table.ed && range.endIndex >= table.st)) {
+                visibleTables.push(entry);
+            }
+        }
+        return visibleTables;
     }
 
     private _drawBodySections(
@@ -1102,7 +1218,7 @@ export class Documents extends DocComponent {
     private _drawTable(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
-        skeTables: Map<string, IDocumentSkeletonTable>,
+        skeTables: Iterable<[string, IDocumentSkeletonTable]>,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
         preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],

@@ -649,6 +649,8 @@ describe('General number display', () => {
             fontBoundingBoxDescent: 0,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
             width: text.length * 7,
         }));
 
@@ -670,6 +672,8 @@ describe('Custom number display', () => {
             fontBoundingBoxDescent: 0,
             actualBoundingBoxAscent: 0,
             actualBoundingBoxDescent: 0,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
             width: text.length * 7,
         }));
 

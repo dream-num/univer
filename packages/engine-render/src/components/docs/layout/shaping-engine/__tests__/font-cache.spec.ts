@@ -214,8 +214,41 @@ describe('font cache', () => {
             fontBoundingBoxDescent: 3,
             actualBoundingBoxAscent: 8,
             actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 0,
         });
         expect(measureText).toHaveBeenCalledWith('W');
+    });
+
+    it('extends measured width by the italic overhang so right-aligned text is not clipped', () => {
+        // https://github.com/dream-num/univer/issues/7658
+        const measureText = vi.fn(() => ({
+            width: 16,
+            fontBoundingBoxAscent: 9,
+            fontBoundingBoxDescent: 3,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 18.5,
+        }));
+
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return {
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText,
+                };
+            }
+        });
+
+        const italic = FontCache.getMeasureText('W', 'italic 12px Tahoma', 'auto');
+        expect(italic.width).toBe(18.5);
+        expect(italic.actualBoundingBoxRight).toBe(18.5);
+
+        const upright = FontCache.getMeasureText('W', '12px Tahoma', 'auto');
+        expect(upright.width).toBe(16);
     });
 
     it('handles measure cache lifecycle and fallback metrics', () => {
@@ -251,6 +284,8 @@ describe('font cache', () => {
             fontBoundingBoxDescent: 1,
             actualBoundingBoxAscent: 1,
             actualBoundingBoxDescent: 1,
+            actualBoundingBoxLeft: 0,
+            actualBoundingBoxRight: 1,
         });
         expect(FontCache.getFontMeasureCache('12px Arial', 'B')).toBeTruthy();
         expect(FontCache.clearFontMeasureCache('12px Arial/B')).toBe(true);

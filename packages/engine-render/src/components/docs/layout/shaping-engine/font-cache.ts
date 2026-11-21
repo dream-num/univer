@@ -27,6 +27,8 @@ export interface IMeasureTextCache {
     fontBoundingBoxDescent: number;
     actualBoundingBoxAscent: number;
     actualBoundingBoxDescent: number;
+    actualBoundingBoxLeft: number;
+    actualBoundingBoxRight: number;
     width: number;
 }
 
@@ -321,6 +323,8 @@ export class FontCache {
                 fontBoundingBoxDescent: 0,
                 actualBoundingBoxAscent: 0,
                 actualBoundingBoxDescent: 0,
+                actualBoundingBoxLeft: 0,
+                actualBoundingBoxRight: 0,
             };
         }
         // const { fontString, fontSize, fontFamily } = fontStyle;
@@ -345,6 +349,8 @@ export class FontCache {
             fontBoundingBoxDescent,
             actualBoundingBoxAscent,
             actualBoundingBoxDescent,
+            actualBoundingBoxLeft,
+            actualBoundingBoxRight,
         } = textMetrics;
 
         const cache: IMeasureTextCache = {
@@ -353,7 +359,17 @@ export class FontCache {
             fontBoundingBoxDescent,
             actualBoundingBoxAscent,
             actualBoundingBoxDescent,
+            actualBoundingBoxLeft: actualBoundingBoxLeft ?? 0,
+            actualBoundingBoxRight: actualBoundingBoxRight ?? 0,
         };
+
+        // Italic glyphs slant past their advance width, so the ink extends beyond
+        // `width` on the right. Right-aligned (or centered) text positioned by the
+        // advance width gets its overhang clipped by the cell boundary.
+        // https://github.com/dream-num/univer/issues/7658
+        if (/\bitalic\b/.test(fontString) && Number.isFinite(cache.actualBoundingBoxRight)) {
+            cache.width = Math.max(cache.width, cache.actualBoundingBoxRight);
+        }
 
         // Compatibility for browsers that do not support textMetrics
         if (

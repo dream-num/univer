@@ -278,7 +278,10 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 setSkinToneMenuOpen(false);
             }}
             className={clsx(
-                'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
+                `
+                  univer-flex univer-h-[340px] univer-w-[min(420px,calc(100vw-16px))] univer-max-w-full univer-flex-col
+                  univer-overflow-hidden
+                `,
                 !props.embedded && `
                   univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
                   univer-shadow-lg
@@ -454,8 +457,9 @@ function EmojiButton(props: {
             title={title}
             className={clsx(
                 `
-                  univer-flex univer-size-7 univer-cursor-pointer univer-items-center univer-justify-center
-                  univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0 univer-text-lg
+                  univer-flex univer-size-7 univer-max-w-full univer-cursor-pointer univer-items-center
+                  univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0
+                  univer-text-lg
                   focus-visible:univer-outline-none focus-visible:univer-ring-1 focus-visible:univer-ring-primary-600
                   dark:!univer-text-gray-200
                 `,
@@ -481,7 +485,7 @@ function EmojiButton(props: {
 
     const variants = getEmojiFamilyVariants(props.item.emoji);
     return (
-        <div className="univer-relative univer-size-7">
+        <div className="univer-relative univer-size-7 univer-max-w-full">
             {button}
             <props.DropdownComponent
                 align="end"

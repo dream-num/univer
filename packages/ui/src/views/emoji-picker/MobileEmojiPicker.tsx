@@ -19,5 +19,5 @@ import type { IEmojiPickerProps } from './EmojiPicker';
 import { EmojiPicker } from './EmojiPicker';
 
 export function MobileEmojiPicker(props: IEmojiPickerProps) {
-    return <EmojiPicker {...props} horizontalPadding={props.horizontalPadding ?? !props.embedded} DropdownComponent={MobileDropdown} />;
+    return <EmojiPicker {...props} DropdownComponent={MobileDropdown} />;
 }

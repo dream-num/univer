@@ -280,15 +280,14 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 setSkinToneMenuOpen(false);
             }}
             className={clsx(
-                `
-                  univer-flex univer-h-[340px] univer-w-[min(420px,calc(100vw-16px))] univer-max-w-full univer-flex-col
-                  univer-overflow-hidden
-                `,
-                !props.embedded && `
-                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
-                  univer-shadow-lg
-                  dark:!univer-border-gray-600 dark:!univer-bg-gray-900
-                `
+                'univer-flex univer-h-[340px] univer-max-w-full univer-flex-col univer-overflow-hidden',
+                props.embedded
+                    ? 'univer-w-[min(420px,calc(100vw-2px))]'
+                    : `
+                      univer-w-[min(420px,calc(100vw-16px))] univer-rounded-[10px] univer-border univer-border-solid
+                      univer-border-gray-200 univer-bg-gray-0 univer-shadow-lg
+                      dark:!univer-border-gray-600 dark:!univer-bg-gray-900
+                    `
             )}
         >
             <div className={clsx('univer-flex univer-items-center univer-gap-1 univer-pb-2 univer-pt-2.5', contentInset)}>

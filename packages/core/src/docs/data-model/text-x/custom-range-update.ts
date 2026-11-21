@@ -18,6 +18,7 @@ import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-do
 import type { IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import { TextXActionType } from './action-types';
 import { deleteCustomRanges, insertCustomRanges } from './apply-utils/common';
@@ -181,6 +182,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         return;
     }
     const ranges = doc.customRanges ?? [];
+    let hasBookmarkUpdate = false;
     for (const { rangeId, range, nextRangeId, propertyPaths } of [...updates].reverse()) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
@@ -190,6 +192,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             continue;
         }
         if (range) {
+            hasBookmarkUpdate ||= range.rangeType === CustomRangeType.BOOKMARK;
             if (nextRangeId !== undefined) {
                 if (index >= 0) {
                     ranges.splice(index, 1);
@@ -204,6 +207,10 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         } else if (index >= 0) {
             ranges.splice(index, 1);
         }
+    }
+    if (hasBookmarkUpdate) {
+        // Text insertion also orders ranges by position. A stable sort preserves coincident range nesting.
+        ranges.sort((left, right) => left.startIndex - right.startIndex);
     }
     doc.customRanges = ranges;
 }

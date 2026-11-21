@@ -20,8 +20,13 @@ import { SheetPermissionCheckController } from '@univerjs/sheets';
 import type { ISheetDeleteNoteCommandParams } from '../commands/commands/note.command';
 import type { IUpdateNoteMutationParams } from '../commands/mutations/note.mutation';
 import type { LocaleKey } from '../locale/types';
-import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '../commands/commands/note.command';
-import { SHEET_NOTE_EDIT_PERMISSIONS } from '../const';
+import {
+    SheetDeleteNoteCommand,
+    SheetToggleNotePopupCommand,
+    SheetUpdateNoteCommand,
+} from '../commands/commands/note.command';
+import { SHEET_NOTE_EDIT_PERMISSIONS, SHEET_NOTE_TOGGLE_PERMISSIONS } from '../const';
+import { SheetsNoteModel } from '../models/sheets-note.model';
 
 /**
  * Blocks note writes without edit permission in the base package, so headless
@@ -33,6 +38,7 @@ export class SheetsNotePermissionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController,
+        @Inject(SheetsNoteModel) private readonly _noteModel: SheetsNoteModel,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
@@ -51,7 +57,11 @@ export class SheetsNotePermissionController extends Disposable {
                         return;
                     }
 
-                    if (!this._checkCell(params.unitId, params.sheetId, params.row, params.col)) {
+                    const { unitId, sheetId, row, col, note } = params;
+                    const previous = this._noteModel.getNote(unitId, sheetId, { noteId: note.id });
+                    const moving = previous && (previous.row !== row || previous.col !== col);
+                    if (!this._checkCell(unitId, sheetId, row, col) ||
+                        (moving && !this._checkCell(unitId, sheetId, previous.row, previous.col))) {
                         this._blockExecute();
                     }
                 } else if (id === SheetDeleteNoteCommand.id) {
@@ -65,7 +75,7 @@ export class SheetsNotePermissionController extends Disposable {
                     }
                 } else if (id === SheetToggleNotePopupCommand.id) {
                     // Showing or hiding a note changes the persisted note, so it is a write.
-                    if (!this._sheetPermissionCheckController.permissionCheckWithoutRange(SHEET_NOTE_EDIT_PERMISSIONS)) {
+                    if (!this._sheetPermissionCheckController.permissionCheckWithoutRange(SHEET_NOTE_TOGGLE_PERMISSIONS)) {
                         this._blockExecute();
                     }
                 }

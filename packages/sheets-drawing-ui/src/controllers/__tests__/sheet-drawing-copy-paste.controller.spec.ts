@@ -338,7 +338,7 @@ describe('SheetsDrawingCopyPasteController', () => {
             unitId: 'unit-2',
             subUnitId: 'sheet-2',
             transform: { left: 35, top: 45, width: 10, height: 20 },
-            sheetTransform: {
+            axisAlignSheetTransform: {
                 from: { row: 2, column: 3, rowOffset: 5, columnOffset: 5 },
                 to: { row: 3, column: 4, rowOffset: 5, columnOffset: 5 },
             },

@@ -211,7 +211,7 @@ it('commits actual None feature updates through both stores, full save/reopen an
     await Promise.resolve();
     const changed = bed.drawings.getDrawingByParam(search)!;
     expect(changed.transform).toMatchObject({ ...before.transform, left: 210, top: 180, width: 330, height: 220 });
-    expect(changed.sheetTransform.from).toEqual({ row: 0, column: 0, columnOffset: 210, rowOffset: 180 });
+    expect(changed.axisAlignSheetTransform.from).toEqual({ row: 0, column: 0, columnOffset: 210, rowOffset: 180 });
     expect(bed.drawingManager.getDrawingByParam(search)).toEqual(changed);
     expect(bed.manager.getFloatDomInfo('child')!.rect.width).toBe(330);
     expect(bed.manager.getFloatDomInfo('child')!.rect.left).toBe(210);
@@ -266,7 +266,7 @@ describe('target-bound image insertion', () => {
         finish({ imageId: 'new-image', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
         expect(await pending).toBe(true);
         const image = bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'new-image' })!;
-        expect(image.sheetTransform.from).toMatchObject({ row: 3, column: 4 });
+        expect(image.axisAlignSheetTransform.from).toMatchObject({ row: 3, column: 4 });
         expect(image.transform).toMatchObject({ width: 500, height: 250 });
         expect(bed.drawings.getDrawingData('test', 'chart')).toEqual({});
         expect(await bed.commandService.executeCommand(UndoCommand.id)).toBe(true);
@@ -290,8 +290,8 @@ describe('target-bound image insertion', () => {
         expect(await second).toBe(true);
         uploads[0]({ imageId: 'first', imageSourceType: ImageSourceType.BASE64, source: 'data:image/png;base64,test', base64Cache: 'data:image/png;base64,test', status: ImageUploadStatusType.SUCCUSS });
         expect(await first).toBe(true);
-        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'first' })?.sheetTransform.from).toMatchObject({ row: 1, column: 2 });
-        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'second' })?.sheetTransform.from).toMatchObject({ row: 5, column: 6 });
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'first' })?.axisAlignSheetTransform.from).toMatchObject({ row: 1, column: 2 });
+        expect(bed.drawings.getDrawingByParam({ unitId: 'test', subUnitId: 'grid', drawingId: 'second' })?.axisAlignSheetTransform.from).toMatchObject({ row: 5, column: 6 });
     });
 
     it('cancels a Grid upload if its captured sheet is deleted', async () => {

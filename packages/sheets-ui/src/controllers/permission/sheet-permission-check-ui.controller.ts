@@ -35,14 +35,20 @@ import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionRuleModel,
     SheetPermissionCheckController,
+    WorkbookDeleteSheetPermission,
     WorkbookEditablePermission,
+    WorkbookHideSheetPermission,
+    WorkbookRenameSheetPermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
+    WorksheetSetColumnStylePermission,
 } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import type { LocaleKey } from '../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import {
     SetColumnFrozenCommand,
@@ -51,7 +57,10 @@ import {
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
+import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
 import {
     UNIVER_SHEET_PERMISSION_ALERT_DIALOG,
     UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
@@ -155,6 +164,41 @@ export class SheetPermissionCheckUIController extends Disposable {
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.commonErr');
+                break;
+            case SetWorksheetColAutoWidthCommand.id:
+                params = commandInfo.params as ISetWorksheetColIsAutoWidthCommandParams | undefined;
+
+                // Column width follows the column style permission only, so read-only workbooks can still fit columns.
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    worksheetTypes: [WorksheetSetColumnStylePermission],
+                }, params?.unitId, params?.subUnitId);
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.setRowColStyleErr');
+                break;
+            case RemoveSheetConfirmCommand.id:
+                params = commandInfo.params as { subUnitId?: string } | undefined;
+
+                // Check before the confirmation dialog opens so users without delete
+                // permission are blocked up front instead of after confirming.
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission, WorkbookDeleteSheetPermission],
+                }, undefined, params?.subUnitId);
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.operatorSheetErr');
+                break;
+            case RenameSheetOperation.id:
+                params = commandInfo.params as { subUnitId?: string } | undefined;
+
+                // Check before the inline rename editor opens.
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission, WorkbookRenameSheetPermission],
+                }, undefined, params?.subUnitId);
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.operatorSheetErr');
+                break;
+            case ShowMenuListCommand.id:
+                // Check before the unhide menu opens.
+                permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission, WorkbookHideSheetPermission],
+                });
+                errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.operatorSheetErr');
                 break;
             case SetSelectionFrozenCommand.id:
             case SetRowFrozenCommand.id:

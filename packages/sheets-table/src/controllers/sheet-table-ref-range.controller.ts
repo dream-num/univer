@@ -625,11 +625,7 @@ export class SheetTableRefRangeController extends Disposable {
                             startColumn: tableRange.startColumn + insertCount,
                             endColumn: tableRange.endColumn + insertCount,
                         };
-                        if (hasTableDxfStyles(table.toJSON())) {
-                            this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
-                        } else {
-                            this._tableManager.updateTableRange(unitId, table.getId(), { newRange });
-                        }
+                        this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
                     }
                 });
             } else if (commandInfo.id === RemoveRowMutation.id) {
@@ -662,7 +658,7 @@ export class SheetTableRefRangeController extends Disposable {
                             startColumn: tableRange.startColumn - removeCount,
                             endColumn: tableRange.endColumn - removeCount,
                         };
-                        if (hasTableDxfStyles(table.toJSON())) {
+                        if (range.endColumn < tableRange.startColumn || hasTableDxfStyles(table.toJSON())) {
                             this._tableManager.moveTable(unitId, table.getId(), subUnitId, newRange);
                         } else {
                             this._tableManager.updateTableRange(unitId, table.getId(), { newRange });

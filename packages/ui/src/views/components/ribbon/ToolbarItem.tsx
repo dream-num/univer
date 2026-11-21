@@ -36,6 +36,7 @@ export type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     grid?: boolean;
     overflow?: boolean;
     large?: boolean;
+    alignStart?: boolean;
     showLabel?: boolean;
     iconSize?: number;
     iconColor?: string;
@@ -50,10 +51,8 @@ const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-a
 const toolbarButtonSelectorRootVariants = cva(
     `
       univer-toolbar-button-selector-root univer-animate-in univer-fade-in univer-group univer-relative univer-flex
-      univer-h-7 univer-cursor-pointer univer-items-center univer-rounded univer-pr-6 univer-text-sm
-      univer-transition-colors
+      univer-h-7 univer-cursor-pointer univer-items-center univer-rounded univer-text-sm univer-transition-colors
       hover:univer-bg-gray-100
-      rtl:univer-pl-6 rtl:univer-pr-0
       dark:hover:!univer-bg-gray-700
     `,
     {
@@ -74,7 +73,7 @@ const toolbarButtonSelectorRootVariants = cva(
 
 const toolbarButtonSelectorMainVariants = cva(
     `
-      univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-min-w-7
+      univer-toolbar-button-selector-main univer-relative univer-z-[1] univer-flex univer-h-full univer-min-w-6
       univer-items-center univer-justify-center univer-rounded-l univer-px-1 univer-transition-colors
       hover:univer-bg-gray-200
       rtl:univer-rounded-l-none rtl:univer-rounded-r
@@ -110,10 +109,10 @@ const toolbarButtonSelectorMainVariants = cva(
 
 const toolbarButtonSelectorTriggerVariants = cva(
     `
-      univer-toolbar-button-selector-trigger univer-absolute univer-right-0 univer-top-0 univer-box-border univer-flex
-      univer-h-7 univer-w-6 univer-items-center univer-justify-center univer-rounded-r univer-transition-colors
+      univer-toolbar-button-selector-trigger univer-box-border univer-flex univer-h-7 univer-min-w-4 univer-flex-1
+      univer-items-center univer-justify-start univer-rounded-r univer-p-0 univer-transition-colors
       hover:univer-bg-gray-200
-      rtl:univer-left-0 rtl:univer-right-auto rtl:univer-rounded-l rtl:univer-rounded-r-none
+      rtl:univer-rounded-l rtl:univer-rounded-r-none
       dark:hover:!univer-bg-gray-600
     `,
     {
@@ -226,11 +225,12 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         grid,
         overflow,
         large,
+        alignStart,
         showLabel,
         iconSize,
         iconColor,
         fullWidth,
-        preserveStrokeWidth,
+        preserveStrokeWidth = true,
         dropdownComponent,
         dropdownMenuComponent,
     } = props;
@@ -268,6 +268,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
     }, [icon, options, value]);
 
     const iconToDisplay = useObservable(icon$, undefined, true);
+    const alignIconStart = alignStart && iconToDisplay && !label;
 
     function renderSelectorType(menuType: MenuItemType) {
         const selectionsCommandId = (props as IDisplayMenuItem<IMenuSelectorItem>).selectionsCommandId;
@@ -276,6 +277,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const customLabelName = typeof label === 'string' ? label : label?.name ?? '';
         const hasCustomLabel = Boolean(componentManager.get(customLabelName));
         const SelectorTrigger = hasCustomLabel ? ToolbarDropdownButton : 'div';
+        const isGridField = grid && !large && !icon;
         let titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
         if (overflow) {
             titleToDisplay = hasCustomLabel || (iconToDisplay && !showLabel) ? undefined : gridLabel;
@@ -319,8 +321,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     data-disabled={disabled}
                     aria-disabled={disabled}
                     className={clsx(toolbarButtonSelectorRootVariants({ disabled }), {
-                        'univer-box-border univer-h-full univer-min-w-14 univer-flex-col !univer-pr-0': grid && large,
-                        'univer-box-border univer-h-full': grid && !large,
+                        'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-text-xs': grid && large,
+                        'univer-box-border univer-h-full univer-text-xs': grid && !large,
+                        'univer-mx-auto !univer-w-max': grid && !large && !overflow && !alignStart && iconToDisplay && !label && !titleToDisplay,
                         '!univer-h-auto univer-min-h-7 univer-w-full univer-text-xs': overflow,
                     })}
                 >
@@ -334,7 +337,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                           focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                         `, toolbarButtonSelectorMainVariants({ active: activated, disabled }), {
                             'univer-h-full univer-w-full univer-flex-col univer-justify-center univer-rounded univer-px-1 univer-pb-4 [&>svg]:univer-size-6': grid && large,
-                            '[&>svg]:univer-size-4': grid && !large,
+                            'univer-min-w-5 univer-flex-1 univer-px-0.5 [&>svg]:univer-size-4': grid && !large,
+                            'univer-text-xs': grid,
+                            'univer-flex-none univer-justify-start univer-px-1': alignIconStart,
                             'univer-min-h-7 univer-min-w-0 univer-flex-1 univer-gap-1.5 univer-whitespace-normal univer-px-1.5 univer-text-start': overflow,
                         })}
                         onClick={handleClick}
@@ -369,8 +374,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                               univer-border-0 univer-bg-transparent univer-text-inherit
                               focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
                             `, toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
-                                '!univer-top-auto univer-bottom-0 univer-h-4 univer-w-full univer-rounded-b univer-rounded-t-none': grid && large,
-                                'univer-h-full': grid && !large,
+                                'univer-absolute univer-bottom-0 univer-h-4 univer-w-full univer-justify-center univer-rounded-b univer-rounded-t-none': grid && large,
+                                'univer-h-full univer-w-4 univer-flex-none univer-justify-center': grid && !large,
+                                'univer-flex-1 univer-justify-start': alignIconStart,
                             })}
                             data-disabled={disabled}
                         >
@@ -396,15 +402,15 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         data-u-command={id}
                         role={hasCustomLabel ? undefined : 'button'}
                         tabIndex={hasCustomLabel ? undefined : disabled ? -1 : 0}
-                        aria-disabled={hasCustomLabel ? undefined : disabled}
+                        aria-disabled={disabled}
                         aria-label={hasCustomLabel ? undefined : selectorAriaLabel}
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-6': grid && large,
-                            'univer-box-border univer-h-full': grid && !large,
-                            'univer-bg-gray-0 dark:!univer-bg-gray-800': grid && !large && !icon,
+                            'univer-box-border univer-h-full univer-text-xs': grid && !large,
+                            'univer-bg-gray-0 univer-pr-0.5 rtl:univer-pl-0.5 rtl:univer-pr-1 dark:!univer-bg-gray-800': isGridField,
                             '[&>svg]:univer-size-4': grid && !large,
                             '!univer-h-auto univer-min-h-7 univer-w-full univer-min-w-0 univer-gap-1.5 univer-whitespace-normal univer-px-1.5 univer-text-start univer-text-xs focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 [&>span]:univer-min-w-0 [&>span]:univer-whitespace-normal': overflow,
-                        }, grid && !large && !icon && borderClassName)}
+                        }, isGridField && borderClassName)}
                     >
                         {grid && large
                             ? (
@@ -417,11 +423,12 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                     <div
                                         className={clsx(
                                             toolbarSelectorTriggerVariants({ disabled }),
-                                            'univer-h-4 univer-justify-center univer-gap-0.5'
+                                            'univer-h-4 univer-justify-center univer-gap-1'
                                         )}
                                     >
                                         <CustomLabel
                                             ariaLabel={selectorAriaLabel}
+                                            preserveStrokeWidth={preserveStrokeWidth}
                                             title={titleToDisplay}
                                             value={value}
                                             label={label}
@@ -450,14 +457,17 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                         disabled={hasCustomLabel ? disabled : undefined}
                                         aria-label={hasCustomLabel ? selectorAriaLabel : undefined}
                                         aria-haspopup={hasCustomLabel ? slot ? 'dialog' : 'menu' : undefined}
-                                        className={clsx(toolbarSelectorTriggerVariants({ disabled }), {
-                                            'univer-ml-auto rtl:univer-ml-0 rtl:univer-mr-auto': grid && !large && !icon,
-                                        }, 'univer-w-6 univer-shrink-0 univer-justify-center', hasCustomLabel && `
-                                          univer-h-7 univer-cursor-pointer univer-rounded univer-border-0
-                                          univer-bg-transparent univer-p-0 univer-text-inherit
-                                          focus-visible:univer-outline-none focus-visible:univer-ring-2
-                                          focus-visible:univer-ring-inset focus-visible:univer-ring-primary-600
-                                        `)}
+                                        className={clsx(toolbarSelectorTriggerVariants({ disabled }), iconToDisplay
+                                            ? 'univer-w-4 univer-shrink-0 univer-justify-start'
+                                            : 'univer-w-6 univer-shrink-0 univer-justify-center', isGridField && `
+                                              univer-ml-auto univer-justify-end
+                                              rtl:univer-ml-0 rtl:univer-mr-auto
+                                            `, hasCustomLabel && `
+                                              univer-h-7 univer-cursor-pointer univer-rounded univer-border-0
+                                              univer-bg-transparent univer-p-0 univer-text-inherit
+                                              focus-visible:univer-outline-none focus-visible:univer-ring-2
+                                              focus-visible:univer-ring-inset focus-visible:univer-ring-primary-600
+                                            `)}
                                     >
                                         <MoreDownIcon className="univer-size-3" preserveStrokeWidth={preserveStrokeWidth} />
                                     </SelectorTrigger>
@@ -477,20 +487,20 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 ? localeService.t(title)
                 : undefined;
         const buttonClassName = clsx(grid && !large && `
-          univer-min-w-7
+          univer-h-full univer-min-w-7 univer-text-xs
           [&>svg]:univer-size-4
         `, grid && large
             ? `
               univer-h-full univer-min-w-14 univer-flex-col univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs
               [&>svg]:univer-size-6
             `
-            : showLabel
-                ? 'univer-gap-1 univer-px-1.5 univer-text-sm'
-                : 'univer-text-sm', grid && (fullWidth || large) && isCustomComponent && '!univer-p-0', overflow && `
-                  !univer-h-auto univer-min-h-7 univer-w-full univer-justify-start univer-gap-1.5
-                  univer-whitespace-normal univer-px-1.5 univer-py-1 univer-text-start univer-text-xs
-                  focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
-                `);
+            : showLabel && 'univer-gap-1 univer-px-1.5', !grid && 'univer-text-sm', grid && isCustomComponent && `
+              !univer-p-0
+            `, overflow && `
+              !univer-h-auto univer-min-h-7 univer-w-full univer-justify-start univer-gap-1.5 univer-whitespace-normal
+              univer-px-1.5 univer-py-1 univer-text-start univer-text-xs
+              focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
+            `, alignIconStart && 'univer-justify-start univer-px-1');
         const buttonStyle = grid && large ? { textAlign: 'center', whiteSpace: 'normal' } as const : undefined;
 
         if (isCustomComponent) {

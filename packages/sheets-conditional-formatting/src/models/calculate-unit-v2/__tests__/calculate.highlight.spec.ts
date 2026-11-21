@@ -637,6 +637,26 @@ describe('Test conditional formatting highlight', () => {
             const result = testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
             expect(result).toEqual({ style: {} });
         });
+        // Excel builds these rules from SEARCH and "=", which ignore case.
+        it.each<{ operator: CFTextOperator; value: string; matched: boolean }>([
+            { operator: CFTextOperator.beginsWith, value: 'APPLE', matched: true },
+            { operator: CFTextOperator.endsWith, value: 'PIE', matched: true },
+            { operator: CFTextOperator.containsText, value: 'le p', matched: true },
+            { operator: CFTextOperator.notContainsText, value: 'APPLE', matched: false },
+            { operator: CFTextOperator.equal, value: 'apple pie', matched: true },
+            { operator: CFTextOperator.notEqual, value: 'APPLE PIE', matched: false },
+        ])('compares text case-insensitively for $operator "$value"', ({ operator, value, matched }) => {
+            (testBed.workbook as Workbook).getSheetBySheetId(testBed.subUnitId)!.getCellMatrix().setValue(0, 0, { v: 'Apple Pie', t: CellValueType.STRING });
+            testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, {
+                ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+                cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                stopIfTrue: false,
+                rule: { type: CFRuleType.highlightCell, subType: CFSubRuleType.text, operator, value, style: { bl: 1 } } as ITextHighlightCell,
+            });
+            testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 0);
+            expect(testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 0, 0))
+                .toEqual({ style: matched ? { bl: 1 } : {} });
+        });
     });
     describe('Test average', () => {
         it(`is ${CFNumberOperator.greaterThanOrEqual} average`, () => {

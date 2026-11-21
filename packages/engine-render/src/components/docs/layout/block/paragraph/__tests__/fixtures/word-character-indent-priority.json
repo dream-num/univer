@@ -1,0 +1,411 @@
+{
+    "source": "Independent Word COM first prints and zero-character inheritance observations",
+    "actualObservationSha256": "b919368551424da4dbfc6f908f8bb8148b4332ad4af31dccfbb43a3f79e5310a",
+    "actualWordSessionSha256": "902387ef7f6c43c2c36d8d01cfa97d3f38af5cb7fd7bdb97d81a6a2991b9bd2c",
+    "actualSourceDocxSha256": "8fd22bae7494b61051224823e7e316ad2f875d927f780fa8c1c27590381d61f1",
+    "styles": {
+        "Start": {
+            "type": 1,
+            "name": "Start",
+            "basedOn": "Normal",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 2,
+                    "u": 2,
+                    "fallback": 13.333333333333334
+                }
+            }
+        },
+        "First": {
+            "type": 1,
+            "name": "First",
+            "basedOn": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2,
+                    "u": 2,
+                    "fallback": 13.333333333333334
+                }
+            }
+        },
+        "Hang": {
+            "type": 1,
+            "name": "Hang",
+            "basedOn": "Normal",
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 2,
+                    "u": 2,
+                    "fallback": 13.333333333333334
+                }
+            }
+        }
+    },
+    "cases": [
+        {
+            "name": "zero-first-no-absolute",
+            "styleId": "Hang",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -10.0
+        },
+        {
+            "name": "zero-first-with-absolute",
+            "styleId": "Hang",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 12.0
+        },
+        {
+            "name": "zero-hang-no-absolute",
+            "styleId": "First",
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 0.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 10.0
+        },
+        {
+            "name": "zero-hang-with-absolute",
+            "styleId": "First",
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -12.0
+        },
+        {
+            "name": "reset-inherited-hang-with-absolute",
+            "styleId": "Hang",
+            "paragraphStyle": {
+                "hanging": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -12.0
+        },
+        {
+            "name": "reset-inherited-first-with-absolute",
+            "styleId": "First",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 12.0
+        },
+        {
+            "name": "zero-left-and-char-hang",
+            "styleId": "Start",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 0.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "physical-left-and-hang-inherit-start",
+            "styleId": "Start",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 16.0
+                },
+                "hanging": {
+                    "v": 26.666666666666668
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 40.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "physical-first-inherit-char-hang",
+            "styleId": "Hang",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 20.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -20.0
+        },
+        {
+            "name": "char-left-physical-hang-inherit-first",
+            "styleId": "First",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 3.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 26.666666666666668
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 30.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 20.0
+        },
+        {
+            "name": "zero-left-physical-only",
+            "styleId": "Start",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 12.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "zero-left-no-physical",
+            "styleId": "Start",
+            "paragraphStyle": {
+                "indentStart": {
+                    "v": 0.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 10,
+            "bodyFontSize": 10.0,
+            "wordLeft": 10.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "same-level-both-char",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 22.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -22.0
+        },
+        {
+            "name": "same-level-first-char-zero-hang",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 0.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "same-level-zero-first-hang-char",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 22.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -22.0
+        },
+        {
+            "name": "same-level-physical-first-zero-hang",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 16.0
+                },
+                "hanging": {
+                    "v": 0.0
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "same-level-zero-first-physical-hang",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0
+                },
+                "hanging": {
+                    "v": 16.0
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -12.0
+        },
+        {
+            "name": "same-level-first-char-zero-physical-hang",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 0.0
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 22.0
+        },
+        {
+            "name": "same-level-both-zero-char-both-physical",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 16.0
+                },
+                "hanging": {
+                    "v": 0.0,
+                    "u": 2,
+                    "fallback": 0.0
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 0.0,
+            "wordRight": 0.0,
+            "wordFirstLine": 0.0
+        },
+        {
+            "name": "same-level-both-char-both-physical",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2,
+                    "fallback": 16.0
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2,
+                    "fallback": 32.0
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 22.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -22.0
+        },
+        {
+            "name": "same-level-reverse-both-char",
+            "styleId": "Normal",
+            "paragraphStyle": {
+                "indentFirstLine": {
+                    "v": 2.0,
+                    "u": 2
+                },
+                "hanging": {
+                    "v": 2.0,
+                    "u": 2
+                }
+            },
+            "normalFontSize": 11,
+            "bodyFontSize": 11.0,
+            "wordLeft": 22.0,
+            "wordRight": 0.0,
+            "wordFirstLine": -22.0
+        }
+    ],
+    "actualSameLevelWordObservationSha256": "6100472e4e803f70f96bf79094879d41e5c3e280b563f20f7ea56df88d1b4795",
+    "actualSameLevelWordSessionSha256": "75e9975ab3b72a5ac824155c0604c7db11f72eb3d07b33c6c3eb2ca92ddb612d"
+}

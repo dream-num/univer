@@ -20,10 +20,12 @@ import {
     characterSpacingControlType,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocStyleType,
     DocumentFlavor,
     MODERN_DOCUMENT_DEFAULT_MARGIN,
     NamedStyleType,
     PositionedObjectLayoutType,
+    SpecialCharacterKind,
     TabStopAlignment,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
@@ -33,13 +35,332 @@ import { getDocumentCompatibilityPolicy } from '../../../../document-compatibili
 import { Lang } from '../../../hyphenation/lang';
 import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
+import { resolveNoteReferences } from '../../../note-numbering';
 import { FontCache } from '../../../shaping-engine/font-cache';
 import { clearFontCreateConfigCache } from '../../../tools';
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
+import wordUrlHyphenBreaks from './fixtures/word-url-hyphen-breaks.json';
 
 describe('shaping', () => {
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        ['X', '9', 'é', 'e\u0301'].flatMap((suffix) => [false, true].map((field) =>
+            ({ documentFlavor, suffix, field })))))('breaks before a Word fullwidth parenthesis after a word ($documentFlavor/$suffix/field=$field)', ({ documentFlavor, suffix, field }) => {
+        const prefix = 'Reference 10-';
+        const word = `20${suffix}`;
+        const content = `${prefix}${field ? `\x1F${word}\x1E` : word}（978-1-23456-789-0）．`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+            body: { customRanges: field
+                ? [{
+                    rangeId: 'word-before-parenthesis',
+                    rangeType: CustomRangeType.FIELD,
+                    startIndex: prefix.length,
+                    endIndex: prefix.length + 1 + word.length,
+                    properties: { fieldType: 'REF', instruction: 'REF word_target', cachedResult: word },
+                }]
+                : [] },
+        });
+        try {
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const points = result.map((item) => (offset += item.glyphs.reduce((sum, glyph) => sum + glyph.count, 0)));
+            expect(points.includes(content.indexOf('（'))).toBe(documentFlavor === DocumentFlavor.TRADITIONAL);
+            expect(result.map((item) => item.text).join('').replace(/[\x1E\x1F]/g, '')).toBe(`${content.replace(/[\x1E\x1F]/g, '')}\r`);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(['X', '9', 'é', 'e\u0301'])('retains a Word word beside an ASCII parenthesis: %s', (suffix) => {
+        const content = `Reference 20${suffix}(978-1-23456-789-0)`;
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL } });
+        try {
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const points = result.map((item) => (offset += item.glyphs.reduce((sum, glyph) => sum + glyph.count, 0)));
+            expect(points).not.toContain(content.indexOf('('));
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(['\u00A0', '\u2060'])('retains an explicit Word no-break control before a fullwidth parenthesis: %s', (joiner) => {
+        const content = `Reference 20X${joiner}（978-1-23456-789-0）`;
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL } });
+        try {
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const points = result.map((item) => (offset += item.glyphs.reduce((sum, glyph) => sum + glyph.count, 0)));
+            expect(points).not.toContain(content.indexOf('（'));
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [
+            characterSpacingControlType.compressPunctuation,
+            characterSpacingControlType.compressPunctuationAndJapaneseKana,
+            characterSpacingControlType.doNotCompress,
+        ].flatMap((characterSpacingControl) =>
+            ['（word）', '(word)', 'word', ' word', '字', ' 字', '9', '．（word）'].map((suffix) =>
+                ({ documentFlavor, characterSpacingControl, suffix })))))('keeps a Word fullwidth stop with following text ($documentFlavor/$characterSpacingControl/$suffix)', ({ documentFlavor, characterSpacingControl, suffix }) => {
+        const content = `Reference 10-20．${suffix}`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor, characterSpacingControl },
+        });
+        try {
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const breaks = result.map((item) => (offset += item.glyphs.reduce((total, glyph) => total + glyph.count, 0)));
+            const stop = content.indexOf('．');
+            const next = stop + 1 + Number(suffix.startsWith(' '));
+            if (documentFlavor === DocumentFlavor.TRADITIONAL) {
+                expect(breaks.some((position) => position > stop && position <= next)).toBe(false);
+            } else if (suffix !== '．（word）') {
+                expect(breaks.some((position) => position > stop && position <= next)).toBe(true);
+            }
+            expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each(['.', '。', '，', '）'])('retains a break after other Word punctuation: %s', (punctuation) => {
+        const content = `Reference 10-20${punctuation}（978-1-23456-789-0）．`;
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL } });
+        try {
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const breaks = result.map((item) => (offset += item.glyphs.reduce((total, glyph) => total + glyph.count, 0)));
+            expect(breaks).toContain(content.indexOf('（'));
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it('retains a manual break after a Word fullwidth stop', () => {
+        const content = 'Reference 10-20．\v（word）';
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL } });
+        try {
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            expect(result.find((item) => item.text === '20．')?.breakPointType).toBe(BreakPointType.Mandatory);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        ['7', '168', '12345'].flatMap((number) => [false, true].map((field) => ({ documentFlavor, number, field })))))('keeps Word ellipsis and numeric reference labels together ($documentFlavor/$number/field=$field)', ({ documentFlavor, number, field }) => {
+        const previousContext = Reflect.get(FontCache, '_context');
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText(text: string) {
+                return { width: text.length * 8, fontBoundingBoxAscent: 12, fontBoundingBoxDescent: 3, actualBoundingBoxAscent: 12, actualBoundingBoxDescent: 3 };
+            },
+        } as unknown as CanvasRenderingContext2D);
+        const prefix = `9  Special Arrangements${'\u2026'.repeat(28)}`;
+        const content = `${prefix}${field ? `\x1F${number}\x1E` : number}`;
+        const numberStart = prefix.length + Number(field);
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+            body: { customRanges: field
+                ? [{
+                    rangeId: 'reference-page-label',
+                    rangeType: CustomRangeType.FIELD,
+                    startIndex: prefix.length,
+                    endIndex: numberStart + number.length,
+                    properties: { fieldType: 'SEQ', instruction: `SEQ Figure \\r ${number}`, cachedResult: number, dirty: BooleanNumber.FALSE },
+                }]
+                : [] },
+        });
+        try {
+            clearFontCreateConfigCache();
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const ordinaryBreaks = shaped.flatMap((item) => {
+                offset += item.glyphs.reduce((total, glyph) => total + glyph.count, 0);
+                return item.breakPointType === BreakPointType.Normal ? [offset] : [];
+            });
+            expect(ordinaryBreaks.some((position) => position >= prefix.length && position <= numberStart))
+                .toBe(documentFlavor !== DocumentFlavor.TRADITIONAL);
+            expect(shaped.flatMap((item) => item.glyphs).map((glyph) => glyph.raw).join('')).toBe(`${content}\r\n`);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            canvas.mockRestore();
+            Reflect.set(FontCache, '_context', previousContext);
+            FontCache.invalidateMetrics(() => true);
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) =>
+        [' ', '\v'].map((separator) => ({ documentFlavor, separator }))))('retains explicit breaks between ellipsis and reference labels ($documentFlavor/$separator)', ({ documentFlavor, separator }) => {
+        const previousContext = Reflect.get(FontCache, '_context');
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText(text: string) {
+                return { width: text.length * 8, fontBoundingBoxAscent: 12, fontBoundingBoxDescent: 3, actualBoundingBoxAscent: 12, actualBoundingBoxDescent: 3 };
+            },
+        } as unknown as CanvasRenderingContext2D);
+        const content = `Label\u2026${separator}168`;
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor } });
+        try {
+            clearFontCreateConfigCache();
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const shaped = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const breaks = shaped.map((item) => {
+                offset += item.glyphs.reduce((total, glyph) => total + glyph.count, 0);
+                return offset;
+            });
+            expect(breaks).toContain(content.indexOf('168'));
+            if (separator === '\v') {
+                expect(shaped.find((item) => item.text === 'Label\u2026')?.breakPointType).toBe(BreakPointType.Mandatory);
+            }
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            canvas.mockRestore();
+            Reflect.set(FontCache, '_context', previousContext);
+            FontCache.invalidateMetrics(() => true);
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, marked: false },
+        { documentFlavor: DocumentFlavor.MODERN, marked: false },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, marked: true },
+        { documentFlavor: DocumentFlavor.MODERN, marked: true },
+    ])('distinguishes a literal hyphen from an optional object in $documentFlavor when marked=$marked', ({ documentFlavor, marked }) => {
+        const previousContext = Reflect.get(FontCache, '_context');
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText(text: string) {
+                return { width: Array.from(text).reduce((width, char) => width + (char === '\u00AD' ? 0 : 5), 0), fontBoundingBoxAscent: 12, fontBoundingBoxDescent: 3, actualBoundingBoxAscent: 12, actualBoundingBoxDescent: 3 };
+            },
+        } as unknown as CanvasRenderingContext2D);
+        const content = 'A😀\u00ADB';
+        const index = content.indexOf('\u00AD');
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+            body: { customRanges: [
+                { rangeId: 'outer-bookmark', rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: content.length - 1, properties: { bookmarkId: 'target' } },
+                ...(marked ? [{ rangeId: 'optional', rangeType: CustomRangeType.CUSTOM, startIndex: index, endIndex: index, wholeEntity: true, properties: { kind: SpecialCharacterKind.OPTIONAL_HYPHEN } }] : []),
+            ] },
+        });
+        try {
+            clearFontCreateConfigCache();
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const glyphs = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig).flatMap((item) => item.glyphs);
+            expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(`${content}\r\n`);
+            expect(glyphs.find((glyph) => glyph.raw === '\u00AD')).toMatchObject({ content: marked ? '\u00AD' : '-', count: 1, width: marked ? 0 : 5 });
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            canvas.mockRestore();
+            Reflect.set(FontCache, '_context', previousContext);
+            FontCache.invalidateMetrics(() => true);
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([false, true])('keeps Latin inter-word spaces narrow around East Asian quoted text (cross-run hints: %s)', (crossRunHints) => {
+        const previousContext = Reflect.get(FontCache, '_context');
+        Reflect.set(FontCache, '_context', null);
+        FontCache.invalidateMetrics(() => true);
+        const context = {
+            font: '',
+            measureText(this: CanvasRenderingContext2D, text: string) {
+                const match = this.font.match(/([\d.]+)(pt|px)/);
+                const em = match ? Number(match[1]) * (match[2] === 'pt' ? 4 / 3 : 1) : 16;
+                return { width: text.length * em / 4, fontBoundingBoxAscent: em * 0.8, fontBoundingBoxDescent: em * 0.2, actualBoundingBoxAscent: em * 0.8, actualBoundingBoxDescent: em * 0.2 };
+            },
+        } as unknown as CanvasRenderingContext2D;
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context);
+        const content = 'J. Smith, “Reference Study,” Document';
+        const quotedStart = content.indexOf('“');
+        const quotedEnd = content.indexOf('”') + 1;
+        const style = { ff: 'Arial', eastAsiaFontFamily: 'Arial', fs: 11 };
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, balanceSingleByteDoubleByteWidth: BooleanNumber.TRUE },
+            body: { textRuns: crossRunHints
+                ? [{ st: 0, ed: quotedStart, ts: { ...style, fontHint: 'default' } }, { st: quotedStart, ed: quotedEnd, ts: { ...style, fontHint: 'eastAsia' } }, { st: quotedEnd, ed: content.length, ts: { ...style, fontHint: 'default' } }]
+                : [{ st: 0, ed: content.length, ts: { ...style, fontHint: 'eastAsia' } }] },
+        });
+        try {
+            clearFontCreateConfigCache();
+            bed.sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const spaces = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig)
+                .flatMap((item) => item.glyphs)
+                .filter((glyph) => glyph.content === ' ');
+            expect(spaces).toHaveLength(4);
+            // Word's measured J. Smith / Reference Study gaps are narrower than the gaps next to hinted quotes.
+            expect(spaces.map((glyph) => glyph.width)).toEqual([11 / 3, 22 / 3, 11 / 3, 22 / 3]);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            canvas.mockRestore();
+            Reflect.set(FontCache, '_context', previousContext);
+            FontCache.invalidateMetrics(() => true);
+            clearFontCreateConfigCache();
+        }
+    });
+
+    it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, type: 'footnote' as const },
+        { documentFlavor: DocumentFlavor.MODERN, type: 'footnote' as const },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, type: 'endnote' as const },
+        { documentFlavor: DocumentFlavor.MODERN, type: 'endnote' as const },
+    ])('shapes a $type directly after a quote in $documentFlavor documents', ({ documentFlavor, type }) => {
+        const prefix = 'Word"';
+        const content = `${prefix}\uFFFCafter`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor },
+            body: {
+                customRanges: [{ startIndex: prefix.length, endIndex: prefix.length, rangeId: 'note', rangeType: type === 'footnote' ? CustomRangeType.FOOTNOTE : CustomRangeType.ENDNOTE, wholeEntity: true, properties: { noteId: 'note' } }],
+            },
+            notes: {
+                note: { noteId: 'note', type, body: { dataStream: 'Explanation\r\n', paragraphs: [{ startIndex: 11 }], sectionBreaks: [{ startIndex: 12 }] } },
+            },
+        });
+        try {
+            bed.ctx.noteReferences = resolveNoteReferences(bed.dataModel.getSnapshot());
+            const glyphs = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig).flatMap((item) => item.glyphs);
+            expect(glyphs.map((glyph) => glyph.raw).join('')).toBe(`${content}\r\n`);
+            expect(glyphs.filter((glyph) => glyph.noteId === 'note')).toMatchObject([{ content: type === 'footnote' ? '1' : 'i', raw: '\uFFFC', count: 1 }]);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
     it.each([
         { content: '오늘 전략을', inherited: 1, direct: undefined, lines: ['오늘 전략', '을'] },
         { content: '오늘 전략을', inherited: 1, direct: 0, lines: ['오늘 ', '전략을'] },
@@ -399,6 +720,58 @@ describe('shaping', () => {
         expect(glyph.ts?.bl === BooleanNumber.TRUE).toBe(styleId == null);
     });
 
+    it('uses the document font classification for missing glyph fallback without changing authored runs', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('中', {
+            documentStyle: {
+                documentFlavor: 1,
+                fontFamilyClasses: { 'Authored Roman': 'roman' },
+            },
+            body: { textRuns: [{ st: 0, ed: 1, ts: { ff: 'Authored Roman', fs: 12 } }] },
+        });
+        const glyph = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)[0].glyphs[0];
+        expect(glyph.fontStyle?.fontFamily).toBe('"Authored Roman", serif');
+        expect(glyph.ts?.ff).toBe('Authored Roman');
+        expect(viewModel.getDataModel().getBody()?.textRuns?.[0].ts?.ff).toBe('Authored Roman');
+    });
+
+    it.each([
+        { documentFlavor: DocumentFlavor.TRADITIONAL, noteLabel: undefined },
+        { documentFlavor: DocumentFlavor.MODERN, noteLabel: undefined },
+        { documentFlavor: DocumentFlavor.TRADITIONAL, noteLabel: '3' },
+        { documentFlavor: DocumentFlavor.MODERN, noteLabel: '3' },
+    ])('keeps Latin substitutes ahead of the East Asian slot in $documentFlavor with note label $noteLabel', ({ documentFlavor, noteLabel }) => {
+        const bed = createParagraphLayoutTestBed('A中', {
+            documentStyle: {
+                documentFlavor,
+                fontFamilyClasses: { 'Unavailable Author Font': 'auto' },
+                fontFamilyFallbacks: { 'Unavailable Author Font': 'Alternate Family' },
+                textStyle: { ff: 'Unavailable Author Font', eastAsiaFontFamily: 'SimSun', fs: 13, bl: 1 },
+            },
+        });
+        try {
+            bed.ctx.noteLabel = noteLabel;
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const glyphs = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig)
+                .flatMap((item) => item.glyphs);
+            const latin = glyphs.find((glyph) => glyph.content === 'A')!;
+            const eastAsian = glyphs.find((glyph) => glyph.content === '中')!;
+            expect(latin.fontStyle?.fontFamily).toBe('"Unavailable Author Font", "Alternate Family", Calibri, SimSun');
+            expect(eastAsian.fontStyle?.fontFamily.split(',')[0].trim()).toBe('SimSun');
+            if (noteLabel != null) {
+                const label = glyphs.find((glyph) => glyph.content === noteLabel && glyph.count === 0)!;
+                expect(label.fontStyle?.fontFamily).toBe(latin.fontStyle?.fontFamily);
+                expect(label.ts?.ff).toBe('Unavailable Author Font');
+            }
+            expect(latin.ts?.ff).toBe('Unavailable Author Font');
+            expect(eastAsian.ts?.eastAsiaFontFamily).toBe('SimSun');
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
+    });
+
     it('uses document font alternates for rendering without replacing authored run fonts', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello', {
             documentStyle: {
@@ -498,6 +871,49 @@ describe('shaping', () => {
         const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
         expect(result.some((item) => item.text === link)).toBe(!allowBreaks);
+    });
+
+    it.each(wordUrlHyphenBreaks.cases.flatMap((control) => [BooleanNumber.FALSE, BooleanNumber.TRUE].map((wordWrap) =>
+        ({ ...control, wordWrap }))))('retains the Word hyphen break inside a traditional bibliography URL ($sourceField/$wordWrap)', ({ url, wordBreakAfter, wordWrap }) => {
+        const content = `Reference ${url} continues`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: { paragraphs: [{ startIndex: content.length, paragraphStyle: { wordWrap } }] },
+        });
+        try {
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            let offset = 0;
+            const points = result.map((item) => (offset += item.text.length));
+            expect(points).toContain(content.indexOf(url) + wordBreakAfter.length);
+            expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
+
+    it.each([
+        'https://example.org/2026-10-30/study',
+        '<https://example.org/2026-10-30/study>',
+        'www.example.org/2026-10-30/study',
+    ])('keeps numeric hyphens inside a traditional URL protected: %s', (url) => {
+        const content = `Reference ${url} continues`;
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+        });
+        const before = JSON.stringify(bed.dataModel.getSnapshot());
+        const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+        let offset = 0;
+        const points = result.map((item) => (offset += item.text.length));
+        const start = content.indexOf(url);
+
+        expect(points.some((position) => position > start && position < start + url.length)).toBe(false);
+        expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
+        expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        bed.viewModel.dispose();
+        bed.dataModel.dispose();
     });
 
     it('honors disabled East Asian spacing while preserving the default and explicit enabled spacing', () => {
@@ -630,6 +1046,27 @@ describe('shaping', () => {
         expect(breaks.includes(content.lastIndexOf('-') + 1)).toBe(expected);
         expect(breaks.includes(content.indexOf('+') + 1)).toBe(false);
         expect(JSON.stringify(dataModel.getSnapshot())).toBe(before);
+    });
+
+    it.each([
+        { flavor: DocumentFlavor.TRADITIONAL, content: '978-1-23456-789-0', expected: [4, 6, 12, 16] },
+        { flavor: DocumentFlavor.MODERN, content: '978-1-23456-789-0', expected: [] },
+        { flavor: DocumentFlavor.TRADITIONAL, content: '-12.5 +34', expected: [] },
+        { flavor: DocumentFlavor.TRADITIONAL, content: '978\u20111\u201123456\u2011789\u20110', expected: [] },
+    ])('breaks hyphenated numeric references like Word without splitting signs: %j', ({ flavor, content, expected }) => {
+        // Word wraps bibliography ISBNs after their numeric hyphens, even with punctuation compression enabled.
+        const bed = createParagraphLayoutTestBed(content, { documentStyle: { documentFlavor: flavor } });
+        const before = JSON.stringify(bed.dataModel.getSnapshot());
+        const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+        let offset = 0;
+        const breaks = result.flatMap((item) => {
+            offset += item.glyphs.reduce((total, glyph) => total + glyph.count, 0);
+            return item.breakPointType === BreakPointType.Normal && /[-\u2011]/.test(content[offset - 1] || '') ? [offset] : [];
+        });
+        expect(breaks).toEqual(expected);
+        expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        bed.viewModel.dispose();
+        bed.dataModel.dispose();
     });
 
     it('shapes text with spaces', () => {
@@ -1177,6 +1614,44 @@ describe('shaping', () => {
         expect(customBlockGlyph).toBeDefined();
         expect(customBlockGlyph!.width).toBe(0);
         expect(customBlockGlyph!.bBox.ba + customBlockGlyph!.bBox.bd).toBe(0);
+    });
+
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN].flatMap((documentFlavor) => [
+        { name: 'document-default', defaultValue: 1, base: undefined, derived: undefined, direct: undefined, allowed: false },
+        { name: 'document-allow', defaultValue: 0, base: undefined, derived: undefined, direct: undefined, allowed: true },
+        { name: 'named-allow', defaultValue: 1, base: 0, derived: undefined, direct: undefined, allowed: true },
+        { name: 'named-suppress', defaultValue: 0, base: 1, derived: undefined, direct: undefined, allowed: false },
+        { name: 'derived-allow', defaultValue: 1, base: 1, derived: 0, direct: undefined, allowed: true },
+        { name: 'derived-suppress', defaultValue: 0, base: 0, derived: 1, direct: undefined, allowed: false },
+        { name: 'direct-allow', defaultValue: 1, base: 1, derived: 1, direct: 0, allowed: true },
+        { name: 'direct-suppress', defaultValue: 0, base: 0, derived: 0, direct: 1, allowed: false },
+    ].map((testCase) => ({ documentFlavor, ...testCase }))))('inherits hyphenation suppression through document and paragraph styles ($documentFlavor/$name)', async ({ documentFlavor, defaultValue, base, derived, direct, allowed }) => {
+        const content = 'The extraordinary bibliography references discuss automatic hyphenation of scientific documents.';
+        const bed = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                documentFlavor,
+                autoHyphenation: BooleanNumber.TRUE,
+                defaultParagraphStyle: { suppressHyphenation: defaultValue },
+            },
+            styles: {
+                Base: { type: DocStyleType.paragraph, paragraphStyle: { suppressHyphenation: base } },
+                Derived: { type: DocStyleType.paragraph, basedOn: 'Base', paragraphStyle: { suppressHyphenation: derived } },
+            },
+            body: { paragraphs: [{ startIndex: content.length, styleId: 'Derived', paragraphStyle: { suppressHyphenation: direct } }] },
+        });
+        try {
+            const language = bed.ctx.languageDetector.detect(content);
+            expect(language).not.toBe(Lang.UNKNOWN);
+            await bed.ctx.hyphen.loadPattern(language);
+            const before = JSON.stringify(bed.dataModel.getSnapshot());
+            const result = shaping(bed.ctx, bed.paragraphNode.content!, bed.viewModel, bed.paragraphNode, bed.sectionBreakConfig);
+            expect(result.some((part) => part.breakPointType === BreakPointType.Hyphen)).toBe(allowed);
+            expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(before);
+        } finally {
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+            clearFontCreateConfigCache();
+        }
     });
 
     it('loads hyphen pattern when language pattern is not available', () => {

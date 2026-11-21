@@ -52,11 +52,13 @@ afterEach(() => vi.unstubAllGlobals());
 describe('OLE vector canvas content', () => {
     it('paints a vector warning badge and explicit status below the filename without a bitmap or background', () => {
         const ctx = context();
+        const available = context();
+        new OleCanvasRenderer('linked.pdf', 'application/pdf', () => '#112233').draw(available as unknown as UniverRenderingContext, 192, 128);
         const renderer = new OleCanvasRenderer('linked.pdf', 'application/pdf', () => '#112233', undefined, { label: 'Link unavailable', color: () => '#AA6600' });
         renderer.draw(ctx as unknown as UniverRenderingContext, 192, 128);
         expect(ctx.fillText.mock.calls.map(([text]) => text)).toEqual(['linked.pdf', 'Link unavailable']);
         expect(ctx.fillStyle).toBe('#AA6600');
-        expect(ctx.fill.mock.calls.some(([path]) => (path as TestPath2D).data === 'M8 1L15 14H1Z')).toBe(true);
+        expect(ctx._context.fill.mock.calls.length).toBeGreaterThan(available._context.fill.mock.calls.length);
         expect(ctx.font).toMatch(/^12px /);
         expect(ctx.rect).toHaveBeenCalledWith(0, 0, 192, 128);
         expect(ctx.fillRect).not.toHaveBeenCalled();

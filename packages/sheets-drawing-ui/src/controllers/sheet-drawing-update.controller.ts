@@ -373,7 +373,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 imageSourceType,
                 source,
                 transform: { left: 0, top: 0, width: width * scale, height: height * scale },
-                sheetTransform: { from: marker, to: marker },
                 axisAlignSheetTransform: { from: marker, to: marker },
             }], bounds, target.worksheet.getConfig().rightToLeft === BooleanNumber.TRUE);
             if (!placed?.length) {
@@ -407,7 +406,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             imageSourceType,
             source,
             transform: newTransform,
-            sheetTransform,
             axisAlignSheetTransform: transformToAxisAlignPosition(newTransform, skeleton) ?? sheetTransform,
         };
 
@@ -800,7 +798,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
                     transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, sheetSkeletonParam) },
-                    sheetTransform: { ...sheetTransform },
                     axisAlignSheetTransform: { ...axisAlignSheetTransform },
                 };
 
@@ -816,10 +813,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }));
     }
 
-    private _getSheetTransformByParam(param: IDrawingParam, isCreate: boolean): Nullable<{
-        sheetTransform: ISheetDrawingPosition;
-        axisAlignSheetTransform: ISheetDrawingPosition;
-    }> {
+    private _getAnchorByParam(param: IDrawingParam, isCreate: boolean): Nullable<ISheetDrawingPosition> {
         const { unitId, subUnitId, drawingId, transform } = param;
         const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!transform || !skeleton) {
@@ -837,14 +831,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return null;
         }
 
-        const sheetTransform = transformToDrawingPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
-        const axisAlignSheetTransform = transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
-
-        if (!sheetTransform || !axisAlignSheetTransform) {
-            return null;
-        }
-
-        return { sheetTransform, axisAlignSheetTransform };
+        return transformToAxisAlignPosition({ ...sheetDrawingTransform, ...transform }, skeleton);
     }
 
     private _groupDrawingListener() {
@@ -852,22 +839,21 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             const grpParams = [];
             for (const param of params) {
                 const parent = param.parent;
-                const grpSheetTransform = this._getSheetTransformByParam(parent, true);
+                const grpSheetTransform = this._getAnchorByParam(parent, true);
 
                 const children = [];
                 for (const child of param.children) {
-                    const childSheetTransformInfo = this._getSheetTransformByParam(child, false);
+                    const childSheetTransformInfo = this._getAnchorByParam(child, false);
                     if (childSheetTransformInfo != null) {
                         children.push({
                             ...child,
-                            sheetTransform: childSheetTransformInfo.sheetTransform,
-                            axisAlignSheetTransform: childSheetTransformInfo.axisAlignSheetTransform,
+                            axisAlignSheetTransform: childSheetTransformInfo,
                         });
                     }
                 }
 
                 const grpParam = {
-                    parent: { ...parent, sheetTransform: grpSheetTransform?.sheetTransform, axisAlignSheetTransform: grpSheetTransform?.axisAlignSheetTransform },
+                    parent: { ...parent, axisAlignSheetTransform: grpSheetTransform ?? undefined },
                     children,
 
                 };
@@ -886,12 +872,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 const { children } = param;
                 const childParams = [];
                 for (const child of children) {
-                    const childSheetTransform = this._getSheetTransformByParam(child, false);
+                    const childSheetTransform = this._getAnchorByParam(child, false);
                     if (childSheetTransform != null) {
                         childParams.push({
                             ...child,
-                            sheetTransform: childSheetTransform.sheetTransform,
-                            axisAlignSheetTransform: childSheetTransform.axisAlignSheetTransform,
+                            axisAlignSheetTransform: childSheetTransform,
                         });
                     }
                 }

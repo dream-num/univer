@@ -554,6 +554,28 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         this._initThemeListener();
     }
 
+    async prepareForPrint(): Promise<boolean> {
+        if (this._disposed) {
+            return false;
+        }
+
+        const layoutRequestId = ++this._layoutRequestId;
+        // Interactive publications must not replace the complete geometry while print builds its page slices.
+        this._cancelWorkerHandoff();
+        this._layoutCoordinator.cancel();
+        const initialization = this._docLayoutExecutorService.getExecutor()?.renderingFontsReady;
+        await initialization;
+        if (this._disposed || layoutRequestId !== this._layoutRequestId) {
+            return false;
+        }
+
+        this._fontInitialization = initialization ?? null;
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
+        skeleton.makeDirty(true);
+        this._docSkeletonManagerService.recalculate();
+        return true;
+    }
+
     private _scheduleVisualFrame(callback: () => void): () => void {
         const beginFrame$ = this._context.engine.beginFrame$;
         if (beginFrame$ == null) {

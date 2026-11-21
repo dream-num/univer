@@ -19,6 +19,7 @@ import type {
     ICellDataForSheetInterceptor,
     ICommandInfo,
     IObjectMatrixPrimitiveType,
+    IPermissionPoint,
     IPermissionTypes,
     IRange,
     Nullable,
@@ -42,6 +43,7 @@ import {
     MAX_ROW_COUNT,
     moveRangeByOffset,
     ObjectMatrix,
+    RANGE_TYPE,
     Rectangle,
     Tools,
     UniverInstanceType,
@@ -58,30 +60,51 @@ import {
     operatorToken,
     sequenceNodeType,
 } from '@univerjs/engine-formula';
+import { UnitObject } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
+import type { IAddRangeProtectionCommandParams } from '../../commands/commands/add-range-protection.command';
+import type { IAddMergeCommandParams } from '../../commands/commands/add-worksheet-merge.command';
+import type { IAddWorksheetProtectionParams } from '../../commands/commands/add-worksheet-protection.command';
 import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { IClearSelectionAllCommandParams } from '../../commands/commands/clear-selection-all.command';
 import type { IClearSelectionContentCommandParams } from '../../commands/commands/clear-selection-content.command';
 import type { IClearSelectionFormatCommandParams } from '../../commands/commands/clear-selection-format.command';
+import type { ICopySheetCommandParams } from '../../commands/commands/copy-worksheet.command';
 import type { IDeleteRangeMoveLeftCommandParams } from '../../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../../commands/commands/delete-range-move-up.command';
+import type { IDeleteRangeProtectionCommandParams } from '../../commands/commands/delete-range-protection.command';
+import type { IDeleteWorksheetProtectionParams } from '../../commands/commands/delete-worksheet-protection.command';
 import type { IInsertRangeMoveDownCommandParams } from '../../commands/commands/insert-range-move-down.command';
 import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import type { IInsertSheetCommandParams } from '../../commands/commands/insert-sheet.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
 import type {
     IRemoveColByRangeCommandParams,
     IRemoveRowByRangeCommandParams,
 } from '../../commands/commands/remove-row-col.command';
+import type { IRemoveSheetCommandParams } from '../../commands/commands/remove-sheet.command';
+import type { IRemoveWorksheetMergeCommandParams } from '../../commands/commands/remove-worksheet-merge.command';
+import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { ISetBorderCommandParams } from '../../commands/commands/set-border.command';
-import type { ISetSpecificColsVisibleCommandParams } from '../../commands/commands/set-col-visible.command';
+import type {
+    ISetColHiddenCommandParams,
+    ISetSpecificColsVisibleCommandParams,
+} from '../../commands/commands/set-col-visible.command';
 import type { ICancelFrozenCommandParams, ISetFrozenCommandParams } from '../../commands/commands/set-frozen.command';
 import type { ISetGridlinesColorCommandParams } from '../../commands/commands/set-gridlines-color.command';
+import type { ISetProtectionParams } from '../../commands/commands/set-protection.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
-import type { ISetSpecificRowsVisibleCommandParams } from '../../commands/commands/set-row-visible.command';
+import type {
+    ISetRowHiddenCommandParams,
+    ISetSpecificRowsVisibleCommandParams,
+} from '../../commands/commands/set-row-visible.command';
 import type { ISetStyleCommandParams } from '../../commands/commands/set-style.command';
+import type { ISetTabColorCommandParams } from '../../commands/commands/set-tab-color.command';
+import type { ISetWorkbookNameCommandParams } from '../../commands/commands/set-workbook-name.command';
 import type { ISetColWidthCommandParams } from '../../commands/commands/set-worksheet-col-width.command';
+import type { ISetWorksheetHiddenCommandParams } from '../../commands/commands/set-worksheet-hide.command';
 import type { ISetWorksheetNameCommandParams } from '../../commands/commands/set-worksheet-name.command';
 import type { ISetWorksheetOrderCommandParams } from '../../commands/commands/set-worksheet-order.command';
 import type {
@@ -92,35 +115,51 @@ import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
 import type { IToggleGridlinesCommandParams } from '../../commands/commands/toggle-gridlines.command';
 import type { LocaleKey } from '../../locale/types';
+import { AddRangeProtectionCommand } from '../../commands/commands/add-range-protection.command';
+import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
+import { AddWorksheetProtectionCommand } from '../../commands/commands/add-worksheet-protection.command';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { ClearSelectionAllCommand } from '../../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../../commands/commands/clear-selection-format.command';
+import { CopySheetCommand } from '../../commands/commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
+import { DeleteRangeProtectionCommand } from '../../commands/commands/delete-range-protection.command';
+import { DeleteWorksheetProtectionCommand } from '../../commands/commands/delete-worksheet-protection.command';
 import { InsertDefinedNameCommand } from '../../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../../commands/commands/insert-range-move-right.command';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../../commands/commands/insert-row-col.command';
+import { InsertSheetCommand } from '../../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../../commands/commands/move-rows-cols.command';
 import { RemoveDefinedNameCommand } from '../../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveRowByRangeCommand } from '../../commands/commands/remove-row-col.command';
+import { RemoveSheetCommand } from '../../commands/commands/remove-sheet.command';
+import { RemoveWorksheetMergeCommand } from '../../commands/commands/remove-worksheet-merge.command';
+import { ReorderRangeCommand } from '../../commands/commands/reorder-range.command';
 import { SetBorderCommand } from '../../commands/commands/set-border.command';
 import {
+    SetColHiddenCommand,
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.command';
 import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/set-frozen.command';
 import { SetGridlinesColorCommand } from '../../commands/commands/set-gridlines-color.command';
+import { SetProtectionCommand } from '../../commands/commands/set-protection.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import {
+    SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '../../commands/commands/set-row-visible.command';
 import { SetStyleCommand } from '../../commands/commands/set-style.command';
+import { SetTabColorCommand } from '../../commands/commands/set-tab-color.command';
+import { SetWorkbookNameCommand } from '../../commands/commands/set-workbook-name.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetHideCommand } from '../../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../../commands/commands/set-worksheet-order.command';
 import {
@@ -136,10 +175,16 @@ import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { AUTO_FILL_APPLY_TYPE } from '../../services/auto-fill/type';
+import { RangeProtectionPermissionDeleteProtectionPoint } from '../../services/permission/permission-point/range/delete-protection';
 import { RangeProtectionPermissionEditPoint } from '../../services/permission/permission-point/range/edit';
+import { RangeProtectionPermissionManageCollaPoint } from '../../services/permission/permission-point/range/manage-collaborator';
 import { RangeProtectionPermissionViewPoint } from '../../services/permission/permission-point/range/view';
+import { WorkbookCopySheetPermission } from '../../services/permission/permission-point/workbook/copy-sheet';
+import { WorkbookCreateProtectPermission } from '../../services/permission/permission-point/workbook/create-permission';
+import { WorkbookCreateSheetPermission } from '../../services/permission/permission-point/workbook/create-sheet';
 import { WorkbookDeleteColumnPermission } from '../../services/permission/permission-point/workbook/delete-column';
 import { WorkbookDeleteRowPermission } from '../../services/permission/permission-point/workbook/delete-row';
+import { WorkbookDeleteSheetPermission } from '../../services/permission/permission-point/workbook/delete-sheet';
 import { WorkbookEditablePermission } from '../../services/permission/permission-point/workbook/editable';
 import { WorkbookHideSheetPermission } from '../../services/permission/permission-point/workbook/hide-sheet';
 import { WorkbookInsertColumnPermission } from '../../services/permission/permission-point/workbook/insert-column';
@@ -147,16 +192,19 @@ import { WorkbookInsertRowPermission } from '../../services/permission/permissio
 import { WorkbookMoveSheetPermission } from '../../services/permission/permission-point/workbook/move-sheet';
 import { WorkbookRenameSheetPermission } from '../../services/permission/permission-point/workbook/rename-sheet';
 import { WorksheetDeleteColumnPermission } from '../../services/permission/permission-point/worksheet/delete-column';
+import { WorksheetDeleteProtectionPermission } from '../../services/permission/permission-point/worksheet/delete-protection';
 import { WorksheetDeleteRowPermission } from '../../services/permission/permission-point/worksheet/delete-row';
 import { WorksheetEditPermission } from '../../services/permission/permission-point/worksheet/edit';
 import { WorksheetInsertColumnPermission } from '../../services/permission/permission-point/worksheet/insert-column';
 import { WorksheetInsertRowPermission } from '../../services/permission/permission-point/worksheet/insert-row';
+import { WorksheetManageCollaboratorPermission } from '../../services/permission/permission-point/worksheet/manage-collaborator';
 import { WorksheetSetCellStylePermission } from '../../services/permission/permission-point/worksheet/set-cell-style';
 import { WorksheetSetCellValuePermission } from '../../services/permission/permission-point/worksheet/set-cell-value';
 import {
     WorksheetSetColumnStylePermission,
 } from '../../services/permission/permission-point/worksheet/set-column-style';
 import { WorksheetSetRowStylePermission } from '../../services/permission/permission-point/worksheet/set-row-style';
+import { WorksheetSortPermission } from '../../services/permission/permission-point/worksheet/sort';
 import { WorksheetViewPermission } from '../../services/permission/permission-point/worksheet/view';
 import {
     WorksheetProtectionRuleModel,
@@ -375,6 +423,62 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setStyleErr');
                 break;
 
+            // merge and unmerge cells
+            case AddWorksheetMergeCommand.id:
+                params = commandInfo.params as IAddMergeCommandParams | undefined;
+
+                // Merge variants expand each selection into per-row/per-column rectangles that cover
+                // the same cells, so the original selections are enough to resolve protected ranges.
+                permission = params
+                    ? this.permissionCheckWithRanges(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],
+                            rangeTypes: [RangeProtectionPermissionEditPoint],
+                        },
+                        params.selections,
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+            case RemoveWorksheetMergeCommand.id:
+                params = commandInfo.params as IRemoveWorksheetMergeCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // sort
+            case ReorderRangeCommand.id:
+                params = commandInfo.params as IReorderRangeCommandParams | undefined;
+
+                // SortRangeCommand and every sort entry point funnel into ReorderRangeCommand.
+                permission = params
+                    ? this.permissionCheckWithRanges(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
+                            rangeTypes: [RangeProtectionPermissionEditPoint],
+                        },
+                        [params.range],
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
             // set column width
             case DeltaColumnWidthCommand.id:
                 permission = this.permissionCheckWithoutRange(
@@ -476,6 +580,18 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.removeRowColErr');
                 break;
 
+            // workbook operations
+            case SetWorkbookNameCommand.id:
+                params = commandInfo.params as ISetWorkbookNameCommandParams | undefined;
+
+                // There is no workbook-rename permission point in the protocol; the server enforces
+                // Unit Edit for this changeset, so mirror it with the workbook edit point.
+                permission = params
+                    ? this.permissionCheckByPoints([new WorkbookEditablePermission(params.unitId)])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.workbookEditErr');
+                break;
+
             // worksheet operations
             case SetWorksheetOrderCommand.id:
                 params = commandInfo.params as ISetWorksheetOrderCommandParams;
@@ -490,9 +606,34 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
                 break;
             case SetWorksheetShowCommand.id:
-                params = commandInfo.params as ISetWorksheetShowCommandParams;
+            case SetWorksheetHideCommand.id:
+                params = commandInfo.params as ISetWorksheetShowCommandParams | ISetWorksheetHiddenCommandParams;
 
                 permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookHideSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case SetTabColorCommand.id:
+                params = commandInfo.params as ISetTabColorCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case InsertSheetCommand.id:
+                params = commandInfo.params as IInsertSheetCommandParams | undefined;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookCreateSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case RemoveSheetCommand.id:
+                params = commandInfo.params as IRemoveSheetCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookDeleteSheetPermission], params);
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+            case CopySheetCommand.id:
+                params = commandInfo.params as ICopySheetCommandParams;
+
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookCopySheetPermission], params);
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
                 break;
 
@@ -541,6 +682,38 @@ export class SheetPermissionCheckController extends Disposable {
                     worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
                     rangeTypes: [RangeProtectionPermissionEditPoint],
                 });
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+
+            // hide rows/columns
+            case SetColHiddenCommand.id:
+                params = commandInfo.params as ISetColHiddenCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetColumnStylePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    this._getRangesForHideCommand(params, RANGE_TYPE.COLUMN),
+                    params?.unitId,
+                    params?.subUnitId
+                );
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
+                break;
+            case SetRowHiddenCommand.id:
+                params = commandInfo.params as ISetRowHiddenCommandParams | undefined;
+
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetEditPermission, WorksheetSetRowStylePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    this._getRangesForHideCommand(params, RANGE_TYPE.ROW),
+                    params?.unitId,
+                    params?.subUnitId
+                );
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setRowColStyleErr');
                 break;
 
@@ -659,6 +832,48 @@ export class SheetPermissionCheckController extends Disposable {
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
                 break;
 
+            // worksheet and range protection
+            case AddWorksheetProtectionCommand.id:
+                params = commandInfo.params as IAddWorksheetProtectionParams | undefined;
+
+                permission = params
+                    ? this.permissionCheckByPoints([new WorkbookCreateProtectPermission(params.unitId)])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
+                break;
+            case AddRangeProtectionCommand.id:
+                params = commandInfo.params as IAddRangeProtectionCommandParams | undefined;
+
+                permission = params?.rule
+                    ? this.permissionCheckByPoints([new WorkbookCreateProtectPermission(params.rule.unitId)])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
+                break;
+            case SetProtectionCommand.id:
+                params = commandInfo.params as ISetProtectionParams | undefined;
+
+                permission = params ? this._permissionCheckSetProtection(params) : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
+                break;
+            case DeleteWorksheetProtectionCommand.id:
+                params = commandInfo.params as IDeleteWorksheetProtectionParams | undefined;
+
+                permission = params
+                    ? this.permissionCheckByPoints([new WorksheetDeleteProtectionPermission(params.unitId, params.subUnitId)])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
+                break;
+            case DeleteRangeProtectionCommand.id:
+                params = commandInfo.params as IDeleteRangeProtectionCommandParams | undefined;
+
+                permission = params?.rule
+                    ? this.permissionCheckByPoints([
+                        new RangeProtectionPermissionDeleteProtectionPoint(params.unitId, params.subUnitId, params.rule.permissionId),
+                    ])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
+                break;
+
             // text to number
             case TextToNumberCommand.id:
                 params = commandInfo.params as ITextToNumberCommandParams | undefined;
@@ -683,6 +898,63 @@ export class SheetPermissionCheckController extends Disposable {
             this.blockExecuteWithoutPermission(errorMsg);
         }
     };
+
+    /**
+     * Hide commands act on whole rows or columns. When they receive no ranges, resolve the same
+     * row/column selections they would use so an unrelated cell selection cannot block them, and
+     * widen explicit ranges to the whole row or column so protected cells are covered.
+     */
+    private _getRangesForHideCommand(params: { ranges?: IRange[] } | undefined, rangeType: RANGE_TYPE): IRange[] {
+        const ranges = params?.ranges?.length
+            ? params.ranges
+            : (this._selectionManagerService.getCurrentSelections() ?? [])
+                .map((selection) => selection.range)
+                .filter((range) => range.rangeType === rangeType);
+
+        return ranges.map((range) => (rangeType === RANGE_TYPE.ROW
+            ? { ...range, startColumn: 0, endColumn: MAX_COLUMN_COUNT - 1 }
+            : { ...range, startRow: 0, endRow: MAX_ROW_COUNT - 1 }));
+    }
+
+    /**
+     * `SetProtectionCommand` creates a rule, updates the collaborators of an existing rule, or
+     * replaces a rule of another unit type. The server authorizes these branches with different
+     * points, so mirror that split instead of requiring a point the operation does not own.
+     */
+    private _permissionCheckSetProtection(params: ISetProtectionParams): boolean {
+        const { rule, oldRule } = params;
+        const { unitId, subUnitId } = rule;
+
+        if (oldRule && oldRule.unitType === rule.unitType) {
+            if (rule.unitType === UnitObject.Worksheet) {
+                return this.permissionCheckByPoints([
+                    new WorksheetManageCollaboratorPermission(unitId, subUnitId),
+                ]);
+            }
+
+            return this.permissionCheckByPoints([
+                new RangeProtectionPermissionManageCollaPoint(unitId, subUnitId, oldRule.permissionId),
+            ]);
+        }
+
+        const points: IPermissionPoint[] = [new WorkbookCreateProtectPermission(unitId)];
+        if (oldRule?.unitType === UnitObject.Worksheet) {
+            points.push(new WorksheetDeleteProtectionPermission(unitId, subUnitId));
+        } else if (oldRule?.unitType === UnitObject.SelectRange) {
+            points.push(new RangeProtectionPermissionDeleteProtectionPoint(unitId, subUnitId, oldRule.permissionId));
+        }
+
+        return this.permissionCheckByPoints(points);
+    }
+
+    /**
+     * Check explicitly constructed points. Protection manage/delete points are scoped by a rule's
+     * `permissionId`, which the range helpers can only resolve from the current selection, so
+     * commands that already know the target rule check their points directly.
+     */
+    public permissionCheckByPoints(points: IPermissionPoint[]): boolean {
+        return points.every((point) => this._permissionService.getPermissionPoint(point.id)?.value !== false);
+    }
 
     public permissionCheckWithRanges(permissionTypes: IPermissionTypes, selectionRanges?: IRange[], unitId?: string, subUnitId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
@@ -1103,7 +1375,10 @@ export class SheetPermissionCheckController extends Disposable {
         return this.permissionCheckWithRanges(permissionTypes, [_range], unitId, subUnitId);
     }
 
-    private _permissionCheckByWorksheetCommand(workbookPermissionTypes: WorkbookPermissionPointConstructor[], params: ISetWorksheetOrderCommandParams | ISetWorksheetNameCommandParams | ISetWorksheetShowCommandParams) {
+    private _permissionCheckByWorksheetCommand(
+        workbookPermissionTypes: WorkbookPermissionPointConstructor[],
+        params?: { unitId?: string; subUnitId?: string }
+    ) {
         const target = getSheetCommandTarget(this._univerInstanceService, params);
         if (!target) {
             this._worksheetProtectionRuleModel.resetOrder();

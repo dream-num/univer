@@ -381,6 +381,7 @@ const locale: typeof enUS = {
                 searchEmptyDescription: 'Prova un altro nome o cancella la ricerca.',
                 commonErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per questa operazione. Per modificare, contatta il creatore.',
                 editErr: 'L\'intervallo è protetto e non hai l\'autorizzazione di modifica. Per modificare, contatta il creatore.',
+                operatorSheetErr: 'Non si dispone dell\'autorizzazione per operare sul foglio di lavoro. Per operare sul foglio di lavoro, contattare il creatore.',
                 pasteErr: 'L\'intervallo è protetto e non hai l\'autorizzazione di incolla. Per incollare, contatta il creatore.',
                 setStyleErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per impostare gli stili. Per impostare gli stili, contatta il creatore.',
                 copyErr: 'L\'intervallo è protetto e non hai l\'autorizzazione di copia. Per copiare, contatta il creatore.',

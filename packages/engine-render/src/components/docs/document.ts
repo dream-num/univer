@@ -69,8 +69,7 @@ import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad, fixLineWidthByScale } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
 import { DrawingGroupObject } from '../../drawing-group';
-import { MAIN_VIEW_PORT_KEY } from '../../scene';
-import { clippedViewportRenders } from '../../viewport-render-clip';
+import { viewportRenderClips } from '../../viewport-render-clip';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
@@ -84,9 +83,16 @@ import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
+import {
+    getCellBorderWidth,
+    getTableCellSpacing,
+    getTableCellSpacingInsets,
+    getTableOuterBorder,
+    hasTableCellSpacing,
+} from './layout/table-cell-spacing';
 import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
-import { drawPageBorders } from './page-borders';
+import { drawPageBorders, getDocumentBorderBands, getDocumentBorderWidth } from './page-borders';
 import {
     getDocsTableLayoutViewportWidth,
     getDocsTableRenderViewport,
@@ -200,6 +206,7 @@ interface IHeaderFooterFieldContext {
     customRanges: ICustomRange[];
     pageNumber: number;
     pageCount: number;
+    pageNumberFormat?: string;
     viewModel?: DocumentViewModel;
 }
 
@@ -207,8 +214,8 @@ function resolveHeaderFooterFieldGlyphGroup(
     divide: IDocumentSkeletonDivide,
     context: IHeaderFooterFieldContext
 ): IDocumentSkeletonGlyph[] {
-    // Legacy skeletons and note stories resolve fields at draw time. New header/footer
-    // layouts already resolve their fields before wrapping and bypass this fallback.
+    // Shared page fields can reserve wider labels for fitting. Painting adjusts the
+    // current value and alignment while retaining those fitted line breaks.
     const { glyphGroup } = divide;
     let index = divide.st;
     const resolved = glyphGroup.map((glyph) => {
@@ -218,17 +225,18 @@ function resolveHeaderFooterFieldGlyphGroup(
             index + glyph.count - 1,
             context.customRanges,
             context.pageNumber,
-            context.pageCount
+            context.pageCount,
+            context.pageNumberFormat
         );
         index += glyph.count;
-        if (result === glyph) {
+        if (result === glyph && glyph.fieldLayoutContent == null) {
             return glyph;
         }
         const font = glyph.fontStyle?.fontString;
         let widthDelta = -glyph.width;
         if (result.content) {
             widthDelta = font
-                ? (FontCache.getMeasureText(result.content, font).width - FontCache.getMeasureText(glyph.content, font).width)
+                ? (FontCache.getMeasureText(result.content, font).width - FontCache.getMeasureText(glyph.fieldLayoutContent ?? glyph.content, font).width)
                 * getTextHorizontalScale(glyph.ts?.sa)
                 : 0;
         }
@@ -360,9 +368,11 @@ export class Documents extends DocComponent {
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
     private _inactiveAreaOpacity = 1;
+    private readonly _pageFieldContext?: IDocumentsConfig['pageFieldContext'];
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
+        this._pageFieldContext = config?.pageFieldContext;
 
         this._initialDefaultExtension();
 
@@ -502,6 +512,7 @@ export class Documents extends DocComponent {
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const isContinuousLayout = this.getSkeleton()?.getViewModel?.().getDataModel().documentStyle.documentFlavor === DocumentFlavor.MODERN;
         const isTraditionalLayout = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
+        const bodyFieldContext = this._getEmbeddedPageFieldContext();
         const dataModel = this.getSkeleton()?.getViewModel?.().getDataModel();
         const sectionBorders = new Map((dataModel?.getBody?.()?.sectionBreaks ?? [])
             .map((section) => [section.sectionId, section.pageBorders]));
@@ -602,7 +613,7 @@ export class Documents extends DocComponent {
 
             if (skeTables.size > 0) {
                 const tables = isContinuousLayout && centerAngle === 0 && vertexAngle === 0
-                    ? this._getTablesInViewport(ctx, bounds, page, skeletonData, dataModel?.getBody?.()?.customRanges)
+                    ? this._getTablesInViewport(ctx, page, skeletonData, dataModel?.getBody?.()?.customRanges)
                     : skeTables;
                 ctx.save();
                 ctx.globalAlpha *= bodyOpacity;
@@ -618,7 +629,8 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    bodyFieldContext
                 );
                 ctx.restore();
             }
@@ -770,28 +782,26 @@ export class Documents extends DocComponent {
 
     private _getTablesInViewport(
         ctx: UniverRenderingContext,
-        bounds: IDocumentRenderBounds | undefined,
         page: IDocumentSkeletonPage,
         skeletonData: IDocumentSkeletonCached,
         customRanges: readonly ICustomRange[] | undefined
     ): Iterable<[string, IDocumentSkeletonTable]> {
         const tables = page.skeTables;
-        if (bounds?.viewportKey !== MAIN_VIEW_PORT_KEY || !clippedViewportRenders.has(bounds) ||
-            this.parent?.classType !== RENDER_CLASS_TYPE.SCENE || this._glyphPaintSink ||
+        const clip = viewportRenderClips.get(ctx);
+        if (!clip || this.parent?.classType !== RENDER_CLASS_TYPE.SCENE || this._glyphPaintSink ||
             ctx.globalCompositeOperation !== 'source-over' || ctx.shadowBlur || ctx.shadowOffsetX || ctx.shadowOffsetY ||
             (ctx.filter && ctx.filter !== 'none')) {
             return tables;
         }
 
-        const { b, c, d } = ctx.getTransform();
-        const [, skewY, skewX, scaleY, , offsetY] = this.transform.getMatrix();
-        if (b !== 0 || c !== 0 || skewY !== 0 || skewX !== 0 || d <= 0 || scaleY <= 0) {
+        const { b, c, d, f } = ctx.getTransform();
+        if (b !== 0 || c !== 0 || d <= 0) {
             return tables;
         }
 
-        // Viewport bounds are in scene coordinates; the table origin is document-local.
-        const viewportTop = (bounds.viewBound.top - offsetY) / scaleY;
-        const viewportBottom = (bounds.viewBound.bottom - offsetY) / scaleY;
+        // Translate the current Canvas clip through the document transform.
+        const viewportTop = (clip.top - f) / d;
+        const viewportBottom = (clip.bottom - f) / d;
         const originY = this._drawLiquid!.y + page.marginTop;
         if (![viewportTop, viewportBottom, originY, d].every(Number.isFinite) || viewportTop >= viewportBottom) {
             return tables;
@@ -858,6 +868,7 @@ export class Documents extends DocComponent {
         const { sections, marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0 } = page;
         const { verticalAlign = VerticalAlign.TOP, wrapStrategy = WrapStrategy.UNSPECIFIED } = renderConfig;
         const isVertical = renderConfig.vertexAngle === VERTICAL_ROTATE_ANGLE && renderConfig.centerAngle === VERTICAL_ROTATE_ANGLE;
+        const fieldContext = this._getEmbeddedPageFieldContext();
         const clip = bounds?.glyphClipBound;
         const matrix = clip ? ctx.getTransform() : undefined;
         // Unknown extensions and deferred streams must receive their original complete glyph sequence.
@@ -962,7 +973,7 @@ export class Documents extends DocComponent {
 
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
-                            const { glyphGroup } = divide;
+                            const glyphGroup = fieldContext ? resolveHeaderFooterFieldGlyphGroup(divide, fieldContext) : divide.glyphGroup;
 
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide, isVertical && wrapStrategy === WrapStrategy.WRAP, verticalAlign, rotatedHeightStore);
@@ -1246,7 +1257,10 @@ export class Documents extends DocComponent {
         for (const [tableId, tableSkeleton] of skeTables) {
             const { top: tableTop, left: tableLeft, rows } = tableSkeleton;
             const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
-            const viewport = this._getTableViewport(page, tableSkeleton, renderUnitId, sourceTableId);
+            // Printed tables follow paper geometry, independently of editor scrolling and viewport registration.
+            const viewport = ctx.__mode === 'printing'
+                ? null
+                : this._getTableViewport(page, tableSkeleton, renderUnitId, sourceTableId);
             drawLiquid.translateSave();
             drawLiquid.translate(tableLeft, tableTop);
 
@@ -1267,6 +1281,7 @@ export class Documents extends DocComponent {
             }
 
             this._drawTableCellBackgrounds(ctx, page, tableSkeleton);
+            this._drawSpacedTableFrame(ctx, page, tableSkeleton);
 
             for (const row of rows) {
                 const { top: rowTop, cells } = row;
@@ -1352,13 +1367,24 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    this._getEmbeddedPageFieldContext()
                 );
                 drawLiquid.translateRestore();
             }
 
             drawLiquid.translateRestore();
         }
+    }
+
+    private _getEmbeddedPageFieldContext(): IHeaderFooterFieldContext | undefined {
+        if (!this._pageFieldContext) {
+            return undefined;
+        }
+        const viewModel = this.getSkeleton()?.getViewModel();
+        return viewModel
+            ? { ...this._pageFieldContext, customRanges: viewModel.getBody()?.customRanges ?? [], viewModel }
+            : undefined;
     }
 
     private _drawTableCellBackgrounds(
@@ -1391,11 +1417,12 @@ export class Documents extends DocComponent {
                 }
 
                 const rects = backgrounds.get(color) ?? [];
+                const insets = getTableCellSpacingInsets(tableSkeleton.tableSource, row.index, index);
                 rects.push({
-                    x: tableX + cell.left,
-                    y: tableY + row.top,
-                    width: cell.pageWidth,
-                    height: cell.pageHeight,
+                    x: tableX + cell.left + insets.left,
+                    y: tableY + row.top + insets.top,
+                    width: Math.max(0, cell.pageWidth - insets.left - insets.right),
+                    height: Math.max(0, cell.pageHeight - insets.top - insets.bottom),
                 });
                 backgrounds.set(color, rects);
             });
@@ -1535,28 +1562,51 @@ export class Documents extends DocComponent {
         // Word adds 1.5pt of horizontal clearance, even for top/bottom-only paragraph borders.
         // Border spacing reaches the inner edge; Canvas strokes are centered on their path.
         const traditional = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL;
-        const leftWidth = line.borderLeft ? Math.max(0, line.borderLeft.width ?? 1) : 0;
-        const rightWidth = line.borderRight ? Math.max(0, line.borderRight.width ?? 1) : 0;
+        const leftWidth = getDocumentBorderWidth(line.borderLeft);
+        const rightWidth = getDocumentBorderWidth(line.borderRight);
         const leftOutset = traditional ? 2 + leftWidth / 2 : 0;
         const rightOutset = traditional ? 2 + rightWidth / 2 : 0;
-        const startX = x + (line.paragraphPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0) - leftOutset;
+        const borderPaddingLeft = traditional ? line.paragraphBorderPaddingLeft ?? line.paragraphPaddingLeft : line.paragraphPaddingLeft;
+        const startX = x + (borderPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0) - leftOutset;
         const endX = x + width - (line.paragraphPaddingRight ?? 0) + (line.borderRight?.padding ?? 0) + rightOutset;
-        const startY = y + line.marginTop + (line.borderTopSpace ?? 0) - (line.borderTop?.padding ?? 0);
-        const endY = y + line.lineHeight - line.marginBottom - (line.borderBottomSpace ?? 0) + (bottomBorder?.padding ?? 0);
+        const startY = y + line.marginTop + (line.borderTopSpace ?? 0) - (line.borderTop?.padding ?? 0) +
+            (traditional ? line.minimumLineLeading ?? 0 : 0);
+        const afterSpacing = traditional && line.borderBetween ? line.spaceBelowApply ?? 0 : 0;
+        const endY = y + line.lineHeight - line.marginBottom - (line.borderBottomSpace ?? 0) + (bottomBorder?.padding ?? 0) + afterSpacing;
         const drawBorder = (border: IParagraphBorder, type: BORDER_TYPE) => {
-            const lineWidth = border.width ?? 1;
-            // Explicit zero widths cancel inherited borders; Canvas ignores a zero lineWidth.
-            if (lineWidth <= 0) {
+            const stroke = {
+                width: { v: border.width ?? 1 },
+                color: { rgb: border.color.rgb === 'auto' ? COLOR_BLACK_RGB : getColorStyleForCanvas(border.color) ?? COLOR_BLACK_RGB },
+                dashStyle: border.dashStyle,
+            };
+            if (border.style == null) {
+                this._drawBorder(ctx, stroke, type, { startX, startY, endX, endY });
                 return;
             }
-            ctx.save();
-            ctx.setLineWidthByPrecision(lineWidth);
-            ctx.strokeStyle = border.color.rgb === 'auto'
-                ? COLOR_BLACK_RGB
-                : getColorStyleForCanvas(border.color) ?? COLOR_BLACK_RGB;
-            setDocsBorderDash(ctx, border.dashStyle);
-            drawLineByBorderType(ctx, type, 0, { startX, startY, endX, endY });
-            ctx.restore();
+            const bands = getDocumentBorderBands(border);
+            const extent = getDocumentBorderWidth(border);
+            const horizontal = type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM;
+            let offset = type === BORDER_TYPE.TOP ? startY - extent : endY;
+            if (!horizontal) {
+                offset = (type === BORDER_TYPE.LEFT ? startX : endX) - extent / 2;
+            }
+            for (const [index, width] of bands.entries()) {
+                if (index % 2 === 0) {
+                    const position = { startX, startY, endX, endY };
+                    const center = offset + width / 2;
+                    if (type === BORDER_TYPE.TOP) {
+                        position.startY = center;
+                    } else if (type === BORDER_TYPE.BOTTOM) {
+                        position.endY = center;
+                    } else if (type === BORDER_TYPE.LEFT) {
+                        position.startX = center;
+                    } else {
+                        position.endX = center;
+                    }
+                    this._drawBorder(ctx, { ...stroke, width: { v: width } }, type, position);
+                }
+                offset += width;
+            }
         };
 
         if (line.borderTop) {
@@ -1925,6 +1975,18 @@ export class Documents extends DocComponent {
             ctx.restore();
         }
 
+        if (tableSke?.tableSource && getTableCellSpacing(tableSke.tableSource, rowSke.index) != null) {
+            const insets = getTableCellSpacingInsets(tableSke.tableSource, rowSke.index, index);
+            position.startX += Math.min(pageWidth, insets.left);
+            position.endX = Math.max(position.startX, position.endX - insets.right);
+            position.startY += Math.min(pageHeight, insets.top);
+            position.endY = Math.max(position.startY, position.endY - insets.bottom);
+            for (const [edge, type] of [['borderTop', BORDER_TYPE.TOP], ['borderBottom', BORDER_TYPE.BOTTOM], ['borderLeft', BORDER_TYPE.LEFT], ['borderRight', BORDER_TYPE.RIGHT]] as const) {
+                this._drawBorder(ctx, cellSource[edge] ?? null, type, position);
+            }
+            return;
+        }
+
         const rightCellSource = this._getTableCellSource(rowSke, index + 1);
         const rowSourceIndex = rowSke.index ?? 0;
         const sourceRows = tableSke?.tableSource?.tableRows;
@@ -1936,14 +1998,14 @@ export class Documents extends DocComponent {
         const bottomBorder = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL && rowIndex === (tableSke?.rows.length ?? 1) - 1
             ? bottom?.tableBottomBorder ?? bottom
             : bottom;
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(bottomBorder, adjacentCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
+        this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
+        this._drawBorder(ctx, this._resolveTableCellBorder(bottomBorder, adjacentCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
 
         if (rowIndex <= 0) {
             const top = cellSource.borderTop;
             const border = this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL ? top?.tableTopBorder ?? top : top;
             const previousCellSource = rowSourceIndex > 0 ? sourceRows?.[rowSourceIndex - 1]?.tableCells[index] : undefined;
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(border, previousCellSource?.borderBottom), BORDER_TYPE.TOP, position);
+            this._drawBorder(ctx, this._resolveTableCellBorder(border, previousCellSource?.borderBottom), BORDER_TYPE.TOP, position);
         } else if (tableSke) {
             // The preceding row owns shared horizontal edges, but omitted grid
             // columns can leave part of this cell's top without an owner.
@@ -1951,7 +2013,7 @@ export class Documents extends DocComponent {
             const right = cell.left + pageWidth;
             const drawExposedTop = (end: number) => {
                 if (end > left) {
-                    this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, {
+                    this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, {
                         ...position,
                         startX: x + left - cell.left,
                         endX: x + end - cell.left,
@@ -1974,7 +2036,31 @@ export class Documents extends DocComponent {
         }
 
         if (index <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_TYPE.LEFT, position);
+            this._drawBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_TYPE.LEFT, position);
+        }
+    }
+
+    private _drawSpacedTableFrame(ctx: UniverRenderingContext, page: IDocumentSkeletonPage, table: IDocumentSkeletonTable): void {
+        if (this._drawLiquid == null || !hasTableCellSpacing(table.tableSource)) {
+            return;
+        }
+        const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
+        const borders = {
+            top: getTableOuterBorder(source, 'top'),
+            bottom: getTableOuterBorder(source, 'bottom'),
+            left: getTableOuterBorder(source, 'left'),
+            right: getTableOuterBorder(source, 'right'),
+        };
+        const x = this._drawLiquid.x + page.marginLeft;
+        const y = this._drawLiquid.y + page.marginTop;
+        const position = {
+            startX: x + getCellBorderWidth(borders.left) / 2,
+            startY: y + getCellBorderWidth(borders.top) / 2,
+            endX: x + table.width - getCellBorderWidth(borders.right) / 2,
+            endY: y + table.height - getCellBorderWidth(borders.bottom) / 2,
+        };
+        for (const [edge, type] of [['top', BORDER_TYPE.TOP], ['bottom', BORDER_TYPE.BOTTOM], ['left', BORDER_TYPE.LEFT], ['right', BORDER_TYPE.RIGHT]] as const) {
+            this._drawBorder(ctx, borders[edge] ?? null, type, position);
         }
     }
 
@@ -2042,7 +2128,7 @@ export class Documents extends DocComponent {
                 ? top?.tableTopBorder ?? top
                 : top;
             const previousRowCellSource = tableRows[rowSourceIndex - 1]?.tableCells[column];
-            this._drawTableCellBorder(
+            this._drawBorder(
                 ctx,
                 this._resolveTableCellBorder(topBorder, previousRowCellSource?.borderBottom),
                 BORDER_TYPE.TOP,
@@ -2050,7 +2136,7 @@ export class Documents extends DocComponent {
             );
         }
 
-        this._drawTableCellBorder(
+        this._drawBorder(
             ctx,
             this._resolveTableCellBorder(startCell.borderRight, nextCellSource?.borderLeft),
             BORDER_TYPE.RIGHT,
@@ -2059,7 +2145,7 @@ export class Documents extends DocComponent {
 
         if (rowSourceIndex === startRowIndex + rowSpan - 1) {
             const nextRowCellSource = tableRows[rowSourceIndex + 1]?.tableCells[column];
-            this._drawTableCellBorder(
+            this._drawBorder(
                 ctx,
                 this._resolveTableCellBorder(startCell.borderBottom, nextRowCellSource?.borderTop),
                 BORDER_TYPE.BOTTOM,
@@ -2069,7 +2155,7 @@ export class Documents extends DocComponent {
 
         // Interior vertical edges are owned by the preceding cell's right border.
         if (column <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(startCell.borderLeft), BORDER_TYPE.LEFT, position);
+            this._drawBorder(ctx, this._resolveTableCellBorder(startCell.borderLeft), BORDER_TYPE.LEFT, position);
         }
     }
 
@@ -2099,7 +2185,7 @@ export class Documents extends DocComponent {
         return lineWidth > 0 && color !== 'transparent';
     }
 
-    private _drawTableCellBorder(
+    private _drawBorder(
         ctx: UniverRenderingContext,
         border: Nullable<ITableCellBorder>,
         type: BORDER_TYPE,
@@ -2186,7 +2272,7 @@ export class Documents extends DocComponent {
                 .getSelfOrHeaderFooterViewModel(page.segmentId)
             : undefined;
         const customRanges = page.fieldsResolved ? [] : customRangesOverride ?? viewModel?.getBody()?.customRanges ?? [];
-        const fieldContext = { customRanges, pageNumber: parentPage.pageNumber, pageCount, viewModel };
+        const fieldContext = { customRanges, pageNumber: parentPage.pageNumber, pageCount, pageNumberFormat: parentPage.pageNumberFormat, viewModel };
 
         ctx.save();
         ctx.globalAlpha *= opacity;
@@ -2231,6 +2317,8 @@ export class Documents extends DocComponent {
                 const linesCount = lines.length;
 
                 const alignOffset = alignOffsetNoAngle;
+                // Story alignment already includes its page offset; decoration helpers add marginTop themselves.
+                const decorationTop = alignOffset.y - page.marginTop;
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
@@ -2257,7 +2345,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         }
-                        this._drawLineBackground(ctx, page, line, column.width, parentPage.marginLeft);
+                        this._drawLineBackground(ctx, page, line, column.width, parentPage.marginLeft, decorationTop);
 
                         const divideLength = divides.length;
 
@@ -2296,7 +2384,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
 
-                        this._drawParagraphBorders(ctx, page, line, column.width, parentPage.marginLeft);
+                        this._drawParagraphBorders(ctx, page, line, column.width, parentPage.marginLeft, decorationTop);
 
                         this._drawLiquid.translateRestore();
                     }

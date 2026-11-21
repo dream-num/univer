@@ -14,7 +14,28 @@
  * limitations under the License.
  */
 
-import type { IViewportInfo } from './basics/vector2';
+import type { UniverRenderingContext } from './context';
 
-// A viewport's geometry can also be passed to a renderer without applying a Canvas clip.
-export const clippedViewportRenders = new WeakSet<IViewportInfo>();
+interface IViewportRenderClip {
+    top: number;
+    bottom: number;
+}
+
+// Track the actual clip for each context. A renderer may transform or replace its input bounds.
+export const viewportRenderClips = new WeakMap<UniverRenderingContext, IViewportRenderClip>();
+
+export function getViewportClipInDevicePixels(ctx: UniverRenderingContext, top: number, height: number): IViewportRenderClip | undefined {
+    const { b, c, d, f } = ctx.getTransform();
+    if (b !== 0 || c !== 0 || !(d > 0) || !(height > 0)) {
+        return;
+    }
+    return { top: top * d + f, bottom: (top + height) * d + f };
+}
+
+export function setViewportRenderClip(ctx: UniverRenderingContext, clip: IViewportRenderClip | undefined): void {
+    if (clip) {
+        viewportRenderClips.set(ctx, clip);
+    } else {
+        viewportRenderClips.delete(ctx);
+    }
+}

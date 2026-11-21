@@ -24,7 +24,12 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { SheetDeleteNoteCommand, SheetsNoteModel, SheetToggleNotePopupCommand } from '@univerjs/sheets-note';
+import {
+    SHEET_NOTE_EDIT_PERMISSIONS,
+    SheetDeleteNoteCommand,
+    SheetsNoteModel,
+    SheetToggleNotePopupCommand,
+} from '@univerjs/sheets-note';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, map, merge, startWith } from 'rxjs';
@@ -65,10 +70,7 @@ export function sheetNoteContextMenuFactory(accessor: IAccessor): IMenuButtonIte
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
             getSelectedNote$(accessor),
         ]).pipe(map(([hidden, note]) => hidden || !!note)),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-        }),
+        disabled$: getCurrentRangeDisable$(accessor, SHEET_NOTE_EDIT_PERMISSIONS),
         commandId: AddNotePopupOperation.id,
     };
 }
@@ -80,10 +82,7 @@ export function sheetDeleteNoteMenuFactory(accessor: IAccessor): IMenuButtonItem
         title: 'sheets-note-ui.rightClick.deleteNote',
         icon: 'DeleteNoteIcon',
         hidden$: getSelectedNote$(accessor).pipe(map((note) => !note), distinctUntilChanged()),
-        disabled$: getCurrentRangeDisable$(accessor, {
-            workbookTypes: [WorkbookEditablePermission],
-            worksheetTypes: [WorksheetEditPermission],
-        }),
+        disabled$: getCurrentRangeDisable$(accessor, SHEET_NOTE_EDIT_PERMISSIONS),
     };
 }
 export function sheetNoteToggleMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {

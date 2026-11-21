@@ -24,13 +24,7 @@ import type {
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
-import {
-    CellValueType,
-    getDisplayValueFromCell,
-    HorizontalAlign,
-    Tools,
-    WrapStrategy,
-} from '@univerjs/core';
+import { CellValueType, getDisplayValueFromCell, HorizontalAlign, Tools, WrapStrategy } from '@univerjs/core';
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDocumentRenderBounds } from '../../docs/doc-component';
@@ -45,7 +39,12 @@ import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
-import { DEFAULT_PADDING_DATA, FULL_WIDTH_HORIZONTAL_ALIGNMENTS, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
+import { SHEET_VIEWPORT_KEY } from '../interfaces';
+import {
+    DEFAULT_PADDING_DATA,
+    FULL_WIDTH_HORIZONTAL_ALIGNMENTS,
+    getDocsSkeletonPageSize,
+} from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
 import { RenderPrimitiveCache } from './render-primitive-cache';
 import { SheetExtension } from './sheet-extension';
@@ -220,6 +219,10 @@ export class Font extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
+        // At unit sheet scale, native text avoids a bitmap lookup and blit per document glyph.
+        // The frozen row band still needs stable glyph coverage where a horizontal repair clips text.
+        const cacheDocumentGlyphs = this.constructor !== Font || parentScale.scaleX !== 1 || parentScale.scaleY !== 1
+            || moreBoundsInfo.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP;
         const { fontRenderRanges, viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
         const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
@@ -365,7 +368,7 @@ export class Font extends SheetExtension {
                     }
 
                     renderFontContext.cellInfo = cellInfo;
-                    if (fontCache.documentSkeleton || moreBoundsInfo.textClipBound) {
+                    if (fontCache.documentSkeleton ? cacheDocumentGlyphs : moreBoundsInfo.textClipBound) {
                         this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache), fontCache.documentSkeleton ? undefined : moreBoundsInfo.textClipBound, moreBoundsInfo.textClipBound);
                     } else {
                         this._renderFontEachCell(renderFontContext, row, col, fontMatrix, fontCache);
@@ -382,6 +385,10 @@ export class Font extends SheetExtension {
 
             const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
+            if (fontCache.documentSkeleton && !cacheDocumentGlyphs) {
+                this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache);
+                return;
+            }
             this._primitiveCache.draw(ctx, () => this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix, fontCache), undefined, moreBoundsInfo.textClipBound);
         });
 

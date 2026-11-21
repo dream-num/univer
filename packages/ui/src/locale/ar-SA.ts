@@ -151,6 +151,7 @@ const locale: typeof enUS = {
                 formulas: 'الصيغ',
                 rules: 'القواعد',
                 organization: 'تنظيم البيانات',
+                analysis: 'تحليل البيانات',
                 display: 'العرض',
                 visibility: 'الظهور',
             },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DisposableCollection } from '@univerjs/core';
+import type { DisposableCollection, IDocumentData, IDrawingParam } from '@univerjs/core';
 import type {
     Documents,
     DocumentSkeleton,
@@ -52,6 +52,32 @@ const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, IDocPrintComp
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintDomtContext>('PRINTING_DOM_COLLECT');
 
 export class DocPrintInterceptorService extends Disposable {
+    getDrawingForPrint<T extends IDrawingParam>(skeleton: DocumentSkeleton, drawing: T): T {
+        const model = skeleton.getViewModel().getDataModel();
+        let drawings = model.getDrawings();
+        if (!drawings?.[drawing.drawingId]) {
+            drawings = Object.values(model.getSnapshot().notes ?? {}).find((note) => note.drawings?.[drawing.drawingId])?.drawings;
+        }
+        const source = drawings?.[drawing.drawingId];
+        if (!source) {
+            return drawing;
+        }
+        let hidden = source.hidden === true;
+        let groupId: string | undefined = source.groupId;
+        const visited = new Set<string>();
+        while (!hidden && groupId && !visited.has(groupId)) {
+            visited.add(groupId);
+            const parent = drawings?.[groupId];
+            if (!parent) {
+                break;
+            }
+            hidden = parent.hidden === true;
+            groupId = parent.groupId;
+        }
+        // Viewport culling is transient; print visibility comes from the document.
+        return { ...drawing, hidden };
+    }
+
     private _printComponentMap: Map<string, string> = new Map();
     private readonly _printPreparationHandlers = new Set<(context: IDocPrintPreparationContext) => Promise<void>>();
 
@@ -84,12 +110,13 @@ export class DocPrintInterceptorService extends Disposable {
 
     getPageDrawingIds(skeleton: DocumentSkeleton, pageIndex?: number): ReadonlySet<string> | null {
         const data = skeleton.getSkeletonData();
-        if (!data || data.pages.length <= 1 || pageIndex == null) {
+        if (!data || pageIndex == null) {
             return null;
         }
 
         const drawingIds = new Set<string>();
-        const page = data.pages[pageIndex];
+        // Every print slice of a continuous document belongs to its one measured page.
+        const page = data.pages.length === 1 ? data.pages[0] : data.pages[pageIndex];
         if (!page) {
             return drawingIds;
         }
@@ -103,6 +130,8 @@ export class DocPrintInterceptorService extends Disposable {
         if (footer) {
             collectPageDrawingIds(footer, drawingIds);
         }
+
+        collectGroupedDrawingIds(skeleton.getViewModel().getDataModel().getSnapshot(), drawingIds);
         return drawingIds;
     }
 
@@ -118,6 +147,29 @@ export class DocPrintInterceptorService extends Disposable {
     override dispose(): void {
         this._printPreparationHandlers.clear();
         super.dispose();
+    }
+}
+
+function collectGroupedDrawingIds(document: IDocumentData, drawingIds: Set<string>): void {
+    const drawingMaps = [document.drawings, ...Object.values(document.notes ?? {}).map((note) => note.drawings)];
+    const children = new Map<string, string[]>();
+    for (const drawings of drawingMaps) {
+        for (const drawing of Object.values(drawings ?? {})) {
+            if (drawing.groupId) {
+                const siblings = children.get(drawing.groupId) ?? [];
+                siblings.push(drawing.drawingId);
+                children.set(drawing.groupId, siblings);
+            }
+        }
+    }
+    const pending = [...drawingIds];
+    for (let index = 0; index < pending.length; index++) {
+        for (const child of children.get(pending[index]) ?? []) {
+            if (!drawingIds.has(child)) {
+                drawingIds.add(child);
+                pending.push(child);
+            }
+        }
     }
 }
 

@@ -62,7 +62,7 @@ export function InsertTableOfContentsDialog(props: IInsertTableOfContentsDialogP
     const indent = { fromTemplate: 18, classic: 14, modern: 20, simple: 12 }[value.format];
 
     return (
-        <div className="univer-grid univer-gap-4" data-testid="table-of-contents-insert-dialog">
+        <div className="univer-grid univer-gap-4">
             <div className="univer-grid univer-grid-cols-2 univer-gap-3">
                 <label className="univer-grid univer-gap-1 univer-text-sm">
                     <span>{localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.levels')}</span>

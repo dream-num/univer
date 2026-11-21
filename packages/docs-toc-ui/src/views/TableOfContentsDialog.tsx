@@ -36,7 +36,7 @@ export function TableOfContentsDialog(props: ITableOfContentsDialogProps) {
     ] as const;
 
     return (
-        <div className="univer-grid univer-gap-4" data-testid="table-of-contents-update-dialog">
+        <div className="univer-grid univer-gap-4">
             <p className="univer-m-0 univer-text-sm">
                 {localeService.t<LocaleKey>('docs-toc-ui.tableOfContents.updateHint')}
             </p>

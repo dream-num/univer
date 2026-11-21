@@ -23,6 +23,21 @@ import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { BinomDistRange } from '../index';
 
+function exactCombination(n: number, k: number): bigint {
+    let result = 1n;
+    const integerN = BigInt(n);
+    for (let i = 1; i <= Math.min(k, n - k); i++) {
+        result = result * (integerN - BigInt(i) + 1n) / BigInt(i);
+    }
+    return result;
+}
+
+function expectRelative(actual: unknown, expected: number) {
+    expect(typeof actual).toBe('number');
+    expect(Number.isFinite(actual)).toBe(true);
+    expect(Math.abs((actual as number) / expected - 1)).toBeLessThan(1e-14);
+}
+
 describe('Test binomDistRange function', () => {
     const testFunction = new BinomDistRange(FUNCTION_NAMES_STATISTICAL.BINOM_DIST_RANGE);
 
@@ -152,6 +167,14 @@ describe('Test binomDistRange function', () => {
                 [0.954832518508, ErrorType.VALUE, 0.954832518508, 0.954832518508, 0.954832518508, 0.954832518508],
                 [0.954832518508, ErrorType.NUM, 0.954832518508, ErrorType.VALUE, ErrorType.NUM, 0.954832518508],
             ]);
+        });
+
+        it('restores binomial ranges using finite coefficients', () => {
+            const number = NumberValueObject.create;
+            const trials = 1024;
+            const midpoint = trials / 2;
+            const pmf = Number(exactCombination(trials, midpoint)) * 2 ** -trials;
+            expectRelative(getObjectValue(testFunction.calculate(number(trials), number(0.5), number(midpoint), number(midpoint))), pmf);
         });
     });
 });

@@ -41,8 +41,10 @@ export function calculateCombin(n: number, k: number): number {
             break;
         }
 
-        result *= n - i + 1;
-        result /= i;
+        const numerator = result * (n - i + 1);
+        result = Number.isFinite(numerator)
+            ? numerator / i
+            : result * ((n - i + 1) / i);
     }
 
     return result;

@@ -33,4 +33,17 @@ describe('interval helpers', () => {
             [8, 10],
         ]);
     });
+
+    it.each([
+        { points: [[2, 6]], expected: [[2, 6]] },
+        { points: [[2, 6], 8], expected: [[2, 6], [8, 8]] },
+        { points: [8, [2, 6], 7], expected: [[2, 8]] },
+        { points: [[2, 8], [3, 4], 6], expected: [[2, 8]] },
+        { points: [[2, 8], [2, 4], 9], expected: [[2, 9]] },
+    ])('preserves the complete leading range in $points', ({ points, expected }) => {
+        const input = points as Array<number | [number, number]>;
+        const original = structuredClone(input);
+        expect(generateIntervalsByPoints(input)).toEqual(expected);
+        expect(input).toEqual(original);
+    });
 });

@@ -30,6 +30,7 @@ import {
     resolveDocumentParagraphStyle,
     SectionType,
     Skeleton,
+    VerticalAlign,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type {
@@ -118,7 +119,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
-import { getBoundingBox } from './model/line';
+import { getBoundingBox, getPlainTextLineInkBounds } from './model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
@@ -157,19 +158,83 @@ function getFlowSuffixTop(page: IDocumentSkeletonPage, sectionIndex: number, col
     return top;
 }
 
-function hasEmbeddedGeometryInFlowSuffix(page: IDocumentSkeletonPage, startOffset: number, startTop: number): boolean {
+function indexDrawingAnchorOffsets(body: IDocumentBody | undefined): Map<string, number | undefined> {
+    const offsets = new Map<string, number | undefined>();
+    if (body != null) {
+        for (const { blockId, startIndex } of body.customBlocks ?? []) {
+            const valid = !offsets.has(blockId) && body.dataStream[startIndex] === DataStreamTreeTokenType.CUSTOM_BLOCK;
+            offsets.set(blockId, valid ? startIndex : undefined);
+        }
+    }
+    return offsets;
+}
+
+function getUnclippedColumnGroupBottom(group: IDocumentSkeletonColumnGroup, page: IDocumentSkeletonPage): number {
+    const config = page.renderConfig;
+    if (config?.centerAngle || config?.vertexAngle || config?.stackedText ||
+        config?.useCustomGlyphRenderer === BooleanNumber.TRUE || config?.paintTextOutline === BooleanNumber.TRUE ||
+        (config?.verticalAlign != null && config.verticalAlign !== VerticalAlign.TOP)) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    let bottom = group.top + group.height;
+    for (const column of group.columns) {
+        const nestedPage = column.page;
+        if (nestedPage.cellTextDirection === 'tbRlV' || nestedPage.skeTables.size > 0 ||
+            nestedPage.skeDrawings.size > 0 || nestedPage.skeColumnGroups.size > 0) {
+            return Number.POSITIVE_INFINITY;
+        }
+
+        const columnTop = group.top + column.top + nestedPage.marginTop;
+        for (const section of nestedPage.sections) {
+            for (const nestedColumn of section.columns) {
+                for (const line of nestedColumn.lines) {
+                    if (line.type !== LineType.PARAGRAPH || line.bullet || line.backgroundColor || line.paragraphBorders ||
+                        line.borderTop || line.borderBottom || line.borderLeft || line.borderRight || line.borderBetween ||
+                        line.divides.some((divide) => divide.glyphGroup.some((glyph) => glyph.ts?.bg || glyph.featureId || glyph.fieldLayoutContent != null))) {
+                        return Number.POSITIVE_INFINITY;
+                    }
+
+                    // Match the nested-page text origin, including line margins and padding.
+                    const lineTop = columnTop + section.top + line.top + line.marginTop + line.paddingTop;
+                    const ink = getPlainTextLineInkBounds(line, lineTop);
+                    if (ink == null) {
+                        return Number.POSITIVE_INFINITY;
+                    }
+                    bottom = Math.max(bottom, ink.bottom);
+                }
+            }
+        }
+    }
+    return bottom;
+}
+
+function hasEmbeddedGeometryInFlowSuffix(
+    page: IDocumentSkeletonPage,
+    startOffset: number,
+    startTop: number,
+    drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
+): boolean {
     for (const table of page.skeTables.values()) {
         if (table.ed >= startOffset) {
             return true;
         }
     }
     for (const group of page.skeColumnGroups.values()) {
-        if (group.ed >= startOffset || group.columnGroupSource.clipContent === BooleanNumber.FALSE || !(group.top + group.height < startTop)) {
+        if (group.ed >= startOffset || !(group.top + group.height < startTop) ||
+            (group.columnGroupSource.clipContent === BooleanNumber.FALSE && !(getUnclippedColumnGroupBottom(group, page) < startTop))) {
             return true;
         }
     }
-    for (const drawing of page.skeDrawings.values()) {
-        const { aTop, aLeft, height, width, angle, drawingOrigin, blockAnchorTop, lineTop } = drawing;
+    for (const [drawingId, drawing] of page.skeDrawings) {
+        const anchorOffset = drawingAnchorOffsets.get(drawingId);
+        // Floating drawings can paint before their anchors. Use the body offset
+        // because anchor geometry is still fragment-local after a continuous merge.
+        if (anchorOffset == null || anchorOffset >= startOffset) {
+            return true;
+        }
+
+        const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
         // Layout bounds do not cover transforms or child overflow for these objects.
         if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
             drawing.customBlockRenderViewport != null || height < 0 || width < 0 || !Number.isFinite(angle)) {
@@ -177,7 +242,7 @@ function hasEmbeddedGeometryInFlowSuffix(page: IDocumentSkeletonPage, startOffse
         }
         const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
         const bottomPadding = Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
-        const bottom = Math.max((bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding, blockAnchorTop, lineTop);
+        const bottom = (bounds.top ?? aTop) + (bounds.height ?? height) + bottomPadding;
         if (!Number.isFinite(bottom) || bottom >= startTop) {
             return true;
         }
@@ -1324,6 +1389,7 @@ export class DocumentSkeleton extends Skeleton {
     private _externalProtectedContinuousLayout: Nullable<{
         range: Extract<IDocumentLayoutProtectedRange, { mode: 'continuous' }>;
         pendingPublications: IDocumentLayoutBlockGeometryPublication[];
+        drawingAnchorOffsets: ReadonlyMap<string, number | undefined>;
         workerLayout?: { baseline: IDocumentSkeletonCached; draft: IDocumentSkeletonCached };
     }> = null;
 
@@ -2757,6 +2823,7 @@ export class DocumentSkeleton extends Skeleton {
             ? {
                 range: protectedRange,
                 pendingPublications: [],
+                drawingAnchorOffsets: indexDrawingAnchorOffsets(this._docViewModel.getBody()),
             }
             : null;
         const dataModel = this.getViewModel().getDataModel();
@@ -2931,7 +2998,13 @@ export class DocumentSkeleton extends Skeleton {
             this._applyExternalLayoutResources(draft, publication.resources);
             const page = applyDocumentSkeletonContinuousBlock(draft, publication.block, this._docViewModel.getSnapshot(), { staging: true });
             if (!progress.complete) {
-                const didUpdateForeground = this._publishProtectedWorkerFlow(publication, page, baseline, protectedContinuousLayout.range.endOffset);
+                const didUpdateForeground = this._publishProtectedWorkerFlow(
+                    publication,
+                    page,
+                    baseline,
+                    protectedContinuousLayout.range.endOffset,
+                    protectedContinuousLayout.drawingAnchorOffsets
+                );
                 this._externalLayoutProgress = progress;
                 if (didUpdateForeground) {
                     this._publishedHeadingCollapseSignature = this._getHeadingCollapseSignature();
@@ -3236,7 +3309,8 @@ export class DocumentSkeleton extends Skeleton {
         publication: IDocumentLayoutBlockGeometryPublication,
         workerPage: IDocumentSkeletonPage,
         baseline: IDocumentSkeletonCached,
-        protectedEndOffset: number
+        protectedEndOffset: number,
+        drawingAnchorOffsets: ReadonlyMap<string, number | undefined>
     ): boolean {
         const foreground = this._skeletonData;
         const { pageIndex, flow } = publication.block;
@@ -3267,8 +3341,8 @@ export class DocumentSkeleton extends Skeleton {
             getFlowSuffixTop(workerPage, flow.sectionIndex, flow.columnIndex, sourceLineIndex)
         );
         const start = lines[0].st;
-        if (!Number.isFinite(top) || hasEmbeddedGeometryInFlowSuffix(page, start, top) ||
-            hasEmbeddedGeometryInFlowSuffix(workerPage, start, top)) {
+        if (!Number.isFinite(top) || hasEmbeddedGeometryInFlowSuffix(page, start, top, drawingAnchorOffsets) ||
+            hasEmbeddedGeometryInFlowSuffix(workerPage, start, top, drawingAnchorOffsets)) {
             return false;
         }
         applyDocumentSkeletonContinuousBlock(foreground, continuation.block, this._docViewModel.getSnapshot(), { preserveEmbeddedGeometry: true });

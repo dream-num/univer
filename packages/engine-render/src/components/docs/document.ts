@@ -24,7 +24,6 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
-    BaselineOffset,
     BooleanNumber,
     CellValueType,
     ColumnSeparatorType,
@@ -81,6 +80,7 @@ import { Line } from './extensions/line';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { resolveHeaderFooterFieldGlyph } from './layout/header-footer-field';
 import { getTextHorizontalScale } from './layout/model/glyph';
+import { getPlainTextLineInkBounds } from './layout/model/line';
 import { FontCache } from './layout/shaping-engine/font-cache';
 import { getColorStyleForCanvas } from './layout/style/color';
 import {
@@ -1070,29 +1070,8 @@ export class Documents extends DocComponent {
 
     private _isPlainLineOutsideClip(line: IDocumentSkeletonLine, top: number, clipTop: number, clipBottom: number): boolean {
         // Keep backgrounds and paragraph borders on their original path. Only ordinary text ink is culled.
-        const baseline = top + line.asc;
-        let ascent = Math.max(line.lineHeight, line.contentHeight);
-        let descent = ascent;
-        for (const divide of line.divides) {
-            for (const glyph of divide.glyphGroup) {
-                const style = glyph.ts;
-                const box = glyph.bBox;
-                if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
-                    || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
-                    || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
-                    || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
-                    || style.bbl || style.bd
-                    || style.textOutline || style.textFill || style.glow || style.outerShadow
-                    || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
-                    || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
-                    return false;
-                }
-                ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
-                descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
-            }
-        }
-        return [baseline, ascent, descent].every(Number.isFinite)
-            && (baseline + descent < clipTop || baseline - ascent > clipBottom);
+        const ink = getPlainTextLineInkBounds(line, top);
+        return ink != null && (ink.bottom < clipTop || ink.top > clipBottom);
     }
 
     private _getColumnDrawLayout(

@@ -15,7 +15,7 @@
  */
 
 import type { IDistFromText, Nullable } from '@univerjs/core';
-import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
@@ -27,6 +27,7 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../basics/interfaces';
 import type { IFloatObject } from '../tools';
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
@@ -582,6 +583,33 @@ function _calculateSplit(
 
     // wrapThrough | wrapTight
     return __getCrossPoint(boundingBox.points, lineTop, lineHeight, columnWidth);
+}
+
+export function getPlainTextLineInkBounds(line: IDocumentSkeletonLine, top: number): { top: number; bottom: number } | undefined {
+    const baseline = top + line.asc;
+    let ascent = Math.max(line.lineHeight, line.contentHeight);
+    let descent = ascent;
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            const style = glyph.ts;
+            const box = glyph.bBox;
+            if ((glyph.glyphType !== GlyphType.LETTER && glyph.glyphType !== GlyphType.WORD)
+                || !style || !glyph.fontStyle?.fontString || !box || glyph.fontStyle.fontSize <= 0
+                || style.pos || (style.va !== undefined && style.va !== BaselineOffset.NORMAL)
+                || style.ul?.s === BooleanNumber.TRUE || style.st?.s === BooleanNumber.TRUE || style.ol?.s === BooleanNumber.TRUE
+                || style.bbl || style.bd
+                || style.textOutline || style.textFill || style.glow || style.outerShadow
+                || style.fontRenderScale || style.textPaintOffsets?.length || style.customGlyphKey || style.textAdvance
+                || glyph.noteSeparator || glyph.fauxBoldStrokeWidth) {
+                return;
+            }
+            ascent = Math.max(ascent, box.aba, box.ba, glyph.fontStyle.fontSize * 2);
+            descent = Math.max(descent, box.abd, box.bd, glyph.fontStyle.fontSize * 2);
+        }
+    }
+    if (Number.isFinite(baseline) && Number.isFinite(ascent) && Number.isFinite(descent)) {
+        return { top: baseline - ascent, bottom: baseline + descent };
+    }
 }
 
 export function getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {

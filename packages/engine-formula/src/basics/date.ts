@@ -202,30 +202,35 @@ export function getWeekendArray(weekend: number | string): number[] {
 }
 
 export function countWorkingDays(startDateSerialNumber: number, endDateSerialNumber: number, weekend: number | string = 1, holidays?: number[], dateSystem = DateSystem.Date1900): number {
+    if (!Number.isFinite(startDateSerialNumber) || !Number.isFinite(endDateSerialNumber)) {
+        return 0;
+    }
+
     const weekendArray = getWeekendArray(weekend);
 
     const start = Math.floor(startDateSerialNumber);
     const end = Math.floor(endDateSerialNumber);
     const startSerialNumber = end > start ? start : end;
+    const endSerialNumber = Math.max(start, end);
+    const daysDiff = Math.abs(end - start) + 1;
 
-    let workingDays = 0;
+    let workingDays = Math.floor(daysDiff / 7) * (7 - weekendArray.length);
 
-    const daysDiff = Math.abs(Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber)) + 1;
-
-    for (let i = 0; i < daysDiff; i++) {
-        const currentDateSerialNumber = startSerialNumber + i;
-
-        if (holidays && holidays.length > 0 && holidays.some((item) => Math.floor(item) === currentDateSerialNumber)) {
-            continue;
+    // Every complete week contains the same number of working days.
+    for (let i = 0; i < daysDiff % 7; i++) {
+        if (!weekendArray.includes(getWeekDayByDateSerialNumber(startSerialNumber + i, dateSystem))) {
+            workingDays++;
         }
+    }
 
-        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber, dateSystem);
-
-        if (weekendArray.includes(weekDay)) {
-            continue;
+    const countedHolidays = new Set<number>();
+    for (const holiday of holidays ?? []) {
+        const day = Math.floor(holiday);
+        if (day >= startSerialNumber && day <= endSerialNumber && !countedHolidays.has(day)
+            && !weekendArray.includes(getWeekDayByDateSerialNumber(day, dateSystem))) {
+            countedHolidays.add(day);
+            workingDays--;
         }
-
-        workingDays++;
     }
 
     return end >= start ? workingDays : -workingDays;

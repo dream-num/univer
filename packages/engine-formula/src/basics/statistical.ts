@@ -327,7 +327,9 @@ export function exponentialCDF(x: number, lambda: number): number {
         return 0;
     }
 
-    return 1 - Math.exp(-lambda * x);
+    // Avoid subtracting nearly equal values when the probability is small.
+    const scaledX = lambda * x;
+    return scaledX === 0 ? 0 : -Math.expm1(-scaledX);
 }
 
 export function exponentialPDF(x: number, lambda: number): number {

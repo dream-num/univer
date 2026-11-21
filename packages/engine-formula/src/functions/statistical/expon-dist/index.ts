@@ -105,6 +105,7 @@ export class ExponDist extends BaseFunction {
             result = exponentialPDF(xValue, lambdaValue);
         }
 
-        return NumberValueObject.create(result);
+        // Excel worksheets flush subnormal cumulative probabilities to positive zero.
+        return NumberValueObject.create(cumulativeValue && Math.abs(result) < 2 ** -1022 ? 0 : result);
     }
 }

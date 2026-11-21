@@ -16,9 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
+import { exponentialCDF } from '../../../../basics/statistical';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_COMPATIBILITY } from '../../../compatibility/function-names';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { ExponDist } from '../index';
@@ -27,6 +29,70 @@ describe('Test exponDist function', () => {
     const testFunction = new ExponDist(FUNCTION_NAMES_STATISTICAL.EXPON_DIST);
 
     describe('ExponDist', () => {
+        it('Preserves small positive cumulative probabilities in both function aliases', () => {
+            // References evaluated with 400-digit decimal arithmetic.
+            const cases = [
+                [1e-20, 1, 1e-20],
+                [1e-10, 2, 1.9999999998e-10],
+                [1e-12, 0.25, 2.4999999999996874e-13],
+                [1e-200, 1e100, 1e-100],
+            ];
+            for (const name of [FUNCTION_NAMES_STATISTICAL.EXPON_DIST, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST]) {
+                const fn = new ExponDist(name);
+                for (const [x, lambda, expected] of cases) {
+                    const result = fn.calculate(NumberValueObject.create(x), NumberValueObject.create(lambda), BooleanValueObject.create(true));
+                    const actual = getObjectValue(result) as number;
+                    expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-14);
+                }
+            }
+        });
+
+        it('Flushes subnormal cumulative results to positive zero in both aliases', () => {
+            for (const name of [FUNCTION_NAMES_STATISTICAL.EXPON_DIST, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST]) {
+                const fn = new ExponDist(name);
+                for (const [x, lambda] of [[1e-200, 1e-110], [1e-308, 0.5], [Number.MIN_VALUE, 1]]) {
+                    const result = fn.calculate(NumberValueObject.create(x), NumberValueObject.create(lambda), BooleanValueObject.create(true));
+                    expect(getObjectValue(result)).toBe(0);
+                }
+            }
+        });
+
+        it('Preserves the smallest normal cumulative result while broadcasting rates', () => {
+            const factor = 2 ** -511;
+            const lambda = ArrayValueObject.createByArray([[factor * (1 - Number.EPSILON), factor, factor * (1 + Number.EPSILON)]]);
+            const result = testFunction.calculate(NumberValueObject.create(factor), lambda, BooleanValueObject.create(true));
+            expect(getObjectValue(result)).toEqual([[0, 2 ** -1022, 2 ** -1022 + Number.MIN_VALUE]]);
+        });
+
+        it('Keeps subnormal precision in the mathematical helper', () => {
+            const result = exponentialCDF(1e-200, 1e-110);
+            expect(result).toBeGreaterThan(0);
+            expect(result).toBeLessThan(2 ** -1022);
+        });
+
+        it('Preserves small cumulative probabilities while broadcasting arrays', () => {
+            const x = ArrayValueObject.createByArray([[1e-20, 1e-10], [1e-12, 1e-100]]);
+            const lambda = ArrayValueObject.createByArray([[1], [2]]);
+            const result = testFunction.calculate(x, lambda, BooleanValueObject.create(true));
+            const actual = getObjectValue(result) as number[][];
+            const expected = [[1e-20, 9.999999999500001e-11], [1.999999999998e-12, 2e-100]];
+            for (let r = 0; r < expected.length; r++) {
+                for (let c = 0; c < expected[r].length; c++) {
+                    expect(Math.abs(actual[r][c] / expected[r][c] - 1)).toBeLessThan(1e-14);
+                }
+            }
+        });
+
+        it('Retains positive zero at the origin and saturation for large inputs', () => {
+            const lambda = NumberValueObject.create(2);
+            for (const x of [0, -0]) {
+                const result = testFunction.calculate(NumberValueObject.create(x), lambda, BooleanValueObject.create(true));
+                expect(getObjectValue(result)).toBe(0);
+            }
+            const result = testFunction.calculate(NumberValueObject.create(1000), lambda, BooleanValueObject.create(true));
+            expect(getObjectValue(result)).toBe(1);
+        });
+
         it('Value is normal', () => {
             const x = NumberValueObject.create(0.5);
             const lambda = NumberValueObject.create(1);

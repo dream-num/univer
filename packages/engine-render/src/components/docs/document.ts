@@ -116,6 +116,24 @@ interface ITablePaintExtent {
     maxBorderWidth: number;
 }
 
+function isBuiltInDocumentExtension(extension: object): boolean {
+    const type = extension.constructor;
+    return type === Background || type === Border || type === FontAndBaseLine || type === Line;
+}
+
+function getSpacedTableFrameBorders(table: IDocumentSkeletonTable) {
+    if (!hasTableCellSpacing(table.tableSource)) {
+        return;
+    }
+    const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
+    return {
+        top: getTableOuterBorder(source, 'top'),
+        bottom: getTableOuterBorder(source, 'bottom'),
+        left: getTableOuterBorder(source, 'left'),
+        right: getTableOuterBorder(source, 'right'),
+    };
+}
+
 function getTablePaintExtent(table: IDocumentSkeletonTable): ITablePaintExtent | null {
     let top = 0;
     let bottom = table.height;
@@ -137,6 +155,11 @@ function getTablePaintExtent(table: IDocumentSkeletonTable): ITablePaintExtent |
     // Shared edges can use a neighbor's border from the source table.
     for (const row of table.tableSource.tableRows ?? []) {
         maxBorderWidth = getMaxTableBorderWidth(row.tableCells, maxBorderWidth);
+    }
+
+    const frame = getSpacedTableFrameBorders(table);
+    if (frame != null) {
+        maxBorderWidth = Math.max(maxBorderWidth, ...Object.values(frame).map(getCellBorderWidth));
     }
 
     return [top, bottom, maxBorderWidth].every(Number.isFinite) ? { top, bottom, maxBorderWidth } : null;
@@ -530,6 +553,9 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
+        // Extensions can use offscreen glyph callbacks for their own render state.
+        const canClipTables = isContinuousLayout && this.constructor === Documents &&
+            !this._glyphPaintSink && extensions.every(isBuiltInDocumentExtension);
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
         const preTextBackgroundExtensions = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.BACKGROUND);
         const glyphExtensionsExcludeBackground = extensions
@@ -612,7 +638,8 @@ export class Documents extends DocComponent {
             }
 
             if (skeTables.size > 0) {
-                const tables = isContinuousLayout && centerAngle === 0 && vertexAngle === 0
+                const tables = canClipTables && centerAngle === 0 && vertexAngle === 0 && !renderConfig.stackedText &&
+                    renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
                     ? this._getTablesInViewport(ctx, page, skeletonData, dataModel?.getBody?.()?.customRanges)
                     : skeTables;
                 ctx.save();
@@ -788,7 +815,7 @@ export class Documents extends DocComponent {
     ): Iterable<[string, IDocumentSkeletonTable]> {
         const tables = page.skeTables;
         const clip = viewportRenderClips.get(ctx);
-        if (!clip || this.parent?.classType !== RENDER_CLASS_TYPE.SCENE || this._glyphPaintSink ||
+        if (!clip || this.parent?.classType !== RENDER_CLASS_TYPE.SCENE ||
             ctx.globalCompositeOperation !== 'source-over' || ctx.shadowBlur || ctx.shadowOffsetX || ctx.shadowOffsetY ||
             (ctx.filter && ctx.filter !== 'none')) {
             return tables;
@@ -878,7 +905,7 @@ export class Documents extends DocComponent {
             && renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
             && !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY
             && (!ctx.filter || ctx.filter === 'none') && ctx.globalCompositeOperation === 'source-over'
-            && extensions.every((extension) => [Background, Border, FontAndBaseLine, Line].some((type) => extension.constructor === type));
+            && extensions.every(isBuiltInDocumentExtension);
         const glyphClipTop = canClipGlyphs ? (clip.top - 2 - matrix.f) / matrix.d : undefined;
         const glyphClipBottom = canClipGlyphs ? (clip.bottom + 2 - matrix.f) / matrix.d : undefined;
 
@@ -2041,16 +2068,10 @@ export class Documents extends DocComponent {
     }
 
     private _drawSpacedTableFrame(ctx: UniverRenderingContext, page: IDocumentSkeletonPage, table: IDocumentSkeletonTable): void {
-        if (this._drawLiquid == null || !hasTableCellSpacing(table.tableSource)) {
+        const borders = getSpacedTableFrameBorders(table);
+        if (this._drawLiquid == null || borders == null) {
             return;
         }
-        const source = { ...table.tableSource, tableRows: table.rows.map((row) => row.rowSource) };
-        const borders = {
-            top: getTableOuterBorder(source, 'top'),
-            bottom: getTableOuterBorder(source, 'bottom'),
-            left: getTableOuterBorder(source, 'left'),
-            right: getTableOuterBorder(source, 'right'),
-        };
         const x = this._drawLiquid.x + page.marginLeft;
         const y = this._drawLiquid.y + page.marginTop;
         const position = {

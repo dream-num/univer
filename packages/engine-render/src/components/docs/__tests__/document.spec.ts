@@ -3875,7 +3875,7 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it('draws the tables at the destination of a continuous viewport jump and reverse', () => {
+    function createContinuousTableFixture(frameOwner?: 'table' | 'row') {
         const T = DataStreamTreeTokenType;
         const wrapTable = (text: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
         const first = wrapTable('A');
@@ -3884,6 +3884,8 @@ describe('documents render', () => {
         const secondStart = first.length + gap.length;
         const dataStream = `${first}${gap}${second}\r\n`;
         const bottomBorder = { width: { v: 20 }, color: { rgb: '#a02030' } };
+        const frameBorder = { width: { v: 40 }, color: { rgb: '#dc4444' } };
+        const cellBorder = { width: { v: 1 }, color: { rgb: '#000000' } };
         const tableSource = Object.fromEntries(['first', 'second'].map((tableId): [string, ITable] => [tableId, {
             tableId,
             align: TableAlignmentType.START,
@@ -3893,10 +3895,13 @@ describe('documents render', () => {
             position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
             dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
             cellMargin: { top: { v: 0 }, bottom: { v: 0 }, start: { v: 0 }, end: { v: 0 } },
+            ...(tableId === 'first' && frameOwner ? { cellSpacing: { v: 2 } } : {}),
+            ...(tableId === 'first' && frameOwner === 'table' ? { borderDefaults: { bottom: frameBorder } } : {}),
             tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
             tableRows: [{
                 trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
-                tableCells: [tableId === 'first' ? { borderBottom: bottomBorder } : {}],
+                ...(tableId === 'first' && frameOwner === 'row' ? { borderDefaults: { bottom: frameBorder } } : {}),
+                tableCells: [tableId === 'first' ? { borderBottom: frameOwner ? cellBorder : bottomBorder } : {}],
             }],
         }]));
         const bed = createParagraphLayoutTestBed('', {
@@ -3920,11 +3925,31 @@ describe('documents render', () => {
         scene.transformByState({ height: 10_000 });
         const viewport = scene.getMainViewport();
         const scrollbar = new ScrollBar(viewport);
+        const page = skeleton.getSkeletonData()!.pages[0];
+        const [firstTable, secondTable] = [...page.skeTables.values()];
+        return {
+            documents,
+            viewport,
+            page,
+            firstTable,
+            secondTable,
+            bottomBorder,
+            frameBorder,
+            dispose: () => {
+                scrollbar.dispose();
+                documents.dispose();
+                skeleton.dispose();
+                bed.viewModel.dispose();
+                bed.dataModel.dispose();
+            },
+        };
+    }
+
+    it('draws the tables at the destination of a continuous viewport jump and reverse', () => {
+        const { documents, viewport, page, firstTable, secondTable, bottomBorder, dispose } = createContinuousTableFixture();
         const ctx = canvas.getContext();
         const text = vi.spyOn(ctx, 'fillText');
         try {
-            const page = skeleton.getSkeletonData()!.pages[0];
-            const [firstTable, secondTable] = [...page.skeTables.values()];
             expect(secondTable.top).toBeGreaterThan(viewport.height!);
             for (const [scrollY, expected] of [[0, 'A'], [secondTable.top, 'B'], [0, 'A']] as const) {
                 text.mockClear();
@@ -3957,11 +3982,50 @@ describe('documents render', () => {
             viewport.render(ctx, [documents]);
             expect(text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B')).toEqual(['A', 'B']);
         } finally {
-            scrollbar.dispose();
-            documents.dispose();
-            skeleton.dispose();
-            bed.viewModel.dispose();
-            bed.dataModel.dispose();
+            dispose();
+        }
+    });
+
+    it.each(['table', 'row'] as const)('draws a thick %s frame that reaches a zoomed viewport', (frameOwner) => {
+        const { documents, viewport, page, firstTable, frameBorder, dispose } = createContinuousTableFixture(frameOwner);
+        try {
+            scene.transformByState({ scaleX: 0.5, scaleY: 0.5 });
+            const ctx = canvas.getContext();
+            const strokes: Array<string | CanvasGradient | CanvasPattern> = [];
+            const stroke = ctx.stroke.bind(ctx);
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                strokes.push(ctx.strokeStyle);
+                stroke();
+            });
+            const tableBottom = documents.top + page.marginTop + firstTable.top + firstTable.height;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: tableBottom + 10 });
+            viewport.render(ctx, [documents]);
+            expect(strokes).toContain(frameBorder.color.rgb);
+        } finally {
+            dispose();
+        }
+    });
+
+    it('delivers clipped table glyphs to independently registered extensions', () => {
+        const { documents, viewport, dispose } = createContinuousTableFixture();
+        const text: string[] = [];
+        class TableGlyphExtension extends docExtension {
+            override uKey = 'TableGlyphExtension';
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[TableGlyphExtension]]);
+        const extension = documents.register(injector.get(TableGlyphExtension));
+        try {
+            viewport.render(canvas.getContext(), [documents]);
+            expect(text).toEqual(['A', 'B']);
+        } finally {
+            extension.dispose();
+            injector.dispose();
+            dispose();
         }
     });
 

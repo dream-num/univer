@@ -1691,7 +1691,7 @@ describe('worker document layout session', () => {
         }
     });
 
-    it('applies an acknowledged Worker tail edit without retransmitting an unchanged table', () => {
+    it.each([false, true])('applies an acknowledged Worker tail edit after skipping a completed result (protected: %s)', (protectedLayout) => {
         mockWorkerCanvas();
         const T = DataStreamTreeTokenType;
         const table = (text: string) => T.TABLE_START + T.TABLE_ROW_START + T.TABLE_CELL_START + text +
@@ -1749,12 +1749,19 @@ describe('worker document layout session', () => {
         try {
             main.beginExternalLayout({ reason: 'initial' });
             const initial = worker.start({ reason: 'initial', continuousLayoutVersion: 'initial-complete' });
-            const complete = worker.step(initial, Number.POSITIVE_INFINITY);
-            if (complete.publication == null) {
-                throw new Error('Expected the complete initial Worker layout.');
+            let initialPublication = worker.step(initial, 0, 1);
+            for (let step = 0; step < 100 && initialPublication.publication == null && !initialPublication.progress.complete; step++) {
+                initialPublication = worker.step(initial, 0, 1);
             }
+            expect(initialPublication.progress.complete).toBe(false);
+            expect(initialPublication.publication).not.toBeNull();
+            main.applyLayoutPublication(structuredClone(initialPublication.publication!), initialPublication.progress);
             expect(main.getAppliedContinuousLayoutVersion()).toBeUndefined();
-            main.applyLayoutPublication(structuredClone(complete.publication), complete.progress);
+
+            const complete = worker.step(initial, Number.POSITIVE_INFINITY);
+            expect(complete.progress.complete).toBe(true);
+            expect(complete.publication).not.toBeNull();
+            main.applyLayoutPublication(structuredClone(complete.publication!), complete.progress);
             const initialPage = main.getSkeletonData()!.pages[0];
             const retainedTable = initialPage.skeTables.get('first');
             expect(retainedTable).toBeDefined();
@@ -1778,10 +1785,17 @@ describe('worker document layout session', () => {
                 anchor,
                 priorityAnchor: anchor,
                 invalidation,
-                appliedLayoutVersion: main.getAppliedContinuousLayoutVersion(),
+                ...(protectedLayout
+                    ? { acknowledgedLayoutVersion: main.getAppliedContinuousLayoutVersion() }
+                    : { appliedLayoutVersion: main.getAppliedContinuousLayoutVersion() }),
                 continuousLayoutVersion: 'unapplied-worker-reply',
             });
-            expect(worker.step(skipped, Number.POSITIVE_INFINITY).progress.complete).toBe(true);
+            const skippedResult = worker.step(skipped, Number.POSITIVE_INFINITY);
+            expect(skippedResult.progress.complete).toBe(true);
+            expect(skippedResult.publication?.kind).toBe('block');
+            if (protectedLayout && skippedResult.publication?.kind === 'block') {
+                expect(skippedResult.publication.block.baseLayoutVersion).toBeUndefined();
+            }
             main.beginExternalLayout({ reason: 'edit' });
             const generation = worker.start({
                 reason: 'edit',

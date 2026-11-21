@@ -1155,9 +1155,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         // A partial Main layout may still need progressively published regions.
         // Keep that path on complete Worker prefixes until Main finishes locally.
-        const canUseAppliedBase = !forceFullPublication &&
-            this._context.unit.documentStyle.documentFlavor === DocumentFlavor.MODERN &&
-            (protectedRange == null || preserveCompletedLayout);
+        const acknowledgedLayoutVersion = this._context.unit.documentStyle.documentFlavor === DocumentFlavor.MODERN
+            ? skeleton.getAppliedContinuousLayoutVersion()
+            : undefined;
+        const canUseAppliedBase = !forceFullPublication && (protectedRange == null || preserveCompletedLayout);
         const retryFullWorkerPublication = () => {
             this._layoutCoordinator.cancel();
             this._queueWorkerHandoff(layoutRequestId, () => this._scheduleWorkerLayout(
@@ -1180,7 +1181,12 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             this._docLayoutExecutorService,
             {
                 ...workerOptions,
-                ...(canUseAppliedBase ? { appliedLayoutVersion: skeleton.getAppliedContinuousLayoutVersion() } : {}),
+                ...(acknowledgedLayoutVersion == null
+                    ? {}
+                    : {
+                        acknowledgedLayoutVersion,
+                        ...(canUseAppliedBase ? { appliedLayoutVersion: acknowledgedLayoutVersion } : {}),
+                    }),
             },
             protectedRange,
             {

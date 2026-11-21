@@ -128,16 +128,16 @@ describe('document layout page patch', () => {
                     }
                 }
             }
-            const initial = serializeDocumentSkeletonContinuousBlock(page, null);
+            const initial = serializeDocumentSkeletonContinuousBlock(page, null, false, { trackBaseline: true, complete: true });
             const target = { ...data, pages: [] };
             const applied = applyDocumentSkeletonContinuousBlock(target, initial.block, model.getSnapshot());
             const retainedSection = applied.sections[0];
             const retainedColumn = applied.sections[1].columns[0];
-            const baseline = structuredClone(page);
+            const { height, baselineSections, tables } = initial.snapshot;
             page.sections[1].columns[1].lines[0] = { ...three, top: three.top + 10 };
 
             const { block } = serializeDocumentSkeletonContinuousBlock(page, null, false, {
-                base: { version: 'previous', page: baseline },
+                base: { version: 'previous', height, sections: baselineSections!, tables: tables! },
             });
 
             expect(block.flow).toMatchObject({ sectionIndex: 1, columnIndex: 1 });

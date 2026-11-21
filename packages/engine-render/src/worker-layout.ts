@@ -50,6 +50,9 @@ export interface IDocumentLayoutSessionStartOptions {
     waitForHyphenationPatterns?: boolean;
     modernPageWidth?: number;
     modernHorizontalMargin?: number;
+    /** Version Main has applied, even when this request needs a full first publication. */
+    acknowledgedLayoutVersion?: string;
+    /** An acknowledged version that this request may use as the first patch's base. */
     appliedLayoutVersion?: string;
     continuousLayoutVersion?: string;
 }
@@ -106,18 +109,20 @@ export class DocumentLayoutSession extends Disposable {
         this._resetPublishedResources = true;
         this._pendingPaginatedCompletion = null;
         // Only a completed result acknowledged by Main can seed a new generation.
-        const appliedVersion = options?.appliedLayoutVersion;
+        const acknowledgedVersion = options?.acknowledgedLayoutVersion ?? options?.appliedLayoutVersion;
         const completed = this._completedContinuousLayout;
         const acknowledged = this._acknowledgedContinuousLayout;
-        const base = completed?.version === appliedVersion
+        const base = completed?.version === acknowledgedVersion
             ? completed
-            : acknowledged?.version === appliedVersion ? acknowledged : undefined;
-        this._continuousEditBase = this._layoutReason === 'edit' && appliedVersion != null ? base : undefined;
-        // A completed Worker reply may be skipped when Main finished its own
-        // layout. Keep the last agreed base alongside the latest candidate.
-        if (this._continuousEditBase != null) {
-            this._acknowledgedContinuousLayout = this._continuousEditBase;
+            : acknowledged?.version === acknowledgedVersion ? acknowledged : undefined;
+        // A later complete reply can be dropped by Main. Preserve its last
+        // acknowledged geometry even for requests that require a full prefix.
+        if (base != null) {
+            this._acknowledgedContinuousLayout = base;
         }
+        this._continuousEditBase = this._layoutReason === 'edit' && base?.version === options?.appliedLayoutVersion
+            ? base
+            : undefined;
         this._continuousLayoutVersion = options?.continuousLayoutVersion;
         this._continuousPageSnapshot = null;
         const generation = this._skeleton.startIncrementalLayout({
@@ -312,18 +317,26 @@ export class DocumentLayoutSession extends Disposable {
             if (page == null) {
                 throw new Error('Continuous document layout reported a publication without a logical page.');
             }
-            if (progress.complete) {
-                this._completedContinuousLayout = this._captureContinuousLayout(page);
-            }
             const { block, snapshot } = serializeDocumentSkeletonContinuousBlock(
                 page,
                 this._continuousPageSnapshot,
                 true,
                 {
                     base: this._continuousEditBase,
-                    completedLayoutVersion: progress.complete ? this._completedContinuousLayout?.version : undefined,
+                    trackBaseline: this._continuousLayoutVersion != null,
+                    complete: progress.complete,
+                    captureFrom: this._completedContinuousLayout ?? this._acknowledgedContinuousLayout,
                 }
             );
+            if (progress.complete) {
+                const version = this._continuousLayoutVersion;
+                this._completedContinuousLayout = version != null && snapshot.baselineSections != null && snapshot.tables != null
+                    ? { version, height: snapshot.height, sections: snapshot.baselineSections, tables: snapshot.tables }
+                    : undefined;
+                if (this._completedContinuousLayout != null) {
+                    block.completedLayoutVersion = this._completedContinuousLayout.version;
+                }
+            }
             this._continuousEditBase = undefined;
             this._continuousPageSnapshot = progress.complete ? null : snapshot;
             return {
@@ -368,23 +381,6 @@ export class DocumentLayoutSession extends Disposable {
                 resources,
             },
         };
-    }
-
-    private _captureContinuousLayout(page: IDocumentSkeletonPage): IDocumentSkeletonContinuousBaseline | undefined {
-        const version = this._continuousLayoutVersion;
-        if (version == null || typeof structuredClone !== 'function') {
-            return undefined;
-        }
-        try {
-            // Geometry can refer to the Worker model; the next edit must not
-            // mutate the version against which its changes are compared.
-            return { version, page: structuredClone(page) };
-        } catch (error) {
-            if (error instanceof Error && error.name === 'DataCloneError') {
-                return undefined;
-            }
-            throw error;
-        }
     }
 
     private _collectResourcePublication(

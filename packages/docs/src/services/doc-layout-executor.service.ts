@@ -123,6 +123,7 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     baseRevision: number;
     modelRevision: number;
     supportsAppliedLayoutVersion?: boolean;
+    acknowledgedLayoutVersion?: string;
     appliedLayoutVersion?: string;
     mutations: IDocLayoutMutationProjection[];
     reason: 'initial' | 'edit';
@@ -377,6 +378,7 @@ export interface IDocLayoutStartOptions {
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
     modernPageWidth?: number;
     modernHorizontalMargin?: number;
+    acknowledgedLayoutVersion?: string;
     appliedLayoutVersion?: string;
 }
 

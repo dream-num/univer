@@ -128,16 +128,23 @@ export interface IDocumentSkeletonContinuousSnapshot {
     height: number;
     lineEnds: number[];
     tables?: Map<string, IDocumentSkeletonTable>;
+    usesTableDelta: boolean;
+    baselineSections?: IDocumentSkeletonSectionPatch[];
 }
 
 export interface IDocumentSkeletonContinuousBaseline {
     version: string;
-    page: IDocumentSkeletonPage;
+    height: number;
+    sections: IDocumentSkeletonSectionPatch[];
+    tables: Map<string, IDocumentSkeletonTable>;
 }
 
 interface IContinuousBlockOptions {
     base?: IDocumentSkeletonContinuousBaseline;
-    completedLayoutVersion?: string;
+    trackBaseline?: boolean;
+    complete?: boolean;
+    /** Detached comparison geometry usable for the new snapshot, independent of wire deltas. */
+    captureFrom?: IDocumentSkeletonContinuousBaseline;
 }
 
 function withoutParent<T extends { parent?: unknown }>(value: T): Omit<T, 'parent'> {
@@ -690,7 +697,7 @@ function compareLayoutGeometry(
 }
 
 function getContinuousPrefixCursor(
-    baseline: IDocumentSkeletonPage,
+    baseline: IDocumentSkeletonContinuousBaseline,
     current: IDocumentSkeletonPage
 ): IDocumentSkeletonFlowCursor {
     // Anything before the selected section or column is retained verbatim, so
@@ -717,28 +724,91 @@ function getContinuousPrefixCursor(
     return { sectionIndex, columnIndex, lineIndex: Math.max(0, equalLines - 1) };
 }
 
-function collectContinuousTableDelta(
+function recordContinuousBaselineFlow(
+    flow: IDocumentSkeletonContinuousFlowPatch,
+    previousSections: IDocumentSkeletonSectionPatch[] | undefined,
+    base: IDocumentSkeletonContinuousBaseline | undefined
+): IDocumentSkeletonSectionPatch[] {
+    // Own the prefix arrays once, while sharing detached geometry with the
+    // acknowledged version. Each publication replaces only its changed suffix.
+    const sections = previousSections ?? base?.sections.slice(0, flow.sectionIndex + 1).map((section) => ({
+        ...section,
+        columns: section.columns.map((column) => ({ ...column, lines: column.lines.slice() })),
+    })) ?? [];
+    const detached = structuredClone(flow);
+    const columns = sections[flow.sectionIndex]?.columns ?? [];
+    const lines = columns[flow.columnIndex]?.lines ?? [];
+    replaceArrayTail(lines, flow.lineIndex, detached.lines);
+    replaceArrayTail(columns, flow.columnIndex, [{ ...detached.column, lines }, ...detached.trailingColumns]);
+    replaceArrayTail(sections, flow.sectionIndex, [{ ...detached.section, columns }, ...detached.trailingSections]);
+    return sections;
+}
+
+function collectContinuousTables(
     page: IDocumentSkeletonPage,
-    previous: Map<string, IDocumentSkeletonTable>,
-    omitResourceSources: boolean
+    previous: Map<string, IDocumentSkeletonTable> | undefined,
+    omitResourceSources: boolean,
+    usesTableDelta: boolean,
+    validateBaseline: boolean
 ): {
-    tables: Map<string, IDocumentSkeletonTable>;
-    changes: IDocumentSkeletonContinuousBlockPatch['skeTables'];
+    tables: Map<string, IDocumentSkeletonTable> | undefined;
+    patches: IDocumentSkeletonContinuousBlockPatch['skeTables'];
 } {
     const tables = new Map<string, IDocumentSkeletonTable>();
-    const changes: IDocumentSkeletonContinuousBlockPatch['skeTables'] = [];
+    const patches: IDocumentSkeletonContinuousBlockPatch['skeTables'] = [];
+    let canTrackTables = true;
     for (const [key, table] of page.skeTables) {
-        const prior = previous.get(key);
-        if (prior != null && compareLayoutGeometry(prior, table, prior.parent, page)) {
+        const prior = previous?.get(key);
+        // Full intermediate packets still serialize the current table. The
+        // private draft can reuse its first copy until final validation.
+        const unchanged = prior != null && (!validateBaseline || compareLayoutGeometry(prior, table, prior.parent, page));
+        if (unchanged) {
             tables.set(key, prior);
-        } else {
-            const entry = serializeTable(table, false);
-            changes.push([key, omitResourceSources ? serializeTable(table, true) : entry]);
-            // Detach only the changed table, without copying its enclosing page.
-            tables.set(key, hydrateTable(structuredClone(entry), undefined, undefined, page.segmentId));
+        } else if (canTrackTables) {
+            try {
+                // Retain only top-level table geometry and its painting inputs.
+                // Serializing the table drops the parent link to the rest of the document.
+                const detached = structuredClone(serializeTable(table, false));
+                tables.set(key, hydrateTable(detached, undefined, undefined, page.segmentId));
+            } catch (error) {
+                if (!(error instanceof Error) || error.name !== 'DataCloneError') {
+                    throw error;
+                }
+                canTrackTables = false;
+            }
+        }
+        if (!usesTableDelta || !unchanged) {
+            patches.push([key, serializeTable(table, omitResourceSources)]);
         }
     }
-    return { tables, changes };
+    return { tables: canTrackTables ? tables : undefined, patches };
+}
+
+function serializeContinuousFlow(
+    currentPage: IDocumentSkeletonPage,
+    cursor: IDocumentSkeletonFlowCursor
+): IDocumentSkeletonContinuousFlowPatch {
+    const section = currentPage.sections[cursor.sectionIndex];
+    const column = section?.columns[cursor.columnIndex];
+    if (section == null || column == null) {
+        throw new Error('Continuous document layout requires at least one section and column.');
+    }
+
+    const serializedSection = withoutParent(section);
+    const serializedColumn = withoutParent(column);
+    const { columns: _columns, ...sectionGeometry } = serializedSection;
+    const { lines: _lines, ...columnGeometry } = serializedColumn;
+
+    return {
+        sectionIndex: cursor.sectionIndex,
+        section: sectionGeometry,
+        columnIndex: cursor.columnIndex,
+        column: columnGeometry,
+        lineIndex: cursor.lineIndex,
+        lines: column.lines.slice(cursor.lineIndex).map(serializeDocumentSkeletonLine),
+        trailingColumns: section.columns.slice(cursor.columnIndex + 1).map(serializeColumn),
+        trailingSections: currentPage.sections.slice(cursor.sectionIndex + 1).map(serializeSection),
+    };
 }
 
 /**
@@ -765,26 +835,37 @@ export function serializeDocumentSkeletonContinuousBlock(
         currentLineEnds = collectFlowLineEnds(currentPage);
         cursor = baseline == null
             ? resolveFlowCursor(currentPage, 0)
-            : getContinuousPrefixCursor(baseline.page, currentPage);
+            : getContinuousPrefixCursor(baseline, currentPage);
     }
-    const section = currentPage.sections[cursor.sectionIndex];
-    const column = section?.columns[cursor.columnIndex];
-    if (section == null || column == null) {
-        throw new Error('Continuous document layout requires at least one section and column.');
+    const flow = serializeContinuousFlow(currentPage, cursor);
+    const wantsBaseline = options.trackBaseline && typeof structuredClone === 'function' &&
+        (previousSnapshot == null || previousSnapshot.baselineSections != null);
+    const captureBase = wantsBaseline && previousSnapshot == null ? baseline ?? options.captureFrom : undefined;
+    const previousTables = previousSnapshot?.tables ?? baseline?.tables ?? captureBase?.tables;
+    const usesTableDelta = previousTables != null && (baseline != null || previousSnapshot?.usesTableDelta === true);
+    const tableHistory = wantsBaseline || usesTableDelta
+        ? collectContinuousTables(currentPage, previousTables, omitResourceSources, usesTableDelta, usesTableDelta || options.complete === true)
+        : undefined;
+    let baselineSections: IDocumentSkeletonSectionPatch[] | undefined;
+    if (wantsBaseline && tableHistory?.tables != null) {
+        try {
+            const captureFlow = captureBase != null && captureBase !== baseline
+                ? serializeContinuousFlow(currentPage, getContinuousPrefixCursor(captureBase, currentPage))
+                : flow;
+            baselineSections = recordContinuousBaselineFlow(captureFlow, previousSnapshot?.baselineSections, captureBase);
+        } catch (error) {
+            if (!(error instanceof Error) || error.name !== 'DataCloneError') {
+                throw error;
+            }
+        }
     }
-
-    const serializedSection = withoutParent(section);
-    const serializedColumn = withoutParent(column);
-    const { columns: _columns, ...sectionGeometry } = serializedSection;
-    const { lines: _lines, ...columnGeometry } = serializedColumn;
-
-    const previousTables = previousSnapshot?.tables ?? (baseline == null ? undefined : baseline.page.skeTables);
-    const tableDelta = previousTables == null ? undefined : collectContinuousTableDelta(currentPage, previousTables, omitResourceSources);
-    const previousHeight = previousSnapshot?.height ?? baseline?.page.height ?? 0;
+    const previousHeight = previousSnapshot?.height ?? baseline?.height ?? 0;
     const snapshot: IDocumentSkeletonContinuousSnapshot = {
         height: currentPage.height,
         lineEnds: currentLineEnds,
-        tables: tableDelta?.tables,
+        tables: tableHistory?.tables,
+        usesTableDelta,
+        baselineSections,
     };
 
     return {
@@ -792,27 +873,18 @@ export function serializeDocumentSkeletonContinuousBlock(
         block: {
             pageIndex: 0,
             page: serializePageGeometry(currentPage),
-            flow: {
-                sectionIndex: cursor.sectionIndex,
-                section: sectionGeometry,
-                columnIndex: cursor.columnIndex,
-                column: columnGeometry,
-                lineIndex: cursor.lineIndex,
-                lines: column.lines.slice(cursor.lineIndex).map(serializeDocumentSkeletonLine),
-                trailingColumns: section.columns.slice(cursor.columnIndex + 1).map(serializeColumn),
-                trailingSections: currentPage.sections.slice(cursor.sectionIndex + 1).map(serializeSection),
-            },
+            flow,
             skeDrawings: [...currentPage.skeDrawings].map(([drawingId, drawing]) => [
                 drawingId,
                 serializeDrawing(drawing, omitResourceSources),
             ]),
-            skeTables: tableDelta?.changes ?? [...currentPage.skeTables].map(([tableId, table]) => [
+            skeTables: tableHistory?.patches ?? [...currentPage.skeTables].map(([tableId, table]) => [
                 tableId,
                 serializeTable(table, omitResourceSources),
             ]),
-            ...(tableDelta == null ? {} : { tableOrder: Array.from(tableDelta.tables.keys()) }),
+            // A missing comparison snapshot affects the next publication only.
+            ...(usesTableDelta ? { tableOrder: Array.from(currentPage.skeTables.keys()) } : {}),
             ...(baseline == null ? {} : { baseLayoutVersion: baseline.version }),
-            ...(options.completedLayoutVersion == null ? {} : { completedLayoutVersion: options.completedLayoutVersion }),
             skeColumnGroups: [...currentPage.skeColumnGroups].map(([groupId, group]) => [
                 groupId,
                 serializeColumnGroup(group, omitResourceSources),

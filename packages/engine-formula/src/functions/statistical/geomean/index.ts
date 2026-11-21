@@ -28,9 +28,27 @@ export class Geomean extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
-        let sum = 1;
+        let product = 1;
+        let logMean = 0;
         let len = 0;
         let isNonPositive = false;
+        let productUnderflowed = false;
+        let hasPositiveInfinity = false;
+
+        const addValue = (value: number) => {
+            product *= value;
+            len++;
+
+            if (value === Infinity) {
+                hasPositiveInfinity = true;
+                return;
+            }
+
+            // A subnormal intermediate product can lose precision before recovering.
+            productUnderflowed ||= product > 0 && product < 2 ** -1022;
+            // Average logs incrementally so long arrays of extreme values stay bounded.
+            logMean += (Math.log(value) - logMean) / len;
+        };
 
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
@@ -60,8 +78,7 @@ export class Geomean extends BaseFunction {
                         isNonPositive = true;
                     }
 
-                    sum *= +value;
-                    len++;
+                    addValue(+value);
                 });
 
                 if (isError) {
@@ -94,8 +111,7 @@ export class Geomean extends BaseFunction {
                     isNonPositive = true;
                 }
 
-                sum *= +value;
-                len++;
+                addValue(+value);
             }
         }
 
@@ -103,7 +119,13 @@ export class Geomean extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = sum ** (1 / len);
+        if (hasPositiveInfinity) {
+            return NumberValueObject.create(Infinity);
+        }
+
+        const result = Number.isFinite(product) && product > 0 && !productUnderflowed
+            ? product ** (1 / len)
+            : Math.exp(logMean);
 
         return NumberValueObject.create(result);
     }

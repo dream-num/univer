@@ -1590,7 +1590,8 @@ export function getMedianResult(array: number[]): BaseValueObject {
 
     if (n % 2 === 0) {
         const mid = n / 2;
-        result = (array[mid - 1] + array[mid]) / 2;
+        const sum = array[mid - 1] + array[mid];
+        result = Number.isFinite(sum) ? sum / 2 : array[mid - 1] / 2 + array[mid] / 2;
     } else {
         result = array[Math.floor(n / 2)];
     }

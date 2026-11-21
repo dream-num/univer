@@ -97,6 +97,8 @@ export function EditorMenuPanel(props: {
               univer-box-border univer-flex univer-flex-col univer-rounded-lg univer-border univer-border-solid
               univer-border-gray-200 univer-bg-gray-0 univer-p-3 univer-shadow-lg
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900
+              [[data-slot=popover-content]_&]:univer-rounded-none [[data-slot=popover-content]_&]:univer-border-0
+              [[data-slot=popover-content]_&]:univer-shadow-none
             `, minWidthClassName ?? 'univer-min-w-[240px]', className)}
         >
             {title && (

@@ -552,12 +552,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             v: cell?.v ?? 0,
             t: cell?.v == null ? CellValueType.NUMBER : cell.t,
         });
-        if (this._currentSourceFormula) {
-            const formulas = this._sourceFormulaData[unitId] ??= {};
-            const sheet = formulas[sheetId] ??= {};
-            const row = sheet[this.currentRow] ??= {};
-            row[this.currentColumn] = { ...this._currentSourceFormula };
-        }
+        this._recordCurrentSourceFormula(unitId, sheetId, this.currentRow, this.currentColumn);
     }
 
     setCurrent(
@@ -774,6 +769,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     row,
                     true
                 );
+                this._recordCurrentSourceFormula(unitId, sheetId, row, column);
 
                 return;
             }
@@ -792,6 +788,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     row,
                     true
                 );
+                this._recordCurrentSourceFormula(unitId, sheetId, row, column);
 
                 return;
             }
@@ -888,15 +885,12 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     runtimeArrayUnitData.setValue(currentRow, currentColumn, value);
                 });
             }
+
+            this._recordCurrentSourceFormula(unitId, sheetId, row, column);
         } else {
             const valueObject = this._getValueObjectOfRuntimeData(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
-            if (this._currentSourceFormula != null) {
-                const unitFormulas = this._sourceFormulaData[unitId] ??= {};
-                const sheetFormulas = unitFormulas[sheetId] ??= {};
-                const rowFormulas = sheetFormulas[row] ??= {};
-                rowFormulas[column] = { ...this._currentSourceFormula };
-            }
+            this._recordCurrentSourceFormula(unitId, sheetId, row, column);
 
             // If it is the result of the IMAGE formula, the image info needs to be saved to runtimeImageFormulaData
             if ((functionVariant as BaseValueObject).isString() && (functionVariant as StringValueObject).isImage()) {
@@ -924,6 +918,17 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             clearArrayUnitData.setValue(row, column, valueObject);
         }
+    }
+
+    private _recordCurrentSourceFormula(unitId: string, sheetId: string, row: number, column: number): void {
+        if (this._currentSourceFormula == null) {
+            return;
+        }
+
+        const unitFormulas = this._sourceFormulaData[unitId] ??= {};
+        const sheetFormulas = unitFormulas[sheetId] ??= {};
+        const rowFormulas = sheetFormulas[row] ??= {};
+        rowFormulas[column] = { ...this._currentSourceFormula };
     }
 
     private _getValueObjectOfRuntimeData(variant: Nullable<BaseValueObject>): Nullable<ICellData> {

@@ -36,6 +36,7 @@ import type { IImageFormulaInfo } from '../engine/value-object/primitive-object'
 import type { ICircularReference } from '../services/runtime.service';
 import type { IFormulaDataSnapshot } from './formula-data-snapshot';
 import { copyUnitData } from '../basics/runtime';
+import { formulaSourceMatchesCell } from '../basics/stale-formula-result';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { deserializeRangeWithSheet } from '../engine/utils/reference';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
@@ -470,6 +471,21 @@ export class FormulaDataModel extends Disposable {
 
     getArrayFormulaCellData() {
         return this._arrayFormulaCellData;
+    }
+
+    /**
+     * Whether the formula captured before evaluation still identifies the live cell.
+     * A missing workbook is treated as a match so results are not dropped blindly.
+     */
+    matchesFormulaSource(unitId: string, sheetId: string, row: number, column: number, source: Pick<IFormulaDataItem, 'f' | 'si'>): boolean {
+        const worksheet = this._univerInstanceService
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(sheetId);
+        if (!worksheet) {
+            return true;
+        }
+
+        return formulaSourceMatchesCell(source, worksheet.getCellRaw(row, column));
     }
 
     setArrayFormulaCellData(value: IArrayFormulaUnitCellType) {

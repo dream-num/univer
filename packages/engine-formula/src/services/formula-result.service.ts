@@ -18,6 +18,7 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { ISetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IAllRuntimeData } from './runtime.service';
 import { convertRuntimeToUnitData } from '../basics/runtime';
+import { omitMismatchedArrayFormulaResults } from '../basics/stale-formula-result';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetFormulaCalculationResultMutation, SetFormulaDependencyCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
@@ -66,6 +67,14 @@ export class FormulaResultService extends Disposable {
             console.error('No sheetData from Formula Engine!');
             return;
         }
+
+        omitMismatchedArrayFormulaResults(
+            arrayFormulaRange,
+            arrayFormulaCellData,
+            arrayFormulaEmbedded,
+            sourceFormulaData,
+            (unitId, sheetId, row, column, source) => this._formulaDataModel.matchesFormulaSource(unitId, sheetId, row, column, source)
+        );
 
         if (arrayFormulaRange || arrayFormulaEmbedded) {
             this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);

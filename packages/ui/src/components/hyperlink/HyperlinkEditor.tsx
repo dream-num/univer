@@ -44,7 +44,7 @@ export function HyperlinkEditor({ url, label, urlError, labelError, labels, onUr
               dark:!univer-bg-gray-900
             `, mobile
                 ? 'univer-w-full'
-                : ['univer-w-[328px] univer-rounded-xl univer-p-4 univer-shadow', borderClassName], className)}
+                : ['univer-w-[328px] univer-rounded-xl univer-p-3 univer-shadow', borderClassName], className)}
             onSubmit={async (event) => {
                 event.preventDefault();
                 if (url.trim()) {

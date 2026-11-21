@@ -103,7 +103,7 @@ export function MobileSidebar() {
                 header={(
                     <header
                         className="
-                          univer-flex univer-h-12 univer-flex-1 univer-items-center univer-justify-between univer-px-4
+                          univer-flex univer-h-12 univer-flex-1 univer-items-center univer-justify-between univer-px-3
                         "
                     >
                         <div className="univer-min-w-0 univer-truncate univer-text-base univer-font-semibold">{options.header}</div>
@@ -130,7 +130,7 @@ export function MobileSidebar() {
                         <footer
                             className="
                               univer-shrink-0 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200
-                              univer-p-4
+                              univer-p-3
                               dark:!univer-border-gray-700
                             "
                         >

@@ -128,7 +128,7 @@ export function TableSizePicker(props: ITableSizePickerProps) {
         return (
             <section
                 className="
-                  univer-box-border univer-w-[300px] univer-rounded-lg univer-bg-gray-0 univer-p-4 univer-text-gray-900
+                  univer-box-border univer-w-[300px] univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-text-gray-900
                   dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                 "
                 data-u-comp="table-size-picker"

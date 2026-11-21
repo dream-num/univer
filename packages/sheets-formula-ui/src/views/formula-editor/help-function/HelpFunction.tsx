@@ -131,7 +131,7 @@ export function HelpFunction(props: {
                     >
                         <div
                             className={clsx(`
-                              univer-box-border univer-flex univer-items-center univer-justify-between univer-p-4
+                              univer-box-border univer-flex univer-items-center univer-justify-between univer-p-3
                               univer-text-xs univer-font-medium univer-text-gray-900
                               dark:!univer-text-gray-0
                             `, borderTopClassName)}
@@ -176,7 +176,7 @@ export function HelpFunction(props: {
                         </div>
                         <div
                             className={clsx(`
-                              univer-box-border univer-max-h-[350px] univer-overflow-y-auto univer-px-4 univer-pb-4
+                              univer-box-border univer-max-h-[350px] univer-overflow-y-auto univer-px-3 univer-pb-3
                               univer-pt-0
                             `, scrollbarClassName)}
                             style={{

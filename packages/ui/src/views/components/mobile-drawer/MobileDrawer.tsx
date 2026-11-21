@@ -358,14 +358,14 @@ export function MobileDrawer(props: {
                     <div
                         ref={contentRef}
                         className={clsx(
-                            'univer-overflow-y-auto univer-overflow-x-hidden univer-p-4',
+                            'univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
                             autoHeight ? 'univer-min-h-0 univer-flex-initial' : 'univer-flex-1',
                             scrollbarClassName,
                             contentClassName
                         )}
                         style={{
                             paddingBottom: !autoHeight && keyboardLayout
-                                ? `calc(1rem + ${keyboardLayout.bottom}px)`
+                                ? `calc(0.75rem + ${keyboardLayout.bottom}px)`
                                 : undefined,
                         }}
                     >

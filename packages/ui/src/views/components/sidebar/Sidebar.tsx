@@ -208,7 +208,7 @@ export function Sidebar() {
                 <header
                     className={`
                       univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-cursor-default
-                      univer-items-center univer-justify-between univer-bg-gray-0 univer-p-4 univer-pb-2
+                      univer-items-center univer-justify-between univer-bg-gray-0 univer-p-3 univer-pb-2
                       univer-text-base univer-font-medium univer-text-gray-800
                       dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                     `}
@@ -233,14 +233,14 @@ export function Sidebar() {
                     </button>
                 </header>
 
-                <section className="univer-box-border univer-min-w-0 univer-cursor-default univer-px-4 univer-pb-4">
+                <section className="univer-box-border univer-min-w-0 univer-cursor-default univer-px-3 univer-pb-3">
                     {options?.children}
                 </section>
 
                 {options?.footer && (
                     <footer
                         className={`
-                          univer-sticky univer-bottom-0 univer-box-border univer-bg-gray-0 univer-p-4
+                          univer-sticky univer-bottom-0 univer-box-border univer-bg-gray-0 univer-p-3
                           dark:!univer-bg-gray-900
                         `}
                     >

@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-import { NotImplementedFunction } from '../../not-implemented-function';
+import type { BaseAstNode } from '../../../engine/ast-node/base-ast-node';
+import { LambdaParameterNode } from '../../../engine/ast-node/lambda-parameter-node';
+import { NullNode } from '../../../engine/ast-node/null-node';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
-export class Isomitted extends NotImplementedFunction {
+export class Isomitted extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    // TODO: Implement omitted-argument metadata propagation for LAMBDA evaluation.
+    override needsAstChildren = true;
+
+    override calculateAst(children: BaseAstNode[]) {
+        const child = children[0];
+        return BooleanValueObject.create(
+            child instanceof NullNode || (child instanceof LambdaParameterNode && child.isOmitted())
+        );
+    }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import Decimal from 'decimal.js';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -36,7 +37,7 @@ export class Dollarde extends BaseFunction {
         const [fractionalDollarObject, fractionObject] = variants as BaseValueObject[];
 
         const fractionalDollarValue = +fractionalDollarObject.getValue();
-        let fractionValue = Math.floor(+fractionObject.getValue());
+        const fractionValue = Math.floor(+fractionObject.getValue());
 
         if (Number.isNaN(fractionalDollarValue) || Number.isNaN(fractionValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -50,19 +51,25 @@ export class Dollarde extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        fractionValue = Number.parseInt(`${fractionValue}`, 10);
+        const scaleDigits = Math.ceil(Math.log(fractionValue) / Math.LN10);
+        let result = Math.trunc(fractionalDollarValue);
+        result += ((fractionalDollarValue % 1) * 10 ** scaleDigits) / fractionValue;
 
-        // Compute integer part
-        let result = Number.parseInt(`${fractionalDollarValue}`, 10);
+        const roundingDigits = Math.ceil(Math.log(fractionValue) / Math.LN2) + 1;
+        const power = 10 ** roundingDigits;
+        const scaled = result * power;
 
-        // Add decimal part
-        result += ((fractionalDollarValue % 1) * 10 ** Math.ceil(Math.log(fractionValue) / Math.LN10)) / fractionValue;
+        if (Number.isFinite(scaled) || !Number.isFinite(fractionalDollarValue) || !Number.isFinite(fractionValue)) {
+            return NumberValueObject.create(Math.round(scaled) / power);
+        }
 
-        // Round result
-        const power = 10 ** (Math.ceil(Math.log(fractionValue) / Math.LN2) + 1);
+        // An overflowing conversion or rounding scale must not erase a finite price.
+        const preciseResult = Number.isFinite(result)
+            ? new Decimal(result)
+            : new Decimal(Math.trunc(fractionalDollarValue)).add(
+                new Decimal(fractionalDollarValue % 1).mul(Decimal.pow(10, scaleDigits)).div(fractionValue)
+            );
 
-        result = Math.round(result * power) / power;
-
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(preciseResult.toDecimalPlaces(roundingDigits, Decimal.ROUND_HALF_CEIL).toNumber());
     }
 }

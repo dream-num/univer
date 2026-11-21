@@ -36,7 +36,7 @@ export class Dollarfr extends BaseFunction {
         const [decimalDollarObject, fractionObject] = variants as BaseValueObject[];
 
         const decimalDollarValue = +decimalDollarObject.getValue();
-        let fractionValue = Math.floor(+fractionObject.getValue());
+        const fractionValue = Math.floor(+fractionObject.getValue());
 
         if (Number.isNaN(decimalDollarValue) || Number.isNaN(fractionValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -50,12 +50,7 @@ export class Dollarfr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        fractionValue = Number.parseInt(`${fractionValue}`, 10);
-
-        // Compute integer part
-        let result = Number.parseInt(`${decimalDollarValue}`, 10);
-
-        // Add decimal part
+        let result = Math.trunc(decimalDollarValue);
         result += (decimalDollarValue % 1) * 10 ** -Math.ceil(Math.log(fractionValue) / Math.LN10) * fractionValue;
 
         return NumberValueObject.create(result);

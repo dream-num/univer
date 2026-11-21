@@ -20,6 +20,7 @@ import type { ILayoutService } from '../../services/layout/layout.service';
 import { Disposable, isInternalEditorID, LifecycleStages, LifecycleUnreachableError, Quantity } from '@univerjs/core';
 import { IWorkbenchService } from '../../services/workbench/workbench.service';
 
+const DEFAULT_RENDER_DELAY = 300;
 const STEADY_TIMEOUT = 3000;
 
 /**
@@ -28,15 +29,19 @@ const STEADY_TIMEOUT = 3000;
 export abstract class SingleUnitUIController extends Disposable {
     protected _steadyTimeout: number;
     protected _renderTimeout: number;
+    protected _renderDelay: number;
 
     constructor(
         protected readonly _injector: Injector,
         protected readonly _instanceService: IUniverInstanceService,
         protected readonly _layoutService: ILayoutService,
         protected readonly _lifecycleService: LifecycleService,
-        protected readonly _renderManagerService: IRenderManagerService
+        protected readonly _renderManagerService: IRenderManagerService,
+        renderDelay?: number
     ) {
         super();
+
+        this._renderDelay = renderDelay ?? DEFAULT_RENDER_DELAY;
     }
 
     override dispose(): void {
@@ -94,7 +99,7 @@ export abstract class SingleUnitUIController extends Disposable {
                     this._steadyTimeout = window.setTimeout(() => {
                         this._lifecycleService.stage = LifecycleStages.Steady;
                     }, STEADY_TIMEOUT);
-                }, 300);
+                }, this._renderDelay);
             } catch (error) {
                 clearTimeout(this._steadyTimeout);
                 clearTimeout(this._renderTimeout);

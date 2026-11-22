@@ -505,7 +505,7 @@ describe('engine scene viewport extra', () => {
         scene.dispose();
     });
 
-    it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
+    it('repaints shared viewport edges excluded from incremental scroll copies', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
         const rowHeaderViewport = injector.createInstance(Viewport, 'viewRowBottom', scene, {
@@ -546,7 +546,9 @@ describe('engine scene viewport extra', () => {
         expect(mainCopy?.[5]).toBe(47);
         expect(Number(mainCopy?.[6])).toBeGreaterThan(Number(mainCopy?.[2]));
         const copiedOffsetY = Number(mainCopy?.[6]) - Number(mainCopy?.[2]);
-        expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
+
+        expect(clearRectSpy.mock.calls).toContainEqual([46, 20, expect.any(Number), copiedOffsetY + 1]);
+        expect(clearRectSpy.mock.calls).toContainEqual([46, 20, 1, expect.any(Number)]);
 
         scene.dispose();
     });

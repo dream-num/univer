@@ -74,17 +74,23 @@ interface IViewportScrollPosition {
     viewportScrollY: number;
 }
 
-function createExposedScrollBounds(bounds: IBoundRectNoAngle, offsetX: number, offsetY: number) {
+function createScrollRepaintBounds(viewportBounds: IBoundRectNoAngle, copyBounds: IBoundRectNoAngle, offsetX: number, offsetY: number) {
+    const left = copyBounds.left + Math.max(0, offsetX);
+    const right = copyBounds.right + Math.min(0, offsetX);
+    const top = copyBounds.top + Math.max(0, offsetY);
+    const bottom = copyBounds.bottom + Math.min(0, offsetY);
     const dirtyBounds: IBoundRectNoAngle[] = [];
-    if (offsetX > 0) {
-        dirtyBounds.push({ ...bounds, right: bounds.left + offsetX });
-    } else if (offsetX < 0) {
-        dirtyBounds.push({ ...bounds, left: bounds.right + offsetX });
+    if (left > viewportBounds.left) {
+        dirtyBounds.push({ ...viewportBounds, right: left });
     }
-    if (offsetY > 0) {
-        dirtyBounds.push({ ...bounds, bottom: bounds.top + offsetY });
-    } else if (offsetY < 0) {
-        dirtyBounds.push({ ...bounds, top: bounds.bottom + offsetY });
+    if (right < viewportBounds.right) {
+        dirtyBounds.push({ ...viewportBounds, left: right });
+    }
+    if (top > viewportBounds.top) {
+        dirtyBounds.push({ ...viewportBounds, bottom: top });
+    }
+    if (bottom < viewportBounds.bottom) {
+        dirtyBounds.push({ ...viewportBounds, top: bottom });
     }
     return dirtyBounds;
 }
@@ -1012,16 +1018,16 @@ export class Scene extends Disposable {
                     .slice(index + 1)
                     .map((state) => state.viewportInfo.viewPortPosition)
                     .filter((bounds): bounds is IBoundRectNoAngle => bounds != null);
-                const bounds = trimSharedViewportEdges(scrollRenderInfo.bounds, followingViewportBounds);
-                const { offsetX, offsetY } = scrollRenderInfo;
+                const { bounds: viewportBounds, offsetX, offsetY } = scrollRenderInfo;
+                const bounds = trimSharedViewportEdges(viewportBounds, followingViewportBounds);
                 // A partial device pixel at a viewport edge can contain both header and sheet pixels.
-                const pixelCoordinates = [bounds.left, bounds.top, bounds.right, bounds.bottom, offsetX, offsetY];
+                const pixelCoordinates = [...Object.values(viewportBounds), ...Object.values(bounds), offsetX, offsetY];
                 if (isInvalidScrollBounds(bounds, offsetX, offsetY) ||
                     pixelCoordinates.some((value) => !Number.isInteger(precisionTo(value * pixelRatio, 6)))) {
                     canPreserveEngine = false;
                     continue;
                 }
-                dirtyBounds.push(...createExposedScrollBounds(bounds, offsetX, offsetY));
+                dirtyBounds.push(...createScrollRepaintBounds(viewportBounds, bounds, offsetX, offsetY));
                 scrollRenderInfos.push({ bounds, offsetX, offsetY });
             }
         }

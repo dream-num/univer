@@ -25,6 +25,9 @@ import { OpenTableFilterPanelOperation } from '../../commands/operations/open-ta
 export const FILTER_ICON_SIZE = 16;
 export const FILTER_ICON_PADDING = 1;
 const FILTER_TRIGGER_HOVER_RADIUS = 4;
+const FILTER_CHEVRON_SIZE = 24;
+const FILTER_CHEVRON_LEFT = (FILTER_ICON_SIZE - FILTER_CHEVRON_SIZE) / 2;
+const FILTER_CHEVRON_TOP = FILTER_CHEVRON_LEFT - 0.25;
 
 export interface ISheetsTableFilterButtonShapeProps extends IShapeProps {
     cellWidth: number;
@@ -125,7 +128,12 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         const hasFilter = buttonState === SheetsTableButtonStateEnum.FilteredSortNone
             || buttonState === SheetsTableButtonStateEnum.FilteredSortAsc
             || buttonState === SheetsTableButtonStateEnum.FilteredSortDesc;
-        drawCanvasIcon(ctx, hasFilter ? 'filter-applied-icon' : 'more-down-icon', 0, 0, FILTER_ICON_SIZE, iconColor);
+        if (hasFilter) {
+            drawCanvasIcon(ctx, 'filter-applied-icon', 0, 0, FILTER_ICON_SIZE, iconColor);
+        } else {
+            // The shared chevron has more internal padding than the table's 16 px trigger.
+            drawCanvasIcon(ctx, 'more-down-icon', FILTER_CHEVRON_LEFT, FILTER_CHEVRON_TOP, FILTER_CHEVRON_SIZE, iconColor);
+        }
         ctx.restore();
     }
 

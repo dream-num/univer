@@ -476,12 +476,17 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     readonly hoverTableRealTime$ = this._hoverTable$.asObservable();
 
     private _customRangeBoundsCache: ICustomRangeBoundsCache | null = null;
-    private _hoverRangeGeometry: { page: IDocumentSkeletonPage; endIndex: number; index: IDocHoverRangeGeometry } | null = null;
-    private _hoverRangeWindow: {
+    private _hoverRangeGeometry: {
+        page: IDocumentSkeletonPage;
+        endIndex: number;
         model: DocumentDataModel;
+        modelRevision: number;
+        index: IDocHoverRangeGeometry;
+    } | null = null;
+
+    private _hoverRangeWindow: {
         top: number;
         bottom: number;
-        modelRevision: number;
         tableIds: ReadonlySet<string>;
         tableViewports: string;
         bounds: ICustomRangeBound[];
@@ -755,7 +760,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._customRangeBoundsCache = cache;
         }
 
-        this._updateCustomRangeTableViewports(cache, body?.tables ?? []);
+        if (bodyRangeCount > 0 && body?.tables != null) {
+            this._updateCustomRangeTableViewports(cache, body.tables);
+        }
         return cache;
     }
 
@@ -841,34 +848,37 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         top: number,
         bottom: number
     ): ICustomRangeBound[] {
-        if (this._hoverRangeGeometry?.page !== page || this._hoverRangeGeometry.endIndex !== page.ed) {
-            this._hoverRangeGeometry = {
-                page,
-                endIndex: page.ed,
-                index: buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop),
-            };
-            this._hoverRangeWindow = null;
-        }
-        const geometry = this._hoverRangeGeometry.index;
         const { unit } = this._context;
         const modelRevision = unit.getMutationRevision();
+        let indexed = this._hoverRangeGeometry;
+        if (indexed?.page !== page || indexed.endIndex !== page.ed ||
+            indexed.model !== unit || indexed.modelRevision !== modelRevision) {
+            indexed = {
+                page,
+                endIndex: page.ed,
+                model: unit,
+                modelRevision,
+                index: buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop, ranges),
+            };
+            this._hoverRangeGeometry = indexed;
+            this._hoverRangeWindow = null;
+        }
+        const geometry = indexed.index;
         const window = this._hoverRangeWindow;
-        if (window != null && window.model === unit && top >= window.top && bottom <= window.bottom &&
-            window.modelRevision === modelRevision && window.tableViewports === this._getHoverTableViewportSignature(window.tableIds)) {
+        if (window != null && top >= window.top && bottom <= window.bottom &&
+            window.tableViewports === this._getHoverTableViewportSignature(window.tableIds)) {
             return window.bounds;
         }
 
         const buffer = (bottom - top) * HOVER_SCROLL_BUFFER_RATIO;
         const windowTop = top - buffer;
         const windowBottom = bottom + buffer;
-        const { candidates, tableIds } = findDocHoverRangeCandidates(geometry, ranges, windowTop, windowBottom);
+        const { candidates, tableIds } = findDocHoverRangeCandidates(geometry, windowTop, windowBottom);
         const bounds = this._getBodyCustomRangeBounds(candidates, this._getCustomRangeBoundsCache())
             .filter((layout) => layout.rects.some((rect) => rect.top <= windowBottom && rect.bottom >= windowTop));
         this._hoverRangeWindow = {
-            model: unit,
             top: windowTop,
             bottom: windowBottom,
-            modelRevision,
             tableIds,
             tableViewports: this._getHoverTableViewportSignature(tableIds),
             bounds,

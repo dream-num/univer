@@ -537,6 +537,18 @@ export function collisionDetection(
     return true;
 }
 
+export function getDrawingWrapPolygonPoints(drawing: IDocumentSkeletonDrawing, columnLeft: number): Vector2[] | undefined {
+    const { angle = 0, drawingOrigin: { start = [0, 0], lineTo } } = drawing;
+    if (lineTo == null) {
+        return;
+    }
+    const rotation = angle === 0 ? undefined : new Transform().rotate(angle);
+    return [start, ...lineTo].map(([x, y]) => {
+        const point = new Vector2(x - columnLeft, y);
+        return rotation?.applyPoint(point) ?? point;
+    });
+}
+
 function _calculateSplit(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
@@ -555,31 +567,8 @@ function _calculateSplit(
     }
 
     if (layoutType === PositionedObjectLayoutType.WRAP_POLYGON) {
-        const { start = [0, 0], lineTo } = drawingOrigin;
-        if (!lineTo) {
-            return;
-        }
-
-        const points: Vector2[] = [];
-        points.push(new Vector2(start[0], start[1]));
-        for (let i = 0; i < lineTo.length; i++) {
-            const point = lineTo[i];
-            points.push(new Vector2(point[0], point[1]));
-        }
-
-        points.forEach((point) => {
-            point.x -= columnLeft;
-        });
-
-        if (angle !== 0) {
-            const transform = new Transform().rotate(angle); // Create a rotated transform class
-            for (let i = 0; i < points.length; i++) {
-                const point = points[i];
-                points[i] = transform.applyPoint(point);
-            }
-        }
-
-        return __getCrossPoint(points, lineTop, lineHeight, columnWidth);
+        const points = getDrawingWrapPolygonPoints(drawing, columnLeft);
+        return points == null ? undefined : __getCrossPoint(points, lineTop, lineHeight, columnWidth);
     }
 
     const { distL = 0, distT = 0, distB = 0, distR = 0, wrapText } = drawingOrigin;

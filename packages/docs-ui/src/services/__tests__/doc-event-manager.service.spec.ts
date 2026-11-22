@@ -332,9 +332,8 @@ describe('custom-range hit testing with real document layout', () => {
         }
     });
 
-    it('reuses link rectangles across five scroll jumps in a 1,200-row vertical table', () => {
+    it.each([1_200, 4_800])('reuses link rectangles across five scroll jumps in a %i-row vertical table', (count) => {
         vi.useFakeTimers();
-        const count = 1_200;
         let rowIndex = 0;
         const tableStream = genEmptyTable(count, 1).dataStream.replace(/\r/g, () => `Link ${rowIndex++}\r`);
         const dataStream = `${tableStream}\r\n`;
@@ -378,7 +377,7 @@ describe('custom-range hit testing with real document layout', () => {
             const documents = injector.createInstance(Documents, 'vertical-table-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
-            render.scene.transformByState({ width: 320, height: 100_000 });
+            render.scene.transformByState({ width: 320, height: 100_000 * count / 1_200 });
             const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 240, height: 100 });
             const scrollBar = new ScrollBar(viewport);
             try {
@@ -409,12 +408,42 @@ describe('custom-range hit testing with real document layout', () => {
                     return event;
                 };
                 hover(0, 0);
-                const positions = [1170, 953, 736, 519, 302];
+                let offsetReads = 0;
+                for (const range of model.getBody()!.customRanges!) {
+                    const { startIndex } = range;
+                    Object.defineProperty(range, 'startIndex', {
+                        configurable: true,
+                        enumerable: true,
+                        get: () => {
+                            offsetReads++;
+                            return startIndex;
+                        },
+                    });
+                }
+                let rectangleReads = 0;
+                for (const bound of bounds) {
+                    const { rects } = bound;
+                    Object.defineProperty(bound, 'rects', {
+                        configurable: true,
+                        enumerable: true,
+                        get: () => {
+                            rectangleReads++;
+                            return rects;
+                        },
+                    });
+                }
+                const positions = [1170, 953, 736, 519, 302].map((index) => index * count / 1_200);
                 const lookupCounts = [];
+                const offsetReadsByJump = [];
                 for (const index of positions) {
                     lookup.mockClear();
-                    const event = hover(index, bounds[index].rects[0].top - 16);
+                    offsetReads = 0;
+                    const scrollTop = bounds[index].rects[0].top - 16;
+                    rectangleReads = 0;
+                    const event = hover(index, scrollTop);
+                    expect(rectangleReads).toBeLessThan(count / 10);
                     lookupCounts.push(lookup.mock.calls.length);
+                    offsetReadsByJump.push(offsetReads);
                     lookup.mockClear();
                     documents.onPointerDown$.emitEvent(event);
                     render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
@@ -422,12 +451,64 @@ describe('custom-range hit testing with real document layout', () => {
                 }
                 expect(clicks).toEqual(positions.map((index) => `link-${index}`));
                 expect(lookupCounts).toEqual(positions.map(() => 0));
+                expect(offsetReadsByJump).toEqual(positions.map(() => 0));
             } finally {
                 scrollBar.dispose();
             }
         } finally {
             univer.dispose();
             vi.useRealTimers();
+        }
+    });
+
+    it('skips table viewports when there are no custom ranges to hit', () => {
+        const tableCount = 80;
+        const tableStream = genEmptyTable(1, 1).dataStream;
+        const tableParagraph = `${tableStream}\r`;
+        const dataStream = `${tableParagraph.repeat(tableCount)}\n`;
+        const tables = Array.from({ length: tableCount }, (_, index) => ({
+            tableId: `table-${index}`,
+            startIndex: index * tableParagraph.length,
+            endIndex: index * tableParagraph.length + tableStream.length,
+        }));
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'tables-without-ranges',
+                body: {
+                    dataStream,
+                    tables,
+                    paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                    sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
+                },
+                tableSource: Object.fromEntries(tables.map(({ tableId }) => [tableId, { ...genTableSource(1, 1, 160), tableId }])),
+                documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+            });
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const skeleton = render.with(DocSkeletonManagerService).recalculate();
+            const documents = injector.createInstance(Documents, 'tables-without-ranges-document', skeleton);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.addRenderDependencies([[DocEventManagerService]]);
+            const service = render.with(DocEventManagerService);
+            const getTableViewport = vi.fn(() => null);
+            setDocsTableRenderViewportProvider(getTableViewport);
+            const viewportReads = [];
+            for (let attempt = 0; attempt < 3; attempt++) {
+                getTableViewport.mockClear();
+                expect(service.isPointerOnInteractiveRange(20, 20)).toBe(false);
+                viewportReads.push(getTableViewport.mock.calls.length);
+            }
+            expect(viewportReads).toEqual([0, 0, 0]);
+        } finally {
+            setDocsTableRenderViewportProvider(null);
+            univer.dispose();
         }
     });
 

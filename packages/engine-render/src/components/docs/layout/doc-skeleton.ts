@@ -123,7 +123,7 @@ import { getHeaderFooterReferenceOffsetMap } from './header-footer-reference-pro
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
-import { getBoundingBox, getPlainTextLineInkBounds, getTableWrapBounds, usesDrawingBoundsForTextWrap } from './model/line';
+import { getBoundingBox, getDrawingWrapPolygonPoints, getPlainTextLineInkBounds, getTableWrapBounds, usesDrawingBoundsForTextWrap } from './model/line';
 import { createSkeletonPage, getNextSkeletonPageNumber } from './model/page';
 import { createSkeletonSection } from './model/section';
 import { formatNoteNumber, resolveNoteReferences } from './note-numbering';
@@ -428,7 +428,10 @@ function getColumnGroupVerticalBounds(
     return { top, bottom };
 }
 
-function getDrawingVerticalBounds(drawing: IDocumentSkeletonDrawing): { top: number; bottom: number } | null {
+function getDrawingVerticalBounds(
+    drawing: IDocumentSkeletonDrawing,
+    polygonHasPageOrigin: boolean
+): { top: number; bottom: number } | null {
     const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
     // Layout bounds do not cover transforms or child overflow for these objects.
     if (drawingOrigin.drawingType === DrawingTypeEnum.DRAWING_GROUP || drawingOrigin.isMultiTransform === BooleanNumber.TRUE ||
@@ -437,9 +440,23 @@ function getDrawingVerticalBounds(drawing: IDocumentSkeletonDrawing): { top: num
     }
     const bounds = angle ? getBoundingBox(angle, aLeft, width, aTop, height) : { top: aTop, height };
     const boxTop = bounds.top ?? aTop;
-    const top = boxTop - Math.max(0, drawingOrigin.effectExtent?.top ?? 0) - Math.max(0, drawingOrigin.distT ?? 0);
-    const bottom = boxTop + (bounds.height ?? height) +
+    let top = boxTop - Math.max(0, drawingOrigin.effectExtent?.top ?? 0) - Math.max(0, drawingOrigin.distT ?? 0);
+    let bottom = boxTop + (bounds.height ?? height) +
         Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
+    if (drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_POLYGON && drawingOrigin.lineTo != null) {
+        // Merged fragments shift the drawing box; the custom polygon remains
+        // in its original fragment. Rotation also makes Y column-dependent.
+        if (!polygonHasPageOrigin || angle !== 0) {
+            return null;
+        }
+        for (const { x, y } of getDrawingWrapPolygonPoints(drawing, 0) ?? []) {
+            if (!Number.isFinite(x)) {
+                return null;
+            }
+            top = Math.min(top, y);
+            bottom = Math.max(bottom, y);
+        }
+    }
     return Number.isFinite(top) && Number.isFinite(bottom) ? { top, bottom } : null;
 }
 
@@ -554,20 +571,19 @@ function mergeProtectedForegroundGeometry(
             return null;
         }
         const layout = drawing.drawingOrigin.layoutType;
-        if (layout === PositionedObjectLayoutType.WRAP_POLYGON) {
-            // Custom polygon points are independent of the drawing box.
-            return null;
-        }
         const inTail = anchorOffset >= startOffset;
         if (inTail && (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE)) {
             return true;
         }
-        const bounds = getDrawingVerticalBounds(drawing);
+        const firstSection = (incoming ? workerPage : page).sections[0];
+        const polygonHasPageOrigin = firstSection?.top === 0 &&
+            firstSection.st <= anchorOffset && anchorOffset <= firstSection.ed;
+        const bounds = getDrawingVerticalBounds(drawing, polygonHasPageOrigin);
         if (bounds == null) {
             return null;
         }
         if (inTail ? bounds.top > getRetainedBottom() : bounds.bottom < startTop) {
-            return inTail && !usesDrawingBoundsForTextWrap(layout) ? null : inTail;
+            return inTail && layout !== PositionedObjectLayoutType.WRAP_POLYGON && !usesDrawingBoundsForTextWrap(layout) ? null : inTail;
         }
         const otherAnchor = (incoming ? visibleAnchors : workerAnchors).get(id);
         const counterpart = (incoming ? page : workerPage).skeDrawings.get(id);

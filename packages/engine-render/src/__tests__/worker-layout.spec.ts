@@ -2262,6 +2262,8 @@ describe('worker document layout session', () => {
 
     it.each([
         { embedded: 'prefix drawing', drawing: 'inline', publishesTail: true },
+        { embedded: 'prefix polygon ending before the Worker tail', drawing: 'polygon', polygonBottom: 22, publishesTail: true },
+        { embedded: 'prefix polygon extending into the Worker tail', drawing: 'polygon', polygonBottom: 8_000, publishesTail: false },
         { embedded: 'rotated drawing overlapping the tail', drawing: 'rotated', publishesTail: false },
         { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
         { embedded: 'square-wrapped drawing below the splice after a page break', drawing: 'suffix', wrap: 'below', publishesTail: true },
@@ -2279,18 +2281,18 @@ describe('worker document layout session', () => {
         { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
         { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
         { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
-    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce }) => {
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce, polygonBottom }) => {
         mockWorkerCanvas();
         const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
         const T = DataStreamTreeTokenType;
-        const afterPageBreak = drawing === 'prefix' || drawing === 'suffix';
+        const afterPageBreak = drawing === 'prefix' || drawing === 'suffix' || drawing === 'polygon';
         const columnStream = (left: string, right: string) =>
             [T.COLUMN_GROUP_START, T.COLUMN_START, left, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_START, right, T.PARAGRAPH, T.COLUMN_END, T.COLUMN_GROUP_END].join('');
         const laterColumns = columns === 'two' ? columnStream('Later left', 'Later right') : '';
         const prefix = columns != null
             ? columnStream('Left', 'Right')
             : afterPageBreak
-                ? Array.from({ length: 68 }, (_, index) => `Before break ${index} on the first page.\r`).join('') + T.PAGE_BREAK
+                ? Array.from({ length: 68 }, (_, index) => `Before break ${index}${index === 0 && drawing === 'polygon' ? T.CUSTOM_BLOCK : ''} on the first page.\r`).join('') + T.PAGE_BREAK
                 : `Introduction ${T.CUSTOM_BLOCK} before the edit.\r`;
         const lead = drawing === 'prefix' ? `Lead ${T.CUSTOM_BLOCK}.\r` : 'Lead.\r';
         const content = prefix + lead + Array.from({ length: 90 }, (_, index) => {
@@ -2339,6 +2341,8 @@ describe('worker document layout session', () => {
             let layoutType = PositionedObjectLayoutType.WRAP_NONE;
             if (wrap) {
                 layoutType = wrapLayout ?? PositionedObjectLayoutType.WRAP_SQUARE;
+            } else if (drawing === 'polygon') {
+                layoutType = PositionedObjectLayoutType.WRAP_POLYGON;
             } else if (drawing === 'inline') {
                 layoutType = PositionedObjectLayoutType.INLINE;
             }
@@ -2350,6 +2354,12 @@ describe('worker document layout session', () => {
                     subUnitId: snapshot.id,
                     layoutType,
                     ...(wrap === 'crossing' ? { distT: 1_200 } : {}),
+                    ...(polygonBottom == null
+                        ? {}
+                        : {
+                            start: [0, 8],
+                            lineTo: [[24, 8], [24, polygonBottom], [0, polygonBottom], [0, 8]],
+                        }),
                     docTransform: {
                         angle: drawing === 'rotated' ? 90 : 0,
                         positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },

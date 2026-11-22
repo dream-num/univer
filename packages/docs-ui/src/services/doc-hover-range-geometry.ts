@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '@univerjs/engine-render';
+import type { IDocumentSkeletonDivide, IDocumentSkeletonPage } from '@univerjs/engine-render';
 import { getTableIdAndSliceIndex } from '@univerjs/engine-render';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { getDocRangeBorderBoxBottom } from './selection/convert-text-range';
@@ -31,30 +31,57 @@ interface IHoverLine extends ISourceSpan {
     bottom: number;
 }
 
+interface IIndexedRange {
+    range: ICustomRange;
+    startIndex: number;
+    endIndex: number;
+    order: number;
+}
+
 export interface IDocHoverRangeGeometry {
     lines: IHoverLine[];
     bottomThroughLine: number[];
     unbounded: ISourceSpan[];
+    ranges: IIndexedRange[];
+    endThroughRange: number[];
 }
 
-export function buildDocHoverRangeGeometry(root: IDocumentSkeletonPage, docsTop: number): IDocHoverRangeGeometry {
+function getVerticalDivideBounds(divide: IDocumentSkeletonDivide, top: number): [number, number] {
+    // Selection projects each glyph's logical X edges onto the cell's physical Y axis.
+    const origin = top + divide.left + divide.paddingLeft;
+    let first = Number.POSITIVE_INFINITY;
+    let last = Number.NEGATIVE_INFINITY;
+    for (const { left, width } of divide.glyphGroup) {
+        first = Math.min(first, origin + left, origin + left + width);
+        last = Math.max(last, origin + left, origin + left + width);
+    }
+    return [first, last];
+}
+
+export function buildDocHoverRangeGeometry(
+    root: IDocumentSkeletonPage,
+    docsTop: number,
+    ranges: readonly ICustomRange[]
+): IDocHoverRangeGeometry {
     const lines: IHoverLine[] = [];
     const unbounded: ISourceSpan[] = [];
 
     const collect = (page: IDocumentSkeletonPage, pageTop: number, tableIds: readonly string[], unboundedAncestor = false): void => {
-        const hasUnboundedGeometry = unboundedAncestor || page.cellTextDirection === 'tbRlV';
+        const vertical = page.cellTextDirection === 'tbRlV';
         for (const section of page.sections) {
             for (const column of section.columns) {
+                const verticalTop = pageTop - page.marginTop + page.marginLeft + column.left + docsTop;
                 for (const line of column.lines) {
                     const lineTop = pageTop + section.top + (line.top + line.marginTop);
-                    const start = lineTop + docsTop;
-                    const end = getDocRangeBorderBoxBottom(line, lineTop) + docsTop;
+                    const lineStart = lineTop + docsTop;
+                    const lineEnd = getDocRangeBorderBoxBottom(line, lineTop) + docsTop;
                     for (const divide of line.divides) {
                         if (divide.glyphGroup.length === 0) {
                             continue;
                         }
                         const span = { startIndex: divide.st, endIndex: divide.ed, tableIds };
-                        if (hasUnboundedGeometry || !Number.isFinite(start) || !Number.isFinite(end)) {
+                        const [start, end] = vertical ? getVerticalDivideBounds(divide, verticalTop) : [lineStart, lineEnd];
+                        if (unboundedAncestor || !Number.isFinite(start) || !Number.isFinite(end)) {
                             unbounded.push(span);
                         } else {
                             lines.push({ ...span, top: Math.min(start, end), bottom: Math.max(start, end) });
@@ -70,14 +97,14 @@ export function buildDocHoverRangeGeometry(root: IDocumentSkeletonPage, docsTop:
             const cellTableIds = [...tableIds, getTableIdAndSliceIndex(id).tableId];
             for (const row of table.rows) {
                 for (const cell of row.cells) {
-                    collect(cell, pageTop + (table.top + row.top) + cell.marginTop, cellTableIds, hasUnboundedGeometry);
+                    collect(cell, pageTop + (table.top + row.top) + cell.marginTop, cellTableIds, unboundedAncestor || vertical);
                 }
             }
         }
         for (const group of page.skeColumnGroups.values()) {
             for (const column of group.columns) {
                 // Nested groups use their own selection page path.
-                collect(column.page, pageTop + (group.top + column.top) + column.page.marginTop, tableIds, hasUnboundedGeometry || page !== root);
+                collect(column.page, pageTop + (group.top + column.top) + column.page.marginTop, tableIds, unboundedAncestor || vertical || page !== root);
             }
         }
     };
@@ -89,43 +116,66 @@ export function buildDocHoverRangeGeometry(root: IDocumentSkeletonPage, docsTop:
         bottom = Math.max(bottom, line.bottom);
         return bottom;
     });
-    return { lines, bottomThroughLine, unbounded };
+    const indexedRanges = ranges.map((range, order) => ({
+        range,
+        startIndex: range.startIndex,
+        endIndex: range.endIndex,
+        order,
+    })).sort((left, right) => left.startIndex - right.startIndex);
+    let end = Number.NEGATIVE_INFINITY;
+    const endThroughRange = indexedRanges.map((range) => {
+        end = Math.max(end, range.endIndex);
+        return end;
+    });
+    return { lines, bottomThroughLine, unbounded, ranges: indexedRanges, endThroughRange };
 }
 
-export function findDocHoverRangeCandidates(
-    geometry: IDocHoverRangeGeometry,
-    ranges: readonly ICustomRange[],
-    top: number,
-    bottom: number
-): { candidates: ICustomRange[]; tableIds: Set<string> } {
-    const { lines, bottomThroughLine, unbounded } = geometry;
-    const paddedTop = top - DOC_VERTICAL_PADDING;
-    const paddedBottom = bottom + DOC_VERTICAL_PADDING;
-    // A tall or overflowing line can end below a later line. Search cumulative
-    // bottoms so a viewport starting inside that earlier line still finds it.
+// Cumulative endpoints keep earlier, overlapping entries searchable even when
+// an item ends after those that follow it.
+function findFirstIntersectingEnd(ends: readonly number[], start: number): number {
     let first = 0;
-    let end = lines.length;
+    let end = ends.length;
     while (first < end) {
         const middle = (first + end) >>> 1;
-        if (bottomThroughLine[middle] < paddedTop) {
+        if (ends[middle] < start) {
             first = middle + 1;
         } else {
             end = middle;
         }
     }
-    const visible: ISourceSpan[] = [...unbounded];
+    return first;
+}
+
+export function findDocHoverRangeCandidates(
+    geometry: IDocHoverRangeGeometry,
+    top: number,
+    bottom: number
+): { candidates: ICustomRange[]; tableIds: Set<string> } {
+    const { lines, bottomThroughLine, unbounded, ranges, endThroughRange } = geometry;
+    const paddedTop = top - DOC_VERTICAL_PADDING;
+    const paddedBottom = bottom + DOC_VERTICAL_PADDING;
+    const matching = new Set<IIndexedRange>();
+    const tableIds = new Set<string>();
+    const addSpan = (span: ISourceSpan) => {
+        for (let index = findFirstIntersectingEnd(endThroughRange, span.startIndex);
+            index < ranges.length && ranges[index].startIndex <= span.endIndex; index++) {
+            const range = ranges[index];
+            if (range.endIndex >= span.startIndex) {
+                matching.add(range);
+            }
+        }
+        span.tableIds.forEach((id) => tableIds.add(id));
+    };
+
+    unbounded.forEach(addSpan);
+    const first = findFirstIntersectingEnd(bottomThroughLine, paddedTop);
     for (let index = first; index < lines.length && lines[index].top <= paddedBottom; index++) {
         if (lines[index].bottom >= paddedTop) {
-            visible.push(lines[index]);
+            addSpan(lines[index]);
         }
     }
 
-    const candidates = ranges.filter((range) =>
-        visible.some((line) => range.startIndex <= line.endIndex && range.endIndex >= line.startIndex)
-    );
-    const tableIds = new Set<string>();
-    for (const span of visible) {
-        span.tableIds.forEach((id) => tableIds.add(id));
-    }
+    // Hit order follows the document's custom ranges, including nested ranges.
+    const candidates = Array.from(matching).sort((left, right) => left.order - right.order).map(({ range }) => range);
     return { candidates, tableIds };
 }

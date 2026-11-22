@@ -291,16 +291,76 @@ export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRan
     return true;
 }
 
+function parseTsvTextRows(text: string): string[][] {
+    const normalized = text.replace(/(?:\r\n|\r|\n)$/, '');
+    const rows: string[][] = [[]];
+    let currentField = '';
+    let inQuotes = false;
+    let isFieldStart = true;
+
+    for (let i = 0; i < normalized.length; i++) {
+        const char = normalized[i];
+
+        if (inQuotes) {
+            if (char === '"') {
+                if (normalized[i + 1] === '"') {
+                    currentField += '"';
+                    i++;
+                } else {
+                    inQuotes = false;
+                }
+            } else {
+                currentField += char;
+            }
+            continue;
+        }
+
+        if (isFieldStart && char === '"') {
+            inQuotes = true;
+            isFieldStart = false;
+            continue;
+        }
+
+        if (char === '\t') {
+            rows[rows.length - 1].push(currentField);
+            currentField = '';
+            isFieldStart = true;
+            continue;
+        }
+
+        if (char === '\r' || char === '\n') {
+            if (char === '\r' && normalized[i + 1] === '\n') {
+                i++;
+            }
+            rows[rows.length - 1].push(currentField);
+            rows.push([]);
+            currentField = '';
+            isFieldStart = true;
+            continue;
+        }
+
+        currentField += char;
+        isFieldStart = false;
+    }
+
+    rows[rows.length - 1].push(currentField);
+    return rows;
+}
+
 export function convertTextToTable(text: string): string {
-    const rows = text.trim().split('\n');
+    const rows = parseTsvTextRows(text);
 
     let html = '<table>';
 
-    rows.forEach((row) => {
-        const columns = row.split('\t');
+    rows.forEach((columns) => {
         html += '<tr>';
         columns.forEach((column) => {
-            html += `<td>${column}</td>`;
+            const escaped = column
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\r\n|\r|\n/g, '<br>');
+            html += `<td>${escaped}</td>`;
         });
         html += '</tr>';
     });

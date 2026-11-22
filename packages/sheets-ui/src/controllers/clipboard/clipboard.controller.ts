@@ -32,6 +32,7 @@ import type {
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
 import {
+    CellValueType,
     createDocumentModelWithStyle,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
@@ -308,7 +309,9 @@ export class SheetClipboardController extends RxDisposable {
                     return convertBodyToHtml(cell.p);
                 }
 
-                const content = extractPureTextFromCell(cell);
+                const content = cell && !cell.p && typeof cell.v === 'string' && cell.t !== CellValueType.BOOLEAN
+                    ? cell.v
+                    : extractPureTextFromCell(cell);
 
                 if (content.trim() === '') {
                     return content;

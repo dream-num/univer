@@ -36,6 +36,7 @@ import type { Observable } from 'rxjs';
 import {
     BooleanNumber,
     CellModeEnum,
+    CellValueType,
     cloneCellDataWithSpanAndDisplay,
     createIdentifier,
     Disposable,
@@ -155,10 +156,35 @@ export const FORMULA_CLIPBOARD_MIME_TYPE = 'web application/x-univer-sheets-form
 // The existing object HTML/cache format needs an empty slot, never a grid selection or Chart source range.
 const OBJECT_CLIPBOARD_CARRIER_RANGE: IRange = { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 };
 
-function wrapHtmlForExcel(html: string): string {
-    const table = html.match(/<table[\s\S]*<\/table>/)?.[0] ?? html;
+function normalizeCellParagraphsForExcel(html: string): string {
+    const paragraphCellPattern = /^(?:\s*<p\b[^>]*\bclass\s*=\s*["'](?:[^"']*\s)?UniverNormal(?:\s[^"']*)?["'][^>]*>[\s\S]*?<\/p>\s*)+$/i;
+    const singleParagraphPattern = /<p\b([^>]*)>([\s\S]*?)<\/p>/gi;
 
-    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"></head><body><!--StartFragment-->${table}<!--EndFragment--></body></html>`;
+    return html.replace(/<td([^>]*)>([\s\S]*?)<\/td>/gi, (fullMatch, tdAttrs: string, cellContent: string) => {
+        if (!paragraphCellPattern.test(cellContent)) {
+            return fullMatch;
+        }
+
+        const paragraphs: string[] = [];
+        singleParagraphPattern.lastIndex = 0;
+        let match = singleParagraphPattern.exec(cellContent);
+        while (match) {
+            const attrs = match[1];
+            const inner = match[2];
+            const styleMatch = attrs.match(/\bstyle\s*=\s*(["'])([\s\S]*?)\1/i);
+            const style = styleMatch?.[2]?.trim();
+            paragraphs.push(style && inner !== '' ? `<span style="${style}">${inner}</span>` : inner);
+            match = singleParagraphPattern.exec(cellContent);
+        }
+
+        return `<td${tdAttrs}>${paragraphs.join('<br>')}</td>`;
+    });
+}
+
+function wrapHtmlForExcel(html: string): string {
+    const table = normalizeCellParagraphsForExcel(html.match(/<table[\s\S]*<\/table>/)?.[0] ?? html);
+
+    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"><style>br { mso-data-placement: same-cell; }</style></head><body><!--StartFragment-->${table}<!--EndFragment--></body></html>`;
 }
 
 interface IFormulaClipboardPayload {
@@ -1783,6 +1809,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 // #region copy generation
 
+function formatPlainTextCell(text: string): string {
+    const normalized = text.replace(/\r\n|\r/g, '\n');
+    if (/[\n\t"]/.test(normalized)) {
+        return `"${normalized.replace(/"/g, '""')}"`;
+    }
+    return normalized;
+}
+
 export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>) {
     let plain = '';
     const matrixLength = matrix.getLength();
@@ -1791,7 +1825,7 @@ export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanAndDisp
         cols.forEach((col) => {
             const cell = matrix.getValue(row, col);
             if (cell) {
-                const cellText = getCellTextForClipboard(cell);
+                const cellText = formatPlainTextCell(getCellTextForClipboard(cell));
                 arr.push(cellText);
             }
         });
@@ -1808,6 +1842,9 @@ function getCellTextForClipboard(cell: ICellDataWithSpanAndDisplay) {
     if (isNotNullOrUndefined(cell.displayV)) {
         return cell.displayV;
     }
+    if (!cell.p && typeof cell.v === 'string' && cell.t !== CellValueType.BOOLEAN) {
+        return cell.v;
+    }
     return extractPureTextFromCell(cell);
 }
 
@@ -1816,7 +1853,8 @@ export const escapeSpecialCode = (cellStr: string) =>
         .replace(/&/g, '&amp;')
         .replace(/\uFEFF/g, '')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/>/g, '&gt;')
+        .replace(/\r\n|\r|\n/g, '<br>');
 
 function rowAcrossMergedCell(row: number, startColumn: number, endColumn: number, worksheet: Worksheet): boolean {
     return worksheet

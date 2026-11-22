@@ -18,7 +18,7 @@ import type { IMutationInfo, IRange } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
-import { getRepeatRange, mergeSetRangeValues, spilitLargeSetRangeValuesMutations } from '../utils';
+import { convertTextToTable, getRepeatRange, mergeSetRangeValues, spilitLargeSetRangeValuesMutations } from '../utils';
 
 describe('test getRepeatRange', () => {
     it('repeat row 2 times', () => {
@@ -368,5 +368,15 @@ describe('test "spilitLargeSetRangeValuesMutations"', () => {
         });
 
         expect(result).toHaveLength(4); // 100 rows / 25 rows per chunk = 4 chunks
+    });
+});
+
+describe('test convertTextToTable', () => {
+    it('keeps quoted multiline TSV cells inside a single table cell', () => {
+        const tsv = '"line1\nline2"\t"say ""hi"""\r\nrow2\t<tag>';
+
+        expect(convertTextToTable(tsv)).toBe(
+            '<table><tr><td>line1<br>line2</td><td>say "hi"</td></tr><tr><td>row2</td><td>&lt;tag&gt;</td></tr></table>'
+        );
     });
 });

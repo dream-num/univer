@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, numfmt } from '@univerjs/core';
+import { isPatternEqualWithoutDecimal, LocaleType, numfmt } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { DATEFMTLISG } from '../../base/const/formatdetail';
 import { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from '../options';
@@ -81,6 +81,19 @@ describe('format options', () => {
         expect(getNumberFormatOptions()[0]).toMatchObject({
             label: expect.any(String),
             value: expect.any(String),
+        });
+    });
+
+    it('selects the preset a pattern was built from, including its negative color', () => {
+        // The panel resolves the edited cell's pattern back to a preset with
+        // `isPatternEqualWithoutDecimal`. A red negative section must map to the red
+        // preset; otherwise the negative type reverts and the color is dropped on the
+        // next decimal change.
+        const options = getNumberFormatOptions();
+        const findPreset = (pattern: string) => options.findIndex((option) => isPatternEqualWithoutDecimal(option.value, pattern));
+
+        options.forEach((option, index) => {
+            expect(findPreset(option.value)).toBe(index);
         });
     });
 });

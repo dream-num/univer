@@ -988,7 +988,7 @@ export class Scene extends Disposable {
         }
     }
 
-    private _createScrollRenderState(): ISceneScrollRenderState {
+    private _createScrollRenderState(pixelRatio: number): ISceneScrollRenderState {
         const dirtyBounds: IBoundRectNoAngle[] = [];
         const scrollRenderInfos: IScrollRenderInfo[] = [];
         const viewportInfos = new Map<string, IViewportInfo>();
@@ -1014,7 +1014,10 @@ export class Scene extends Disposable {
                     .filter((bounds): bounds is IBoundRectNoAngle => bounds != null);
                 const bounds = trimSharedViewportEdges(scrollRenderInfo.bounds, followingViewportBounds);
                 const { offsetX, offsetY } = scrollRenderInfo;
-                if (isInvalidScrollBounds(bounds, offsetX, offsetY)) {
+                // A partial device pixel at a viewport edge can contain both header and sheet pixels.
+                const pixelCoordinates = [bounds.left, bounds.top, bounds.right, bounds.bottom, offsetX, offsetY];
+                if (isInvalidScrollBounds(bounds, offsetX, offsetY) ||
+                    pixelCoordinates.some((value) => !Number.isInteger(precisionTo(value * pixelRatio, 6)))) {
                     canPreserveEngine = false;
                     continue;
                 }
@@ -1122,12 +1125,13 @@ export class Scene extends Disposable {
         let layerRenderOptions: ILayerRenderOptions | undefined;
 
         if (shouldTryPreservingEngine) {
-            const scrollRenderState = this._createScrollRenderState();
+            const pixelRatio = canvasInstance.getPixelRatio();
+            const scrollRenderState = this._createScrollRenderState(pixelRatio);
             const { canPreserveEngine, dirtyBounds, scrollRenderInfos, viewportInfos } = scrollRenderState;
             if (canPreserveEngine) {
                 scrollAndClearCanvas(
                     canvasInstance.getContext(),
-                    canvasInstance.getPixelRatio(),
+                    pixelRatio,
                     scrollRenderInfos,
                     dirtyBounds
                 );

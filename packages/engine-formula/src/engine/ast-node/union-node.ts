@@ -117,12 +117,15 @@ export class UnionNode extends BaseAstNode {
         variant1: FunctionVariantType,
         variant2: FunctionVariantType
     ): FunctionVariantType {
-        if (variant1.isError() || variant2.isError()) {
-            return ErrorValueObject.create(ErrorType.REF);
+        if (variant1.isError()) {
+            return variant1;
+        }
+        if (variant2.isError()) {
+            return variant2;
         }
 
         if (!(variant1 instanceof BaseReferenceObject) || !(variant2 instanceof BaseReferenceObject)) {
-            return ErrorValueObject.create(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return getRangeReferenceObjectFromCache(variant1, variant2);

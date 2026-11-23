@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Ctor } from '@univerjs/core';
+import type { Ctor, IWorkbookData } from '@univerjs/core';
 import type { IFormulaDatasetConfig } from '../../basics/common';
 import type { IFunctionNames } from '../../basics/function';
 import type { BaseFunction } from '../../functions/base-function';
 import type { IAllRuntimeData } from '../runtime.service';
-import { CellValueType, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
@@ -27,13 +27,14 @@ import { createFunctionTestBed } from '../../functions/__tests__/create-function
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../../functions/index';
 
 import { ICalculateFormulaService } from '../calculate-formula.service';
+import { IDefinedNamesService } from '../defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from '../dependency-manager.service';
 import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../feature-calculation-manager.service';
 import { IFunctionService } from '../function.service';
 import { IFormulaRuntimeService } from '../runtime.service';
 
-function createBed() {
-    const bed = createFunctionTestBed(undefined, [
+function createBed(workbookData?: IWorkbookData) {
+    const bed = createFunctionTestBed(workbookData, [
         [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
         [IDependencyManagerService, { useClass: DependencyManagerService }],
     ]);
@@ -263,10 +264,80 @@ describe('Persisted calculation settings', () => {
         }
     });
 
+    it('combines the areas of a range endpoint into one rectangle', async () => {
+        const cases = [
+            ['=SUM(A1:(A2,A3))', 63],
+            ['=SUM((A2,A3):A1)', 63],
+            ['=SUM(D4:(C6,A2))', 850],
+            ['=SUM((A1,A3):(C2,D4))', 440],
+            ['=SUM(B3:((E1,A2),C6))', 1140],
+            ['=SUM((B3:D4,A5):(A2,D4:F6))', 1305],
+            ['=SUM(A1:((A2,A4) A1:A4))', 104],
+            ['=SUM(A1:Corners)', 212],
+            ['=SUM(Corners:A1)', 212],
+            ['=SUM(A1:IF(TRUE,(A2,A4),(A2,A6)))', 104],
+            ['=AREAS((D4:B3,A6):(C7,B1))', 1],
+            ['=COLUMNS((2:3,5:6):B2)', 16384],
+            ['=ROWS(B2:(A:A,D:D))', 1048576],
+            ['=SUM(Sheet1!A1:(Sheet1!A2,Sheet1!B3))', 129],
+            ['=SUM(Other!A1:(Other!A2,Other!B3))', 141],
+            ['=SUM(Sheet1!A1:(Other!A2,Sheet1!B3))', ErrorType.VALUE],
+            ['=SUM(A1:(Other!A2,Other!B3))', ErrorType.VALUE],
+            ['=SUM(A1:(A2,INDIRECT("bad reference")))', ErrorType.REF],
+            ['=SUM(A1:INDIRECT({"A2","A4"}))', ErrorType.VALUE],
+            ['=SUM(A1:(A2,XLOOKUP(999,A2:A4,B2:B4)))', ErrorType.NA],
+            ['=SUM(A1:CHOOSE(0,(A2,A4),(A2,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:CHOOSE({1,2},(A2,A4),(A2,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:(Sheet1:Other!A2))', ErrorType.NAME],
+            ['=SUM(A1:(Sheet1:Other!A2,Sheet1!A3))', ErrorType.NAME],
+        ] as const;
+        const bed = createBed({
+            id: 'multi-area',
+            name: 'Multi-area references',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            sheetOrder: ['main', 'other'],
+            sheets: {
+                main: { id: 'main', name: 'Sheet1' },
+                other: { id: 'other', name: 'Other' },
+            },
+            styles: {},
+        });
+        try {
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'corners',
+                name: 'Corners',
+                formulaOrRefString: '(Sheet1!$A$3,Sheet1!$B$4)',
+            });
+            // All cells are filled so an endpoint-only or duplicated-area sum cannot pass.
+            const { main, other } = bed.sheetData;
+            for (const sheet of [main, other]) {
+                for (let row = 0; row < 8; row++) {
+                    for (let column = 0; column < 8; column++) {
+                        sheet.cellData.setValue(row, column, { v: 10 * (row + 1) + column + 1 });
+                    }
+                }
+            }
+            other.cellData.setValue(0, 0, { v: 23 });
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index + 9, { 11: { f } }]));
+            const result = await calculate(bed, formulas, false, 100, 0.001, {
+                unitSheetNameMap: { [bed.unitId]: { Sheet1: 'main', Other: 'other' } },
+            });
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(index + 9, 11)?.v, formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it.each([
         'A1:INDEX(C4:C5,D1)',
         'A1:(INDEX(C4:C5,D1))',
         '(INDEX(C4:C5,D1)):A1',
+        'A1:(A2,INDEX(C4:C5,D1))',
+        '(A2,INDEX(C4:C5,D1)):A1',
+        'A1:CHOOSE(D1,(A2,C4),(A2,C5))',
+        'A1:IF(D1=1,(A2,C4),(A2,C5))',
     ])('updates the dependency range when an endpoint moves in %s', async (range) => {
         const bed = createBed();
         const formulas = { 0: { 4: { f: `=SUM(${range})` } } };

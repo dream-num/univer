@@ -30,6 +30,10 @@ export class Cube extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: FunctionVariantType[]) {
+        if (variants.some((variant) => variant instanceof MultiAreaReferenceObject && variant.isSheetSpan)) {
+            return ErrorValueObject.create(ErrorType.NAME);
+        }
+
         if (variants.every((variant) => variant.isReferenceObject())) {
             const areas = (variants as BaseReferenceObject[]).flatMap((reference) =>
                 reference instanceof MultiAreaReferenceObject && !reference.isArrayOfReferences()

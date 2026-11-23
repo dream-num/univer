@@ -453,6 +453,9 @@ export class Interpreter extends Disposable {
         let parent = child.getParent();
 
         while (parent != null) {
+            if (parent.nodeType === NodeType.UNION) {
+                return true;
+            }
             if (parent.nodeType === NodeType.FUNCTION) {
                 return parent.preservesLazyIfReferenceArray(child);
             }

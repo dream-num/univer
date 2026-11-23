@@ -15,7 +15,6 @@
  */
 
 import type { IRange, LocaleType, Nullable } from '@univerjs/core';
-import { DateSystem } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type {
@@ -30,6 +29,7 @@ import type { FormulaFunctionResultValueType, FormulaFunctionValueType } from '.
 import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 import type { IFormulaUnitReferenceResolver } from '../services/unit-reference-resolver.service';
+import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../basics/error-type';
 import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -107,6 +107,8 @@ export class BaseFunction {
      * Whether the function needs unevaluated AST children.
      */
     needsAstChildren: boolean = false;
+
+    calculateReferenceEndpoint?(variants: FunctionVariantType[]): FunctionVariantType;
 
     bindCalculationRegion?(getRegion: () => LocaleType): void;
     bindCalculationTimestamp?(getTimestamp: () => number): void;

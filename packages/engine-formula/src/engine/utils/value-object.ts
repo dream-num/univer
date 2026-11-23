@@ -928,6 +928,17 @@ export enum ReferenceObjectType {
     ROW,
 }
 
+export function getScalarRangeEndpointSelector(value: FunctionVariantType): BaseValueObject {
+    if (value.isReferenceObject()) {
+        const reference = value as BaseReferenceObject;
+        if (!reference.isMultiArea() && reference.getRowCount() === 1 && reference.getColumnCount() === 1) {
+            return reference.getCellByPosition();
+        }
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+    return value.isArray() ? ErrorValueObject.create(ErrorType.VALUE) : value as BaseValueObject;
+}
+
 export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
     let referenceObject: BaseReferenceObject;
     switch (type) {

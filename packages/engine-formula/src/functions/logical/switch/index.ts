@@ -14,16 +14,46 @@
  * limitations under the License.
  */
 
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { compareToken } from '../../../basics/token';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { isLiteralTextMatch } from '../../../engine/utils/compare';
+import { getScalarRangeEndpointSelector } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Switch extends BaseFunction {
     override minParams = 3;
+
+    override calculateReferenceEndpoint(params: FunctionVariantType[]) {
+        if (params.length < 3) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+        const expression = getScalarRangeEndpointSelector(params[0]);
+        if (expression.isError()) {
+            return expression;
+        }
+        for (let index = 1; index + 1 < params.length; index += 2) {
+            const candidate = getScalarRangeEndpointSelector(params[index]);
+            if (candidate.isError()) {
+                return candidate;
+            }
+            if (expression.isString() !== candidate.isString() || expression.isBoolean() !== candidate.isBoolean()) {
+                continue;
+            }
+            const matches = expression.isString()
+                ? isLiteralTextMatch(String(expression.getValue()), String(candidate.getValue()))
+                : expression.compare(candidate, compareToken.EQUALS).getValue();
+            if (matches) {
+                return params[index + 1];
+            }
+        }
+        return params.length % 2 === 0 ? params[params.length - 1] : ErrorValueObject.create(ErrorType.NA);
+    }
 
     // TODO(formula-contract): Enforce the documented 255-argument maximum instead of inheriting the unlimited default.
     override calculate(expression: BaseValueObject, ...args: BaseValueObject[]) {

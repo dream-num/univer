@@ -283,6 +283,10 @@ describe('Persisted calculation settings', () => {
             ['=SUM(Other!A1:(Other!A2,Other!B3))', 141],
             ['=SUM(Sheet1!A1:(Other!A2,Sheet1!B3))', ErrorType.VALUE],
             ['=SUM(A1:(Other!A2,Other!B3))', ErrorType.VALUE],
+            ['=SUM(A1:IFS(TRUE,Other!A4))', ErrorType.VALUE],
+            ['=SUM(Other!A1:SWITCH(1,1,A4))', ErrorType.VALUE],
+            ['=SUM(Other!A1:IFS(TRUE,Other!A4))', 116],
+            ['=SUM(SWITCH(1,1,Other!A4):Other!A1)', 116],
             ['=SUM(A1:(A2,INDIRECT("bad reference")))', ErrorType.REF],
             ['=SUM(A1:INDIRECT({"A2","A4"}))', ErrorType.VALUE],
             ['=SUM(A1:(A2,XLOOKUP(999,A2:A4,B2:B4)))', ErrorType.NA],
@@ -338,6 +342,8 @@ describe('Persisted calculation settings', () => {
         '(A2,INDEX(C4:C5,D1)):A1',
         'A1:CHOOSE(D1,(A2,C4),(A2,C5))',
         'A1:IF(D1=1,(A2,C4),(A2,C5))',
+        'A1:_xlfn.IFS(D1=1,(A2,C4),TRUE,(A2,C5))',
+        'SWITCH(D1,1,(A2,C4),(A2,C5)):A1',
     ])('updates the dependency range when an endpoint moves in %s', async (range) => {
         const bed = createBed();
         const formulas = { 0: { 4: { f: `=SUM(${range})` } } };
@@ -364,6 +370,47 @@ describe('Persisted calculation settings', () => {
             expect(read(await edit(4, 1, 30))).toBe(40);
             expect(read(await edit(0, 3, 1))).toBe(5);
             expect(read(await edit(4, 1, 10))).toBeUndefined();
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps selected references in range endpoints without changing ordinary selector results', async () => {
+        const cases = [
+            ['=SUM(IFS(TRUE,(A2,A4),TRUE,(A3,A6)):A1)', 10],
+            ['=SUM(A1:SWITCH(1,1,(A2,A4),(A3,A6)))', 10],
+            ['=SUM(A1:(A2,IFS(TRUE,(A3,A4),TRUE,(A5,A6))))', 10],
+            ['=SUM(A1:CHOOSE(1,SWITCH(1,1,(A2,A4),(A3,A6))))', 10],
+            ['=SUM(A1:IFS(TRUE,(A2,A4),FALSE,NA()))', 10],
+            ['=SUM(A1:IFS(TRUE,(A2,A4),NA(),(A2,A6)))', 10],
+            ['=SUM(A1:SWITCH(1,1,(A2,A4),NA(),(A2,A6)))', 10],
+            ['=SUM(A1:IFS({TRUE,FALSE},(A2,A4),TRUE,(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:IFS({TRUE},(A2,A4),TRUE,(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH({1,2},1,(A2,A4),(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH({1},1,(A2,A4),(A3,A6)))', ErrorType.VALUE],
+            ['=SUM(A1:SWITCH(1,"1",(A2,A4),(A3,A6)))', 21],
+            ['=SUM(A1:SWITCH(TRUE,1,(A2,A4),(A3,A6)))', 21],
+            ['=SUM(A1:IFS("TRUE",(A2,A4),TRUE,(A3,A6)))', 10],
+            ['=SUM(A1:IFS(FALSE,(A2,A4)))', ErrorType.NA],
+            ['=SUM(A1:SWITCH(2,1,(A2,A4)))', ErrorType.NA],
+            ['=SUM(A1:IFS(TRUE,A4))', 10],
+            ['=SUM(A1:SWITCH(1,1,A4))', 10],
+            ['=IFS(TRUE,5,TRUE,10)', 5],
+            ['=SWITCH(1,1,5,6)', 5],
+            ['=SUM(IFS({TRUE,FALSE},10,TRUE,20))', 30],
+            ['=SUM(SWITCH({1,2},1,10,20))', 30],
+        ] as const;
+        const bed = createBed();
+        try {
+            const data = bed.sheetData[bed.sheetId]!.cellData;
+            data.reset();
+            for (let row = 0; row < 6; row++) {
+                data.setValue(row, 0, { v: row + 1 });
+            }
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index, { 9: { f } }]));
+            const result = await calculate(bed, formulas, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(index, 9)?.v, formula).toBe(expected));
         } finally {
             bed.univer.dispose();
         }

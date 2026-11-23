@@ -85,7 +85,10 @@ import {
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
-import { InsertDocumentColumnBreakOperation } from '../commands/operations/insert-break.operation';
+import {
+    DOCUMENT_SECTION_BREAK_MENU_OPERATIONS,
+    InsertDocumentColumnBreakOperation,
+} from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
 import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
@@ -125,11 +128,6 @@ import {
     DOC_BREAKS_MENU_ID,
     DOC_INSERT_EMOJI_MENU_ID,
     DOC_INSERT_SYMBOL_MENU_ID,
-    DOC_SECTION_BREAK_CONTINUOUS_MENU_ID,
-    DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID,
-    DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID,
-    DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID,
-    DOC_SECTION_BREAK_ODD_PAGE_MENU_ID,
     EmojiPickerMenuItemFactory,
     FLOAT_TEXT_STYLE_MENU_ID,
     FLOAT_TOOLBAR_MENU_POSITION,
@@ -364,23 +362,23 @@ export const menuSchema: MenuSchemaType = {
                 order: 0,
                 menuItemFactory: InsertColumnBreakMenuFactory,
             },
-            [DOC_SECTION_BREAK_NEXT_PAGE_MENU_ID]: {
+            [DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.nextPage.id]: {
                 order: 1,
                 menuItemFactory: InsertNextPageSectionBreakMenuFactory,
             },
-            [DOC_SECTION_BREAK_CONTINUOUS_MENU_ID]: {
+            [DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.continuous.id]: {
                 order: 2,
                 menuItemFactory: InsertContinuousSectionBreakMenuFactory,
             },
-            [DOC_SECTION_BREAK_NEXT_COLUMN_MENU_ID]: {
+            [DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.nextColumn.id]: {
                 order: 3,
                 menuItemFactory: InsertNextColumnSectionBreakMenuFactory,
             },
-            [DOC_SECTION_BREAK_EVEN_PAGE_MENU_ID]: {
+            [DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.evenPage.id]: {
                 order: 4,
                 menuItemFactory: InsertEvenPageSectionBreakMenuFactory,
             },
-            [DOC_SECTION_BREAK_ODD_PAGE_MENU_ID]: {
+            [DOCUMENT_SECTION_BREAK_MENU_OPERATIONS.oddPage.id]: {
                 order: 5,
                 menuItemFactory: InsertOddPageSectionBreakMenuFactory,
             },

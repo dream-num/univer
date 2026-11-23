@@ -562,11 +562,6 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
         this._allTreeMap.delete(treeId);
     }
 
-    override addDependencyRTreeCache(tree: IFormulaDependencyTree) {
-        this._removeDependencyRTreeCache(tree.treeId);
-        this._removeAllTreeMap(tree.treeId);
-        super.addDependencyRTreeCache(tree);
-    }
 
     protected override _addAllTreeMap(tree: IFormulaDependencyTree) {
         const rangeList = tree.rangeList;

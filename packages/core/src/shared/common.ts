@@ -244,7 +244,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                         str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
                     }
                     if (style.ul.t && str.indexOf('text-decoration-style') === -1) {
-                        str += `text-decoration-style: ${style.ul.t} `;
+                        str += `text-decoration-style: ${style.ul.t}; `;
                     }
                 }
             },
@@ -262,7 +262,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                         str += `text-decoration-color: ${getColorStyle(style.st.cl)}; `;
                     }
                     if (style.st.t && str.indexOf('text-decoration-style') === -1) {
-                        str += `text-decoration-style: ${style.st.t} `;
+                        str += `text-decoration-style: ${style.st.t}; `;
                     }
                 }
             },
@@ -280,7 +280,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                         str += `text-decoration-color: ${getColorStyle(style.ol.cl)}; `;
                     }
                     if (style.ol.t && str.indexOf('text-decoration-style') === -1) {
-                        str += `text-decoration-style: ${style.ol.t} `;
+                        str += `text-decoration-style: ${style.ol.t}; `;
                     }
                 }
             },

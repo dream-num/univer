@@ -160,7 +160,14 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRetainActio
 }
 
 export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], resultLength: number): void {
-    for (const { rangeId, range, nextRangeId, propertyPaths } of updates ?? []) {
+    for (const { rangeId, range, nextRangeId, previousBookmarkIds, propertyPaths } of updates ?? []) {
+        if (previousBookmarkIds !== undefined && (
+            range?.rangeType !== CustomRangeType.BOOKMARK || nextRangeId === undefined || propertyPaths ||
+            !Array.isArray(previousBookmarkIds) || !previousBookmarkIds.includes(rangeId) ||
+            previousBookmarkIds.some((id) => typeof id !== 'string' || !id)
+        )) {
+            throw new Error('Invalid bookmark history.');
+        }
         if (propertyPaths !== undefined) {
             validatePropertyPaths(propertyPaths);
             if (!range) {
@@ -188,8 +195,17 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
     if (!updates?.length) {
         return;
     }
-    const ranges = doc.customRanges ?? [];
-    for (const { rangeId, range, nextRangeId, propertyPaths } of [...updates].reverse()) {
+    let ranges = doc.customRanges ?? [];
+    let peerBookmarks: Set<string> | undefined;
+    for (const { rangeId, range, nextRangeId, previousBookmarkIds, propertyPaths } of [...updates].reverse()) {
+        if (previousBookmarkIds) {
+            const previousIds = new Set(previousBookmarkIds);
+            for (const item of ranges) {
+                if (item.rangeType === CustomRangeType.BOOKMARK && !previousIds.has(item.rangeId)) {
+                    (peerBookmarks ??= new Set()).add(item.rangeId);
+                }
+            }
+        }
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
             if (index >= 0) {
@@ -213,6 +229,17 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             }
         } else if (index >= 0) {
             ranges.splice(index, 1);
+        }
+    }
+    // New bookmarks use the same placement as if they were inserted after the restore.
+    const peerIds = peerBookmarks;
+    if (peerIds?.size) {
+        const isPeerBookmark = (range: ICustomRange): boolean => range.rangeType === CustomRangeType.BOOKMARK && peerIds.has(range.rangeId);
+        const positioned = ranges.filter(isPeerBookmark);
+        ranges = ranges.filter((range) => !isPeerBookmark(range));
+        for (const bookmark of positioned) {
+            const nextIndex = findBookmarkInsertionIndex(ranges, bookmark);
+            ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, bookmark);
         }
     }
     doc.customRanges = ranges;
@@ -248,9 +275,17 @@ export function moveRangeUpdates(
             offset += action.len;
         }
         const moved = body.customRanges?.find((item) => item.rangeId === rangeId);
-        return { ...update, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
-            ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
-            : moved ?? null };
+        const movedUpdate = {
+            ...update,
+            propertyPaths: moved ? update.propertyPaths : undefined,
+            range: moved && range && preserveProperties
+                ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
+                : moved ?? null,
+        };
+        if (movedUpdate.range?.rangeType !== CustomRangeType.BOOKMARK && movedUpdate.previousBookmarkIds) {
+            delete movedUpdate.previousBookmarkIds;
+        }
+        return movedUpdate;
     });
 }
 

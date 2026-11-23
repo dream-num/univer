@@ -46,6 +46,8 @@ export interface IRetainAction {
         rangeId: string;
         range: ICustomRange | null;
         nextRangeId?: string | null;
+        /** Bookmark IDs present when capturing an exact legacy position for undo. */
+        previousBookmarkIds?: string[];
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;

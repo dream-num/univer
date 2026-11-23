@@ -118,6 +118,49 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(left, right))).toEqual(bob);
     });
 
+    it.each(['b', 'zz'])('converges when restoring legacy bookmark order while a peer inserts %s', (rangeId) => {
+        const bookmark = (id: string, startIndex = 0) => ({
+            rangeId: id,
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex,
+            endIndex: startIndex + 3,
+            properties: { bookmarkId: id },
+        });
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\r\n',
+            customRanges: [bookmark('z'), bookmark('a')],
+        };
+        const move = TextX.makeInvertible(
+            [{
+                t: TextXActionType.RETAIN,
+                len: 0,
+                rangeUpdates: [{ rangeId: 'a', range: bookmark('a', 5) }],
+            }],
+            Tools.deepClone(original)
+        );
+        const moved = TextX.apply(Tools.deepClone(original), move);
+        const restore = TextX.invert(move);
+        const insert: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 0,
+            rangeUpdates: [{ rangeId, range: bookmark(rangeId) }],
+        }];
+        const alice = TextX.apply(TextX.apply(Tools.deepClone(moved), restore), TextX.transform(insert, restore, 'left'));
+        const rebasedRestore = JSON.parse(JSON.stringify(TextX.transform(restore, insert, 'right'))) as TextXAction[];
+        const afterInsert = TextX.apply(Tools.deepClone(moved), insert);
+        const bob = TextX.apply(Tools.deepClone(afterInsert), rebasedRestore);
+        expect(alice).toEqual(bob);
+        expect(alice.customRanges?.filter((range) => range.rangeId !== rangeId)).toEqual(original.customRanges);
+        const serializedRestore = JSON.parse(JSON.stringify(restore)) as TextXAction[];
+        expect(TextX.apply(Tools.deepClone(afterInsert), serializedRestore)).toEqual(bob);
+
+        const deleteText: TextXAction[] = [{ t: TextXActionType.DELETE, len: 4 }];
+        const restoreAfterDelete = TextX.transform(rebasedRestore, deleteText);
+        expect(TextX.apply(TextX.apply(afterInsert, deleteText), restoreAfterDelete)).toEqual(
+            TextX.apply(bob, TextX.transform(deleteText, rebasedRestore, 'left'))
+        );
+    });
+
     it('converges when restoring a bookmark while a peer creates another', () => {
         const bookmark = (rangeId: string) => ({
             rangeId,
@@ -128,12 +171,20 @@ describe('test TextX methods and branches', () => {
         });
         const original: IDocumentBody = { dataStream: 'Body\r\n', customRanges: [bookmark('alpha'), bookmark('gamma')] };
         const remove = TextX.makeInvertible(
-            new TextX().updateCustomRanges([{ rangeId: 'alpha', range: null }]).serialize(),
+            [{
+                t: TextXActionType.RETAIN,
+                len: 0,
+                rangeUpdates: [{ rangeId: 'alpha', range: null }],
+            }],
             Tools.deepClone(original)
         );
         const deleted = TextX.apply(Tools.deepClone(original), remove);
         const restore = TextX.invert(remove);
-        const insert = new TextX().updateCustomRanges([{ rangeId: 'beta', range: bookmark('beta') }]).serialize();
+        const insert: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 0,
+            rangeUpdates: [{ rangeId: 'beta', range: bookmark('beta') }],
+        }];
         const alice = TextX.apply(TextX.apply(Tools.deepClone(deleted), restore), TextX.transform(insert, restore, 'left'));
         const bob = TextX.apply(TextX.apply(Tools.deepClone(deleted), insert), TextX.transform(restore, insert, 'right'));
         expect(alice).toEqual(bob);

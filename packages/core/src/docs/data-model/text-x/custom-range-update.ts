@@ -160,14 +160,7 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRetainActio
 }
 
 export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], resultLength: number): void {
-    for (const { rangeId, range, nextRangeId, previousBookmarkIds, propertyPaths } of updates ?? []) {
-        if (previousBookmarkIds !== undefined && (
-            range?.rangeType !== CustomRangeType.BOOKMARK || nextRangeId === undefined || propertyPaths ||
-            !Array.isArray(previousBookmarkIds) || !previousBookmarkIds.includes(rangeId) ||
-            previousBookmarkIds.some((id) => typeof id !== 'string' || !id)
-        )) {
-            throw new Error('Invalid bookmark history.');
-        }
+    for (const { rangeId, range, nextRangeId, propertyPaths } of updates ?? []) {
         if (propertyPaths !== undefined) {
             validatePropertyPaths(propertyPaths);
             if (!range) {
@@ -185,27 +178,50 @@ export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], res
 }
 
 export function findBookmarkInsertionIndex(ranges: ICustomRange[], bookmark: ICustomRange): number {
-    return ranges.findIndex((item) => item.rangeId !== bookmark.rangeId && (
-        item.startIndex > bookmark.startIndex ||
-        (item.startIndex === bookmark.startIndex && item.rangeType === CustomRangeType.BOOKMARK && item.rangeId > bookmark.rangeId)
-    ));
+    // Structural ranges delimit slots in document order. Within a slot, bookmark IDs are
+    // stable even when a peer moves an existing bookmark to a different offset.
+    let index = -1;
+    for (const [position, range] of ranges.entries()) {
+        if (range.rangeType === CustomRangeType.BOOKMARK) {
+            if (index === -1 && range.rangeId > bookmark.rangeId) {
+                index = position;
+            }
+        } else {
+            if (range.startIndex > bookmark.startIndex) {
+                return index === -1 ? position : index;
+            }
+            index = -1;
+        }
+    }
+    return index;
+}
+
+function getRangeUpdateApplyOrder(updates: NonNullable<IRetainAction['rangeUpdates']>): NonNullable<IRetainAction['rangeUpdates']> {
+    // Apply an updated anchor before the ranges that are restored in front of it.
+    if (!updates.some(({ nextRangeId }) => nextRangeId != null)) {
+        return [...updates].reverse();
+    }
+    const pending = new Map(updates.map((update) => [update.rangeId, update]));
+    const ordered: NonNullable<IRetainAction['rangeUpdates']> = [];
+    for (let index = updates.length - 1; index >= 0; index--) {
+        const chain: NonNullable<IRetainAction['rangeUpdates']> = [];
+        let update = pending.get(updates[index].rangeId);
+        while (update) {
+            chain.push(update);
+            pending.delete(update.rangeId);
+            update = update.nextRangeId == null ? undefined : pending.get(update.nextRangeId);
+        }
+        ordered.push(...chain.reverse());
+    }
+    return ordered;
 }
 
 export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['rangeUpdates']): void {
     if (!updates?.length) {
         return;
     }
-    let ranges = doc.customRanges ?? [];
-    let peerBookmarks: Set<string> | undefined;
-    for (const { rangeId, range, nextRangeId, previousBookmarkIds, propertyPaths } of [...updates].reverse()) {
-        if (previousBookmarkIds) {
-            const previousIds = new Set(previousBookmarkIds);
-            for (const item of ranges) {
-                if (item.rangeType === CustomRangeType.BOOKMARK && !previousIds.has(item.rangeId)) {
-                    (peerBookmarks ??= new Set()).add(item.rangeId);
-                }
-            }
-        }
+    const ranges = doc.customRanges ?? [];
+    for (const { rangeId, range, nextRangeId, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
             if (index >= 0) {
@@ -214,32 +230,22 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             continue;
         }
         if (range) {
-            if (nextRangeId !== undefined || range.rangeType === CustomRangeType.BOOKMARK) {
+            if (nextRangeId !== undefined) {
                 if (index >= 0) {
                     ranges.splice(index, 1);
                 }
-                const nextIndex = nextRangeId === undefined
-                    ? findBookmarkInsertionIndex(ranges, range)
-                    : ranges.findIndex((item) => item.rangeId === nextRangeId);
+                const nextIndex = ranges.findIndex((item) => item.rangeId === nextRangeId);
                 ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, Tools.deepClone(range));
             } else if (index >= 0) {
                 ranges[index] = Tools.deepClone(range);
+            } else if (range.rangeType === CustomRangeType.BOOKMARK) {
+                const nextIndex = findBookmarkInsertionIndex(ranges, range);
+                ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, Tools.deepClone(range));
             } else {
                 ranges.push(Tools.deepClone(range));
             }
         } else if (index >= 0) {
             ranges.splice(index, 1);
-        }
-    }
-    // New bookmarks use the same placement as if they were inserted after the restore.
-    const peerIds = peerBookmarks;
-    if (peerIds?.size) {
-        const isPeerBookmark = (range: ICustomRange): boolean => range.rangeType === CustomRangeType.BOOKMARK && peerIds.has(range.rangeId);
-        const positioned = ranges.filter(isPeerBookmark);
-        ranges = ranges.filter((range) => !isPeerBookmark(range));
-        for (const bookmark of positioned) {
-            const nextIndex = findBookmarkInsertionIndex(ranges, bookmark);
-            ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, bookmark);
         }
     }
     doc.customRanges = ranges;
@@ -275,17 +281,9 @@ export function moveRangeUpdates(
             offset += action.len;
         }
         const moved = body.customRanges?.find((item) => item.rangeId === rangeId);
-        const movedUpdate = {
-            ...update,
-            propertyPaths: moved ? update.propertyPaths : undefined,
-            range: moved && range && preserveProperties
-                ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
-                : moved ?? null,
-        };
-        if (movedUpdate.range?.rangeType !== CustomRangeType.BOOKMARK && movedUpdate.previousBookmarkIds) {
-            delete movedUpdate.previousBookmarkIds;
-        }
-        return movedUpdate;
+        return { ...update, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
+            ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
+            : moved ?? null };
     });
 }
 

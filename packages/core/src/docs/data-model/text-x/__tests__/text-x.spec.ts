@@ -118,6 +118,85 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(left, right))).toEqual(bob);
     });
 
+    const bookmarkAt = (rangeId: string, startIndex = 0) => ({
+        rangeId,
+        rangeType: CustomRangeType.BOOKMARK,
+        startIndex,
+        endIndex: startIndex + 3,
+        properties: { bookmarkId: rangeId },
+    });
+    const updateBookmarks = (rangeUpdates: IRetainAction['rangeUpdates']): TextXAction[] => [
+        { t: TextXActionType.RETAIN, len: 0, rangeUpdates },
+    ];
+
+    it('converges when a peer moves an existing bookmark and another creates a bookmark', () => {
+        const original: IDocumentBody = { dataStream: 'Body\rNext\r\n', customRanges: [bookmarkAt('z'), bookmarkAt('a')] };
+        const move = updateBookmarks([{ rangeId: 'z', range: bookmarkAt('z', 5) }]);
+        const insert = updateBookmarks([{ rangeId: 'b', range: bookmarkAt('b') }]);
+        const moved = TextX.apply(TextX.apply(Tools.deepClone(original), move), insert);
+        const inserted = TextX.apply(TextX.apply(Tools.deepClone(original), insert), move);
+        expect(moved).toEqual(inserted);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(move, insert))).toEqual(moved);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(insert, move))).toEqual(moved);
+        expect(TextX.apply(TextX.apply(Tools.deepClone(original), insert), TextX.transform(move, insert, 'right'))).toEqual(moved);
+        expect(TextX.apply(TextX.apply(Tools.deepClone(original), move), TextX.transform(insert, move, 'left'))).toEqual(moved);
+    });
+
+    it.each([
+        { t: TextXActionType.INSERT, len: 1, body: { dataStream: '!' } },
+        { t: TextXActionType.DELETE, len: 1 },
+    ] as const)('keeps bookmark slots when a peer changes plain text ($t)', (textEdit) => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\rLast Word\r\n',
+            customRanges: [bookmarkAt('z'), bookmarkAt('a', 5)],
+        };
+        const move = updateBookmarks([{ rangeId: 'z', range: bookmarkAt('z', 10) }]);
+        const text: TextXAction[] = [{ t: TextXActionType.RETAIN, len: 15 }, textEdit];
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), move), TextX.transform(text, move, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), text), TextX.transform(move, text, 'right'));
+        expect(left).toEqual(right);
+    });
+
+    it('converges when undo restores a removed bookmark and a peer moves its anchor', () => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\rLast\r\n',
+            customRanges: [bookmarkAt('z'), bookmarkAt('a'), bookmarkAt('c', 5)],
+        };
+        const deletion = TextX.makeInvertible(updateBookmarks([{ rangeId: 'z', range: null }]), Tools.deepClone(original));
+        const deleted = TextX.apply(Tools.deepClone(original), deletion);
+        const restore = TextX.invert(deletion);
+        const move = updateBookmarks([{ rangeId: 'a', range: bookmarkAt('a', 10) }]);
+        const alice = TextX.apply(TextX.apply(Tools.deepClone(deleted), restore), TextX.transform(move, restore, 'left'));
+        const bob = TextX.apply(TextX.apply(Tools.deepClone(deleted), move), TextX.transform(restore, move, 'right'));
+        expect(alice).toEqual(bob);
+    });
+
+    it('restores the complete snapshot when undoing a batch of bookmark moves', () => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\r\n',
+            customRanges: [bookmarkAt('b'), bookmarkAt('a'), bookmarkAt('c')],
+        };
+        const move = TextX.makeInvertible(updateBookmarks([
+            { rangeId: 'a', range: bookmarkAt('a', 5) },
+            { rangeId: 'b', range: bookmarkAt('b', 5) },
+        ]), Tools.deepClone(original));
+        const edited = TextX.apply(Tools.deepClone(original), move);
+        expect(TextX.apply(edited, TextX.invert(move))).toEqual(original);
+    });
+
+    it('keeps a large bookmark undo linear and restores every slot', () => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\r\n',
+            customRanges: Array.from({ length: 1000 }, (_, index) => bookmarkAt(`bookmark-${String(1000 - index).padStart(4, '0')}`)),
+        };
+        const remove = updateBookmarks(original.customRanges!.map(({ rangeId }) => ({ rangeId, range: null })));
+        TextX.makeInvertible(remove, Tools.deepClone(original));
+        const undo = TextX.invert(remove);
+        expect(JSON.stringify(undo).length).toBeLessThan(250_000);
+        const deleted = TextX.apply(Tools.deepClone(original), remove);
+        expect(TextX.apply(deleted, undo)).toEqual(original);
+    });
+
     it.each(['b', 'zz'])('converges when restoring legacy bookmark order while a peer inserts %s', (rangeId) => {
         const bookmark = (id: string, startIndex = 0) => ({
             rangeId: id,

@@ -38,16 +38,14 @@ export interface IRetainAction {
     coverType?: UpdateDocsAttributeType;
     /**
      * Identity edits applied after the text operation, with absolute result-document offsets.
-     * Without nextRangeId, a bookmark is placed by offset and ID. An explicit nextRangeId restores
-     * array order by identity (null means the end), including coincident SDT nesting.
+     * nextRangeId restores array order by identity (null means the end), including coincident SDT nesting.
+     * Without it, an existing bookmark keeps its slot and a new bookmark gets a deterministic slot.
      * Collaboration peers must support this extension; legacy TextX implementations ignore it.
      */
     rangeUpdates?: Array<{
         rangeId: string;
         range: ICustomRange | null;
         nextRangeId?: string | null;
-        /** Bookmark IDs present when capturing an exact legacy position for undo. */
-        previousBookmarkIds?: string[];
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;

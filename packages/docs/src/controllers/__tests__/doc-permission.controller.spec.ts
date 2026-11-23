@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentData, Univer } from '@univerjs/core';
+import type { ICommand, IDocumentData, TextXAction, Univer } from '@univerjs/core';
 import {
     CommandType,
     CustomRangeType,
@@ -368,6 +368,30 @@ describe('DocPermissionController', () => {
         await permission.setEditable(true);
         expect(commands.syncExecuteCommand(RedoCommand.id)).toBe(true);
         expect(ranges()).toEqual([range]);
+    });
+
+    it.each([false, true])('checks the full bookmark span across protected paragraphs (with text edit: %s)', async (withTextEdit) => {
+        const commands = get(ICommandService);
+        await document.getParagraph('paragraph-two')!.getPermission().setEditable(false);
+        const range = {
+            rangeId: 'cross-paragraph',
+            rangeType: CustomRangeType.BOOKMARK,
+            startIndex: 1,
+            endIndex: withTextEdit ? 8 : 7,
+            properties: { bookmarkId: 'CrossParagraph', collapsed: true },
+        };
+        const actions: TextXAction[] = [];
+        if (withTextEdit) {
+            actions.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+        }
+        actions.push({ t: TextXActionType.RETAIN, len: 0, rangeUpdates: [{ rangeId: range.rangeId, range }] });
+        expect(commands.syncExecuteCommand(RichTextEditingMutation.id, {
+            unitId: document.getId(),
+            actions: JSONX.getInstance().editOp(actions, ['body']),
+            textRanges: [],
+        })).toBe(false);
+        expect(document.getParagraph('paragraph-one')!.getText()).toBe('One');
+        expect(document.getDocumentDataModel().getBody()?.customRanges ?? []).toEqual([]);
     });
 
     it('maps custom range positions back through text edits before checking protected sections', async () => {

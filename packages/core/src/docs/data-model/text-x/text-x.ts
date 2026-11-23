@@ -471,27 +471,25 @@ export class TextX {
         for (const action of actions) {
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
                 const ranges = doc.customRanges ?? [];
-                let bookmarkIds: string[] | undefined;
-                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, propertyPaths }) => {
+                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, range, nextRangeId: targetAnchor, propertyPaths }) => {
                     const index = ranges.findIndex((range) => range.rangeId === rangeId);
                     const previous = ranges[index];
                     let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
-                    let previousBookmarkIds: string[] | undefined;
                     if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
-                        const insertionIndex = findBookmarkInsertionIndex(ranges, previous);
-                        // Canonical placement also works when a peer inserts another bookmark during undo.
-                        if (insertionIndex === index + 1 || (insertionIndex < 0 && index === ranges.length - 1)) {
+                        if (range && targetAnchor === undefined) {
+                            // An in-place move keeps its original slot in both directions.
                             nextRangeId = undefined;
-                        } else {
-                            bookmarkIds ??= ranges.filter((range) => range.rangeType === CustomRangeType.BOOKMARK).map((range) => range.rangeId);
-                            previousBookmarkIds = bookmarkIds;
+                        } else if (action.rangeUpdates?.length === 1 && !range) {
+                            const insertionIndex = findBookmarkInsertionIndex(ranges, previous);
+                            if (insertionIndex === index + 1 || (insertionIndex < 0 && index === ranges.length - 1)) {
+                                nextRangeId = undefined;
+                            }
                         }
                     }
                     return {
                         rangeId,
                         range: previous ? Tools.deepClone(previous) : null,
                         nextRangeId,
-                        ...(previousBookmarkIds && { previousBookmarkIds }),
                         propertyPaths: previous ? propertyPaths : undefined,
                     };
                 });

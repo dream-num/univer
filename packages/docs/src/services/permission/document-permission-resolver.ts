@@ -294,7 +294,7 @@ function addCustomRangeUpdateTargets(
                 if (hasTextEdits) {
                     start = getSourceTextOffset(actions, start, false);
                     end = start;
-                    if (!range.properties?.collapsed) {
+                    if (!isCollapsedCustomRange(range)) {
                         end = getSourceTextOffset(actions, range.endIndex, true);
                     }
                 }
@@ -308,7 +308,11 @@ function addCustomRangeUpdateTargets(
 }
 
 function customRangeEnd(range: ICustomRange): number {
-    return range.properties?.collapsed ? range.startIndex : range.endIndex + 1;
+    return isCollapsedCustomRange(range) ? range.startIndex : range.endIndex + 1;
+}
+
+function isCollapsedCustomRange(range: ICustomRange): boolean {
+    return range.startIndex === range.endIndex && range.properties?.collapsed === true;
 }
 
 function getSourceTextOffset(actions: TextXAction[], index: number, afterCharacter: boolean): number {

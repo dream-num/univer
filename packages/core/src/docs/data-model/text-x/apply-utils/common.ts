@@ -696,13 +696,29 @@ export function sliceByParagraph(body: IDocumentBody) {
 const ID_SPLIT_SYMBOL = '$';
 const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
 
-export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
+export function mergeContinuousRanges(ranges: ICustomRange[], preserveOrder = false): ICustomRange[] {
     if (ranges.length <= 1) {
         return ranges;
+    }
+    let positions: Map<ICustomRange, number> | undefined;
+    if (preserveOrder) {
+        const ids = new Set<string>();
+        const alreadyMerged = ranges.every(({ rangeId }) => {
+            if (ids.has(rangeId) || rangeId.includes(ID_SPLIT_SYMBOL)) {
+                return false;
+            }
+            ids.add(rangeId);
+            return true;
+        });
+        if (alreadyMerged) {
+            return ranges;
+        }
+        positions = new Map(ranges.map((range, index) => [range, index]));
     }
     ranges.sort((a, b) => a.startIndex - b.startIndex);
 
     const mergedRanges: ICustomRange[] = [];
+    const mergedPositions = positions && new Map<ICustomRange, number>();
     const latestById = new Map<string, ICustomRange>();
     for (const range of ranges) {
         const nextRange = { ...range, rangeId: getRootId(range.rangeId) };
@@ -715,9 +731,15 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         ) {
             // Overlapping identities can interleave fragments of the same range.
             currentRange.endIndex = Math.max(currentRange.endIndex, nextRange.endIndex);
+            if (positions && mergedPositions) {
+                mergedPositions.set(currentRange, Math.min(mergedPositions.get(currentRange)!, positions.get(range)!));
+            }
         } else {
             mergedRanges.push(nextRange);
             latestById.set(nextRange.rangeId, nextRange);
+            if (positions && mergedPositions) {
+                mergedPositions.set(nextRange, positions.get(range)!);
+            }
         }
     }
 
@@ -731,6 +753,10 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         } else {
             idMap[id] = 1;
         }
+    }
+
+    if (mergedPositions) {
+        mergedRanges.sort((left, right) => mergedPositions.get(left)! - mergedPositions.get(right)!);
     }
 
     return mergedRanges;
@@ -865,7 +891,9 @@ export function insertCustomRanges(
         customRanges.push(...insertRanges);
     }
 
-    body.customRanges = mergeContinuousRanges(customRanges);
+    // Plain text edits move offsets without changing the bookmark slots used by range history.
+    const preserveOrder = !insertBody.customRanges?.length && customRanges.some((range) => range.rangeType === CustomRangeType.BOOKMARK);
+    body.customRanges = mergeContinuousRanges(customRanges, preserveOrder);
 }
 
 interface IIndexRange {
@@ -1314,7 +1342,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             });
         }
 
-        body.customRanges = mergeContinuousRanges(newCustomRanges);
+        const preserveOrder = newCustomRanges.some((range) => range.rangeType === CustomRangeType.BOOKMARK);
+        body.customRanges = mergeContinuousRanges(newCustomRanges, preserveOrder);
     }
 
     return removeCustomRanges;

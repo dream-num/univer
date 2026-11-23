@@ -4200,6 +4200,56 @@ describe('documents render', () => {
         }
     });
 
+    it('keeps legal offscreen formula glyphs when an earlier legacy range lacks an end index', () => {
+        const { documents, viewport, page, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const formulaTable = [...page.skeTables.values()][2];
+        const [paragraph] = formulaTable.rows[0].cells[0].sections[0].columns[0].lines;
+        const formulaRange = {
+            rangeId: 'offscreen-formula',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            startIndex: paragraph.st,
+            endIndex: paragraph.ed,
+        };
+        const legacyLink = { rangeId: 'legacy-link', rangeType: CustomRangeType.HYPERLINK, startIndex: 0 };
+        const model = documents.getSkeleton()!.getViewModel().getDataModel();
+        const json = JSONX.getInstance();
+        model.apply(json.insertOp(['body', 'customRanges'], [formulaRange]));
+
+        const text: string[] = [];
+        class FormulaGlyphExtension extends docExtension {
+            override uKey = 'FormulaGlyphExtension';
+
+            getOffscreenTablePaintRanges(): readonly [] {
+                return [];
+            }
+
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B' || glyph.content === 'C') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[FormulaGlyphExtension]]);
+        const registration = documents.register(injector.get(FormulaGlyphExtension));
+        const render = () => {
+            text.length = 0;
+            viewport.render(canvas.getContext(), [documents]);
+            return text.join('');
+        };
+        try {
+            expect(render()).toBe('AC');
+            model.apply(json.insertOp(['body', 'customRanges', 0], legacyLink));
+            expect(render()).toBe('ABC');
+            model.apply(json.removeOp(['body', 'customRanges', 0], legacyLink));
+            expect(render()).toBe('AC');
+        } finally {
+            registration.dispose();
+            injector.dispose();
+            dispose();
+        }
+    });
+
     it('visits only viewport-adjacent lines when imported modern geometry keeps a finite page height', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         bodyPage.pageHeight = 120;

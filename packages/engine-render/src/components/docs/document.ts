@@ -135,6 +135,10 @@ function isBuiltInDocumentExtension(extension: object): boolean {
     return type === Background || type === Border || type === FontAndBaseLine || type === Line;
 }
 
+function hasValidTablePaintOffsets(start: number, end: number): boolean {
+    return Number.isSafeInteger(start) && Number.isSafeInteger(end) && start >= 0 && end >= start;
+}
+
 function getExtensionTablePaintRanges(extensions: readonly IDocumentTablePaintExtension[]): [number, number][] | undefined {
     const ranges: [number, number][] = [];
     for (const extension of extensions) {
@@ -151,8 +155,7 @@ function getExtensionTablePaintRanges(extensions: readonly IDocumentTablePaintEx
             return;
         }
         for (const range of declared) {
-            if (!Array.isArray(range) || !Number.isSafeInteger(range[0]) || !Number.isSafeInteger(range[1]) ||
-                range[0] < 0 || range[1] < range[0]) {
+            if (!Array.isArray(range) || !hasValidTablePaintOffsets(range[0], range[1])) {
                 return;
             }
             ranges.push([range[0], range[1]]);
@@ -436,7 +439,7 @@ export class Documents extends DocComponent {
         model: DocumentDataModel;
         revision: number;
         ranges: readonly ICustomRange[];
-        intervals: [number, number][];
+        intervals: [number, number][] | null;
     };
 
     private readonly _tablePaintExtents = new WeakMap<IDocumentSkeletonCached, WeakMap<IDocumentSkeletonTable, ITablePaintExtent | null>>();
@@ -888,8 +891,12 @@ export class Documents extends DocComponent {
         this._glyphPaintSink?.(this._glyphPaints);
     }
 
-    private _getTablePaintRanges(model: DocumentDataModel | undefined): readonly [number, number][] {
+    private _getTablePaintRanges(model: DocumentDataModel | undefined): readonly [number, number][] | null {
         const ranges = model?.getBody?.()?.customRanges;
+        if (ranges != null && !Array.isArray(ranges)) {
+            this._tablePaintRanges = undefined;
+            return null;
+        }
         if (model == null || !ranges?.length) {
             this._tablePaintRanges = undefined;
             return [];
@@ -898,8 +905,16 @@ export class Documents extends DocComponent {
         const revision = model.getMutationRevision();
         let index = this._tablePaintRanges;
         if (index?.model !== model || index.revision !== revision || index.ranges !== ranges) {
-            const intervals = mergeIntervals(ranges.map(({ startIndex, endIndex }) => [startIndex, endIndex]));
-            index = { model, revision, ranges, intervals };
+            let intervals: [number, number][] | null = [];
+            for (const range of ranges) {
+                if (range == null || !hasValidTablePaintOffsets(range.startIndex, range.endIndex)) {
+                    // Legacy snapshots can omit offsets. Keep the full glyph sequence for this revision.
+                    intervals = null;
+                    break;
+                }
+                intervals.push([range.startIndex, range.endIndex]);
+            }
+            index = { model, revision, ranges, intervals: intervals && mergeIntervals(intervals) };
             this._tablePaintRanges = index;
         }
         return index.intervals;
@@ -939,7 +954,7 @@ export class Documents extends DocComponent {
             this._tablePaintExtents.set(skeletonData, extents);
         }
 
-        let paintRanges: readonly [number, number][] | undefined;
+        let paintRanges: readonly [number, number][] | null | undefined;
         const visibleTables: Array<[string, IDocumentSkeletonTable]> = [];
         for (const entry of tables) {
             const [, table] = entry;
@@ -962,10 +977,17 @@ export class Documents extends DocComponent {
                 viewportTop,
                 viewportBottom
             );
-            // Custom ranges can trigger render work such as formula preparation even
-            // outside the viewport. Let their table keep the original glyph dispatch.
-            if (overlaps || hasTablePaintRange(extensionRanges, table) ||
-                hasTablePaintRange(paintRanges ??= this._getTablePaintRanges(dataModel), table)) {
+            if (overlaps || hasTablePaintRange(extensionRanges, table)) {
+                visibleTables.push(entry);
+                continue;
+            }
+
+            // Custom ranges can trigger render work such as formula preparation even outside the viewport.
+            paintRanges ??= this._getTablePaintRanges(dataModel);
+            if (paintRanges == null) {
+                return tables;
+            }
+            if (hasTablePaintRange(paintRanges, table)) {
                 visibleTables.push(entry);
             }
         }

@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
+import { binSearchFirstGreaterThanTarget, BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
@@ -1569,6 +1569,7 @@ export class Spreadsheet extends SheetComponent {
         let mergeVisibleRangeStartRow = startRow;
 
         //#region draw horizontal lines
+        let lastRowPosition = startY;
         for (let r = rowStart; r <= rowEnd; r++) {
             if (hasMergeData) {
                 if (worksheet.getRowVisible(r) === false) {
@@ -1597,24 +1598,37 @@ export class Spreadsheet extends SheetComponent {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
+            if (rowEndPosition === lastRowPosition) {
+                continue;
+            }
             ctx.beginPath();
             ctx.moveToByPrecision(startX, rowEndPosition);
             ctx.lineToByPrecision(endX, rowEndPosition);
             ctx.closePathByEnv();
             ctx.stroke();
+            lastRowPosition = rowEndPosition;
         }
         //#endregion
 
+        let lastColumnPosition = startX;
         for (let c = columnStart; c <= columnEnd; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
+            if (columnEndPosition === lastColumnPosition) {
+                if (columnWidthAccumulation[columnEnd] === columnEndPosition) {
+                    break;
+                }
+                c = binSearchFirstGreaterThanTarget(columnWidthAccumulation, columnEndPosition) - 1;
+                continue;
+            }
             ctx.beginPath();
             ctx.moveToByPrecision(columnEndPosition, startY);
             ctx.lineToByPrecision(columnEndPosition, endY);
             ctx.closePathByEnv();
             ctx.stroke();
+            lastColumnPosition = columnEndPosition;
         }
         //#endregion
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRange, IWorkbookCalculationSettings } from '@univerjs/core';
+import type { ICellData, IRange, IUnitRange, IWorkbookCalculationSettings, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import {
     AsyncLock,
@@ -27,6 +27,7 @@ import {
     isFormulaString,
     normalizeWorkbookCalculationSettings,
     ObjectMatrix,
+    Optional,
     Rectangle,
     requestImmediateMacroTask,
 } from '@univerjs/core';
@@ -63,6 +64,7 @@ import { Interpreter } from '../engine/interpreter/interpreter';
 import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { FUNCTION_NAMES_LOOKUP } from '../functions/lookup/function-names';
 import { IFormulaCurrentConfigService } from './current-data.service';
+import { IFeatureCalculationManagerService } from './feature-calculation-manager.service';
 import { FormulaResultService } from './formula-result.service';
 import { FormulaExecutedStateType, FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
@@ -94,12 +96,21 @@ export interface ICalculateFormulaService {
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
 
+interface IFeatureOutput {
+    runtimeCellData: IRuntimeUnitDataType;
+    dirtyRanges: IFeatureDirtyRangeType;
+}
+
 export class CalculateFormulaService extends Disposable implements ICalculateFormulaService {
     protected readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
     readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     protected readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
+
+    private readonly _featureOutputs = new Map<string, Map<string, IFeatureOutput>>();
+    private readonly _releasedFeatureRanges = new Set<IUnitRange>();
+    private _activeFeatureCalculation?: { unitId: string; subUnitId: string; featureId: string; invalidated: boolean };
 
     protected _executeLock = new AsyncLock();
 
@@ -229,9 +240,96 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         @IFormulaDependencyGenerator protected readonly _formulaDependencyGenerator: IFormulaDependencyGenerator,
         @Inject(Interpreter) protected readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
-        @Inject(FormulaResultService) protected readonly _formulaResultService: FormulaResultService
+        @Inject(FormulaResultService) protected readonly _formulaResultService: FormulaResultService,
+        @Optional(IFeatureCalculationManagerService) protected readonly _features?: IFeatureCalculationManagerService
     ) {
         super();
+        if (_features) {
+            this.disposeWithMe(_features.onChanged$.subscribe(({ unitId, subUnitId, featureIds }) => {
+                const active = this._activeFeatureCalculation;
+                if (active?.unitId === unitId && active.subUnitId === subUnitId && featureIds.includes(active.featureId)) {
+                    active.invalidated = true;
+                }
+                for (const id of featureIds) {
+                    const owners = this._featureOutputs.get(id);
+                    const owner = JSON.stringify([unitId, subUnitId]);
+                    const previous = owners?.get(owner);
+                    if (!owners || !previous) {
+                        continue;
+                    }
+                    for (const [book, sheets] of Object.entries(previous.runtimeCellData)) {
+                        for (const [sheetId, matrix] of Object.entries(sheets ?? {})) {
+                            const range = matrix.getDataRange();
+                            if (range.endRow >= range.startRow && range.endColumn >= range.startColumn) {
+                                this._releasedFeatureRanges.add({ unitId: book, sheetId, range });
+                            }
+                        }
+                    }
+                    owners.delete(owner);
+                    this._publishFeatureOutput(id, owners);
+                    if (!owners.size) {
+                        this._featureOutputs.delete(id);
+                    }
+                }
+            }));
+        }
+    }
+
+    protected _loadFeatureDirtyRanges(config: IFormulaDatasetConfig): IUnitRange[] {
+        const released = [...this._releasedFeatureRanges];
+        this._currentConfigService.load(released.length ? { ...config, dirtyRanges: [...config.dirtyRanges, ...released] } : config);
+        return released;
+    }
+
+    protected _acknowledgeReleasedRanges(released: IUnitRange[]): void {
+        if (!this._runtimeService.isStopExecution()) {
+            for (const range of released) {
+                this._releasedFeatureRanges.delete(range);
+            }
+        }
+    }
+
+    protected _setFeatureOutput(id: string, unitId: string, sheetId: string, output: IFeatureOutput): void {
+        let owners = this._featureOutputs.get(id);
+        if (!owners) {
+            owners = new Map();
+            this._featureOutputs.set(id, owners);
+        }
+        owners.set(JSON.stringify([unitId, sheetId]), output);
+        this._publishFeatureOutput(id, owners);
+        const ranges: IFeatureDirtyRangeType = { ...this._runtimeService.getRuntimeFeatureRange()[id] };
+        for (const [book, sheets] of Object.entries(output.dirtyRanges)) {
+            const target: Record<string, IRange[]> = ranges[book] = { ...ranges[book] };
+            for (const [sheet, dirty] of Object.entries(sheets ?? {})) {
+                target[sheet] = [...target[sheet] ?? [], ...dirty];
+            }
+        }
+        this._runtimeService.setRuntimeFeatureRange(id, ranges);
+    }
+
+    private _publishFeatureOutput(id: string, owners: Map<string, IFeatureOutput>): void {
+        if (owners.size === 1) {
+            const [output] = owners.values();
+            this._runtimeService.setRuntimeFeatureCellData(id, output.runtimeCellData);
+            return;
+        }
+        const cells: IRuntimeUnitDataType = Object.create(null);
+        for (const output of owners.values()) {
+            for (const [book, sheets] of Object.entries(output.runtimeCellData)) {
+                const target: Record<string, ObjectMatrix<Nullable<ICellData>>> = cells[book] ??= Object.create(null);
+                for (const [sheet, matrix] of Object.entries(sheets ?? {})) {
+                    if (!target[sheet]) {
+                        target[sheet] = matrix;
+                    } else {
+                        const combined = new ObjectMatrix<Nullable<ICellData>>();
+                        target[sheet].forValue((r, c, cell) => combined.setValue(r, c, cell));
+                        matrix.forValue((r, c, cell) => combined.setValue(r, c, cell));
+                        target[sheet] = combined;
+                    }
+                }
+            }
+        }
+        this._runtimeService.setRuntimeFeatureCellData(id, cells);
     }
 
     override dispose() {
@@ -242,6 +340,12 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         this._runtimeService.releaseCalculationCache?.();
         super.dispose();
 
+        for (const id of this._featureOutputs.keys()) {
+            this._runtimeService.setRuntimeFeatureCellData(id, {});
+            this._runtimeService.setRuntimeFeatureRange(id, {});
+        }
+        this._featureOutputs.clear();
+        this._releasedFeatureRanges.clear();
         this._executionInProgressListener$.complete();
         this._executionCompleteListener$.complete();
     }
@@ -279,7 +383,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START);
             this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-            this._currentConfigService.load(formulaDatasetConfig);
+            const released = this._loadFeatureDirtyRanges(formulaDatasetConfig);
 
             this._runtimeService.reset();
 
@@ -301,7 +405,17 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 this._runtimeService.completeCircularReferences();
                 this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
                 this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
+                const propagatedFeatureRanges = { ...this._runtimeService.getRuntimeFeatureRange() };
                 await this._completeExecution();
+                if (!this._runtimeService.isStopExecution()) {
+                    for (const [id, ranges] of Object.entries(propagatedFeatureRanges)) {
+                        // Retain cached cells and any changes published while writeback was pending.
+                        if (this._runtimeService.getRuntimeFeatureRange()[id] === ranges) {
+                            this._runtimeService.setRuntimeFeatureRange(id, {});
+                        }
+                    }
+                }
+                this._acknowledgeReleasedRanges(released);
             } finally {
                 this._runtimeService.clearInvertedIndexCache?.();
                 this._runtimeService.reset();
@@ -520,11 +634,27 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                  * and return the dirty area marked by the feature,
                  * so as to allow the formulas depending on the dirty area to continue the calculation.
                  */
-                const { runtimeCellData, dirtyRanges } = getDirtyData(this._currentConfigService.getDirtyData(true), this._runtimeService.getAllRuntimeData());
+                const registration = this._features?.get(tree.unitId, tree.subUnitId, tree.featureId);
+                if (this._features && registration?.getDirtyData !== getDirtyData) {
+                    i++;
+                    continue;
+                }
+                const active = { unitId: tree.unitId, subUnitId: tree.subUnitId, featureId: tree.featureId, invalidated: false };
+                this._activeFeatureCalculation = active;
+                let output: IFeatureOutput;
+                try {
+                    output = getDirtyData(this._currentConfigService.getDirtyData(true), this._runtimeService.getAllRuntimeData());
+                } finally {
+                    this._activeFeatureCalculation = undefined;
+                }
 
-                this._runtimeService.setRuntimeFeatureCellData(tree.featureId, runtimeCellData);
+                // Even re-registering the same object invalidates work from its previous lifetime.
+                if (this._disposed || active.invalidated || (this._features && this._features.get(tree.unitId, tree.subUnitId, tree.featureId) !== registration)) {
+                    i++;
+                    continue;
+                }
 
-                this._runtimeService.setRuntimeFeatureRange(tree.featureId, dirtyRanges);
+                this._setFeatureOutput(tree.featureId, tree.unitId, tree.subUnitId, output);
             } else {
                 const node = generateAstNode(
                     tree.unitId,

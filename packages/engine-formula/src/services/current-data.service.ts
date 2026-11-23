@@ -510,6 +510,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {
         this._dirtyIterationUnits = [];
         this._dirtyReferenceUnits = [];
+        // Explicit feature invalidations were handled before propagating their output ranges.
+        this._dirtyUnitFeatureMap = Object.create(null);
         this._dirtyRanges = dirtyRanges;
 
         this._excludedCell = excludedCell;

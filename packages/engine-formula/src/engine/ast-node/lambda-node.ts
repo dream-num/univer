@@ -15,13 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { LambdaPrivacyVarType } from './base-ast-node';
 import { generateRandomId, Inject } from '@univerjs/core';
+import type { LambdaPrivacyVarType } from './base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
+    DEFAULT_TOKEN_TYPE_PARAMETER,
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
@@ -113,6 +114,16 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
         if (lambdaVar.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
             const lambdaVarChildren = lambdaVar.getChildren();
+
+            // An empty invocation has no argument nodes, while a trailing empty
+            // argument has an empty parameter node. Normalize the single-argument
+            // case so both follow the same omitted-parameter path.
+            if (parameterArray.length === 1 && lambdaVarChildren.length === 0) {
+                const emptyParameter = new LexerNode();
+                emptyParameter.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+                emptyParameter.setParent(lambdaVar);
+                lambdaVar.addChildren(emptyParameter);
+            }
 
             if (parameterArray.length !== lambdaVarChildren.length) {
                 return ErrorNode.create(ErrorType.VALUE);

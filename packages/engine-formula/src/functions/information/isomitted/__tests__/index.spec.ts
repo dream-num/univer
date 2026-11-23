@@ -52,6 +52,12 @@ describe('ISOMITTED formulas', () => {
     }
 
     it.each([
+        ['=LAMBDA(x,ISOMITTED(x))()', true],
+        ['=LAMBDA(x,ISOMITTED((x)))()', true],
+        ['=LAMBDA(x,LAMBDA(y,ISOMITTED(y))(x))()', true],
+        ['=LAMBDA(x,IF(ISOMITTED(x),1,0))()', 1],
+        ['=LAMBDA(x,ISOMITTED(x))(1,2)', '#VALUE!'],
+        ['=LAMBDA(x,y,ISOMITTED(x))()', '#VALUE!'],
         ['=LAMBDA(x,ISOMITTED(x))(1)', false],
         ['=LAMBDA(x,ISOMITTED(x))("")', false],
         ['=LAMBDA(x,ISOMITTED(x))(FALSE)', false],

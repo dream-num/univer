@@ -3403,6 +3403,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../../packages/sheets-numfmt
       tsrs:
         specifier: 7.1.0-beta.tsrs2
         version: 7.1.0-beta.tsrs2

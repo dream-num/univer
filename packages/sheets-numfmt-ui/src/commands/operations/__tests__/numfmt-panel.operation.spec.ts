@@ -16,8 +16,10 @@
 
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { ICommandService, LocaleService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
+import { DefinedNamesService, FormulaDataModel, IDefinedNamesService } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import {
@@ -27,11 +29,13 @@ import {
     IContextMenuHostService,
     ISidebarService,
 } from '@univerjs/ui';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ISheetNumfmtPanelProps } from '../../../views/SheetNumfmtPanel';
 import { createTestBed } from '../../../controllers/__tests__/test.util';
 import { SheetNumfmtUIController } from '../../../controllers/ui.controller';
 import { CloseNumfmtPanelOperator } from '../close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../open.numfmt.panel.operation';
+import '@univerjs/sheets/facade';
 
 function createSelection(row: number, column: number): ISelectionWithStyle {
     return {
@@ -50,6 +54,7 @@ function createSelection(row: number, column: number): ISelectionWithStyle {
 }
 
 describe('number format panel operation', () => {
+    let testBed: ReturnType<typeof createTestBed>;
     let commandService: ICommandService;
     let selectionsService: SheetsSelectionsService;
     let sidebarService: ISidebarService;
@@ -57,8 +62,10 @@ describe('number format panel operation', () => {
     let subUnitId: string;
 
     beforeEach(() => {
-        const testBed = createTestBed(undefined, [
+        testBed = createTestBed(undefined, [
             [SheetsSelectionsService],
+            [IDefinedNamesService, { useClass: DefinedNamesService }],
+            [FormulaDataModel],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
             [ComponentManager],
@@ -77,6 +84,10 @@ describe('number format panel operation', () => {
         testBed.get(SheetNumfmtUIController);
     });
 
+    afterEach(() => {
+        testBed.univer.dispose();
+    });
+
     it('opens the number format panel with the active cell preview value', async () => {
         selectionsService.setSelections(unitId, subUnitId, [createSelection(0, 1)]);
 
@@ -93,6 +104,21 @@ describe('number format panel operation', () => {
                 col: 1,
             },
         });
+    });
+
+    it('previews the format without changing the effective cell value', async () => {
+        selectionsService.setSelections(unitId, subUnitId, [createSelection(0, 1)], SelectionMoveType.MOVE_END);
+        await commandService.executeCommand(OpenNumfmtPanelOperator.id);
+        const props = sidebarService.options.children as unknown as ISheetNumfmtPanelProps;
+        props.onChange({ type: 'change', value: '0%' });
+
+        const cell = FUniver.newAPI(testBed.univer).getActiveWorkbook()!.getActiveSheet().getRange('B1');
+        expect(cell.getDisplayValue()).toBe('100%');
+        expect(cell.getValue()).toBe(1);
+        expect(cell.getValues()).toEqual([[1]]);
+
+        await commandService.executeCommand(CloseNumfmtPanelOperator.id);
+        expect(cell.getDisplayValue()).toBe('1');
     });
 
     it('keeps the sidebar closed when there is no active selection', async () => {

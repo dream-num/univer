@@ -64,15 +64,31 @@ describe('Test FRange', () => {
         expect(workbook.setNumfmtLocal('fr')).toBe(workbook);
     });
 
-    it('hides a formatted value without changing its raw value', () => {
+    it('reads numeric cell values independently of their display formats', () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
-        const cell = activeSheet.getRange('A1');
+        const range = activeSheet.getRange('A1:C2');
+        activeSheet.getRange('A1:C1').setValues([[0.25, 1.23456, 45658]]);
+        const hiddenCell = activeSheet.getRange('A2');
+        hiddenCell.setValue(233628);
+        range.setNumberFormats([
+            ['0%', '0.00', 'yyyy-mm-dd'],
+            [';;;', '', ''],
+        ]);
 
-        cell.setValue(233628);
-        cell.setNumberFormat(';;;');
+        expect(range.getValue()).toBe(0.25);
+        expect(range.getValue(true)).toBe(0.25);
+        expect(range.getDisplayValue()).toBe('25%');
+        expect(range.getValues()).toEqual([
+            [0.25, 1.23456, 45658],
+            [233628, null, null],
+        ]);
+        expect(range.getDisplayValues()).toEqual([
+            ['25%', '1.23', '2025-01-01'],
+            ['', '', ''],
+        ]);
 
-        expect(cell.getDisplayValue()).toBe('');
-        expect(cell.getRawValue()).toBe(233628);
-        expect(cell.getNumberFormat()).toBe(';;;');
+        expect(hiddenCell.getValue()).toBe(233628);
+        expect(hiddenCell.getRawValue()).toBe(233628);
+        expect(hiddenCell.getNumberFormat()).toBe(';;;');
     });
 });

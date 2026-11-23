@@ -693,7 +693,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     }
                     matrix.setValue(r, c, { ...merged, rowSpan: endIndex - startIndex });
                 }
-                const rawDisplay = projection?.getCellRawForDisplay(r, c);
+                const merge = projection && worksheet.getMergedCell(r, c);
+                const rawDisplay = !merge || (merge.startRow === r && merge.startColumn === c)
+                    ? projection?.getCellRawForDisplay(r, c)
+                    : undefined;
                 if (rawDisplay) {
                     const displayed = projection!.getCell(r, c);
                     matrix.setValue(r, c, {

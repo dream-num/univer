@@ -307,6 +307,10 @@ export class SheetClipboardController extends RxDisposable {
                 currentSkeleton = manager?.hasProjection(subUnitId) ? manager.getSkeleton(subUnitId) ?? undefined : undefined;
             },
             onCopyCellContent(row: number, col: number): string {
+                const merge = currentSheet!.getMergedCell(row, col);
+                if (merge && (merge.startRow !== row || merge.startColumn !== col)) {
+                    return '';
+                }
                 const cell = currentSkeleton ? currentSkeleton.getCell(row, col) : currentSheet!.getCell(row, col);
 
                 if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {

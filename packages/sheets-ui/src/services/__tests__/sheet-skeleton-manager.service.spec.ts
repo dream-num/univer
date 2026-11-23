@@ -249,13 +249,21 @@ describe('SheetSkeletonManagerService', () => {
             expect(second.getCurrentSkeleton()?.getCell(1, 0)?.v).toBe(181);
             expect(workbook.getActiveSheet()?.getCellRaw(0, 0)?.v).toBe(180);
 
+            workbook.getActiveSheet()!.getRowManager().setRowHeight(2, 35);
+            first.makeDirty({ sheetId: 'sheet-1' });
+            first.reCalculate();
+            second.makeDirty({ sheetId: 'sheet-1' });
+            second.reCalculate();
+            expect(first.getCurrentSkeleton()?.rowHeightAccumulation).toEqual([0, 0, 35, 55]);
+
             first.setProjection('sheet-1', undefined);
-            expect(first.getCurrentSkeleton()?.rowHeightAccumulation).toEqual([20, 20, 40, 40]);
+            expect(first.getCurrentSkeleton()?.rowHeightAccumulation).toEqual([20, 20, 55, 55]);
             expect(first.getCurrentSkeleton()?.getCell(0, 0)?.v).toBe(180);
             expect(second.getCurrentSkeleton()?.getCell(0, 0)?.v).toBe(120);
 
             second.setProjection('sheet-1', undefined);
             expect(second.getCurrentSkeleton()?.columnHeaderHeight).toBe(firstHeaderHeight + 10);
+            expect(second.getCurrentSkeleton()?.rowHeightAccumulation).toEqual([20, 20, 55, 55]);
         } finally {
             first.dispose();
             second.dispose();

@@ -173,6 +173,8 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             }
             this._projectedSkeletons.delete(sheetId);
             param.skeleton.dispose();
+            // The cached base layout may predate mutations made while the projection was active.
+            this.makeDirty({ sheetId });
         }
 
         if (this._sheetId === sheetId && this._context.unit.getSheetBySheetId(sheetId)) {

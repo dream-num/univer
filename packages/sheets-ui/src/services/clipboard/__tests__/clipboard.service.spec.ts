@@ -1092,6 +1092,45 @@ describe('Test clipboard', () => {
         expect(Array.from(document.querySelectorAll('td'), (cell) => cell.textContent)).toEqual(['', '151']);
     });
 
+    it('keeps covered merged values out of projected clipboard content', () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 30, startColumn: 0, endColumn: 1 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Anchor' }, 1: { v: 'Covered' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [range] })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: () => false,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', range)!;
+        expect(content.plain).toBe('Anchor\t');
+        expect(content.matrixFragment.getValue(0, 1)?.v).toBeFalsy();
+        expect(content.matrixFragment.getValue(0, 0)).toMatchObject({ v: 'Anchor', colSpan: 2 });
+    });
+
+    it.each(['outside selection', 'filtered'] as const)('omits covered HTML values when the merge anchor is %s', (anchor) => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const range = { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 };
+        expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 30: { 0: { v: 'Anchor' } }, 31: { 0: { v: 'Covered' } } },
+        })).toBe(true);
+        expect(commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [range] })).toBe(true);
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => anchor === 'filtered' && row === 30,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            ...range,
+            startRow: anchor === 'outside selection' ? 31 : 30,
+        })!;
+        const document = new DOMParser().parseFromString(content.html, 'text/html');
+        expect(document.querySelector('td')?.textContent).toBe('');
+        expect(content.matrixFragment.getValue(0, 0)?.v).toBeFalsy();
+    });
+
     it('copies only projected visible rows and compacts a merge across a hidden row', async () => {
         const target = { unitId: 'test', subUnitId: 'sheet1' };
         const range = { startRow: 30, endRow: 33, startColumn: 0, endColumn: 0 };

@@ -21,10 +21,8 @@ import { ApplicationJSONType, isApplicationJSONType } from './headers';
 
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-/**
- * @internal
- */
-export interface IHTTPRequestParams {
+// Keep this type available to the public HTTPRequest signature without exporting it.
+interface IHTTPRequestParams {
     // eslint-disable-next-line ts/no-explicit-any
     body?: any;
     headers: HTTPHeaders;

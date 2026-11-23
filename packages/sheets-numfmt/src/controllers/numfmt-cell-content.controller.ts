@@ -88,6 +88,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         }));
 
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            displayOnly: true,
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
             handler: (cell, location, next) => next(this._formatCell(cell, location)),
             priority: InterceptCellContentPriority.NUMFMT,

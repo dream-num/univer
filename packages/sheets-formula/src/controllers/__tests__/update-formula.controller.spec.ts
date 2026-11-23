@@ -1154,6 +1154,9 @@ describe('UpdateFormulaController spill cache integration', () => {
         try {
             await calculate(() => calculator.executeCalculation());
             expectValues(5);
+            const spillTail = sheet.getRange(tail);
+            expect(spillTail.getRawValue() ?? null).toBeNull();
+            expect(spillTail.getValues(true)).toEqual([[5 * scale]]);
             for (const count of [2, 1, 5, 1, 3]) {
                 await calculate(() => sheet.getRange('A1').setValue(count));
                 expectValues(count);

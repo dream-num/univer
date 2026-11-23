@@ -40,6 +40,7 @@ import {
     ILogService,
     IUniverInstanceService,
     LifecycleStages,
+    LocaleType,
     TestConfirmService,
     Tools,
     UniverInstanceType,
@@ -87,6 +88,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FRange } from '../f-range';
 import type { FWorksheet } from '../f-worksheet';
 import { SetBorderBasicCommand, SetBorderCommand } from '../../commands/commands/set-border.command';
+import { NumberCellDisplayController } from '../../controllers/number-cell.controller';
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SHEETS_CUSTOM_FIELD_WARNING_MESSAGE } from '../const';
 import { createFacadeTestBed } from './create-test-bed';
@@ -160,6 +162,39 @@ describe('FRange style-only text preservation', () => {
                 expect(worksheet.getRange('A2').getCellStyleData()?.bd?.r).toBeUndefined();
                 expect(worksheet.getRange('J2').getCellStyleData()?.bd?.l).toBeUndefined();
             }
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+});
+
+describe('FRange effective values', () => {
+    it('reads legacy numeric cells without scientific display formatting', () => {
+        const bed = createFacadeTestBed({
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: 'test',
+            sheetOrder: ['sheet1'],
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 20,
+                    columnCount: 20,
+                    cellData: {
+                        0: { 0: { v: '1e+21', t: CellValueType.NUMBER }, 1: { v: '001', t: CellValueType.FORCE_STRING } },
+                    },
+                },
+            },
+            styles: {},
+        }, [[NumberCellDisplayController]]);
+        try {
+            bed.get(NumberCellDisplayController);
+            const sheet = bed.univerAPI.getActiveWorkbook()!.getActiveSheet();
+            expect(sheet.getRange('A1').getDisplayValue()).toBe('1E+21');
+            expect(sheet.getRange('A1').getValue()).toBe(1e21);
+            expect(sheet.getRange('A1:B1').getValues()).toEqual([[1e21, '001']]);
         } finally {
             bed.univer.dispose();
         }
@@ -847,8 +882,10 @@ describe('Test FRange', () => {
         const richText = univerAPI.newRichTextValue({ body: { dataStream: 'Hello\r\n' } } as IDocumentData);
         const docData = { body: { dataStream: 'World\r\n' } } as IDocumentData;
 
-        activeSheet.getRange('H1:I1').setRichTextValues([[richText, docData]]);
-        const values = activeSheet.getRange('H1:I1').getValues(true);
+        const range = activeSheet.getRange('H1:I1').setRichTextValues([[richText, docData]]);
+        expect(range.getValue()).toBe('Hello');
+        expect(range.getValues()).toEqual([['Hello', 'World']]);
+        const values = range.getValues(true);
         expect((values[0][0] as RichTextValue).toPlainText()).toBe('Hello');
         expect((values[0][1] as RichTextValue).toPlainText()).toBe('World');
 

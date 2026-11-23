@@ -33,6 +33,7 @@ import {
     appendRangeUpdates,
     composeRangeUpdate,
     dropRemovedRangeAnchors,
+    findBookmarkInsertionIndex,
     getChangedPropertyPaths,
     getRangeUpdates,
     moveRangeUpdates,
@@ -469,13 +470,23 @@ export class TextX {
 
         for (const action of actions) {
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
+                const ranges = doc.customRanges ?? [];
                 action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, propertyPaths }) => {
-                    const index = doc.customRanges?.findIndex((range) => range.rangeId === rangeId) ?? -1;
+                    const index = ranges.findIndex((range) => range.rangeId === rangeId);
+                    const previous = ranges[index];
+                    let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
+                    if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
+                        const insertionIndex = findBookmarkInsertionIndex(ranges, previous);
+                        // Canonical placement also works when a peer inserts another bookmark during undo.
+                        if (insertionIndex === index + 1 || (insertionIndex < 0 && index === ranges.length - 1)) {
+                            nextRangeId = undefined;
+                        }
+                    }
                     return {
                         rangeId,
-                        range: index < 0 ? null : Tools.deepClone(doc.customRanges![index]),
-                        nextRangeId: index < 0 ? undefined : doc.customRanges![index + 1]?.rangeId ?? null,
-                        propertyPaths: index < 0 ? undefined : propertyPaths,
+                        range: previous ? Tools.deepClone(previous) : null,
+                        nextRangeId,
+                        propertyPaths: previous ? propertyPaths : undefined,
                     };
                 });
             }

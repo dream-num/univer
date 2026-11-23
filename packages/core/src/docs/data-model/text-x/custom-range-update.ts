@@ -177,12 +177,18 @@ export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], res
     }
 }
 
+export function findBookmarkInsertionIndex(ranges: ICustomRange[], bookmark: ICustomRange): number {
+    return ranges.findIndex((item) => item.rangeId !== bookmark.rangeId && (
+        item.startIndex > bookmark.startIndex ||
+        (item.startIndex === bookmark.startIndex && item.rangeType === CustomRangeType.BOOKMARK && item.rangeId > bookmark.rangeId)
+    ));
+}
+
 export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['rangeUpdates']): void {
     if (!updates?.length) {
         return;
     }
     const ranges = doc.customRanges ?? [];
-    let hasBookmarkUpdate = false;
     for (const { rangeId, range, nextRangeId, propertyPaths } of [...updates].reverse()) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
@@ -192,12 +198,13 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             continue;
         }
         if (range) {
-            hasBookmarkUpdate ||= range.rangeType === CustomRangeType.BOOKMARK;
-            if (nextRangeId !== undefined) {
+            if (nextRangeId !== undefined || range.rangeType === CustomRangeType.BOOKMARK) {
                 if (index >= 0) {
                     ranges.splice(index, 1);
                 }
-                const nextIndex = ranges.findIndex((item) => item.rangeId === nextRangeId);
+                const nextIndex = nextRangeId === undefined
+                    ? findBookmarkInsertionIndex(ranges, range)
+                    : ranges.findIndex((item) => item.rangeId === nextRangeId);
                 ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, Tools.deepClone(range));
             } else if (index >= 0) {
                 ranges[index] = Tools.deepClone(range);
@@ -207,24 +214,6 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         } else if (index >= 0) {
             ranges.splice(index, 1);
         }
-    }
-    if (hasBookmarkUpdate) {
-        // Bookmarks at the same position have no delimiter order. Other coincident ranges retain their nesting.
-        ranges.sort((left, right) => {
-            const position = left.startIndex - right.startIndex;
-            if (position) {
-                return position;
-            }
-            const leftBookmark = left.rangeType === CustomRangeType.BOOKMARK;
-            const rightBookmark = right.rangeType === CustomRangeType.BOOKMARK;
-            if (leftBookmark && rightBookmark) {
-                if (left.rangeId < right.rangeId) {
-                    return -1;
-                }
-                return Number(left.rangeId > right.rangeId);
-            }
-            return Number(leftBookmark) - Number(rightBookmark);
-        });
     }
     doc.customRanges = ranges;
 }

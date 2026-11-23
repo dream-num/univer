@@ -16,6 +16,7 @@
 
 import type { ICustomRange } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonPage } from '@univerjs/engine-render';
+import { documentSkeletonLineIterator } from '@univerjs/engine-render';
 import type { IDocInterval, IDocIntervalIndex } from './doc-range-interval-index';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { buildDocIntervalIndex, visitDocIntervals } from './doc-range-interval-index';
@@ -57,49 +58,33 @@ export function buildDocHoverRangeGeometry(
     const lines: IDocInterval<ISourceSpan>[] = [];
     const unbounded: ISourceSpan[] = [];
 
-    const collect = (page: IDocumentSkeletonPage, pageTop: number, unboundedAncestor = false): void => {
+    documentSkeletonLineIterator([root], { includeUnclippedDescendants: true }, ({
+        page,
+        column,
+        section,
+        sectionTop,
+        line,
+        hasAncestorTransform,
+    }) => {
+        const lineTop = sectionTop + (line.top + line.marginTop);
         const vertical = isDocVerticalTableCell(page);
-        for (const section of page.sections) {
-            for (const column of section.columns) {
-                const verticalTop = pageTop - page.marginTop + page.marginLeft + column.left + docsTop;
-                for (const line of column.lines) {
-                    const lineTop = pageTop + section.top + (line.top + line.marginTop);
-                    const lineStart = lineTop + docsTop;
-                    const lineEnd = getDocRangeBorderBoxBottom(line, lineTop) + docsTop;
-                    for (const divide of line.divides) {
-                        if (divide.glyphGroup.length === 0) {
-                            continue;
-                        }
-                        const span = { startIndex: divide.st, endIndex: divide.ed };
-                        const [start, end] = vertical ? getVerticalDivideBounds(divide, verticalTop) : [lineStart, lineEnd];
-                        if (unboundedAncestor || !Number.isFinite(start) || !Number.isFinite(end)) {
-                            unbounded.push(span);
-                        } else {
-                            lines.push({ value: span, start: Math.min(start, end), end: Math.max(start, end) });
-                        }
-                    }
-                }
+        // In a vertical cell, the selection's logical column X becomes physical Y.
+        const verticalTop = sectionTop - section.top - page.marginTop + page.marginLeft + column.left + docsTop;
+        for (const divide of line.divides) {
+            if (divide.glyphGroup.length === 0) {
+                continue;
+            }
+            const span = { startIndex: divide.st, endIndex: divide.ed };
+            const [start, end] = vertical
+                ? getVerticalDivideBounds(divide, verticalTop)
+                : [lineTop + docsTop, getDocRangeBorderBoxBottom(line, lineTop) + docsTop];
+            if (hasAncestorTransform || !Number.isFinite(start) || !Number.isFinite(end)) {
+                unbounded.push(span);
+            } else {
+                lines.push({ value: span, start: Math.min(start, end), end: Math.max(start, end) });
             }
         }
-
-        // Use the text origin, including overflowing and vertically merged
-        // cells. The table frame is too small for some selection rectangles.
-        for (const table of page.skeTables.values()) {
-            for (const row of table.rows) {
-                for (const cell of row.cells) {
-                    collect(cell, pageTop + (table.top + row.top) + cell.marginTop, unboundedAncestor || vertical);
-                }
-            }
-        }
-        for (const group of page.skeColumnGroups.values()) {
-            for (const column of group.columns) {
-                // Nested groups use their own selection page path.
-                collect(column.page, pageTop + (group.top + column.top) + column.page.marginTop, unboundedAncestor || vertical || page !== root);
-            }
-        }
-    };
-
-    collect(root, root.marginTop);
+    });
     const rangeIndex = buildDocIntervalIndex(ranges.map((range, order) => ({
         value: { range, order },
         start: range.startIndex,

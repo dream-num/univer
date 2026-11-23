@@ -116,6 +116,12 @@ interface ITablePaintExtent {
     maxBorderWidth: number;
 }
 
+function canCullWithCanvasState(ctx: UniverRenderingContext): boolean {
+    return ctx.globalCompositeOperation === 'source-over' &&
+        !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY &&
+        (!ctx.filter || ctx.filter === 'none');
+}
+
 function isBuiltInDocumentExtension(extension: object): boolean {
     const type = extension.constructor;
     return type === Background || type === Border || type === FontAndBaseLine || type === Line;
@@ -183,10 +189,10 @@ function getMaxTableBorderWidth(cells: readonly ITableCell[], initialWidth: numb
     for (const cell of cells) {
         max = Math.max(
             max,
-            cell.borderTop?.width?.v ?? 1,
-            cell.borderBottom?.width?.v ?? 1,
-            cell.borderLeft?.width?.v ?? 1,
-            cell.borderRight?.width?.v ?? 1
+            getCellBorderWidth(cell.borderTop),
+            getCellBorderWidth(cell.borderBottom),
+            getCellBorderWidth(cell.borderLeft),
+            getCellBorderWidth(cell.borderRight)
         );
     }
     return max;
@@ -828,8 +834,7 @@ export class Documents extends DocComponent {
         const tables = page.skeTables;
         const clip = viewportRenderClips.get(ctx);
         if (!clip || this.parent?.classType !== RENDER_CLASS_TYPE.SCENE ||
-            ctx.globalCompositeOperation !== 'source-over' || ctx.shadowBlur || ctx.shadowOffsetX || ctx.shadowOffsetY ||
-            (ctx.filter && ctx.filter !== 'none')) {
+            !canCullWithCanvasState(ctx)) {
             return tables;
         }
 
@@ -914,8 +919,7 @@ export class Documents extends DocComponent {
             && [clip.top, clip.bottom, matrix.d, matrix.f].every(Number.isFinite)
             && !vertexAngle && !centerAngle && !renderConfig.stackedText && !this._glyphPaintSink
             && renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
-            && !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY
-            && (!ctx.filter || ctx.filter === 'none') && ctx.globalCompositeOperation === 'source-over'
+            && canCullWithCanvasState(ctx)
             && extensions.every(isBuiltInDocumentExtension);
         const glyphClipTop = canClipGlyphs ? (clip.top - 2 - matrix.f) / matrix.d : undefined;
         const glyphClipBottom = canClipGlyphs ? (clip.bottom + 2 - matrix.f) / matrix.d : undefined;
@@ -2172,11 +2176,11 @@ export class Documents extends DocComponent {
     }
 
     private _resolveTableCellBorder(primary?: ITableCellBorder, secondary?: ITableCellBorder): Nullable<ITableCellBorder> {
-        if (this._isDrawableTableCellBorder(primary)) {
+        if (getCellBorderWidth(primary) > 0) {
             return primary!;
         }
 
-        if (this._isDrawableTableCellBorder(secondary)) {
+        if (getCellBorderWidth(secondary) > 0) {
             return secondary!;
         }
 
@@ -2185,16 +2189,6 @@ export class Documents extends DocComponent {
         }
 
         return DEFAULT_BORDER_COLOR;
-    }
-
-    private _isDrawableTableCellBorder(border?: ITableCellBorder): boolean {
-        if (!border) {
-            return false;
-        }
-
-        const lineWidth = border.width?.v ?? 1;
-        const color = border.color?.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        return lineWidth > 0 && color !== 'transparent';
     }
 
     private _drawBorder(
@@ -2207,16 +2201,15 @@ export class Documents extends DocComponent {
             return;
         }
 
-        const lineWidth = border.width?.v ?? 1;
-        const color = border.color?.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
-        if (lineWidth <= 0 || color === 'transparent') {
+        const lineWidth = getCellBorderWidth(border);
+        if (lineWidth <= 0) {
             return;
         }
 
         ctx.save();
         ctx.setLineWidthByPrecision(lineWidth);
         setDocsBorderDash(ctx, border.dashStyle);
-        ctx.strokeStyle = color;
+        ctx.strokeStyle = border.color?.rgb ?? DEFAULT_BORDER_COLOR.color.rgb!;
         if (this._getDocumentFlavor() === DocumentFlavor.TRADITIONAL) {
             const { a, b, c, d, e, f } = ctx.getTransform();
             if (b === 0 && c === 0 && a > 0 && d > 0) {

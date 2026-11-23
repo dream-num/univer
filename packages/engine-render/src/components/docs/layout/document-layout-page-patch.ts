@@ -678,12 +678,12 @@ export function compareLayoutGeometry(
         }
         return true;
     }
-    if (Object.prototype.toString.call(left) !== '[object Object]' || Object.prototype.toString.call(right) !== '[object Object]') {
+    if (!Tools.isObject<Record<string, unknown>>(left) || !Tools.isObject<Record<string, unknown>>(right)) {
         return false;
     }
 
-    const previous = left as Record<string, unknown>;
-    const next = right as Record<string, unknown>;
+    const previous = left;
+    const next = right;
     const keys = Object.keys(previous);
     const nextKeys = Object.keys(next);
     const leftBackReference = leftOwner != null && previous.parent === leftOwner;
@@ -726,18 +726,31 @@ function getContinuousPrefixCursor(
     return { sectionIndex, columnIndex, lineIndex: Math.max(0, equalLines - 1) };
 }
 
+function cloneContinuousBaseline<T>(value: T): T | undefined {
+    try {
+        return structuredClone(value);
+    } catch (error) {
+        if (!(error instanceof Error) || error.name !== 'DataCloneError') {
+            throw error;
+        }
+    }
+}
+
 function recordContinuousBaselineFlow(
     flow: IDocumentSkeletonContinuousFlowPatch,
     previousSections: IDocumentSkeletonSectionPatch[] | undefined,
     base: IDocumentSkeletonContinuousBaseline | undefined
-): IDocumentSkeletonSectionPatch[] {
+): IDocumentSkeletonSectionPatch[] | undefined {
+    const detached = cloneContinuousBaseline(flow);
+    if (detached == null) {
+        return;
+    }
     // Own the prefix arrays once, while sharing detached geometry with the
     // acknowledged version. Each publication replaces only its changed suffix.
     const sections = previousSections ?? base?.sections.slice(0, flow.sectionIndex + 1).map((section) => ({
         ...section,
         columns: section.columns.map((column) => ({ ...column, lines: column.lines.slice() })),
     })) ?? [];
-    const detached = structuredClone(flow);
     const columns = sections[flow.sectionIndex]?.columns ?? [];
     const lines = columns[flow.columnIndex]?.lines ?? [];
     replaceArrayTail(lines, flow.lineIndex, detached.lines);
@@ -764,16 +777,12 @@ function collectContinuousTables(
         if (unchanged) {
             tables.set(key, prior);
         } else if (canTrackTables) {
-            try {
-                // Retain only top-level table geometry and its painting inputs.
-                // Serializing the table drops the parent link to the rest of the document.
-                const detached = structuredClone(serializeTable(table, false));
-                tables.set(key, hydrateTable(detached, undefined, undefined, page.segmentId));
-            } catch (error) {
-                if (!(error instanceof Error) || error.name !== 'DataCloneError') {
-                    throw error;
-                }
+            // Serialize only table geometry and painting inputs, without the parent document.
+            const detached = cloneContinuousBaseline(serializeTable(table, false));
+            if (detached == null) {
                 canTrackTables = false;
+            } else {
+                tables.set(key, hydrateTable(detached, undefined, undefined, page.segmentId));
             }
         }
         if (!usesTableDelta || !unchanged) {
@@ -853,16 +862,10 @@ export function serializeDocumentSkeletonContinuousBlock(
         : undefined;
     let baselineSections: IDocumentSkeletonSectionPatch[] | undefined;
     if (wantsBaseline && tableHistory?.tables != null) {
-        try {
-            const captureFlow = captureBase != null && captureBase !== baseline
-                ? serializeContinuousFlow(currentPage, getContinuousPrefixCursor(captureBase.sections, currentPage))
-                : flow;
-            baselineSections = recordContinuousBaselineFlow(captureFlow, previousSnapshot?.baselineSections, captureBase);
-        } catch (error) {
-            if (!(error instanceof Error) || error.name !== 'DataCloneError') {
-                throw error;
-            }
-        }
+        const captureFlow = captureBase != null && captureBase !== baseline
+            ? serializeContinuousFlow(currentPage, getContinuousPrefixCursor(captureBase.sections, currentPage))
+            : flow;
+        baselineSections = recordContinuousBaselineFlow(captureFlow, previousSnapshot?.baselineSections, captureBase);
     }
     const previousHeight = previousSnapshot?.height ?? baseline?.height ?? 0;
     const snapshot: IDocumentSkeletonContinuousSnapshot = {

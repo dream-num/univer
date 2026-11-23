@@ -378,6 +378,12 @@ const HOVER_SCROLL_BUFFER_RATIO = 0.5;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_LEFT = 72;
 const TABLE_BLOCK_MENU_HOVER_GUTTER_TOP = 42;
 
+function getTableViewportSignature(viewport: IDocsTableRenderViewport | null): string {
+    return viewport == null
+        ? ''
+        : [viewport.scrollLeft, viewport.viewportWidth, viewport.contentWidth, viewport.leadingInsetLeft, viewport.trailingInsetRight].join(':');
+}
+
 function hasStoryCustomRanges(unit: DocumentDataModel, segmentId?: string): boolean {
     return Boolean(segmentId && unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.length);
 }
@@ -877,10 +883,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         for (const tableId of tableIds) {
             let signature = viewportSignatures.get(tableId);
             if (signature === undefined) {
-                const table = getDocsTableRenderViewport(this._context.unitId, tableId);
-                signature = table == null
-                    ? ''
-                    : [table.scrollLeft, table.viewportWidth, table.contentWidth, table.leadingInsetLeft, table.trailingInsetRight].join(':');
+                signature = getTableViewportSignature(getDocsTableRenderViewport(this._context.unitId, tableId));
                 viewportSignatures.set(tableId, signature);
             }
             parts.push(signature);
@@ -1458,37 +1461,21 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _getTableViewportSignature(): string {
+        const tableIds = new Set<string>();
         if (this._tableBounds.size > 0) {
-            const tableIds = new Set<string>();
             this._tableBounds.forEach((_bound, tableId) => tableIds.add(getTableIdAndSliceIndex(tableId).tableId));
-            return Array.from(tableIds).map((tableId) => {
-                const viewport = getDocsTableRenderViewport(this._context.unitId, tableId);
-                return viewport
-                    ? `${tableId}:${viewport.contentWidth}:${viewport.viewportWidth}:${viewport.scrollLeft}`
-                    : `${tableId}:none`;
-            }).join('|');
-        }
-
-        const pages = this._skeleton.getSkeletonData()?.pages ?? [];
-        const signatures: string[] = [];
-
-        for (const tableContext of documentSkeletonTableIterator(pages, {
-            includeCells: false,
-            pageMarginTop: this._documents.getOffsetConfig().pageMarginTop,
-            resolveViewport: false,
-            unitId: this._context.unitId,
-        })) {
-            const tableId = getTableIdAndSliceIndex(tableContext.tableId).tableId;
-            const viewport = getDocsTableRenderViewport(this._context.unitId, tableId);
-            if (!viewport) {
-                signatures.push(`${tableId}:none`);
-                continue;
+        } else {
+            const pages = this._skeleton.getSkeletonData()?.pages ?? [];
+            for (const { tableId } of documentSkeletonTableIterator(pages, {
+                includeCells: false,
+                pageMarginTop: this._documents.getOffsetConfig().pageMarginTop,
+                resolveViewport: false,
+                unitId: this._context.unitId,
+            })) {
+                tableIds.add(getTableIdAndSliceIndex(tableId).tableId);
             }
-
-            signatures.push(`${tableId}:${viewport.contentWidth}:${viewport.viewportWidth}:${viewport.scrollLeft}`);
         }
-
-        return signatures.join('|');
+        return Array.from(tableIds, (tableId) => `${tableId}:${getTableViewportSignature(getDocsTableRenderViewport(this._context.unitId, tableId))}`).join('|');
     }
 }
 

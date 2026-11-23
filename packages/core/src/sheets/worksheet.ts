@@ -97,6 +97,7 @@ export class Worksheet {
     protected _rowManager: RowManager;
     protected _columnManager: ColumnManager;
 
+    /** @internal */
     protected readonly _viewModel: SheetViewModel;
 
     protected _spanModel: SpanModel;

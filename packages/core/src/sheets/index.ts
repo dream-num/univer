@@ -43,6 +43,7 @@ export {
     isRangesEqual,
     isUnitRangesEqual,
 } from './util';
+/** @internal */
 export { SheetViewModel } from './view-model';
 export { getWorksheetUID, Workbook } from './workbook';
 export { extractPureTextFromCell, getDisplayValueFromCell, getOriginCellValue, Worksheet } from './worksheet';

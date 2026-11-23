@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
+import { BooleanNumber, Rectangle, sortRules, Tools } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
@@ -28,7 +28,7 @@ import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { BORDER_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { getColor } from '../../basics/tools';
+import { fixLineWidthByScale, getColor } from '../../basics/tools';
 import { Canvas } from '../../canvas';
 import { Documents } from '../docs/document';
 import { FontCache } from '../docs/layout/shaping-engine/font-cache';
@@ -49,6 +49,22 @@ const MARKER_EXTENSION_KEY = 'DefaultMarkerExtension';
 const RANGE_PROTECTION_VIEW_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY';
 const RANGE_PROTECTION_HIDDEN_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY';
 const PRINTING_GRIDLINES_COLOR = getColor([214, 216, 219]);
+
+interface IGridlineVisibilityRange {
+    range: IRange;
+    visible: boolean;
+}
+
+type GridlineRangeProvider = (sheetId: string) => readonly IGridlineVisibilityRange[];
+
+interface IDrawGridlinesOptions {
+    hasMergeData: boolean;
+    redrawBackgrounds?: (ranges: IRange[]) => void;
+    repairNativeGridlines?: boolean;
+    deviceClipBound?: IBoundRectNoAngle;
+    includedRanges?: readonly IRange[];
+    excludedRanges?: readonly IRange[];
+}
 
 interface IRepaintBound {
     bound: IBoundRectNoAngle;
@@ -404,6 +420,8 @@ export class Spreadsheet extends SheetComponent {
 
     private _forceDisableGridlines = false;
 
+    private _gridlineRangeProvider?: GridlineRangeProvider;
+
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
         pageMarginTop: 0,
@@ -518,13 +536,20 @@ export class Spreadsheet extends SheetComponent {
         };
 
         drawBackgroundExtensions(diffRanges, viewRanges);
+        const gridlineOverrides = this._forceDisableGridlines || ctx.__mode === 'printing'
+            ? undefined
+            : this._gridlineRangeProvider?.(spreadsheetSkeleton.worksheet.getSheetId());
         // Overwrite opaque interiors only inside the offscreen cache's integer device clip.
         const repairNativeGridlines = !!ctx._context && ctx.__mode !== 'printing' && ctx.getSystemType() === 'Linux'
             && this.allowCache && ctx._context.canvas === (scene?.getViewport(viewportInfo.viewportKey)?.canvas ?? viewportInfo.cacheCanvas)?.getCanvasEle();
         this._gridlineCache.draw(ctx, () => {
-            this._drawAuxiliary(ctx, hasMergeData, (clearedRanges) => {
-                drawBackgroundExtensions(clearedRanges, clearedRanges);
-            }, repairNativeGridlines, textClipBound);
+            this._drawAuxiliary(ctx, {
+                hasMergeData,
+                redrawBackgrounds: (clearedRanges) => drawBackgroundExtensions(clearedRanges, clearedRanges),
+                repairNativeGridlines,
+                deviceClipBound: textClipBound,
+                excludedRanges: gridlineOverrides?.map(({ range }) => range),
+            });
         });
 
         for (const extension of gridExtensions) {
@@ -552,6 +577,13 @@ export class Spreadsheet extends SheetComponent {
                 diffBounds: viewportInfo.diffBounds,
                 textClipBound,
             } as IDrawInfo);
+            // Explicit gridlines remain visible over cell fills and below cell content and borders.
+            if (extension === this._backgroundExtension && gridlineOverrides?.length) {
+                const includedRanges = gridlineOverrides.filter(({ visible }) => visible).map(({ range }) => range);
+                if (includedRanges.length) {
+                    this._gridlineCache.draw(ctx, () => this._drawAuxiliary(ctx, { hasMergeData, includedRanges }));
+                }
+            }
             const cost = Tools.now() - st;
             this.addRenderFrameTimeMetricToScene(timeKey, cost, scene);
         }
@@ -670,6 +702,14 @@ export class Spreadsheet extends SheetComponent {
 
     setForceDisableGridlines(disabled: boolean) {
         this._forceDisableGridlines = disabled;
+    }
+
+    /**
+     * Provides ranges with an explicit setting for their internal gridlines.
+     */
+    setGridlineRangeProvider(provider: GridlineRangeProvider | undefined) {
+        this._gridlineRangeProvider = provider;
+        this.makeDirty();
     }
 
     override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
@@ -1498,10 +1538,7 @@ export class Spreadsheet extends SheetComponent {
     // eslint-disable-next-line max-lines-per-function, complexity
     private _drawAuxiliary(
         ctx: UniverRenderingContext2D,
-        hasMergeData = true,
-        redrawBackgrounds?: (ranges: IRange[]) => void,
-        repairNativeGridlines = false,
-        deviceClipBound?: IBoundRectNoAngle
+        { hasMergeData, redrawBackgrounds, repairNativeGridlines, deviceClipBound, includedRanges, excludedRanges }: IDrawGridlinesOptions
     ) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
@@ -1510,7 +1547,7 @@ export class Spreadsheet extends SheetComponent {
 
         const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor, worksheet } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
+        if (this._forceDisableGridlines || (showGridlines === BooleanNumber.FALSE && !includedRanges)) {
             return;
         }
 
@@ -1552,6 +1589,26 @@ export class Spreadsheet extends SheetComponent {
         const endY = rowHeightAccumulation[rowEnd];
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
+        const drawRange = { startRow: rowStart, endRow: rowEnd, startColumn: columnStart, endColumn: columnEnd };
+        const visibleOverrides = (includedRanges ?? excludedRanges)?.filter((range) => Rectangle.intersects(range, drawRange));
+        if (includedRanges && !visibleOverrides?.length) {
+            ctx.restore();
+            return;
+        }
+
+        if (visibleOverrides?.length) {
+            ctx.save();
+            this._clipGridlineRanges(ctx, visibleOverrides, rowHeightAccumulation, columnWidthAccumulation, !includedRanges);
+            if (includedRanges) {
+                const merged = hasMergeData ? worksheet.getMergedCellRange(rowStart, columnStart, rowEnd, columnEnd) : [];
+                const blankInteriors = [...merged, ...overflowCache.toNativeArray()]
+                    .filter((range) => visibleOverrides.some((override) => Rectangle.intersects(range, override)));
+                if (blankInteriors.length) {
+                    this._clipGridlineRanges(ctx, blankInteriors, rowHeightAccumulation, columnWidthAccumulation, true);
+                }
+            }
+        }
+
         ctx.beginPath();
         ctx.moveToByPrecision(startX, startY);
         ctx.lineToByPrecision(endX, startY);
@@ -1570,7 +1627,7 @@ export class Spreadsheet extends SheetComponent {
 
         //#region draw horizontal lines
         for (let r = rowStart; r <= rowEnd; r++) {
-            if (hasMergeData) {
+            if (hasMergeData && !includedRanges) {
                 if (worksheet.getRowVisible(r) === false) {
                     if (mergeVisibleRangeStartRow < r) {
                         mergeVisibleRanges.push({
@@ -1618,6 +1675,12 @@ export class Spreadsheet extends SheetComponent {
         }
         //#endregion
 
+        if (includedRanges) {
+            ctx.restore();
+            ctx.restore();
+            return;
+        }
+
         // clear line of merge cell
         const mergeCellRanges: IRange[] = [];
         if (hasMergeData) {
@@ -1639,10 +1702,50 @@ export class Spreadsheet extends SheetComponent {
             deviceClipBound
         );
 
-        // Draw gap areas AFTER merge/overflow clearing so gap visuals are always on top
+        // Gap visuals follow the worksheet and are independent of the gridline clip.
+        if (visibleOverrides?.length) {
+            ctx.restore();
+        }
         this._drawGapAreas(ctx, spreadsheetSkeleton, rowStart, rowEnd, columnStart, columnEnd, startX, endX, startY, endY);
 
         ctx.restore();
+    }
+
+    private _clipGridlineRanges(
+        ctx: UniverRenderingContext2D,
+        ranges: readonly IRange[],
+        rowHeights: number[],
+        columnWidths: number[],
+        exclude: boolean
+    ): void {
+        const { scaleX, scaleY } = ctx.getScale();
+        // Keep the full stroke on the table perimeter controlled by the worksheet.
+        const inset = ctx.lineWidth / 2;
+        const sheetRight = fixLineWidthByScale(columnWidths[columnWidths.length - 1], scaleX);
+        const sheetBottom = fixLineWidthByScale(rowHeights[rowHeights.length - 1], scaleY);
+
+        ctx.beginPath();
+        for (const range of ranges) {
+            const left = fixLineWidthByScale(columnWidths[range.startColumn - 1] ?? 0, scaleX) + inset;
+            const top = fixLineWidthByScale(rowHeights[range.startRow - 1] ?? 0, scaleY) + inset;
+            const right = fixLineWidthByScale(columnWidths[range.endColumn] ?? columnWidths[columnWidths.length - 1], scaleX) - inset;
+            const bottom = fixLineWidthByScale(rowHeights[range.endRow] ?? rowHeights[rowHeights.length - 1], scaleY) - inset;
+            if (right <= left || bottom <= top) {
+                continue;
+            }
+            if (exclude) {
+                // Intersect the complements so overlapping hidden ranges stay hidden.
+                ctx.beginPath();
+                ctx.rect(-inset, -inset, sheetRight + 2 * inset, sheetBottom + 2 * inset);
+                ctx.rect(left, top, right - left, bottom - top);
+                ctx.clip('evenodd');
+            } else {
+                ctx.rect(left, top, right - left, bottom - top);
+            }
+        }
+        if (!exclude) {
+            ctx.clip();
+        }
     }
 
     /**

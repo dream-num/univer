@@ -16,8 +16,6 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { LocaleKey } from '../../locale/types';
-import type { ITableSetConfig } from '../../types/type';
 import {
     CommandType,
     ICommandService,
@@ -36,6 +34,8 @@ import {
     SheetInterceptorService,
     WorkbookEditablePermission,
 } from '@univerjs/sheets';
+import type { LocaleKey } from '../../locale/types';
+import type { ITableSetConfig } from '../../types/type';
 import { TableManager } from '../../models/table-manager';
 import { IRangeOperationTypeEnum } from '../../types/type';
 import { getExistingNamesSet } from '../../util';
@@ -57,7 +57,7 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
             return false;
         }
 
-        const { unitId, tableId, name, updateRange, rowColOperation, theme, filterButtons } = params;
+        const { unitId, tableId, name, updateRange, rowColOperation, theme, filterButtons, showGridlines } = params;
         const tableManager = accessor.get(TableManager);
         const table = tableManager.getTableById(unitId, tableId);
 
@@ -69,6 +69,17 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
         const cellUndos: IMutationInfo[] = [];
         const oldTableConfig: ITableSetConfig = {};
         const newTableConfig: ITableSetConfig = {};
+        if ((filterButtons || showGridlines !== undefined)
+            && accessor.get(IPermissionService).getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value === false) {
+            return false;
+        }
+        if (showGridlines !== undefined) {
+            if (showGridlines !== null && typeof showGridlines !== 'boolean') {
+                return false;
+            }
+            oldTableConfig.showGridlines = table.getShowGridlines() ?? null;
+            newTableConfig.showGridlines = showGridlines;
+        }
         if (params.calculatedColumn) {
             const { columnId, formula, formulaIsArray } = params.calculatedColumn;
             const column = table.getColumn(columnId);
@@ -106,9 +117,6 @@ export const SetSheetTableCommand: ICommand<ISetSheetTableCommandParams> = {
             }
         }
         if (filterButtons) {
-            if (accessor.get(IPermissionService).getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value === false) {
-                return false;
-            }
             const { showAutoFilter, columns } = filterButtons;
             if (showAutoFilter !== undefined && typeof showAutoFilter !== 'boolean') {
                 return false;

@@ -49,6 +49,8 @@ export interface ITableOptions {
      * @default true
      */
     showAutoFilter?: boolean;
+    /** When omitted, use the worksheet's gridline setting. */
+    showGridlines?: boolean;
     /**
      * The table style id. If the property is empty, the default style will be used.
      * @default: table-default-0 ~ table-default-5
@@ -191,6 +193,8 @@ export interface ITableCalculatedColumnConfig {
 export interface ITableSetConfig {
     calculatedColumn?: ITableCalculatedColumnConfig;
     filterButtons?: ITableFilterButtonConfig;
+    /** Null restores the worksheet's gridline setting. */
+    showGridlines?: boolean | null;
     name?: string;
     updateRange?: ITableRangeUpdate;
     rowColOperation?: ITableRangeRowColOperation;
@@ -201,7 +205,7 @@ export interface ITableSetConfig {
     };
 }
 
-interface ITableBaseEvent {
+export interface ITableBaseEvent {
     unitId: string;
     subUnitId: string;
     tableId: string;
@@ -269,6 +273,7 @@ export interface ITableInfo {
     columns: ITableColumnJson[];
     showHeader: boolean;
     showAutoFilter: boolean;
+    showGridlines?: boolean;
 }
 
 export interface ITableInfoWithUnitId extends ITableInfo {

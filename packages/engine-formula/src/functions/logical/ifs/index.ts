@@ -30,6 +30,10 @@ export class Ifs extends BaseFunction {
     // TODO(formula-contract): Restrict the maximum to 254 so condition/value pairs cannot be truncated at an odd count.
     override maxParams = 255;
 
+    override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
+        return argumentIndex % 2 === 1;
+    }
+
     override calculateReferenceEndpoint(params: FunctionVariantType[]) {
         if (params.length < 2 || params.length % 2 !== 0) {
             return ErrorValueObject.create(ErrorType.NA);

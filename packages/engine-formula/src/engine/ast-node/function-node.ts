@@ -217,10 +217,12 @@ export class FunctionNode extends BaseAstNode {
         let child: BaseAstNode = this;
         let parent = child.getParent();
         while (parent instanceof FunctionNode) {
+            const args = parent.getChildren();
+            const argumentIndex = args.indexOf(child);
             // These calls can pass a reference result through to the range operator.
             if (parent.getToken() !== FUNCTION_NAMES_META.CUBE &&
-                !parent._functionExecutor.calculateReferenceEndpoint &&
-                !(parent._functionExecutor instanceof If && parent.getChildren()[0] !== child) &&
+                !parent._functionExecutor.preservesReferenceInRangeEndpointArgument?.(argumentIndex, args.length) &&
+                !(parent._functionExecutor instanceof If && argumentIndex > 0) &&
                 !parent.preservesLazyIfReferenceArray(child)) {
                 return;
             }

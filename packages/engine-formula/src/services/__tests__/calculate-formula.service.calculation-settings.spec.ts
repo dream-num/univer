@@ -22,9 +22,13 @@ import type { IAllRuntimeData } from '../runtime.service';
 import { CellValueType, LocaleType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { LexerNode } from '../../engine/analysis/lexer-node';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
+import { StringValueObject } from '../../engine/value-object/primitive-object';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../../functions/index';
+import { ExcelRegexreplace } from '../../functions/text/excel-regex';
+import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 
 import { ICalculateFormulaService } from '../calculate-formula.service';
 import { IDefinedNamesService } from '../defined-names.service';
@@ -411,6 +415,92 @@ describe('Persisted calculation settings', () => {
             const result = await calculate(bed, formulas, false);
             const actual = result.unitData[bed.unitId]?.[bed.sheetId];
             cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(index, 9)?.v, formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('evaluates grouped intersections and preserves references only in reference-producing arguments', async () => {
+        const bed = createBed();
+        const cells = bed.sheetData[bed.sheetId]!.cellData;
+        const cases = [
+            ['=SUM(A1:A4 (A2:A3))', 5, 5],
+            ['=SUM((A1:A4) ( A2:A3 ))', 5, 5],
+            ['=SUM(CHOOSE(D1,A1:A4,A3:A4) (A2:A3))', 5, 3],
+            ['=SUM(CHOOSE(D1,A1:A4,A3:A4) A2:A3)', 5, 3],
+            ['=SUM(A1:A4 (A2:A3,A4))', 9, 9],
+            ['=SUM(A1:A4 (A2:INDEX(A1:A4,D1+2)))', 5, 9],
+            ['=SUM(A1:IFS(IFS(TRUE,B1),A4))', 10, 10],
+            ['=SUM(A1:INDEX(IFS(TRUE,A2:A4),D1+1))', 6, 10],
+            ['=SUM(A1:INDEX(SWITCH(1,1,A2:A4),2))', 6, 6],
+            ['=SUM(A1:INDEX(IFS(TRUE,(A2:A4,B2:B4)),2,1,1))', 6, 6],
+            ['=SUM (A1:A4)', 10, 10],
+        ] as const;
+        try {
+            cells.reset();
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+            }
+            cells.setValue(0, 1, { v: 1 });
+            cells.setValue(0, 3, { v: 1 });
+            const formulas = Object.fromEntries(cases.map(([f], index) => [index, { 9: { f } }]));
+            const read = (result: IAllRuntimeData, index: number) => result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(index, 9)?.v;
+            const full = await calculate(bed, formulas, false);
+            cases.forEach(([formula, expected], index) => expect.soft(read(full, index), formula).toBe(expected));
+            cells.setValue(0, 3, { v: 2 });
+            const updated = await calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId: bed.unitId, sheetId: bed.sheetId, range: { startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 } }],
+            });
+            cases.forEach(([formula, , expected], index) => expect.soft(read(updated, index) ?? read(full, index), formula).toBe(expected));
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('parses formulas and expands regex backreferences without newer browser built-ins', () => {
+        const bed = createBed();
+        const lexer = bed.get(LexerTreeBuilder);
+        const replace = bed.univer.__getInjector().createInstance(ExcelRegexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE);
+        const at = Object.getOwnPropertyDescriptor(Array.prototype, 'at')!;
+        const hasOwn = Object.getOwnPropertyDescriptor(Object, 'hasOwn')!;
+        let parsed: ReturnType<LexerTreeBuilder['treeBuilder']>[];
+        let replacements: unknown[];
+        try {
+            // eslint-disable-next-line no-extend-native -- Simulate older browsers for this synchronous test.
+            Object.defineProperty(Array.prototype, 'at', { value: undefined, configurable: true });
+            Object.defineProperty(Object, 'hasOwn', { value: undefined, configurable: true });
+            parsed = [lexer.treeBuilder('=(1+2)'), lexer.treeBuilder('=1+{2,3}')];
+            const evaluate = (pattern: string, replacement: string) => replace.calculate(
+                StringValueObject.create('a'),
+                StringValueObject.create(pattern),
+                StringValueObject.create(replacement)
+            ).getValue();
+            replacements = [evaluate('(a)', '\\1'), evaluate('(?<letter>a)', '$<letter>')];
+        } finally {
+            // eslint-disable-next-line no-extend-native -- Restore the original browser API.
+            Object.defineProperty(Array.prototype, 'at', at);
+            Object.defineProperty(Object, 'hasOwn', hasOwn);
+            bed.univer.dispose();
+        }
+        expect(parsed.every((node) => node instanceof LexerNode)).toBe(true);
+        expect(replacements).toEqual(['a', 'a']);
+    });
+
+    it('detects a weekly period in four weeks of hourly values', async () => {
+        const bed = createBed();
+        try {
+            const cases = [
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(672)-1,168),SEQUENCE(672))', 168],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(336)-1,168),SEQUENCE(336))', 0],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(419)-1,168),SEQUENCE(419))', 0],
+                ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(420)-1,168),SEQUENCE(420))', 168],
+                ['=FORECAST.ETS.SEASONALITY(SEQUENCE(672),SEQUENCE(672))', 0],
+            ] as const;
+            const result = await calculate(bed, { 0: Object.fromEntries(cases.map(([f], index) => [index + 9, { f }])) }, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            cases.forEach(([formula, expected], index) => expect(actual?.getValue(0, index + 9)?.v, formula).toBe(expected));
         } finally {
             bed.univer.dispose();
         }

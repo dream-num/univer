@@ -476,7 +476,7 @@ export class LexerTreeBuilder extends Disposable {
             return true;
         }
         const children = this._currentLexerNode.getChildren();
-        const preceding = children.at(-1);
+        const preceding = children[children.length - 1];
         if (typeof preceding === 'string' && OPERATOR_TOKEN_SET.has(preceding.trim())) {
             return true;
         }
@@ -756,7 +756,7 @@ export class LexerTreeBuilder extends Disposable {
 
         if (transformSuffix) {
             const children = this._currentLexerNode.getChildren();
-            if (children[0] === matchToken.OPEN_BRACKET && children.at(-1) === matchToken.CLOSE_BRACKET) {
+            if (children[0] === matchToken.OPEN_BRACKET && children[children.length - 1] === matchToken.CLOSE_BRACKET) {
                 let depth = 0;
                 for (let index = 0; index < children.length; index++) {
                     if (children[index] === matchToken.OPEN_BRACKET) {
@@ -1232,19 +1232,26 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     private _isReferenceIntersection(formula: string, current: number): boolean {
-        const right = formula.slice(current + 1).trimStart();
-        if (!/^(?:[$'\[]|[\p{L}_]|\d+:)/u.test(right)) {
+        let operand = formula.slice(current + 1).trimStart();
+        const grouped = operand.startsWith(matchToken.OPEN_BRACKET);
+        while (operand.startsWith(matchToken.OPEN_BRACKET)) {
+            operand = operand.slice(1).trimStart();
+        }
+        if (!/^(?:[$'\[]|[\p{L}_]|\d+:)/u.test(operand)) {
             return false;
         }
 
         const left = this._segment.trim();
         if (left !== '') {
+            if (grouped && !this.isColonOpen()) {
+                return isReferenceStringWithEffectiveColumn(left);
+            }
             return /(?:^|!)\$?[\p{L}_][\p{L}\d_.$]*$/u.test(left) || (this.isColonOpen() && /^\$?\d+$/u.test(left));
         }
 
         const previous = this._getLastChildCurrent();
-        return previous === matchToken.CLOSE_BRACKET || (previous instanceof LexerNode &&
-            [DEFAULT_TOKEN_CUBE_FUNCTION_NAME, matchToken.COLON, 'INDEX', 'INDIRECT', 'OFFSET'].includes(previous.getToken().toUpperCase()));
+        return previous === matchToken.CLOSE_BRACKET ||
+            (previous instanceof LexerNode && this._findPreviousToken(formula, current - 1) === matchToken.CLOSE_BRACKET);
     }
 
     private _openSquareBracket() {
@@ -1495,7 +1502,7 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _findPreviousToken(data: string[], indexRaw: number) {
+    private _findPreviousToken(data: string | string[], indexRaw: number) {
         let index = indexRaw;
         while (index >= 0) {
             const token = data[index];

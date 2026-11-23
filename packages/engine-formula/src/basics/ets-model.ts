@@ -16,6 +16,9 @@
 
 import { normalINV } from './statistical';
 
+export const MAX_ETS_PERIOD = 8760;
+const SHORT_PERIOD_LIMIT = 64;
+
 // Additive error, trend, and seasonality. Candidate order breaks equal-loss ties.
 type Weights = readonly [number, number, number];
 
@@ -116,15 +119,26 @@ function lagCorrelation(changes: readonly number[], lag: number): number {
 
 export function detectEtsPeriod(values: readonly number[]): number {
     if (values.length < 5) return 0;
-    const differences = values.slice(1).map((value, i) => value - values[i]);
-    const mean = differences.reduce((sum, value) => sum + value, 0) / differences.length;
-    const changes = differences.map((value) => value - mean);
+    const changes = Array.from({ length: values.length - 1 }, (_, i) => values[i + 1] - values[i]);
+    const mean = changes.reduce((sum, value) => sum + value, 0) / changes.length;
+    for (let i = 0; i < changes.length; i++) changes[i] -= mean;
 
-    // Evaluate local peaks in the autocorrelation of the centered first differences.
-    let previous = lagCorrelation(changes, 1);
-    let current = lagCorrelation(changes, 2);
-    if (previous < -0.25 && current > 0.09) return 2;
-    for (let lag = 2; lag <= Math.min(Math.floor(values.length / 2), 64); lag++) {
+    if (changes.every((change) => change === 0)) return 0;
+    // Automatic detection needs observations beyond the first two repeated periods.
+    const maxLag = Math.min(Math.floor(values.length * 2 / 5), MAX_ETS_PERIOD);
+    const shortPeriod = findLagPeak(changes, 2, Math.min(maxLag, SHORT_PERIOD_LIMIT));
+    if (shortPeriod || maxLag <= SHORT_PERIOD_LIMIT) return shortPeriod;
+
+    // Keep lookups for long periods bounded on very large timelines.
+    const searchWindow = changes.length > 4 * MAX_ETS_PERIOD ? changes.slice(-4 * MAX_ETS_PERIOD) : changes;
+    return findLagPeak(searchWindow, SHORT_PERIOD_LIMIT + 1, maxLag);
+}
+
+function findLagPeak(changes: readonly number[], firstLag: number, lastLag: number): number {
+    let previous = lagCorrelation(changes, firstLag - 1);
+    let current = lagCorrelation(changes, firstLag);
+    if (firstLag === 2 && previous < -0.25 && current > 0.09) return 2;
+    for (let lag = firstLag; lag <= lastLag; lag++) {
         const next = lagCorrelation(changes, lag + 1);
         if (current >= 0.65 && current > previous && current >= next) return lag;
         previous = current;

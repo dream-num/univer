@@ -29,6 +29,10 @@ import { BaseFunction } from '../../base-function';
 export class Switch extends BaseFunction {
     override minParams = 3;
 
+    override preservesReferenceInRangeEndpointArgument(argumentIndex: number, argumentCount: number): boolean {
+        return argumentIndex > 0 && (argumentIndex % 2 === 0 || argumentIndex === argumentCount - 1);
+    }
+
     override calculateReferenceEndpoint(params: FunctionVariantType[]) {
         if (params.length < 3) {
             return ErrorValueObject.create(ErrorType.NA);

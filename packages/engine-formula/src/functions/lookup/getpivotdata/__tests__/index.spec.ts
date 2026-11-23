@@ -15,13 +15,12 @@
  */
 
 import type { ICellData, IWorkbookData, Nullable } from '@univerjs/core';
-import { CellValueType, Injector, LocaleType, ObjectMatrix, Rectangle } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
 import type { IUnitData } from '../../../../basics/common';
 import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import type { IPivotFormulaReportLookup } from '../index';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { CellValueType, Injector, LocaleType, ObjectMatrix, Rectangle } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { LexerNode } from '../../../../engine/analysis/lexer-node';
@@ -33,6 +32,7 @@ import { StringValueObject } from '../../../../engine/value-object/primitive-obj
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
+import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../../../index';
 import { getObjectValue } from '../../../util';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
@@ -167,6 +167,47 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('A3', 'Region', 'North')).toBe(ErrorType.REF);
         } finally {
             injector.dispose();
+        }
+    });
+
+    it.each([3, undefined])('matches both column field headers with data start row %s', (firstDataRow) => {
+        const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 7 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Category', 'Year', 'Quarter'],
+                        columnFields: ['Year', 'Fiscal Year', 'Quarter'],
+                        dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
+                        layout: { firstDataRow },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = [
+                ['Sum of Amount', 'Column Labels'],
+                ['', 2025, '', '2025 Total', 2026, '', '2026 Total', 'Grand Total'],
+                ['Row Labels', 'Q1', 'Q2', '', 'Q1', 'Q2'],
+                ['East', 4, 5, 9, 6, 12, 18, 27],
+                ['West', 1, 2, 3, 3, 10, 13, 16],
+                ['Grand Total', 5, 7, 12, 9, 22, 31, 43],
+            ];
+            const cells = grid.flatMap((values, row) => values.flatMap((value, column): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[row, column, typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const report = anchor(cells);
+            const lookup = (...pairs: string[]) => getObjectValue(fn.calculate(textArg('Amount'), report, ...pairs.map(textArg)));
+            expect(lookup('Year', '2026', 'Quarter', 'Q2')).toBe(22);
+            expect(lookup('Quarter', 'Q2', 'Year', '2026')).toBe(22);
+            expect(lookup('Quarter', 'Q2', 'Category', 'West', 'Year', '2026')).toBe(10);
+            expect(lookup('Year', '2025', 'Quarter', 'Q2')).toBe(7);
+            expect(lookup('Year', '2026', 'Quarter', 'Q3')).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
         }
     });
 

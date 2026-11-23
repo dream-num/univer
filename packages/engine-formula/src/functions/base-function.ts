@@ -109,6 +109,7 @@ export class BaseFunction {
     needsAstChildren: boolean = false;
 
     calculateReferenceEndpoint?(variants: FunctionVariantType[]): FunctionVariantType;
+    preservesReferenceInRangeEndpointArgument?(argumentIndex: number, argumentCount: number): boolean;
 
     bindCalculationRegion?(getRegion: () => LocaleType): void;
     bindCalculationTimestamp?(getTimestamp: () => number): void;

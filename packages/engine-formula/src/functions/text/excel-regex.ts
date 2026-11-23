@@ -198,7 +198,7 @@ function expandReplacement(template: string, match: RegExpMatchArray): string | 
         }
         const value = token.slice(1);
         if (token[0] === '\\') {
-            if (Object.hasOwn(REPLACEMENT_ESCAPES, value)) {
+            if (Object.prototype.hasOwnProperty.call(REPLACEMENT_ESCAPES, value)) {
                 return REPLACEMENT_ESCAPES[value];
             }
             if (/^x[\da-fA-F]{2}$/.test(value)) {
@@ -209,7 +209,7 @@ function expandReplacement(template: string, match: RegExpMatchArray): string | 
         if (/^\d+$/.test(group) && Number(group) < match.length) {
             return match[Number(group)] ?? '';
         }
-        if (group !== value && match.groups && Object.hasOwn(match.groups, group)) {
+        if (group !== value && match.groups && Object.prototype.hasOwnProperty.call(match.groups, group)) {
             return match.groups[group] ?? '';
         }
         valid = false;

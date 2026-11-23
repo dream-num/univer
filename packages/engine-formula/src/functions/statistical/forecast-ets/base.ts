@@ -22,7 +22,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import { getDaysInMonth } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { detectEtsPeriod, trainEts } from '../../../basics/ets-model';
+import { detectEtsPeriod, MAX_ETS_PERIOD, trainEts } from '../../../basics/ets-model';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -116,7 +116,7 @@ export abstract class EtsFunction extends BaseFunction {
                 if (typeof prepared !== 'string') {
                     period = season === 1
                         ? detectEtsPeriod(prepared.values)
-                        : season <= 8760 && season < Math.floor(prepared.values.length * 7 / 10) ? season : 0;
+                        : season <= MAX_ETS_PERIOD && season < Math.floor(prepared.values.length * 7 / 10) ? season : 0;
                 }
             }
             if (typeof prepared === 'string') return ErrorValueObject.create(prepared);

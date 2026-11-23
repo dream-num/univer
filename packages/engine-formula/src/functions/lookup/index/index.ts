@@ -43,6 +43,10 @@ export class Index extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
+        return argumentIndex === 0;
+    }
+
     // eslint-disable-next-line max-lines-per-function, complexity
     override calculate(
         reference: FunctionVariantType,

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../../locale/types';
-import type { IPopup } from '../../services/popup/canvas-popup.service';
-import type { ISymbolCategory } from './symbols';
 import { LocaleService } from '@univerjs/core';
 import { clsx, scrollbarClassName } from '@univerjs/design';
 import { useState } from 'react';
+import type { LocaleKey } from '../../locale/types';
+import type { IPopup } from '../../services/popup/canvas-popup.service';
+import type { ISymbolCategory } from './symbols';
 import { useDependency, useObservable } from '../../utils/di';
 import { SYMBOL_CATEGORIES } from './symbols';
 
@@ -53,7 +53,10 @@ export function SymbolPicker(props: ISymbolPickerProps) {
         <section
             data-u-comp={SYMBOL_PICKER_COMPONENT}
             className={clsx(
-                'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
+                `
+                  univer-flex univer-h-[340px] univer-w-[min(420px,calc(100vw-16px))] univer-max-w-full univer-flex-col
+                  univer-overflow-hidden
+                `,
                 !props.embedded && `
                   univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
                   univer-shadow-lg
@@ -113,7 +116,7 @@ function SymbolSection(props: {
                             title={symbol}
                             className={clsx(
                                 `
-                                  univer-flex univer-size-8 univer-cursor-pointer univer-items-center
+                                  univer-flex univer-size-8 univer-max-w-full univer-cursor-pointer univer-items-center
                                   univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent
                                   univer-p-0 univer-text-lg univer-text-gray-900
                                   dark:!univer-text-gray-100

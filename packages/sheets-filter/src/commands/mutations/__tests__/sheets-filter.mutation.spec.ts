@@ -285,7 +285,7 @@ describe('test mutations of sheets filter', () => {
             expect(sheetsFilterService.getFilterModel('test', 'sheet1')).toBeNull();
         });
 
-        it('should return false when there is no filter', () => {
+        it('should be an idempotent cleanup when there is no filter', () => {
             const testBed = createFilterMutationTestBed(testWorkbookDataFactory());
             const { commandService } = testBed;
             univer = testBed.univer;
@@ -293,7 +293,7 @@ describe('test mutations of sheets filter', () => {
             expect(commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
-            })).toBeFalsy();
+            })).toBeTruthy();
         });
     });
 });

@@ -115,7 +115,9 @@ export const RemoveSheetsFilterMutation: IMutation<ISheetsFilterMutationResult> 
             params.removedFilterRange = range;
             setFilterMutationResult(params);
         }
-        return removed;
+        // Cleanup can race with worksheet disposal, which also removes the model. Treat an
+        // already-removed model as a successful, idempotent cleanup.
+        return true;
     },
 };
 

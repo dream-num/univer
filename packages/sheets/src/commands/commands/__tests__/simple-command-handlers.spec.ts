@@ -19,6 +19,7 @@ import {
     CellValueType,
     DateSystem,
     ICommandService,
+    IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
@@ -676,6 +677,7 @@ describe('SplitTextToColumnsCommand', () => {
                 return true;
             } }],
             [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
+            [IPermissionService, { getPermissionPoint: () => ({ value: true }) }],
             [IUniverInstanceService, createUniverInstanceService(worksheet)],
         ]));
 

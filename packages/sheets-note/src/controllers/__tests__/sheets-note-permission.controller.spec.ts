@@ -14,147 +14,93 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, Injector, LocaleService, toDisposable } from '@univerjs/core';
-import { SheetPermissionCheckController } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
-import { SheetDeleteNoteCommand, SheetToggleNotePopupCommand, SheetUpdateNoteCommand } from '../../commands/commands/note.command';
-import { SHEET_NOTE_EDIT_PERMISSIONS } from '../../const';
+import {
+    ICommandService,
+    IPermissionService,
+    LocaleService,
+    LocaleType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
+import { SheetPermissionCheckController, WorksheetEditPermission } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+    SheetDeleteNoteCommand,
+    SheetToggleNotePopupCommand,
+    SheetUpdateNoteCommand,
+} from '../../commands/commands/note.command';
+import enUS from '../../locale/en-US';
+import { SheetsNoteModel } from '../../models/sheets-note.model';
+import { UniverSheetsNotePlugin } from '../../plugin';
 import { SheetsNotePermissionController } from '../sheets-note-permission.controller';
-
-type BeforeCommandHandler = (command: ICommandInfo) => void;
-
-const CELL_RANGE = [{ startRow: 3, startColumn: 2, endRow: 3, endColumn: 2 }];
-
-function createTestBed(options: { allowed?: boolean } = {}) {
-    let beforeCommandHandler: BeforeCommandHandler | undefined;
-    const permissionCheck = {
-        permissionCheckWithRanges: vi.fn(() => options.allowed ?? true),
-        permissionCheckWithoutRange: vi.fn(() => options.allowed ?? true),
-        blockExecuteWithoutPermission: vi.fn(),
-    };
-    const injector = new Injector([
-        [ICommandService, { useValue: {
-            beforeCommandExecuted: vi.fn((handler: BeforeCommandHandler) => {
-                beforeCommandHandler = handler;
-
-                return toDisposable(() => undefined);
-            }),
-        } as never }],
-        [LocaleService, { useValue: { t: (key: string) => key } as never }],
-        [SheetPermissionCheckController, { useValue: permissionCheck as never }],
-        [SheetsNotePermissionController],
-    ]);
-
-    const controller = injector.get(SheetsNotePermissionController);
-
-    return {
-        client: () => beforeCommandHandler,
-        controller,
-        permissionCheck,
-    };
-}
+import '@univerjs/sheets/facade';
 
 describe('SheetsNotePermissionController', () => {
-    it('checks the edited cell and blocks the update when edit permission is missing', () => {
-        const bed = createTestBed({ allowed: false });
+    let univer: Univer;
 
-        bed.client()?.({
-            id: SheetUpdateNoteCommand.id,
-            params: {
-                unitId: 'unit-1',
-                sheetId: 'sheet-1',
-                row: 3,
-                col: 2,
-                note: { id: 'note-1', row: 3, col: 2, width: 160, height: 72, note: 'hint' },
-            },
-        } as ICommandInfo);
-
-        expect(bed.permissionCheck.permissionCheckWithRanges).toHaveBeenCalledWith(
-            SHEET_NOTE_EDIT_PERMISSIONS,
-            CELL_RANGE,
-            'unit-1',
-            'sheet-1'
-        );
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledWith('sheets-note.permission.editErr');
-
-        bed.controller.dispose();
+    beforeEach(() => {
+        univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS } });
+        univer.registerPlugin(UniverSheetsNotePlugin);
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'book',
+            sheetOrder: ['sheet'],
+            sheets: { sheet: { id: 'sheet', name: 'Sheet' } },
+        });
+        univer.__getInjector().get(LocaleService).setDirection('ltr');
     });
 
-    it('does not block an update when edit permission is granted', () => {
-        const bed = createTestBed();
+    afterEach(() => univer.dispose());
 
-        bed.client()?.({
-            id: SheetUpdateNoteCommand.id,
-            params: {
-                unitId: 'unit-1',
-                sheetId: 'sheet-1',
-                row: 3,
-                col: 2,
-                note: { id: 'note-1', row: 3, col: 2, width: 160, height: 72, note: 'hint' },
-            },
-        } as ICommandInfo);
-
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).not.toHaveBeenCalled();
-
-        bed.controller.dispose();
+    it('protects note contents at their cell while allowing edits to a neighboring cell', async () => {
+        const injector = univer.__getInjector();
+        injector.get(SheetsNotePermissionController);
+        const api = FUniver.newAPI(injector);
+        const worksheet = api.getActiveWorkbook()!.getActiveSheet();
+        const commands = injector.get(ICommandService);
+        const model = injector.get(SheetsNoteModel);
+        const location = { unitId: 'book', sheetId: 'sheet', row: 1, col: 1 };
+        const note = { id: 'original', row: 1, col: 1, note: 'Original', width: 160, height: 72 };
+        expect(await commands.executeCommand(SheetUpdateNoteCommand.id, { ...location, note })).toBe(true);
+        const protectedCell = worksheet.getRange('B2');
+        const rule = await protectedCell.getRangePermission().protect({ name: 'Review' });
+        await rule.setPoint(api.Enum.RangePermissionPoint.Edit, false);
+        const messages: string[] = [];
+        const subscription = injector.get(SheetPermissionCheckController).triggerPermissionUIEvent$.subscribe((message) => messages.push(message));
+        try {
+            const changedNote = { ...note, note: 'Revised' };
+            expect(await commands.executeCommand(SheetUpdateNoteCommand.id, { ...location, note: changedNote })).toBe(false);
+            expect(messages).toContain(enUS['sheets-note'].permission.editErr);
+            expect(await commands.executeCommand(SheetDeleteNoteCommand.id, location)).toBe(false);
+            protectedCell.activate();
+            expect(await commands.executeCommand(SheetDeleteNoteCommand.id)).toBe(false);
+            expect(await commands.executeCommand(SheetUpdateNoteCommand.id, { ...location, row: 2, note: changedNote })).toBe(false);
+            expect(model.getNote('book', 'sheet', { row: 1, col: 1 })?.note).toBe('Original');
+            expect(await commands.executeCommand(SheetUpdateNoteCommand.id, {
+                ...location,
+                row: 2,
+                note: { ...changedNote, id: 'neighbor', row: 2 },
+            })).toBe(true);
+            expect(model.getNote('book', 'sheet', { row: 2, col: 1 })?.note).toBe('Revised');
+            expect(await commands.executeCommand(SheetToggleNotePopupCommand.id)).toBe(true);
+        } finally {
+            subscription.unsubscribe();
+        }
     });
 
-    it('checks the given cell when deleting a note by location', () => {
-        const bed = createTestBed({ allowed: false });
-
-        bed.client()?.({
-            id: SheetDeleteNoteCommand.id,
-            params: { unitId: 'unit-1', sheetId: 'sheet-1', row: 3, col: 2 },
-        } as ICommandInfo);
-
-        expect(bed.permissionCheck.permissionCheckWithRanges).toHaveBeenCalledWith(
-            SHEET_NOTE_EDIT_PERMISSIONS,
-            CELL_RANGE,
-            'unit-1',
-            'sheet-1'
-        );
-        expect(bed.permissionCheck.permissionCheckWithoutRange).not.toHaveBeenCalled();
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalled();
-
-        bed.controller.dispose();
-    });
-
-    it('falls back to the current selection when deleting from the context menu', () => {
-        const bed = createTestBed({ allowed: false });
-
-        bed.client()?.({ id: SheetDeleteNoteCommand.id } as ICommandInfo);
-
-        expect(bed.permissionCheck.permissionCheckWithRanges).not.toHaveBeenCalled();
-        expect(bed.permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledWith(SHEET_NOTE_EDIT_PERMISSIONS);
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalled();
-
-        bed.controller.dispose();
-    });
-
-    it('blocks showing or hiding a note without edit permission', () => {
-        const bed = createTestBed({ allowed: false });
-
-        bed.client()?.({ id: SheetToggleNotePopupCommand.id } as ICommandInfo);
-
-        expect(bed.permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledWith(SHEET_NOTE_EDIT_PERMISSIONS);
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalled();
-
-        bed.controller.dispose();
-    });
-
-    it('ignores commands without note parameters', () => {
-        const bed = createTestBed({ allowed: false });
-
-        bed.client()?.({
-            id: SheetUpdateNoteCommand.id,
-        } as ICommandInfo);
-        bed.client()?.({ id: 'sheet.command.set-range-values' } as ICommandInfo);
-
-        expect(bed.permissionCheck.permissionCheckWithRanges).not.toHaveBeenCalled();
-        expect(bed.permissionCheck.permissionCheckWithoutRange).not.toHaveBeenCalled();
-        expect(bed.permissionCheck.blockExecuteWithoutPermission).not.toHaveBeenCalled();
-
-        bed.controller.dispose();
+    it('blocks toggling a note when worksheet editing is disabled', async () => {
+        const injector = univer.__getInjector();
+        injector.get(SheetsNotePermissionController);
+        const commands = injector.get(ICommandService);
+        const note = { id: 'visible', row: 0, col: 0, note: 'Original', width: 160, height: 72, show: true };
+        expect(await commands.executeCommand(SheetUpdateNoteCommand.id, { unitId: 'book', sheetId: 'sheet', row: 0, col: 0, note })).toBe(true);
+        const api = FUniver.newAPI(injector);
+        api.getActiveWorkbook()!.getActiveSheet().getRange('A1').activate();
+        const permission = injector.get(IPermissionService);
+        const edit = new WorksheetEditPermission('book', 'sheet');
+        permission.addPermissionPoint(edit);
+        permission.updatePermissionPoint(edit.id, false);
+        expect(await commands.executeCommand(SheetToggleNotePopupCommand.id)).toBe(false);
+        expect(injector.get(SheetsNoteModel).getNote('book', 'sheet', { noteId: 'visible' })?.show).toBe(true);
     });
 });

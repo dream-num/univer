@@ -136,6 +136,11 @@ const locale: typeof enUS = {
             title: 'Casella de selecció',
             error: 'El contingut d’aquesta cel·la incompleix la seva regla de validació',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
+            },
+        },
     },
 };
 

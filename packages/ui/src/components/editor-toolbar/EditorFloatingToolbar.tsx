@@ -192,6 +192,24 @@ export function EditorFloatingToolbar(props: {
     );
 }
 
+export function EditorToolbarGroup({ children }: { children: ReactNode }) {
+    return (
+        <div
+            className="
+              univer-relative univer-flex univer-h-7 univer-items-center univer-gap-1 univer-px-1
+              before:univer-pointer-events-none before:univer-absolute before:univer-inset-y-0 before:-univer-left-px
+              before:univer-w-px before:univer-bg-gray-200 before:univer-content-['']
+              first:before:univer-hidden
+              empty:univer-hidden
+              rtl:before:-univer-right-px rtl:before:univer-left-auto
+              dark:before:univer-bg-gray-600
+            "
+        >
+            {children}
+        </div>
+    );
+}
+
 export function EditorToolbarButton(props: {
     title?: string;
     active?: boolean;

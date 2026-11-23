@@ -19,6 +19,9 @@ const locale = {
         message: {
             refError: 'Invalid Range',
         },
+        permission: {
+            editErr: 'The range is protected, and you do not have edit permission. To edit, please contact the creator.',
+        },
     },
 };
 

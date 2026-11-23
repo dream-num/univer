@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'Chuyển đổi lọc',
         },
         permission: {
-            filterErr: 'Bạn không có quyền sử dụng bộ lọc.',
+            filterErr: 'Phạm vi được bảo vệ và bạn không có quyền lọc. Để lọc, vui lòng liên hệ với người tạo.',
         },
         panel: {
             'clear-filter': 'Xóa lọc',

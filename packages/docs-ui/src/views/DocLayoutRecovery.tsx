@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { LoadingMultiIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import type { LocaleKey } from '../locale/types';
 
 export const DOC_LAYOUT_RECOVERY_COMPONENT = 'DOC_LAYOUT_RECOVERY_COMPONENT';
 
@@ -28,8 +28,8 @@ export function DocLayoutRecovery() {
         <div
             aria-live="polite"
             className="
-              univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-bg-white univer-px-4 univer-py-3
-              univer-text-sm univer-text-gray-700 univer-shadow-lg
+              univer-flex univer-items-center univer-gap-2 univer-rounded-lg univer-bg-white univer-p-2 univer-text-sm
+              univer-text-gray-700 univer-shadow-lg
               dark:univer-bg-gray-800 dark:univer-text-gray-200
             "
             role="status"

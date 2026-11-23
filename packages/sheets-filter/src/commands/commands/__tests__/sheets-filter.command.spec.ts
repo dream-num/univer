@@ -200,6 +200,64 @@ describe('sheet filter commands', () => {
         expect(filterModel?.filteredOutRows.size).toBe(0);
     });
 
+    it('notifies local filter takeover only after a successful command', async () => {
+        const succeeded: Array<{ unitId: string; subUnitId: string }> = [];
+        sheetsFilterService.localFilterOperationSucceeded$.subscribe((event) => succeeded.push(event));
+
+        await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId,
+            subUnitId,
+            col: 0,
+            criteria: { colId: 0, filters: { filters: ['Apple'] } },
+        });
+        expect(succeeded).toEqual([]);
+
+        await commandService.executeCommand(SetSheetFilterRangeCommand.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 },
+        });
+        expect(succeeded).toEqual([{ unitId, subUnitId }]);
+    });
+
+    it('ends initial catch-up only after a filter command succeeds', async () => {
+        const range = { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 };
+
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        const failedCriteria = await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId,
+            subUnitId,
+            col: 0,
+            criteria: { colId: 0, filters: { filters: ['Apple'] } },
+        });
+        expect(failedCriteria).toBe(false);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(true);
+
+        expect(await commandService.executeCommand(SetSheetFilterRangeCommand.id, { unitId, subUnitId, range })).toBe(true);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        expect(await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId,
+            subUnitId,
+            col: 0,
+            criteria: { colId: 0, filters: { filters: ['Apple'] } },
+        })).toBe(true);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        expect(await commandService.executeCommand(ClearSheetsFilterCriteriaCommand.id, { unitId, subUnitId })).toBe(true);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        expect(await commandService.executeCommand(ReCalcSheetsFilterCommand.id, { unitId, subUnitId })).toBe(true);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, { unitId, subUnitId })).toBe(true);
+        expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+    });
+
     it('removes an existing filter model from the worksheet', async () => {
         await commandService.executeCommand(SetSheetFilterRangeCommand.id, {
             unitId,

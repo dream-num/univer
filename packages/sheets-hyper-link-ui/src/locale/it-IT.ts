@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'Inserisci collegamento',
         },
         permission: {
-            hyperLinkErr: 'Non hai l’autorizzazione per inserire un collegamento.',
+            editErr: 'L\'intervallo è protetto e non si dispone dell\'autorizzazione di modifica. Per modificare, contattare il creatore.',
         },
         message: {
             noSheet: 'Il foglio di destinazione è stato eliminato',

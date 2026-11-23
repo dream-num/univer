@@ -23,7 +23,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetLazyExecuteScheduleService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
-import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
+import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../../commands/mutations/sheets-filter.mutation';
 
 function testWorkbookDataWithFilterFactory(): IWorkbookData {
     return {
@@ -208,6 +208,122 @@ describe('test controller of sheets filter', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    describe('test remote structural range transforms', () => {
+        it('shifts a filter range by the full inserted row count even when the insert ends beyond it', () => {
+            const controller = get(SheetsFilterController);
+            const redos = controller.handleRemoteInsertRow(
+                { startRow: 0, endRow: 7, startColumn: 0, endColumn: 5 },
+                'test',
+                'sheet1'
+            );
+            expect(redos).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: expect.objectContaining({
+                        range: { startRow: 11, startColumn: 0, endRow: 13, endColumn: 5 },
+                    }),
+                }),
+            ]));
+        });
+
+        it('uses the exact remote removal interval instead of the locally visible rows', () => {
+            const controller = get(SheetsFilterController);
+            const redos = controller.handleRemoteRemoveRow(
+                { startRow: 4, endRow: 5, startColumn: 0, endColumn: 5 },
+                'test',
+                'sheet1'
+            );
+            expect(redos).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: expect.objectContaining({
+                        range: { startRow: 3, startColumn: 0, endRow: 3, endColumn: 5 },
+                    }),
+                }),
+            ]));
+        });
+
+        it('keeps the remaining data under a replacement header when a remote move removes the header row', () => {
+            const controller = get(SheetsFilterController);
+            const model = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+            model.setRange({ startRow: 4, endRow: 9, startColumn: 0, endColumn: 2 });
+
+            const redos = controller.handleRemoteMoveRows(
+                { startRow: 4, endRow: 4, startColumn: 0, endColumn: 2 },
+                { startRow: 12, endRow: 12, startColumn: 0, endColumn: 2 },
+                'test',
+                'sheet1'
+            );
+
+            expect(redos).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: expect.objectContaining({
+                        range: { startRow: 3, startColumn: 0, endRow: 8, endColumn: 2 },
+                    }),
+                }),
+            ]));
+            expect(redos.some((mutation) => mutation.id === RemoveSheetsFilterMutation.id)).toBe(false);
+        });
+
+        it('computes large filter bounds without spreading row numbers into Math.min/max', () => {
+            const controller = get(SheetsFilterController);
+            const model = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+            model.setRange({ startRow: 5, endRow: 200005, startColumn: 0, endColumn: 0 });
+
+            const redos = controller.handleRemoteMoveRows(
+                { startRow: 5, endRow: 5, startColumn: 0, endColumn: 0 },
+                { startRow: 200006, endRow: 200006, startColumn: 0, endColumn: 0 },
+                'test',
+                'sheet1'
+            );
+
+            expect(redos).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: expect.objectContaining({
+                        range: expect.objectContaining({ startRow: 4, endRow: 200004 }),
+                    }),
+                }),
+            ]));
+        });
+
+        it('migrates filter criteria when remote columns are inserted or removed', () => {
+            const controller = get(SheetsFilterController);
+            const model = sheetsFilterService.getFilterModel('test', 'sheet1')!;
+            model.setRange({ startRow: 0, endRow: 5, startColumn: 1, endColumn: 3 });
+            model.setCriteria(3, { colId: 3, filters: { filters: ['A'] } } as never);
+
+            const inserted = controller.handleRemoteInsertCol(
+                { startRow: 0, endRow: 5, startColumn: 0, endColumn: 0 },
+                'test',
+                'sheet1'
+            );
+            expect(inserted).toEqual(expect.arrayContaining([
+                expect.objectContaining({ id: SetSheetsFilterRangeMutation.id }),
+                expect.objectContaining({
+                    id: SetSheetsFilterCriteriaMutation.id,
+                    params: expect.objectContaining({ col: 4 }),
+                }),
+            ]));
+
+            model.setRange({ startRow: 0, endRow: 5, startColumn: 1, endColumn: 3 });
+            model.setCriteria(3, { colId: 3, filters: { filters: ['A'] } } as never);
+            const removed = controller.handleRemoteRemoveCol(
+                { startRow: 0, endRow: 5, startColumn: 1, endColumn: 1 },
+                'test',
+                'sheet1'
+            );
+            expect(removed.some((mutation) => mutation.id === RemoveSheetsFilterMutation.id)).toBe(false);
+            expect(removed).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    id: SetSheetsFilterRangeMutation.id,
+                    params: expect.objectContaining({ range: expect.objectContaining({ startColumn: 1, endColumn: 2 }) }),
+                }),
+            ]));
+        });
     });
 
     describe('test interceptor of move-rows-command', () => {

@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'تغییر حالت فیلتر',
         },
         permission: {
-            filterErr: 'شما مجوز استفاده از فیلتر را ندارید.',
+            filterErr: 'محدوده محافظت شده است و شما اجازه فیلتر کردن را ندارید. برای فیلتر کردن، لطفاً با سازنده تماس بگیرید.',
         },
         panel: {
             'clear-filter': 'پاک کردن فیلتر',

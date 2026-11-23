@@ -118,7 +118,7 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
             className={clsx(
                 `
                   univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between
-                  univer-overflow-y-auto univer-pb-5
+                  univer-overflow-y-auto
                 `,
                 scrollbarClassName
             )}

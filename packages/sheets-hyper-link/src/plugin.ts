@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsHyperLinkConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsHyperLinkConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './config/config';
+import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
@@ -61,7 +62,7 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRichTextRefRangeController],
-
+            [SheetsHyperLinkPermissionController],
         ]);
 
         touchDependencies(this._injector, [
@@ -70,6 +71,7 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRichTextRefRangeController],
+            [SheetsHyperLinkPermissionController],
         ]);
     }
 }

@@ -97,11 +97,6 @@ const locale: typeof enUS = {
         showTime: {
             label: 'Zobraziť výber času',
         },
-        permission: {
-            dialog: {
-                setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
-            },
-        },
     },
 };
 

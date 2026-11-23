@@ -131,6 +131,7 @@ describe('conditional formatting render extensions', () => {
         const allocation = vi.spyOn(document, 'createElement');
         if (mode === 'safari' || mode === 'iphone') {
             vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(mode === 'safari' ? 'Safari' : 'iPhone Chrome Safari');
+            vi.spyOn(navigator, 'platform', 'get').mockReturnValue(mode === 'safari' ? 'MacIntel' : 'iPhone');
         } else {
             vi.stubGlobal('navigator', undefined);
             if (mode === 'printing') {
@@ -150,7 +151,7 @@ describe('conditional formatting render extensions', () => {
         expect(ctx.drawImage).not.toHaveBeenCalled();
     });
 
-    it('reuses real bar rasters, separates changed bar styles and releases owned images on disposal', () => {
+    it.each(['Chrome Safari', 'Safari'])('reuses real bar rasters on Linux %s and keeps changed styles separate', (userAgent) => {
         const ctx = createCtx();
         const smoothing: boolean[] = [];
         Object.assign(ctx._context, {
@@ -168,7 +169,8 @@ describe('conditional formatting render extensions', () => {
             ctx._context.imageSmoothingEnabled = smoothing.pop()!;
         });
         vi.mocked(ctx._context.getTransform).mockReturnValue({ a: 3, b: 0, c: 0, d: 3, e: -162.5, f: 100.5 } as DOMMatrix);
-        vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Chrome Safari');
+        vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+        vi.spyOn(navigator, 'platform', 'get').mockReturnValue('Linux x86_64');
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
             return {
                 ...ctx._context,

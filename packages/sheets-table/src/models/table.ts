@@ -31,6 +31,7 @@ export class Table {
     private _showHeader: boolean;
     private _showFooter: boolean;
     private _showAutoFilter: boolean;
+    private _showGridlines?: boolean;
     private _range: ITableRange;
     private _columns: Map<string, TableColumn> = new Map();
     private _columnOrder: string[] = [];
@@ -52,6 +53,7 @@ export class Table {
         this._showHeader = options?.showHeader ?? true;
         this._showFooter = options?.showFooter ?? false;
         this._showAutoFilter = options?.showAutoFilter ?? true;
+        this._showGridlines = options?.showGridlines;
         // init table columns
         const range = this.getRange();
         const startColumn = range.startColumn;
@@ -229,6 +231,14 @@ export class Table {
         this._showAutoFilter = showAutoFilter;
     }
 
+    getShowGridlines() {
+        return this._showGridlines;
+    }
+
+    setShowGridlines(showGridlines?: boolean) {
+        this._showGridlines = showGridlines;
+    }
+
     getTableInfo(): ITableInfo {
         return {
             id: this._id,
@@ -238,6 +248,7 @@ export class Table {
             meta: this.tableMeta,
             showHeader: this._showHeader,
             showAutoFilter: this._showAutoFilter,
+            showGridlines: this._showGridlines,
             columns: this._columnOrder.map((columnId) => this._columns.get(columnId)!.toJSON()),
         };
     }
@@ -250,6 +261,7 @@ export class Table {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
                 showAutoFilter: this._showAutoFilter,
+                ...(this._showGridlines === undefined ? {} : { showGridlines: this._showGridlines }),
             },
             tableStyleId: this._tableStyleId,
         };
@@ -269,6 +281,7 @@ export class Table {
                 showHeader: this._showHeader,
                 showFooter: this._showFooter,
                 showAutoFilter: this._showAutoFilter,
+                ...(this._showGridlines === undefined ? {} : { showGridlines: this._showGridlines }),
                 tableStyleId: this._tableStyleId,
             },
             // TODO: support filter
@@ -287,6 +300,7 @@ export class Table {
         this._showHeader = json.options.showHeader ?? true;
         this._showFooter = json.options.showFooter ?? true;
         this._showAutoFilter = json.options.showAutoFilter ?? true;
+        this._showGridlines = json.options.showGridlines;
         this._columns.clear();
         this._columnOrder = [];
         const columns = json.columns;
@@ -307,6 +321,7 @@ export class Table {
         this._showHeader = true;
         this._showFooter = true;
         this._showAutoFilter = true;
+        this._showGridlines = undefined;
         // @ts-ignore
         delete this._range;
         this._columns.clear();

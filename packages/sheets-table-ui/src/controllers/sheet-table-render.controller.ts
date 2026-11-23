@@ -16,7 +16,8 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject, Injector, RxDisposable } from '@univerjs/core';
+import { Inject, RxDisposable, toDisposable } from '@univerjs/core';
+import { Spreadsheet } from '@univerjs/engine-render';
 import { TableManager } from '@univerjs/sheets-table';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
@@ -28,12 +29,24 @@ import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 export class SheetsTableRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(TableManager) private _tableManager: TableManager,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController
     ) {
         super();
+        const { mainComponent, unitId } = this._context;
+        if (mainComponent instanceof Spreadsheet) {
+            mainComponent.setGridlineRangeProvider((sheetId) => this._tableManager.getTablesBySubunitId(unitId, sheetId).flatMap((table) => {
+                const visible = table.getShowGridlines();
+                return visible === undefined ? [] : [{ range: table.getRange(), visible }];
+            }));
+            this.disposeWithMe(toDisposable(() => mainComponent.setGridlineRangeProvider(undefined)));
+            this.disposeWithMe(this._tableManager.tableGridlinesChanged$.subscribe((event) => {
+                if (event.unitId === unitId && event.subUnitId === mainComponent.getSkeleton()?.worksheet.getSheetId()) {
+                    mainComponent.makeDirty();
+                }
+            }));
+        }
         this._initListener();
     }
 

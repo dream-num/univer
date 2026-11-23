@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { ActionRow, Button, Checkbox } from '@univerjs/design';
+import { ActionRow, Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { SetSheetTableCommand, TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -35,6 +35,7 @@ export function SheetTableSettingsDialog(props: ISheetTableSettingsDialogProps) 
     const commandService = useDependency(ICommandService);
     const tableManager = useDependency(TableManager);
     const [initial] = useState(() => tableManager.getTableById(unitId, tableId)?.getTableInfo());
+    const [showGridlines, setShowGridlines] = useState(initial?.showGridlines ?? null);
     const [showAutoFilter, setShowAutoFilter] = useState(initial?.showAutoFilter ?? true);
     const [columns, setColumns] = useState<Record<string, boolean>>(() =>
         Object.fromEntries((initial?.columns ?? []).map((column) => [column.id, column.showFilterButton !== false])));
@@ -48,7 +49,9 @@ export function SheetTableSettingsDialog(props: ISheetTableSettingsDialogProps) 
         const changedColumns = Object.fromEntries(initial.columns
             .filter((column) => columns[column.id] !== (column.showFilterButton !== false))
             .map((column) => [column.id, columns[column.id]]));
-        if (showAutoFilter === initial.showAutoFilter && Object.keys(changedColumns).length === 0) {
+        const filterButtonsChanged = showAutoFilter !== initial.showAutoFilter || Object.keys(changedColumns).length > 0;
+        const gridlinesChanged = showGridlines !== (initial.showGridlines ?? null);
+        if (!filterButtonsChanged && !gridlinesChanged) {
             onClose();
             return;
         }
@@ -58,10 +61,13 @@ export function SheetTableSettingsDialog(props: ISheetTableSettingsDialogProps) 
             const success = await commandService.executeCommand(SetSheetTableCommand.id, {
                 unitId,
                 tableId,
-                filterButtons: {
-                    ...(showAutoFilter === initial.showAutoFilter ? {} : { showAutoFilter }),
-                    columns: changedColumns,
-                },
+                showGridlines: gridlinesChanged ? showGridlines : undefined,
+                filterButtons: filterButtonsChanged
+                    ? {
+                        ...(showAutoFilter === initial.showAutoFilter ? {} : { showAutoFilter }),
+                        columns: changedColumns,
+                    }
+                    : undefined,
             });
             if (success) {
                 onClose();
@@ -75,8 +81,24 @@ export function SheetTableSettingsDialog(props: ISheetTableSettingsDialogProps) 
         }
     };
 
+    const gridlinesLabel = localeService.t<LocaleKey>('sheets-table-ui.tableGridlines');
+
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
+            <FormLayout label={gridlinesLabel}>
+                <Select
+                    aria-label={gridlinesLabel}
+                    className="univer-w-full"
+                    disabled={saving || !initial}
+                    options={[
+                        { value: 'worksheet', label: localeService.t<LocaleKey>('sheets-table-ui.gridlinesFollowWorksheet') },
+                        { value: 'show', label: localeService.t<LocaleKey>('sheets-table-ui.gridlinesShow') },
+                        { value: 'hide', label: localeService.t<LocaleKey>('sheets-table-ui.gridlinesHide') },
+                    ]}
+                    value={showGridlines === null ? 'worksheet' : showGridlines ? 'show' : 'hide'}
+                    onChange={(value) => setShowGridlines(value === 'worksheet' ? null : value === 'show')}
+                />
+            </FormLayout>
             <Checkbox checked={showAutoFilter} disabled={saving || !initial} onChange={(value) => setShowAutoFilter(Boolean(value))}>
                 {localeService.t<LocaleKey>('sheets-table-ui.showFilterButtons')}
             </Checkbox>

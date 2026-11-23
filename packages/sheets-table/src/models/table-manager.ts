@@ -21,6 +21,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import type {
     ITableAddedEvent,
+    ITableBaseEvent,
     ITableDeletedEvent,
     ITableFilterChangedEvent,
     ITableFilterItem,
@@ -63,6 +64,9 @@ export class TableManager extends Disposable {
 
     private _tableThemeChanged$ = new Subject<ITableThemeChangedEvent>();
     public tableThemeChanged$ = this._tableThemeChanged$.asObservable();
+
+    private _tableGridlinesChanged$ = new Subject<ITableBaseEvent>();
+    public tableGridlinesChanged$ = this._tableGridlinesChanged$.asObservable();
 
     private _tableFilterChanged$ = new Subject<ITableFilterChangedEvent>();
     public tableFilterChanged$ = this._tableFilterChanged$.asObservable();
@@ -400,6 +404,10 @@ export class TableManager extends Disposable {
         }
         const subUnitId = table.getSubunitId();
         const { name, updateRange, rowColOperation, theme, sortInfo, options, filterButtons } = config;
+        if (config.showGridlines !== undefined) {
+            table.setShowGridlines(config.showGridlines ?? undefined);
+            this._tableGridlinesChanged$.next({ unitId, subUnitId, tableId });
+        }
         if (config.calculatedColumn) {
             const column = table.getColumn(config.calculatedColumn.columnId);
             if (column) {
@@ -558,6 +566,7 @@ export class TableManager extends Disposable {
         this._tableNameChanged$.complete();
         this._tableRangeChanged$.complete();
         this._tableThemeChanged$.complete();
+        this._tableGridlinesChanged$.complete();
         this._tableFilterChanged$.complete();
         this._tableInitStatus.complete();
 

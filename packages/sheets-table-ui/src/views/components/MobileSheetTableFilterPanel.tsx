@@ -271,7 +271,7 @@ function MobileSheetTableFilterPanelContent(props: IMobileSheetTableFilterPanelC
                     role="dialog"
                     ariaLabel={detailTitle}
                     panelClassName="univer-pointer-events-auto"
-                    contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                    contentClassName="univer-min-h-0"
                     header={(
                         <header
                             className="

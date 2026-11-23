@@ -130,11 +130,11 @@ export function MobileDialogPart() {
                       univer-bg-gray-0 univer-text-gray-900
                       dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                     "
-                contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                contentClassName="univer-min-h-0"
                 header={(
                     <header
                         className="
-                          univer-flex univer-h-12 univer-flex-1 univer-items-center univer-justify-between univer-px-4
+                          univer-flex univer-h-12 univer-flex-1 univer-items-center univer-justify-between univer-px-3
                         "
                     >
                         <div className="univer-min-w-0 univer-truncate univer-text-base univer-font-semibold">{options.title}</div>
@@ -162,7 +162,7 @@ export function MobileDialogPart() {
                         <footer
                             className="
                               univer-shrink-0 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200
-                              univer-p-4
+                              univer-p-3
                               dark:!univer-border-gray-700
                             "
                         >

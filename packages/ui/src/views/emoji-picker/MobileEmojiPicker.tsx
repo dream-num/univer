@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IEmojiPickerProps } from './EmojiPicker';
 import { MobileDropdown } from '@univerjs/design';
+import type { IEmojiPickerProps } from './EmojiPicker';
 import { EmojiPicker } from './EmojiPicker';
 
 export function MobileEmojiPicker(props: IEmojiPickerProps) {

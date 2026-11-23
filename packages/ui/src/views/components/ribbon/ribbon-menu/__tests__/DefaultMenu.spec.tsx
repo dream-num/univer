@@ -60,4 +60,14 @@ it('focuses the current group and returns to the trigger after selection or Esca
     await waitFor(() => expect(document.activeElement).toBe(selected));
     fireEvent.keyDown(selected, { key: 'Escape' });
     await waitFor(() => expect(document.activeElement).toBe(trigger));
+
+    fireEvent.pointerEnter(trigger, { pointerType: 'mouse' });
+    const preview = await waitFor(() => getByRole('dialog', { name: 'Start' }));
+    expect(document.activeElement).toBe(trigger);
+    fireEvent.pointerDown(trigger, { pointerType: 'mouse', button: 0 });
+    fireEvent.click(trigger);
+    const currentGroup = within(preview).getByRole('button', { name: /^Start/ });
+    await waitFor(() => expect(document.activeElement).toBe(currentGroup));
+    fireEvent.keyDown(currentGroup, { key: 'Escape' });
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
 });

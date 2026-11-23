@@ -55,6 +55,7 @@ export function DefaultMenu({
 
     const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const hoverPreviewRef = useRef(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const selectedButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => () => clearTimeout(hoverTimerRef.current), []);
@@ -103,6 +104,12 @@ export function DefaultMenu({
                         if (!hoverPreviewRef.current) {
                             selectedButtonRef.current?.focus();
                         }
+                    }
+                }}
+                onInteractOutside={(event) => {
+                    // Pinning a hover preview is an interaction with the chooser. Escape should still refocus its trigger.
+                    if (event.target instanceof Node && triggerRef.current?.contains(event.target)) {
+                        event.preventDefault();
                     }
                 }}
                 onCloseAutoFocus={(event) => {
@@ -157,6 +164,7 @@ export function DefaultMenu({
                 })}
             >
                 <Button
+                    ref={triggerRef}
                     type="button"
                     className="
                       univer-me-2 univer-h-7 univer-gap-1.5 univer-rounded-full univer-border-transparent

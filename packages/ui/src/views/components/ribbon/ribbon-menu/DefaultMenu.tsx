@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { LocaleService } from '@univerjs/core';
-import { borderClassName, clsx, HoverCard } from '@univerjs/design';
+import { borderClassName, Button, clsx, Dropdown } from '@univerjs/design';
 import {
     DatabaseIcon,
     EyeIcon,
@@ -26,7 +25,8 @@ import {
     MoreDownIcon,
     MoreVerticalIcon,
 } from '@univerjs/icons';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { RibbonPosition } from '../../../../services/menu/types';
 import { useDependency } from '../../../../utils/di';
 
@@ -53,86 +53,130 @@ export function DefaultMenu({
 
     const [groupSelectorVisible, setGroupSelectorVisible] = useState(false);
 
-    function handleSelectTab(tab: IMenuSchema) {
-        onSelectTab(tab);
-        setGroupSelectorVisible(false);
+    const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const hoverPreviewRef = useRef(false);
+    const selectedButtonRef = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => () => clearTimeout(hoverTimerRef.current), []);
+
+    function handleOpenChange(open: boolean) {
+        clearTimeout(hoverTimerRef.current);
+        if (open) {
+            hoverPreviewRef.current = false;
+        }
+        setGroupSelectorVisible(open);
     }
 
     return (
-        <HoverCard
-            className="univer-max-w-96 !univer-rounded-xl"
-            align="start"
-            open={groupSelectorVisible}
-            overlay={(
-                <div className="univer-grid univer-gap-1 univer-px-2 univer-py-1">
-                    {ribbon.map((group) => {
-                        const Icon = iconMap[group.key as RibbonPosition] ?? MoreVerticalIcon;
-
-                        return (
-                            <a
-                                key={group.key}
-                                data-u-comp="ribbon-group-btn"
-                                className={`
-                                  univer-box-border univer-flex univer-cursor-pointer univer-items-center univer-gap-2.5
-                                  univer-rounded-lg univer-px-2 univer-py-1.5
-                                  hover:univer-bg-gray-100
-                                  dark:hover:!univer-bg-gray-700
-                                `}
-                                role="button"
-                                onClick={() => handleSelectTab(group)}
-                            >
-                                <span
-                                    className={clsx(`
-                                      univer-box-border univer-flex univer-size-9 univer-flex-shrink-0
-                                      univer-items-center univer-justify-center univer-rounded-lg
-                                    `, borderClassName)}
-                                >
-                                    <Icon
-                                        className={`
-                                          univer-text-gray-500
-                                          dark:!univer-text-gray-300
-                                        `}
-                                        preserveStrokeWidth
-                                    />
-                                </span>
-                                <span className="univer-flex univer-flex-col">
-                                    <strong
-                                        className={`
-                                          univer-text-sm univer-font-semibold univer-text-gray-800
-                                          dark:!univer-text-gray-200
-                                        `}
-                                    >
-                                        {localeService.t(group.title || group.key)}
-                                    </strong>
-                                    <span className="univer-text-xs univer-text-gray-400">
-                                        {localeService.t(`${group.title || group.key}Desc`)}
-                                    </span>
-                                </span>
-                            </a>
-                        );
-                    })}
-                </div>
-            )}
-            onOpenChange={setGroupSelectorVisible}
+        <div
+            className="univer-flex univer-items-center"
+            onPointerEnter={(event) => {
+                if (event.pointerType !== 'mouse') {
+                    return;
+                }
+                clearTimeout(hoverTimerRef.current);
+                if (!groupSelectorVisible) {
+                    hoverTimerRef.current = setTimeout(() => {
+                        hoverPreviewRef.current = true;
+                        setGroupSelectorVisible(true);
+                    }, 200);
+                }
+            }}
+            onPointerLeave={() => {
+                clearTimeout(hoverTimerRef.current);
+                if (hoverPreviewRef.current) {
+                    hoverTimerRef.current = setTimeout(() => setGroupSelectorVisible(false), 300);
+                }
+            }}
         >
-            <a
-                className={`
-                  univer-mr-2 univer-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1.5
-                  univer-whitespace-nowrap !univer-rounded-full univer-bg-gray-700 univer-pl-3 univer-pr-2
-                  univer-text-sm univer-text-gray-0
-                  dark:!univer-bg-gray-200 dark:!univer-text-gray-800
-                `}
-                onClick={() => setGroupSelectorVisible(true)}
+            <Dropdown
+                align="start"
+                aria-label={localeService.t(activatedTabTitle)}
+                className="
+                  univer-box-border univer-grid univer-w-64 univer-max-w-[calc(100vw-1rem)] univer-gap-1 univer-p-1.5
+                "
+                open={groupSelectorVisible}
+                onOpenChange={handleOpenChange}
+                onOpenAutoFocus={(event) => {
+                    if (hoverPreviewRef.current || selectedButtonRef.current) {
+                        event.preventDefault();
+                        if (!hoverPreviewRef.current) {
+                            selectedButtonRef.current?.focus();
+                        }
+                    }
+                }}
+                onCloseAutoFocus={(event) => {
+                    if (hoverPreviewRef.current) {
+                        event.preventDefault();
+                    }
+                }}
+                overlay={ribbon.map((group) => {
+                    const Icon = iconMap[group.key as RibbonPosition] ?? MoreVerticalIcon;
+                    const active = group.key === activatedTab;
+                    return (
+                        <Button
+                            key={group.key}
+                            ref={active ? selectedButtonRef : undefined}
+                            type="button"
+                            variant="text"
+                            aria-current={active || undefined}
+                            data-u-comp="ribbon-group-btn"
+                            className="
+                              univer-h-auto univer-w-full univer-justify-start univer-gap-2.5 univer-whitespace-normal
+                              univer-rounded univer-border-0 univer-px-2 univer-py-1.5 univer-text-start
+                              aria-[current=true]:univer-bg-gray-100
+                              dark:aria-[current=true]:!univer-bg-gray-600
+                            "
+                            onClick={() => {
+                                hoverPreviewRef.current = false;
+                                onSelectTab(group);
+                                handleOpenChange(false);
+                            }}
+                        >
+                            <span
+                                className={clsx(`
+                                  univer-box-border univer-grid univer-size-9 univer-shrink-0 univer-place-items-center
+                                  univer-rounded-md
+                                `, borderClassName)}
+                            >
+                                <Icon aria-hidden="true" preserveStrokeWidth />
+                            </span>
+                            <span className="univer-flex univer-min-w-0 univer-flex-col">
+                                <strong className="univer-text-sm univer-font-semibold">{localeService.t(group.title || group.key)}</strong>
+                                <span
+                                    className="
+                                      univer-text-xs univer-text-gray-500
+                                      dark:!univer-text-gray-300
+                                    "
+                                >
+                                    {localeService.t(`${group.title || group.key}Desc`)}
+                                </span>
+                            </span>
+                        </Button>
+                    );
+                })}
             >
-                {localeService.t(activatedTabTitle)}
-                <MoreDownIcon
-                    className={`
-                      univer-text-gray-200
-                      dark:!univer-text-gray-500
-                    `}
-                    preserveStrokeWidth
-                />
-            </a>
-        </HoverCard>
+                <Button
+                    type="button"
+                    className="
+                      univer-me-2 univer-h-7 univer-gap-1.5 univer-rounded-full univer-border-transparent
+                      univer-bg-gray-700 univer-px-3 univer-text-gray-0
+                      hover:univer-bg-gray-600
+                      dark:!univer-bg-gray-200 dark:!univer-text-gray-800
+                    "
+                    onClick={(event) => {
+                        if (groupSelectorVisible && hoverPreviewRef.current) {
+                            event.preventDefault();
+                            clearTimeout(hoverTimerRef.current);
+                            hoverPreviewRef.current = false;
+                            selectedButtonRef.current?.focus();
+                        }
+                    }}
+                >
+                    {localeService.t(activatedTabTitle)}
+                    <MoreDownIcon aria-hidden="true" preserveStrokeWidth />
+                </Button>
+            </Dropdown>
+        </div>
     );
 }

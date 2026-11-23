@@ -28,6 +28,7 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     Injector,
+    JSONX,
     LocaleService,
     LocaleType,
     ObjectRelativeFromH,
@@ -3875,18 +3876,25 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    function createContinuousTableFixture(frameOwner?: 'table' | 'row', frameEdge: 'top' | 'bottom' = 'bottom') {
+    function createContinuousTableFixture(frameOwner?: 'table' | 'row', frameEdge: 'top' | 'bottom' = 'bottom', includeThirdTable = false) {
         const T = DataStreamTreeTokenType;
         const wrapTable = (text: string) => `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
-        const first = wrapTable('A');
-        const second = wrapTable('B');
         const gap = 'gap\r'.repeat(70);
-        const secondStart = first.length + gap.length;
-        const dataStream = `${first}${gap}${second}\r\n`;
+        const tableIds = includeThirdTable ? ['first', 'second', 'third'] : ['first', 'second'];
+        let dataStream = '';
+        const tables = tableIds.map((tableId, index) => {
+            if (index > 0) {
+                dataStream += gap;
+            }
+            const startIndex = dataStream.length;
+            dataStream += wrapTable('ABC'[index]);
+            return { tableId, startIndex, endIndex: dataStream.length };
+        });
+        dataStream += '\r\n';
         const bottomBorder = { width: { v: 20 }, color: { rgb: '#a02030' } };
         const frameBorder = { width: { v: frameEdge === 'top' ? 160 : 40 }, color: { rgb: '#dc4444' } };
         const cellBorder = { width: { v: 1 }, color: { rgb: '#000000' } };
-        const tableSource = Object.fromEntries(['first', 'second'].map((tableId): [string, ITable] => [tableId, {
+        const tableSource = Object.fromEntries(tableIds.map((tableId): [string, ITable] => [tableId, {
             tableId,
             align: TableAlignmentType.START,
             indent: { v: 0 },
@@ -3913,10 +3921,7 @@ describe('documents render', () => {
                 dataStream,
                 paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
                 sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index!, sectionId: `s-${index}` })),
-                tables: [
-                    { tableId: 'first', startIndex: 0, endIndex: first.length },
-                    { tableId: 'second', startIndex: secondStart, endIndex: secondStart + second.length },
-                ],
+                tables,
             },
             tableSource,
             documentStyle: { documentFlavor: DocumentFlavor.MODERN },
@@ -3948,6 +3953,104 @@ describe('documents render', () => {
             },
         };
     }
+
+    it('reuses custom range intersections when redrawing 160 offscreen tables with links', () => {
+        const T = DataStreamTreeTokenType;
+        const count = 160;
+        const tableText = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}L\r\n${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const tableParagraph = `${tableText}\r`;
+        const dataStream = `${tableParagraph.repeat(count)}${'gap\r'.repeat(40)}\n`;
+        const tables = Array.from({ length: count }, (_, index) => ({
+            tableId: `linked-table-${index}`,
+            startIndex: index * tableParagraph.length,
+            endIndex: index * tableParagraph.length + tableText.length,
+        }));
+        const tableWidth = { type: TableSizeType.SPECIFIED, width: { v: 160 } };
+        const bed = createParagraphLayoutTestBed('', {
+            body: {
+                dataStream,
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
+                tables,
+                customRanges: tables.map(({ tableId, startIndex }) => ({
+                    rangeId: tableId,
+                    startIndex: startIndex + tableText.indexOf('L'),
+                    endIndex: startIndex + tableText.indexOf('L'),
+                    rangeType: CustomRangeType.HYPERLINK,
+                })),
+            },
+            tableSource: Object.fromEntries(tables.map(({ tableId }): [string, ITable] => [tableId, {
+                tableId,
+                align: TableAlignmentType.START,
+                indent: { v: 0 },
+                textWrap: TableTextWrapType.NONE,
+                position: { positionH: { relativeFrom: ObjectRelativeFromH.PAGE }, positionV: { relativeFrom: ObjectRelativeFromV.PAGE } },
+                dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                size: tableWidth,
+                tableColumns: [{ size: tableWidth }],
+                tableRows: [{ trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } }, tableCells: [{}] }],
+            }])),
+            documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+        });
+        const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
+        const documents = Documents.create('linked-offscreen-tables', skeleton);
+        scene.addObject(documents, 1);
+        const viewport = scene.getMainViewport();
+        const scrollbar = new ScrollBar(viewport);
+        const ctx = canvas.getContext();
+        const paint = vi.spyOn(ctx, 'fillText');
+
+        try {
+            skeleton.calculate();
+            const page = skeleton.getSkeletonData()!.pages[0];
+            const lastTable = [...page.skeTables.values()].at(-1)!;
+            const scrollY = page.marginTop + lastTable.top + lastTable.height + 32;
+            scene.transformByState({ height: scrollY + 2 * viewport.height! });
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+            expect(viewport.viewportScrollY).toBeCloseTo(scrollY, 0);
+
+            const ranges = bed.dataModel.getBody()!.customRanges!;
+            let startReads = 0;
+            for (const range of ranges) {
+                const { startIndex } = range;
+                Object.defineProperty(range, 'startIndex', {
+                    configurable: true,
+                    enumerable: true,
+                    get: () => {
+                        startReads++;
+                        return startIndex;
+                    },
+                });
+            }
+
+            const redraw = () => {
+                startReads = 0;
+                paint.mockClear();
+                viewport.render(ctx, [documents]);
+                return {
+                    linkPaints: paint.mock.calls.filter(([text]) => text === 'L').length,
+                    startReads,
+                };
+            };
+            redraw();
+            const warmFrames = Array.from({ length: 3 }, redraw);
+            expect(warmFrames.map(({ linkPaints }) => linkPaints)).toEqual([count, count, count]);
+            expect(warmFrames.map((frame) => frame.startReads)).toEqual([0, 0, 0]);
+
+            // Only the changed range metadata should affect the existing table geometry.
+            const firstLink = { ...ranges[0] };
+            bed.dataModel.apply(JSONX.getInstance().removeOp(['body', 'customRanges', 0], firstLink));
+            expect(redraw().linkPaints).toBe(count - 1);
+            bed.dataModel.apply(JSONX.getInstance().insertOp(['body', 'customRanges', 0], firstLink));
+            expect(redraw().linkPaints).toBe(count);
+        } finally {
+            scrollbar.dispose();
+            documents.dispose();
+            skeleton.dispose();
+            bed.viewModel.dispose();
+            bed.dataModel.dispose();
+        }
+    });
 
     it('uses the actual Canvas clip despite stale viewport bounds and preserves border overflow', () => {
         const { documents, viewport, page, firstTable, secondTable, bottomBorder, dispose } = createContinuousTableFixture();
@@ -4046,6 +4149,52 @@ describe('documents render', () => {
             expect(text).toEqual(['A', 'B']);
         } finally {
             extension.dispose();
+            injector.dispose();
+            dispose();
+        }
+    });
+
+    it('draws declared offscreen table glyphs while skipping ordinary offscreen tables on a jump and return', () => {
+        const { documents, viewport, page, secondTable, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const thirdTable = [...page.skeTables.values()][2];
+        const text: string[] = [];
+        let hasKnownRanges = true;
+        class ScopedTableExtension extends docExtension {
+            override uKey = 'ScopedTableExtension';
+            private _ranges?: [number, number][];
+
+            override clearCache() {
+                const line = secondTable.rows[0].cells[0].sections[0].columns[0].lines[0];
+                this._ranges = hasKnownRanges ? [[line.st, line.ed]] : undefined;
+            }
+
+            getOffscreenTablePaintRanges() {
+                return this._ranges;
+            }
+
+            override draw(_ctx: UniverRenderingContext, _scale: IScale, glyph: IDocumentSkeletonGlyph) {
+                if (glyph.content === 'A' || glyph.content === 'B' || glyph.content === 'C') {
+                    text.push(glyph.content);
+                }
+            }
+        }
+        const injector = new Injector([[ScopedTableExtension]]);
+        const registration = documents.register(injector.get(ScopedTableExtension));
+        const renderAt = (scrollY: number) => {
+            text.length = 0;
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
+            viewport.render(canvas.getContext(), [documents]);
+            return text.join('');
+        };
+        try {
+            expect(renderAt(0)).toBe('AB');
+            expect(renderAt(thirdTable.top)).toBe('BC');
+            expect(renderAt(0)).toBe('AB');
+
+            hasKnownRanges = false;
+            expect(renderAt(0)).toBe('ABC');
+        } finally {
+            registration.dispose();
             injector.dispose();
             dispose();
         }

@@ -15,6 +15,7 @@
  */
 
 import type {
+    DocumentDataModel,
     ICustomRange,
     IDisposable,
     IParagraphBorder,
@@ -30,6 +31,7 @@ import {
     DashStyleType,
     DocumentFlavor,
     HorizontalAlign,
+    mergeIntervals,
     TableTextWrapType,
     TabStopAlignment,
     toDisposable,
@@ -116,6 +118,12 @@ interface ITablePaintExtent {
     maxBorderWidth: number;
 }
 
+interface IDocumentTablePaintExtension {
+    uKey: string;
+    /** Inclusive body offsets whose table glyphs must be dispatched even offscreen. */
+    getOffscreenTablePaintRanges?(): readonly (readonly [number, number])[] | undefined;
+}
+
 function canCullWithCanvasState(ctx: UniverRenderingContext): boolean {
     return ctx.globalCompositeOperation === 'source-over' &&
         !ctx.shadowBlur && !ctx.shadowOffsetX && !ctx.shadowOffsetY &&
@@ -125,6 +133,32 @@ function canCullWithCanvasState(ctx: UniverRenderingContext): boolean {
 function isBuiltInDocumentExtension(extension: object): boolean {
     const type = extension.constructor;
     return type === Background || type === Border || type === FontAndBaseLine || type === Line;
+}
+
+function getExtensionTablePaintRanges(extensions: readonly IDocumentTablePaintExtension[]): [number, number][] | undefined {
+    const ranges: [number, number][] = [];
+    for (const extension of extensions) {
+        if (isBuiltInDocumentExtension(extension)) {
+            continue;
+        }
+
+        if (typeof extension.getOffscreenTablePaintRanges !== 'function') {
+            return;
+        }
+        const declared = extension.getOffscreenTablePaintRanges();
+        // Preserve the original glyph sequence for extensions with undeclared or uncertain dependencies.
+        if (!Array.isArray(declared)) {
+            return;
+        }
+        for (const range of declared) {
+            if (!Array.isArray(range) || !Number.isSafeInteger(range[0]) || !Number.isSafeInteger(range[1]) ||
+                range[0] < 0 || range[1] < range[0]) {
+                return;
+            }
+            ranges.push([range[0], range[1]]);
+        }
+    }
+    return mergeIntervals(ranges);
 }
 
 function getSpacedTableFrame(table: IDocumentSkeletonTable) {
@@ -196,6 +230,21 @@ function getMaxTableBorderWidth(cells: readonly ITableCell[], initialWidth: numb
         );
     }
     return max;
+}
+
+function hasTablePaintRange(intervals: readonly [number, number][], table: IDocumentSkeletonTable): boolean {
+    let first = 0;
+    let last = intervals.length;
+    while (first < last) {
+        const middle = Math.floor((first + last) / 2);
+        if (intervals[middle][1] < table.st) {
+            first = middle + 1;
+        } else {
+            last = middle;
+        }
+    }
+    const interval = intervals[first];
+    return interval != null && rangesOverlap(interval[0], interval[1], table.st, table.ed);
 }
 
 function getLineTop(line: IDocumentSkeletonLine): number {
@@ -383,6 +432,13 @@ export interface IDocumentGlyphPaint {
 export class Documents extends DocComponent {
     private _glyphPaintSink?: (paints: readonly IDocumentGlyphPaint[]) => void;
     private _glyphPaints: IDocumentGlyphPaint[] = [];
+    private _tablePaintRanges?: {
+        model: DocumentDataModel;
+        revision: number;
+        ranges: readonly ICustomRange[];
+        intervals: [number, number][];
+    };
+
     private readonly _tablePaintExtents = new WeakMap<IDocumentSkeletonCached, WeakMap<IDocumentSkeletonTable, ITablePaintExtent | null>>();
 
     /** Route actual Docs glyph painters into a host's ordered compositor. */
@@ -428,6 +484,7 @@ export class Documents extends DocComponent {
     override dispose() {
         this._glyphPaintSink = undefined;
         this._glyphPaints = [];
+        this._tablePaintRanges = undefined;
         super.dispose();
 
         this._pageRender$.complete();
@@ -572,8 +629,8 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
-        // Extensions can use offscreen glyph callbacks for their own render state.
-        const canClipTables = isContinuousLayout && !this._glyphPaintSink && extensions.every(isBuiltInDocumentExtension);
+        const canClipTables = isContinuousLayout && !this._glyphPaintSink && viewportRenderClips.has(ctx);
+        let extensionTablePaintRanges: readonly [number, number][] | null | undefined;
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
         const preTextBackgroundExtensions = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.BACKGROUND);
         const glyphExtensionsExcludeBackground = extensions
@@ -656,10 +713,16 @@ export class Documents extends DocComponent {
             }
 
             if (skeTables.size > 0) {
-                const tables = canClipTables && centerAngle === 0 && vertexAngle === 0 && !renderConfig.stackedText &&
-                    renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE
-                    ? this._getTablesInViewport(ctx, page, skeletonData, dataModel?.getBody?.()?.customRanges)
-                    : skeTables;
+                let tables: Iterable<[string, IDocumentSkeletonTable]> = skeTables;
+                if (canClipTables && centerAngle === 0 && vertexAngle === 0 && !renderConfig.stackedText &&
+                    renderConfig.useCustomGlyphRenderer !== BooleanNumber.TRUE && renderConfig.paintTextOutline !== BooleanNumber.TRUE) {
+                    if (extensionTablePaintRanges === undefined) {
+                        extensionTablePaintRanges = getExtensionTablePaintRanges(extensions) ?? null;
+                    }
+                    if (extensionTablePaintRanges != null) {
+                        tables = this._getTablesInViewport(ctx, page, skeletonData, dataModel, extensionTablePaintRanges);
+                    }
+                }
                 ctx.save();
                 ctx.globalAlpha *= bodyOpacity;
                 this._drawTable(
@@ -825,11 +888,29 @@ export class Documents extends DocComponent {
         this._glyphPaintSink?.(this._glyphPaints);
     }
 
+    private _getTablePaintRanges(model: DocumentDataModel | undefined): readonly [number, number][] {
+        const ranges = model?.getBody?.()?.customRanges;
+        if (model == null || !ranges?.length) {
+            this._tablePaintRanges = undefined;
+            return [];
+        }
+
+        const revision = model.getMutationRevision();
+        let index = this._tablePaintRanges;
+        if (index?.model !== model || index.revision !== revision || index.ranges !== ranges) {
+            const intervals = mergeIntervals(ranges.map(({ startIndex, endIndex }) => [startIndex, endIndex]));
+            index = { model, revision, ranges, intervals };
+            this._tablePaintRanges = index;
+        }
+        return index.intervals;
+    }
+
     private _getTablesInViewport(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         skeletonData: IDocumentSkeletonCached,
-        customRanges: readonly ICustomRange[] | undefined
+        dataModel: DocumentDataModel | undefined,
+        extensionRanges: readonly [number, number][]
     ): Iterable<[string, IDocumentSkeletonTable]> {
         const tables = page.skeTables;
         const clip = viewportRenderClips.get(ctx);
@@ -858,6 +939,7 @@ export class Documents extends DocComponent {
             this._tablePaintExtents.set(skeletonData, extents);
         }
 
+        let paintRanges: readonly [number, number][] | undefined;
         const visibleTables: Array<[string, IDocumentSkeletonTable]> = [];
         for (const entry of tables) {
             const [, table] = entry;
@@ -882,7 +964,8 @@ export class Documents extends DocComponent {
             );
             // Custom ranges can trigger render work such as formula preparation even
             // outside the viewport. Let their table keep the original glyph dispatch.
-            if (overlaps || customRanges?.some((range) => range.startIndex <= table.ed && range.endIndex >= table.st)) {
+            if (overlaps || hasTablePaintRange(extensionRanges, table) ||
+                hasTablePaintRange(paintRanges ??= this._getTablePaintRanges(dataModel), table)) {
                 visibleTables.push(entry);
             }
         }

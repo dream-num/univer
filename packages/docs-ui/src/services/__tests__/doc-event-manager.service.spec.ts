@@ -283,18 +283,19 @@ describe('custom-range hit testing with real document layout', () => {
                 render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
             };
 
-            hover(0, 0);
-            expect(lookup.mock.calls.length).toBeGreaterThan(0);
+            const firstHover = hover(0, 0);
             expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(false);
 
             lookup.mockClear();
+            expect(service.isPointerOnInteractiveRange(firstHover.offsetX, firstHover.offsetY)).toBe(true);
+            expect(lookup).not.toHaveBeenCalled();
+
             hover(1, 20);
             hover(0, 0);
             expect(lookup).not.toHaveBeenCalled();
 
             const scrollTop = expected[20].rects[0].top - 16;
             hover(20, scrollTop);
-            expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(true);
 
             const inserted = 'Inserted paragraph\r';
             const edit = new TextX();
@@ -309,7 +310,6 @@ describe('custom-range hit testing with real document layout', () => {
             lookup.mockClear();
             const updatedBounds = service.getCustomRangeBounds();
             expect(updatedBounds[20].rects[0].top).toBeGreaterThan(expected[20].rects[0].top);
-            expect(lookup.mock.calls.some(([offset]) => offset >= customRanges[20].startIndex)).toBe(true);
             lookup.mockClear();
             click(hover(20, updatedBounds[20].rects[0].top - 16, updatedBounds));
             expect(clicks).toEqual(['link-20']);
@@ -461,16 +461,27 @@ describe('custom-range hit testing with real document layout', () => {
         }
     });
 
-    it('skips table viewports when there are no custom ranges to hit', () => {
+    it.each(['no link', 'a body link', 'one table link', 'links in offscreen tables'])('only queries table viewports relevant to %s', (linkPlacement) => {
+        vi.useFakeTimers();
         const tableCount = 80;
+        const offscreenTables = linkPlacement === 'links in offscreen tables';
+        const linkText = 'Link';
+        const linkedTableId = 'table-40';
         const tableStream = genEmptyTable(1, 1).dataStream;
-        const tableParagraph = `${tableStream}\r`;
-        const dataStream = `${tableParagraph.repeat(tableCount)}\n`;
-        const tables = Array.from({ length: tableCount }, (_, index) => ({
-            tableId: `table-${index}`,
-            startIndex: index * tableParagraph.length,
-            endIndex: index * tableParagraph.length + tableStream.length,
-        }));
+        let dataStream = linkPlacement === 'a body link' ? `${linkText}\r` : '';
+        if (offscreenTables) {
+            dataStream += 'Space before the first table.\r'.repeat(30);
+        }
+        const tables = Array.from({ length: tableCount }, (_, index) => {
+            const tableId = `table-${index}`;
+            const stream = offscreenTables || (linkPlacement === 'one table link' && tableId === linkedTableId)
+                ? tableStream.replace('\r', `${linkText}\r`)
+                : tableStream;
+            const startIndex = dataStream.length;
+            dataStream += `${stream}\r`;
+            return { tableId, startIndex, endIndex: startIndex + stream.length };
+        });
+        dataStream += '\n';
         const univer = new Univer();
         try {
             const injector = univer.__getInjector();
@@ -478,35 +489,63 @@ describe('custom-range hit testing with real document layout', () => {
             injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
             injector.add([DocLayoutExecutorService]);
             const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
-                id: 'tables-without-ranges',
+                id: 'tables-with-custom-range',
                 body: {
                     dataStream,
                     tables,
+                    customRanges: Array.from(dataStream.matchAll(/Link/g), (match, index) => ({
+                        startIndex: match.index,
+                        endIndex: match.index + match[0].length - 1,
+                        rangeId: `link-${index}`,
+                        rangeType: CustomRangeType.HYPERLINK,
+                    })),
                     paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
                     sectionBreaks: Array.from(dataStream.matchAll(/\n/g), (match, index) => ({ startIndex: match.index, sectionId: `s-${index}` })),
                 },
                 tableSource: Object.fromEntries(tables.map(({ tableId }) => [tableId, { ...genTableSource(1, 1, 160), tableId }])),
-                documentStyle: { documentFlavor: DocumentFlavor.MODERN },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.MODERN,
+                    pageSize: { width: 320, height: Number.POSITIVE_INFINITY },
+                    marginTop: 8,
+                },
             });
             const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
             render.deactivate();
             render.addRenderDependencies([[DocSkeletonManagerService]]);
             const skeleton = render.with(DocSkeletonManagerService).recalculate();
-            const documents = injector.createInstance(Documents, 'tables-without-ranges-document', skeleton);
+            const documents = injector.createInstance(Documents, 'tables-with-custom-range-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
+            if (linkPlacement !== 'one table link') {
+                render.scene.transformByState({ width: 320, height: 10_000 });
+                injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 320, height: 100 });
+            }
             render.addRenderDependencies([[DocEventManagerService]]);
             const service = render.with(DocEventManagerService);
-            const getTableViewport = vi.fn(() => null);
+            const getTableViewport = vi.fn((_unitId: string, _tableId: string) => null);
             setDocsTableRenderViewportProvider(getTableViewport);
-            const viewportReads = [];
             for (let attempt = 0; attempt < 3; attempt++) {
                 getTableViewport.mockClear();
-                expect(service.isPointerOnInteractiveRange(20, 20)).toBe(false);
-                viewportReads.push(getTableViewport.mock.calls.length);
+                expect(service.isPointerOnInteractiveRange(1_000, 20)).toBe(false);
+                const tableIds = [...new Set(getTableViewport.mock.calls.map(([, tableId]) => tableId))];
+                expect(tableIds).toEqual(linkPlacement === 'one table link' ? [linkedTableId] : []);
             }
-            expect(viewportReads).toEqual([0, 0, 0]);
+            if (linkPlacement === 'a body link') {
+                const event = { offsetX: 300, offsetY: 20, buttons: 0 } as unknown as IPointerEvent;
+                let rangeViewportReads = 0;
+                service.hoverCustomRangesRealTime$.subscribe(() => {
+                    // Listen before the pointer handler queries table geometry for paragraph hover.
+                    rangeViewportReads = getTableViewport.mock.calls.length;
+                });
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    getTableViewport.mockClear();
+                    render.scene.onPointerMove$.emitEvent(event);
+                    vi.advanceTimersByTime(31);
+                    expect(rangeViewportReads).toBe(0);
+                }
+            }
         } finally {
+            vi.useRealTimers();
             setDocsTableRenderViewportProvider(null);
             univer.dispose();
         }
@@ -597,7 +636,6 @@ describe('custom-range hit testing with real document layout', () => {
             lookup.mockClear();
             hover();
             expect(hovered).toEqual(['Second link']);
-            expect(lookup).toHaveBeenCalled();
             expect(lookup.mock.calls.every(([offset]) => offset < dataStream.indexOf(bodyLink))).toBe(true);
             lookup.mockClear();
             click();

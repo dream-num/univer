@@ -41,10 +41,12 @@ import {
 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
 import type { IDocHoverRangeGeometry } from './doc-hover-range-geometry';
+import type { IDocIntervalIndex } from './doc-range-interval-index';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { buildDocHoverRangeGeometry, findDocHoverRangeCandidates } from './doc-hover-range-geometry';
 import { transformOffset2Bound } from './doc-popup-manager.service';
+import { buildDocIntervalIndex, visitDocIntervals } from './doc-range-interval-index';
 import { findDocRangeNodePositions, NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';
 
@@ -55,6 +57,18 @@ export interface ICustomRangeBound {
     segmentPageIndex: number;
 }
 
+interface IRangeBoundsSnapshot {
+    tableIds: ReadonlySet<string>;
+    tableViewports: string;
+    bounds: ICustomRangeBound[];
+}
+
+interface ICachedBodyRange {
+    tableIds: ReadonlySet<string>;
+    tableViewports: string;
+    bound: ICustomRangeBound | null;
+}
+
 interface ICustomRangeBoundsCache {
     model: DocumentDataModel;
     modelRevision: number;
@@ -62,9 +76,11 @@ interface ICustomRangeBoundsCache {
     pageCount: number;
     lastPage: IDocumentSkeletonPage | undefined;
     lastOffset: number | undefined;
-    bodyBounds: Map<ICustomRange, ICustomRangeBound | null>;
-    tableViewports: Map<string, string>;
-    allBounds?: ICustomRangeBound[];
+    bodyBounds: Map<ICustomRange, ICachedBodyRange>;
+    tables: IDocIntervalIndex<ICustomTable>;
+    hoverGeometry?: IDocHoverRangeGeometry;
+    hoverWindow?: IRangeBoundsSnapshot & { top: number; bottom: number };
+    allBounds?: IRangeBoundsSnapshot;
 }
 
 export interface IBulletBound {
@@ -476,21 +492,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     readonly hoverTableRealTime$ = this._hoverTable$.asObservable();
 
     private _customRangeBoundsCache: ICustomRangeBoundsCache | null = null;
-    private _hoverRangeGeometry: {
-        page: IDocumentSkeletonPage;
-        endIndex: number;
-        model: DocumentDataModel;
-        modelRevision: number;
-        index: IDocHoverRangeGeometry;
-    } | null = null;
-
-    private _hoverRangeWindow: {
-        top: number;
-        bottom: number;
-        tableIds: ReadonlySet<string>;
-        tableViewports: string;
-        bounds: ICustomRangeBound[];
-    } | null = null;
 
     private _bulletDirty = true;
     private _paragraphDirty = true;
@@ -538,8 +539,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     override dispose() {
         this._customRangeBoundsCache = null;
-        this._hoverRangeGeometry = null;
-        this._hoverRangeWindow = null;
         this._hoverCustomRanges$.complete();
         this._clickCustomRanges$.complete();
         this._pointerDownCustomRanges$.complete();
@@ -567,8 +566,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _initResetDirty() {
         const invalidateBounds = () => {
             this._customRangeBoundsCache = null;
-            this._hoverRangeGeometry = null;
-            this._hoverRangeWindow = null;
             this._bulletDirty = true;
             this._paragraphDirty = true;
             this._tableBoundsDirty = true;
@@ -602,7 +599,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
             const { x, y } = transformOffset2Bound(evt.offsetX, evt.offsetY, this._context.scene);
             this._hoverCustomRanges$.next(
-                this._calcHoveredRanges({ x, y })
+                this._calcActiveRanges({ x, y })
             );
             this._hoverParagraph$.next(
                 this._calcActiveParagraph({ x, y })
@@ -722,19 +719,39 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
     }
 
-    private _getBodyCustomRangeBounds(ranges: readonly ICustomRange[], cache: ICustomRangeBoundsCache): ICustomRangeBound[] {
+    private _getBodyCustomRangeBounds(
+        ranges: readonly ICustomRange[],
+        cache: ICustomRangeBoundsCache,
+        viewportSignatures: Map<string, string>
+    ): IRangeBoundsSnapshot {
         const bounds: ICustomRangeBound[] = [];
+        const tableIds = new Set<string>();
         for (const range of ranges) {
-            let bound = cache.bodyBounds.get(range);
-            if (bound === undefined) {
-                bound = this._buildCustomRangeBound(range, undefined, -1);
-                cache.bodyBounds.set(range, bound);
+            let entry = cache.bodyBounds.get(range);
+            const rangeTableIds = entry?.tableIds ?? this._getCustomRangeTableIds(cache.tables, range);
+            const tableViewports = this._getRangeViewportSignature(rangeTableIds, viewportSignatures);
+            if (entry == null || entry.tableViewports !== tableViewports) {
+                entry = {
+                    tableIds: rangeTableIds,
+                    tableViewports,
+                    bound: this._buildCustomRangeBound(range, undefined, -1),
+                };
+                cache.bodyBounds.set(range, entry);
             }
-            if (bound != null) {
-                bounds.push(bound);
+            for (const tableId of rangeTableIds) {
+                tableIds.add(tableId);
+            }
+            if (entry.bound != null) {
+                bounds.push(entry.bound);
             }
         }
-        return bounds;
+        return { bounds, tableIds, tableViewports: this._getRangeViewportSignature(tableIds, viewportSignatures) };
+    }
+
+    private _getCustomRangeTableIds(tables: IDocIntervalIndex<ICustomTable>, range: ICustomRange): ReadonlySet<string> {
+        const tableIds = new Set<string>();
+        visitDocIntervals(tables, range.startIndex, range.endIndex, ({ tableId }) => tableIds.add(tableId));
+        return tableIds;
     }
 
     private _getCustomRangeBoundsCache(): ICustomRangeBoundsCache {
@@ -747,6 +764,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         let cache = this._customRangeBoundsCache;
         if (cache == null || cache.model !== unit || cache.modelRevision !== modelRevision ||
             cache.bodyRangeCount !== bodyRangeCount || cache.pageCount !== pages.length || cache.lastPage !== lastPage || cache.lastOffset !== lastPage?.ed) {
+            const tables = bodyRangeCount > 0 ? body?.tables ?? [] : [];
             cache = {
                 model: unit,
                 modelRevision,
@@ -755,48 +773,33 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 lastPage,
                 lastOffset: lastPage?.ed,
                 bodyBounds: new Map(),
-                tableViewports: new Map(),
+                tables: buildDocIntervalIndex(tables.map((table) => ({
+                    start: table.startIndex,
+                    end: table.endIndex - 1, // Model tables have an exclusive end; custom ranges are inclusive.
+                    value: table,
+                }))),
             };
             this._customRangeBoundsCache = cache;
-        }
-
-        if (bodyRangeCount > 0 && body?.tables != null) {
-            this._updateCustomRangeTableViewports(cache, body.tables);
         }
         return cache;
     }
 
-    private _updateCustomRangeTableViewports(cache: ICustomRangeBoundsCache, tables: readonly ICustomTable[]): void {
-        const changedTables = [];
-        for (const table of tables) {
-            const signature = this._getRangeTableViewportSignature(table.tableId);
-            const previous = cache.tableViewports.get(table.tableId);
-            if (previous === signature) {
-                continue;
-            }
-            cache.tableViewports.set(table.tableId, signature);
-            if (previous != null) {
-                changedTables.push(table);
-            }
-        }
-        if (changedTables.length > 0) {
-            // Range rectangles include table clipping and scroll offsets.
-            for (const range of cache.bodyBounds.keys()) {
-                if (changedTables.some((table) => range.startIndex < table.endIndex && range.endIndex >= table.startIndex)) {
-                    cache.bodyBounds.delete(range);
-                }
-            }
-            cache.allBounds = undefined;
-        }
-    }
-
     private _getAllCustomRangeBounds(): ICustomRangeBound[] {
         const cache = this._getCustomRangeBoundsCache();
-        if (cache.allBounds != null) {
-            return cache.allBounds;
+        const viewportSignatures = new Map<string, string>();
+        if (cache.allBounds != null &&
+            cache.allBounds.tableViewports === this._getRangeViewportSignature(cache.allBounds.tableIds, viewportSignatures)) {
+            return cache.allBounds.bounds;
         }
         const { unit } = this._context;
-        const bounds = this._getBodyCustomRangeBounds(unit.getBody()?.customRanges ?? [], cache);
+        const body = this._getBodyCustomRangeBounds(unit.getBody()?.customRanges ?? [], cache, viewportSignatures);
+        cache.allBounds = { ...body, bounds: [...body.bounds, ...this._buildStoryCustomRangeBounds()] };
+        return cache.allBounds.bounds;
+    }
+
+    private _buildStoryCustomRangeBounds(): ICustomRangeBound[] {
+        const { unit } = this._context;
+        const bounds: ICustomRangeBound[] = [];
         this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
             for (const segmentId of [page.headerId, page.footerId]) {
                 if (!segmentId) {
@@ -811,15 +814,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 }
             }
         });
-        cache.allBounds = bounds;
         return bounds;
     }
 
-    private _calcHoveredRanges(point: { x: number; y: number }): ICustomRangeActive[] {
+    private _calcActiveRanges(point: { x: number; y: number }): ICustomRangeActive[] {
         const { scene, unit } = this._context;
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN || viewport?.isActive !== true) {
-            return this._calcActiveRanges(point);
+            return this._hitCustomRangeBounds(point, this._getAllCustomRangeBounds());
         }
 
         const pages = this._skeleton.getSkeletonData()?.pages ?? [];
@@ -835,70 +837,55 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             point.y < top || point.y > bottom ||
             hasStoryCustomRanges(unit, page.headerId) || hasStoryCustomRanges(unit, page.footerId)
         ) {
-            return this._calcActiveRanges(point);
+            return this._hitCustomRangeBounds(point, this._getAllCustomRangeBounds());
         }
 
         const ranges = unit.getBody()?.customRanges;
-        return ranges?.length ? this._hitCustomRangeBounds(point, this._getHoverRangeBounds(page, ranges, top, bottom)) : [];
+        return ranges?.length ? this._hitCustomRangeBounds(point, this._getBufferedRangeBounds(page, ranges, top, bottom)) : [];
     }
 
-    private _getHoverRangeBounds(
+    private _getBufferedRangeBounds(
         page: IDocumentSkeletonPage,
         ranges: readonly ICustomRange[],
         top: number,
         bottom: number
     ): ICustomRangeBound[] {
-        const { unit } = this._context;
-        const modelRevision = unit.getMutationRevision();
-        let indexed = this._hoverRangeGeometry;
-        if (indexed?.page !== page || indexed.endIndex !== page.ed ||
-            indexed.model !== unit || indexed.modelRevision !== modelRevision) {
-            indexed = {
-                page,
-                endIndex: page.ed,
-                model: unit,
-                modelRevision,
-                index: buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop, ranges),
-            };
-            this._hoverRangeGeometry = indexed;
-            this._hoverRangeWindow = null;
-        }
-        const geometry = indexed.index;
-        const window = this._hoverRangeWindow;
+        const cache = this._getCustomRangeBoundsCache();
+        cache.hoverGeometry ??= buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop, ranges);
+        const window = cache.hoverWindow;
+        const viewportSignatures = new Map<string, string>();
         if (window != null && top >= window.top && bottom <= window.bottom &&
-            window.tableViewports === this._getHoverTableViewportSignature(window.tableIds)) {
+            window.tableViewports === this._getRangeViewportSignature(window.tableIds, viewportSignatures)) {
             return window.bounds;
         }
 
         const buffer = (bottom - top) * HOVER_SCROLL_BUFFER_RATIO;
         const windowTop = top - buffer;
         const windowBottom = bottom + buffer;
-        const { candidates, tableIds } = findDocHoverRangeCandidates(geometry, windowTop, windowBottom);
-        const bounds = this._getBodyCustomRangeBounds(candidates, this._getCustomRangeBoundsCache())
-            .filter((layout) => layout.rects.some((rect) => rect.top <= windowBottom && rect.bottom >= windowTop));
-        this._hoverRangeWindow = {
-            top: windowTop,
-            bottom: windowBottom,
-            tableIds,
-            tableViewports: this._getHoverTableViewportSignature(tableIds),
-            bounds,
-        };
+        const candidates = findDocHoverRangeCandidates(cache.hoverGeometry, windowTop, windowBottom);
+        const body = this._getBodyCustomRangeBounds(candidates, cache, viewportSignatures);
+        const bounds = body.bounds.filter((layout) => layout.rects.some((rect) => rect.top <= windowBottom && rect.bottom >= windowTop));
+        cache.hoverWindow = { ...body, top: windowTop, bottom: windowBottom, bounds };
         return bounds;
     }
 
-    private _getRangeTableViewportSignature(tableId: string): string {
-        const table = getDocsTableRenderViewport(this._context.unitId, tableId);
-        return table == null
-            ? ''
-            : [table.scrollLeft, table.viewportWidth, table.contentWidth, table.leadingInsetLeft, table.trailingInsetRight].join(':');
-    }
-
-    private _getHoverTableViewportSignature(tableIds: ReadonlySet<string>): string {
-        return Array.from(tableIds, (id) => this._getRangeTableViewportSignature(id)).join('|');
-    }
-
-    private _calcActiveRanges(point: { x: number; y: number }): ICustomRangeActive[] {
-        return this._hitCustomRangeBounds(point, this._getAllCustomRangeBounds());
+    private _getRangeViewportSignature(tableIds: ReadonlySet<string>, viewportSignatures: Map<string, string>): string {
+        if (tableIds.size === 0) {
+            return '';
+        }
+        const parts: string[] = [];
+        for (const tableId of tableIds) {
+            let signature = viewportSignatures.get(tableId);
+            if (signature === undefined) {
+                const table = getDocsTableRenderViewport(this._context.unitId, tableId);
+                signature = table == null
+                    ? ''
+                    : [table.scrollLeft, table.viewportWidth, table.contentWidth, table.leadingInsetLeft, table.trailingInsetRight].join(':');
+                viewportSignatures.set(tableId, signature);
+            }
+            parts.push(signature);
+        }
+        return parts.join('|');
     }
 
     private _hitCustomRangeBounds({ x, y }: { x: number; y: number }, bounds: ICustomRangeBound[]): ICustomRangeActive[] {

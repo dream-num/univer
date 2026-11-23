@@ -444,7 +444,7 @@ export class Font extends SheetExtension {
         //#endregion
 
         if (notInMergeRange) {
-            const visibleRow = spreadsheetSkeleton.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowHeight(row) > 0;
+            const visibleRow = spreadsheetSkeleton.getRowVisible(row) && spreadsheetSkeleton.worksheet.getRowManager().getRowHeight(row) > 0;
             if (!visibleRow) {
                 return true;
             }
@@ -457,7 +457,7 @@ export class Font extends SheetExtension {
             let isAllRowHidden = true;
 
             for (let r = mergeInfo.startRow; r <= mergeInfo.endRow; r++) {
-                const visibleRow = spreadsheetSkeleton.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowHeight(r) > 0;
+                const visibleRow = spreadsheetSkeleton.getRowVisible(r) && spreadsheetSkeleton.worksheet.getRowManager().getRowHeight(r) > 0;
                 if (visibleRow) {
                     isAllRowHidden = false;
                     break;

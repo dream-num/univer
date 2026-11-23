@@ -17,6 +17,7 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
 import { SheetsTableButtonStateEnum, TableColumnFilterTypeEnum, TableManager } from '@univerjs/sheets-table';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -35,6 +36,7 @@ vi.hoisted(() => {
 describe('SheetsTableFilterButtonRenderController', () => {
     it('shows isolated table criteria, skips unchanged display state, and restores public indicators', () => {
         const univer = new Univer();
+        univer.registerPlugin(UniverRenderEnginePlugin);
         const injector = univer.__getInjector();
         injector.add([TableManager]);
         injector.add([SheetInterceptorService]);

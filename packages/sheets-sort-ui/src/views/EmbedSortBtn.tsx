@@ -30,6 +30,7 @@ export interface IEmbedSortBtnProps {
     range: IRange;
     colIndex: number;
     onClose: () => void;
+    tableId?: string;
 }
 
 export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
@@ -57,6 +58,11 @@ export default function EmbedSortBtn(props: IEmbedSortBtnProps) {
 
         onClose();
     }, [range, colIndex, sheetsSortService, sheetsSortUIService, univerInstanceService, onClose]);
+
+    // Tables provide their own sorting actions, which preserve footers and table sort state.
+    if (props.tableId !== undefined) {
+        return null;
+    }
 
     return (
         <ButtonGroup className="univer-mb-3 univer-w-full univer-grid-cols-2">

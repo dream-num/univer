@@ -107,7 +107,7 @@ function createSpreadsheetSkeleton() {
     const worksheet = {
         getRowVisible: vi.fn(() => true),
         getColVisible: vi.fn(() => true),
-        getRowHeight: vi.fn(() => 20),
+        getRowManager: () => ({ getRowHeight: () => 20 }),
         getColumnWidth: vi.fn(() => 40),
         getCell: vi.fn(() => ({ v: 'A', t: CellValueType.STRING })),
         getMergeData: vi.fn(() => []),
@@ -175,6 +175,8 @@ describe('font extension', () => {
     });
 
     it.each([
+        ['projected rows hidden by the public filter', true, false, false, 1, false, false, true],
+        ['projected merged rows hidden by the public filter', true, true, false, 1, false, false, true],
         ['hidden columns', false, false, true],
         ['hidden rows', true, false, true],
         ['hidden merged columns', false, true, true],
@@ -195,7 +197,7 @@ describe('font extension', () => {
         ['hidden merged rows with gaps', true, true, true, 0, false, true],
         ['partially zero-width merged columns with gaps', false, true, false, 0, true, true],
         ['partially zero-height merged rows with gaps', true, true, false, 0, true, true],
-    ])('renders only visible text for %s', (_name, rows, merged, hidden, start = 1, partiallyVisible = false, withGaps = false) => {
+    ])('renders only visible text for %s', (_name, rows, merged, hidden, start = 1, partiallyVisible = false, withGaps = false, projected = false) => {
         const environment = setupRenderTestEnv();
         const univer = new Univer({ locale: LocaleType.EN_US });
         const dimension = hidden ? { hd: BooleanNumber.TRUE } : rows ? { h: 0 } : { w: 0 };
@@ -208,7 +210,7 @@ describe('font extension', () => {
                     id: 'sheet',
                     rowCount: 5,
                     columnCount: 5,
-                    rowData: rows ? dimensions : {},
+                    rowData: rows && !projected ? dimensions : {},
                     columnData: rows ? {} : dimensions,
                     mergeData: merged ? [{ startRow: start, endRow: start + 1, startColumn: start, endColumn: start + 1 }] : [],
                     cellData: {
@@ -219,6 +221,12 @@ describe('font extension', () => {
             },
         });
         const worksheet = workbook.getActiveSheet()!;
+        if (projected) {
+            worksheet.__interceptViewModel((viewModel) => viewModel.registerRowFilteredInterceptor({
+                getRowFiltered: (row) => row === start || row === start + 1,
+            }));
+            expect(worksheet.getRowHeight(start)).toBe(0);
+        }
         const testInjector = univer.__getInjector();
         testInjector.add([SpreadsheetSkeleton, {
             useFactory: function createSkeleton() {
@@ -226,6 +234,9 @@ describe('font extension', () => {
             },
         }]);
         const skeleton = testInjector.get(SpreadsheetSkeleton);
+        if (projected) {
+            skeleton.setProjection({ isRowFiltered: () => false, getCell: () => undefined });
+        }
         const context = document.createElement('canvas').getContext('2d')!;
         const fillText = vi.spyOn(context, 'fillText');
         try {
@@ -247,7 +258,7 @@ describe('font extension', () => {
                 viewportKey: 'viewMain',
             });
 
-            expect(fillText.mock.calls.map(([text]) => text).sort()).toEqual(partiallyVisible ? ['cell text', 'visible text'] : ['visible text']);
+            expect(fillText.mock.calls.map(([text]) => text).sort()).toEqual(partiallyVisible || projected ? ['cell text', 'visible text'] : ['visible text']);
         } finally {
             skeleton.dispose();
             univer.dispose();

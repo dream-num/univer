@@ -137,6 +137,8 @@ export interface IGetRowColByPosOptions {
 
 /** Session-local data read by one worksheet display. */
 export interface ISheetDisplayProjection {
+    /** Stable view identity across recalculations within the same display. */
+    readonly viewId?: string;
     /** The display is waiting for a result and must not read worksheet content. */
     readonly placeholder?: boolean;
     /** The complete immutable filter mask, when available for layout reuse. */

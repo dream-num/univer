@@ -247,6 +247,7 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
                 const offset = after.startColumn - before.startColumn;
                 if (offset !== 0) {
                     this._filterByModel!.deltaCol(offset);
+                    this._col$.next(after.startColumn);
                 }
             }
         });

@@ -382,13 +382,14 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyRow(row: number) {
                 const sheet = currentSheet!;
-                const height = sheet.getRowHeight(row);
+                const height = currentSkeleton ? sheet.getRowManager().getRowHeight(row) : sheet.getRowHeight(row);
                 return {
                     style: `height: ${height}px;`,
                 };
             },
             onAfterCopy() {
                 currentSheet = null;
+                currentSkeleton = undefined;
             },
             getFilteredOutRows(unitId: string, subUnitId: string, range: IRange) {
                 const worksheet = self._getWorksheet(unitId, subUnitId);

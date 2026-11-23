@@ -429,6 +429,8 @@ describe('test "SheetsFilterPanelService"', () => {
             } as IInsertColMutationParams)).toBe(true);
 
             expect(filterByModel.col).toBe(1);
+            sheetsFilterPanelService.changeFilterBy(FilterBy.CONDITIONS);
+            expect((sheetsFilterPanelService.filterByModel as ByConditionsModel).col).toBe(1);
         });
     });
 

@@ -22,6 +22,7 @@ import type {
     IRange,
     IRowAutoHeightInfo,
     ISheetDisplayProjection,
+    IUndoRedoItem,
     Nullable,
     Workbook,
     Worksheet,
@@ -75,6 +76,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import {
@@ -259,9 +261,17 @@ interface ICapturedPasteView {
     projection: ISheetDisplayProjection | undefined;
 }
 
+interface ICapturedPasteOptions {
+    location: ISheetRangeLocation | undefined;
+    undoItem: IUndoRedoItem;
+    undoMutations: IMutationInfo[];
+    redoMutations: IMutationInfo[];
+}
+
 export class SheetClipboardService extends Disposable implements ISheetClipboardService {
     // Render context stays local while clipboard commands carry logical coordinates.
     private readonly _pasteViews = new WeakMap<ISheetRangeLocation, ICapturedPasteView | null>();
+    private readonly _pasteOptionViews = new WeakMap<IDiscreteRange, ICapturedPasteOptions>();
     private _clipboardHooks: ISheetClipboardHook[] = [];
 
     private readonly _clipboardHooks$ = new BehaviorSubject<ISheetClipboardHook[]>([]);
@@ -317,6 +327,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         this.disposeWithMe(this._htmlToUSM);
         this._initUnitDisposed();
+        const focusChanges = this._renderManagerService.focusedRenderChanged$;
+        if (focusChanges) {
+            this.disposeWithMe(focusChanges.subscribe(() => this.setShowMenu(false)));
+        }
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .subscribe(() => this.setShowMenu(false)));
     }
 
     setShowMenu(show: boolean) {
@@ -551,24 +567,64 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const undoRedoService = this._injector.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopUndoElement();
-        if (element) {
-            const result = sequenceExecute(element.undoMutations, this._commandService);
-            if (result.result) {
-                undoRedoService.popUndoToRedo();
-            }
+        const { target } = pasteOptionsCache;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (workbook?.getUnitId() !== target.unitId || workbook.getActiveSheet()?.getSheetId() !== target.subUnitId) {
+            return false;
+        }
+        const captured = this._pasteOptionViews.get(target.pastedRange);
+        if (!captured) return false;
+        const { location } = captured;
+        const view = location ? this._getPasteView(location, true) : null;
+        if (location && (!view || view.render !== getFocusedRenderForUnit(this._renderManagerService, target.unitId))) {
+            return false;
         }
 
-        const { cellMatrix, rowProperties = [], colProperties = [], source, target } = pasteOptionsCache;
+        const undoRedoService = this._injector.get(IUndoRedoService);
+        const element = undoRedoService.pitchTopUndoElement();
+        // History groups can append to or replace mutations on the same entry.
+        if (element !== captured.undoItem || element.unitID !== target.unitId ||
+            element.undoMutations.length !== captured.undoMutations.length ||
+            element.redoMutations.length !== captured.redoMutations.length ||
+            !element.undoMutations.every((mutation, index) => mutation === captured.undoMutations[index]) ||
+            !element.redoMutations.every((mutation, index) => mutation === captured.redoMutations[index])) {
+            return false;
+        }
+        const result = sequenceExecute(element.undoMutations, this._commandService);
+        if (!result.result) return false;
+        undoRedoService.popUndoToRedo();
 
-        this._pasteUSM({
-            cellMatrix,
-            colProperties,
-            rowProperties,
-        }, target, PREDEFINED_HOOK_NAME_PASTE[type], source);
+        const { cellMatrix, rowProperties = [], colProperties = [], source } = pasteOptionsCache;
 
-        return true;
+        let replaced = false;
+        try {
+            // Undo invalidates this display for recalculation, but the validated logical target stays the same.
+            replaced = this._pasteUSM({
+                cellMatrix,
+                colProperties,
+                rowProperties,
+            }, target, PREDEFINED_HOOK_NAME_PASTE[type], source, location, view);
+            return replaced;
+        } finally {
+            if (!replaced) {
+                const replacement = this._pasteOptionViews.get(target.pastedRange);
+                if (replacement && replacement !== captured && undoRedoService.pitchTopUndoElement() === replacement.undoItem) {
+                    const reverted = sequenceExecute(replacement.undoItem.undoMutations, this._commandService);
+                    if (reverted.result) undoRedoService.popUndoToRedo();
+                }
+                const restored = sequenceExecute(element.redoMutations, this._commandService);
+                if (restored.result) {
+                    if (undoRedoService.pitchTopRedoElement() === element) {
+                        undoRedoService.popRedoToUndo();
+                    } else {
+                        undoRedoService.pushUndoRedo(element);
+                    }
+                    this._pasteOptionViews.set(target.pastedRange, captured);
+                    this.updatePasteOptionsCache(pasteOptionsCache);
+                    this.setShowMenu(false);
+                }
+            }
+        }
     }
 
     updatePasteOptionsCache(cache: IPasteOptionCache | null): void {
@@ -828,7 +884,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
     }
 
-    private _getPasteView(location: ISheetRangeLocation): ICapturedPasteView | null {
+    private _getPasteView(location: ISheetRangeLocation, allowRecalculatedProjection = false): ICapturedPasteView | null {
         const view = this._pasteViews.get(location);
         const { unitId, subUnitId } = location;
         if (!view || this._getPasteWorksheet(unitId, subUnitId) !== view.worksheet) {
@@ -838,7 +894,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (render && (render.isDisposed?.() || this._renderManagerService.getRenderUnitById(render.renderId ?? unitId) !== render)) {
             return null;
         }
-        if (manager?.isProjectionPending(subUnitId) || manager?.getSkeleton(subUnitId)?.getDisplayProjection() !== projection) {
+        const currentProjection = manager?.getSkeleton(subUnitId)?.getDisplayProjection();
+        const sameView = allowRecalculatedProjection && projection?.viewId !== undefined && projection.viewId === currentProjection?.viewId;
+        if (manager?.isProjectionPending(subUnitId) || (currentProjection !== projection && !sameView)) {
             return null;
         }
         return view;
@@ -1238,9 +1296,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         target: IPasteTarget,
         pasteType: IPasteHookValueType,
         source?: ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE; skipCellCopy?: boolean },
-        location?: ISheetRangeLocation
+        location?: ISheetRangeLocation,
+        validatedView?: ICapturedPasteView | null
     ): boolean {
-        const view = location ? this._getPasteView(location) : null;
+        const view = validatedView ?? (location ? this._getPasteView(location) : null);
         if (location && !view) {
             return false;
         }
@@ -1361,8 +1420,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     : this._getPastedRangeAutoHeightMutation(
                         unitId,
                         subUnitId,
-                        pastedRange,
-                        view ? view.manager : this._getSkeletonManager(unitId)
+                        pastedRange
                     );
                 if (autoHeightMutation) {
                     this._commandService.syncExecuteCommand(autoHeightMutation.redo.id, autoHeightMutation.redo.params);
@@ -1371,12 +1429,19 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 }
 
                 // add to undo redo services
-                this._undoRedoService.pushUndoRedo({
+                const undoItem: IUndoRedoItem = {
                     unitID: unitId,
                     undoMutations: undoMutationsInfo,
                     redoMutations: redoMutationsInfo,
-                });
+                };
+                this._undoRedoService.pushUndoRedo(undoItem);
 
+                this._pasteOptionViews.set(pastedRange, {
+                    location,
+                    undoItem,
+                    undoMutations: undoMutationsInfo.slice(),
+                    redoMutations: redoMutationsInfo.slice(),
+                });
                 this.updatePasteOptionsCache({
                     target: {
                         pastedRange,
@@ -1389,7 +1454,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     pasteType,
                     source,
                 });
-                this.setShowMenu(true);
+                const currentWorkbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                this.setShowMenu(currentWorkbook?.getUnitId() === unitId && currentWorkbook.getActiveSheet()?.getSheetId() === subUnitId &&
+                    (!location || view?.render === getFocusedRenderForUnit(this._renderManagerService, unitId)));
             }
 
             if (!objectOnly) {
@@ -1436,8 +1503,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _getPastedRangeAutoHeightMutation(
         unitId: string,
         subUnitId: string,
-        pastedRange: IDiscreteRange,
-        manager: Nullable<SheetSkeletonManagerService>
+        pastedRange: IDiscreteRange
     ): {
         undo: IMutationInfo;
         redo: IMutationInfo;
@@ -1447,7 +1513,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return null;
         }
 
-        const skeleton = manager?.ensureSkeleton(subUnitId);
+        const skeleton = this._injector.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId);
         if (!skeleton) {
             return null;
         }

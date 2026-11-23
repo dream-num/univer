@@ -28,6 +28,8 @@ import {
     IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     ObjectMatrix,
     RANGE_TYPE,
     Rectangle,
@@ -38,7 +40,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasColorService, FontCache, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -55,6 +57,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
@@ -68,6 +71,7 @@ import { SheetCopyCommand, SheetCutCommand } from '../../../commands/commands/cl
 import {
     SheetPermissionInterceptorClipboardController,
 } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import enUS from '../../../locale/en-US';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_COPY, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
@@ -260,7 +264,7 @@ describe('Test clipboard', () => {
         expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
     });
 
-    it.each(['focus switch', 'pending projection', 'changed projection', 'disposed pane'] as const)(
+    it.each(['focus switch', 'unit switch', 'pending projection', 'changed projection', 'disposed pane', 'optional pending', 'optional changed', 'optional disposed', 'optional focus', 'optional recalc'] as const)(
         'keeps a delayed paste bound to its initiating pane after a %s',
         async (change) => {
             // Happy DOM has no canvas backend. Both renderers and their skeleton managers are real.
@@ -288,9 +292,16 @@ describe('Test clipboard', () => {
                 const initiatingView = companion.with(SheetSkeletonManagerService);
                 initiatingView.setCurrent({ sheetId: 'sheet1' });
                 initiatingView.setProjection('sheet1', {
+                    viewId: 'paste-view',
                     isRowFiltered: (row) => row === 30 || row === 32,
                     getCell: () => undefined,
                 });
+                const mutationListener = commandService.onCommandExecuted((command) => {
+                    if (change === 'optional recalc' && command.id === SetRangeValuesMutation.id) {
+                        initiatingView.setProjectionPending('sheet1', true);
+                    }
+                });
+                onTestFinished(() => mutationListener.dispose());
                 renders.focusRender?.('paste-companion');
                 get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
                     range: { startRow: 30, endRow: 31, startColumn: 0, endColumn: 0 },
@@ -310,7 +321,16 @@ describe('Test clipboard', () => {
                         return new Blob(['<table><tr><td>A</td></tr><tr><td>B</td></tr></table>'], { type: 'text/html' });
                     },
                 });
-                renders.focusRender?.('test');
+                sheetClipboardService.setShowMenu(true);
+                if (change === 'unit switch') {
+                    const instances = get(IUniverInstanceService);
+                    const snapshot = Tools.deepClone(instances.getUnit<Workbook>('test')!.getSnapshot());
+                    instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...snapshot, id: 'paste-peer' });
+                    instances.focusUnit('paste-peer');
+                } else {
+                    renders.focusRender?.('test');
+                }
+                expect(sheetClipboardService.getPasteMenuVisible()).toBe(false);
                 if (change === 'pending projection') {
                     initiatingView.setProjectionPending('sheet1', true);
                 } else if (change === 'changed projection') {
@@ -320,43 +340,207 @@ describe('Test clipboard', () => {
                 }
                 releaseRead();
 
-                expect(await pending).toBe(change === 'focus switch');
+                const succeeds = change === 'focus switch' || change === 'unit switch' || change.startsWith('optional');
+                expect(await pending).toBe(succeeds);
+                expect(sheetClipboardService.getPasteMenuVisible()).toBe(false);
                 expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual(
-                    change === 'focus switch' ? [undefined, 'A', undefined, 'B'] : [undefined, undefined, undefined, undefined]
+                    succeeds ? [undefined, 'A', undefined, 'B'] : [undefined, undefined, undefined, undefined]
                 );
+                if (change.startsWith('optional')) {
+                    if (change !== 'optional focus' && change !== 'optional disposed') {
+                        renders.focusRender?.('paste-companion');
+                    }
+                    if (change === 'optional recalc') {
+                        initiatingView.setProjection('sheet1', {
+                            viewId: 'paste-view',
+                            isRowFiltered: (row) => row === 30 || row === 32,
+                            getCell: () => undefined,
+                        });
+                        initiatingView.setProjectionPending('sheet1', false);
+                    } else if (change === 'optional pending') {
+                        initiatingView.setProjectionPending('sheet1', true);
+                    } else if (change === 'optional changed') {
+                        initiatingView.setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+                    } else if (change === 'optional disposed') {
+                        renders.removeRender('paste-companion');
+                    }
+                    expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(change === 'optional recalc');
+                    expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual([undefined, 'A', undefined, 'B']);
+                    expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                    expect(getValues(30, 0, 33, 0)?.map(([cell]) => cell?.v)).toEqual([undefined, undefined, undefined, undefined]);
+                }
             } finally {
                 canvasContext.mockRestore();
             }
         }
     );
 
-    it('recalculates auto height when pasting into a row that already has a measured auto height', async () => {
+    it('rejects optional paste after the current workbook changes without consuming its history', async () => {
+        const location = { unitId: 'test', subUnitId: 'sheet1', range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 } };
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, location)).toBe(true);
+        const instances = get(IUniverInstanceService);
+        const snapshot = Tools.deepClone(instances.getUnit<Workbook>('test')!.getSnapshot());
+        instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...snapshot, id: 'optional-peer' });
+        const peer = instances.getUnit<Workbook>('optional-peer')!;
+        const peerTarget = { unitId: 'optional-peer', subUnitId: 'sheet1' };
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...peerTarget, cellValue: { 31: { 0: { v: 'PEER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'optional-peer',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...peerTarget, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...peerTarget, cellValue: { 31: { 0: { v: 'PEER' } } } } }],
+        });
+        const history = get(IUndoRedoService).getUndoRedoStatus('optional-peer');
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(get(IUndoRedoService).getUndoRedoStatus('optional-peer')).toEqual(history);
+        expect(peer.getActiveSheet()!.getCellRaw(31, 0)?.v).toBe('PEER');
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+    });
+
+    it.each(['separate', 'grouped'] as const)('rejects optional paste after another edit adds %s history in the same workbook', async (mode) => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        const group = mode === 'grouped' ? get(IUndoRedoService).beginUndoRedoGroup('test', 'paste-history', 'append') : undefined;
+        onTestFinished(() => group?.dispose());
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            ...target,
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'test',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } } }],
+        });
+        group?.dispose();
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual(['A', 'LATER']);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual([mode === 'grouped' ? undefined : 'A', undefined]);
+    });
+
+    it('changes paste type while the original paste is the current history entry', async () => {
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBeUndefined();
+    });
+
+    it.each(['rejected', 'throwing', 'after paste'] as const)('restores the original paste when changing paste type is %s', async (failure) => {
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        const hook = sheetClipboardService.addClipboardHook({
+            id: 'reject-replacement',
+            onBeforePaste: () => {
+                if (failure === 'throwing') throw new Error('replacement rejected');
+                return failure !== 'rejected';
+            },
+            onAfterPaste: (success) => {
+                if (failure === 'after paste' && success) throw new Error('replacement rejected');
+            },
+        });
+        onTestFinished(() => hook.dispose());
+        if (failure !== 'rejected') {
+            expect(() => sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toThrow('replacement rejected');
+        } else {
+            expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        }
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBe('A');
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 30, 0)?.[0][0]?.v).toBeUndefined();
+    });
+
+    it('preserves a later undone edit for redo when changing paste type is rejected', async () => {
+        const target = { unitId: 'test', subUnitId: 'sheet1' };
+        expect(await sheetClipboardService.legacyPaste('<table><tr><td>A</td></tr></table>', undefined, undefined, undefined, {
+            ...target,
+            range: { startRow: 30, endRow: 30, startColumn: 0, endColumn: 0 },
+        })).toBe(true);
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } });
+        get(IUndoRedoService).pushUndoRedo({
+            unitID: 'test',
+            undoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: null } } } }],
+            redoMutations: [{ id: SetRangeValuesMutation.id, params: { ...target, cellValue: { 31: { 0: { v: 'LATER' } } } } }],
+        });
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        const hook = sheetClipboardService.addClipboardHook({ id: 'reject-replacement', onBeforePaste: () => false });
+        onTestFinished(() => hook.dispose());
+        expect(sheetClipboardService.rePasteWithPasteType('SPECIAL_PASTE_VALUE')).toBe(false);
+        expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getValues(30, 0, 31, 0)?.map(([cell]) => cell?.v)).toEqual(['A', 'LATER']);
+    });
+
+    it.each(['public', 'pending', 'private value'] as const)('persists public auto height after a paste in a %s display', async (display) => {
         const row = 30;
-        const worksheet = get(IUniverInstanceService)
-            .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!
-            .getSheetBySheetId('sheet1')!;
+        const locale = get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: enUS });
+        locale.setLocale(LocaleType.EN_US);
+        locale.setDirection('ltr');
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
         worksheet.getRowManager().getRowOrCreate(row).ah = 24;
-        const skeleton = get(SheetSkeletonManagerService).ensureSkeleton('sheet1')!;
-        vi.spyOn(skeleton, 'calculateAutoHeightInRange').mockReturnValue([{ row, autoHeight: 34 }]);
-        const copyId = 'existing-auto-height';
+        const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            setTransform: () => {},
+            clearRect: () => {},
+        } as unknown as CanvasRenderingContext2D);
+        onTestFinished(() => canvas.mockRestore());
+        const metrics = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 16,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 16,
+            actualBoundingBoxDescent: 4,
+        }));
+        onTestFinished(() => metrics.mockRestore());
+        univer.__getInjector().add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const renders = get(IRenderManagerService);
+        renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+        const primary = renders.createRender('test');
+        const companion = renders.createRender('test', undefined, 'autoheight-companion');
+        primary.with(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+        const manager = companion.with(SheetSkeletonManagerService);
+        manager.setCurrent({ sheetId: 'sheet1' });
+        if (display !== 'public') {
+            manager.setProjection('sheet1', {
+                isRowFiltered: () => false,
+                getCell: () => display === 'private value' ? { v: 'short', t: CellValueType.STRING } : undefined,
+            });
+        }
+        const listener = commandService.onCommandExecuted((command) => {
+            if (display === 'pending' && command.id === SetRangeValuesMutation.id) {
+                manager.setProjectionPending('sheet1', true);
+                manager.setProjection('sheet1', { placeholder: true, isRowFiltered: () => true, getCell: () => null });
+            }
+        });
+        onTestFinished(() => listener.dispose());
+        renders.focusRender?.('autoheight-companion');
+        const copyId = 'public-auto-height';
+        const value = 'wrapped text '.repeat(25);
         sheetClipboardService.copyContentCache().set(copyId, {
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { rows: [0], cols: [0] },
-            matrix: new ObjectMatrix({ 0: { 0: { v: 'line 1\nline 2' } } }),
+            matrix: new ObjectMatrix({ 0: { 0: { v: value, s: { fs: 12, tb: WrapStrategy.WRAP } } } }),
             copyType: COPY_TYPE.COPY,
         });
-
         expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, {
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { startRow: row, endRow: row, startColumn: 0, endColumn: 0 },
         })).toBe(true);
-        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+        const publicSkeleton = get(SheetSkeletonService).ensureSkeleton('test', 'sheet1')!;
+        const expected = publicSkeleton.calculateAutoHeightInRange([{ startRow: row, endRow: row, startColumn: 0, endColumn: 0 }])[0].autoHeight;
+        expect(expected).toBeGreaterThan(24);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(expected);
         expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
         expect(worksheet.getRowManager().getRow(row)?.ah).toBe(24);
         expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
-        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(34);
+        expect(worksheet.getRowManager().getRow(row)?.ah).toBe(expected);
     });
 
     it.each([
@@ -1172,6 +1356,22 @@ describe('Test clipboard', () => {
             expect.objectContaining({ startRow: 35, endRow: 36, startColumn: 0, endColumn: 0 }),
         ]);
         expect(getValues(37, 0, 37, 0, 'sheet2')?.[0][0]?.v).toBe('Next');
+    });
+
+    it('copies a publicly filtered row with its visible projected height', () => {
+        const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
+        worksheet.__interceptViewModel((viewModel) => {
+            viewModel.registerRowFilteredInterceptor({ getRowFiltered: (row) => row === 32 });
+        });
+        get(SheetSkeletonManagerService).setProjection('sheet1', { isRowFiltered: () => false, getCell: () => undefined });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            startRow: 32,
+            endRow: 32,
+            startColumn: 0,
+            endColumn: 0,
+        })!;
+        expect(content.html).toContain(`height: ${worksheet.getRowManager().getRowHeight(32)}px;`);
+        expect(worksheet.getRowHeight(32)).toBe(0);
     });
 
     it.each([

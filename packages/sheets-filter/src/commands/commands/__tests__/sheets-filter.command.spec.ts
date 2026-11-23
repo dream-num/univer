@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IMutation, IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    CommandType,
     ICommandService,
     Inject,
     Injector,
+    IUndoRedoService,
     IUniverInstanceService,
     LocaleType,
     Plugin,
@@ -26,7 +28,12 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { MarkDirtyFilterChangeMutation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    MarkDirtyFilterChangeMutation,
+    SetWorksheetNameMutation,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterService } from '../../../services/sheet-filter.service';
 import {
@@ -257,6 +264,65 @@ describe('sheet filter commands', () => {
         sheetsFilterService.beginInitialFilterCatchUp(unitId);
         expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, { unitId, subUnitId })).toBe(true);
         expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(false);
+    });
+
+    it.each([
+        { beforeRemoval: true, throws: false },
+        { beforeRemoval: true, throws: true },
+        { beforeRemoval: false, throws: false },
+        { beforeRemoval: false, throws: true },
+    ])('rolls back companion failures without publishing or taking over filters: %j', async ({ beforeRemoval, throws }) => {
+        const target = { unitId, subUnitId };
+        const range = { startRow: 0, startColumn: 0, endRow: 3, endColumn: 0 };
+        await commandService.executeCommand(SetSheetFilterRangeCommand.id, { ...target, range });
+        await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            ...target,
+            col: 0,
+            criteria: { colId: 0, filters: { filters: ['Apple'] } },
+        });
+        const previousFilter = sheetsFilterService.getFilterModel(unitId, subUnitId)!.serialize();
+        const undoRedo = univer.__getInjector().get(IUndoRedoService);
+        const previousUndo = undoRedo.pitchTopUndoElement();
+        const failure: IMutation<typeof target> = {
+            id: 'test.mutation.fail-filter-removal',
+            type: CommandType.MUTATION,
+            handler: () => {
+                if (throws) {
+                    throw new Error('Companion failed');
+                }
+                return false;
+            },
+        };
+        commandService.registerCommand(failure);
+        commandService.registerCommand(SetWorksheetNameMutation);
+        const rename = { id: SetWorksheetNameMutation.id, params: { ...target, name: 'Temporary' } };
+        const fail = { id: failure.id, params: target };
+        univer.__getInjector().get(SheetInterceptorService).interceptCommand({
+            getMutations: ({ id }) => id === RemoveSheetFilterCommand.id
+                ? {
+                    preRedos: beforeRemoval ? [rename, fail] : [rename],
+                    redos: beforeRemoval ? [] : [fail],
+                    undos: [{ id: SetWorksheetNameMutation.id, params: { ...target, name: 'Sheet 1' } }],
+                }
+                : { redos: [], undos: [] },
+        });
+        const published: string[] = [];
+        const listener = commandService.onMutationExecutedForCollab(({ id }, options) => {
+            if (!options?.onlyLocal) {
+                published.push(id);
+            }
+        });
+        sheetsFilterService.beginInitialFilterCatchUp(unitId);
+        try {
+            expect(await commandService.executeCommand(RemoveSheetFilterCommand.id, target)).toBe(false);
+            expect(workbook.getSheetBySheetId(subUnitId)!.getName()).toBe('Sheet 1');
+            expect(sheetsFilterService.getFilterModel(unitId, subUnitId)!.serialize()).toEqual(previousFilter);
+            expect(undoRedo.pitchTopUndoElement()).toBe(previousUndo);
+            expect(sheetsFilterService.isInitialFilterCatchUp(unitId)).toBe(true);
+            expect(published).toEqual([]);
+        } finally {
+            listener.dispose();
+        }
     });
 
     it('removes an existing filter model from the worksheet', async () => {

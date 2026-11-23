@@ -69,9 +69,8 @@ export function getSheetObject(
 
     let components, mainComponent, scene, engine;
     if (isRenderManagerService(renderManagerService)) {
-        const currentRender = renderManagerService.getRenderUnitById(unitId);
+        const currentRender = getFocusedRenderForUnit(renderManagerService, unitId);
         if (currentRender == null) return null;
-        components = currentRender.components;
         components = currentRender.components;
         mainComponent = currentRender.mainComponent;
         scene = currentRender.scene;

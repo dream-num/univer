@@ -15,11 +15,13 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import { ICommandService } from '@univerjs/core';
-import { Shape } from '@univerjs/engine-render';
+import { ICommandService, IUniverInstanceService, Workbook } from '@univerjs/core';
+import { getFocusedRenderForUnit, IRenderManagerService, Shape } from '@univerjs/engine-render';
 import { drawCanvasIcon } from '@univerjs/icons-svg';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
-import type { IRequestOpenTableFilterPanelOperationParams } from '../../commands/operations/open-table-filter-dialog.opration';
+import type {
+    IRequestOpenTableFilterPanelOperationParams,
+} from '../../commands/operations/open-table-filter-dialog.opration';
 import { RequestOpenTableFilterPanelOperation } from '../../commands/operations/open-table-filter-dialog.opration';
 
 export const FILTER_ICON_SIZE = 16;
@@ -48,11 +50,14 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
     private _hoverIconColor = '#202124';
 
     private _hovered = false;
+    private _openTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(
         key: string,
         props: ISheetsTableFilterButtonShapeProps,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(key, props);
 
@@ -62,6 +67,12 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         this.onPointerDown$.subscribeEvent((evt) => this.onPointerDown(evt));
         this.onPointerEnter$.subscribeEvent(() => this.onPointerEnter());
         this.onPointerLeave$.subscribeEvent(() => this.onPointerLeave());
+    }
+
+    override dispose(): void {
+        clearTimeout(this._openTimer);
+        this._openTimer = undefined;
+        super.dispose();
     }
 
     setShapeProps(props: Partial<ISheetsTableFilterButtonShapeProps>): void {
@@ -131,16 +142,28 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
 
     onPointerDown(evt: IPointerEvent | IMouseEvent): void {
         // Right click not trigger this event.
-        if (evt.button === 2) {
+        if (evt.button === 2 || this._disposed) {
             return;
         }
 
-        const { row, col, unitId, subUnitId, tableId } = this._filterParams!;
+        const filterParams = this._filterParams!;
+        const { row, col, unitId, subUnitId, tableId } = filterParams;
         if (!this._commandService.hasCommand(RequestOpenTableFilterPanelOperation.id)) {
             return;
         }
 
-        setTimeout(() => {
+        const scene = this.getScene();
+        clearTimeout(this._openTimer);
+        this._openTimer = setTimeout(() => {
+            this._openTimer = undefined;
+            const unit = this._univerInstanceService.getFocusedUnit();
+            if (this._disposed || this._filterParams !== filterParams || (scene && (
+                !(unit instanceof Workbook) || unit.getUnitId() !== unitId
+                || unit.getActiveSheet()?.getSheetId() !== subUnitId || this.getScene() !== scene
+                || getFocusedRenderForUnit(this._renderManagerService, unitId)?.scene !== scene
+            ))) {
+                return;
+            }
             const cmdParams: IRequestOpenTableFilterPanelOperationParams = {
                 row,
                 col,
@@ -148,7 +171,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
                 subUnitId,
                 tableId,
             };
-            this._commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, cmdParams);
+            return this._commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, cmdParams);
         }, 200);
     }
 

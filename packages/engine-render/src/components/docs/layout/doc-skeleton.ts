@@ -430,7 +430,7 @@ function getColumnGroupVerticalBounds(
 
 function getDrawingVerticalBounds(
     drawing: IDocumentSkeletonDrawing,
-    polygonHasPageOrigin: boolean
+    page: IDocumentSkeletonPage
 ): { top: number; bottom: number } | null {
     const { aTop, aLeft, height, width, angle, drawingOrigin } = drawing;
     // Layout bounds do not cover transforms or child overflow for these objects.
@@ -444,17 +444,30 @@ function getDrawingVerticalBounds(
     let bottom = boxTop + (bounds.height ?? height) +
         Math.max(0, drawingOrigin.effectExtent?.bottom ?? 0) + Math.max(0, drawingOrigin.distB ?? 0);
     if (drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_POLYGON && drawingOrigin.lineTo != null) {
-        // Merged fragments shift the drawing box; the custom polygon remains
-        // in its original fragment. Rotation also makes Y column-dependent.
-        if (!polygonHasPageOrigin || angle !== 0) {
-            return null;
-        }
-        for (const { x, y } of getDrawingWrapPolygonPoints(drawing, 0) ?? []) {
-            if (!Number.isFinite(x)) {
-                return null;
+        const polygonTopOffset = drawing.wrapPolygonTopOffset ?? 0;
+        let leftmost = 0;
+        let rightmost = 0;
+        if (angle !== 0) {
+            // Rotation makes a vertex's Y linear in the column's X origin.
+            // The two extreme column origins bound the wrap in every column.
+            leftmost = drawing.columnLeft;
+            rightmost = drawing.columnLeft;
+            for (const section of page.sections) {
+                for (const column of section.columns) {
+                    leftmost = Math.min(leftmost, column.left);
+                    rightmost = Math.max(rightmost, column.left);
+                }
             }
-            top = Math.min(top, y);
-            bottom = Math.max(bottom, y);
+        }
+        const columnOrigins = leftmost === rightmost ? [leftmost] : [leftmost, rightmost];
+        for (const columnLeft of columnOrigins) {
+            for (const { x, y } of getDrawingWrapPolygonPoints(drawing, columnLeft) ?? []) {
+                if (!Number.isFinite(x)) {
+                    return null;
+                }
+                top = Math.min(top, y + polygonTopOffset);
+                bottom = Math.max(bottom, y + polygonTopOffset);
+            }
         }
     }
     return Number.isFinite(top) && Number.isFinite(bottom) ? { top, bottom } : null;
@@ -575,10 +588,7 @@ function mergeProtectedForegroundGeometry(
         if (inTail && (layout === PositionedObjectLayoutType.INLINE || layout === PositionedObjectLayoutType.WRAP_NONE)) {
             return true;
         }
-        const firstSection = (incoming ? workerPage : page).sections[0];
-        const polygonHasPageOrigin = firstSection?.top === 0 &&
-            firstSection.st <= anchorOffset && anchorOffset <= firstSection.ed;
-        const bounds = getDrawingVerticalBounds(drawing, polygonHasPageOrigin);
+        const bounds = getDrawingVerticalBounds(drawing, incoming ? workerPage : page);
         if (bounds == null) {
             return null;
         }
@@ -1321,6 +1331,10 @@ function mergeContinuousDuplicatePages(pages: IDocumentSkeletonPage[], mergeAll 
 
         page.skeDrawings?.forEach((drawing, drawingId) => {
             drawing.aTop += topOffset;
+            if (drawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_POLYGON && drawing.drawingOrigin.lineTo != null) {
+                // The authored vertices stay in fragment coordinates after the drawing box moves.
+                drawing.wrapPolygonTopOffset = (drawing.wrapPolygonTopOffset ?? 0) + topOffset;
+            }
             previousPage.skeDrawings.set(drawingId, drawing);
         });
 

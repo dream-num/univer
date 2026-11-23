@@ -32,6 +32,7 @@ import {
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
     PresetListType,
+    SectionType,
     TableAlignmentType,
     TableRowHeightRule,
     TableSizeType,
@@ -2263,6 +2264,10 @@ describe('worker document layout session', () => {
     it.each([
         { embedded: 'prefix drawing', drawing: 'inline', publishesTail: true },
         { embedded: 'prefix polygon ending before the Worker tail', drawing: 'polygon', polygonBottom: 22, publishesTail: true },
+        { embedded: 'rotated prefix polygon ending before the Worker tail', drawing: 'polygon', polygonBottom: 22, polygonAngle: 15, publishesTail: true },
+        { embedded: 'prefix polygon in a continuous section', drawing: 'polygon', polygonBottom: 22, polygonSection: SectionType.CONTINUOUS, publishesTail: true },
+        { embedded: 'prefix polygon in a next-page section', drawing: 'polygon', polygonBottom: 22, polygonSection: SectionType.NEXT_PAGE, publishesTail: true },
+        { embedded: 'polygon reaching the Worker tail from a later section', drawing: 'polygon', polygonBottom: 4_000, polygonSection: SectionType.NEXT_PAGE, publishesTail: false },
         { embedded: 'prefix polygon extending into the Worker tail', drawing: 'polygon', polygonBottom: 8_000, publishesTail: false },
         { embedded: 'rotated drawing overlapping the tail', drawing: 'rotated', publishesTail: false },
         { embedded: 'margin-relative drawing after the edit and a page break', drawing: 'suffix', publishesTail: true },
@@ -2281,7 +2286,7 @@ describe('worker document layout session', () => {
         { embedded: 'unclipped prefix column group with ordinary text', columns: 'unclipped', publishesTail: true },
         { embedded: 'unclipped prefix column group followed by a new group in the Worker tail', columns: 'two', publishesTail: true },
         { embedded: 'unclipped prefix column group with a shadow reaching the tail', columns: 'shadow', publishesTail: false },
-    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce, polygonBottom }) => {
+    ])('handles protected foreground progress with a $embedded', ({ drawing, columns, publishesTail, interrupt, wrap, wrapLayout, deferOnce, polygonBottom, polygonAngle, polygonSection }) => {
         mockWorkerCanvas();
         const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
         const T = DataStreamTreeTokenType;
@@ -2292,9 +2297,9 @@ describe('worker document layout session', () => {
         const prefix = columns != null
             ? columnStream('Left', 'Right')
             : afterPageBreak
-                ? Array.from({ length: 68 }, (_, index) => `Before break ${index}${index === 0 && drawing === 'polygon' ? T.CUSTOM_BLOCK : ''} on the first page.\r`).join('') + T.PAGE_BREAK
+                ? Array.from({ length: 68 }, (_, index) => `Before break ${index}${index === 0 && drawing === 'polygon' && polygonSection == null ? T.CUSTOM_BLOCK : ''} on the first page.\r`).join('') + (polygonSection == null ? T.PAGE_BREAK : T.SECTION_BREAK)
                 : `Introduction ${T.CUSTOM_BLOCK} before the edit.\r`;
-        const lead = drawing === 'prefix' ? `Lead ${T.CUSTOM_BLOCK}.\r` : 'Lead.\r';
+        const lead = drawing === 'prefix' || polygonSection != null ? `Lead ${T.CUSTOM_BLOCK}.\r` : 'Lead.\r';
         const content = prefix + lead + Array.from({ length: 90 }, (_, index) => {
             const marker = drawing === 'suffix' && index === 24 ? T.CUSTOM_BLOCK : '';
             const nextGroup = index === 24 ? laterColumns : '';
@@ -2303,6 +2308,17 @@ describe('worker document layout session', () => {
         const seedModel = createDocumentModelWithStyle(content, {});
         const snapshot = seedModel.getSnapshot();
         const drawingId = 'picture';
+        if (polygonSection != null) {
+            snapshot.body!.dataStream = content + T.SECTION_BREAK;
+            snapshot.body!.paragraphs = Array.from(content.matchAll(/\r/g), (match, index) => ({
+                startIndex: match.index,
+                paragraphId: `paragraph-${index}`,
+            }));
+            snapshot.body!.sectionBreaks = [
+                { startIndex: prefix.length - 1, sectionId: 'before-polygon' },
+                { startIndex: content.length, sectionId: 'with-polygon', sectionType: polygonSection },
+            ];
+        }
         const groupId = 'early-columns';
         const laterGroupId = 'later-columns';
         if (columns != null) {
@@ -2361,7 +2377,7 @@ describe('worker document layout session', () => {
                             lineTo: [[24, 8], [24, polygonBottom], [0, polygonBottom], [0, 8]],
                         }),
                     docTransform: {
-                        angle: drawing === 'rotated' ? 90 : 0,
+                        angle: drawing === 'rotated' ? 90 : (polygonAngle ?? 0),
                         positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
                         positionV: {
                             relativeFrom: afterPageBreak && !wrap ? ObjectRelativeFromV.MARGIN : ObjectRelativeFromV.PARAGRAPH,
@@ -2451,7 +2467,7 @@ describe('worker document layout session', () => {
             let deferredPublication = false;
             let publishedLaterGroup = false;
             let stoppedBeforeCompletion = false;
-            for (let step = 0; step < 180; step++) {
+            for (let step = 0; step < 350; step++) {
                 const result = worker.step(generation, 0, 1);
                 if (result.publication?.kind === 'block') {
                     if (intermediateCount === 0) {
@@ -2553,7 +2569,7 @@ describe('worker document layout session', () => {
                     reuseUnaffectedTail: false,
                 });
                 let localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
-                for (let step = 0; step < 180 && !localProgress.didPublishAnchor; step++) {
+                for (let step = 0; step < 350 && !localProgress.didPublishAnchor; step++) {
                     localProgress = main.stepIncrementalLayout(localWindow, 0, 1);
                 }
                 expect(localProgress.didPublishAnchor).toBe(true);

@@ -26,6 +26,7 @@ import {
     DocumentBlockRangeType,
     SpecialCharacterKind,
 } from '../../../../types/interfaces/i-document-data';
+import { createBookmarkRangeId } from '../../../bookmark-id';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
@@ -62,14 +63,14 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(restored, action)).toEqual(edited);
     });
 
-    it('keeps a bookmark and inserted field in document order across batching and rebasing', () => {
+    it('keeps an authored bookmark and a field in the same order across batching and rebasing', () => {
         const original: IDocumentBody = { dataStream: 'Reference target\rBody\r\n' };
         const bookmark: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 0,
             rangeUpdates: [{
-                rangeId: 'target',
-                range: { rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 15, properties: { bookmarkId: 'target' } },
+                rangeId: createBookmarkRangeId('target'),
+                range: { rangeId: createBookmarkRangeId('target'), rangeType: CustomRangeType.BOOKMARK, startIndex: 0, endIndex: 15, properties: { bookmarkId: 'target' } },
             }],
         }];
         const field: TextXAction[] = [
@@ -84,7 +85,7 @@ describe('test TextX methods and branches', () => {
             },
         ];
         const expected = TextX.apply(TextX.apply(Tools.deepClone(original), bookmark), field);
-        expect(expected.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['target', 'ref']);
+        expect(expected.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['ref', createBookmarkRangeId('target')]);
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(bookmark, field))).toEqual(expected);
         const afterField = TextX.apply(Tools.deepClone(original), field);
         expect(TextX.apply(afterField, TextX.transform(bookmark, field))).toEqual(expected);
@@ -109,12 +110,12 @@ describe('test TextX methods and branches', () => {
                 properties: { bookmarkId: rangeId },
             })),
         };
-        const left = createBookmark('alpha');
-        const right = createBookmark('beta');
-        const alice = TextX.apply(TextX.apply({ ...original }, left), TextX.transform(right, left, priority));
-        const bob = TextX.apply(TextX.apply({ ...original }, right), TextX.transform(left, right, priority === 'left' ? 'right' : 'left'));
+        const left = createBookmark(createBookmarkRangeId('alpha'));
+        const right = createBookmark(createBookmarkRangeId('beta'));
+        const alice = TextX.apply(TextX.apply(Tools.deepClone(original), left), TextX.transform(right, left, priority));
+        const bob = TextX.apply(TextX.apply(Tools.deepClone(original), right), TextX.transform(left, right, priority === 'left' ? 'right' : 'left'));
         expect(alice).toEqual(bob);
-        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['alpha', 'beta', 'z', 'a']);
+        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['z', 'a', createBookmarkRangeId('alpha'), createBookmarkRangeId('beta')]);
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(left, right))).toEqual(bob);
     });
 
@@ -155,6 +156,67 @@ describe('test TextX methods and branches', () => {
         const left = TextX.apply(TextX.apply(Tools.deepClone(original), move), TextX.transform(text, move, 'left'));
         const right = TextX.apply(TextX.apply(Tools.deepClone(original), text), TextX.transform(move, text, 'right'));
         expect(left).toEqual(right);
+    });
+
+    it.each([false, true])('converges when a peer removes a bookmark during an insert (authored: %s)', (authored) => {
+        const original: IDocumentBody = { dataStream: 'Body\r\n', customRanges: [bookmarkAt('z'), bookmarkAt('a')] };
+        const remove = updateBookmarks([{ rangeId: 'z', range: null }]);
+        const rangeId = authored ? createBookmarkRangeId('b') : 'b';
+        const insert = updateBookmarks([{ rangeId, range: bookmarkAt(rangeId) }]);
+        const sequential = TextX.apply(TextX.apply(Tools.deepClone(original), remove), insert);
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), remove), TextX.transform(insert, remove, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), insert), TextX.transform(remove, insert, 'right'));
+        expect(left).toEqual(right);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(remove, insert))).toEqual(sequential);
+    });
+
+    it.each([false, true])('converges when a peer restores a bookmark during an insert (authored: %s)', (authored) => {
+        const original: IDocumentBody = { dataStream: 'Body\r\n', customRanges: [bookmarkAt('z'), bookmarkAt('a')] };
+        const remove = TextX.makeInvertible(updateBookmarks([{ rangeId: 'z', range: null }]), Tools.deepClone(original));
+        const deleted = TextX.apply(Tools.deepClone(original), remove);
+        const restore = TextX.invert(remove);
+        const rangeId = authored ? createBookmarkRangeId('b') : 'b';
+        const insert = updateBookmarks([{ rangeId, range: bookmarkAt(rangeId) }]);
+        const left = TextX.apply(TextX.apply(Tools.deepClone(deleted), restore), TextX.transform(insert, restore, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(deleted), insert), TextX.transform(restore, insert, 'right'));
+        expect(left).toEqual(right);
+    });
+
+    it.each([false, true])('preserves bookmark order when a peer pastes a field (authored: %s)', (authored) => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\rLast\r\n',
+            customRanges: [bookmarkAt('a'), bookmarkAt('d', 5)],
+        };
+        const rangeId = authored ? createBookmarkRangeId('b') : 'b';
+        const insert = updateBookmarks([{ rangeId, range: bookmarkAt(rangeId, 10) }]);
+        const paste: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 3,
+            body: {
+                dataStream: '\u001F1\u001E',
+                customRanges: [{ rangeId: 'field', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { instruction: 'REF a' } }],
+            },
+        }];
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), insert), TextX.transform(paste, insert, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), paste), TextX.transform(insert, paste, 'right'));
+        expect(left).toEqual(right);
+    });
+
+    it.each([false, true])('restores the saved bookmark order after undoing text deletion (authored: %s)', (authored) => {
+        const rangeId = authored ? createBookmarkRangeId('d') : 'd';
+        const source: IDocumentBody = {
+            dataStream: 'Body\rNext\rLast\r\n',
+            customBlocks: [],
+            customRanges: [bookmarkAt('a'), bookmarkAt(rangeId, 5)],
+        };
+        const original = TextX.apply(source, updateBookmarks([{ rangeId: 'b', range: bookmarkAt('b', 10) }]));
+        const deletion = TextX.makeInvertible([
+            { t: TextXActionType.RETAIN, len: 5 },
+            { t: TextXActionType.DELETE, len: 4 },
+        ], Tools.deepClone(original));
+        const edited = TextX.apply(Tools.deepClone(original), deletion);
+        expect(edited.customRanges?.some((range) => range.rangeId === rangeId)).toBe(false);
+        expect(TextX.apply(edited, TextX.invert(deletion))).toEqual(original);
     });
 
     it('converges when undo restores a removed bookmark and a peer moves its anchor', () => {
@@ -267,7 +329,7 @@ describe('test TextX methods and branches', () => {
         const alice = TextX.apply(TextX.apply(Tools.deepClone(deleted), restore), TextX.transform(insert, restore, 'left'));
         const bob = TextX.apply(TextX.apply(Tools.deepClone(deleted), insert), TextX.transform(restore, insert, 'right'));
         expect(alice).toEqual(bob);
-        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['alpha', 'beta', 'gamma']);
+        expect(alice.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['alpha', 'gamma', 'beta']);
     });
 
     it.each([false, true])('preserves newly inserted field boundaries through a composed refresh (nested=%s)', (nested) => {

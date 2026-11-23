@@ -18,7 +18,7 @@ import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-do
 import type { IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import { CustomRangeType } from '../../../types/interfaces/i-document-data';
+import { orderManagedBookmarks } from '../../bookmark-id';
 import { DataStreamTreeTokenType } from '../types';
 import { TextXActionType } from './action-types';
 import { deleteCustomRanges, insertCustomRanges } from './apply-utils/common';
@@ -177,25 +177,6 @@ export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], res
     }
 }
 
-export function findBookmarkInsertionIndex(ranges: ICustomRange[], bookmark: ICustomRange): number {
-    // Structural ranges delimit slots in document order. Within a slot, bookmark IDs are
-    // stable even when a peer moves an existing bookmark to a different offset.
-    let index = -1;
-    for (const [position, range] of ranges.entries()) {
-        if (range.rangeType === CustomRangeType.BOOKMARK) {
-            if (index === -1 && range.rangeId > bookmark.rangeId) {
-                index = position;
-            }
-        } else {
-            if (range.startIndex > bookmark.startIndex) {
-                return index === -1 ? position : index;
-            }
-            index = -1;
-        }
-    }
-    return index;
-}
-
 function getRangeUpdateApplyOrder(updates: NonNullable<IRetainAction['rangeUpdates']>): NonNullable<IRetainAction['rangeUpdates']> {
     // Apply an updated anchor before the ranges that are restored in front of it.
     if (!updates.some(({ nextRangeId }) => nextRangeId != null)) {
@@ -238,9 +219,6 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
                 ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, Tools.deepClone(range));
             } else if (index >= 0) {
                 ranges[index] = Tools.deepClone(range);
-            } else if (range.rangeType === CustomRangeType.BOOKMARK) {
-                const nextIndex = findBookmarkInsertionIndex(ranges, range);
-                ranges.splice(nextIndex < 0 ? ranges.length : nextIndex, 0, Tools.deepClone(range));
             } else {
                 ranges.push(Tools.deepClone(range));
             }
@@ -248,7 +226,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             ranges.splice(index, 1);
         }
     }
-    doc.customRanges = ranges;
+    doc.customRanges = orderManagedBookmarks(ranges);
 }
 
 export function moveRangeUpdates(

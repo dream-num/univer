@@ -33,6 +33,7 @@ import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { CustomRangeType } from '../../../../types/interfaces';
+import { orderManagedBookmarks } from '../../../bookmark-id';
 import { cloneParagraphWithId } from '../../../paragraph-id';
 import { cloneSectionBreakWithId } from '../../../section-break-id';
 import { DataStreamTreeTokenType } from '../../types';
@@ -711,7 +712,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[], preserveOrder = fa
             return true;
         });
         if (alreadyMerged) {
-            return ranges;
+            return orderManagedBookmarks(ranges);
         }
         positions = new Map(ranges.map((range, index) => [range, index]));
     }
@@ -759,7 +760,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[], preserveOrder = fa
         mergedRanges.sort((left, right) => mergedPositions.get(left)! - mergedPositions.get(right)!);
     }
 
-    return mergedRanges;
+    return orderManagedBookmarks(mergedRanges);
 }
 
 export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {

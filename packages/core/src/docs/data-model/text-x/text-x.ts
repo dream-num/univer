@@ -33,7 +33,6 @@ import {
     appendRangeUpdates,
     composeRangeUpdate,
     dropRemovedRangeAnchors,
-    findBookmarkInsertionIndex,
     getChangedPropertyPaths,
     getRangeUpdates,
     moveRangeUpdates,
@@ -479,11 +478,6 @@ export class TextX {
                         if (range && targetAnchor === undefined) {
                             // An in-place move keeps its original slot in both directions.
                             nextRangeId = undefined;
-                        } else if (action.rangeUpdates?.length === 1 && !range) {
-                            const insertionIndex = findBookmarkInsertionIndex(ranges, previous);
-                            if (insertionIndex === index + 1 || (insertionIndex < 0 && index === ranges.length - 1)) {
-                                nextRangeId = undefined;
-                            }
                         }
                     }
                     return {

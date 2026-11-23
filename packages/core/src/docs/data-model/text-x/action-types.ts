@@ -39,7 +39,6 @@ export interface IRetainAction {
     /**
      * Identity edits applied after the text operation, with absolute result-document offsets.
      * nextRangeId restores array order by identity (null means the end), including coincident SDT nesting.
-     * Without it, an existing bookmark keeps its slot and a new bookmark gets a deterministic slot.
      * Collaboration peers must support this extension; legacy TextX implementations ignore it.
      */
     rangeUpdates?: Array<{

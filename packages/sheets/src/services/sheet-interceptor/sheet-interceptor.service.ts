@@ -24,6 +24,7 @@ import type {
     IComposeInterceptors,
     IDisposable,
     IInterceptor,
+    IMutationInfo,
     IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
@@ -55,7 +56,12 @@ export interface IBeforeCommandInterceptor {
 
 export interface ICommandInterceptor {
     priority?: number;
-    getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
+    getMutations(command: ICommandInfo): ICommandMutationGroup;
+}
+
+export interface ICommandMutationGroup extends IUndoRedoCommandInfosByInterceptor {
+    /** Inverses for each step in [...preRedos, ...redos], used only to roll back partial execution. */
+    rollbackMutations?: IMutationInfo[][];
 }
 
 export interface IRangesInfo {
@@ -207,7 +213,7 @@ export class SheetInterceptorService extends Disposable {
      * @returns
      */
     onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
+        const infos = this.getCommandMutationGroups(info);
 
         return {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),
@@ -215,6 +221,11 @@ export class SheetInterceptorService extends Disposable {
             preRedos: infos.map((i) => i.preRedos ?? []).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
+    }
+
+    /** Keeps each hook's inverse mutations paired with its work for transaction rollback. */
+    getCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
+        return this._commandInterceptors.map((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {

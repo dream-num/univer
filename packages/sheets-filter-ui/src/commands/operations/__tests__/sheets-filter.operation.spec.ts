@@ -165,6 +165,23 @@ describe('test sheets filter ui operations', () => {
             })).toBe(false);
         });
 
+        it('retains the source pane until the filter panel closes', () => {
+            commandService.syncExecuteCommand(SetSheetsFilterRangeMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 },
+            });
+            expect(commandService.syncExecuteCommand(RequestOpenFilterPanelOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 0,
+                renderId: 'right-pane',
+            })).toBe(true);
+            expect(sheetsFilterPanelService.renderId).toBe('right-pane');
+            commandService.syncExecuteCommand(CloseFilterPanelOperation.id);
+            expect(sheetsFilterPanelService.renderId).toBeUndefined();
+        });
+
         it('should return false when the filter model is not found', () => {
             const spy = vi.spyOn(sheetsFilterPanelService, 'setupCol');
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {

@@ -15,6 +15,15 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import {
+    CommandType,
+    ICommandService,
+    Injector,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+    throttle,
+} from '@univerjs/core';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -23,17 +32,10 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    sequenceExecute,
-    throttle,
-} from '@univerjs/core';
 import { getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {
     RemoveColMutation,
@@ -95,12 +97,30 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const { range, unitId, subUnitId } = params;
 
-        const visibleRanges = getVisibleRanges([range], accessor, unitId, subUnitId).reverse();
+        const skeletons = accessor.get(Injector).has(SheetSkeletonService) ? accessor.get(SheetSkeletonService) : undefined;
+        if (skeletons?.isDisplayProjectionPending(unitId, subUnitId)) {
+            return false;
+        }
+        const display = skeletons?.getDisplaySkeleton(unitId, subUnitId);
+        const visibleRanges = getVisibleRanges(
+            [range],
+            accessor,
+            unitId,
+            subUnitId,
+            display ? (row) => display.getRowFiltered(row) : undefined
+        ).reverse();
+        if (!visibleRanges.length) {
+            return false;
+        }
 
         const undoMutations: IMutationInfo[] = [];
         const redoMutations: IMutationInfo[] = [];
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
 
-        visibleRanges.forEach((visibleRange) => {
+        // Each span must update dependent models before the next span is prepared. Their
+        // interceptors describe contiguous deletions, so an envelope would include kept rows.
+        for (const visibleRange of visibleRanges) {
             const undos: IMutationInfo[] = [];
             const redos: IMutationInfo[] = [];
             const removeRowsParams: IRemoveRowsMutationParams = {
@@ -124,28 +144,28 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             undos.push({ id: InsertRowMutation.id, params: undoRemoveRowsParams });
             undos.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams });
 
-            redoMutations.push(...redos);
-            undoMutations.unshift(...undos);
-        });
-
-        const interceptorParams: IRemoveRowColCommandInterceptParams = params;
-        const intercepted = sheetInterceptorService.onCommandExecute({
-            id: RemoveRowCommandId,
-            params: interceptorParams,
-        });
-
-        const commandService = accessor.get(ICommandService);
-        const result = sequenceExecute(
-            [
+            const interceptorParams: IRemoveRowColCommandInterceptParams = {
+                ...params,
+                range: visibleRange,
+                ranges: [visibleRange],
+            };
+            const intercepted = sheetInterceptorService.onCommandExecute({
+                id: RemoveRowCommandId,
+                params: interceptorParams,
+            });
+            const spanRedos = [
                 ...(intercepted.preRedos ?? []),
-                ...redoMutations,
+                ...redos,
                 ...intercepted.redos,
-            ],
-            commandService
-        );
-
-        if (result.result) {
-            setSelection(range, workbook, worksheet, commandService);
+            ];
+            const result = sequenceExecute(spanRedos, commandService);
+            if (!result.result) {
+                // Preserve recovery of already completed spans if a later interceptor fails.
+                if (redoMutations.length) {
+                    undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+                }
+                return false;
+            }
 
             const afterInterceptors = sheetInterceptorService.afterCommandExecute({
                 id: RemoveRowCommandId,
@@ -153,25 +173,17 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             });
             sequenceExecute(afterInterceptors.redos, commandService);
 
-            const undoRedoService = accessor.get(IUndoRedoService);
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [
-                    ...(intercepted.preUndos ?? []),
-                    ...undoMutations,
-                    ...intercepted.undos,
-                    ...afterInterceptors.undos,
-                ],
-                redoMutations: [
-                    ...(intercepted.preRedos ?? []),
-                    ...redoMutations,
-                    ...intercepted.redos,
-                    ...afterInterceptors.redos,
-                ],
-            });
-            return true;
+            undoMutations.unshift(
+                ...(intercepted.preUndos ?? []),
+                ...undos,
+                ...intercepted.undos,
+                ...afterInterceptors.undos
+            );
+            redoMutations.push(...spanRedos, ...afterInterceptors.redos);
         }
-        return false;
+        setSelection(range, workbook, worksheet, commandService);
+        undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+        return true;
     },
 };
 
@@ -196,6 +208,9 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         const commandService = accessor.get(ICommandService);
 
         const { worksheet, unitId, subUnitId } = target;
+        const skeletons = accessor.get(Injector).has(SheetSkeletonService) ? accessor.get(SheetSkeletonService) : undefined;
+        const display = skeletons?.getDisplaySkeleton(unitId, subUnitId);
+        const projection = display?.getDisplayProjection();
 
         range = {
             ...range,
@@ -208,7 +223,8 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
             params: { range, unitId, subUnitId },
         });
 
-        if (!canPerform) {
+        if (!canPerform || skeletons?.isDisplayProjectionPending(unitId, subUnitId) ||
+            skeletons?.getDisplaySkeleton(unitId, subUnitId) !== display || display?.getDisplayProjection() !== projection) {
             return false;
         }
 

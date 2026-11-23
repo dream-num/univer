@@ -29,6 +29,7 @@ export interface IOpenFilterPanelOperationParams {
     subUnitId: string;
 
     col: number;
+    renderId?: string;
 }
 
 export interface IRequestOpenFilterPanelOperationParams extends IOpenFilterPanelOperationParams {
@@ -60,7 +61,7 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
             return false;
         }
 
-        sheetsFilterPanelService.setupCol(filterModel, col);
+        sheetsFilterPanelService.setupCol(filterModel, col, { renderId: params.renderId });
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, true);
         }

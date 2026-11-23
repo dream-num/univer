@@ -69,12 +69,14 @@ export interface IFilterByColorItem {
 }
 
 export interface ISheetsFilterPanelOptions {
+    renderId?: string;
     applyCriteria?: (params: ISetSheetsFilterCriteriaCommandParams) => Promise<boolean>;
     getCachedColumnRows?: () => ReadonlyMap<number, ReadonlySet<number>> | undefined;
 }
 
 export interface ISheetsFilterPanelService {
     readonly col: number;
+    readonly renderId?: string;
     readonly col$: Observable<number>;
     readonly filterBy: FilterBy;
     readonly filterBy$: Observable<FilterBy>;
@@ -128,6 +130,7 @@ export class SheetsFilterPanelService extends Disposable implements ISheetsFilte
 
     private _options: ISheetsFilterPanelOptions | undefined;
     private _setupVersion = 0;
+    get renderId(): string | undefined { return this._options?.renderId; }
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

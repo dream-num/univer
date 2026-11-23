@@ -96,7 +96,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         const mergeCell = skeleton.worksheet.getMergedCell(cellPos.row, cellPos.column);
         const row = mergeCell ? mergeCell.startRow : cellPos.row;
         const col = mergeCell ? mergeCell.startColumn : cellPos.column;
-        const cellData = worksheet.getCell(row, col);
+        const cellData = skeleton.getCell(row, col);
         if (!cellData?.customRender?.length) {
             return;
         }

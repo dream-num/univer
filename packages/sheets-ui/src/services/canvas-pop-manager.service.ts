@@ -600,7 +600,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param viewport
      * @returns A disposable that detaches the popup, or `null` if it cannot be attached.
      */
-    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, renderId?: string): Nullable<INeedCheckDisposable> {
         let workbook = _unitId
             ? this._univerInstanceService.getUnit<Workbook>(_unitId)
             : this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -613,11 +613,11 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
+        const currentRender = this._renderManagerService.getRenderUnitById(renderId ?? unitId);
         const skeleton = currentRender?.with(SheetSkeletonManagerService).ensureSkeleton(subUnitId);
         const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
 
-        if (!currentRender || !skeleton || !sheetSelectionRenderService) {
+        if (!currentRender || (renderId && currentRender.unitId !== unitId) || !skeleton || !sheetSelectionRenderService) {
             return null;
         }
 

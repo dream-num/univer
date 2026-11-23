@@ -110,11 +110,12 @@ export interface ISheetClipboardHook {
     /**
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.
+     * discreteRange contains the exact source rows and columns used for copied cell values.
      * @param unitId
      * @param subUnitId
      * @param range
      */
-    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange, copyType: COPY_TYPE): void;
+    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange, copyType: COPY_TYPE, discreteRange?: IDiscreteRange): void;
     /**
      * Properties that would be appended to the td element.
      *

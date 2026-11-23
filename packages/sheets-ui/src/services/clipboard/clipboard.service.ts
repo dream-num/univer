@@ -362,7 +362,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             hooks = this._clipboardHooks.filter((h) => h.id === copyHookType);
         }
 
-        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range, copyType));
         const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks, copyHookType, copyType);
         if (copyContent && copyType === COPY_TYPE.COPY) {
             copyContent.formulaClipboardPayload = this._generateFormulaClipboardPayload(
@@ -721,6 +720,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return null;
         }
 
+        const discreteRange: IDiscreteRange = { rows, cols: [] };
+        for (let c = startColumn; c <= endColumn; c++) {
+            discreteRange.cols.push(c);
+        }
+        hooks.forEach((hook) => hook.onBeforeCopy?.(unitId, subUnitId, range, copyType, discreteRange));
+
         const visibleOnly = projection && copyType === COPY_TYPE.COPY && copyHookType === PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY;
         const compactRows = !!visibleOnly && rows.length !== endRow - startRow + 1;
         const matrix = worksheet.getMatrixWithMergedCells(
@@ -733,7 +738,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         );
         const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
         const plainMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
-        const discreteRange: IDiscreteRange = { rows, cols: [] };
 
         const handleMatrixOnCellHook = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY ? hooks.find((h) => h.handleMatrixOnCell) : undefined;
         const getCellValueBySpecialMatrixHooks = hooks.filter((h) => h.getCellValueBySpecialMatrix);
@@ -789,10 +793,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 }
             }
             rowIndex += 1;
-        }
-
-        for (let c = startColumn; c <= endColumn; c++) {
-            discreteRange.cols.push(c);
         }
 
         // convert matrix to html

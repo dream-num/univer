@@ -127,27 +127,46 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const autoFilter = filterModel.serialize();
-        const interceptor = accessor.get(SheetInterceptorService).onCommandExecute({
+        const groups = accessor.get(SheetInterceptorService).getCommandMutationGroups({
             id: RemoveSheetFilterCommand.id,
             params: { unitId, subUnitId },
         });
+        // A hook can have any number of inverse mutations. Never guess which inverse belongs
+        // to an unfinished step: multi-step hooks must supply explicit rollback boundaries.
+        if (groups.some((group) => {
+            const count = (group.preRedos?.length ?? 0) + group.redos.length;
+            return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
+        })) {
+            return false;
+        }
+        const filterUndos = destructFilterModel(unitId, subUnitId, autoFilter);
         const undoMutations = [
-            ...(interceptor.preUndos ?? []),
-            ...destructFilterModel(unitId, subUnitId, autoFilter),
-            ...interceptor.undos,
+            ...groups.flatMap((group) => group.preUndos ?? []),
+            ...filterUndos,
+            ...groups.flatMap((group) => group.undos),
         ];
-        const redoMutations = [
-            ...(interceptor.preRedos ?? []),
-            { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } },
-            ...interceptor.redos,
+        const hookSteps = groups.map((group) => {
+            const pre = group.preRedos ?? [];
+            const rollback = group.rollbackMutations ?? [[...(group.preUndos ?? []), ...group.undos]];
+            return {
+                pre: pre.map((mutation, index) => ({ mutation, rollback: rollback[index] })),
+                post: group.redos.map((mutation, index) => ({ mutation, rollback: rollback[pre.length + index] })),
+            };
+        });
+        const steps = [
+            ...hookSteps.flatMap((group) => group.pre),
+            { mutation: { id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }, rollback: filterUndos },
+            ...hookSteps.flatMap((group) => group.post),
         ];
+        const redoMutations = steps.map(({ mutation }) => mutation);
 
         const hasCompanionMutations = redoMutations.length > 1;
         // Keep the intermediate states local until the filter and its companion mutations all succeed.
         const { result, index } = sequenceExecute(redoMutations, commandService, hasCompanionMutations ? { onlyLocal: true } : undefined);
         if (!result) {
             if (hasCompanionMutations && index > 0) {
-                sequenceExecute(undoMutations, commandService, { onlyLocal: true });
+                const rollback = steps.slice(0, index).reverse().flatMap((step) => step.rollback);
+                sequenceExecute(rollback, commandService, { onlyLocal: true });
             }
             return false;
         }

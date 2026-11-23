@@ -15,10 +15,20 @@
  */
 
 import type { IMouseEvent, IPointerEvent, IShapeProps, UniverRenderingContext2D } from '@univerjs/engine-render';
-import { ICommandService, IContextService, Inject, IUniverInstanceService, ThemeService, Workbook } from '@univerjs/core';
+import {
+    ICommandService,
+    IContextService,
+    Inject,
+    IUniverInstanceService,
+    ThemeService,
+    Workbook,
+} from '@univerjs/core';
 import { getFocusedRenderForUnit, IRenderManagerService, Shape } from '@univerjs/engine-render';
 import type { IRequestOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import { FILTER_PANEL_OPENED_KEY, RequestOpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import {
+    FILTER_PANEL_OPENED_KEY,
+    RequestOpenFilterPanelOperation,
+} from '../../commands/operations/sheets-filter.operation';
 import { drawFilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;
@@ -129,10 +139,11 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         this._openTimer = setTimeout(() => {
             this._openTimer = undefined;
             const unit = this._univerInstanceService.getFocusedUnit();
+            const render = getFocusedRenderForUnit(this._renderManagerService, unitId);
             if (this._disposed || this._filterParams !== filterParams || (scene && (
                 !(unit instanceof Workbook) || unit.getUnitId() !== unitId
                 || unit.getActiveSheet()?.getSheetId() !== subUnitId || this.getScene() !== scene
-                || getFocusedRenderForUnit(this._renderManagerService, unitId)?.scene !== scene
+                || render?.scene !== scene
             ))) {
                 return;
             }
@@ -140,6 +151,7 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
                 unitId,
                 subUnitId,
                 col,
+                renderId: render?.renderId ?? unitId,
             } as IRequestOpenFilterPanelOperationParams);
         }, 200);
     }

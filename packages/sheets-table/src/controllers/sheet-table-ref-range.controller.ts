@@ -246,29 +246,8 @@ export class SheetTableRefRangeController extends Disposable {
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
                 if (range.startRow <= tableRange.startRow && range.endRow >= tableRange.startRow) {
-                    preRedos.push({
-                        id: DeleteSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: table.getId(),
-                        },
-                    });
-                    const tableJson = table.toJSON();
-                    undos.push({
-                        id: AddSheetTableMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            tableId: tableJson.id,
-                            name: tableJson.name,
-                            range: tableJson.range,
-                            ...(hasTableDxfStyles(tableJson) ? { meta: Tools.deepClone(tableJson.meta) } : {}),
-                            options: hasTableDxfStyles(tableJson)
-                                ? { ...tableJson.options, columns: Tools.deepClone(tableJson.columns) }
-                                : tableJson.options,
-                        },
-                    });
+                    preRedos.push(this._getDeleteTableMutation(unitId, subUnitId, table.getId()));
+                    undos.push(this._getAddTableMutation(unitId, subUnitId, table.toJSON()));
                 } else if (range.startRow > tableRange.startRow && range.startRow <= tableRange.endRow) {
                     redos.push({
                         id: SetSheetTableMutation.id,

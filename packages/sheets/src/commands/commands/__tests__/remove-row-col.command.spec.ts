@@ -15,7 +15,6 @@
  */
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
-import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -26,10 +25,15 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { IRenderManagerService, Spreadsheet, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
+import { handleDefaultRangeChangeWithEffectRefCommands } from '../../../services/ref-range/util';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -44,6 +48,10 @@ describe('Test remove rows cols', () => {
     let commandService: ICommandService;
 
     beforeEach(() => {
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            setTransform: () => {},
+            clearRect: () => {},
+        } as unknown as CanvasRenderingContext2D);
         const testBed = createMoveRowsColsTestBed();
         univer = testBed.univer;
         get = testBed.get;
@@ -65,6 +73,96 @@ describe('Test remove rows cols', () => {
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.restoreAllMocks();
+    });
+
+    it('deletes only the focused pane\'s filtered-visible rows and restores them on undo', async () => {
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const worksheet = workbook.getActiveSheet()!;
+        const target = { unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId() };
+        commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+            ...target,
+            cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } }, 3: { 0: { v: 'D' } } },
+        });
+        univer.registerPlugin(UniverRenderEnginePlugin);
+        const renders = get(IRenderManagerService);
+        renders.createRender(target.unitId);
+        const pane = renders.createRender(target.unitId, { embeddedRender: true }, 'right-pane');
+        const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles(), pane.scene);
+        skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+        pane.mainComponent = univer.__getInjector().createInstance(Spreadsheet, 'right-sheet', skeleton);
+        renders.focusRender?.('right-pane');
+        const rowCount = worksheet.getRowCount();
+        let referencedRange = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
+        const watch = get(RefRangeService).registerRefRange(referencedRange, (command) => {
+            referencedRange = handleDefaultRangeChangeWithEffectRefCommands(referencedRange, command)!;
+            return { redos: [], undos: [] };
+        }, target.unitId, target.subUnitId);
+        try {
+            expect(await commandService.executeCommand(RemoveRowCommand.id, {
+                ...target,
+                range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 19, rangeType: RANGE_TYPE.ROW },
+            })).toBe(true);
+            expect([0, 1].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['B', 'D']);
+            expect(worksheet.getRowCount()).toBe(rowCount - 2);
+            expect(referencedRange).toEqual({ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 });
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect([0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['A', 'B', 'C', 'D']);
+            expect(worksheet.getRowCount()).toBe(rowCount);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect([0, 1].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['B', 'D']);
+        } finally {
+            watch.dispose();
+            skeleton.dispose();
+        }
+    });
+
+    it('does not delete rows while the focused view projection is pending', async () => {
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const worksheet = workbook.getActiveSheet()!;
+        univer.registerPlugin(UniverRenderEnginePlugin);
+        const pane = get(IRenderManagerService).createRender(workbook.getUnitId());
+        get(SheetSkeletonService).setDisplayProjectionPending(pane.scene, worksheet.getSheetId(), true);
+        const rowCount = worksheet.getRowCount();
+        expect(await commandService.executeCommand(RemoveRowCommand.id, {
+            range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 19, rangeType: RANGE_TYPE.ROW },
+        })).toBe(false);
+        expect(worksheet.getRowCount()).toBe(rowCount);
+        expect(worksheet.getCellRaw(0, 0)?.v).toBe('A1');
+    });
+
+    it('aborts deletion if focus changes while an asynchronous permission check is pending', async () => {
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+        const worksheet = workbook.getActiveSheet()!;
+        univer.registerPlugin(UniverRenderEnginePlugin);
+        const renders = get(IRenderManagerService);
+        renders.createRender('test');
+        const pane = renders.createRender('test', { embeddedRender: true }, 'right-pane');
+        const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles(), pane.scene);
+        skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+        pane.mainComponent = univer.__getInjector().createInstance(Spreadsheet, 'right-sheet', skeleton);
+        renders.focusRender?.('right-pane');
+        const check = get(SheetInterceptorService).interceptBeforeCommand({
+            performCheck: async () => {
+                renders.focusRender?.('test');
+                return true;
+            },
+        });
+        try {
+            const count = worksheet.getRowCount();
+            expect(await commandService.executeCommand(RemoveRowCommand.id, {
+                range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 19 },
+            })).toBe(false);
+            expect(worksheet.getRowCount()).toBe(count);
+            expect(worksheet.getCellRaw(1, 0)?.v).toBe('B1');
+        } finally {
+            check.dispose();
+            skeleton.dispose();
+        }
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {

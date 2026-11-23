@@ -17,7 +17,7 @@
 /* eslint-disable perfectionist/sort-imports */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, RedoCommandId, UndoCommand, UndoCommandId, Univer, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, RedoCommandId, sequenceExecute, UndoCommand, UndoCommandId, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetLazyExecuteScheduleService, SheetRangeThemeModel, SheetsSelectionsService, ZebraCrossingCacheController } from '@univerjs/sheets';
@@ -470,6 +470,27 @@ describe('test controller of sheets filter', () => {
     });
 
     describe('test interceptor of remove-rows-command', () => {
+        it('adjusts the filter using the actual deleted ranges when a private pane preserves its header', () => {
+            const result = get(SheetInterceptorService).onCommandExecute({
+                id: RemoveRowCommand.id,
+                params: {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    range: { startRow: 1, endRow: 4, startColumn: 0, endColumn: 5 },
+                    ranges: [
+                        { startRow: 4, endRow: 4, startColumn: 0, endColumn: 5 },
+                        { startRow: 1, endRow: 1, startColumn: 0, endColumn: 5 },
+                    ],
+                },
+            });
+            expect(sequenceExecute(result.redos, commandService).result).toBe(true);
+            expect(sheetsFilterService.getFilterModel('test', 'sheet1')?.getRange())
+                .toEqual({ startRow: 2, endRow: 3, startColumn: 0, endColumn: 5 });
+            expect(sequenceExecute(result.undos, commandService).result).toBe(true);
+            expect(sheetsFilterService.getFilterModel('test', 'sheet1')?.getRange())
+                .toEqual({ startRow: 3, endRow: 5, startColumn: 0, endColumn: 5 });
+        });
+
         it('filter range should move up if remove rows before filter header', async () => {
             expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                 unitId: 'test',

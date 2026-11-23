@@ -87,7 +87,7 @@ function createController(options?: {
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
         id: 'unit-1',
         sheetOrder: ['sheet-1'],
-        sheets: { 'sheet-1': { id: 'sheet-1', rowCount: 4, columnCount: 4 } },
+        sheets: { 'sheet-1': { id: 'sheet-1', rowCount: 4, columnCount: 4, cellData: { 0: { 0: { v: 10 } } } } },
     });
     const context = { unitId: workbook.getUnitId(), unit: workbook, scene };
     injector.add([SheetSkeletonManagerService, {
@@ -159,6 +159,19 @@ describe('CellCustomRenderController', () => {
         protectedCell.injector.get(CellCustomRenderController);
         protectedCell.pointerDown$.emitEvent(protectedCell.event);
         expect(protectedCell.renderA.onPointerDown).not.toHaveBeenCalled();
+    });
+
+    it('uses the pane display data for custom renderer hit testing and pointer callbacks', () => {
+        const bed = createController();
+        const skeleton = bed.skeletons.getCurrentSkeleton()!;
+        bed.skeletons.setProjection('sheet-1', {
+            isRowFiltered: () => false,
+            getCell: (row, col) => ({ ...skeleton.worksheet.getCell(row, col), v: 25 }),
+        });
+        bed.injector.get(CellCustomRenderController);
+        bed.pointerDown$.emitEvent(bed.event);
+        expect(bed.renderA.isHit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ data: expect.objectContaining({ v: 25 }) }));
+        expect(bed.renderA.onPointerDown).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ v: 25 }) }), bed.event);
     });
 
     it('uses the live skeleton when an earlier pointer handler clears the display projection', () => {

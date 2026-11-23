@@ -1358,6 +1358,26 @@ describe('Test clipboard', () => {
         expect(getValues(37, 0, 37, 0, 'sheet2')?.[0][0]?.v).toBe('Next');
     });
 
+    it('shares projected source rows with metadata copy hooks', () => {
+        const rows: number[][] = [];
+        sheetClipboardService.addClipboardHook({
+            id: 'metadata-source-rows',
+            onBeforeCopy: (...args) => rows.push(args[4]?.rows ?? []),
+        });
+        get(SheetSkeletonManagerService).setProjection('sheet1', {
+            isRowFiltered: (row) => row === 31,
+            getCell: () => undefined,
+        });
+        const content = sheetClipboardService.generateCopyContent('test', 'sheet1', {
+            startRow: 30,
+            endRow: 32,
+            startColumn: 0,
+            endColumn: 0,
+        })!;
+        expect(rows).toEqual([content.discreteRange.rows]);
+        expect(rows[0]).toEqual([30, 32]);
+    });
+
     it('copies a publicly filtered row with its visible projected height', () => {
         const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')!.getSheetBySheetId('sheet1')!;
         worksheet.__interceptViewModel((viewModel) => {

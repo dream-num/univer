@@ -15,6 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets';
 import type {
     IAddConditionalRuleMutationParams,
     IConditionFormattingRule,
@@ -79,7 +80,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         this.disposeWithMe(
             this._sheetClipboardService.addClipboardHook({
                 id: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
-                onBeforeCopy: (unitId, subUnitId, range) => this._collectConditionalRule(unitId, subUnitId, range),
+                onBeforeCopy: (unitId, subUnitId, range, _copyType, discreteRange) => this._collectConditionalRule(unitId, subUnitId, range, discreteRange),
                 onPasteCells: (pasteFrom, pasteTo, _data, payload) => {
                     // If pasteFrom or copyInfo is null, it means the copy from outside of Univer, so not need to handle the conditional formatting, just return empty mutations.
                     if (!pasteFrom || !this._copyInfo || !specialPastes.includes(payload.pasteType)) {
@@ -91,7 +92,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         );
     }
 
-    private _collectConditionalRule(unitId: string, subUnitId: string, range: IRange) {
+    private _collectConditionalRule(unitId: string, subUnitId: string, range: IRange, sourceRange?: IDiscreteRange) {
         const rules = new Map<string, IRange[]>();
         const cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'>> = {};
         this._copyInfo = {
@@ -103,7 +104,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             },
         };
 
-        const discreteRange = this._injector.invoke((accessor) => {
+        const discreteRange = sourceRange ?? this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
         });
         if (!discreteRange) {

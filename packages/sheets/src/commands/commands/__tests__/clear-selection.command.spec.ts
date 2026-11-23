@@ -33,6 +33,7 @@ import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -110,9 +111,26 @@ describe('Test clear selection content commands', () => {
                 }, { fromChangeset: true })).toBe(true);
                 expect(worksheet.getCellRaw(3, 0)?.v).toBe('remote');
 
+                const interceptedRanges: unknown[] = [];
+                get(SheetInterceptorService).interceptCommand({
+                    getMutations: (command) => {
+                        if (command.id === ClearSelectionContentCommand.id) {
+                            interceptedRanges.push(command.params);
+                        }
+                        return { redos: [], undos: [] };
+                    },
+                });
                 skeletons.setDisplayProjectionPending(scene, subUnitId, false);
                 expect(await commandService.executeCommand(ClearSelectionContentCommand.id, params)).toBe(true);
                 expect(values()).toEqual([null, 'B', null]);
+                expect(interceptedRanges).toEqual([{
+                    unitId,
+                    subUnitId,
+                    ranges: [
+                        { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                        { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 },
+                    ],
+                }]);
                 expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
                 expect(values()).toEqual(['A', 'B', 'C']);
             } finally {

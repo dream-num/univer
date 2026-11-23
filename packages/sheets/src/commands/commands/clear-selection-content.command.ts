@@ -86,7 +86,10 @@ export const ClearSelectionContentCommand: ICommand<IClearSelectionContentComman
         });
 
         // intercept
-        const intercepted = sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id, params });
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: ClearSelectionContentCommand.id,
+            params: { ...params, unitId, subUnitId, ranges: visibleRanges },
+        });
 
         redoMutations.push(...intercepted.redos);
         undoMutations.unshift(...intercepted.undos);

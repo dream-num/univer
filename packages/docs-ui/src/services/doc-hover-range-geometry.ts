@@ -54,7 +54,17 @@ export function buildDocHoverRangeGeometry(
     root: IDocumentSkeletonPage,
     docsTop: number,
     ranges: readonly ICustomRange[]
-): IDocHoverRangeGeometry {
+): IDocHoverRangeGeometry | null {
+    const indexedRanges: IDocInterval<IIndexedRange>[] = [];
+    for (const [order, range] of ranges.entries()) {
+        const { startIndex, endIndex } = range;
+        // Legacy snapshots can omit endpoints, which would break the ordering used by the interval index.
+        if (!Number.isSafeInteger(startIndex) || !Number.isSafeInteger(endIndex) || startIndex < 0 || endIndex < startIndex) {
+            return null;
+        }
+        indexedRanges.push({ value: { range, order }, start: startIndex, end: endIndex });
+    }
+
     const lines: IDocInterval<ISourceSpan>[] = [];
     const unbounded: ISourceSpan[] = [];
 
@@ -85,11 +95,7 @@ export function buildDocHoverRangeGeometry(
             }
         }
     });
-    const rangeIndex = buildDocIntervalIndex(ranges.map((range, order) => ({
-        value: { range, order },
-        start: range.startIndex,
-        end: range.endIndex,
-    })));
+    const rangeIndex = buildDocIntervalIndex(indexedRanges);
     // Unsupported coordinate paths must stay eligible. Map their ranges once,
     // so scrolling never revisits those text fragments.
     const unboundedRanges = new Set<IIndexedRange>();

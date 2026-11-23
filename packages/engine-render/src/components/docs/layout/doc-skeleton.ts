@@ -109,6 +109,7 @@ import { ContinuousLayoutPublicationScheduler } from './continuous-layout-public
 import {
     applyDocumentSkeletonContinuousBlock,
     attachContinuousLayoutGeometry,
+    compareFlowCursors,
     compareLayoutGeometry,
     forkContinuousLayoutSkeleton,
     hydrateDocumentSkeletonPage,
@@ -144,10 +145,6 @@ import {
 } from './tools';
 
 const INTERACTION_PAGE_WINDOW_SIZE = 5;
-
-function compareFlowCursors(left: IDocumentSkeletonFlowCursor, right: IDocumentSkeletonFlowCursor): number {
-    return (left.sectionIndex - right.sectionIndex) || (left.columnIndex - right.columnIndex) || (left.lineIndex - right.lineIndex);
-}
 
 function findUnprotectedFlowCursor(
     page: IDocumentSkeletonPage,

@@ -18,6 +18,7 @@ import type { IDocumentBody, IParagraphStyle, IScale, ITable } from '@univerjs/c
 import {
     BaselineOffset,
     BooleanNumber,
+    BorderStyleTypes,
     ColumnSeparatorType,
     createDocumentModelWithStyle,
     createIdentifier,
@@ -70,6 +71,7 @@ import { DocBackground } from '../doc-background';
 import { docExtension, DOCS_EXTENSION_TYPE } from '../doc-extension';
 import { Documents, drawSectionColumnSeparators } from '../document';
 import { registerDocumentLayoutPresentation } from '../document-layout-presentation';
+import { Border } from '../extensions/border';
 import { createParagraphLayoutTestBed } from '../layout/block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import wordParagraphSeparators from '../layout/block/paragraph/__tests__/fixtures/word-paragraph-separator-spacing.json';
 import { DocumentSkeleton } from '../layout/doc-skeleton';
@@ -4150,6 +4152,56 @@ describe('documents render', () => {
         } finally {
             extension.dispose();
             injector.dispose();
+            dispose();
+        }
+    });
+
+    it('preserves the visible text border when an intervening table is clipped', () => {
+        const { documents, viewport, page, dispose } = createContinuousTableFixture(undefined, 'bottom', true);
+        const tables = [...page.skeTables.values()];
+        const blue = { s: BorderStyleTypes.MEDIUM_DASHED, cl: { rgb: '#2244ee' } };
+        const red = { s: BorderStyleTypes.THIN, cl: { rgb: '#cc2222' } };
+        try {
+            const lines = tables.map((table) => table.rows[0].cells[0].sections[0].columns[0].lines[0]);
+            for (const [index, line] of lines.entries()) {
+                const glyph = line.divides.flatMap((divide) => divide.glyphGroup).find((glyph) => glyph.content === 'ABC'[index])!;
+                glyph.ts = { ...glyph.ts, bd: { t: index === 1 ? red : blue } };
+            }
+            const model = documents.getSkeleton()!.getViewModel().getDataModel();
+            model.apply(JSONX.getInstance().insertOp(['body', 'customRanges'], [{
+                rangeId: 'keep-first-table',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: lines[0].st,
+                endIndex: lines[0].ed,
+            }]));
+
+            const ctx = canvas.getContext();
+            const drawBorder = Border.prototype.draw;
+            const stroke = ctx.stroke.bind(ctx);
+            const strokes: Array<{ glyph: string; style: CanvasRenderingContext2D['strokeStyle']; width: number; dash: number[] }> = [];
+            let currentGlyph: string | undefined;
+            vi.spyOn(Border.prototype, 'draw').mockImplementation(function (this: Border, context, scale, glyph) {
+                currentGlyph = glyph.content;
+                try {
+                    drawBorder.call(this, context, scale, glyph);
+                } finally {
+                    currentGlyph = undefined;
+                }
+            });
+            vi.spyOn(ctx, 'stroke').mockImplementation(() => {
+                if (currentGlyph === 'A' || currentGlyph === 'B' || currentGlyph === 'C') {
+                    strokes.push({ glyph: currentGlyph, style: ctx.strokeStyle, width: ctx.lineWidth, dash: ctx.getLineDash() });
+                }
+                stroke();
+            });
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: tables[2].top });
+            viewport.render(ctx, [documents]);
+
+            expect(strokes).toEqual([
+                { glyph: 'A', style: '#2244ee', width: 2, dash: [3, 3] },
+                { glyph: 'C', style: '#2244ee', width: 2, dash: [3, 3] },
+            ]);
+        } finally {
             dispose();
         }
     });

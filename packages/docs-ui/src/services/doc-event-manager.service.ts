@@ -78,7 +78,7 @@ interface ICustomRangeBoundsCache {
     lastOffset: number | undefined;
     bodyBounds: Map<ICustomRange, ICachedBodyRange>;
     tables: IDocIntervalIndex<ICustomTable>;
-    hoverGeometry?: IDocHoverRangeGeometry;
+    hoverGeometry?: IDocHoverRangeGeometry | null;
     hoverWindow?: IRangeBoundsSnapshot & { top: number; bottom: number };
     allBounds?: IRangeBoundsSnapshot;
 }
@@ -857,7 +857,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         bottom: number
     ): ICustomRangeBound[] {
         const cache = this._getCustomRangeBoundsCache();
-        cache.hoverGeometry ??= buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop, ranges);
+        if (cache.hoverGeometry === undefined) {
+            cache.hoverGeometry = buildDocHoverRangeGeometry(page, this._documents.getOffsetConfig().docsTop, ranges);
+        }
+        if (cache.hoverGeometry === null) {
+            return this._getAllCustomRangeBounds();
+        }
         const window = cache.hoverWindow;
         const viewportSignatures = new Map<string, string>();
         if (window != null && top >= window.top && bottom <= window.bottom &&

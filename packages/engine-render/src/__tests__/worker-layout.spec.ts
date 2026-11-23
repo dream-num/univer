@@ -1993,13 +1993,6 @@ describe('worker document layout session', () => {
                         receivedFirst = true;
                         expect(result.publication.block.flow.lineIndex).toBeGreaterThanOrEqual(589);
                         expect(result.publication.block.flow.lines.length).toBeLessThanOrEqual(2);
-                        if (process.env.DOC_BENCHMARK_LOG === '1') {
-                            stdout.write(`protected-tail-first-packet ${JSON.stringify({
-                                lineIndex: result.publication.block.flow.lineIndex,
-                                lines: result.publication.block.flow.lines.length,
-                                bytes: new TextEncoder().encode(JSON.stringify(result.publication)).length,
-                            })}\n`);
-                        }
                     }
                     expect(main.applyLayoutPublication(structuredClone(result.publication), result.progress).requiresFullPublication).toBeFalsy();
                     if (!cancelledDraft && !result.progress.complete) {

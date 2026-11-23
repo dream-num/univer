@@ -571,6 +571,10 @@ export interface IDocumentSkeletonFlowCursor {
     lineIndex: number;
 }
 
+export function compareFlowCursors(left: IDocumentSkeletonFlowCursor, right: IDocumentSkeletonFlowCursor): number {
+    return (left.sectionIndex - right.sectionIndex) || (left.columnIndex - right.columnIndex) || (left.lineIndex - right.lineIndex);
+}
+
 function countFlowLines(page: IDocumentSkeletonPage): number {
     let lineCount = 0;
     for (const section of page.sections) {
@@ -843,9 +847,7 @@ export function serializeDocumentSkeletonContinuousBlock(
         const rewind = previousSections == null
             ? resolveFlowCursor(currentPage, Math.max(0, findContinuousLineIndex(currentPage, options.invalidatedOffset) - 1))
             : getContinuousPrefixCursor(previousSections, currentPage);
-        if (rewind.sectionIndex < cursor.sectionIndex ||
-            (rewind.sectionIndex === cursor.sectionIndex && rewind.columnIndex < cursor.columnIndex) ||
-            (rewind.sectionIndex === cursor.sectionIndex && rewind.columnIndex === cursor.columnIndex && rewind.lineIndex < cursor.lineIndex)) {
+        if (compareFlowCursors(rewind, cursor) < 0) {
             cursor = rewind;
         }
     }

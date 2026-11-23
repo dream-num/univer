@@ -206,6 +206,85 @@ describe('custom-range hit testing with real document layout', () => {
         }
     });
 
+    function createBufferedRangeTestBed(univer: Univer, snapshot: IDocumentData) {
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([DocLayoutExecutorService]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, snapshot);
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        const manager = render.with(DocSkeletonManagerService);
+        const skeleton = manager.recalculate();
+        const documents = injector.createInstance(Documents, 'hover-document', skeleton);
+        render.mainComponent = documents;
+        render.scene.addObject(documents);
+        render.scene.transformByState({ width: 320, height: 3200 });
+        const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 240, height: 100 });
+        const scrollBar = new ScrollBar(viewport);
+        render.addRenderDependencies([[DocEventManagerService]]);
+        const service = render.with(DocEventManagerService);
+        return { model, render, manager, skeleton, documents, viewport, scrollBar, service };
+    }
+
+    it.each([
+        { endIndex: 12 },
+        { startIndex: 12 },
+        { startIndex: 20, endIndex: 12 },
+    ])('keeps early hover and click targets with invalid legacy offsets %j', (legacyOffsets) => {
+        vi.useFakeTimers();
+        const dataStream = `First link\r${'Paragraph\r'.repeat(24)}Last link\r\n`;
+        const lastStart = dataStream.indexOf('Last link');
+        const snapshot: IDocumentData = {
+            id: 'legacy-hover-ranges',
+            body: {
+                dataStream,
+                paragraphs: Array.from(dataStream.matchAll(/\r/g), (match, index) => ({ startIndex: match.index, paragraphId: `p-${index}` })),
+                sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'body' }],
+                customRanges: [
+                    { startIndex: lastStart, endIndex: lastStart + 8, rangeId: 'late', rangeType: CustomRangeType.HYPERLINK },
+                    { ...legacyOffsets, rangeId: 'legacy', rangeType: CustomRangeType.HYPERLINK } as ICustomRange,
+                    { startIndex: 0, endIndex: 9, rangeId: 'early', rangeType: CustomRangeType.HYPERLINK },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 320, height: Number.POSITIVE_INFINITY },
+                marginTop: 8,
+                marginLeft: 12,
+            },
+        };
+
+        const univer = new Univer();
+        try {
+            const { documents, render, service } = createBufferedRangeTestBed(univer, snapshot);
+            const hovered: string[][] = [];
+            const clicked: string[] = [];
+            service.hoverCustomRangesRealTime$.subscribe((ranges) => hovered.push(ranges.map(({ range }) => range.rangeId)));
+            service.clickCustomRanges$.subscribe(({ range }) => clicked.push(range.rangeId));
+            const early = service.getCustomRangeBounds().find(({ customRange }) => customRange.rangeId === 'early')!;
+            const [rect] = early.rects;
+            const event = {
+                buttons: 0,
+                button: 0,
+                offsetX: (rect.left + rect.right) / 2,
+                offsetY: (rect.top + rect.bottom) / 2,
+                target: documents,
+                timeStamp: 100,
+            } as unknown as IPointerEvent;
+            render.scene.onPointerMove$.emitEvent(event);
+            vi.advanceTimersByTime(31);
+            documents.onPointerDown$.emitEvent(event);
+            render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
+
+            expect({ hovered: hovered.at(-1), clicked }).toEqual({ hovered: ['early'], clicked: ['early'] });
+        } finally {
+            univer.dispose();
+            vi.useRealTimers();
+        }
+    });
+
     it('keeps hover rectangles while scrolling within the buffer and rebuilds after a jump or layout change', () => {
         vi.useFakeTimers();
         const paragraphs = Array.from({ length: 24 }, (_, index) => `Link ${index} example text\r`);
@@ -234,24 +313,7 @@ describe('custom-range hit testing with real document layout', () => {
 
         const univer = new Univer();
         try {
-            const injector = univer.__getInjector();
-            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-            injector.add([DocLayoutExecutorService]);
-            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, snapshot);
-            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
-            render.deactivate();
-            render.addRenderDependencies([[DocSkeletonManagerService]]);
-            const manager = render.with(DocSkeletonManagerService);
-            const skeleton = manager.recalculate();
-            const documents = injector.createInstance(Documents, 'hover-document', skeleton);
-            render.mainComponent = documents;
-            render.scene.addObject(documents);
-            render.scene.transformByState({ width: 320, height: 3200 });
-            const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 240, height: 100 });
-            const scrollBar = new ScrollBar(viewport);
-            render.addRenderDependencies([[DocEventManagerService]]);
-            const service = render.with(DocEventManagerService);
+            const { model, render, manager, skeleton, documents, viewport, scrollBar, service } = createBufferedRangeTestBed(univer, snapshot);
             let hovered: Array<{ range: { rangeId: string }; rects: unknown }> = [];
             const clicks: string[] = [];
             service.clickCustomRanges$.subscribe(({ range }) => clicks.push(range.rangeId));

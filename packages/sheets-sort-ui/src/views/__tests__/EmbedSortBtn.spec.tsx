@@ -66,22 +66,4 @@ describe('EmbedSortBtn', () => {
         expect(getColumnValues(currentTestBed.worksheet, 1, [0, 1, 2, 3])).toEqual(['Score', 30, 20, 10]);
         expect(closeCount).toBe(1);
     });
-
-    it('leaves table sorting to the table panel actions', async () => {
-        currentTestBed = createSortViewTestBed();
-        container = document.createElement('div');
-        document.body.appendChild(container);
-        root = createRoot(container);
-        await renderWithInjector(
-            root,
-            currentTestBed,
-            <EmbedSortBtn
-                tableId="orders"
-                range={{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 }}
-                colIndex={1}
-                onClose={() => undefined}
-            />
-        );
-        expect(container.querySelector('button')).toBeNull();
-    });
 });

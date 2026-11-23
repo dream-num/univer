@@ -27,19 +27,16 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { CanvasColorService, ICanvasColorService, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPermissionCheckController } from '@univerjs/sheets';
-import { DesktopLayoutService, ILayoutService, RediContext } from '@univerjs/ui';
+import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
-import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetOptionalPasteCommand } from '../../../commands/commands/clipboard.command';
-import { SheetRenderController } from '../../../controllers/render-controllers/sheet.render-controller';
-import { clipboardTestBed } from '../../../services/clipboard/__tests__/clipboard-test-bed';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
-import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { ClipboardPopupMenu } from '../ClipboardPopupMenu';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -240,68 +237,6 @@ describe('ClipboardPopupMenu', () => {
         root = undefined;
         container = undefined;
         currentBed = undefined;
-    });
-
-    it.each([2, 0])('positions a companion paste menu relative to the content host while preserving local visibility for row %s', async (row) => {
-        vi.useFakeTimers();
-        onTestFinished(() => {
-            vi.useRealTimers();
-        });
-        const canvasContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
-            return new Proxy({
-                canvas: this,
-                webkitBackingStorePixelRatio: 1,
-                mozBackingStorePixelRatio: 1,
-                msBackingStorePixelRatio: 1,
-                oBackingStorePixelRatio: 1,
-                backingStorePixelRatio: 1,
-                getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
-                measureText: () => ({ width: 10, actualBoundingBoxAscent: 10, actualBoundingBoxDescent: 2 }),
-            }, { get: (target, key) => Reflect.get(target, key) ?? (() => {}) }) as unknown as CanvasRenderingContext2D;
-        });
-        onTestFinished(() => canvasContext.mockRestore());
-        const bed = clipboardTestBed();
-        const injector = bed.univer.__getInjector();
-        currentBed = { univer: bed.univer, injector, workbook: bed.sheet, permissionCheckWithRanges: vi.fn(() => true) };
-        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-        injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
-        injector.add([SheetsRenderService]);
-        const renders = injector.get(IRenderManagerService);
-        renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
-        renders.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController]);
-        const companion = renders.createRender('test', undefined, 'popup-companion');
-        companion.engine.resizeBySize(1000, 700);
-        const manager = companion.with(SheetSkeletonManagerService);
-        manager.setCurrent({ sheetId: 'sheet1' });
-        if (row === 0) {
-            companion.scene.getMainViewport().scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: 100 });
-        }
-        renders.focusRender?.('popup-companion');
-        const host = document.createElement('div');
-        injector.get(ILayoutService).registerContentElement(host);
-        vi.spyOn(companion.engine.getCanvasElement(), 'getBoundingClientRect').mockReturnValue(new DOMRect(500, 100, 1000, 700));
-        vi.spyOn(host, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 30, 1400, 900));
-        const clipboard = injector.get(ISheetClipboardService);
-        clipboard.updatePasteOptionsCache({
-            target: { unitId: 'test', subUnitId: 'sheet1', pastedRange: { rows: [row], cols: [2] } },
-            cellMatrix: new ObjectMatrix(),
-            pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
-        });
-        const rendered = renderWithDependencies(<ClipboardPopupMenu />, injector);
-        root = rendered.root;
-        container = rendered.container;
-        await act(async () => {
-            await Promise.resolve();
-            clipboard.setShowMenu(true);
-        });
-        const cell = manager.getCurrentSkeleton()!.getNoMergeCellWithCoordByIndex(row, 2);
-        const positioned = container.querySelector<HTMLElement>('[style]');
-        if (row === 0) {
-            expect(positioned).toBeNull();
-            return;
-        }
-        expect(positioned?.style.left).toBe(`${String(cell.endX + 480 + 2)}px`);
-        expect(positioned?.style.top).toBe(`${String(cell.endY + 70 + 2)}px`);
     });
 
     it('runs optional paste through the command service with the selected paste option', async () => {

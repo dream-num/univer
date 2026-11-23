@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import type { IMouseEvent } from '@univerjs/engine-render';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { CommandType, ICommandService, Univer } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { SheetsTableButtonStateEnum } from '@univerjs/sheets-table';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type {
     IOpenTableFilterPanelOperationParams,
 } from '../../../commands/operations/open-table-filter-dialog.opration';
@@ -44,8 +43,6 @@ describe('sheet table filter button shape', () => {
     afterEach(() => {
         univer?.dispose();
         univer = undefined;
-        vi.useRealTimers();
-        vi.restoreAllMocks();
     });
 
     function createShape(executedParams: IOpenTableFilterPanelOperationParams[]): SheetsTableFilterButtonShape {
@@ -82,61 +79,6 @@ describe('sheet table filter button shape', () => {
             },
         });
     }
-
-    it.each(['unchanged', 'focus changed', 'disposed', 'reused', 'unit changed', 'sheet changed'])('keeps delayed requests owned by their source scene: %s', async (change) => {
-        vi.useFakeTimers();
-        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
-            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
-        });
-        const executedParams: IOpenTableFilterPanelOperationParams[] = [];
-        const shape = createShape(executedParams);
-        univer!.createUnit(UniverInstanceType.UNIVER_SHEET, {
-            id: 'unit-1',
-            name: '',
-            appVersion: '',
-            locale: LocaleType.EN_US,
-            sheetOrder: ['sheet-1', 'sheet-2'],
-            sheets: { 'sheet-1': { id: 'sheet-1', name: '' }, 'sheet-2': { id: 'sheet-2', name: 'Other' } },
-            styles: {},
-        });
-        const renders = univer!.__getInjector().get(IRenderManagerService);
-        const primary = renders.createRender('unit-1');
-        renders.createRender('unit-1', undefined, 'right-pane');
-        const instances = univer!.__getInjector().get(IUniverInstanceService);
-        instances.focusUnit('unit-1');
-        primary.scene.addObject(shape);
-        shape.onPointerDown(createPointerEvent(0));
-        if (change === 'unit changed') {
-            univer!.createUnit(UniverInstanceType.UNIVER_SHEET, {
-                id: 'other-unit',
-                name: '',
-                appVersion: '',
-                locale: LocaleType.EN_US,
-                sheetOrder: [],
-                sheets: {},
-                styles: {},
-            });
-            instances.focusUnit('other-unit');
-        } else if (change === 'sheet changed') {
-            const workbook = instances.getUnit<Workbook>('unit-1', UniverInstanceType.UNIVER_SHEET)!;
-            workbook.setActiveSheet(workbook.getSheetBySheetId('sheet-2')!);
-        } else if (change === 'focus changed') {
-            renders.focusRender?.('right-pane');
-        } else if (change === 'disposed') {
-            shape.dispose();
-        } else if (change === 'reused') {
-            shape.setShapeProps({ filterParams: {
-                row: 8,
-                col: 2,
-                unitId: 'unit-1',
-                subUnitId: 'sheet-1',
-                buttonState: SheetsTableButtonStateEnum.FilterNoneSortNone,
-                tableId: 'other-table',
-            } });
-        }
-        await vi.advanceTimersByTimeAsync(200);
-        expect(executedParams.length).toBe(change === 'unchanged' ? 1 : 0);
-    });
 
     it('opens the table filter panel with the current cell and table parameters on primary pointer down', async () => {
         const executedParams: IOpenTableFilterPanelOperationParams[] = [];

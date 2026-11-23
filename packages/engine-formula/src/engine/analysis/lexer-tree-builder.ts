@@ -134,8 +134,6 @@ export class LexerTreeBuilder extends Disposable {
 
     private _bracketState: bracketType[] = []; // ()
 
-    private _openBracketNormalIndexStack: number[] = [];
-
     private readonly _rangeEndpointBracketLevels: number[] = [];
 
     private _squareBracketState: number = 0;
@@ -1173,27 +1171,7 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    private _openBracketNormalIndex() {
-        this._openBracketNormalIndexStack.push(this._currentLexerNode.getChildren().length - 1);
-    }
-
-    private _getNodesByCurrentBracketNormalIndex() {
-        const openIndex = this._openBracketNormalIndexStack.pop();
-
-        if (openIndex === undefined) {
-            return [];
-        }
-
-        const children = this._currentLexerNode.getChildren();
-        if (children.length === 0) {
-            return [];
-        }
-
-        const nodes = children.splice(openIndex);
-        return nodes;
-    }
-
-    private _moveTrailingGroupToRangeEndpoint(endpoint: LexerNode) {
+    private _moveTrailingParenthesizedGroup(target: LexerNode) {
         const children = this._currentLexerNode.getChildren();
         let depth = 1;
         for (let index = children.length - 2; index >= 0; index--) {
@@ -1202,10 +1180,10 @@ export class LexerTreeBuilder extends Disposable {
                 depth++;
             } else if (child === matchToken.OPEN_BRACKET && --depth === 0) {
                 const group = children.splice(index);
-                endpoint.setChildren(group);
+                target.setChildren(group);
                 for (const node of group) {
                     if (node instanceof LexerNode) {
-                        node.setParent(endpoint);
+                        node.setParent(target);
                     }
                 }
                 return;
@@ -1604,7 +1582,6 @@ export class LexerTreeBuilder extends Disposable {
 
         this._bracketState = []; // ()
 
-        this._openBracketNormalIndexStack = [];
         this._rangeEndpointBracketLevels.length = 0;
 
         this._squareBracketState = 0;
@@ -1784,7 +1761,6 @@ export class LexerTreeBuilder extends Disposable {
                     }
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
-                    this._openBracketNormalIndex();
                     this._resetSegment();
                 }
             } else if (
@@ -2067,7 +2043,7 @@ export class LexerTreeBuilder extends Disposable {
                     if (lastChildNode) {
                         lastChildNode.changeToParent(subLexerNode_left);
                     } else if (this._getLastChildCurrent() === matchToken.CLOSE_BRACKET) {
-                        this._moveTrailingGroupToRangeEndpoint(subLexerNode_left);
+                        this._moveTrailingParenthesizedGroup(subLexerNode_left);
                     }
                 }
 
@@ -2100,8 +2076,7 @@ export class LexerTreeBuilder extends Disposable {
                 if (lastChildNode instanceof LexerNode) {
                     lastChildNode.changeToParent(subLexerNode);
                 } else if (lastChildNode === matchToken.CLOSE_BRACKET) {
-                    const nodes = this._getNodesByCurrentBracketNormalIndex();
-                    subLexerNode.getChildren().push(...nodes);
+                    this._moveTrailingParenthesizedGroup(subLexerNode);
                 } else if (lastChildNode !== false) {
                     subLexerNode.getChildren().push(lastChildNode);
                     this._removeLastChild();

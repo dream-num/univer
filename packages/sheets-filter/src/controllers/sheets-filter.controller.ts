@@ -40,11 +40,6 @@ import type {
     ISetWorksheetActiveOperationParams,
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import type {
-    ISetSheetsFilterCriteriaMutationParams,
-    ISetSheetsFilterRangeMutationParams,
-} from '../commands/mutations/sheets-filter.mutation';
-import type { FilterColumn } from '../models/filter-model';
 import {
     Disposable,
     DisposableCollection,
@@ -79,6 +74,11 @@ import {
     SheetInterceptorService,
     ZebraCrossingCacheController,
 } from '@univerjs/sheets';
+import type {
+    ISetSheetsFilterCriteriaMutationParams,
+    ISetSheetsFilterRangeMutationParams,
+} from '../commands/mutations/sheets-filter.mutation';
+import type { FilterColumn } from '../models/filter-model';
 import {
     ClearSheetsFilterCriteriaCommand,
     ReCalcSheetsFilterCommand,
@@ -265,6 +265,219 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
+    handleInsertRowCommand(range: IRange, unitId: string, subUnitId: string) {
+        return this._handleInsertRowCommand({ unitId, subUnitId, range } as IInsertRowCommandParams, unitId, subUnitId).redos;
+    }
+
+    handleRemoveRowCommand(range: IRange, unitId: string, subUnitId: string) {
+        return this._handleRemoveRowCommand({ unitId, subUnitId, range } as IRemoveRowsMutationParams, unitId, subUnitId).redos;
+    }
+
+    handleMoveRowsCommand(sourceRange: IRange, targetRange: IRange, unitId: string, subUnitId: string) {
+        return this._handleMoveRowsCommand({ fromRange: sourceRange, toRange: targetRange }, unitId, subUnitId).redos;
+    }
+
+    /**
+     * Remote structural mutations are authoritative: they already contain the final row/column
+     * interval, so they must not reuse the local command logic that skips locally hidden rows.
+     */
+    handleRemoteInsertRow(range: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        const filterRange = this._getRemoteFilterRange(unitId, subUnitId);
+        if (!filterRange || range.startRow > filterRange.endRow) {
+            return [];
+        }
+        const count = range.endRow - range.startRow + 1;
+        const shiftStart = range.startRow <= filterRange.startRow;
+        return this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+            ...filterRange,
+            startRow: shiftStart ? filterRange.startRow + count : filterRange.startRow,
+            endRow: filterRange.endRow + count,
+        });
+    }
+
+    handleRemoteRemoveRow(range: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        const filterRange = this._getRemoteFilterRange(unitId, subUnitId);
+        if (!filterRange || range.startRow > filterRange.endRow) {
+            return [];
+        }
+        const count = range.endRow - range.startRow + 1;
+        if (range.endRow < filterRange.startRow) {
+            return this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+                ...filterRange,
+                startRow: filterRange.startRow - count,
+                endRow: filterRange.endRow - count,
+            });
+        }
+        if (range.startRow <= filterRange.startRow) {
+            return [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }];
+        }
+        return this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+            ...filterRange,
+            endRow: range.endRow >= filterRange.endRow ? range.startRow - 1 : filterRange.endRow - count,
+        });
+    }
+
+    handleRemoteInsertCol(range: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+        const filterRange = filterModel?.getRange() ?? null;
+        if (!filterModel || !filterRange || range.startColumn > filterRange.endColumn) {
+            return [];
+        }
+        const count = range.endColumn - range.startColumn + 1;
+        const shiftStart = range.startColumn <= filterRange.startColumn;
+        const redos = this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+            ...filterRange,
+            startColumn: shiftStart ? filterRange.startColumn + count : filterRange.startColumn,
+            endColumn: filterRange.endColumn + count,
+        });
+        const affected = filterModel.getAllFilterColumns().filter(([col]) => col >= range.startColumn);
+        if (affected.length > 0) {
+            const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, affected, count);
+            redos.push(...oldRange.redos, ...newRange.redos);
+        }
+        return mergeSetFilterCriteria(redos);
+    }
+
+    handleRemoteRemoveCol(range: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+        const filterRange = filterModel?.getRange() ?? null;
+        if (!filterModel || !filterRange || range.startColumn > filterRange.endColumn) {
+            return [];
+        }
+        const count = range.endColumn - range.startColumn + 1;
+        const removedBefore = Math.max(0, Math.min(range.endColumn, filterRange.startColumn - 1) - range.startColumn + 1);
+        const coversWholeRange = range.startColumn <= filterRange.startColumn && range.endColumn >= filterRange.endColumn;
+        if (coversWholeRange) {
+            return [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }];
+        }
+
+        const startColumn = range.endColumn < filterRange.startColumn
+            ? filterRange.startColumn - count
+            : filterRange.startColumn - removedBefore;
+        const endColumn = range.startColumn > filterRange.endColumn
+            ? filterRange.endColumn
+            : range.endColumn >= filterRange.endColumn
+                ? range.startColumn - 1
+                : filterRange.endColumn - count;
+        const redos = this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+            ...filterRange,
+            startColumn,
+            endColumn,
+        });
+
+        const filterColumns = filterModel.getAllFilterColumns();
+        filterColumns
+            .filter(([col]) => col >= range.startColumn && col <= range.endColumn)
+            .forEach(([col]) => {
+                redos.push({
+                    id: SetSheetsFilterCriteriaMutation.id,
+                    params: { unitId, subUnitId, col, criteria: null },
+                });
+            });
+        const shifted = filterColumns.filter(([col]) => col > range.endColumn);
+        if (shifted.length > 0) {
+            const { oldRange, newRange } = this._moveCriteria(unitId, subUnitId, shifted, -count);
+            redos.push(...oldRange.redos, ...newRange.redos);
+        }
+        return mergeSetFilterCriteria(redos);
+    }
+
+    handleRemoteMoveRows(sourceRange: IRange, targetRange: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        const filterRange = this._getRemoteFilterRange(unitId, subUnitId);
+        if (
+            filterRange &&
+            sourceRange.startRow <= filterRange.startRow &&
+            sourceRange.endRow < filterRange.endRow &&
+            sourceRange.endRow >= filterRange.startRow
+        ) {
+            // The local command rejects moving the filter header alone. A remote user can still
+            // do it, so keep the remaining data rows and use the row above them as the new header.
+            return this._remoteMoveRowsWithHeaderRemoved(sourceRange, targetRange, filterRange, unitId, subUnitId);
+        }
+        return this.handleMoveRowsCommand(sourceRange, targetRange, unitId, subUnitId)
+            .filter((mutation) => mutation.id !== ReCalcSheetsFilterMutation.id);
+    }
+
+    private _remoteMoveRowsWithHeaderRemoved(
+        sourceRange: IRange,
+        targetRange: IRange,
+        filterRange: IRange,
+        unitId: string,
+        subUnitId: string
+    ): IMutationInfo[] {
+        const dataStart = filterRange.startRow + 1;
+        const dataEnd = filterRange.endRow;
+        const filterRow: Record<number, { oldIndex: number }> = {};
+
+        // Track only data rows that stay in the filter. Rows moved together with the header
+        // leave the filter; moved data rows are intentionally not part of this map.
+        for (let row = dataStart; row <= dataEnd; row++) {
+            if (row < sourceRange.startRow || row > sourceRange.endRow) {
+                filterRow[row] = { oldIndex: row };
+            }
+        }
+
+        moveMatrixArray(
+            sourceRange.startRow,
+            sourceRange.endRow - sourceRange.startRow + 1,
+            targetRange.startRow,
+            filterRow
+        );
+
+        let newDataStart = Number.POSITIVE_INFINITY;
+        let newDataEnd = Number.NEGATIVE_INFINITY;
+        let hasData = false;
+        // Do not spread a large row array into Math.min/max: a filter can cover more rows than
+        // the engine's function-argument limit.
+        for (const key in filterRow) {
+            const row = Number(key);
+            hasData = true;
+            if (row < newDataStart) {
+                newDataStart = row;
+            }
+            if (row > newDataEnd) {
+                newDataEnd = row;
+            }
+        }
+        if (!hasData) {
+            return [];
+        }
+
+        return this._remoteRangeRedos(unitId, subUnitId, filterRange, {
+            ...filterRange,
+            startRow: Math.max(0, newDataStart - 1),
+            endRow: newDataEnd,
+        });
+    }
+
+    handleRemoteMoveCols(sourceRange: IRange, targetRange: IRange, unitId: string, subUnitId: string): IMutationInfo[] {
+        return this.handleMoveColsCommand({ fromRange: sourceRange, toRange: targetRange }, unitId, subUnitId)
+            .redos
+            .filter((mutation) => mutation.id !== ReCalcSheetsFilterMutation.id);
+    }
+
+    private _getRemoteFilterRange(unitId: string, subUnitId: string): IRange | null {
+        return this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange() ?? null;
+    }
+
+    private _remoteRangeRedos(
+        unitId: string,
+        subUnitId: string,
+        filterRange: IRange,
+        nextRange: IRange
+    ): IMutationInfo[] {
+        const redos: IMutationInfo[] = [];
+        if (
+            nextRange.startRow !== filterRange.startRow ||
+            nextRange.endRow !== filterRange.endRow ||
+            nextRange.startColumn !== filterRange.startColumn ||
+            nextRange.endColumn !== filterRange.endColumn
+        ) {
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: nextRange } });
+        }
+        return redos;
+    }
+
     handleInsertColCommand(range: IRange, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
@@ -275,7 +488,7 @@ export class SheetsFilterController extends Disposable {
         const { startColumn: insertStartColumn, endColumn: insertEndColumn } = range;
         const count = insertEndColumn - insertStartColumn + 1;
 
-        if (insertEndColumn > endColumn) {
+        if (insertStartColumn > endColumn) {
             return this._handleNull();
         }
 
@@ -322,7 +535,7 @@ export class SheetsFilterController extends Disposable {
         const { startRow, endRow } = filterRange;
         const { startRow: insertStartRow, endRow: insertEndRow } = config.range;
         const rowCount = insertEndRow - insertStartRow + 1;
-        if (insertEndRow > endRow) {
+        if (insertStartRow > endRow) {
             return this._handleNull();
         }
         const redos: IMutationInfo[] = [];

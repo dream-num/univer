@@ -16,12 +16,6 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import type {
-    IInsertSheetDrawingCommandParams,
-    IRemoveSheetDrawingCommandParams,
-    ISetDrawingArrangeCommandParams,
-    ISetDrawingCommandParams,
-} from '@univerjs/sheets-drawing';
 import {
     Disposable,
     ICommandService,
@@ -41,14 +35,7 @@ import {
     WorksheetEditPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import {
-    InsertSheetDrawingCommand,
-    ISheetDrawingService,
-    RemoveSheetDrawingCommand,
-    SetDrawingArrangeCommand,
-    SetSheetDrawingCommand,
-    SetSheetDrawingPlacementCommand,
-} from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 import type { IFlipSheetDrawingCommandParams } from '../commands/commands/flip-drawings.command';
 import type { LocaleKey } from '../locale/types';
@@ -79,7 +66,6 @@ export class SheetDrawingPermissionController extends Disposable {
         this._initDrawingEditable();
         this._initViewPermissionChange();
         this._initEditPermissionChange();
-        this._initCommandPermissionCheck();
         this._initChartSheetCommandPermissionCheck();
     }
 
@@ -472,57 +458,4 @@ export class SheetDrawingPermissionController extends Disposable {
             this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
         }
     }
-
-    private _initCommandPermissionCheck() {
-        this.disposeWithMe(
-            this._commandService.beforeCommandExecuted((command) => {
-                let unitId: string | undefined;
-                let subUnitId: string | undefined;
-
-                if (command.id === InsertSheetDrawingCommand.id || command.id === RemoveSheetDrawingCommand.id || command.id === SetSheetDrawingCommand.id) {
-                    const params = command.params as IInsertSheetDrawingCommandParams | IRemoveSheetDrawingCommandParams | ISetDrawingCommandParams;
-                    const { drawings } = params;
-                    unitId = drawings?.[0]?.unitId;
-                    subUnitId = drawings?.[0]?.subUnitId;
-                } else if (command.id === SetSheetDrawingPlacementCommand.id) {
-                    const target = getPlacementCommandTarget(command.params);
-                    unitId = target.unitId;
-                    subUnitId = target.subUnitId;
-                } else if (command.id === SetDrawingArrangeCommand.id) {
-                    const params = command.params as ISetDrawingArrangeCommandParams;
-                    unitId = params.unitId;
-                    subUnitId = params.subUnitId;
-                }
-
-                if (!unitId || !subUnitId) {
-                    return;
-                }
-
-                const permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
-                    workbookTypes: [WorkbookEditablePermission],
-                    worksheetTypes: [WorksheetEditPermission],
-                }, unitId, subUnitId);
-                if (!permission) {
-                    this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t<LocaleKey>('sheets-drawing-ui.permission.dialog.editErr'));
-                }
-            })
-        );
-    }
-}
-
-function getPlacementCommandTarget(params: object | undefined): {
-    unitId?: string;
-    subUnitId?: string;
-} {
-    if (!params) {
-        return {};
-    }
-
-    const unitId = 'unitId' in params && typeof params.unitId === 'string'
-        ? params.unitId
-        : undefined;
-    const subUnitId = 'subUnitId' in params && typeof params.subUnitId === 'string'
-        ? params.subUnitId
-        : undefined;
-    return { unitId, subUnitId };
 }

@@ -16,8 +16,8 @@
 
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { IFilterColumn } from '../../models/types';
 import { CommandType } from '@univerjs/core';
+import type { IFilterColumn } from '../../models/types';
 import {
     ReCalcSheetsFilterMutationId,
     RemoveSheetsFilterMutationId,
@@ -103,7 +103,9 @@ export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = 
         if (removed) {
             (params as ISheetCommandSharedParams & { filteredOutRows?: number[] }).filteredOutRows = [];
         }
-        return removed;
+        // Cleanup can race with worksheet disposal, which also removes the model. Treat an
+        // already-removed model as a successful, idempotent cleanup.
+        return true;
     },
 };
 

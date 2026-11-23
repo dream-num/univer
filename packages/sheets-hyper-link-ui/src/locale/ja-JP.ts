@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             add: 'リンクの挿入',
         },
         permission: {
-            hyperLinkErr: 'リンクを挿入する権限がありません。',
+            editErr: 'この範囲は保護されており、編集権限がありません。編集するには作成者に連絡してください。',
         },
         message: {
             noSheet: '対象のワークシートが削除されました',

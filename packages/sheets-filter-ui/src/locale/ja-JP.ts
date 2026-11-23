@@ -27,7 +27,7 @@ const locale: typeof enUS = {
             'smart-toggle-filter': 'フィルタの切替',
         },
         permission: {
-            filterErr: 'フィルタを使用する権限がありません。',
+            filterErr: '範囲は保護されており、フィルターを設定する権限がありません。フィルターを設定するには、作成者に連絡してください。',
         },
         panel: {
             'clear-filter': 'フィルタをクリア',

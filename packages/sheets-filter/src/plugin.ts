@@ -15,12 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsFilterConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type { IUniverSheetsFilterConfig } from './config/config';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './config/config';
+import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterSyncController } from './controllers/sheets-filter-sync.controller';
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SheetsFilterFormulaService } from './services/sheet-filter-formula.service';
@@ -55,6 +56,7 @@ export class UniverSheetsFilterPlugin extends Plugin {
             [SheetsFilterService],
             [SheetsFilterController],
             [SheetsFilterSyncController],
+            [SheetsFilterPermissionController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
@@ -63,6 +65,7 @@ export class UniverSheetsFilterPlugin extends Plugin {
             [SheetsFilterFormulaService],
             [SheetsFilterController],
             [SheetsFilterSyncController],
+            [SheetsFilterPermissionController],
         ]);
     }
 }

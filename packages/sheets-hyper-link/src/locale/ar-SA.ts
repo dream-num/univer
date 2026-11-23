@@ -21,6 +21,9 @@ const locale: typeof enUS = {
         message: {
             refError: 'نطاق غير صالح',
         },
+        permission: {
+            editErr: 'النطاق محمي، وليس لديك إذن التحرير. للتحرير، يرجى الاتصال بالمنشئ.',
+        },
     },
 };
 

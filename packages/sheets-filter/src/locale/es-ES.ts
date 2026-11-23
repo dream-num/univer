@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'No puedes mover la fila de encabezado de un filtro.',
         },
+        permission: {
+            filterErr: 'El rango está protegido y no tienes permiso para filtrar. Para filtrar, contacta con el creador.',
+        },
     },
 };
 

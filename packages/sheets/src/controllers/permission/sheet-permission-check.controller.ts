@@ -43,6 +43,7 @@ import {
     MAX_ROW_COUNT,
     moveRangeByOffset,
     ObjectMatrix,
+    Range,
     RANGE_TYPE,
     Rectangle,
     Tools,
@@ -95,6 +96,7 @@ import type {
 import type { ICancelFrozenCommandParams, ISetFrozenCommandParams } from '../../commands/commands/set-frozen.command';
 import type { ISetGridlinesColorCommandParams } from '../../commands/commands/set-gridlines-color.command';
 import type { ISetProtectionParams } from '../../commands/commands/set-protection.command';
+import type { ISetRangeCustomMetadataCommandParams } from '../../commands/commands/set-range-custom-metadata.command';
 import type { ISetRangeValuesCommandParams } from '../../commands/commands/set-range-values.command';
 import type {
     ISetRowHiddenCommandParams,
@@ -107,14 +109,22 @@ import type { ISetColWidthCommandParams } from '../../commands/commands/set-work
 import type { ISetWorksheetHiddenCommandParams } from '../../commands/commands/set-worksheet-hide.command';
 import type { ISetWorksheetNameCommandParams } from '../../commands/commands/set-worksheet-name.command';
 import type { ISetWorksheetOrderCommandParams } from '../../commands/commands/set-worksheet-order.command';
+import type { ISetWorksheetPermissionPointsCommandParams } from '../../commands/commands/set-worksheet-permission-points.command';
 import type {
     ISetRowHeightCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
+import type { ISplitTextToColumnsCommandParams } from '../../commands/commands/split-text-to-columns.command';
 import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
+import type { IToggleCellCheckboxCommandParams } from '../../commands/commands/toggle-checkbox.command';
 import type { IToggleGridlinesCommandParams } from '../../commands/commands/toggle-gridlines.command';
+import type { ISetWorkbookCalculationSettingsMutationParams } from '../../commands/mutations/set-workbook-calculation-settings.mutation';
+import type { ISetWorksheetColumnCountMutationParams } from '../../commands/mutations/set-worksheet-column-count.mutation';
+import type { ISetWorksheetDefaultStyleMutationParams } from '../../commands/mutations/set-worksheet-default-style.mutation';
+import type { ISetWorksheetRowCountMutationParams } from '../../commands/mutations/set-worksheet-row-count.mutation';
 import type { LocaleKey } from '../../locale/types';
+import { splitRangeText } from '../../basics/split-range-text';
 import { AddRangeProtectionCommand } from '../../commands/commands/add-range-protection.command';
 import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import { AddWorksheetProtectionCommand } from '../../commands/commands/add-worksheet-protection.command';
@@ -149,6 +159,7 @@ import { SetDefinedNameCommand } from '../../commands/commands/set-defined-name.
 import { CancelFrozenCommand, SetFrozenCommand } from '../../commands/commands/set-frozen.command';
 import { SetGridlinesColorCommand } from '../../commands/commands/set-gridlines-color.command';
 import { SetProtectionCommand } from '../../commands/commands/set-protection.command';
+import { SetRangeCustomMetadataCommand } from '../../commands/commands/set-range-custom-metadata.command';
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
 import {
     SetRowHiddenCommand,
@@ -157,18 +168,25 @@ import {
 } from '../../commands/commands/set-row-visible.command';
 import { SetStyleCommand } from '../../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../../commands/commands/set-tab-color.command';
+import { SetWorkbookCalculationSettingsCommand } from '../../commands/commands/set-workbook-calculation-settings.command';
 import { SetWorkbookNameCommand } from '../../commands/commands/set-workbook-name.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetColumnCountCommand } from '../../commands/commands/set-worksheet-column-count.command';
+import { SetWorksheetDefaultStyleCommand } from '../../commands/commands/set-worksheet-default-style.command';
 import { SetWorksheetHideCommand } from '../../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../../commands/commands/set-worksheet-order.command';
+import { SetWorksheetPermissionPointsCommand } from '../../commands/commands/set-worksheet-permission-points.command';
+import { SetWorksheetRowCountCommand } from '../../commands/commands/set-worksheet-row-count.command';
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
+import { SplitTextToColumnsCommand } from '../../commands/commands/split-text-to-columns.command';
 import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
+import { ToggleCellCheckboxCommand } from '../../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../../commands/commands/toggle-gridlines.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
@@ -888,6 +906,148 @@ export class SheetPermissionCheckController extends Disposable {
                     params?.subUnitId
                 );
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            case ToggleCellCheckboxCommand.id:
+                params = commandInfo.params as IToggleCellCheckboxCommandParams | undefined;
+                permission = params
+                    ? this.permissionCheckWithRanges(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+                            rangeTypes: [RangeProtectionPermissionEditPoint],
+                        },
+                        [{
+                            startRow: params.row,
+                            endRow: params.row,
+                            startColumn: params.col,
+                            endColumn: params.col,
+                        }],
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            case SplitTextToColumnsCommand.id:
+                params = commandInfo.params as ISplitTextToColumnsCommandParams | undefined;
+                if (!params) {
+                    permission = false;
+                    errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                    break;
+                }
+                {
+                    const target = getSheetCommandTarget(this._univerInstanceService, params);
+                    if (!target) {
+                        permission = false;
+                        errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                        break;
+                    }
+                    const { worksheet } = target;
+                    const { lastRow, maxLength } = splitRangeText(
+                        worksheet,
+                        params.range,
+                        params.delimiter,
+                        params.customDelimiter,
+                        params.treatMultipleDelimitersAsOne
+                    );
+                    const { startColumn } = Range.transformRange(params.range, worksheet);
+                    const insertColCount = startColumn + maxLength + 1 - worksheet.getColumnCount();
+                    const workbookTypes: IPermissionTypes['workbookTypes'] = [WorkbookEditablePermission];
+                    if (insertColCount > 0) {
+                        workbookTypes.push(WorkbookInsertColumnPermission);
+                    }
+                    const worksheetTypes: IPermissionTypes['worksheetTypes'] = [WorksheetEditPermission, WorksheetSetCellValuePermission];
+                    if (insertColCount > 0) {
+                        worksheetTypes.push(WorksheetInsertColumnPermission);
+                    }
+                    // The command writes from the original range through the split columns, so
+                    // check the actual destination rather than only the original selection.
+                    permission = this.permissionCheckWithRanges(
+                        {
+                            workbookTypes,
+                            worksheetTypes,
+                            rangeTypes: [RangeProtectionPermissionEditPoint],
+                        },
+                        [{
+                            startRow: params.range.startRow,
+                            endRow: lastRow,
+                            startColumn,
+                            endColumn: startColumn + maxLength,
+                        }],
+                        params.unitId,
+                        params.subUnitId
+                    );
+                }
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            case SetWorksheetRowCountCommand.id:
+            case SetWorksheetColumnCountCommand.id:
+                params = commandInfo.params as ISetWorksheetRowCountMutationParams | ISetWorksheetColumnCountMutationParams | undefined;
+                // Resizing the grid is an edit action, not an insert/delete-row or column action.
+                permission = params
+                    ? this.permissionCheckWithoutRange(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission],
+                        },
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.operatorSheetErr');
+                break;
+
+            case SetWorksheetDefaultStyleCommand.id:
+                params = commandInfo.params as ISetWorksheetDefaultStyleMutationParams | undefined;
+                permission = params
+                    ? this.permissionCheckWithoutRange(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
+                        },
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.setStyleErr');
+                break;
+
+            case SetRangeCustomMetadataCommand.id:
+                params = commandInfo.params as ISetRangeCustomMetadataCommandParams | undefined;
+                permission = params
+                    ? this.permissionCheckWithRanges(
+                        {
+                            workbookTypes: [WorkbookEditablePermission],
+                            worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission],
+                            rangeTypes: [RangeProtectionPermissionEditPoint],
+                        },
+                        [params.range],
+                        params.unitId,
+                        params.subUnitId
+                    )
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            case SetWorkbookCalculationSettingsCommand.id:
+                params = commandInfo.params as ISetWorkbookCalculationSettingsMutationParams | undefined;
+                permission = params
+                    ? this.permissionCheckWithoutRange({ workbookTypes: [WorkbookEditablePermission] }, params.unitId)
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.workbookEditErr');
+                break;
+
+            case SetWorksheetPermissionPointsCommand.id:
+                params = commandInfo.params as ISetWorksheetPermissionPointsCommandParams | undefined;
+                // This command is the creation branch of the worksheet-protection dialog
+                // (`SetWorksheetProtectionMutation` handles updates to an existing rule).
+                permission = params
+                    ? this.permissionCheckByPoints([new WorkbookCreateProtectPermission(params.rule.unitId)])
+                    : false;
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.manageProtectionErr');
                 break;
 
             default:

@@ -36,8 +36,9 @@ function createBed() {
         [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
         [IDependencyManagerService, { useClass: DependencyManagerService }],
     ]);
+    const injector = bed.univer.__getInjector();
     bed.get(IFunctionService).registerExecutors(...ALL_IMPLEMENTED_FUNCTIONS.map(([Fn, name]) =>
-        new (Fn as Ctor<BaseFunction>)(name as IFunctionNames)));
+        injector.createInstance(Fn as Ctor<BaseFunction>, name as IFunctionNames)));
     return bed;
 }
 
@@ -220,6 +221,37 @@ describe('Persisted calculation settings', () => {
             expect(read(await calculateEdit())).toEqual([12, 20, 23, 46]);
             cells.setValue(1, 0, { v: 2 });
             expect(read(await calculateEdit())).toEqual([6, 8, 11, 22]);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('updates the dependency range when INDEX selects another endpoint', async () => {
+        const bed = createBed();
+        const formulas = { 0: { 4: { f: '=SUM(A1:INDEX(C4:C5,D1))' } } };
+        const { unitId, sheetId } = bed;
+        const cells = bed.sheetData[sheetId]!.cellData;
+        const read = (result: IAllRuntimeData) => result.unitData[unitId]?.[sheetId]?.getValue(0, 4)?.v;
+        const edit = (row: number, column: number, v: number) => {
+            cells.setValue(row, column, { v });
+            return calculate(bed, formulas, false, 100, 0.001, {
+                forceCalculate: false,
+                clearDependencyTreeCache: {},
+                dirtyRanges: [{ unitId, sheetId, range: { startRow: row, endRow: row, startColumn: column, endColumn: column } }],
+            });
+        };
+        try {
+            cells.reset();
+            cells.setValue(0, 0, { v: 1 });
+            cells.setValue(0, 3, { v: 1 });
+            cells.setValue(3, 2, { v: 4 });
+            cells.setValue(4, 1, { v: 10 });
+            cells.setValue(4, 2, { v: 5 });
+            expect(read(await calculate(bed, formulas, false))).toBe(5);
+            expect(read(await edit(0, 3, 2))).toBe(20);
+            expect(read(await edit(4, 1, 30))).toBe(40);
+            expect(read(await edit(0, 3, 1))).toBe(5);
+            expect(read(await edit(4, 1, 10))).toBeUndefined();
         } finally {
             bed.univer.dispose();
         }

@@ -488,6 +488,25 @@ describe('Persisted calculation settings', () => {
         expect(replacements).toEqual(['a', 'a']);
     });
 
+    it('returns positive zero when ISO.CEILING rounds a negative number to zero', async () => {
+        const bed = createBed();
+        try {
+            const result = await calculate(bed, {
+                0: {
+                    9: { f: '=ISO.CEILING(-1.3,2)' },
+                    10: { f: '=ISO.CEILING(-1.3,-2)' },
+                    11: { f: '=ISO.CEILING(-2.3,-2)' },
+                },
+            }, false);
+            const actual = result.unitData[bed.unitId]?.[bed.sheetId];
+            expect(actual?.getValue(0, 9)?.v).toBe(0);
+            expect(actual?.getValue(0, 10)?.v).toBe(0);
+            expect(actual?.getValue(0, 11)?.v).toBe(-2);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('detects a weekly period in four weeks of hourly values', async () => {
         const bed = createBed();
         try {

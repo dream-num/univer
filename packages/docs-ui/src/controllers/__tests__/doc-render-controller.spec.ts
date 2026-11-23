@@ -184,7 +184,6 @@ function createControllerFixture(options?: {
     initialSkeletonDataMissing?: boolean;
     useWorker?: boolean;
     workerCompletes?: boolean;
-    workerFirstPublicationIsPartial?: boolean;
     workerCompletionPromise?: Promise<void>;
     workerReplacesProtectedPages?: boolean;
     focusedUnitId?: string;
@@ -426,7 +425,7 @@ function createControllerFixture(options?: {
                         publishedPageCount: 20,
                         reason: 'edit',
                         mode: 'paginated',
-                        complete: !options.workerFirstPublicationIsPartial || layoutExecutorService.startLayout.mock.calls.length > 1,
+                        complete: true,
                         cancelled: false,
                         anchorReady: true,
                         laidOutThrough: 20_000,
@@ -1665,58 +1664,6 @@ describe('doc render controller', () => {
 
             expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
 
-            controller.dispose();
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    it('retries a rejected Worker baseline without composing the same edit twice', async () => {
-        vi.useFakeTimers();
-        try {
-            const { commandCallbacks, controller, layoutExecutorService, skeletonManager } = createControllerFixture({
-                documentFlavor: DocumentFlavor.MODERN,
-                useWorker: true,
-                workerCompletes: true,
-                workerFirstPublicationIsPartial: true,
-                layoutProgress: [{
-                    complete: false,
-                    anchorReady: true,
-                    didPublishAnchor: true,
-                    interactionWindowComplete: true,
-                    stableLaidOutThrough: -1,
-                    elapsedTime: 1,
-                }],
-            });
-            const skeleton = skeletonManager.getSkeleton();
-            skeleton.getAppliedContinuousLayoutVersion.mockReturnValue('applied-version');
-            skeleton.applyLayoutPublication.mockReturnValueOnce({
-                didReplaceProtectedPages: false,
-                requiresFullPublication: true,
-            });
-
-            commandCallbacks[0]({
-                id: RichTextEditingMutation.id,
-                params: {
-                    unitId: 'doc-unit',
-                    actions: ['body', {
-                        et: 'text-x',
-                        e: [
-                            { t: 'r', len: 10 },
-                            { t: 'i', len: 1, body: { dataStream: 'X' } },
-                        ],
-                    }],
-                },
-            } satisfies ICommandInfo);
-            await vi.advanceTimersByTimeAsync(500);
-
-            const starts = layoutExecutorService.startLayout.mock.calls;
-            expect(starts).toHaveLength(2);
-            expect(starts[0][1]).toMatchObject({ appliedLayoutVersion: 'applied-version' });
-            expect(starts[1][1]).not.toHaveProperty('appliedLayoutVersion');
-            expect(starts[1][1]).toMatchObject({ invalidation: { oldStart: 10, oldEnd: 10, newEnd: 11 } });
-            expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(1);
-            expect(layoutExecutorService.recoverExecutor).not.toHaveBeenCalled();
             controller.dispose();
         } finally {
             vi.useRealTimers();

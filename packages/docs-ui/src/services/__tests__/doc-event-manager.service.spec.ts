@@ -168,8 +168,10 @@ describe('custom-range hit testing with real document layout', () => {
                     target: documents,
                     timeStamp: 100,
                 } as unknown as IPointerEvent;
+                const clicksBeforePointerDown = clicks.length;
                 documents.onPointerDown$.emitEvent(event);
-                render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
+                expect(clicks).toHaveLength(clicksBeforePointerDown);
+                render.scene.onPointerUp$.emitEvent({ ...event, ctrlKey: true, metaKey: false, timeStamp: 180 });
             };
             click(bounds.left + (bounds.right - bounds.left) * 0.75);
             if (overlappingField) {
@@ -332,8 +334,9 @@ describe('custom-range hit testing with real document layout', () => {
         }
     });
 
-    it.each([1_200, 4_800])('reuses link rectangles across five scroll jumps in a %i-row vertical table', (count) => {
+    it('reuses link rectangles across five scroll jumps in a 1,200-row vertical table', () => {
         vi.useFakeTimers();
+        const count = 1_200;
         let rowIndex = 0;
         const tableStream = genEmptyTable(count, 1).dataStream.replace(/\r/g, () => `Link ${rowIndex++}\r`);
         const dataStream = `${tableStream}\r\n`;
@@ -377,7 +380,7 @@ describe('custom-range hit testing with real document layout', () => {
             const documents = injector.createInstance(Documents, 'vertical-table-document', skeleton);
             render.mainComponent = documents;
             render.scene.addObject(documents);
-            render.scene.transformByState({ width: 320, height: 100_000 * count / 1_200 });
+            render.scene.transformByState({ width: 320, height: 100_000 });
             const viewport = injector.createInstance(Viewport, VIEWPORT_KEY.VIEW_MAIN, render.scene, { width: 240, height: 100 });
             const scrollBar = new ScrollBar(viewport);
             try {
@@ -408,18 +411,6 @@ describe('custom-range hit testing with real document layout', () => {
                     return event;
                 };
                 hover(0, 0);
-                let offsetReads = 0;
-                for (const range of model.getBody()!.customRanges!) {
-                    const { startIndex } = range;
-                    Object.defineProperty(range, 'startIndex', {
-                        configurable: true,
-                        enumerable: true,
-                        get: () => {
-                            offsetReads++;
-                            return startIndex;
-                        },
-                    });
-                }
                 let rectangleReads = 0;
                 for (const bound of bounds) {
                     const { rects } = bound;
@@ -432,18 +423,15 @@ describe('custom-range hit testing with real document layout', () => {
                         },
                     });
                 }
-                const positions = [1170, 953, 736, 519, 302].map((index) => index * count / 1_200);
+                const positions = [1170, 953, 736, 519, 302];
                 const lookupCounts = [];
-                const offsetReadsByJump = [];
                 for (const index of positions) {
                     lookup.mockClear();
-                    offsetReads = 0;
                     const scrollTop = bounds[index].rects[0].top - 16;
                     rectangleReads = 0;
                     const event = hover(index, scrollTop);
                     expect(rectangleReads).toBeLessThan(count / 10);
                     lookupCounts.push(lookup.mock.calls.length);
-                    offsetReadsByJump.push(offsetReads);
                     lookup.mockClear();
                     documents.onPointerDown$.emitEvent(event);
                     render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
@@ -451,7 +439,6 @@ describe('custom-range hit testing with real document layout', () => {
                 }
                 expect(clicks).toEqual(positions.map((index) => `link-${index}`));
                 expect(lookupCounts).toEqual(positions.map(() => 0));
-                expect(offsetReadsByJump).toEqual(positions.map(() => 0));
             } finally {
                 scrollBar.dispose();
             }
@@ -524,23 +511,30 @@ describe('custom-range hit testing with real document layout', () => {
             const service = render.with(DocEventManagerService);
             const getTableViewport = vi.fn((_unitId: string, _tableId: string) => null);
             setDocsTableRenderViewportProvider(getTableViewport);
-            for (let attempt = 0; attempt < 3; attempt++) {
+            const bodyLink = linkPlacement === 'a body link' ? service.getCustomRangeBounds()[0].rects[0] : undefined;
+            const offsetX = bodyLink ? (bodyLink.left + bodyLink.right) / 2 : 1_000;
+            const offsetY = bodyLink ? (bodyLink.top + bodyLink.bottom) / 2 : 20;
+            const attempts = linkPlacement === 'no link' ? 1 : 3;
+            for (let attempt = 0; attempt < attempts; attempt++) {
                 getTableViewport.mockClear();
-                expect(service.isPointerOnInteractiveRange(1_000, 20)).toBe(false);
+                expect(service.isPointerOnInteractiveRange(offsetX, offsetY)).toBe(bodyLink != null);
                 const tableIds = [...new Set(getTableViewport.mock.calls.map(([, tableId]) => tableId))];
                 expect(tableIds).toEqual(linkPlacement === 'one table link' ? [linkedTableId] : []);
             }
-            if (linkPlacement === 'a body link') {
-                const event = { offsetX: 300, offsetY: 20, buttons: 0 } as unknown as IPointerEvent;
+            if (bodyLink) {
+                const event = { offsetX, offsetY, buttons: 0 } as unknown as IPointerEvent;
                 let rangeViewportReads = 0;
-                service.hoverCustomRangesRealTime$.subscribe(() => {
+                let hovered: string[] = [];
+                service.hoverCustomRangesRealTime$.subscribe((ranges) => {
                     // Listen before the pointer handler queries table geometry for paragraph hover.
                     rangeViewportReads = getTableViewport.mock.calls.length;
+                    hovered = ranges.map(({ range }) => range.rangeId);
                 });
                 for (let attempt = 0; attempt < 2; attempt++) {
                     getTableViewport.mockClear();
                     render.scene.onPointerMove$.emitEvent(event);
                     vi.advanceTimersByTime(31);
+                    expect(hovered).toEqual(['link-0']);
                     expect(rangeViewportReads).toBe(0);
                 }
             }

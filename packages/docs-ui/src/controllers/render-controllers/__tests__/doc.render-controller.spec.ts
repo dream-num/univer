@@ -16,13 +16,14 @@
 
 // @vitest-environment jsdom
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor } from '@univerjs/docs';
 import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     CustomRangeType,
     DataStreamTreeTokenType,
+    DocumentDataModel,
     DocumentFlavor,
     DrawingTypeEnum,
     HorizontalAlign,
@@ -40,6 +41,7 @@ import {
 } from '@univerjs/core';
 import {
     DocLayoutExecutorService,
+    DocLayoutSessionStatus,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     DocStateEmitService,
@@ -55,6 +57,7 @@ import {
     IRenderManagerService,
     RenderManagerService,
 } from '@univerjs/engine-render';
+import { DocumentLayoutSession } from '@univerjs/engine-render/worker';
 import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -468,6 +471,93 @@ describe('DocRenderController bounded input publication', () => {
             expect(pages.every((page) => page.sections.length > 0)).toBe(true);
         } finally {
             editor.dispose();
+        }
+    });
+
+    it('retries a rejected Worker baseline with a full publication of the same edit', async () => {
+        let worker: { model: DocumentDataModel; session: DocumentLayoutSession } | undefined;
+        const locale = new LocaleService();
+        locale.setDirection('ltr');
+        const startLayout = vi.fn<IDocLayoutExecutor['startLayout']>(async (request) => {
+            if (!worker) {
+                throw new Error('Expected the Worker session to be registered.');
+            }
+            const { modelRevision, metricsRevision, mountEpoch, mountId, unitId, viewportEpoch } = request;
+            const { model, session } = worker;
+            for (const mutation of request.mutations) {
+                model.apply(mutation.actions);
+            }
+            if (request.mutations.length > 0) {
+                session.resetDataModel(model);
+            }
+            const generation = session.start({
+                reason: request.reason,
+                anchor: request.anchor,
+                priorityAnchor: request.priorityAnchor,
+                invalidation: request.invalidation,
+                modernPageWidth: request.modernPageWidth,
+                modernHorizontalMargin: request.modernHorizontalMargin,
+                acknowledgedLayoutVersion: request.acknowledgedLayoutVersion,
+                appliedLayoutVersion: request.appliedLayoutVersion,
+                continuousLayoutVersion: `worker-version-${metricsRevision}`,
+            });
+            const result = session.step(generation, Number.POSITIVE_INFINITY);
+            const { publication } = result;
+            if (request.reason === 'edit' && request.appliedLayoutVersion != null && publication?.kind === 'block') {
+                publication.block.baseLayoutVersion = 'rejected-test-baseline';
+            }
+            return {
+                status: DocLayoutSessionStatus.ACCEPTED,
+                step: { modelRevision, metricsRevision, mountEpoch, mountId, unitId, viewportEpoch, ...structuredClone(result) },
+            };
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, undefined, {
+            initialize: async () => {},
+            createSession: async ({ snapshot }) => {
+                const model = new DocumentDataModel(structuredClone(snapshot));
+                worker = { model, session: new DocumentLayoutSession(model, locale) };
+            },
+            startLayout,
+            cancelLayout: async ({ generation }) => {
+                if (generation != null) {
+                    worker?.session.cancel(generation);
+                }
+            },
+            disposeLayoutMount: async () => {},
+        });
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            editor.render.engine._beginFrame(0);
+            await vi.advanceTimersByTimeAsync(1);
+            const acknowledged = editor.skeleton.getAppliedContinuousLayoutVersion();
+            expect(acknowledged).toBeDefined();
+            editor.selection.replaceDocRanges([{ startOffset: 5, endOffset: 5 }], true, { shouldFocus: false });
+            await editor.commands.executeCommand(InsertTextCommand.id, {
+                unitId: editor.unitId,
+                range: { startOffset: 5, endOffset: 5, collapsed: true },
+                body: { dataStream: 'X' },
+            });
+            // The test renderer is inactive. Advance real Engine frame events
+            // so the controller can accept or reject each staged publication.
+            for (let frame = 0; frame < 25; frame++) {
+                await vi.advanceTimersByTimeAsync(40);
+                editor.render.engine._beginFrame(frame * 40);
+            }
+
+            const edits = startLayout.mock.calls.map(([request]) => request).filter(({ reason }) => reason === 'edit');
+            expect(edits).toHaveLength(2);
+            expect(edits[0].appliedLayoutVersion).toBe(acknowledged);
+            expect(edits[1].appliedLayoutVersion).toBeUndefined();
+            expect(edits[1].invalidation).toEqual({ oldStart: 5, oldEnd: 5, newEnd: 6 });
+            expect(edits[1].mutations).toEqual([]);
+            expect(worker?.model.getBody()?.dataStream).toBe(editor.model.getBody()?.dataStream);
+            expect(editor.skeleton.findNodeByCharIndex(5)?.raw).toBe('X');
+            expect(editor.skeleton.getAppliedContinuousLayoutVersion()).toBe(`worker-version-${edits[1].metricsRevision}`);
+        } finally {
+            editor.dispose();
+            worker?.session.dispose();
+            worker?.model.dispose();
+            locale.dispose();
         }
     });
 

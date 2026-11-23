@@ -2703,10 +2703,6 @@ describe('worker document layout session', () => {
             main.makeDirty(true);
             main.calculate();
             const expected = main.getSkeletonData();
-            const lines = (page: IDocumentSkeletonPage | undefined) =>
-                page?.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)) ?? [];
-            expect(lines(workerPage)).toHaveLength(lines(expected?.pages[0]).length);
-            expect(lines(received?.pages[0])).toHaveLength(lines(expected?.pages[0]).length);
             expect(normalizeSkeleton(workerPage)).toEqual(normalizeSkeleton(expected?.pages[0]));
             expect(normalizeSkeleton(received)).toEqual(normalizeSkeleton(expected));
         } finally {

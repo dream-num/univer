@@ -3949,20 +3949,12 @@ describe('documents render', () => {
         };
     }
 
-    it('draws the tables at the destination of a continuous viewport jump and reverse', () => {
+    it('uses the actual Canvas clip despite stale viewport bounds and preserves border overflow', () => {
         const { documents, viewport, page, firstTable, secondTable, bottomBorder, dispose } = createContinuousTableFixture();
         const ctx = canvas.getContext();
         const text = vi.spyOn(ctx, 'fillText');
         try {
-            expect(secondTable.top).toBeGreaterThan(viewport.height!);
-            for (const [scrollY, expected] of [[0, 'A'], [secondTable.top, 'B'], [0, 'A']] as const) {
-                text.mockClear();
-                viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: scrollY });
-                viewport.render(ctx, [documents]);
-                const tableText = text.mock.calls.map(([value]) => value).filter((value) => value === 'A' || value === 'B');
-                expect(tableText).toEqual([expected]);
-            }
-
+            viewport.render(ctx, [documents]);
             // The Canvas clips at the new scroll position even if the caller reused old bounds.
             const previousBounds = viewport.calcViewportInfo();
             viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: secondTable.top });

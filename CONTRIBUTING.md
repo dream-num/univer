@@ -28,8 +28,6 @@ To better assist you, we recommend:
 
 ## Contributing Code
 
-For changes to the workbench UI, follow [the visual and interaction guide](DESIGN.md).
-
 ### Install dependencies
 
 The development of Univer requires Node.js >= 22.18 and pnpm >= 11. Please make sure you have the correct versions installed.

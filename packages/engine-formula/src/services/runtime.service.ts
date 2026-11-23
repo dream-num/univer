@@ -15,6 +15,17 @@
  */
 
 import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import {
+    CellValueType,
+    createIdentifier,
+    Disposable,
+    Inject,
+    isNullCell,
+    isRealNum,
+    IUniverInstanceService,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -32,17 +43,6 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
 import type { FormulaCalculationCache } from './formula-cache.service';
-import {
-    CellValueType,
-    createIdentifier,
-    Disposable,
-    Inject,
-    isNullCell,
-    isRealNum,
-    IUniverInstanceService,
-    ObjectMatrix,
-    UniverInstanceType,
-} from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
@@ -50,7 +50,7 @@ import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
-import { NumberValueObject } from '../engine/value-object/primitive-object';
+import { NumberValueObject, OmittedValueObject } from '../engine/value-object/primitive-object';
 import { hasDeferredFormulaDataSnapshot, IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaCacheService } from './formula-cache.service';
 import { IHyperlinkEngineFormulaService } from './hyperlink-engine-formula.service';
@@ -683,6 +683,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             if (cell?.f && cell.v != null && (formula == null || formula === cell.f)) {
                 return;
             }
+        }
+        // Excel shows 0 when an omitted LAMBDA argument is a formula's result, e.g. =LAMBDA(x,y,y)(1,).
+        if (functionVariant instanceof OmittedValueObject) {
+            this.setRuntimeData(NumberValueObject.create(0));
+            return;
         }
         const row = this._currentRow;
         const column = this._currentColumn;

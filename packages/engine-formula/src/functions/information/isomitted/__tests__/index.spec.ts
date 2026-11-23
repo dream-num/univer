@@ -18,17 +18,23 @@ import type { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
+import type { LambdaValueObjectObject } from '../../../../engine/value-object/lambda-value-object';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { NullValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { IFunctionService } from '../../../../services/function.service';
 import { FUNCTION_NAMES_LOGICAL } from '../../../logical/function-names';
 import { If } from '../../../logical/if';
+import { Iferror } from '../../../logical/iferror';
 import { Lambda } from '../../../logical/lambda';
 import { Map } from '../../../logical/map';
+import { Choose } from '../../../lookup/choose';
+import { FUNCTION_NAMES_LOOKUP } from '../../../lookup/function-names';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Plus } from '../../../meta/plus';
 import { getObjectValue } from '../../../util';
@@ -62,6 +68,8 @@ describe('Test isomitted function', () => {
             new Isblank(FUNCTION_NAMES_INFORMATION.ISBLANK),
             new Lambda(FUNCTION_NAMES_LOGICAL.LAMBDA),
             new If(FUNCTION_NAMES_LOGICAL.IF),
+            new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
+            new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
             new Map(FUNCTION_NAMES_LOGICAL.MAP),
             new Plus(FUNCTION_NAMES_META.PLUS)
         );
@@ -93,6 +101,30 @@ describe('Test isomitted function', () => {
         it('passes an omitted argument through a nested LAMBDA call', async () => {
             expect(await calculate('=LAMBDA(a,b,LAMBDA(c,ISOMITTED(c))(b))(1,)')).toBe(true);
             expect(await calculate('=LAMBDA(a,b,LAMBDA(c,ISOMITTED(c))(a))(1,)')).toBe(false);
+        });
+
+        // Verified in Excel for the web: the omission survives functions that return the argument as is.
+        it('passes an omitted argument through functions that return it', async () => {
+            expect(await calculate('=LAMBDA(x,y,ISOMITTED(CHOOSE(1,y)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,LAMBDA(z,ISOMITTED(z))(CHOOSE(1,y)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,ISOMITTED(IF(TRUE,y)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,ISOMITTED(IFERROR(y,0)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,LET(z,y,ISOMITTED(z)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,ISOMITTED((y)))(1,)')).toBe(true);
+            expect(await calculate('=LAMBDA(x,y,ISOMITTED((y)))(1,2)')).toBe(false);
+        });
+
+        it('still returns 0 for IF with a blank result', async () => {
+            expect(await calculate('=IF(TRUE,C1)')).toBe(0);
+            expect(await calculate('=LAMBDA(x,y,IF(TRUE,y))(1,)')).toBe(0);
+        });
+
+        it('does not carry an omission into a later call of the same LAMBDA', async () => {
+            const lambda = await interpreter.executeAsync(generateExecuteAstNodeData(
+                astTreeBuilder.parse(lexer.treeBuilder('=LAMBDA(x,ISOMITTED(x))') as LexerNode) as BaseAstNode
+            )) as LambdaValueObjectObject;
+            expect(getObjectValue(lambda.execute(NumberValueObject.create(1)) as BaseValueObject)).toBe(false);
+            expect(getObjectValue(lambda.execute(NullValueObject.create()) as BaseValueObject)).toBe(false);
         });
 
         it('keeps blank semantics for an omitted argument used by other functions', async () => {

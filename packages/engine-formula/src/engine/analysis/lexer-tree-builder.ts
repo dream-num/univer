@@ -136,6 +136,8 @@ export class LexerTreeBuilder extends Disposable {
 
     private _openBracketNormalIndexStack: number[] = [];
 
+    private readonly _rangeEndpointBracketLevels: number[] = [];
+
     private _squareBracketState: number = 0;
 
     private _bracesState = 0; // {}
@@ -1164,6 +1166,11 @@ export class LexerTreeBuilder extends Disposable {
 
     private _closeBracket() {
         this._bracketState.pop();
+        const levels = this._rangeEndpointBracketLevels;
+        if (levels[levels.length - 1] === this._bracketState.length) {
+            levels.pop();
+            this._setParentCurrentLexerNode();
+        }
     }
 
     private _openBracketNormalIndex() {
@@ -1184,6 +1191,26 @@ export class LexerTreeBuilder extends Disposable {
 
         const nodes = children.splice(openIndex);
         return nodes;
+    }
+
+    private _moveTrailingGroupToRangeEndpoint(endpoint: LexerNode) {
+        const children = this._currentLexerNode.getChildren();
+        let depth = 1;
+        for (let index = children.length - 2; index >= 0; index--) {
+            const child = children[index];
+            if (child === matchToken.CLOSE_BRACKET) {
+                depth++;
+            } else if (child === matchToken.OPEN_BRACKET && --depth === 0) {
+                const group = children.splice(index);
+                endpoint.setChildren(group);
+                for (const node of group) {
+                    if (node instanceof LexerNode) {
+                        node.setParent(endpoint);
+                    }
+                }
+                return;
+            }
+        }
     }
 
     private _startReferenceUnion(current: number): boolean {
@@ -1578,6 +1605,7 @@ export class LexerTreeBuilder extends Disposable {
         this._bracketState = []; // ()
 
         this._openBracketNormalIndexStack = [];
+        this._rangeEndpointBracketLevels.length = 0;
 
         this._squareBracketState = 0;
 
@@ -1749,6 +1777,11 @@ export class LexerTreeBuilder extends Disposable {
                         this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                     }
                 } else {
+                    if (this.isColonOpen()) {
+                        // Keep the entire group in the range operand before closing the colon state.
+                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+                        this._rangeEndpointBracketLevels.push(this._bracketState.length);
+                    }
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
                     this._openBracketNormalIndex();
@@ -2033,6 +2066,8 @@ export class LexerTreeBuilder extends Disposable {
                     const lastChildNode = this._getLastChildCurrentLexerNode();
                     if (lastChildNode) {
                         lastChildNode.changeToParent(subLexerNode_left);
+                    } else if (this._getLastChildCurrent() === matchToken.CLOSE_BRACKET) {
+                        this._moveTrailingGroupToRangeEndpoint(subLexerNode_left);
                     }
                 }
 

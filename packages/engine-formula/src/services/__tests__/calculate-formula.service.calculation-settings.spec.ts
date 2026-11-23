@@ -22,6 +22,7 @@ import type { IAllRuntimeData } from '../runtime.service';
 import { CellValueType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
+import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { createFunctionTestBed } from '../../functions/__tests__/create-function-test-bed';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../../functions/index';
 
@@ -226,9 +227,46 @@ describe('Persisted calculation settings', () => {
         }
     });
 
-    it('updates the dependency range when INDEX selects another endpoint', async () => {
+    it.each([
+        ['=SUM((A1):(A3))', 6],
+        ['=SUM(A1:((INDEX(A3:A4,1))))', 6],
+        ['=SUM(A1:(A2:A3))', 6],
+        ['=SUM(A1:(INDEX(A3:A4,1)))+10', 16],
+        ['=SUM(A1:(INDEX(A3:A4,1)),20)', 26],
+    ])('keeps grouped range endpoints and surrounding expressions intact in %s', async (formula, expected) => {
         const bed = createBed();
-        const formulas = { 0: { 4: { f: '=SUM(A1:INDEX(C4:C5,D1))' } } };
+        const cells = bed.sheetData[bed.sheetId]!.cellData;
+        try {
+            cells.reset();
+            for (let row = 0; row < 4; row++) {
+                cells.setValue(row, 0, { v: row + 1 });
+            }
+            const result = await calculate(bed, { 0: { 1: { f: formula } } }, false);
+            expect(result.unitData[bed.unitId]?.[bed.sheetId]?.getValue(0, 1)?.v).toBe(expected);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('preserves grouped endpoints when adding Excel function prefixes', () => {
+        const bed = createBed();
+        try {
+            const input = '=SUM(A1:(XLOOKUP(3,A3:A4,A3:A4)),20)';
+            const functions = bed.get(IFunctionService);
+            expect(bed.get(LexerTreeBuilder).getNewFormulaWithPrefix(input, (name) => functions.hasExecutor(name)))
+                .toBe('=SUM(A1:(_xlfn.XLOOKUP(3,A3:A4,A3:A4)),20)');
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it.each([
+        'A1:INDEX(C4:C5,D1)',
+        'A1:(INDEX(C4:C5,D1))',
+        '(INDEX(C4:C5,D1)):A1',
+    ])('updates the dependency range when an endpoint moves in %s', async (range) => {
+        const bed = createBed();
+        const formulas = { 0: { 4: { f: `=SUM(${range})` } } };
         const { unitId, sheetId } = bed;
         const cells = bed.sheetData[sheetId]!.cellData;
         const read = (result: IAllRuntimeData) => result.unitData[unitId]?.[sheetId]?.getValue(0, 4)?.v;

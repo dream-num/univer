@@ -44,7 +44,7 @@ export class SheetsSortService extends Disposable {
     private readonly _compareFns: IRegisteredCompareFn[] = [];
     private readonly _sortGuards = new Map<(location: ISheetRangeLocation) => boolean, (() => void) | undefined>();
     private readonly _sortGuardsChanged = new EventSubject<number>();
-    readonly sortGuardsChanged$ = fromEventSubject(this._sortGuardsChanged);
+    readonly sortGuardsChanged$: ReturnType<typeof fromEventSubject<number>> = fromEventSubject(this._sortGuardsChanged);
     private _guardRevision = 0;
 
     constructor(

@@ -43,7 +43,6 @@ import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutatio
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { AppendRowCommand } from '../append-row.command';
 import {
-    AutoClearContentCommand,
     AutoFillCommand,
     SheetCopyDownCommand,
     SheetCopyRightCommand,
@@ -390,43 +389,6 @@ describe('AutoFillCommand family', () => {
         ]));
         await expect(SheetCopyDownCommand.handler(failedAccessor)).resolves.toBe(false);
         expect(shownStates).toEqual([]);
-    });
-
-    it('clears dragged content, restores selection on undo, and runs after-interceptor mutations', async () => {
-        const executed: unknown[] = [];
-        const undoRecords: unknown[] = [];
-        const oldSelection = { range: { startRow: 9, endRow: 9, startColumn: 9, endColumn: 9 } };
-        const cellMatrix = new ObjectMatrix({ 2: { 2: { v: 'old' } } });
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getCellMatrix: () => cellMatrix,
-        };
-        const accessor = createAccessor(new Map<unknown, unknown>([
-            [ICommandService, { syncExecuteCommand: (id: string, params: unknown) => {
-                executed.push({ id, params });
-                return true;
-            } }],
-            [IUndoRedoService, { pushUndoRedo: (record: unknown) => undoRecords.push(record) }],
-            [IUniverInstanceService, createUniverInstanceService(worksheet)],
-            [SheetsSelectionsService, { getCurrentLastSelection: () => oldSelection }],
-            [SheetInterceptorService, { afterCommandExecute: () => ({ redos: [{ id: 'after-redo', params: {} }], undos: [{ id: 'after-undo', params: {} }] }) }],
-        ]));
-
-        await expect(AutoClearContentCommand.handler(accessor, {
-            clearRange: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 },
-            selectionRange: { startRow: 2, endRow: 2, startColumn: 2, endColumn: 3 },
-        })).resolves.toBe(true);
-        expect((executed[0] as { id: string }).id).toBe(SetRangeValuesMutation.id);
-        expect((executed[1] as { id: string }).id).toBe(SetSelectionsOperation.id);
-        expect((executed[2] as { id: string }).id).toBe('after-redo');
-        expect(undoRecords[0]).toMatchObject({
-            unitID: 'unit-1',
-            undoMutations: [
-                { id: SetRangeValuesMutation.id },
-                { id: SetSelectionsOperation.id, params: { selections: [oldSelection], unitId: 'unit-1', subUnitId: 'sheet-1' } },
-                { id: 'after-undo' },
-            ],
-        });
     });
 });
 

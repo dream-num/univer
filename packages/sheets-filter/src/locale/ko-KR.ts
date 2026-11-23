@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': '필터 헤더 행은 이동할 수 없습니다.',
         },
+        permission: {
+            filterErr: '범위가 보호되어 있으며 필터링할 권한이 없습니다. 필터링하려면 생성자에게 문의하세요.',
+        },
     },
 };
 

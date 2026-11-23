@@ -26,6 +26,7 @@ import {
     ILogService,
     Inject,
     Injector,
+    IPermissionService,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -34,6 +35,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { WorkbookEditablePermission } from '@univerjs/sheets';
 import { FilterBy, SheetsFilterService, SheetsFilterSyncController, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { ILayoutService, IMessageService, IUIPartsService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
@@ -544,6 +546,26 @@ describe('FilterPanel', () => {
             cellFillColors: ['rgb(255,0,0)'],
         });
         expect(currentTestBed.contextService.getContextValue(FILTER_PANEL_OPENED_KEY)).toBe(false);
+    });
+
+    it('hides the sync switch when the workbook is not editable', async () => {
+        currentTestBed = createFilterPanelViewTestBed(WithValuesFilterModelFactory(), {
+            enableSyncSwitch: { defaultValue: true },
+        });
+        const permissionId = new WorkbookEditablePermission(UNIT_ID).id;
+        const permissionService = currentTestBed.injector.get(IPermissionService);
+        if (!permissionService.getPermissionPoint(permissionId)) {
+            permissionService.addPermissionPoint(new WorkbookEditablePermission(UNIT_ID));
+        }
+        permissionService.updatePermissionPoint(permissionId, false);
+        await openPanel(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await renderPanel(root, currentTestBed);
+
+        expect(container.querySelector('input[aria-label="Filter is visible to everyone"]')).toBeNull();
     });
 
     it('turns sync off through the switch and reports the change', async () => {

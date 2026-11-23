@@ -25,7 +25,7 @@ const locale = {
             'smart-toggle-filter': 'Toggle Filter',
         },
         permission: {
-            filterErr: 'You do not have permission to use the filter.',
+            filterErr: 'The range is protected, and you do not have permission to filter. To filter, please contact the creator.',
         },
         panel: {
             'clear-filter': 'Clear Filter',

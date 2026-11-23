@@ -46,6 +46,7 @@ import {
     FILTER_PANEL_OPENED_KEY,
 } from '../../commands/operations/sheets-filter.operation';
 import { ISheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { useWorkbookEditable } from '../components/use-workbook-editable';
 import { MobileFilterByColor } from './MobileFilterByColor';
 import { MobileFilterByCondition } from './MobileFilterByCondition';
 import { MobileFilterByValue } from './MobileFilterByValue';
@@ -60,10 +61,11 @@ function MobileFilterSyncSwitch() {
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
     const filterSyncController = useDependency(SheetsFilterSyncController);
+    const editable = useWorkbookEditable();
     const visible = useObservable(filterSyncController.visible$, false, true);
     const enabled = useObservable(filterSyncController.enabled$, true, true);
 
-    if (!visible) {
+    if (!visible || !editable) {
         return null;
     }
 

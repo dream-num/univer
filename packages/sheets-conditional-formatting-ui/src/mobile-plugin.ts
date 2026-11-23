@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -33,6 +32,7 @@ import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingP
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsFormulaMobileUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
+import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
@@ -50,7 +50,6 @@ import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
-import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { ConditionalFormattingMobileMenuController } from './menu/mobile-cf.menu.controller';
@@ -96,7 +95,6 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
             [MobileComponentsController],
             [SheetsCfRenderController],
             [ConditionalFormattingCopyPasteController],
-            [ConditionalFormattingPermissionController],
             [ConditionalFormattingI18nController],
             [ConditionalFormattingFormulaRefRangeController],
             [ConditionalFormattingPanelController],
@@ -119,7 +117,6 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
     override onRendered(): void {
         touchDependencies(this._injector, [
             [ConditionalFormattingCopyPasteController],
-            [ConditionalFormattingPermissionController],
             [ConditionalFormattingI18nController],
         ]);
     }

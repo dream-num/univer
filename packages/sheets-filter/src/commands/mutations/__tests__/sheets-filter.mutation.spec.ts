@@ -15,9 +15,9 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../../services/sheet-filter.service';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../sheets-filter.mutation';
 
@@ -261,7 +261,7 @@ describe('test mutations of sheets filter', () => {
             expect(sheetsFilterService.getFilterModel('test', 'sheet1')).toBeNull();
         });
 
-        it('should return false when there is no filter', () => {
+        it('should be an idempotent cleanup when there is no filter', () => {
             const testBed = createFilterMutationTestBed(testWorkbookDataFactory());
             const { commandService } = testBed;
             univer = testBed.univer;
@@ -269,7 +269,7 @@ describe('test mutations of sheets filter', () => {
             expect(commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
-            })).toBeFalsy();
+            })).toBeTruthy();
         });
     });
 });

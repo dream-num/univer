@@ -24,6 +24,11 @@ const locale: typeof enUS = {
             mark: 'Znak',
             rank: 'Ranga',
         },
+        permission: {
+            dialog: {
+                setStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów. Aby ustawić style, skontaktuj się z twórcą.',
+            },
+        },
     },
 };
 

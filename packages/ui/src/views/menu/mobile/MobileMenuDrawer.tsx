@@ -71,7 +71,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                 aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                 className={clsx(resetButtonClassName, `
                   !univer-absolute !univer-inset-0 !univer-m-0 !univer-block !univer-appearance-none
-                  !univer-rounded-none !univer-border-0 !univer-bg-black/[.35] !univer-p-0 univer-backdrop-blur-[2px]
+                  !univer-rounded-none !univer-border-0 !univer-bg-black/35 !univer-p-0 univer-backdrop-blur-[2px]
                 `)}
                 onClick={onClose}
             />

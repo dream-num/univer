@@ -14,126 +14,114 @@
  * limitations under the License.
  */
 
-// Adapted from ot-json1 1.0.2 (Joseph Gentle). See THIRD_PARTY_NOTICES.txt.
+import { cloneDeep } from 'lodash-es';
+import type { IJSON1Component, JSON1Document, JSONXActions, JSONXPath } from './json1';
+import { JSON1WriteCursor } from './cursor';
+import { editComponent, entries, getEdit } from './operation';
 
-import type { IJSON1Component, JSON1Document, JSONXActions } from './json1';
-import type { IJSONObject, Key, OperationList } from './snapshot';
-import { checkValidOp, getEdit, getEditType } from './operation';
-import {
-    assert,
-    hasPick,
-    insertChildMut,
-    isValidKey,
-    maybeGetChild,
-    removeChild,
-    replaceChild,
-    shallowClone,
-} from './snapshot';
+type Container = JSON1Document[] | Record<string, JSON1Document>;
 
-/**
- * Apply structural changes in two passes. Picks run from the highest sibling index down so removals
- * preserve source indices. Drops run in ascending order using result indices. Move slots carry values
- * between the passes, including values moved across parents.
- *
- * @param snapshot - Document at the revision where the operation was authored. An absent root is `undefined`.
- * @param op - Operation to replay. A `null` operation returns `snapshot` directly.
- * @returns The new root, which can be `undefined` after a root removal.
- */
+function insert(parent: Record<string, JSON1Document | undefined>, key: string | number, value: JSON1Document) {
+    if (Array.isArray(parent)) {
+        if (Number(key) > parent.length) {
+            throw new Error('Array insertion is out of bounds');
+        }
+        parent.splice(Number(key), 0, value);
+    } else {
+        if (Object.prototype.hasOwnProperty.call(parent, key) && parent[key] !== undefined) {
+            throw new Error('Insertion would overwrite a property');
+        }
+        parent[key] = value;
+    }
+}
+
+/** A replay clones each written container once, retaining references to unaffected branches. */
+function replay(snapshot: JSON1Document | undefined, op: JSONXActions, undoData?: JSON1WriteCursor) {
+    const changes = entries(op);
+    const holder: Record<string, JSON1Document | undefined> = { root: snapshot };
+    const owned = new WeakSet<object>();
+
+    function target(path: JSONXPath) {
+        let parent = holder;
+        let key: string | number = 'root';
+        for (const segment of path) {
+            const child = Object.prototype.hasOwnProperty.call(parent, key) ? parent[key] : undefined;
+            if (!child || typeof child !== 'object' || Array.isArray(child) !== (typeof segment === 'number')) {
+                throw new Error('Invalid document path');
+            }
+            let writable: Container = child;
+            if (!owned.has(child)) {
+                writable = Array.isArray(child) ? child.slice() : { ...child };
+                owned.add(writable);
+                parent[key] = writable;
+            }
+            parent = writable as Record<string, JSON1Document>;
+            key = segment;
+        }
+        return { parent, key };
+    }
+
+    const slots: JSON1Document[] = [];
+    const captured = new Map<JSONXPath, IJSON1Component>();
+    for (let index = changes.length - 1; index >= 0; index--) {
+        const { path, component } = changes[index];
+        if (component.r === undefined && component.p === undefined) {
+            continue;
+        }
+        const { parent, key } = target(path);
+        const value = Object.prototype.hasOwnProperty.call(parent, key) ? parent[key] : undefined;
+        if (value === undefined) {
+            throw new Error('Cannot remove a missing value');
+        }
+        if (component.p !== undefined) {
+            slots[component.p] = value;
+        }
+        if (undoData && component.r !== undefined) {
+            captured.set(path, { ...component, r: value });
+        }
+        if (Array.isArray(parent)) {
+            parent.splice(Number(key), 1);
+        } else {
+            delete parent[key];
+        }
+    }
+    for (const { path, component } of changes) {
+        let record = captured.get(path) ?? component;
+        const edit = getEdit(component);
+        const value = component.d === undefined ? component.i as JSON1Document | undefined : slots[component.d];
+        if (value !== undefined || edit) {
+            const { parent, key } = target(path);
+            if (value !== undefined) {
+                insert(parent, key, value);
+            }
+            if (edit) {
+                const current = Object.prototype.hasOwnProperty.call(parent, key) ? parent[key] : undefined;
+                if (current === undefined) {
+                    throw new Error('Cannot edit a missing value');
+                }
+                if (undoData && edit.type.makeInvertible) {
+                    const payload = edit.type.makeInvertible(edit.payload, current);
+                    record = { ...record, ...editComponent({ ...edit, payload }) };
+                }
+                parent[key] = edit.type.apply(undoData ? cloneDeep(current) : current, edit.payload) as JSON1Document;
+            }
+        }
+        if (undoData) {
+            undoData.reset();
+            undoData.at(path, (w) => w.mergeTree([record]));
+        }
+    }
+    return holder.root;
+}
+
+/** Replay structural edits in source order for cuts and result order for insertions. */
 export function apply(snapshot: JSON1Document | undefined, op: JSONXActions) {
-    checkValidOp(op);
-    if (op === null) {
-        return snapshot;
-    }
-    const held: JSON1Document[] = [];
-    /** Detach removed or moved values from the source tree. Rebuild ancestors only where a child changed. */
-    function pick(subDoc: JSON1Document | undefined, descent: OperationList) {
-        const stack: (JSON1Document | undefined)[] = [];
-        let i = 0;
-        for (; i < descent.length; i++) {
-            const d = descent[i];
-            if (Array.isArray(d)) {
-                break;
-            }
-            if (typeof d === 'object') {
-                continue;
-            }
-            stack.push(subDoc);
-            subDoc = maybeGetChild(subDoc, d);
-        }
-        for (let j = descent.length - 1; j >= i; j--) {
-            subDoc = pick(subDoc, descent[j] as OperationList);
-        }
-        for (--i; i >= 0; i--) {
-            const d = descent[i] as Key | IJSON1Component;
-            if (typeof d !== 'object') {
-                const container = stack.pop();
-                const expectedChild = maybeGetChild(container, d);
-                subDoc =
-                    subDoc === expectedChild
-                        ? container
-                        : subDoc === undefined
-                            ? removeChild(container as JSON1Document[] | IJSONObject, d)
-                            : replaceChild(container as JSON1Document[] | IJSONObject, d, subDoc);
-            } else if (hasPick(d)) {
-                assert(subDoc !== undefined, 'Cannot pick up or remove undefined');
-                if (d.p != null) {
-                    held[d.p] = subDoc;
-                }
-                subDoc = undefined;
-            }
-        }
-        return subDoc;
-    }
-    snapshot = pick(snapshot, op) as JSON1Document;
-    /** Insert literals and held values, then pass the resulting value at each edited path to its subtype. */
-    function drop(root: JSON1Document, descent: OperationList) {
-        let subDoc = root;
-        let i = 0;
-        const rootContainer: JSON1Document = { root };
-        let m = 0;
-        let container: JSON1Document = rootContainer;
-        let key: Key = 'root';
-        // Copy the parent path lazily on the first write to this branch.
-        function mut() {
-            for (; m < i; m++) {
-                const d = descent[m];
-                if (typeof d === 'object') {
-                    continue;
-                }
-                assert(isValidKey(container, key));
-                container = (container as IJSONObject)[key] = shallowClone((container as IJSONObject)[key]);
-                key = d;
-            }
-        }
-        for (; i < descent.length; i++) {
-            const d = descent[i];
-            if (Array.isArray(d)) {
-                const child = drop(subDoc, d);
-                if (child !== subDoc && child !== undefined) {
-                    mut();
-                    subDoc = container[key] = child;
-                }
-            } else if (typeof d === 'object') {
-                if (d.d != null) {
-                    mut();
-                    subDoc = insertChildMut(container, key, held[d.d]);
-                } else if (d.i !== undefined) {
-                    mut();
-                    subDoc = insertChildMut(container, key, d.i as JSON1Document);
-                }
-                const t = getEditType(d);
-                if (t) {
-                    mut();
-                    subDoc = container[key] = t.apply(subDoc, getEdit(d)) as JSON1Document;
-                } else if (d.e !== undefined) {
-                    throw new Error(`Subtype ${d.et} undefined`);
-                }
-            } else {
-                subDoc = maybeGetChild(subDoc, d) as JSON1Document;
-            }
-        }
-        return rootContainer.root;
-    }
-    snapshot = drop(snapshot, op);
-    return snapshot;
+    return op === null ? snapshot : replay(snapshot, op);
+}
+
+/** Capture values at the instant they are removed, after any nested moves have been detached. */
+export function makeInvertible(op: JSONXActions, snapshot: JSON1Document) {
+    const writer = new JSON1WriteCursor();
+    replay(snapshot, op, writer);
+    return writer.get();
 }

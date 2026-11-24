@@ -14,60 +14,13 @@
  * limitations under the License.
  */
 
-import { apply } from './apply';
+import { apply, makeInvertible } from './apply';
 import { compose } from './compose';
 import { JSON1ReadCursor, JSON1WriteCursor } from './cursor';
-import { invert, invertWithDoc, makeInvertible } from './invert';
-import { checkValidOp, editOp, insertOp, moveOp, registerSubtype, removeOp, replaceOp } from './operation';
+import { invert, invertWithDoc } from './invert';
+import { editOp, entries, registerSubtype } from './operation';
 import { transformPosition } from './position';
-import { ConflictType, transform, transformWithConflictsPred } from './transform';
-
-/*! @license
- * ot-json1 1.0.2
- *
- * Copyright (c) 2013-2018, Joseph Gentle <me@josephg.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
- * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
- * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
- * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
- * PERFORMANCE OF THIS SOFTWARE.
- *
- * ot-text-unicode 4.0.0
- *
- * All code contributed to this repository is licensed under the standard MIT license:
- *
- * Copyright 2011 ottypes library contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following condition:
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * unicount 1.1.0
- *
- * Copyright 2019 Joseph Gentle
- *
- * Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
+import { DocumentConflict, rebase } from './transform';
 
 /** A JSON snapshot. JSON `null` is a stored value. Removing the root produces `undefined`. */
 export type JSON1Document = null | boolean | number | string | JSON1Document[] | { [key: string]: JSON1Document };
@@ -253,25 +206,30 @@ interface IJSON1Operations {
 
 /** Shared JSON1 operations for building, replaying, and rebasing Univer changesets. */
 export const JSON1: IJSON1Operations = {
-    insertOp,
-    removeOp,
-    replaceOp,
-    moveOp,
+    insertOp: (path, value) => new JSON1WriteCursor().writeAtPath(path, 'i', value).get(),
+    removeOp: (path, value = true) => new JSON1WriteCursor().writeAtPath(path, 'r', value).get(),
+    replaceOp: (path, previous, next) => new JSON1WriteCursor().at(path, (writer) => {
+        writer.write('r', previous);
+        writer.write('i', next);
+    }).get(),
+    moveOp: (from, to) => new JSON1WriteCursor().writeMove(from, to).get(),
     readCursor: (op) => new JSON1ReadCursor(op),
     writeCursor: () => new JSON1WriteCursor(),
-    checkValidOp,
+    checkValidOp: (op) => {
+        entries(op);
+    },
     isNoop: (op) => op == null,
     apply,
     compose,
     invert,
     makeInvertible,
     invertWithDoc,
-    transform,
+    transform: (op, against, side) => rebase(op, against, side, () => false),
     transformPosition,
-    transformNoConflict: (op, against, side) => transformWithConflictsPred(() => true, op, against, side),
-    createTransform: (allow) => (op, against, side) => transformWithConflictsPred(allow, op, against, side),
-    RM_UNEXPECTED_CONTENT: ConflictType.RM_UNEXPECTED_CONTENT,
-    DROP_COLLISION: ConflictType.DROP_COLLISION,
+    transformNoConflict: (op, against, side) => rebase(op, against, side, () => true),
+    createTransform: (allow) => (op, against, side) => rebase(op, against, side, allow),
+    RM_UNEXPECTED_CONTENT: DocumentConflict.Removal,
+    DROP_COLLISION: DocumentConflict.Destination,
 };
 
 /**

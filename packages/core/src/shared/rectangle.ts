@@ -190,11 +190,12 @@ export class Rectangle {
         if (!src.length || !target.length) {
             return false;
         }
-        if (target.length === 1) {
-            return src.some((range) => Rectangle.simpleRangesIntersect(range, target[0]));
-        }
         if (src.length === 1) {
             return target.some((range) => Rectangle.simpleRangesIntersect(src[0], range));
+        }
+        // Unresolved or inverted source bounds must go through the same index as a multi-range query.
+        if (target.length <= 2 && src.every((r) => r.startRow <= r.endRow && r.startColumn <= r.endColumn)) {
+            return target.some((query) => src.some((range) => Rectangle.simpleRangesIntersect(range, query)));
         }
         const rbush = new RBush<IBoundingBox>();
         rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));

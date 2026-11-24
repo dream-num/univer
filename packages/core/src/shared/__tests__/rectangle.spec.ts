@@ -114,6 +114,13 @@ describe('test "Rectangle"', () => {
         expect(Rectangle.doAnyRangesIntersect([area, distant], [adjacent, cellToRange(9, 4)])).toBe(false);
     });
 
+    it('preserves intersection results for source lists with an unresolved coordinate', () => {
+        const cell = cellToRange(1, 2);
+        const unresolved = { ...cell, endRow: Number.NaN };
+        expect(Rectangle.doAnyRangesIntersect([cell, unresolved], [cell])).toBe(false);
+        expect(Rectangle.doAnyRangesIntersect([cell], [unresolved, cell])).toBe(true);
+    });
+
     it('test getRelativeRange', () => {
         const relativeRange = Rectangle.getRelativeRange({ startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 }, cellToRange(10, 10));
         expect(relativeRange).toEqual({

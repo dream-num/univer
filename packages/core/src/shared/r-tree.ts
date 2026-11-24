@@ -469,7 +469,7 @@ export class RTree {
         return result;
     }
 
-    fromJSON(data: IRTreeData) {
+    fromJSON(data: Record<string, Record<string, unknown>>) {
         this._tree.clear();
         for (const unitId in data) {
             this._tree.set(unitId, new Map());

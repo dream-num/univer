@@ -40,6 +40,63 @@ describe('RBush', () => {
         expect(tree.all()).toHaveLength(boxes.length - 4);
     });
 
+    it.each([
+        { batch: true, order: [6, 2, 11, 1, 10, 7, 9, 0, 8, 5, 4, 3] },
+        { batch: false, order: [0, 1, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+    ])('preserves the public hit order for coincident entries (batch: $batch)', ({ batch, order }) => {
+        const box = { minX: 1, minY: 1, maxX: 2, maxY: 2 };
+        const items = Array.from({ length: 12 }, (_, id) => ({ ...box, id }));
+        const tree = new RBush<typeof items[number]>(4);
+        if (batch) {
+            tree.load(items);
+        } else {
+            items.forEach((item) => tree.insert(item));
+        }
+        expect(tree.search(box).map((item) => item.id)).toEqual(order);
+        tree.remove(items[0], (a, b) => a.minX === b.minX);
+        expect(tree.search(box).map((item) => item.id)).toEqual(order.slice(1));
+    });
+
+    it('returns the same first match when a saved index is reopened', () => {
+        const item = (id: string, minX: number, maxX: number) => ({ id, minX, maxX, minY: 0, maxY: 0 });
+        const first = item('left', 0, 2);
+        const middle = item('middle', 1, 1);
+        const last = item('right', 1, 3);
+        const leaf = (entry: typeof first) => ({ ...entry, children: [entry], leaf: true as const, height: 1 });
+        const index = new RBush<typeof first>().fromJSON({
+            minX: 0,
+            maxX: 3,
+            minY: 0,
+            maxY: 0,
+            height: 2,
+            leaf: false,
+            children: [leaf(first), leaf(middle), leaf(last)],
+        });
+
+        expect(index.search(middle)).toEqual([middle, last, first]);
+        expect(index.search({ ...middle, minX: 0, maxX: 3 })).toEqual([first, middle, last]);
+        expect(index.all()).toEqual([last, middle, first]);
+    });
+
+    it('removes by ID when the supplied copy moved to a neighboring leaf in a saved index', () => {
+        const left = { id: 'left', minX: 0, maxX: 0, minY: 0, maxY: 0 };
+        const right = { ...left, id: 'right', minX: 9, maxX: 9 };
+        const leaf = (entry: typeof left) => ({ ...entry, children: [entry], leaf: true as const, height: 1 });
+        const index = new RBush<typeof left>().fromJSON({
+            minX: 0,
+            maxX: 9,
+            minY: 0,
+            maxY: 0,
+            height: 2,
+            leaf: false,
+            children: [leaf(left), leaf(right)],
+        });
+
+        index.remove({ ...right, id: 'left' }, (copy, stored) => copy.id === stored.id);
+        expect(index.collides(left)).toBe(false);
+        expect(index.all()).toEqual([right]);
+    });
+
     it('reads a saved RBush node and preserves custom item coordinates and removal by value', () => {
         type Point = [number, number];
         class PointIndex extends RBush<Point> {

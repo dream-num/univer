@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import KDBush from 'kdbush';
 import type { IUnitRange } from '../sheets/typedef';
 import type { IBoundingBox, RBushNode } from './rbush';
+import { CellPoint, CellPointIndex } from './cell-point-index';
 import { RBush } from './rbush';
 
 type StringOrNumber = string | number;
@@ -29,12 +29,6 @@ interface IRBushItem extends IBoundingBox {
     id: StringOrNumber;
 }
 
-interface IRdTreeItem {
-    x: number;
-    y: number;
-    ids: Set<StringOrNumber>;
-}
-
 export interface IRTreeData {
     [unitId: string]: {
         [subUnitId: string]: RBushNode<IRBushItem>;
@@ -45,9 +39,9 @@ export class RTree {
     private _tree: Map<string, Map<string, RBush<IRBushItem>>> = new Map();
 
     // unitId -> subUnitId -> row -> column -> ids
-    private _oneCellCache = new Map<string, Map<string, Map<number, Map<number, Set<StringOrNumber>>>>>();
+    private _oneCellCache = new Map<string, Map<string, Map<number, Map<number, CellPoint>>>>();
 
-    private _kdTree: Map<string, Map<string, { tree: KDBush; items: IRdTreeItem[] } | undefined>> = new Map();
+    private _kdTree: Map<string, Map<string, CellPointIndex | undefined>> = new Map();
 
     constructor(private _enableOneCellCache = false) {
 
@@ -68,21 +62,28 @@ export class RTree {
         return this._tree.get(unitId)!.get(subUnitId)!;
     }
 
-    private _getOneCellCache(unitId: string, subUnitId: string, row: number, column: number): Set<StringOrNumber> {
-        if (!this._oneCellCache.has(unitId)) {
-            this._oneCellCache.set(unitId, new Map());
+    private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
+        let sheets = this._oneCellCache.get(unitId);
+        if (!sheets) {
+            sheets = new Map();
+            this._oneCellCache.set(unitId, sheets);
         }
-        if (!this._oneCellCache.get(unitId)!.has(subUnitId)) {
-            this._oneCellCache.get(unitId)!.set(subUnitId, new Map());
+        let rows = sheets.get(subUnitId);
+        if (!rows) {
+            rows = new Map();
+            sheets.set(subUnitId, rows);
         }
-        if (!this._oneCellCache.get(unitId)!.get(subUnitId)!.has(row)) {
-            this._oneCellCache.get(unitId)!.get(subUnitId)!.set(row, new Map());
+        let columns = rows.get(row);
+        if (!columns) {
+            columns = new Map();
+            rows.set(row, columns);
         }
-        if (!this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.has(column)) {
-            this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.set(column, new Set());
+        const cell = columns.get(column);
+        if (cell) {
+            cell.add(id);
+        } else {
+            columns.set(column, new CellPoint(+column, +row, id));
         }
-
-        return this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.get(column)!;
     }
 
     private _removeOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
@@ -125,76 +126,24 @@ export class RTree {
         }
     }
 
-    private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
-        this._getOneCellCache(unitId, subUnitId, row, column).add(id);
-    }
-
-    private _getRdTreeItems(map: Map<number, Map<number, Set<StringOrNumber>>>) {
-        const items: IRdTreeItem[] = [];
-
-        for (const [y, innerMap] of map) {
-            for (const [x, ids] of innerMap) {
-                items.push({
-                    x,
-                    y,
-                    ids,
-                });
-            }
-        }
-
-        return items;
-    }
-
-    private _searchByOneCellCache(search: IUnitRange): StringOrNumber[] {
-        const { unitId, sheetId: subUnitId, range } = search;
-        const { startRow, startColumn, endRow, endColumn } = range;
-        const searchObject = this._kdTree.get(unitId)?.get(subUnitId);
-        if (!searchObject) {
-            return [];
-        }
-
-        const { tree, items } = searchObject;
-
-        const indexes = tree.range(startColumn, startRow, endColumn, endRow);
-
-        const result: StringOrNumber[] = [];
-
-        for (const index of indexes) {
-            const item = items[index];
-            result.push(...Array.from(item.ids));
-        }
-
-        return result;
-    }
-
-    /**
-     * Open the kd-tree search state.
-     * The kd-tree is used to search for data in a single cell.
-     */
+    /** Snapshot the coordinates available to formula dependency searches. */
     openKdTree() {
-        for (const [unitId, map1] of this._oneCellCache) {
-            if (!this._kdTree.has(unitId)) {
-                this._kdTree.set(unitId, new Map());
+        for (const [unitId, sheets] of this._oneCellCache) {
+            let indexes = this._kdTree.get(unitId);
+            if (!indexes) {
+                indexes = new Map();
+                this._kdTree.set(unitId, indexes);
             }
-            for (const [subUnitId, map2] of map1) {
-                const items = this._getRdTreeItems(map2);
-                const tree = new KDBush(items.length);
-                this._kdTree.get(unitId)?.set(subUnitId, {
-                    tree,
-                    items,
-                });
-                for (const item of items) {
-                    tree.add(item.x, item.y);
-                }
-                tree.finish();
+            for (const [sheetId, rows] of sheets) {
+                indexes.set(sheetId, new CellPointIndex(rows));
             }
         }
     }
 
     closeKdTree() {
-        for (const [unitId, map1] of this._oneCellCache) {
-            for (const [subUnitId, map2] of map1) {
-                this._kdTree.get(unitId)?.set(subUnitId, undefined);
+        for (const [unitId, sheets] of this._oneCellCache) {
+            for (const sheetId of sheets.keys()) {
+                this._kdTree.get(unitId)?.set(sheetId, undefined);
             }
         }
     }
@@ -247,7 +196,7 @@ export class RTree {
         const { unitId, sheetId: subUnitId, range } = search;
 
         if (this._enableOneCellCache) {
-            const oneCellResults = this._searchByOneCellCache(search);
+            const oneCellResults = this._kdTree.get(unitId)?.get(subUnitId)?.search(range) ?? [];
             for (const result of oneCellResults) {
                 yield result;
             }
@@ -394,11 +343,11 @@ export class RTree {
         const cells = this._oneCellCache.get(unitId)?.get(sheetId);
         if (cells) {
             for (const [row, columns] of cells) {
-                for (const [column, ids] of columns) {
+                for (const [column, cell] of columns) {
                     const bounds = { minX: column, maxX: column, minY: row, maxY: row };
-                    for (const id of ids) {
+                    for (const id of cell.values()) {
                         if (matches(id, bounds)) {
-                            ids.delete(id);
+                            cell.delete(id);
                         }
                     }
                 }

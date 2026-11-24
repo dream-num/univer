@@ -621,9 +621,6 @@ importers:
       '@wendellhu/redi':
         specifier: 1.1.3
         version: 1.1.3(react@19.3.1)
-      kdbush:
-        specifier: ^4.1.0
-        version: 4.1.0
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
@@ -8738,9 +8735,6 @@ packages:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
     hasBin: true
 
-  kdbush@4.1.0:
-    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
-
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -16240,8 +16234,6 @@ snapshots:
   katex@0.16.47:
     dependencies:
       commander: 8.3.0
-
-  kdbush@4.1.0: {}
 
   keyv@4.5.4:
     dependencies:

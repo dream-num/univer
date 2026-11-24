@@ -16,6 +16,7 @@
 
 import { cloneDeep } from 'lodash-es';
 import type { IJSON1Component, JSON1Document, JSONXActions, JSONXPath } from './json1';
+import type { IEntry } from './operation';
 import { JSON1WriteCursor } from './cursor';
 import { editComponent, entries, getEdit } from './operation';
 
@@ -36,8 +37,7 @@ function insert(parent: Record<string, JSON1Document | undefined>, key: string |
 }
 
 /** A replay clones each written container once, retaining references to unaffected branches. */
-function replay(snapshot: JSON1Document | undefined, op: JSONXActions, undoData?: JSON1WriteCursor) {
-    const changes = entries(op);
+function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData?: JSON1WriteCursor) {
     const holder: Record<string, JSON1Document | undefined> = { root: snapshot };
     const owned = new WeakSet<object>();
 
@@ -116,12 +116,18 @@ function replay(snapshot: JSON1Document | undefined, op: JSONXActions, undoData?
 
 /** Replay structural edits in source order for cuts and result order for insertions. */
 export function apply(snapshot: JSON1Document | undefined, op: JSONXActions) {
-    return op === null ? snapshot : replay(snapshot, op);
+    return op === null ? snapshot : replay(snapshot, entries(op));
 }
 
 /** Capture values at the instant they are removed, after any nested moves have been detached. */
 export function makeInvertible(op: JSONXActions, snapshot: JSON1Document) {
+    const changes = entries(op);
+    // Insertions and moves already encode their inverses. Callers can prepare undo before
+    // the command has validated whether those placements apply to this snapshot.
+    if (!changes.some(({ component }) => component.r !== undefined || getEdit(component)?.type.makeInvertible)) {
+        return op;
+    }
     const writer = new JSON1WriteCursor();
-    replay(snapshot, op, writer);
+    replay(snapshot, changes, writer);
     return writer.get();
 }

@@ -45,6 +45,8 @@ export interface IRetainAction {
         rangeId: string;
         range: ICustomRange | null;
         nextRangeId?: string | null;
+        /** Where to reinsert a moved bookmark if a concurrent text edit removed its old target. */
+        fallbackNextRangeId?: string | null;
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;

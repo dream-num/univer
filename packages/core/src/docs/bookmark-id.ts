@@ -23,7 +23,7 @@ export function createBookmarkRangeId(id: string): string {
     return `${BOOKMARK_ID_PREFIX}${id}`;
 }
 
-function isManagedBookmark(range: ICustomRange): boolean {
+export function isManagedBookmark(range: ICustomRange): boolean {
     return range.rangeType === CustomRangeType.BOOKMARK && range.rangeId.startsWith(BOOKMARK_ID_PREFIX);
 }
 

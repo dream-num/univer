@@ -31,6 +31,7 @@ import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from '../action-types';
 import { BuildTextUtils } from '../build-utils';
+import { copyCustomRange } from '../build-utils/custom-range';
 import { validateDocumentStructure } from '../structure-validator';
 import { TextX } from '../text-x';
 import { composeBody, getBodySlice } from '../utils';
@@ -129,6 +130,54 @@ describe('test TextX methods and branches', () => {
     const updateBookmarks = (rangeUpdates: IRetainAction['rangeUpdates']): TextXAction[] => [
         { t: TextXActionType.RETAIN, len: 0, rangeUpdates },
     ];
+
+    it('converges when the original text of a moved legacy bookmark is deleted', () => {
+        const original: IDocumentBody = {
+            dataStream: 'One\rTwo\rEnd\r\n',
+            customRanges: [
+                { ...bookmarkAt('z'), endIndex: 2 },
+                { ...bookmarkAt('a', 4), endIndex: 6 },
+            ],
+            customBlocks: [],
+        };
+        const move = TextX.makeInvertible(updateBookmarks([{ rangeId: 'z', range: { ...bookmarkAt('z', 8), endIndex: 10 } }]), Tools.deepClone(original));
+        const remove: TextXAction[] = [{ t: TextXActionType.DELETE, len: 3 }];
+        const left = TextX.apply(TextX.apply(Tools.deepClone(original), move), TextX.transform(remove, move, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(original), remove), TextX.transform(move, remove, 'right'));
+        expect(left).toEqual(right);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(move, remove))).toEqual(left);
+        expect(TextX.apply(Tools.deepClone(original), TextX.compose(remove, TextX.transform(move, remove, 'right')))).toEqual(right);
+    });
+
+    it('converges when a peer pastes a bookmark during legacy bookmark undo', () => {
+        const original: IDocumentBody = { dataStream: 'Body\rNext\r\n', customRanges: [bookmarkAt('old')], customBlocks: [] };
+        const deletion = TextX.makeInvertible(updateBookmarks([{ rangeId: 'old', range: null }]), Tools.deepClone(original));
+        const deleted = TextX.apply(Tools.deepClone(original), deletion);
+        const restore = TextX.invert(deletion);
+        const pasted = copyCustomRange(bookmarkAt(createBookmarkRangeId('source')));
+        const paste: TextXAction[] = [
+            { t: TextXActionType.RETAIN, len: 5 },
+            { t: TextXActionType.INSERT, len: 4, body: { dataStream: 'Copy', customRanges: [pasted] } },
+        ];
+        const left = TextX.apply(TextX.apply(Tools.deepClone(deleted), restore), TextX.transform(paste, restore, 'left'));
+        const right = TextX.apply(TextX.apply(Tools.deepClone(deleted), paste), TextX.transform(restore, paste, 'right'));
+        expect(left).toEqual(right);
+        expect(left.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['old', pasted.rangeId]);
+    });
+
+    it('undoes a bookmark move combined with deletion through a second legacy bookmark', () => {
+        const original: IDocumentBody = {
+            dataStream: 'Body\rNext\rLast\r\n',
+            customRanges: [bookmarkAt('a'), bookmarkAt('z', 5)],
+            customBlocks: [],
+        };
+        const moveAndDelete = TextX.makeInvertible([
+            { t: TextXActionType.RETAIN, len: 5 },
+            { t: TextXActionType.DELETE, len: 1 },
+            ...updateBookmarks([{ rangeId: 'a', range: bookmarkAt('a', 9) }]),
+        ], Tools.deepClone(original));
+        expect(TextX.apply(TextX.apply(Tools.deepClone(original), moveAndDelete), TextX.invert(moveAndDelete))).toEqual(original);
+    });
 
     it('converges when a peer moves an existing bookmark and another creates a bookmark', () => {
         const original: IDocumentBody = { dataStream: 'Body\rNext\r\n', customRanges: [bookmarkAt('z'), bookmarkAt('a')] };

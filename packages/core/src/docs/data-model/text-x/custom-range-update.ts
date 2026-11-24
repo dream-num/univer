@@ -18,6 +18,7 @@ import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-do
 import type { IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { CustomRangeType } from '../../../types/interfaces/i-document-data';
 import { orderManagedBookmarks } from '../../bookmark-id';
 import { DataStreamTreeTokenType } from '../types';
 import { TextXActionType } from './action-types';
@@ -160,7 +161,11 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRetainActio
 }
 
 export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], resultLength: number): void {
-    for (const { rangeId, range, nextRangeId, propertyPaths } of updates ?? []) {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, propertyPaths } of updates ?? []) {
+        if (fallbackNextRangeId !== undefined && (range?.rangeType !== CustomRangeType.BOOKMARK || propertyPaths || nextRangeId !== undefined ||
+            (fallbackNextRangeId !== null && typeof fallbackNextRangeId !== 'string'))) {
+            throw new Error('Invalid bookmark move anchor.');
+        }
         if (propertyPaths !== undefined) {
             validatePropertyPaths(propertyPaths);
             if (!range) {
@@ -202,7 +207,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         return;
     }
     const ranges = doc.customRanges ?? [];
-    for (const { rangeId, range, nextRangeId, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
             if (index >= 0) {
@@ -220,7 +225,8 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             } else if (index >= 0) {
                 ranges[index] = Tools.deepClone(range);
             } else {
-                ranges.push(Tools.deepClone(range));
+                const anchor = fallbackNextRangeId == null ? -1 : ranges.findIndex((item) => item.rangeId === fallbackNextRangeId);
+                ranges.splice(anchor < 0 ? ranges.length : anchor, 0, Tools.deepClone(range));
             }
         } else if (index >= 0) {
             ranges.splice(index, 1);
@@ -259,9 +265,13 @@ export function moveRangeUpdates(
             offset += action.len;
         }
         const moved = body.customRanges?.find((item) => item.rangeId === rangeId);
-        return { ...update, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
+        const mapped = { ...update, propertyPaths: moved ? update.propertyPaths : undefined, range: moved && range && preserveProperties
             ? { ...Tools.deepClone(range), startIndex: moved.startIndex, endIndex: moved.endIndex }
             : moved ?? null };
+        if (mapped.range?.rangeType !== CustomRangeType.BOOKMARK && mapped.fallbackNextRangeId !== undefined) {
+            delete mapped.fallbackNextRangeId;
+        }
+        return mapped;
     });
 }
 

@@ -20,6 +20,7 @@ import type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from '.
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { CustomRangeType } from '../../../types/interfaces/i-document-data';
+import { isManagedBookmark } from '../../bookmark-id';
 import { DataStreamTreeTokenType } from '../types';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
@@ -466,18 +467,27 @@ export class TextX {
         let index = 0;
         const reservedParagraphIds = new Set<string>();
         const reservedSectionIds = new Set<string>();
+        const changesText = actions.some((action) => action.t !== TextXActionType.RETAIN || action.body?.customRanges?.length);
 
         for (const action of actions) {
             if (action.t === TextXActionType.RETAIN && action.rangeUpdates) {
                 const ranges = doc.customRanges ?? [];
-                action.oldRangeUpdates = action.rangeUpdates.map(({ rangeId, range, nextRangeId: targetAnchor, propertyPaths }) => {
-                    const index = ranges.findIndex((range) => range.rangeId === rangeId);
+                action.oldRangeUpdates = action.rangeUpdates.map((update) => {
+                    const { rangeId, range, propertyPaths } = update;
+                    const index = ranges.findIndex((candidate) => candidate.rangeId === rangeId);
                     const previous = ranges[index];
                     let nextRangeId = previous ? ranges[index + 1]?.rangeId ?? null : undefined;
                     if (previous?.rangeType === CustomRangeType.BOOKMARK && !propertyPaths) {
-                        if (range && targetAnchor === undefined) {
-                            // An in-place move keeps its original slot in both directions.
+                        if (isManagedBookmark(previous)) {
                             nextRangeId = undefined;
+                        } else if (range?.rangeType === CustomRangeType.BOOKMARK && update.nextRangeId === undefined) {
+                            // A peer may delete the old target before applying this move.
+                            if (update.fallbackNextRangeId === undefined) {
+                                update.fallbackNextRangeId = nextRangeId;
+                            }
+                            if (!changesText) {
+                                nextRangeId = undefined;
+                            }
                         }
                     }
                     return {

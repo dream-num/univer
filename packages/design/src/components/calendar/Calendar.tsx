@@ -306,7 +306,11 @@ export function Calendar(props: ICalendarProps) {
                                     '!univer-bg-primary-600 univer-font-bold univer-text-gray-0': !isToday(day) && isSelected(day),
                                     'dark:!univer-text-gray-0': !isToday(day) && !isSelected(day),
                                     '!univer-bg-primary-600 univer-text-gray-0': isToday(day) && isSelected(day),
-                                    'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day) && !isSelected(day),
+                                    [`
+                                      univer-font-semibold univer-text-primary-600
+                                      dark:!univer-text-primary-100
+                                      dark:hover:!univer-text-primary-50
+                                    `]: isToday(day) && !isSelected(day),
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
                                     'univer-cursor-pointer univer-text-gray-800 hover:univer-bg-primary-100': !isSelected(day) && !isDisabled(day),
                                 })}

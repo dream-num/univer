@@ -122,8 +122,7 @@ describe('Test custom filter functions', () => {
             expect(textMatch.fn('yhell', '?hell?')).toBeFalsy();
 
             expect(textMatch.fn('hello111', '*hello?*')).toBeTruthy();
-            expect(textMatch.fn('hello111\r\n', '*hello?*')).toBeFalsy();
-            expect(textMatch.fn('hello111\r\n'.trimEnd(), '*hello?*')).toBeTruthy();
+            expect(textMatch.fn('hello111\r\n', '*hello?*')).toBeTruthy();
             expect(textMatch.fn('hello', '*hello?*')).toBeFalsy();
         });
 
@@ -143,6 +142,7 @@ describe('Test custom filter functions', () => {
             expect(textMatch.fn('a~b', '*a~~b*')).toBeTruthy();
 
             expect(notEquals.fn('a~~b', 'a~~b')).toBeFalsy();
+            expect(notEquals.fn('A~~B', 'a~~b')).toBeFalsy();
             expect(notEquals.fn('a~b', 'a~~b')).toBeTruthy();
         });
     });

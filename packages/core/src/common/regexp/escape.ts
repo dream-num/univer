@@ -33,26 +33,27 @@ export function createLiteralRegExp(value: string, flags?: string): RegExp {
 /**
  * Converts a spreadsheet-style wildcard pattern to an anchored regular expression.
  *
- * `*` matches any number of characters and `?` matches one character. In a pattern
- * that contains either of them, a tilde makes the following `*`, `?` or `~` literal,
- * and before any other character it is a literal tilde. A pattern with neither `*`
- * nor `?` is matched as written, tildes included, so `a~~b` matches only `a~~b`.
- * All other regular-expression syntax is treated as literal text. Matching is
- * case-insensitive.
+ * `*` matches any number of characters and `?` matches one character, including
+ * line breaks. If the pattern contains either symbol, a tilde escapes the next
+ * character and a trailing tilde is ignored. Other patterns are matched as
+ * written, including tildes. Matching is case-insensitive.
  */
 export function createFromWildcard(pattern: string): RegExp {
-    // Excel reads tildes as escapes only in a pattern that has a `*` or a `?` to escape.
     if (!/[*?]/.test(pattern)) {
         return createRegExpFromSafeFragment(`^${escapeRegExp(pattern)}$`, 'i');
     }
 
-    // After escaping, `*` and `?` read `\*` and `\?`; a tilde is left unescaped.
-    const source = escapeRegExp(pattern).replace(/~(\\[*?]|~)|\\\*|\\\?/g, (match, escapedLiteral?: string) => {
-        if (escapedLiteral !== undefined) {
-            return escapedLiteral;
+    const source = pattern.replace(/~.?|[*?]|[^~*?]+/gs, (token) => {
+        switch (token[0]) {
+            case '~':
+                return escapeRegExp(token.slice(1));
+            case '*':
+                return '.*';
+            case '?':
+                return '.';
+            default:
+                return escapeRegExp(token);
         }
-
-        return match === '\\*' ? '.*' : '.';
     });
-    return createRegExpFromSafeFragment(`^${source}$`, 'i');
+    return createRegExpFromSafeFragment(`^${source}$`, 'is');
 }

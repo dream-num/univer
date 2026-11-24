@@ -78,4 +78,18 @@ describe('normalizeHistoricalSheetDrawingEdit', () => {
         const op = compose(JSON1.removeOp(path('axisAlignSheetTransform'), true), top);
         expect(normalize(op)).toEqual(top);
     });
+
+    it('turns an insert of angle/flipX/flipY/skewX/skewY on transform into a replace of the value loading filled in', () => {
+        // XLSX imports keep the angle on sheetTransform only; loading copies it
+        // into transform, while v1.5.2 clients inserted their own value.
+        const loaded = { ...current, transform: { ...current.transform, angle: 90 } };
+        const rotate = JSON1.insertOp(path('transform', 'angle'), 45);
+        expect(normalize(rotate, loaded)).toEqual(JSON1.replaceOp(path('transform', 'angle'), true, 45));
+        expect(normalize(rotate)).toEqual(rotate);
+    });
+
+    it('drops a removal of angle/flipX/flipY/skewX/skewY on transform that loading never filled in', () => {
+        const top = JSON1.replaceOp(path('transform', 'top'), 92, 20);
+        expect(normalize(compose(JSON1.removeOp(path('transform', 'flipX'), true), top))).toEqual(top);
+    });
 });

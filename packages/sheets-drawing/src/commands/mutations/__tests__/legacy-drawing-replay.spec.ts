@@ -29,8 +29,8 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
 /**
  * Mutations recorded from v0.15.4 (the last release that stored only
  * `sheetTransform`) and v1.5.2 builds through their real entry points. Each
- * case inserts a drawing, performs one edit, then undo, redo and another UI
- * drag. The cases were picked from a full matrix of drawing shapes and edits,
+ * case inserts a drawing, or loads an imported one from the snapshot, performs
+ * one edit, then undo, redo and usually another UI drag. The cases were picked from a full matrix of drawing shapes and edits,
  * one for each way old history broke replay or takes a separate branch:
  *
  * - v1.5.2 chart whose position fields hold only from/to, then a UI drag: inserts of
@@ -46,6 +46,9 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
  * - v1.5.2 floating image inserted from a file, then cropped; Facade builder
  *   image rotated 15°, then cropped (different angle on the two position
  *   fields); Facade setRotate.
+ * - v1.5.2 absolute image as imported from XLSX, with its angle only on
+ *   `sheetTransform`, rotated in the UI first and after a drag: inserts of
+ *   `transform.angle` where loading already filled one in.
  * - v0.15.4 UI drag on a plain and a 90° rotated image, and removing rows
  *   above a chart: whole-field replacements of `sheetTransform` only.
  *
@@ -67,7 +70,12 @@ interface ILegacyFixture {
     }>;
 }
 
-const fixtures = ['legacy-v0.15.4-drawing-mutations.json', 'legacy-v1.5.2-drawing-mutations.json', 'legacy-v1.5.2-float-image-mutations.json']
+const fixtures = [
+    'legacy-v0.15.4-drawing-mutations.json',
+    'legacy-v1.5.2-drawing-mutations.json',
+    'legacy-v1.5.2-float-image-mutations.json',
+    'legacy-v1.5.2-imported-drawing-mutations.json',
+]
     .map((file) => JSON.parse(readFileSync(resolve(__dirname, 'fixtures', file), 'utf8')) as ILegacyFixture);
 const unitId = 'test';
 const subUnitId = 'grid';

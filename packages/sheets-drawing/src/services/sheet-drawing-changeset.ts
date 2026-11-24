@@ -64,10 +64,15 @@ function isOrientationOnPositionField([field, key, ...rest]: JSON1.Path): boolea
     return isPositionField([field]) && rest.length === 0 && ORIENTATION_FIELDS.has(key as string);
 }
 
+function isOrientationOnTransform([field, key, ...rest]: JSON1.Path): boolean {
+    return field === 'transform' && rest.length === 0 && ORIENTATION_FIELDS.has(key as string);
+}
+
 /**
  * Translate drawing edits in persisted history written by older clients.
- * Edits that touch neither `sheetTransform` nor `axisAlignSheetTransform`
- * are returned unchanged; see `translateHistoricalDrawingEdit` for the rest.
+ * Edits that touch neither `sheetTransform`, `axisAlignSheetTransform` nor
+ * `angle/flipX/flipY/skewX/skewY` on `transform` are returned unchanged; see
+ * `translateHistoricalDrawingEdit` for the rest.
  */
 export function normalizeHistoricalSheetDrawingEdit(
     op: JSON1.JSONOp,
@@ -91,7 +96,7 @@ export function normalizeHistoricalSheetDrawingEdit(
         edit.push([path.slice(4), component]);
         edits.set(drawingId, edit);
     });
-    if (![...edits.values()].some((edit) => edit.some(([path]) => isPositionField(path)))) return op;
+    if (![...edits.values()].some((edit) => edit.some(([path]) => isPositionField(path) || isOrientationOnTransform(path)))) return op;
 
     for (const [drawingId, edit] of edits) {
         const translated = translateHistoricalDrawingEdit(edit, () => getDrawing(drawingId), getSkeleton);
@@ -105,7 +110,9 @@ export function normalizeHistoricalSheetDrawingEdit(
 /**
  * - Drop `angle/flipX/flipY/skewX/skewY` on `sheetTransform` and
  *   `axisAlignSheetTransform`, and removals of the whole
- *   `axisAlignSheetTransform` (see `removesWholeAxisAlign`).
+ *   `axisAlignSheetTransform` (see `removesWholeAxisAlign`). Reconcile those
+ *   fields on `transform` with the values loading filled in (see
+ *   `reconcileOrientationOnTransform`).
  * - Clients from v0.15.5 on write `axisAlignSheetTransform` next to
  *   `sheetTransform`. When the edit still writes `axisAlignSheetTransform`,
  *   it is authoritative and `sheetTransform` is dropped.
@@ -117,7 +124,9 @@ function translateHistoricalDrawingEdit(
     getDrawing: () => ISheetDrawing | undefined,
     getSkeleton: () => SpreadsheetSkeleton | undefined
 ): DrawingEdit {
-    const kept = edit.filter(([path, component]) => !isOrientationOnPositionField(path) && !removesWholeAxisAlign(path, component));
+    const kept = edit
+        .filter(([path, component]) => !isOrientationOnPositionField(path) && !removesWholeAxisAlign(path, component))
+        .flatMap((entry) => reconcileOrientationOnTransform(entry, getDrawing));
     if (kept.some(([[field]]) => field === 'axisAlignSheetTransform')) {
         return kept
             .filter(([[field]]) => field !== 'sheetTransform')
@@ -129,6 +138,25 @@ function translateHistoricalDrawingEdit(
         return [[[], { r: true, i: applySheetTransformEdit(current, kept, getSkeleton()) as unknown as JSON1.Doc }]];
     }
     return kept;
+}
+
+/**
+ * Loading copies `angle/flipX/flipY/skewX/skewY` from `sheetTransform` or
+ * `axisAlignSheetTransform` into `transform` when `transform` lacks them
+ * (`getSheetDrawingTransformWithOrientation`), as with drawings imported from
+ * XLSX. Old clients edited `transform` without those values, so they inserted
+ * one without `r`, or removed one loading never filled. The insert replaces
+ * the filled value; the removal is dropped.
+ */
+function reconcileOrientationOnTransform(
+    [path, component]: DrawingEdit[number],
+    getDrawing: () => ISheetDrawing | undefined
+): DrawingEdit {
+    if (!isOrientationOnTransform(path)) return [[path, component]];
+    const current = (getDrawing()?.transform as Record<string, unknown> | undefined)?.[path[1] as string];
+    if (component.i !== undefined && component.r === undefined && current !== undefined) return [[path, { ...component, r: true }]];
+    if (component.r !== undefined && component.i === undefined && current === undefined) return [];
+    return [[path, component]];
 }
 
 /**

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
+import type { IRange } from '../../sheets/typedef';
 import { Range } from '../../sheets/range';
 import { AbsoluteRefType } from '../../sheets/typedef';
 import { ObjectMatrix } from '../object-matrix';
@@ -99,6 +99,19 @@ describe('test "Rectangle"', () => {
             { startRow: 2, startColumn: 1, endRow: 2, endColumn: 1 },
             { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 },
         ]);
+    });
+
+    it('detects shared cells between range lists in either order', () => {
+        const area = { startColumn: 2, endColumn: 4, startRow: 6, endRow: 8 };
+        const corner = cellToRange(8, 4);
+        const adjacent = cellToRange(8, 5);
+        const distant = cellToRange(20, 20);
+        expect(Rectangle.doAnyRangesIntersect([], [area])).toBe(false);
+        expect(Rectangle.doAnyRangesIntersect([area], [])).toBe(false);
+        expect(Rectangle.doAnyRangesIntersect([area], [adjacent, corner])).toBe(true);
+        expect(Rectangle.doAnyRangesIntersect([adjacent, corner], [area])).toBe(true);
+        expect(Rectangle.doAnyRangesIntersect([area, distant], [adjacent, corner])).toBe(true);
+        expect(Rectangle.doAnyRangesIntersect([area, distant], [adjacent, cellToRange(9, 4)])).toBe(false);
     });
 
     it('test getRelativeRange', () => {

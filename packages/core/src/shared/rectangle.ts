@@ -187,9 +187,18 @@ export class Rectangle {
      * ```
      */
     static doAnyRangesIntersect(src: IRange[], target: IRange[]): boolean {
+        if (!src.length || !target.length) {
+            return false;
+        }
+        if (target.length === 1) {
+            return src.some((range) => Rectangle.simpleRangesIntersect(range, target[0]));
+        }
+        if (src.length === 1) {
+            return target.some((range) => Rectangle.simpleRangesIntersect(src[0], range));
+        }
         const rbush = new RBush<IBoundingBox>();
         rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));
-        return target.some((r) => rbush.search({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }).length > 0);
+        return target.some((r) => rbush.collides({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }));
     }
 
     /**

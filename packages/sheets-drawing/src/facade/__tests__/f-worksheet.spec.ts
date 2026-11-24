@@ -78,8 +78,8 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 
     it('groups drawings and exposes parent and child relationships', () => {
         const drawings = [
-            createDrawing('drawing-1', 10),
-            createDrawing('drawing-2', 80),
+            { ...createDrawing('drawing-1', 350), transform: { left: 350, top: 320, width: 40, height: 30 } },
+            { ...createDrawing('drawing-2', 470), transform: { left: 470, top: 350, width: 40, height: 30 } },
         ];
         const commandService = injector.get(ICommandService);
         const sheetDrawingService = injector.get(ISheetDrawingService);
@@ -91,6 +91,10 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         const groupDrawing = sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'group-1' });
 
         expect(groupId).toBe('group-1');
+        expect(groupDrawing?.axisAlignSheetTransform).toEqual({
+            from: { row: 12, rowOffset: 12, column: 3, columnOffset: 40 },
+            to: { row: 15, rowOffset: 0, column: 5, columnOffset: 24 },
+        });
         expect(groupDrawing?.drawingType).toBe(DrawingTypeEnum.DRAWING_GROUP);
         expect(Object.prototype.hasOwnProperty.call(groupDrawing?.transform ?? {}, 'rotateEnabled')).toBe(false);
         expect(fWorksheet.isDrawingGrouped('drawing-1')).toBe(true);

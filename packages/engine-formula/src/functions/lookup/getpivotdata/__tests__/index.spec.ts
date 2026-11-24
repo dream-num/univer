@@ -206,6 +206,48 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('Quarter', 'Q2', 'Category', 'West', 'Year', '2026')).toBe(10);
             expect(lookup('Year', '2025', 'Quarter', 'Q2')).toBe(7);
             expect(lookup('Year', '2026', 'Quarter', 'Q3')).toBe(ErrorType.REF);
+            expect(lookup('Year', 'Column Labels', 'Quarter', '2025')).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('matches column fields and the requested measure in the same column', () => {
+        const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 6 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Category', 'Country', 'Channel'],
+                        columnFields: ['Country', 'Channel'],
+                        dataFields: [
+                            { sourceName: 'Sales', displayName: 'Sum of Sales' },
+                            { sourceName: 'Orders', displayName: 'Count of Country' },
+                        ],
+                        layout: { firstDataRow: 4 },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = [
+                ['', 'Column Labels'],
+                ['', 'CA', '', 'US', '', 'Total Sum of Sales', 'Total Count of Country'],
+                ['', 'Retail', '', 'Retail'],
+                ['Row Labels', 'Sum of Sales', 'Count of Country', 'Sum of Sales', 'Count of Country'],
+                ['West', 20, 1, 100, 1, 120, 2],
+                ['Grand Total', 20, 1, 100, 1, 120, 2],
+            ];
+            const cells = grid.flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, c, typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
+            expect(lookup('Sales', 'Country', 'US', 'Channel', 'Retail')).toBe(100);
+            expect(lookup('Count of Country', 'Channel', 'Retail', 'Country', 'US')).toBe(1);
+            expect(lookup('Sales', 'Country', 'Column Labels', 'Channel', 'US')).toBe(ErrorType.REF);
         } finally {
             bed.univer.dispose();
         }

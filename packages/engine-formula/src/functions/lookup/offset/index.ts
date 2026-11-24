@@ -33,6 +33,10 @@ export class Offset extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {
+        return argumentIndex === 0;
+    }
+
     override isAddress() {
         return true;
     }

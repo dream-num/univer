@@ -249,8 +249,11 @@ function visiblePivotGet(
             ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs, firstDataRow)
             : null;
         const matchedColumn = columnItems
-            ? findPivotColumnByHeaderItems(reader, headerRow, dataColumn, maxRow, maxColumn, columnItems, firstDataRow)
+            ? findPivotColumnByHeaderItems(reader, anchorRange, headerRow, dataColumn, dataField, columnItems, firstDataRow)
             : columnMatch?.column;
+        if (columnItems && matchedColumn == null) {
+            continue;
+        }
         const needsTotalColumn = Boolean(report?.columnFields.length && !columnPairs.length);
         const totalColumn = needsTotalColumn
             ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, [['', grandTotalLabel]], firstDataRow)?.column
@@ -284,34 +287,41 @@ function visiblePivotGet(
 
 function findPivotColumnByHeaderItems(
     reader: IPivotCellReader,
+    range: IRange,
     headerRow: number,
     dataColumn: number,
-    maxRow: number,
-    maxColumn: number,
+    dataField: string,
     items: readonly string[],
     dataStartRow?: number
 ): number | undefined {
-    const firstDataRow = dataStartRow ?? findFirstPivotDataRow(reader, headerRow + items.length, dataColumn, maxRow, maxColumn);
+    const { startRow, startColumn, endRow, endColumn } = range;
+    const hasMeasureRow = dataColumn > startColumn;
+    const firstDataRow = dataStartRow ?? findFirstPivotDataRow(
+        reader,
+        hasMeasureRow ? headerRow : headerRow + items.length,
+        dataColumn,
+        endRow,
+        endColumn
+    );
     if (firstDataRow == null) return;
-    const lastHeaderRow = Math.min(maxRow, firstDataRow - 1);
+    const lastItemRow = (hasMeasureRow ? headerRow : firstDataRow) - 1;
+    const firstItemRow = lastItemRow - items.length + 1;
+    if (firstItemRow < startRow || lastItemRow >= firstDataRow) return;
+
     const labels: string[] = [];
-    for (let column = dataColumn + 1; column <= maxColumn; column++) {
+    for (let column = startColumn + 1; column <= endColumn; column++) {
         let parentChanged = false;
-        let matched = 0;
-        for (let row = headerRow; row <= lastHeaderRow; row++) {
-            const level = row - headerRow;
-            const label = reader.text(row, column).trim();
+        for (let level = 0; level < items.length; level++) {
+            const label = reader.text(firstItemRow + level, column).trim();
             // A merged parent caption carries over to the next column in its group.
             if (parentChanged || (label !== '' && !samePivotText(labels[level] ?? '', label))) {
                 labels[level] = label;
                 parentChanged = true;
             }
-            if (samePivotText(labels[level] ?? '', items[matched])) {
-                matched++;
-                if (matched === items.length) {
-                    return column;
-                }
-            }
+        }
+        if (items.every((item, level) => samePivotText(labels[level] ?? '', item)) &&
+            (!hasMeasureRow || samePivotDataField(reader.text(headerRow, column), dataField))) {
+            return column;
         }
     }
 }

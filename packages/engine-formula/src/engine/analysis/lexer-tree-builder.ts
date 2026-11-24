@@ -717,7 +717,7 @@ export class LexerTreeBuilder extends Disposable {
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
         const sequenceArray: ISequenceArray[] = [];
 
-        let state = this._nodeMaker(formulaString, sequenceArray, undefined, transformSuffix);
+        let state = this._nodeMaker(formulaString, sequenceArray, undefined, transformSuffix, injectDefinedNameParam);
 
         if (state === ErrorType.VALUE || sequenceArray.length === 0) {
             return state;
@@ -939,7 +939,7 @@ export class LexerTreeBuilder extends Disposable {
             : this._moveDefinedNameRefOffset(definedContent.formulaOrRefString, refOffsetX, param.refOffsetY);
         const sequenceArray: ISequenceArray[] = [];
 
-        const state = this._nodeMaker(refString, sequenceArray);
+        const state = this._nodeMaker(refString, sequenceArray, undefined, false, param);
 
         if (state === ErrorType.VALUE || sequenceArray.length === 0) {
             return state as string;
@@ -1231,7 +1231,7 @@ export class LexerTreeBuilder extends Disposable {
         return true;
     }
 
-    private _isReferenceIntersection(formula: string, current: number): boolean {
+    private _isReferenceIntersection(formula: string, current: number, names?: IInjectDefinedNameParam): boolean {
         let operand = formula.slice(current + 1).trimStart();
         const grouped = operand.startsWith(matchToken.OPEN_BRACKET);
         while (operand.startsWith(matchToken.OPEN_BRACKET)) {
@@ -1244,7 +1244,15 @@ export class LexerTreeBuilder extends Disposable {
         const left = this._segment.trim();
         if (left !== '') {
             if (grouped && !this.isColonOpen()) {
-                return isReferenceStringWithEffectiveColumn(left);
+                if (isReferenceStringWithEffectiveColumn(left)) {
+                    return true;
+                }
+                if (names?.unitId == null || names.hasFunction(left.toUpperCase())) {
+                    return false;
+                }
+                const identifier = this._getHasSheetNameDefinedName(left, names.unitId, names);
+                const definition = names.getValueByName(names.unitId, identifier, names.sheetId);
+                return definition != null && isReferenceStringWithEffectiveColumn(definition.formulaOrRefString.replace(/^=/, ''));
             }
             return /(?:^|!)\$?[\p{L}_][\p{L}\d_.$]*$/u.test(left) || (this.isColonOpen() && /^\$?\d+$/u.test(left));
         }
@@ -1671,7 +1679,13 @@ export class LexerTreeBuilder extends Disposable {
     // NOTE@wzhudev: this method is over complex, need to refactor. Using recursive descend to parse the formula string
     // without a standalone lexer phase
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number, parseUnaryMinus = false) {
+    private _nodeMaker(
+        formulaStringRaw: string,
+        sequenceArray?: ISequenceArray[],
+        matchCurrentNodeIndex?: number,
+        parseUnaryMinus = false,
+        definedNames?: IInjectDefinedNameParam
+    ) {
         // Editor may add a line break at the end of the formula string.
         // Keep internal line breaks because Excel table column names can contain them.
         let formulaString = formulaStringRaw.replace(/(?:\r\n|\r|\n)$/g, ' ');
@@ -2099,7 +2113,7 @@ export class LexerTreeBuilder extends Disposable {
                 this.isDoubleQuotationClose() &&
                 this.isSquareBracketClose() &&
                 this.isBracesClose() &&
-                this._isReferenceIntersection(formulaString, cur)
+                this._isReferenceIntersection(formulaString, cur, definedNames)
             ) {
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();

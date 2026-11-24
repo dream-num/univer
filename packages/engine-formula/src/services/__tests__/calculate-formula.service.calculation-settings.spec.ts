@@ -435,8 +435,22 @@ describe('Persisted calculation settings', () => {
             ['=SUM(A1:INDEX(SWITCH(1,1,A2:A4),2))', 6, 6],
             ['=SUM(A1:INDEX(IFS(TRUE,(A2:A4,B2:B4)),2,1,1))', 6, 6],
             ['=SUM (A1:A4)', 10, 10],
+            ['=SUM(MyRange (A2:A3))', 5, 5],
+            ['=SUM(A1:OFFSET(IFS(TRUE,A2),1,0))', 6, 6],
+            ['=SUM(A1:OFFSET(SWITCH(1,1,A2),1,0))', 6, 6],
+            ['=SUM(IFS(TRUE,A1:A4) A2:A3)', 5, 5],
+            ['=SUM(A2:A3 IFS(TRUE,A1:A4))', 5, 5],
+            ['=SUM(SWITCH(1,1,A1:A4) A2:A3)', 5, 5],
+            ['=SUM(A2:A3 SWITCH(1,1,A1:A4))', 5, 5],
+            ['=SUM(IFS(D1=1,A1:A4,TRUE,A3:A4) A2:A3)', 5, 3],
+            ['=SUM(A2:A3 SWITCH(D1,1,A1:A4,A3:A4))', 5, 3],
         ] as const;
         try {
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'grouped-range',
+                name: 'MyRange',
+                formulaOrRefString: '=Sheet1!$A$1:$A$4',
+            });
             cells.reset();
             for (let row = 0; row < 4; row++) {
                 cells.setValue(row, 0, { v: row + 1 });
@@ -515,6 +529,8 @@ describe('Persisted calculation settings', () => {
                 ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(336)-1,168),SEQUENCE(336))', 0],
                 ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(419)-1,168),SEQUENCE(419))', 0],
                 ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(420)-1,168),SEQUENCE(420))', 168],
+                ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,168),45000+h/24))', 168],
+                ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,168)/24),h+1))', 168],
                 ['=FORECAST.ETS.SEASONALITY(SEQUENCE(672),SEQUENCE(672))', 0],
             ] as const;
             const result = await calculate(bed, { 0: Object.fromEntries(cases.map(([f], index) => [index + 9, { f }])) }, false);

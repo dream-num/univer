@@ -17,7 +17,8 @@
 import { normalINV } from './statistical';
 
 export const MAX_ETS_PERIOD = 8760;
-const SHORT_PERIOD_LIMIT = 64;
+const DIRECT_LAG_LIMIT = 64;
+const CORRELATION_TOLERANCE = 1e-9;
 
 // Additive error, trend, and seasonality. Candidate order breaks equal-loss ties.
 type Weights = readonly [number, number, number];
@@ -126,25 +127,88 @@ export function detectEtsPeriod(values: readonly number[]): number {
     if (changes.every((change) => change === 0)) return 0;
     // Automatic detection needs observations beyond the first two repeated periods.
     const maxLag = Math.min(Math.floor(values.length * 2 / 5), MAX_ETS_PERIOD);
-    const shortPeriod = findLagPeak(changes, 2, Math.min(maxLag, SHORT_PERIOD_LIMIT));
-    if (shortPeriod || maxLag <= SHORT_PERIOD_LIMIT) return shortPeriod;
-
-    // Keep lookups for long periods bounded on very large timelines.
-    const searchWindow = changes.length > 4 * MAX_ETS_PERIOD ? changes.slice(-4 * MAX_ETS_PERIOD) : changes;
-    return findLagPeak(searchWindow, SHORT_PERIOD_LIMIT + 1, maxLag);
+    // Keep the transform bounded on very large timelines.
+    const window = changes.length > 4 * MAX_ETS_PERIOD ? changes.slice(-4 * MAX_ETS_PERIOD) : changes;
+    const correlations = maxLag <= DIRECT_LAG_LIMIT
+        ? Array.from({ length: maxLag + 2 }, (_, lag) => lagCorrelation(window, lag))
+        : etsLagCorrelations(window, maxLag + 1);
+    return findLagPeak(correlations, maxLag);
 }
 
-function findLagPeak(changes: readonly number[], firstLag: number, lastLag: number): number {
-    let previous = lagCorrelation(changes, firstLag - 1);
-    let current = lagCorrelation(changes, firstLag);
-    if (firstLag === 2 && previous < -0.25 && current > 0.09) return 2;
-    for (let lag = firstLag; lag <= lastLag; lag++) {
-        const next = lagCorrelation(changes, lag + 1);
-        if (current >= 0.65 && current > previous && current >= next) return lag;
-        previous = current;
-        current = next;
+function findLagPeak(correlations: ArrayLike<number>, maxLag: number): number {
+    let period = correlations[1] < -0.25 && correlations[2] > 0.09 ? 2 : 0;
+    for (let lag = 2; period === 0 && lag <= maxLag; lag++) {
+        const score = correlations[lag];
+        if (score >= 0.65 && score > correlations[lag - 1] && score >= correlations[lag + 1]) {
+            period = lag;
+        }
     }
-    return 0;
+    if (period > 0 && correlations[period] < 1 - CORRELATION_TOLERANCE) {
+        // A shorter peak may describe a recurring shape whose offsets repeat on a longer cycle.
+        for (let lag = Math.max(period, DIRECT_LAG_LIMIT) + 1; lag <= maxLag; lag++) {
+            if (correlations[lag] >= 1 - CORRELATION_TOLERANCE) return lag;
+        }
+    }
+    return period;
+}
+
+function etsLagCorrelations(changes: readonly number[], maxLag: number): Float64Array {
+    const n = changes.length;
+    const length = 2 ** Math.ceil(Math.log2(n + maxLag));
+    const real = new Float64Array(length);
+    const imaginary = new Float64Array(length);
+    const energy = new Float64Array(n + 1);
+    real.set(changes);
+    for (let i = 0; i < n; i++) {
+        energy[i + 1] = energy[i] + changes[i] * changes[i];
+    }
+    // Transform the squared spectrum to get every lag's dot product in one pass.
+    transform(real, imaginary);
+    for (let i = 0; i < length; i++) {
+        real[i] = real[i] ** 2 + imaginary[i] ** 2;
+        imaginary[i] = 0;
+    }
+    transform(real, imaginary);
+
+    const correlations = new Float64Array(maxLag + 1);
+    for (let lag = 1; lag <= maxLag; lag++) {
+        const norm = Math.sqrt(energy[n - lag] * (energy[n] - energy[lag]));
+        if (norm > 0) correlations[lag] = real[lag] / (length * norm);
+    }
+    return correlations;
+}
+
+// In-place radix-2 FFT. The power spectrum is real and symmetric, so the forward
+// transform of it gives the same real values as the inverse before normalization.
+function transform(real: Float64Array, imaginary: Float64Array): void {
+    const length = real.length;
+    for (let i = 1, reversed = 0; i < length; i++) {
+        let bit = length >> 1;
+        while (reversed & bit) {
+            reversed ^= bit;
+            bit >>= 1;
+        }
+        reversed ^= bit;
+        if (i < reversed) [real[i], real[reversed]] = [real[reversed], real[i]];
+    }
+
+    for (let span = 2; span <= length; span *= 2) {
+        const half = span / 2;
+        const angle = -2 * Math.PI / span;
+        for (let offset = 0; offset < half; offset++) {
+            const cosine = Math.cos(angle * offset);
+            const sine = Math.sin(angle * offset);
+            for (let left = offset; left < length; left += span) {
+                const right = left + half;
+                const re = cosine * real[right] - sine * imaginary[right];
+                const im = sine * real[right] + cosine * imaginary[right];
+                real[right] = real[left] - re;
+                imaginary[right] = imaginary[left] - im;
+                real[left] += re;
+                imaginary[left] += im;
+            }
+        }
+    }
 }
 
 interface IState {

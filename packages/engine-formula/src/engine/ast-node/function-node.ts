@@ -31,7 +31,7 @@ import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
-import { matchToken } from '../../basics/token';
+import { matchToken, operatorToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
 import { If } from '../../functions/logical/if';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -229,7 +229,7 @@ export class FunctionNode extends BaseAstNode {
             child = parent;
             parent = child.getParent();
         }
-        if (parent?.nodeType !== NodeType.UNION) {
+        if (parent?.nodeType !== NodeType.UNION && parent?.getToken() !== operatorToken.INTERSECTION) {
             return;
         }
         const variants: FunctionVariantType[] = [];

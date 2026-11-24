@@ -217,25 +217,43 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
     const sorted = [...groups.keys()].sort((a, b) => a - b);
     if (sorted.length < 2) return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
 
-    const steps = new Map<number, number>();
-    for (let i = 1; i < sorted.length; i++) {
-        const step = sorted[i] - sorted[i - 1];
-        steps.set(step, (steps.get(step) ?? 0) + 1);
-    }
-    let step = Infinity;
-    let frequency = 0;
-    for (const [distance, count] of steps) {
-        if (count > frequency || (count === frequency && distance < step)) {
-            frequency = count;
-            step = distance;
-        }
-    }
-    if (!Number.isFinite(step) || step <= 0) return ErrorValueObject.create(ErrorType.NUM);
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
+    const step = findTimelineStep(sorted, timestampTolerance(first, last));
+    if (!Number.isFinite(step) || step <= 0) return ErrorValueObject.create(ErrorType.NUM);
     const monthly = step >= 28 && step <= 31 && first >= 61 && last <= MAX_DATE_SERIAL
         && sorted.every((time, index) => shiftMonth(first, index, dateSystem) === time);
     return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthly };
+}
+
+function timestampTolerance(first: number, last: number): number {
+    return 4 * Number.EPSILON * Math.max(Math.abs(first), Math.abs(last), 1);
+}
+
+function findTimelineStep(sorted: readonly number[], tolerance: number): number {
+    const steps = new Map<number, number>();
+    for (let i = 1; i < sorted.length; i++) {
+        const distance = sorted[i] - sorted[i - 1];
+        steps.set(distance, (steps.get(distance) ?? 0) + 1);
+    }
+    let step = Infinity;
+    let frequency = 0;
+    let sum = 0;
+    let count = 0;
+    for (const [distance, occurrences] of [...steps].sort(([left], [right]) => left - right)) {
+        const mean = sum / count;
+        if (count > 0 && distance - mean > Math.min(tolerance, mean * 1e-6)) {
+            if (count > frequency) {
+                step = mean;
+                frequency = count;
+            }
+            sum = 0;
+            count = 0;
+        }
+        sum += distance * occurrences;
+        count += occurrences;
+    }
+    return count > frequency ? sum / count : step;
 }
 
 function fillTimeline(history: ITimeline, complete: boolean, aggregation: number): ISeries | ErrorType {
@@ -253,13 +271,14 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
     }
     let irregular = false;
     const { step, monthly } = history;
+    const tolerance = Math.max(1e-9, Math.min(1e-6, timestampTolerance(first, last) / step));
     if (!monthly) {
         const phases = new Map<number, { anchor: number; count: number }>();
         for (const time of groups.keys()) {
             const position = (time - first) / step;
             if (!Number.isFinite(position) || position >= MAX_POINTS) return ErrorType.NUM;
             const fraction = position - Math.round(position);
-            irregular ||= Math.abs(fraction) > 1e-9;
+            irregular ||= Math.abs(fraction) > tolerance;
             const key = Math.round(fraction * 1e8);
             phases.set(key, { anchor: phases.get(key)?.anchor ?? time, count: (phases.get(key)?.count ?? 0) + 1 });
         }
@@ -289,7 +308,7 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
     for (const [time, samples] of groups) {
         const position = monthly ? index++ : (time - first) / step;
         const rounded = Math.round(position);
-        if (Math.abs(position - rounded) > 1e-9) return ErrorType.NUM;
+        if (Math.abs(position - rounded) > tolerance) return ErrorType.NUM;
         values[rounded] = aggregate(samples.length === 0 && !complete ? [0] : samples, aggregation);
     }
     if (Number.isNaN(values[0]) || Number.isNaN(values[size - 1])) return ErrorType.NUM;

@@ -65,6 +65,17 @@ describe('parseToDom', () => {
 
         expect([...dom.querySelectorAll('td')].map((td) => td.textContent)).toEqual(['North East', 'South West']);
     });
+
+    it('strips HTML formatting indentation immediately following a <br> tag', () => {
+        const dom = parseToDom('<table><tbody><tr><td>line1<br>\r\n  line2</td></tr></tbody></table>');
+        const td = dom.querySelector('td')!;
+
+        expect([...td.childNodes].map((node) => (node.nodeType === Node.TEXT_NODE ? node.textContent : '<br>'))).toEqual([
+            'line1',
+            '<br>',
+            'line2',
+        ]);
+    });
 });
 
 describe('extractNodeStyle', () => {

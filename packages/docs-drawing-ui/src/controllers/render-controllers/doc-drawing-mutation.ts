@@ -32,7 +32,7 @@ export function getDocMutationAffectedDrawingIds(actions: JSONXActions): DocMuta
     let sawComponent = false;
     let needsFullRefresh = false;
     try {
-        const cursor = JSON1.type.readCursor(actions);
+        const cursor = JSON1.readCursor(actions);
         cursor.traverse(null, () => {
             sawComponent = true;
             const path = cursor.getPath();

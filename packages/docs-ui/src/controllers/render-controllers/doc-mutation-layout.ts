@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocStyles, IDocumentBody, IDocumentData, JSONXActions } from '@univerjs/core';
+import type { IDocStyles, IDocumentBody, IDocumentData, IJSON1Component, JSONXActions } from '@univerjs/core';
 import type { IDocumentLayoutInvalidation } from '@univerjs/engine-render';
 import { CustomRangeType, JSON1, resolveDocumentParagraphBullet, TextX } from '@univerjs/core';
 
@@ -152,7 +152,7 @@ export function getBodyTextXActions(actions: JSONXActions, segmentId?: string): 
     let result: unknown[] | undefined;
     let duplicate = false;
     try {
-        const cursor = JSON1.type.readCursor(actions);
+        const cursor = JSON1.readCursor(actions);
         cursor.traverse(null, (component) => {
             const path = cursor.getPath();
             if (
@@ -198,7 +198,7 @@ export function getDocumentMutationLayoutImpact(
     const { body, styles } = snapshot;
     const index = new DocumentMutationLayoutIndex(body, styles);
     try {
-        const cursor = JSON1.type.readCursor(actions);
+        const cursor = JSON1.readCursor(actions);
         cursor.traverse(null, (component) => {
             sawComponent = true;
             const impact = getComponentLayoutImpact(cursor.getPath(), component, body, index);
@@ -215,7 +215,7 @@ export function getDocumentMutationLayoutImpact(
 
 function getComponentLayoutImpact(
     path: (string | number)[],
-    component: Record<string, unknown>,
+    component: IJSON1Component,
     body: IDocumentBody | undefined,
     index: DocumentMutationLayoutIndex
 ): IDocumentMutationLayoutImpact {
@@ -264,7 +264,7 @@ function getComponentLayoutImpact(
 
 function getBodyComponentLayoutImpact(
     path: (string | number)[],
-    component: Record<string, unknown>,
+    component: IJSON1Component,
     body: IDocumentBody | undefined
 ): IDocumentMutationLayoutImpact {
     if (path.length === 1 && component.et === TextX.name && Array.isArray(component.e)) {
@@ -322,7 +322,7 @@ export function resolveMutationLayoutRequest(
 function getBodyCollectionRange(
     body: IDocumentBody,
     path: (string | number)[],
-    component: Record<string, unknown>
+    component: IJSON1Component
 ): IDocumentLayoutRange | undefined {
     const collection = path[1];
     if (typeof collection !== 'string' || !BODY_RANGE_COLLECTIONS.has(collection as keyof IDocumentBody)) {
@@ -385,7 +385,7 @@ function getBodyItemRange(item: unknown, collection: keyof IDocumentBody): IDocu
 
 function getChangedRecordKeys(
     path: (string | number)[],
-    component: Record<string, unknown>
+    component: IJSON1Component
 ): Set<string> {
     const keys = new Set<string>();
     if (typeof path[1] === 'string') {

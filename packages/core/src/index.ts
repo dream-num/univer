@@ -72,6 +72,8 @@ export type { IResolveDocumentParagraphStyleOptions } from './docs/data-model/pa
 export { getSdtBindingKey, getSdtBindingValue } from './docs/sdt-binding';
 export { EventState, EventSubject, fromEventSubject } from './observer/observable';
 export type { IEventObserver } from './observer/observable';
+export { JSON1 } from './ot/json1/json1';
+export type { IJSON1Component, IJSON1WriteCursor, JSON1Document, JSONXActions, JSONXPath } from './ot/json1/json1';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export {

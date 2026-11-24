@@ -17,7 +17,6 @@
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
 import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { DrawingManagerService, UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
@@ -239,8 +238,8 @@ describe('UnitDrawingService', () => {
             throw new Error('Expected both drawing updates to produce JSON1 operations');
         }
 
-        const textPrime = JSON1.type.transform(textOp, nameOp, 'left');
-        const namePrime = JSON1.type.transform(nameOp, textOp, 'right');
+        const textPrime = JSON1.transform(textOp, nameOp, 'left');
+        const namePrime = JSON1.transform(nameOp, textOp, 'right');
         if (!textPrime || !namePrime) {
             throw new Error('Expected concurrent drawing operations to transform');
         }

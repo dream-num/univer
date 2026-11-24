@@ -139,7 +139,7 @@ function pathsEqual(left: JSONXPath, right: JSONXPath): boolean {
 }
 
 function isStructurePreservingJSONXEdit(actions: JSONXActions, expectedPath: JSONXPath): boolean {
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     let hasComponent = false;
     let isStructurePreserving = true;
 
@@ -196,7 +196,7 @@ function getSnapshotBody(snapshot: IDocumentData, segmentId: string): IDocumentB
 }
 
 function containsTextXEdit(actions: JSONXActions): boolean {
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     let found = false;
     cursor.traverse(null, (component) => {
         if (component.et === TextX.id) found = true;
@@ -393,7 +393,7 @@ export function validateDocStructureMutation(
         isStructurePreservingJSONXEdit(undoActions, editPath);
 
     let changesFootnoteStructure = false;
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     cursor.traverse(null, (component) => {
         const path = cursor.getPath();
         if ((path[0] === 'notes' && (path.length <= 2 || path[2] !== 'body')) || path.includes('customRanges')) {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { JSONXActions } from '../../../../ot/json1/json1';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { IDocumentBody, IDocumentData, IDrawingParam } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
-import type { JSONXActions } from '../../json-x/json-x';
 import { createParagraphId } from '../../../paragraph-id';
 import { JSONX } from '../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../types';

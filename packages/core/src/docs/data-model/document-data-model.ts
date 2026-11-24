@@ -15,6 +15,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { JSONXActions } from '../../ot/json1/json1';
 import type { Nullable } from '../../shared';
 import type { ITextRangeParam } from '../../sheets/typedef';
 import type { LocaleType } from '../../types/enum';
@@ -27,16 +28,16 @@ import type {
     IListData,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
-import type { JSONXActions } from './json-x/json-x';
 import { isInternalEditorID } from '../../common/const';
 import { mergeWith } from '../../common/lodash';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
+import { JSON1 } from '../../ot/json1/json1';
 import { generateRandomId } from '../../shared/random-id';
 import { Tools } from '../../shared/tools';
 import { createSectionId } from '../section-break-id';
 import { calculateDocumentStatistics } from './document-statistics';
 import { getEmptySnapshot } from './empty-snapshot';
-import { JSON1, JSONX } from './json-x/json-x';
+import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
 import { getPlainText } from './text-x/build-utils/parse';
 import { getBodySlice, SliceBodyType } from './text-x/utils';
@@ -434,7 +435,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         const previousNotes = this.snapshot.notes;
         const changedNotes = new Set<string>();
         let changedInheritedNoteStyles = false;
-        const cursor = JSON1.type.readCursor(actions);
+        const cursor = JSON1.readCursor(actions);
         cursor.traverse(null, () => {
             const path = cursor.getPath();
             if (path[0] === 'notes' && typeof path[1] === 'string') {

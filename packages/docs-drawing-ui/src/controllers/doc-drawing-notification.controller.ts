@@ -63,7 +63,7 @@ function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDra
         return null;
     }
     const drawings: IAddOrRemoveDrawing[] = [];
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     cursor.traverse(null, () => {
         const path = cursor.getPath();
         if (path.length !== 2 || path[0] !== 'drawings' || typeof path[1] !== 'string') {
@@ -209,7 +209,7 @@ export class DocDrawingAddRemoveController extends Disposable {
                 const { unitId, actions } = params;
                 let changedNotes = false;
                 if (!JSONX.isNoop(actions)) {
-                    const cursor = JSON1.type.readCursor(actions);
+                    const cursor = JSON1.readCursor(actions);
                     cursor.traverse(null, () => {
                         changedNotes ||= cursor.getPath()[0] === 'notes';
                     });

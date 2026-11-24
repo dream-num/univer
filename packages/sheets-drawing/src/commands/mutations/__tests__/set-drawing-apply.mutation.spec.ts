@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IWorkbookData, JSON1Document } from '@univerjs/core';
 import { DrawingTypeEnum, ImageSourceType, IResourceLoaderService, JSON1, RedoCommand, Tools, UndoCommand } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
@@ -63,7 +63,7 @@ it.each([
     const params = {
         unitId,
         subUnitId,
-        op: JSON1.type.compose(legacyEdit, canonicalEdit),
+        op: JSON1.compose(legacyEdit, canonicalEdit),
         objects: [image, other],
         type: DrawingApplyType.UPDATE,
     };
@@ -75,8 +75,8 @@ it.each([
         const draft = { ...image, drawingId: legacyId, sheetTransform: legacy };
         const insert = {
             ...params,
-            op: JSON1.type.compose(
-                JSON1.insertOp([unitId, subUnitId, 'data', legacyId], draft as unknown as JSON1.Doc),
+            op: JSON1.compose(
+                JSON1.insertOp([unitId, subUnitId, 'data', legacyId], draft as unknown as JSON1Document),
                 JSON1.insertOp([unitId, subUnitId, 'order', 2], legacyId)
             ),
             objects: [draft],

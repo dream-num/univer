@@ -199,7 +199,7 @@ export function getDocumentEditTargetObjectIdsFromActions(
     if (actions == null) {
         return [];
     }
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     cursor.traverse(null, () => {
         const path = cursor.getPath();
         const edit = cursor.getComponent();

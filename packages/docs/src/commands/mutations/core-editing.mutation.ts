@@ -138,7 +138,7 @@ export function transformDocumentTextRanges(
 
 function canRemoveFootnoteReference(actions: JSONXActions, references: ICustomRange[]): boolean {
     let canRemove = false;
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     cursor.traverse(null, (component) => {
         const path = cursor.getPath();
         if (path.length === 0) {

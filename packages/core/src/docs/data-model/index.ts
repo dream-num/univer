@@ -16,8 +16,7 @@
 
 export * from './document-data-model';
 export { getEmptySnapshot as getDocsEmptySnapshot } from './empty-snapshot';
-export { JSON1, JSONX } from './json-x/json-x';
-export type { JSONXActions, JSONXPath } from './json-x/json-x';
+export { JSONX } from './json-x/json-x';
 export * from './preset-list-type';
 export { replaceInDocumentBody } from './replacement';
 export {

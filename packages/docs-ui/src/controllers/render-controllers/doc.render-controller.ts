@@ -440,7 +440,7 @@ export function doesDocMutationRequireLayout(
     let drawingOnly = true;
 
     try {
-        const cursor = JSON1.type.readCursor(actions);
+        const cursor = JSON1.readCursor(actions);
         cursor.traverse(null, (component) => {
             sawComponent = true;
             const path = cursor.getPath();

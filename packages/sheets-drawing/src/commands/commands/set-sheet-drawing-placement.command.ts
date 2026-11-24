@@ -79,8 +79,8 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
                     const after = drawing.axisAlignSheetTransform?.[endpoint]?.[axis];
                     if (before === undefined || after === undefined) continue;
                     const path = [unitId, subUnitId, 'data', drawing.drawingId, 'axisAlignSheetTransform', endpoint, axis];
-                    redo = JSON1.type.compose(redo, JSON1.replaceOp(path, after, after));
-                    undo = JSON1.type.compose(undo, JSON1.replaceOp(path, before, before));
+                    redo = JSON1.compose(redo, JSON1.replaceOp(path, after, after));
+                    undo = JSON1.compose(undo, JSON1.replaceOp(path, before, before));
                 }
             }
         }

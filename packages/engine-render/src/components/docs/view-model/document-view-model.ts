@@ -97,7 +97,7 @@ const NON_STRUCTURAL_ROOT_FIELDS = new Set<string>([
 ]);
 
 function getNonStructuralMutationRootFields(actions: JSONXActions): Set<string> | null {
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     const rootFields = new Set<string>();
     let hasComponent = false;
     let isSupported = true;
@@ -209,7 +209,7 @@ function getDataStreamMutationEdits(
     actions: JSONXActions,
     expectedPath: JSONXPath
 ): IDataStreamMutationEdit[] | null {
-    const cursor = JSON1.type.readCursor(actions);
+    const cursor = JSON1.readCursor(actions);
     const edits: IDataStreamMutationEdit[] = [];
     let currentOffset = 0;
     let componentCount = 0;

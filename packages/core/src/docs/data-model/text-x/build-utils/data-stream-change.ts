@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody } from '../../../../types/interfaces';
+import { getTextChangeRange } from '../../../../shared/text-diff';
 
 export interface IDataStreamChange {
     start: number;
@@ -67,31 +68,7 @@ export function getSingleDataStreamChange(
         }
     }
 
-    let start = 0;
-    while (
-        start < previousDataStream.length &&
-        start < nextDataStream.length &&
-        previousDataStream[start] === nextDataStream[start]
-    ) {
-        start++;
-    }
-
-    let previousEnd = previousDataStream.length;
-    let nextEnd = nextDataStream.length;
-    while (
-        previousEnd > start &&
-        nextEnd > start &&
-        previousDataStream[previousEnd - 1] === nextDataStream[nextEnd - 1]
-    ) {
-        previousEnd--;
-        nextEnd--;
-    }
-
-    return {
-        start,
-        deleteLength: previousEnd - start,
-        insertLength: nextEnd - start,
-    };
+    return getTextChangeRange(previousDataStream, nextDataStream);
 }
 
 function findStructuralDeletion(

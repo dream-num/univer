@@ -74,7 +74,7 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_T
     } else if (type === BORDER_TYPE.BOTTOM) {
         drawStartX = startX - lineWidthBuffer;
         drawStartY = endY;
-        drawEndX = endX - lineWidthBuffer;
+        drawEndX = endX + lineWidthBuffer;
         drawEndY = endY;
     } else if (type === BORDER_TYPE.LEFT) {
         drawStartX = startX;

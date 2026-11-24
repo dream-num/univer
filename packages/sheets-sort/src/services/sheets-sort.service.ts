@@ -16,8 +16,6 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
-import type { ISortOption } from './interface';
 import {
     Disposable,
     ICommandService,
@@ -27,11 +25,20 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import type { ICellValueCompareFn, IRowComparator, IRowCompareFn } from '../commands/commands/sheets-sort.command';
+import type { ISortOption } from './interface';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
 
+type PrepareCompareFn = (rows: readonly IRowComparator[]) => IRowCompareFn;
+
+interface IRegisteredCompareFn {
+    compare: ICellValueCompareFn;
+    prepare?: PrepareCompareFn;
+}
+
 export class SheetsSortService extends Disposable {
-    private _compareFns: ICellValueCompareFn[] = [];
+    private readonly _compareFns: IRegisteredCompareFn[] = [];
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -93,12 +100,18 @@ export class SheetsSortService extends Disposable {
         return true;
     }
 
-    registerCompareFn(fn: ICellValueCompareFn) {
-        this._compareFns.unshift(fn);
+    registerCompareFn(compare: ICellValueCompareFn, prepare?: PrepareCompareFn) {
+        this._compareFns.unshift({ compare, prepare });
     }
 
     getAllCompareFns(): ICellValueCompareFn[] {
-        return this._compareFns;
+        return this._compareFns.map(({ compare }) => compare);
+    }
+
+    getRowCompareFns(rows: readonly IRowComparator[]): IRowCompareFn[] {
+        return this._compareFns.map(({ compare, prepare }) => {
+            return prepare ? prepare(rows) : (type, a, b, key) => compare(type, a.value[key], b.value[key]);
+        });
     }
 
     applySort(sortOption: ISortOption, unitId?: string, subUnitId?: string) {

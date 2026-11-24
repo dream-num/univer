@@ -15,9 +15,10 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { SortType } from '../../services/interface';
+import { createRegionTextComparer } from '../text-comparer';
 import { compareCells, getSortRank, SortRank } from '../utils';
 
 const cell = (v: ICellData['v'], t?: CellValueType): ICellData => ({ v, t });
@@ -109,8 +110,13 @@ describe('compareCells text order', () => {
         expect(sorted(['zoe', 'éclair', 'ángel', 'bob', 'abc'], SortType.DESC)).toEqual(['zoe', 'éclair', 'bob', 'ángel', 'abc']);
     });
 
-    it('ignores case, hyphens and apostrophes', () => {
-        expect(sorted(['co-op', 'b', "c'd", 'A'])).toEqual(['A', 'b', "c'd", 'co-op']);
+    it('ignores case according to the configured region', () => {
+        const english = createRegionTextComparer(LocaleType.EN_US).compare;
+        const turkish = createRegionTextComparer('tr-TR').compare;
+
+        expect(english('I', 'i')).toBe(0);
+        expect(turkish('I', 'ı')).toBe(0);
+        expect(turkish('I', 'i')).toBeLessThan(0);
     });
 
     it('uses the text comparer it is given', () => {

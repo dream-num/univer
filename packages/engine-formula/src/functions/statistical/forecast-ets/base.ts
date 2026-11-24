@@ -391,7 +391,7 @@ function targetPosition(target: number, first: number, history: ITimeline, dateS
     );
     let period = Math.floor(calendarMonthDistance(history.first, target, dateSystem) / monthStep);
     // The forecast axis keeps the calendar day even when it rolls into the following month.
-    if (target < anchor(period)) period--;
+    while (target < anchor(period)) period--;
     const start = calendarMonthDistance(history.first, first, dateSystem) / monthStep;
     const previous = anchor(period);
     return period - start + (target - previous) / (anchor(period + 1) - previous);

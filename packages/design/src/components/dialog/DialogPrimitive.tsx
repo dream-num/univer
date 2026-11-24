@@ -40,7 +40,7 @@ const DialogOverlay = forwardRef<
             `
               data-[state=open]:univer-animate-in data-[state=open]:univer-fade-in-0
               data-[state=closed]:univer-animate-out data-[state=closed]:univer-fade-out-0
-              univer-fixed univer-inset-0 univer-z-[1080] univer-bg-black/80
+              univer-fixed univer-inset-0 univer-z-[1080] univer-bg-[rgba(0,0,0,0.8)]
             `,
             className
         )}

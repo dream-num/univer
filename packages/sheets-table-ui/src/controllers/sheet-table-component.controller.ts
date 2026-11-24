@@ -101,6 +101,7 @@ export class SheetsTableComponentController extends Disposable {
         this._popupDisposable = this._sheetCanvasPopupService.attachPopupToCell(startRow, col, {
             componentKey: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
             direction: 'horizontal',
+            onAnchorDisposed: () => this.closeFilterPanel(),
             onClickOutside: () => {
                 this._dialogService.close(UNIVER_SHEET_TABLE_FILTER_PANEL_ID);
                 this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);

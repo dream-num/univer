@@ -16,6 +16,7 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type {
+    ICommandMutationGroup,
     IInsertColCommandParams,
     IInsertRowCommandParams,
     IInsertRowMutationParams,
@@ -225,24 +226,25 @@ export class SheetTableRefRangeController extends Disposable {
     }
 
     private _generateTableMutationWithRemoveRow(removeParams: IRemoveRowColCommandParams) {
-        const undos: IMutationInfo[] = [];
-        const redos: IMutationInfo[] = [];
-        const preRedos: IMutationInfo[] = [];
-        const preUndos: IMutationInfo[] = [];
+        const groups: ICommandMutationGroup[] = [];
 
-        const target = getSheetCommandTarget(this._univerInstanceService);
+        const target = getSheetCommandTarget(this._univerInstanceService, removeParams);
         if (!target) {
-            return { undos, redos, preRedos, preUndos };
+            return groups;
         }
         const { unitId, subUnitId } = target;
         const allSubUnitTables = this._tableManager.getTablesBySubunitId(unitId, subUnitId);
         if (!allSubUnitTables.length) {
-            return { undos, redos, preRedos, preUndos };
+            return groups;
         }
         const { range } = removeParams;
         const removeRowCount = range.endRow - range.startRow + 1;
 
         allSubUnitTables.forEach((table) => {
+            const undos: IMutationInfo[] = [];
+            const redos: IMutationInfo[] = [];
+            const preRedos: IMutationInfo[] = [];
+            const preUndos: IMutationInfo[] = [];
             const tableRange = table.getRange();
             if (Rectangle.intersects(tableRange, range)) {
                 if (range.startRow <= tableRange.startRow && range.endRow >= tableRange.startRow) {
@@ -316,9 +318,10 @@ export class SheetTableRefRangeController extends Disposable {
                     });
                 }
             }
+            groups.push({ undos, redos, preRedos, preUndos });
         });
 
-        return { undos, redos, preRedos, preUndos };
+        return groups;
     }
 
     private _generateTableMutationWithRemoveCol(removeParams: IRemoveRowColCommandParams) {

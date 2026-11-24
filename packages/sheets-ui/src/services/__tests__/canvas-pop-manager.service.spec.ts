@@ -99,6 +99,10 @@ class TestCanvasPopupService {
 class TestCommandService {
     private readonly _listeners: Array<(info: ICommandInfo) => void> = [];
 
+    disposed() {
+        return false;
+    }
+
     onCommandExecuted(listener: (info: ICommandInfo) => void) {
         this._listeners.push(listener);
         return {
@@ -137,6 +141,7 @@ class TestUniverInstanceService {
 
 class TestRenderManagerService {
     render: any;
+    readonly disposed$ = new Subject<string>();
 
     getRenderUnitById() {
         return this.render;
@@ -327,9 +332,20 @@ describe('SheetCanvasPopManagerService', () => {
         manager.addRender('right', { ...primary, renderId: 'right', engine: { ...primary.engine, getCanvasElement: () => rightCanvas } } as never);
         try {
             const service = injector.get(SheetCanvasPopManagerService);
-            const popup = service.attachPopupToCell(0, 0, { componentKey: 'filter-panel' }, 'unit-1', 'sheet-1', undefined, 'right');
+            let panelOpen = true;
+            const popup = service.attachPopupToCell(0, 0, {
+                componentKey: 'filter-panel',
+                onAnchorDisposed: () => { panelOpen = false; },
+            }, 'unit-1', 'sheet-1', undefined, 'right');
             expect(platform.popupService.lastPopup().canvasElement).toBe(rightCanvas);
+            const mainPopup = service.attachPopupToCell(0, 0, { componentKey: 'main-panel' }, 'unit-1', 'sheet-1');
+            manager.removeRender('right');
+            expect(platform.popupService.popups.size).toBe(1);
+            expect(platform.popupService.lastPopup().canvasElement).toBe(platform.canvas);
+            expect(panelOpen).toBe(false);
             popup?.dispose();
+            expect(platform.popupService.popups.size).toBe(1);
+            mainPopup?.dispose();
         } finally {
             univer.dispose();
         }

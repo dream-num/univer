@@ -77,6 +77,8 @@ import { ISheetSelectionRenderService } from './selection/base-selection-render.
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' | 'unitId' | 'subUnitId' | 'canvasElement'> {
+    /** Close owner UI state when the anchor's rendering pane is removed. */
+    onAnchorDisposed?: () => void;
     mask?: boolean;
     extraProps?: Record<string, unknown>;
     showOnSelectionMoving?: boolean;
@@ -437,7 +439,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             this._globalPopupManagerService.removePopup(id);
             gridObserver?.position$.complete();
         }));
-        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection, currentRender.renderId ?? unitId, popup);
 
         return {
             dispose: () => trackedDisposable.dispose(),
@@ -501,7 +503,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             //@ts-ignore
             worksheet = null;
         }));
-        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection, currentRender.renderId ?? unitId, popup);
 
         return {
             dispose: () => trackedDisposable.dispose(),
@@ -578,7 +580,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             this._globalPopupManagerService.removePopup(id);
             onDispose?.();
         }));
-        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection, currentRender.renderId ?? unitId, popup);
 
         return {
             dispose: () => trackedDisposable.dispose(),
@@ -659,7 +661,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
-        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection, currentRender.renderId ?? unitId, popup);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
                 trackedDisposable.dispose();
@@ -749,7 +751,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange = { ...range };
-        const trackedDisposable = this._trackPopupDisposable(disposableCollection);
+        const trackedDisposable = this._trackPopupDisposable(disposableCollection, currentRender.renderId ?? unitId, popup);
         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, watchedRange, (_, after) => {
             if (!after) {
                 trackedDisposable.dispose();
@@ -772,7 +774,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             : undefined;
     }
 
-    private _trackPopupDisposable(disposable: IDisposable): IDisposable {
+    private _trackPopupDisposable(disposable: DisposableCollection, renderId: string, popup: ICanvasPopup): IDisposable {
         let disposed = false;
         const trackedDisposables = this._popupDisposables;
         const trackedDisposable = {
@@ -788,6 +790,14 @@ export class SheetCanvasPopManagerService extends Disposable {
         };
 
         trackedDisposables.add(trackedDisposable);
+        disposable.add(this._renderManagerService.disposed$.subscribe((disposedRenderId) => {
+            if (disposedRenderId === renderId) {
+                trackedDisposable.dispose();
+                if (!this._commandService.disposed()) {
+                    popup.onAnchorDisposed?.();
+                }
+            }
+        }));
         return {
             dispose: () => trackedDisposable.dispose(),
         };

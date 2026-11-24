@@ -87,6 +87,37 @@ async function createTableTestBed(range: IRange) {
 
 describe('SheetTableRefRangeController', () => {
     it.each([
+        { row: 2, secondStart: 0, ends: [5, 5] },
+        { row: 0, secondStart: 0, ends: [undefined, undefined] },
+        { row: 1, secondStart: 1, ends: [5, undefined] },
+    ])('deletes a row crossing two tables and restores both tables on undo (%j)', async ({ row, secondStart, ends }) => {
+        const { commands, injector, worksheet } = await createTableTestBed({ startRow: 0, endRow: 6, startColumn: 1, endColumn: 2 });
+        expect(await commands.executeCommand(AddSheetTableCommand.id, {
+            unitId,
+            subUnitId,
+            id: 'second-table',
+            name: 'Second',
+            range: { startRow: secondStart, endRow: 6, startColumn: 4, endColumn: 5 },
+        })).toBe(true);
+        const read = () => ['table', 'second-table'].map((id) => injector.get(TableManager).getTable(unitId, id)?.toJSON());
+        const before = read();
+        const rowCount = worksheet!.getRowCount();
+        expect(await commands.executeCommand(RemoveRowCommand.id, {
+            unitId,
+            subUnitId,
+            range: { startRow: row, endRow: row, startColumn: 0, endColumn: 19 },
+        })).toBe(true);
+        const after = read();
+        expect(after.map((table) => table?.range.endRow)).toEqual(ends);
+        expect(worksheet!.getRowCount()).toBe(rowCount - 1);
+        expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+        expect(read()).toEqual(before);
+        expect(worksheet!.getRowCount()).toBe(rowCount);
+        expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+        expect(read()).toEqual(after);
+    });
+
+    it.each([
         { tableStart: 0, start: 1, end: 3, hidden: 2, expectedStart: 0, expectedEnd: 7 },
         { tableStart: 1, start: 0, end: 2, hidden: 1, expectedStart: 0, expectedEnd: 7 },
     ])('counts actual deleted rows and preserves a hidden header (%j)', async ({ tableStart, start, end, hidden, expectedStart, expectedEnd }) => {

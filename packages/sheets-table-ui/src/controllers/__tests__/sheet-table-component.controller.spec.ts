@@ -99,15 +99,19 @@ describe('SheetsTableComponentController', () => {
         controller.dispose();
     });
 
-    it('closes the filter dialog and context when clicking outside the popup', () => {
+    it.each(['onClickOutside', 'onAnchorDisposed'] as const)('closes the filter dialog and context on %s', (close) => {
         const { popupService, dialogService, contextService } = createController();
         const controller = injector.get(SheetsTableComponentController);
         const info = { unitId: 'unit-1', subUnitId: 'sheet-1', tableId: 'table-1', row: 2, column: 3 };
 
         controller.openOrToggleFilterPanel(info);
-        const popupCall = popupService.attachPopupToCell.mock.calls[0] as [number, number, { onClickOutside: () => void }];
+        const popupCall = popupService.attachPopupToCell.mock.calls[0] as [
+            number,
+            number,
+            { onClickOutside: () => void; onAnchorDisposed: () => void }
+        ];
         const popupOptions = popupCall[2];
-        popupOptions.onClickOutside();
+        popupOptions[close]();
 
         expect(dialogService.close).toHaveBeenCalledWith(UNIVER_SHEET_TABLE_FILTER_PANEL_ID);
         expect(contextService.setContextValue).toHaveBeenLastCalledWith(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);

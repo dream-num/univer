@@ -146,6 +146,7 @@ export class SheetsFilterUIDesktopController extends RxDisposable {
             componentKey: FILTER_PANEL_POPUP_KEY,
             direction: 'horizontal',
             onClickOutside: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
+            onAnchorDisposed: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
             offset: [5, 0],
         }, currentFilterModel.unitId, currentFilterModel.subUnitId, undefined, this._sheetsFilterPanelService.renderId);
     }

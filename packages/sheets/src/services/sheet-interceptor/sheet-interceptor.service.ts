@@ -62,6 +62,8 @@ export interface ICommandInterceptor {
 export interface ICommandMutationGroup extends IUndoRedoCommandInfosByInterceptor {
     /** Inverses for each step in [...preRedos, ...redos]. Required for multi-step delete/filter removal hooks. */
     rollbackMutations?: IMutationInfo[][];
+    /** Restore layout-dependent after-hook state once the command has restored the sheet structure. */
+    undoAfterBase?: boolean;
 }
 
 export interface IRangesInfo {

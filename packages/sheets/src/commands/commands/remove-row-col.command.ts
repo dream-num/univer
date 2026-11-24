@@ -221,6 +221,7 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             ].map((mutation, index) => ({
                 mutation,
                 undo: group.rollbackMutations?.[index] ?? [...(group.preUndos ?? []), ...group.undos],
+                undoAfterBase: group.undoAfterBase === true,
             })));
             const afterResult = unsafeAfterHook
                 ? { result: false, index: 0 }
@@ -228,10 +229,11 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             const completedAfter = afterResult.result ? afterSteps : afterSteps.slice(0, afterResult.index);
 
             undoMutations.unshift(
-                ...completedAfter.slice().reverse().flatMap((step) => step.undo),
+                ...completedAfter.slice().reverse().filter((step) => !step.undoAfterBase).flatMap((step) => step.undo),
                 ...groups.flatMap((group) => group.preUndos ?? []),
                 ...undos,
-                ...groups.flatMap((group) => group.undos)
+                ...groups.flatMap((group) => group.undos),
+                ...completedAfter.slice().reverse().filter((step) => step.undoAfterBase).flatMap((step) => step.undo)
             );
             redoMutations.push(...spanRedos, ...completedAfter.map((step) => step.mutation));
             if (!afterResult.result) {

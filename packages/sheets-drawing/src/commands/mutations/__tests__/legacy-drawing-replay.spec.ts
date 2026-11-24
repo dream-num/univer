@@ -1,0 +1,144 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IWorkbookData } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it, onTestFinished } from 'vitest';
+import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
+import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
+import { SHEET_DRAWING_PLUGIN } from '../../../controllers/sheet-drawing.controller';
+import { normalizeSheetDrawing } from '../../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/sheet-drawing.service';
+
+/**
+ * Mutations recorded from v0.15.4 (the last release that stored only
+ * `sheetTransform`) and v1.5.2 builds: every seed drawing shape crossed with
+ * every producer of `sheet.mutation.set-drawing-apply` in that release (UI drag, resize
+ * and rotate through SheetDrawingUpdateController, keyboard move, flip,
+ * placement, arrange, row/column structure and size changes, removal, group),
+ * plus floating images created through UI file insertion and the Facade and
+ * edited through the transform panel, align, crop, reset size and Facade
+ * setters. Each case is followed by undo, redo and another UI drag.
+ *
+ * `before` of each step is the drawing resource v1.5.2 persisted at that point,
+ * so each step is a possible cold-load snapshot. `replayed` is the resource a
+ * headless runtime of the same release held after replaying the remaining mutations from
+ * that snapshot, which is what a server of that release stored. It is the baseline here
+ * rather than the authoring client's own state: v1.5.2 Facade setCrop,
+ * setRotate and setSource edit the stored image before diffing, so the client
+ * shows changes its mutation never carried.
+ */
+interface ILegacyFixture {
+    version: string;
+    workbook: IWorkbookData;
+    snapshots: Record<string, string | null>;
+    cases: Array<{
+        name: string;
+        steps: Array<{ label: string; before: string; replayed: string; mutations: Array<{ id: string; params: object }> }>;
+    }>;
+}
+
+const fixtures = ['legacy-v0.15.4-drawing-mutations.json', 'legacy-v1.5.2-drawing-mutations.json', 'legacy-v1.5.2-float-image-mutations.json']
+    .map((file) => JSON.parse(readFileSync(resolve(__dirname, 'fixtures', file), 'utf8')) as ILegacyFixture);
+const unitId = 'test';
+const subUnitId = 'grid';
+const ORIENTATION = ['angle', 'flipX', 'flipY', 'skewX', 'skewY'] as const;
+const CELL = ['row', 'rowOffset', 'column', 'columnOffset'] as const;
+const CONTENT = ['srcRect', 'prstGeom', 'opacity', 'source', 'imageSourceType'] as const;
+
+type Drawing = ISheetDrawing & Record<string, unknown>;
+
+function same(expected: unknown, actual: unknown): boolean {
+    if (typeof expected === 'number' && typeof actual === 'number') return Math.abs(expected - actual) < 0.01;
+    // Missing orientation reads as the neutral value.
+    return expected === actual || (expected ?? 0) === (actual ?? 0) || (expected ?? false) === (actual ?? false);
+}
+
+/** Compare the fields the drawing's anchor type treats as authoritative. */
+function describeGeometry(drawing: Drawing | undefined, compareTo: Drawing | undefined): Record<string, unknown> | undefined {
+    if (!drawing) return undefined;
+    const reference = compareTo ?? drawing;
+    const anchor = reference.anchorType ?? SheetDrawingAnchorType.Position;
+    const markers = drawing.axisAlignSheetTransform ?? drawing.sheetTransform;
+    const fields: Record<string, unknown> = { anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position };
+    if (anchor !== SheetDrawingAnchorType.None && !reference.groupId) {
+        for (const key of CELL) fields[`from.${key}`] = markers?.from?.[key];
+        if (anchor === SheetDrawingAnchorType.Both) {
+            for (const key of CELL) fields[`to.${key}`] = markers?.to?.[key];
+        }
+    }
+    const pixels = anchor === SheetDrawingAnchorType.None || reference.groupId
+        ? ['left', 'top', 'width', 'height']
+        : anchor === SheetDrawingAnchorType.Position ? ['width', 'height'] : [];
+    for (const key of pixels) fields[`transform.${key}`] = drawing.transform?.[key as 'left'];
+    for (const key of ORIENTATION) {
+        fields[key] = drawing.transform?.[key] ?? drawing.sheetTransform?.[key] ?? drawing.axisAlignSheetTransform?.[key];
+    }
+    for (const key of CONTENT) fields[key] = JSON.stringify(drawing[key] ?? null);
+    return fields;
+}
+
+function geometryDiff(expected: Drawing | undefined, actual: Drawing | undefined): string[] {
+    const e = describeGeometry(expected, expected);
+    const a = describeGeometry(actual, expected);
+    if (!e || !a) return e === a ? [] : [`exists ${Boolean(e)} -> ${Boolean(a)}`];
+    return Object.keys(e).filter((key) => !same(e[key], a[key])).map((key) => `${key} ${JSON.stringify(e[key])} -> ${JSON.stringify(a[key])}`);
+}
+
+const runs = fixtures.flatMap((fixture) => fixture.cases.flatMap((testCase) => testCase.steps.map((step, start) => ({ fixture, name: testCase.name, start, label: step.label, testCase }))));
+
+describe.each([
+    { layout: 'same layout as the authoring client', rowHeight: undefined, columnWidth: undefined },
+    // Server layout can differ from the client that authored the history
+    // (fonts, auto height). Cell anchors stay authoritative; pixels do not.
+    { layout: 'different server layout', rowHeight: 31, columnWidth: 97 },
+])('replays legacy drawing history ($layout)', ({ rowHeight, columnWidth }) => {
+    it.each(runs)('$name | cold load before "$label"', ({ fixture, testCase, start }) => {
+        const workbook = JSON.parse(JSON.stringify(fixture.workbook)) as IWorkbookData;
+        const grid = workbook.sheets[subUnitId]!;
+        if (rowHeight) grid.defaultRowHeight = rowHeight;
+        if (columnWidth) grid.defaultColumnWidth = columnWidth;
+        const snapshot = fixture.snapshots[testCase.steps[start].before];
+        workbook.resources = snapshot ? [{ name: SHEET_DRAWING_PLUGIN, data: JSON.stringify(snapshot) }] : [];
+        const bed = createSheetsDrawingTestBed(workbook);
+        onTestFinished(() => bed.univer.dispose());
+
+        for (const step of testCase.steps.slice(start)) {
+            for (const { id, params } of step.mutations) {
+                expect(() => bed.commandService.syncExecuteCommand(id, params, { fromChangeset: true }), `${step.label}: ${id}`).not.toThrow();
+            }
+        }
+
+        const expected = (fixture.snapshots[testCase.steps[start].replayed] as unknown as Record<string, { data: Record<string, Drawing> }> | null)?.[subUnitId]?.data ?? {};
+        const sheet = bed.get(ISheetDrawingService);
+        const manager = bed.get(IDrawingManagerService);
+        const skeleton = bed.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId)!;
+        const actual = sheet.getDrawingData(unitId, subUnitId) ?? {};
+        for (const drawingId of new Set([...Object.keys(expected), ...Object.keys(actual)])) {
+            const search = { unitId, subUnitId, drawingId };
+            expect(manager.getDrawingByParam(search), `${drawingId}: render store`).toEqual(sheet.getDrawingByParam(search));
+            // Releases before axisAlignSheetTransform stored only the unrotated
+            // rectangle; compare through the same conversion snapshot loading uses.
+            const reference = expected[drawingId] && !expected[drawingId].axisAlignSheetTransform
+                ? normalizeSheetDrawing(expected[drawingId], skeleton) as Drawing
+                : expected[drawingId];
+            expect(geometryDiff(reference, sheet.getDrawingByParam(search) as Drawing), drawingId).toEqual([]);
+        }
+    });
+});

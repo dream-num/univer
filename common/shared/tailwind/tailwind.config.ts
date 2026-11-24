@@ -85,7 +85,6 @@ const config: Omit<Config, 'content'> = {
     theme: {
         extend: {
             colors: {
-                black: 'rgb(var(--univer-black-rgb, 0 0 0) / <alpha-value>)',
                 primary: {
                     50: 'var(--univer-primary-50)',
                     100: 'var(--univer-primary-100)',

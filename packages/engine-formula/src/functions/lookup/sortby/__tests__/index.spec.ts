@@ -414,4 +414,77 @@ describe('Test sortby function', () => {
             ]);
         });
     });
+
+    describe('Ties', () => {
+        it('keeps rows with equal TRUE/FALSE keys in their original order', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1], [2], [3], [4], [5]]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const byArray = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[false], [true], [false], [false], [false]]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const descending = testFunction.calculate(array, byArray, NumberValueObject.create(-1));
+            expect(getObjectValue(descending)).toStrictEqual([[2], [1], [3], [4], [5]]);
+            const ascending = testFunction.calculate(array, byArray, NumberValueObject.create(1));
+            expect(getObjectValue(ascending)).toStrictEqual([[1], [3], [4], [5], [2]]);
+        });
+
+        it('keeps rows with blank keys in their original order, after the other rows', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[1], [2], [3], [4], [5]]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const byArray = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[null], [10], [null], [null], [20]]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const descending = testFunction.calculate(array, byArray, NumberValueObject.create(-1));
+            expect(getObjectValue(descending)).toStrictEqual([[5], [2], [1], [3], [4]]);
+            const ascending = testFunction.calculate(array, byArray, NumberValueObject.create(1));
+            expect(getObjectValue(ascending)).toStrictEqual([[2], [5], [1], [3], [4]]);
+        });
+
+        it('uses the second sort key when both first keys are blank', () => {
+            const [array, firstKey, secondKey] = [
+                [[1], [2], [3], [4], [5]],
+                [[null], [10], [null], [null], [20]],
+                [[9], [4], [1], [3], [5]],
+            ].map((values) => ArrayValueObject.create({
+                calculateValueList: transformToValueObject(values),
+                rowCount: values.length,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            }));
+            const ascending = NumberValueObject.create(1);
+
+            const result = testFunction.calculate(array, firstKey, ascending, secondKey, ascending);
+
+            expect(getObjectValue(result)).toStrictEqual([[2], [5], [3], [4], [1]]);
+        });
+    });
 });

@@ -91,6 +91,34 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
             vi.stubGlobal('indexedDB', originalIndexedDB);
         });
 
+        it('should not leave an unhandled rejection when IndexedDB is denied before first use', async () => {
+            // A sandboxed iframe without allow-same-origin has an opaque origin, and
+            // the browser refuses `indexedDB.open` with a SecurityError there.
+            const originalIndexedDB = globalThis.indexedDB;
+            const unhandled: unknown[] = [];
+            const onUnhandled = (reason: unknown) => unhandled.push(reason);
+            process.on('unhandledRejection', onUnhandled);
+
+            vi.stubGlobal('indexedDB', {
+                open: () => {
+                    throw new DOMException('Access to the IndexedDB API is denied in this context.', 'SecurityError');
+                },
+            });
+            vi.resetModules();
+
+            try {
+                const { browserStorage: deniedStorage } = await import('../storage-driver');
+                await new Promise((resolve) => setTimeout(resolve, 10));
+
+                expect(unhandled).toEqual([]);
+                await deniedStorage.setItem('denied', 'local');
+                expect(await deniedStorage.getItem('denied')).toBe('local');
+            } finally {
+                process.off('unhandledRejection', onUnhandled);
+                vi.stubGlobal('indexedDB', originalIndexedDB);
+            }
+        });
+
         it('should store and retrieve a string', async () => {
             await browserStorage.setItem('str', 'hello');
             const value = await browserStorage.getItem<string>('str');

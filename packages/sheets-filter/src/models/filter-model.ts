@@ -17,13 +17,23 @@
 import type { CellValue, ICellData, IRange, IStyleData, Nullable, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
-import { CellValueType, ColorKit, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import {
+    CellValueType,
+    ColorKit,
+    DataStreamTreeTokenType,
+    Disposable,
+    extractPureTextFromCell,
+    mergeSets,
+    Rectangle,
+    Tools,
+} from '@univerjs/core';
 import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import { ensureNumeric, getCustomFilterFn, isNumericFilterFn, notEquals } from './custom-filters';
+import { createTextNotEqualsFilter, ensureNumeric, getCustomFilterFn, isNumericFilterFn } from './custom-filters';
 import { CustomFilterOperator, FilterBy } from './types';
 
 const EMPTY = () => new Set<number>();
+const DOCUMENT_END = `${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
 
 /**
  * This is the in-memory model of filter.
@@ -559,11 +569,8 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
 
-    // Not NOT_EQUALS, if the compare cannot be ensured as number, we should treat it like test not matching.
-    // Otherwise it goes to numeric match.
-    if (filter.operator === CustomFilterOperator.NOT_EQUALS) {
-        const ensured = ensureNumeric(compare);
-        if (!ensured) return (value) => notEquals.fn(value, compare);
+    if (filter.operator === CustomFilterOperator.NOT_EQUALS && typeof compare === 'string' && !ensureNumeric(compare)) {
+        return createTextNotEqualsFilter(compare);
     }
 
     // numeric match
@@ -603,9 +610,12 @@ function getFilterValueForConditionalFiltering(worksheet: Worksheet, row: number
     return extractFilterValueFromCell(rawCell);
 }
 
-function extractFilterValueFromCell(cell: ICellData): string | number {
+function extractFilterValueFromCell(cell: ICellData): Nullable<string | number> {
     const richTextValue = cell.p?.body?.dataStream;
-    if (richTextValue) return richTextValue.trimEnd();
+    if (richTextValue) {
+        const text = richTextValue.endsWith(DOCUMENT_END) ? richTextValue.slice(0, -DOCUMENT_END.length) : richTextValue;
+        return text || null;
+    }
 
     const rawValue = cell.v;
 
@@ -621,5 +631,5 @@ function extractFilterValueFromCell(cell: ICellData): string | number {
 
     if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
 
-    return '';
+    return null;
 }

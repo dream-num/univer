@@ -28,21 +28,30 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
 
 /**
  * Mutations recorded from v0.15.4 (the last release that stored only
- * `sheetTransform`) and v1.5.2 builds: every seed drawing shape crossed with
- * every producer of `sheet.mutation.set-drawing-apply` in that release (UI drag, resize
- * and rotate through SheetDrawingUpdateController, keyboard move, flip,
- * placement, arrange, row/column structure and size changes, removal, group),
- * plus floating images created through UI file insertion and the Facade and
- * edited through the transform panel, align, crop, reset size and Facade
- * setters. Each case is followed by undo, redo and another UI drag.
+ * `sheetTransform`) and v1.5.2 builds through their real entry points. Each
+ * case inserts a drawing, performs one edit, then undo, redo and another UI
+ * drag. The cases were picked from a full matrix of drawing shapes and edits,
+ * one for each way old history broke replay or takes a separate branch:
  *
- * `before` of each step is the drawing resource v1.5.2 persisted at that point,
- * so each step is a possible cold-load snapshot. `replayed` is the resource a
- * headless runtime of the same release held after replaying the remaining mutations from
- * that snapshot, which is what a server of that release stored. It is the baseline here
- * rather than the authoring client's own state: v1.5.2 Facade setCrop,
- * setRotate and setSource edit the stored image before diffing, so the client
- * shows changes its mutation never carried.
+ * - v1.5.2 chart with from/to-only markers, then a UI drag: inserts of
+ *   angle/flipX/flipY/skewX/skewY without `r`, and their removal on undo.
+ * - v1.5.2 two-cell image, removing rows above: v1.5.2 removes those fields
+ *   from `sheetTransform` and adds them back on undo.
+ * - v1.5.2 UI rotate and flip: those fields on `axisAlignSheetTransform` with `r`.
+ * - v1.5.2 image rotated 90°, inserting columns: the two markers differ.
+ * - v1.5.2 arrange, group / ungroup: order moves and group edits.
+ * - v1.5.2 floating image inserted from a file, then cropped; Facade builder
+ *   image rotated 15°, then cropped (contradicting markers); Facade setRotate.
+ * - v0.15.4 UI drag on a plain and a 90° rotated image, and removing rows
+ *   above a chart: whole-field replacements of `sheetTransform` only.
+ *
+ * `before` of each step is the drawing resource persisted at that point, so
+ * each step is a possible cold-load snapshot. `replayed` is the resource a
+ * headless runtime of the same release held after replaying the remaining
+ * mutations from that snapshot, which is what a server of that release stored.
+ * It is the baseline rather than the authoring client's own state: v1.5.2
+ * Facade setCrop, setRotate and setSource edit the stored image before
+ * diffing, so the client shows changes its mutation never carried.
  */
 interface ILegacyFixture {
     version: string;

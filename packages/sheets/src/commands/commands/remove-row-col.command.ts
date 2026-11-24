@@ -153,6 +153,15 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 id: RemoveRowCommandId,
                 params: interceptorParams,
             });
+            if (groups.some((group) => {
+                const count = (group.preRedos?.length ?? 0) + group.redos.length;
+                return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
+            })) {
+                if (redoMutations.length) {
+                    undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+                }
+                return false;
+            }
             const preRedos = groups.flatMap((group) => group.preRedos ?? []);
             const spanRedos = [
                 ...preRedos,
@@ -198,19 +207,37 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 return false;
             }
 
-            const afterInterceptors = sheetInterceptorService.afterCommandExecute({
+            const afterGroups = sheetInterceptorService.getAfterCommandMutationGroups({
                 id: RemoveRowCommandId,
                 params: interceptorParams,
             });
-            sequenceExecute(afterInterceptors.redos, commandService);
+            const unsafeAfterHook = afterGroups.some((group) => {
+                const count = (group.preRedos?.length ?? 0) + group.redos.length;
+                return group.rollbackMutations ? group.rollbackMutations.length !== count : count > 1;
+            });
+            const afterSteps = afterGroups.flatMap((group) => [
+                ...(group.preRedos ?? []),
+                ...group.redos,
+            ].map((mutation, index) => ({
+                mutation,
+                undo: group.rollbackMutations?.[index] ?? [...(group.preUndos ?? []), ...group.undos],
+            })));
+            const afterResult = unsafeAfterHook
+                ? { result: false, index: 0 }
+                : sequenceExecute(afterSteps.map((step) => step.mutation), commandService);
+            const completedAfter = afterResult.result ? afterSteps : afterSteps.slice(0, afterResult.index);
 
             undoMutations.unshift(
+                ...completedAfter.slice().reverse().flatMap((step) => step.undo),
                 ...groups.flatMap((group) => group.preUndos ?? []),
                 ...undos,
-                ...groups.flatMap((group) => group.undos),
-                ...afterInterceptors.undos
+                ...groups.flatMap((group) => group.undos)
             );
-            redoMutations.push(...spanRedos, ...afterInterceptors.redos);
+            redoMutations.push(...spanRedos, ...completedAfter.map((step) => step.mutation));
+            if (!afterResult.result) {
+                undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
+                return false;
+            }
         }
         setSelection(range, workbook, worksheet, commandService);
         undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });

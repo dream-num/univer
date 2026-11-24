@@ -25,6 +25,7 @@ export interface IOpenTableFilterPanelOperationParams {
     unitId: string;
     subUnitId: string;
     tableId: string;
+    renderId?: string;
 }
 
 export interface IRequestOpenTableFilterPanelOperationParams extends IOpenTableFilterPanelOperationParams {
@@ -40,7 +41,7 @@ export const OpenTableFilterPanelOperation: ICommand<IOpenTableFilterPanelOperat
             return false;
         }
 
-        const { row, col, unitId, subUnitId, tableId } = params;
+        const { row, col, unitId, subUnitId, tableId, renderId } = params;
         const tableManager = accessor.get(TableManager);
         const sheetsTableComponentController = accessor.get(SheetsTableComponentController);
 
@@ -49,7 +50,7 @@ export const OpenTableFilterPanelOperation: ICommand<IOpenTableFilterPanelOperat
             return false;
         }
 
-        sheetsTableComponentController.openOrToggleFilterPanel({ unitId, subUnitId, row, tableId, column: col });
+        sheetsTableComponentController.openOrToggleFilterPanel({ unitId, subUnitId, row, tableId, column: col, renderId });
 
         return true;
     },

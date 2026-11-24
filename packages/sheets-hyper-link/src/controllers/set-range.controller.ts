@@ -16,8 +16,30 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { IClearSelectionContentCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { AFTER_CELL_EDIT, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    BuildTextUtils,
+    CustomRangeType,
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    generateRandomId,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Range,
+    TextX,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    AFTER_CELL_EDIT,
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    getSheetCommandTarget,
+    SetRangeValuesCommand,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
 import { HyperLinkModel } from '../models/hyper-link.model';
@@ -103,9 +125,11 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const ranges = params?.ranges ?? (selection ? [selection.range] : []);
                     if (target) {
                         const { unitId, subUnitId } = target;
+                        const clearedLinks = new Set<string>();
                         ranges.forEach((range) => Range.foreach(range, (row, col) => {
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-                            if (link) {
+                            if (link && !clearedLinks.has(link.id)) {
+                                clearedLinks.add(link.id);
                                 redos.push({
                                     id: RemoveHyperLinkMutation.id,
                                     params: {

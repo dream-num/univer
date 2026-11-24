@@ -56,11 +56,11 @@ export interface IBeforeCommandInterceptor {
 
 export interface ICommandInterceptor {
     priority?: number;
-    getMutations(command: ICommandInfo): ICommandMutationGroup;
+    getMutations(command: ICommandInfo): ICommandMutationGroup | ICommandMutationGroup[];
 }
 
 export interface ICommandMutationGroup extends IUndoRedoCommandInfosByInterceptor {
-    /** Inverses for each step in [...preRedos, ...redos], used only to roll back partial execution. */
+    /** Inverses for each step in [...preRedos, ...redos]. Required for multi-step delete/filter removal hooks. */
     rollbackMutations?: IMutationInfo[][];
 }
 
@@ -225,7 +225,7 @@ export class SheetInterceptorService extends Disposable {
 
     /** Keeps each hook's inverse mutations paired with its work for transaction rollback. */
     getCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
-        return this._commandInterceptors.map((interceptor) => interceptor.getMutations(info));
+        return this._commandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {
@@ -240,12 +240,16 @@ export class SheetInterceptorService extends Disposable {
     }
 
     afterCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._afterCommandInterceptors.map((i) => i.getMutations(info));
+        const infos = this.getAfterCommandMutationGroups(info);
 
         return {
             undos: infos.map((i) => i.undos).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
+    }
+
+    getAfterCommandMutationGroups(info: ICommandInfo): ICommandMutationGroup[] {
+        return this._afterCommandInterceptors.flatMap((interceptor) => interceptor.getMutations(info));
     }
 
     interceptAutoHeight(interceptor: IAutoHeightInterceptors): IDisposable {

@@ -156,11 +156,12 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
         clearTimeout(this._openTimer);
         this._openTimer = setTimeout(() => {
             this._openTimer = undefined;
+            const render = getFocusedRenderForUnit(this._renderManagerService, unitId);
             const unit = this._univerInstanceService.getFocusedUnit();
             if (this._disposed || this._filterParams !== filterParams || (scene && (
                 !(unit instanceof Workbook) || unit.getUnitId() !== unitId
                 || unit.getActiveSheet()?.getSheetId() !== subUnitId || this.getScene() !== scene
-                || getFocusedRenderForUnit(this._renderManagerService, unitId)?.scene !== scene
+                || render?.scene !== scene
             ))) {
                 return;
             }
@@ -170,6 +171,7 @@ export class SheetsTableFilterButtonShape extends Shape<ISheetsTableFilterButton
                 unitId,
                 subUnitId,
                 tableId,
+                renderId: render?.renderId ?? unitId,
             };
             return this._commandService.executeCommand(RequestOpenTableFilterPanelOperation.id, cmdParams);
         }, 200);

@@ -42,7 +42,12 @@ import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-m
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
-import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
+import {
+    RemoveColByRangeCommand,
+    RemoveColCommand,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
+} from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test remove rows cols', () => {
@@ -126,7 +131,7 @@ describe('Test remove rows cols', () => {
         }
     });
 
-    it.each(['pre', 'post', 'post-prefix'])(
+    it.each(['pre', 'post', 'post-prefix', 'unsafe', 'after-prefix', 'after-unsafe'])(
         'restores completed rows and hooks after a partial delete fails (%s)',
         async (phase) => {
             const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
@@ -134,7 +139,14 @@ describe('Test remove rows cols', () => {
             const target = { unitId: 'test', subUnitId: worksheet.getSheetId() };
             commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
                 ...target,
-                cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } }, 3: { 0: { v: 'D' } } },
+                cellValue: {
+                    0: { 0: { v: 'A' } },
+                    1: { 0: { v: 'B' } },
+                    2: { 0: { v: 'C' } },
+                    3: { 0: { v: 'D' } },
+                    10: { 0: { v: 'Keep11' } },
+                    12: { 0: { v: 'Keep13' } },
+                },
             });
             const merge = { startRow: 0, endRow: 0, startColumn: 1, endColumn: 2 };
             commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [merge] });
@@ -148,7 +160,11 @@ describe('Test remove rows cols', () => {
             renders.focusRender?.('failure-pane');
             commandService.registerCommand({ id: 'test.fail-delete', type: CommandType.MUTATION, handler: () => false });
             const hookParams = { ...target, range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 19 } };
-            const hook = get(SheetInterceptorService).interceptCommand({ getMutations: (command) => {
+            const interceptors = get(SheetInterceptorService);
+            const register = phase.startsWith('after')
+                ? interceptors.interceptAfterCommand.bind(interceptors)
+                : interceptors.interceptCommand.bind(interceptors);
+            const hook = register({ getMutations: (command) => {
                 const params = command.params as IRemoveRowColCommandParams;
                 if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
                     return { redos: [], undos: [] };
@@ -157,7 +173,20 @@ describe('Test remove rows cols', () => {
                 if (phase === 'pre') {
                     return { preRedos: [fail], redos: [], undos: [] };
                 }
-                if (phase === 'post-prefix') {
+                if (phase === 'unsafe' || phase === 'after-unsafe') {
+                    return {
+                        redos: [
+                            { id: InsertRowMutation.id, params: hookParams },
+                            fail,
+                            { id: InsertRowMutation.id, params: hookParams },
+                        ],
+                        undos: [
+                            { id: RemoveRowMutation.id, params: hookParams },
+                            { id: RemoveRowMutation.id, params: hookParams },
+                        ],
+                    };
+                }
+                if (phase === 'post-prefix' || phase === 'after-prefix') {
                     return {
                         redos: [{ id: InsertRowMutation.id, params: hookParams }, fail],
                         undos: [{ id: RemoveRowMutation.id, params: hookParams }],
@@ -166,7 +195,7 @@ describe('Test remove rows cols', () => {
                 }
                 return { redos: [fail], undos: [] };
             } });
-            const laterHook = get(SheetInterceptorService).interceptCommand({ getMutations: (command) => {
+            const laterHook = register({ getMutations: (command) => {
                 const params = command.params as IRemoveRowColCommandParams;
                 if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
                     return { redos: [], undos: [] };
@@ -185,11 +214,13 @@ describe('Test remove rows cols', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
                 expect([0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['A', 'B', 'C', 'D']);
                 expect(worksheet.getRowCount()).toBe(rowCount);
+                expect(worksheet.getCellRaw(10, 0)?.v).toBe('Keep11');
+                expect(worksheet.getCellRaw(12, 0)?.v).toBe('Keep13');
                 expect(worksheet.getMergeData()).toContainEqual(merge);
                 expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
                 expect([0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v))
-                    .toEqual(phase === 'pre' ? ['A', 'B', 'D'] : ['B', 'D', undefined]);
-                expect(worksheet.getRowCount()).toBe(rowCount - (phase === 'post' ? 2 : 1));
+                    .toEqual(phase === 'pre' || phase === 'unsafe' ? ['A', 'B', 'D'] : ['B', 'D', undefined]);
+                expect(worksheet.getRowCount()).toBe(rowCount - (phase === 'post' || phase === 'after-unsafe' ? 2 : 1));
             } finally {
                 hook.dispose();
                 laterHook.dispose();

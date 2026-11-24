@@ -93,6 +93,7 @@ describe('sheet table filter button shape', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             tableId: 'table-orders',
+            renderId: 'unit-1',
         }]);
     });
 
@@ -119,6 +120,7 @@ describe('sheet table filter button shape', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             tableId: 'table-archive',
+            renderId: 'unit-1',
         }]);
     });
 

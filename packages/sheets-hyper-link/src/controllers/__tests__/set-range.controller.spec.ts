@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    RedoCommand,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand,
     SheetInterceptorService,
     SheetsSelectionsService,
+    UniverSheetsPlugin,
 } from '@univerjs/sheets';
+import enUS from '@univerjs/sheets/locale/en-US';
 import { describe, expect, it } from 'vitest';
 import { AddHyperLinkMutation } from '../../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../../commands/mutations/remove-hyper-link.mutation';
@@ -29,6 +41,57 @@ import { HyperLinkModel } from '../../models/hyper-link.model';
 import { SheetHyperLinkSetRangeController } from '../set-range.controller';
 
 describe('SheetHyperLinkSetRangeController', () => {
+    it.each([ClearSelectionContentCommand.id, ClearSelectionAllCommand.id, ClearSelectionFormatCommand.id])(
+        'clears overlapping selections once and restores cells and links on undo (%s)',
+        async (commandId) => {
+            const univer = new Univer();
+            univer.registerPlugin(UniverSheetsPlugin);
+            const injector = univer.__getInjector();
+            const locale = injector.get(LocaleService);
+            locale.load({ [LocaleType.EN_US]: enUS });
+            locale.setLocale(LocaleType.EN_US);
+            locale.setDirection('ltr');
+            injector.add([HyperLinkModel]);
+            injector.add([SheetHyperLinkSetRangeController]);
+            const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                id: 'test',
+                locale: LocaleType.EN_US,
+                sheetOrder: ['sheet1'],
+                sheets: { sheet1: { id: 'sheet1', name: 'Sheet1', cellData: { 1: { 1: { v: 'Keep', s: { bl: 1 } } } } } },
+            });
+            try {
+                injector.get(IUniverInstanceService).focusUnit('test');
+                const commands = injector.get(ICommandService);
+                commands.registerCommand(AddHyperLinkMutation);
+                commands.registerCommand(RemoveHyperLinkMutation);
+                injector.get(SheetHyperLinkSetRangeController);
+                const target = { unitId: 'test', subUnitId: 'sheet1' };
+                expect(commands.syncExecuteCommand(AddHyperLinkMutation.id, {
+                    ...target,
+                    link: { id: 'link', row: 1, column: 1, display: 'Keep', payload: 'https://example.com/link' },
+                })).toBe(true);
+                const link = () => injector.get(HyperLinkModel).getHyperLinkByLocation('test', 'sheet1', 1, 1);
+                const sheet = workbook.getActiveSheet()!;
+                expect(await commands.executeCommand(commandId, {
+                    ...target,
+                    ranges: [
+                        { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+                        { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
+                    ],
+                })).toBe(true);
+                expect(link()).toBeUndefined();
+                expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
+                expect(sheet.getCellRaw(1, 1)?.v).toBe('Keep');
+                expect(sheet.getComposedCellStyle(1, 1)?.bl).toBe(1);
+                expect(link()?.id).toBe('link');
+                expect(await commands.executeCommand(RedoCommand.id)).toBe(true);
+                expect(link()).toBeUndefined();
+            } finally {
+                univer.dispose();
+            }
+        }
+    );
+
     it.each([ClearSelectionContentCommand.id, ClearSelectionAllCommand.id, ClearSelectionFormatCommand.id])(
         'clears only hyperlinks in resolved ranges through redo and undo (%s)',
         (commandId) => {

@@ -27,6 +27,7 @@ export interface ITableFilterPanelInfo {
     tableId: string;
     column: number;
     row: number;
+    renderId?: string;
 }
 export class SheetsTableComponentController extends Disposable {
     private _popupDisposable?: Nullable<IDisposable>;
@@ -96,7 +97,7 @@ export class SheetsTableComponentController extends Disposable {
             throw new Error('[SheetsFilterUIController]: no filter model when opening filter popup!');
         }
 
-        const { row: startRow, column: col } = currentFilterModel;
+        const { row: startRow, column: col, unitId, subUnitId, renderId } = currentFilterModel;
         this._popupDisposable = this._sheetCanvasPopupService.attachPopupToCell(startRow, col, {
             componentKey: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
             direction: 'horizontal',
@@ -106,7 +107,7 @@ export class SheetsTableComponentController extends Disposable {
             },
             offset: [5, 0],
             portal: true,
-        });
+        }, unitId, subUnitId, undefined, renderId);
     }
 
     private _closeFilterPopup(): void {
@@ -117,6 +118,7 @@ export class SheetsTableComponentController extends Disposable {
     }
 
     private _isSameFilterPanelInfo(a: Nullable<ITableFilterPanelInfo>, b: ITableFilterPanelInfo): boolean {
-        return Boolean(a && a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.tableId === b.tableId && a.column === b.column && a.row === b.row);
+        return Boolean(a && a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.tableId === b.tableId
+            && a.column === b.column && a.row === b.row && (a.renderId ?? a.unitId) === (b.renderId ?? b.unitId));
     }
 }

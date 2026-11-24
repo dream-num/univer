@@ -117,6 +117,36 @@ export const FULL_WIDTH_HORIZONTAL_ALIGNMENTS = new Set([
     HorizontalAlign.DISTRIBUTED,
 ]);
 
+function isNumericCell(cell: ICellDataForSheetInterceptor): boolean {
+    return cell.t === CellValueType.NUMBER || (!Tools.isDefine(cell.t) && typeof cell.v === 'number');
+}
+
+function getGeneralNumberReserveWidth(fontString: string): number {
+    return FontCache.getMeasureText(GENERAL_NUMBER_RESERVE_GLYPH, fontString).width;
+}
+
+function shouldUseCellDocumentLayout(
+    cell: Nullable<ICellDataForSheetInterceptor>,
+    style: IStyleData,
+    { vertexAngle, centerAngle }: ReturnType<typeof convertTextRotation>
+): boolean {
+    return Boolean(cell?.p || vertexAngle || centerAngle) ||
+        FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(style?.ht ?? HorizontalAlign.UNSPECIFIED);
+}
+
+function measureNumericCellWidth(cell: ICellDataForSheetInterceptor, style: IStyleData): number {
+    const displayText = getDisplayValueFromCell(cell);
+    if (!displayText) return 0;
+
+    const fontString = getFontStyleString(style).fontCache;
+    const roundingReserveWidth = isDefaultFormat(style.n?.pattern) && Number.isFinite(Number(cell.v))
+        ? getGeneralNumberReserveWidth(fontString)
+        : 0;
+    const padding = style.pd ?? DEFAULT_PADDING_DATA;
+    const horizontalPadding = (padding.l ?? DEFAULT_PADDING_DATA.l) + (padding.r ?? DEFAULT_PADDING_DATA.r);
+    return Math.ceil(FontCache.getMeasureText(displayText, fontString).width + roundingReserveWidth + horizontalPadding);
+}
+
 function getNumberOverflowText(fontString: string, availableWidth: number): string {
     const hashWidth = FontCache.getMeasureText('#', fontString).width;
     if (hashWidth <= 0) {
@@ -143,7 +173,7 @@ export function getGeneralNumberDisplayText(
         return displayText;
     }
 
-    const roundingReserveWidth = FontCache.getMeasureText(GENERAL_NUMBER_RESERVE_GLYPH, fontString).width;
+    const roundingReserveWidth = getGeneralNumberReserveWidth(fontString);
     if (FontCache.getMeasureText(displayText, fontString).width + roundingReserveWidth <= availableWidth) {
         return displayText;
     }
@@ -938,11 +968,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 // If the row has already been calculated, it does not need to be recalculated
                 if (calculatedCols.has(colIndex)) continue;
 
-                const autoWidth = this._calculateColWidth(colIndex);
                 calculatedCols.add(colIndex);
                 results.push({
                     col: colIndex,
-                    width: Math.max(this._worksheetData.defaultColumnWidth, autoWidth),
+                    width: this._calculateColWidth(colIndex),
                 });
             }
         }
@@ -959,6 +988,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     private _calculateColWidth(colIndex: number): number {
         const worksheet = this.worksheet;
+        const { defaultColumnWidth } = this._worksheetData;
 
         // row has default height, but col does not, col can be very narrow near zero
         let colWidth = 0;
@@ -968,10 +998,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         // first row and last row should be considered.
         // skip hidden row
         // also handle multiple viewport situation (freeze row & freeze row&col)
-        // if there are no content in this column, return current column width.
 
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!visibleRangeViewMain) return colWidth;
+        if (!visibleRangeViewMain) return defaultColumnWidth;
 
         const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
         const rowCount = this.worksheet.getRowCount();
@@ -1011,7 +1040,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
-            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(colIndex, row);
+            const { isMerged, isMergedMainCell } = worksheet.getCellInfoInMergeData(row, colIndex);
             if (isMerged && !isMergedMainCell) continue;
             if (!this.worksheet.getRowVisible(row)) continue;
             const cell = worksheet.getCell(row, colIndex);
@@ -1031,7 +1060,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             // early return, if maxColWidth is larger than MAXIMUM_COL_WIDTH
             if (colWidth >= MAXIMUM_COL_WIDTH) return MAXIMUM_COL_WIDTH;
         }
-        if (colWidth === 0) return currColWidth; // if column is empty, do not modify colWidth, like Google sheet.
+        if (colWidth === 0) return Math.max(defaultColumnWidth, currColWidth);
         return Math.max(MIN_COL_WIDTH, colWidth); // min col width is 2
     }
 
@@ -1056,13 +1085,26 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         let measuredWidth = 0;
 
         // isSkip means the text in this cell would not rendering.
-        if (cell.fontRenderExtension?.isSkip && cell?.interceptorAutoWidth) {
-            const cellWidth = cell.interceptorAutoWidth?.();
+        if (cell.fontRenderExtension?.isSkip && cell.interceptorAutoWidth) {
+            const cellWidth = cell.interceptorAutoWidth();
             if (cellWidth) {
                 return cellWidth;
             }
         }
+        // An empty formula result contributes zero text width.
+        if (!cell.p && (cell.v == null || cell.v === '')) {
+            return 0;
+        }
+
         const style = this.worksheet.getComposedCellStyleByCellData(row, column, cell);
+        if (
+            isNumericCell(cell) &&
+            style.stf !== BooleanNumber.TRUE &&
+            !shouldUseCellDocumentLayout(cell, style, convertTextRotation(style.tr ?? undefined))
+        ) {
+            return measureNumericCellWidth(cell, style);
+        }
+
         const modelObject = this.worksheet.getCellDocumentModel(cell, style, { isDeepClone: true });
         if (modelObject == null) {
             return measuredWidth;
@@ -1072,6 +1114,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (documentModel == null) {
             return measuredWidth;
         }
+
+        // Treat paragraph marks as zero-width in the temporary layout used to fit columns.
+        // The editor uses the mark's width to lay out empty cells.
+        documentModel.updateDocumentRenderConfig({ zeroWidthParagraphBreak: BooleanNumber.TRUE });
 
         const documentViewModel = new SheetCellDocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
@@ -1586,10 +1632,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     private _applyNumberDisplay(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
         const cellData = fontCache.cellData;
-        if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton) {
-            return;
-        }
-        if (cellData.t !== CellValueType.NUMBER && (Tools.isDefine(cellData.t) || typeof cellData.v !== 'number')) {
+        if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton || !isNumericCell(cellData)) {
             return;
         }
 
@@ -1637,9 +1680,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
-        const { vertexAngle, centerAngle } = convertTextRotation(style?.tr ?? { a: 0 });
-        const shouldUseDocumentLayout = Boolean(cellData?.p || vertexAngle || centerAngle) ||
-            FULL_WIDTH_HORIZONTAL_ALIGNMENTS.has(style?.ht ?? HorizontalAlign.UNSPECIFIED);
+        const rotation = convertTextRotation(style?.tr ?? undefined);
+        const { vertexAngle, centerAngle } = rotation;
+        const shouldUseDocumentLayout = shouldUseCellDocumentLayout(cellData, style, rotation);
 
         const modelObject = shouldUseDocumentLayout ?
             this.worksheet.getCellDocumentModel(cellData, style, {

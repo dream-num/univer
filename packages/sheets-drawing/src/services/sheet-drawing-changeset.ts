@@ -50,29 +50,34 @@ export function assertCurrentSheetDrawingEdit({ op, reference }: Pick<ISetDrawin
     });
 }
 
-/** Component of an edit, with its path relative to the drawing (`path[0]` is the field). */
-type DrawingEdit = Array<[path: JSON1.Path, component: JSON1.JSONOpComponent]>;
+/** One component of a drawing's edit; `path` is relative to the drawing, so `path[0]` is the field. */
+type DrawingEditEntry = [path: JSON1.Path, component: JSON1.JSONOpComponent];
+type DrawingEdit = DrawingEditEntry[];
 
-/** Old clients also wrote these on `sheetTransform` and `axisAlignSheetTransform`; the current model reads them only from `transform`. */
+/** Read only from `transform` in the current model; old clients also wrote them on the position fields. */
 const ORIENTATION_FIELDS: ReadonlySet<string> = new Set(['angle', 'flipX', 'flipY', 'skewX', 'skewY']);
 
-function isPositionField(path: JSON1.Path): boolean {
-    return path[0] === 'sheetTransform' || path[0] === 'axisAlignSheetTransform';
-}
+const isInsertOnly = (component: JSON1.JSONOpComponent) => component.i !== undefined && component.r === undefined;
+const isRemoveOnly = (component: JSON1.JSONOpComponent) => component.r !== undefined && component.i === undefined;
+const asReplace = (component: JSON1.JSONOpComponent): JSON1.JSONOpComponent => ({ ...component, r: true });
 
-function isOrientationOnPositionField([field, key, ...rest]: JSON1.Path): boolean {
-    return isPositionField([field]) && rest.length === 0 && ORIENTATION_FIELDS.has(key as string);
-}
+/** The whole `field`, e.g. `['axisAlignSheetTransform']`. */
+const isWholeField = (path: JSON1.Path, field: string) => path.length === 1 && path[0] === field;
+/** `field.angle`, `field.flipX`, ... */
+const isOrientationOn = (path: JSON1.Path, field: string) =>
+    path.length === 2 && path[0] === field && ORIENTATION_FIELDS.has(path[1] as string);
+const isPositionField = (path: JSON1.Path) => path[0] === 'sheetTransform' || path[0] === 'axisAlignSheetTransform';
+const editsField = (edit: DrawingEdit, field: string) => edit.some(([path]) => path[0] === field);
 
-function isOrientationOnTransform([field, key, ...rest]: JSON1.Path): boolean {
-    return field === 'transform' && rest.length === 0 && ORIENTATION_FIELDS.has(key as string);
+/** Whether an edit involves any field whose format changed since older clients. */
+function touchesLegacyFields(edit: DrawingEdit): boolean {
+    return edit.some(([path]) => isPositionField(path) || isOrientationOn(path, 'transform'));
 }
 
 /**
  * Translate drawing edits in persisted history written by older clients.
- * Edits that touch neither `sheetTransform`, `axisAlignSheetTransform` nor
- * `angle/flipX/flipY/skewX/skewY` on `transform` are returned unchanged; see
- * `translateHistoricalDrawingEdit` for the rest.
+ * Edits that pass `touchesLegacyFields` for no drawing are returned
+ * unchanged; see `translateHistoricalDrawingEdit` for the rest.
  */
 export function normalizeHistoricalSheetDrawingEdit(
     op: JSON1.JSONOp,
@@ -96,11 +101,10 @@ export function normalizeHistoricalSheetDrawingEdit(
         edit.push([path.slice(4), component]);
         edits.set(drawingId, edit);
     });
-    if (![...edits.values()].some((edit) => edit.some(([path]) => isPositionField(path) || isOrientationOnTransform(path)))) return op;
+    if (![...edits.values()].some(touchesLegacyFields)) return op;
 
     for (const [drawingId, edit] of edits) {
-        const translated = translateHistoricalDrawingEdit(edit, () => getDrawing(drawingId), getSkeleton);
-        for (const [path, component] of translated) {
+        for (const [path, component] of translateHistoricalDrawingEdit(edit, getDrawing(drawingId), getSkeleton)) {
             result.mergeTree([unitId, subUnitId, 'data', drawingId, ...path, component]);
         }
     }
@@ -108,83 +112,67 @@ export function normalizeHistoricalSheetDrawingEdit(
 }
 
 /**
- * - Drop `angle/flipX/flipY/skewX/skewY` on `sheetTransform` and
- *   `axisAlignSheetTransform`, and removals of the whole
- *   `axisAlignSheetTransform` (see `removesWholeAxisAlign`). Reconcile those
- *   fields on `transform` with the values loading filled in (see
- *   `reconcileOrientationOnTransform`).
- * - Clients from v0.15.5 on write `axisAlignSheetTransform` next to
- *   `sheetTransform`. When the edit still writes `axisAlignSheetTransform`,
- *   it is authoritative and `sheetTransform` is dropped.
- * - Clients up to v0.15.4 wrote only `sheetTransform`. Such an edit is applied
- *   to a view of the current drawing, and the result replaces the drawing.
+ * 1. Drop `angle/flipX/flipY/skewX/skewY` on the position fields.
+ * 2. Reconcile the edit with values loading filled in (`reconcileWithLoadedValues`).
+ * 3. Pick the position field the edit was authored against:
+ *    - `axisAlignSheetTransform` (clients from v0.15.5): it is authoritative,
+ *      and `sheetTransform` is dropped.
+ *    - `sheetTransform` only (clients up to v0.15.4): apply the edit to a view
+ *      of the current drawing and replace the drawing with the result.
+ *    - Neither: apply the edit as it is.
  */
 function translateHistoricalDrawingEdit(
     edit: DrawingEdit,
-    getDrawing: () => ISheetDrawing | undefined,
+    current: ISheetDrawing | undefined,
     getSkeleton: () => SpreadsheetSkeleton | undefined
 ): DrawingEdit {
-    const kept = edit
-        .filter(([path, component]) => !isOrientationOnPositionField(path) && !removesWholeAxisAlign(path, component))
-        .flatMap((entry) => reconcileOrientationOnTransform(entry, getDrawing));
-    if (kept.some(([[field]]) => field === 'axisAlignSheetTransform')) {
-        return kept
-            .filter(([[field]]) => field !== 'sheetTransform')
-            .map(([path, component]) => [path, replacesExistingAxisAlign(path, component, getDrawing) ? { ...component, r: true } : component]);
+    const cleaned = edit
+        .filter(([path]) => !isOrientationOn(path, 'sheetTransform') && !isOrientationOn(path, 'axisAlignSheetTransform'))
+        .flatMap((entry) => reconcileWithLoadedValues(entry, current));
+
+    if (editsField(cleaned, 'axisAlignSheetTransform')) {
+        return cleaned.filter(([path]) => path[0] !== 'sheetTransform');
     }
-    if (kept.some(([[field]]) => field === 'sheetTransform')) {
-        const current = getDrawing();
+    if (editsField(cleaned, 'sheetTransform')) {
         if (!current) throw new Error('Missing drawing for legacy placement edit.');
-        return [[[], { r: true, i: applySheetTransformEdit(current, kept, getSkeleton()) as unknown as JSON1.Doc }]];
+        return [[[], { r: true, i: applySheetTransformEdit(current, cleaned, getSkeleton()) as unknown as JSON1.Doc }]];
     }
-    return kept;
+    return cleaned;
 }
 
 /**
- * Loading copies `angle/flipX/flipY/skewX/skewY` from `sheetTransform` or
- * `axisAlignSheetTransform` into `transform` when `transform` lacks them
- * (`getSheetDrawingTransformWithOrientation`), as with drawings imported from
- * XLSX. Old clients edited `transform` without those values, so they inserted
- * one without `r`, or removed one loading never filled. The insert replaces
- * the filled value; the removal is dropped.
+ * Loading a drawing fills in values old clients never had:
+ * `axisAlignSheetTransform` is derived for drawings created before v0.15.5,
+ * and `angle/flipX/flipY/skewX/skewY` are copied from the position fields into
+ * `transform` (`getSheetDrawingTransformWithOrientation`), as for images
+ * imported from XLSX. Old edits therefore insert those values without `r`, or
+ * remove them where loading never filled them in:
+ *
+ * | Target                        | Insert only, value loaded | Remove only                    |
+ * | ----------------------------- | ------------------------- | ------------------------------ |
+ * | whole axisAlignSheetTransform | replace                   | drop                           |
+ * | angle/flipX/... on transform  | replace                   | drop when the value is missing |
+ *
+ * The whole-field cases come from clients up to v1.0.0-alpha.2, which replaced
+ * whole fields: the first edit of a pre-v0.15.5 drawing inserts
+ * `axisAlignSheetTransform`, and its undo from `invertWithDoc` removes it while
+ * restoring `sheetTransform`, from which the anchor is derived again.
  */
-function reconcileOrientationOnTransform(
-    [path, component]: DrawingEdit[number],
-    getDrawing: () => ISheetDrawing | undefined
-): DrawingEdit {
-    if (!isOrientationOnTransform(path)) return [[path, component]];
-    const current = (getDrawing()?.transform as Record<string, unknown> | undefined)?.[path[1] as string];
-    if (component.i !== undefined && component.r === undefined && current !== undefined) return [[path, { ...component, r: true }]];
-    if (component.r !== undefined && component.i === undefined && current === undefined) return [];
-    return [[path, component]];
-}
+function reconcileWithLoadedValues(entry: DrawingEditEntry, current: ISheetDrawing | undefined): DrawingEdit {
+    const [path, component] = entry;
+    const wholeAxisAlign = isWholeField(path, 'axisAlignSheetTransform');
+    if (!wholeAxisAlign && !isOrientationOn(path, 'transform')) return [entry];
 
-/**
- * Clients up to v1.0.0-alpha.2 replaced whole fields and sent no `r` for a
- * field missing on their side. On the first edit of a drawing created before
- * v0.15.5, that inserts `axisAlignSheetTransform`, which the current model
- * already derived when it loaded the drawing.
- */
-function replacesExistingAxisAlign(path: JSON1.Path, component: JSON1.JSONOpComponent, getDrawing: () => ISheetDrawing | undefined): boolean {
-    return path.length === 1 && path[0] === 'axisAlignSheetTransform'
-        && component.i !== undefined && component.r === undefined
-        && getDrawing()?.axisAlignSheetTransform !== undefined;
-}
-
-/**
- * The undo of that first edit, generated with `invertWithDoc`, removes the
- * whole `axisAlignSheetTransform` and restores `sheetTransform`. The current
- * model derives `axisAlignSheetTransform` from the restored `sheetTransform`
- * instead; without a `sheetTransform` edit it keeps the cell anchor it has.
- */
-function removesWholeAxisAlign(path: JSON1.Path, component: JSON1.JSONOpComponent): boolean {
-    return path.length === 1 && path[0] === 'axisAlignSheetTransform'
-        && component.r !== undefined && component.i === undefined;
+    const loaded = valueAt(current, path);
+    if (isInsertOnly(component) && loaded !== undefined) return [[path, asReplace(component)]];
+    if (isRemoveOnly(component) && (wholeAxisAlign || loaded === undefined)) return [];
+    return [entry];
 }
 
 /** Apply an edit authored against `sheetTransform` only, and derive `axisAlignSheetTransform` from it. */
 function applySheetTransformEdit(current: ISheetDrawing, edit: DrawingEdit, skeleton: SpreadsheetSkeleton | undefined): ISheetDrawing {
     const view = { ...current };
+    // Leaf edits and replacements need the old value; the current model no longer stores it.
     const readsOldValue = edit.some(([path, component]) => path[0] === 'sheetTransform' && (path.length > 1 || component.r !== undefined));
     if (!view.sheetTransform && readsOldValue && skeleton) {
         view.sheetTransform = getLegacySheetDrawingPosition(current, skeleton);
@@ -201,6 +189,10 @@ function applySheetTransformEdit(current: ISheetDrawing, edit: DrawingEdit, skel
         : normalizeSheetDrawing(updated);
     const { sheetTransform: _legacy, ...drawing } = normalized;
     return drawing as ISheetDrawing;
+}
+
+function valueAt(drawing: ISheetDrawing | undefined, path: JSON1.Path): unknown {
+    return path.reduce<unknown>((node, key) => (node === null || typeof node !== 'object' ? undefined : (node as Record<string | number, unknown>)[key]), drawing);
 }
 
 function getDrawingId(path: JSON1.Path, unitId: string, subUnitId: string): string | undefined {

@@ -18,7 +18,7 @@ import type { JSONXActions, JSONXPath } from './json1';
 import type { IEdit } from './operation';
 import type { Value } from './revision';
 import { JSON1WriteCursor } from './cursor';
-import { editComponent } from './operation';
+import { editComponent, entries } from './operation';
 import { Revision } from './revision';
 
 function parentIn(revision: Revision, value: Value, set: Set<Value>) {
@@ -108,6 +108,6 @@ export function compose(first: JSONXActions, second: JSONXActions) {
         return first ?? second;
     }
     const base = new Revision();
-    const final = base.copy().replay(first).replay(second);
+    const final = new Revision(base.root).replay(entries(first)).replay(entries(second));
     return difference(base, final, final.edits);
 }

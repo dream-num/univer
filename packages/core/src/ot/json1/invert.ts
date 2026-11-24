@@ -24,8 +24,8 @@ import { Revision } from './revision';
 export function invert(op: JSONXActions): JSONXActions {
     const writer = new JSON1WriteCursor();
     const base = new Revision();
-    const result = base.copy().replay(op);
     const changes = entries(op);
+    const result = new Revision(base.root).replay(changes);
     const drops = new Set(changes.filter(({ component }) => component.i !== undefined || component.d !== undefined).map(({ path }) => result.at(path)));
     for (const { path, component } of changes) {
         if (component.p !== undefined) {

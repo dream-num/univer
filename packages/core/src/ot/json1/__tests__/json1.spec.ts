@@ -64,6 +64,15 @@ describe('document changesets', () => {
         expect(JSON1.apply(final, JSON1.invertWithDoc(batch, initial))).toEqual(initial);
     });
 
+    it('replays and undoes Unicode edits across paired and unpaired surrogates', () => {
+        const before = 'A😀e\u0301\uD800B\uDC00尾';
+        const edit: JSONXActions = [{ es: [1, { d: 1 }, '🐈', 2, { d: 1 }, '甲', 1, { d: 1 }] }];
+        const after = JSON1.apply(before, wire(edit))!;
+        expect(after).toBe('A🐈e\u0301甲B尾');
+        expect(JSON1.apply(after, wire(JSON1.invertWithDoc(edit, before)))).toBe(before);
+        expect(() => JSON1.apply(before, [{ es: [8, { d: 1 }] }])).toThrow('Text edit extends past the source');
+    });
+
     it('preserves remote edits when undoing a move and a concurrent document-body edit', () => {
         const initial = { rows: [{ id: 'A' }, { id: 'B' }], body: { dataStream: 'ab\r\n', customBlocks: [], customRanges: [] } };
         const insert = (s: string): JSONXActions => ['body', { et: 'text-x', e: [
@@ -132,6 +141,19 @@ describe('document changesets', () => {
             }
             expect(JSON1.apply(model, JSON1.invertWithDoc(history, initial))).toEqual(initial);
         }
+    });
+
+    it('replays a batch assembled by revisiting earlier rows in arbitrary order', () => {
+        const writer = JSON1.writeCursor();
+        const before = Array.from({ length: 127 }, () => ({ count: 0 }));
+        for (let row = 0; row < before.length; row++) {
+            const index = row * 71 % before.length;
+            writer.writeAtPath([index, 'count'], 'ena', index + 1);
+        }
+        const batch = wire(writer.get());
+        const after = JSON1.apply(before, batch)!;
+        expect(after).toEqual(before.map((_, index) => ({ count: index + 1 })));
+        expect(JSON1.apply(after, JSON1.invert(batch))).toEqual(before);
     });
 
     it('allows a collaboration filter to rewrite a component and rebuild a multi-slot move', () => {

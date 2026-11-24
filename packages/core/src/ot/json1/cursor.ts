@@ -185,9 +185,20 @@ export class JSON1WriteCursor implements IJSON1WriteCursor {
             }
             next = this._lastBranch + 1;
         }
-        // Ordered batch writes resume at the next sibling instead of rescanning the whole batch.
-        while (next < list.length && precedes((list[next] as OperationList)[0] as Key, key)) {
-            next++;
+        // Ordered writes usually append or hit the next sibling. A reset can revisit any earlier branch.
+        if (next < list.length && precedes((list[next] as OperationList)[0] as Key, key)) {
+            let end = list.length;
+            if (precedes((list[end - 1] as OperationList)[0] as Key, key)) {
+                next = end;
+            }
+            while (next < end) {
+                const middle = next + Math.floor((end - next) / 2);
+                if (precedes((list[middle] as OperationList)[0] as Key, key)) {
+                    next = middle + 1;
+                } else {
+                    end = middle;
+                }
+            }
         }
         let child = list[next] as OperationList | undefined;
         if (child?.[0] !== key) {

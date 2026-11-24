@@ -15,6 +15,7 @@
  */
 
 import type { JSONXActions, JSONXPath } from './json1';
+import { entries } from './operation';
 import { Revision } from './revision';
 import { unicodeText } from './unicode-text';
 
@@ -22,7 +23,7 @@ import { unicodeText } from './unicode-text';
 export function transformPosition(path: JSONXPath, op: JSONXActions): JSONXPath | null {
     const source = new Revision();
     const value = source.at(path);
-    const result = source.copy().replay(op);
+    const result = new Revision(source.root).replay(entries(op));
     const mapped = result.path(value);
     const offset = path[path.length - 1];
     if (mapped && typeof offset === 'number') {

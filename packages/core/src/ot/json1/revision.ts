@@ -15,9 +15,9 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash-es';
-import type { JSON1Document, JSONXActions, JSONXPath } from './json1';
-import type { IEdit } from './operation';
-import { entries, getEdit } from './operation';
+import type { JSON1Document, JSONXPath } from './json1';
+import type { IEdit, IEntry } from './operation';
+import { getEdit } from './operation';
 
 type Key = JSONXPath[number];
 interface ILocation { parent: Value; key: Key; version: number; action?: object }
@@ -25,18 +25,18 @@ interface IShift { index: number; add: boolean; value: Value }
 
 /** Identity shared by all revisions. Untouched children exist on demand, even at a large array index. */
 export class Value {
-    private readonly _children = new Map<Key, Value>();
-    readonly absent = new Set<Key>();
+    private _children?: Map<Key, Value>;
+    absent?: Set<Key>;
 
     constructor(readonly home?: { parent: Value; key: Key }, readonly literal?: JSON1Document) {}
 
     child(key: Key) {
-        let value = this._children.get(key);
+        let value = this._children?.get(key);
         if (!value) {
             const data = this.literal as Record<Key, JSON1Document> | undefined;
             const literal = data && Object.prototype.hasOwnProperty.call(data, key) ? data[key] : undefined;
             value = new Value({ parent: this, key }, literal);
-            this._children.set(key, value);
+            (this._children ??= new Map()).set(key, value);
         }
         return value;
     }
@@ -71,7 +71,7 @@ export class Revision {
             if (props?.has(key)) {
                 return props.get(key)!;
             }
-            if (parent.absent.has(key)) {
+            if (parent.absent?.has(key)) {
                 return null;
             }
         } else {
@@ -174,7 +174,7 @@ export class Revision {
                 this._objects.set(parent, props = new Map());
             }
             if (add && !props.has(key)) {
-                parent.absent.add(key);
+                (parent.absent ??= new Set()).add(key);
             }
             props.set(key, add ? value : null);
         }
@@ -235,7 +235,7 @@ export class Revision {
                 if (child && data[key] !== undefined) {
                     this._record(child, data[key]);
                 }
-                if (!value.absent.has(key)) {
+                if (!value.absent?.has(key)) {
                     Object.defineProperty(original, key, {
                         value: this.records.get(value.child(key)),
                         writable: true,
@@ -250,8 +250,7 @@ export class Revision {
     }
 
     /** Interpret one changeset, keeping a stable identity for a value while it travels between paths. */
-    replay(op: JSONXActions, concurrent?: Revision) {
-        const changes = entries(op);
+    replay(changes: IEntry[], concurrent?: Revision) {
         const held: Value[] = [];
         for (let i = changes.length - 1; i >= 0; i--) {
             const { path, component } = changes[i];

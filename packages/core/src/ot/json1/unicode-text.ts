@@ -83,32 +83,36 @@ function combine(a: Script, b: Script, side?: 'left' | 'right'): Script {
     return out;
 }
 
-function visit(text: string, op: Script, record: boolean) {
+/** Advance by code points while keeping UTF-16 offsets for slicing the original string. */
+function visit(text: string, op: Script): string;
+function visit(text: string, op: Script, undo: Script): Script;
+function visit(text: string, op: Script, undo?: Script): string | Script {
     if (typeof text !== 'string') {
         throw new TypeError('A text edit requires a string');
     }
-    const chars = Array.from(text);
-    let index = 0;
-    const result: string[] = [];
-    const script: Script = [];
+    let offset = 0;
+    let result = '';
     for (const span of op) {
-        if (typeof span === 'string') {
-            result.push(span);
-            script.push(span);
-            continue;
+        const start = offset;
+        if (typeof span !== 'string') {
+            const count = length(span);
+            for (let i = 0; i < count; i++) {
+                const point = text.codePointAt(offset);
+                if (point === undefined) {
+                    throw new Error('Text edit extends past the source');
+                }
+                offset += point > 0xFFFF ? 2 : 1;
+            }
         }
-        const n = length(span);
-        if (index + n > chars.length) {
-            throw new Error('Text edit extends past the source');
+        if (undo) {
+            undo.push(typeof span === 'object' ? { d: text.slice(start, offset) } : span);
+        } else if (typeof span === 'number') {
+            result += text.slice(start, offset);
+        } else if (typeof span === 'string') {
+            result += span;
         }
-        const content = chars.slice(index, index + n).join('');
-        if (typeof span === 'number') {
-            result.push(content);
-        }
-        script.push(record && typeof span === 'object' ? { d: content } : span);
-        index += n;
     }
-    return { text: result.join('') + chars.slice(index).join(''), script };
+    return undo ?? result + text.slice(offset);
 }
 
 /** Plain-text history uses Unicode code points for retain and delete lengths. */
@@ -139,7 +143,8 @@ export const unicodeText = {
             throw new TypeError('Expected a text edit');
         }
         for (const [i, span] of op.entries()) {
-            if (span == null || !Number.isSafeInteger(length(span)) || length(span) <= 0) {
+            const value = typeof span === 'object' ? span?.d : span;
+            if (typeof value === 'string' ? !value.length : !Number.isSafeInteger(value) || value <= 0) {
                 throw new Error('Invalid text span');
             }
             if (typeof span === 'number' && (i + 1 === op.length || typeof op[i + 1] === 'number')) {
@@ -148,10 +153,10 @@ export const unicodeText = {
         }
     },
     isNoop: (op: Script) => op.length === 0,
-    apply: (doc: string, op: Script) => visit(doc, op, false).text,
+    apply: (doc: string, op: Script) => visit(doc, op),
     compose: (a: Script, b: Script) => combine(a, b),
     transform: (a: Script, b: Script, side: 'left' | 'right') => combine(a, b, side),
-    makeInvertible: (op: Script, doc: string) => visit(doc, op, true).script,
+    makeInvertible: (op: Script, doc: string) => visit(doc, op, []),
     invert(op: Script): Script {
         return op.map((span) => {
             if (typeof span === 'number') {

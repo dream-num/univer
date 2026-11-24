@@ -105,16 +105,23 @@ function requireValid(condition: unknown): asserts condition {
     }
 }
 
-function validateComponent(c: IJSON1Component, picks: Set<number>, drops: Set<number>) {
-    requireValid(Object.keys(c).every((k) => ['i', 'r', 'd', 'p', 'et', 'e', 'es', 'ena'].includes(k)));
-    requireValid(!(c.p !== undefined && c.r !== undefined) && !(c.d !== undefined && c.i !== undefined));
-    for (const [slot, set] of [[c.p, picks], [c.d, drops]] as const) {
-        if (slot !== undefined) {
-            requireValid(Number.isSafeInteger(slot) && slot >= 0 && !set.has(slot));
-            set.add(slot);
-        }
+const componentFields = new Set(['i', 'r', 'd', 'p', 'et', 'e', 'es', 'ena']);
+
+function validateSlot(slot: number | undefined, used: Set<number>) {
+    if (slot !== undefined) {
+        requireValid(Number.isSafeInteger(slot) && slot >= 0 && !used.has(slot));
+        used.add(slot);
     }
-    requireValid((c.e === undefined) === (c.et === undefined) && [c.es, c.ena, c.et].filter((v) => v !== undefined).length <= 1);
+}
+
+function validateComponent(c: IJSON1Component, picks: Set<number>, drops: Set<number>) {
+    requireValid(Object.keys(c).every((k) => componentFields.has(k)));
+    requireValid(!(c.p !== undefined && c.r !== undefined) && !(c.d !== undefined && c.i !== undefined));
+    validateSlot(c.p, picks);
+    validateSlot(c.d, drops);
+    requireValid((c.e === undefined) === (c.et === undefined));
+    requireValid(c.es === undefined || (c.ena === undefined && c.et === undefined));
+    requireValid(c.ena === undefined || c.et === undefined);
     requireValid(c.ena === undefined || Number.isFinite(c.ena));
     const edit = getEdit(c);
     edit?.type.checkValidOp?.(edit.payload);
@@ -128,6 +135,7 @@ export function entries(op: JSONXActions): IEntry[] {
     const drops = new Set<number>();
     function visit(list: NonNullable<JSONXActions>, path: JSONXPath) {
         requireValid(Array.isArray(list) && list.length);
+        const depth = path.length;
         let hasComponent = false;
         let branches = 0;
         let previous: Key | undefined;
@@ -135,7 +143,7 @@ export function entries(op: JSONXActions): IEntry[] {
             if (Array.isArray(item)) {
                 const key = item[0];
                 requireValid(validKey(key) && (previous === undefined || precedes(previous, key)));
-                visit(item, path.slice());
+                visit(item, path);
                 previous = key;
                 branches++;
             } else if (validKey(item)) {
@@ -150,6 +158,7 @@ export function entries(op: JSONXActions): IEntry[] {
             }
         }
         requireValid((hasComponent || branches > 0) && branches !== 1);
+        path.length = depth;
     }
     if (op !== null) {
         visit(op, []);

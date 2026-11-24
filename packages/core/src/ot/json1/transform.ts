@@ -140,16 +140,10 @@ function mergePlacements(high: Revision, low: Revision, merged: Revision, report
             merged.cut(value);
         }
     }
-    const drops = Array.from(high.locations.keys()).filter((value) => high.path(value) !== null);
-    drops.sort((a, b) => {
-        const x = high.path(a)!;
-        const y = high.path(b)!;
-        if (x.length !== y.length) {
-            return x.length - y.length;
-        }
-        return comparePath(x, y);
-    });
-    for (const value of drops) {
+    const drops = Array.from(high.locations.keys(), (value) => ({ value, path: high.path(value) }))
+        .filter((drop): drop is { value: Value; path: JSONXPath } => drop.path !== null);
+    drops.sort((a, b) => a.path.length - b.path.length || comparePath(a.path, b.path));
+    for (const { value } of drops) {
         const destination = high.location(value)!;
         const parent = destination.parent;
         if (low.locations.get(value) === null) {
@@ -188,11 +182,10 @@ export function rebase(op: JSONXActions, against: JSONXActions, side: Side, allo
     if (!op || !against) {
         return op;
     }
-    const base = new Revision();
     const highOp = side === 'left' ? op : against;
     const lowOp = side === 'left' ? against : op;
-    const high = base.copy().replay(highOp);
-    const low = base.copy().replay(lowOp, high);
+    const high = new Revision().replay(entries(highOp));
+    const low = new Revision(high.root).replay(entries(lowOp), high);
     const merged = low.copy();
     const report: Report = (type, a, b) => {
         const first = fragment(a, highOp);

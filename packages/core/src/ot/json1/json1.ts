@@ -14,8 +14,60 @@
  * limitations under the License.
  */
 
-import { editOp, type as engine } from 'ot-json1';
+import { apply } from './apply';
+import { compose } from './compose';
 import { JSON1ReadCursor, JSON1WriteCursor } from './cursor';
+import { invert, invertWithDoc, makeInvertible } from './invert';
+import { checkValidOp, editOp, insertOp, moveOp, registerSubtype, removeOp, replaceOp } from './operation';
+import { transformPosition } from './position';
+import { ConflictType, transform, transformWithConflictsPred } from './transform';
+
+/*! @license
+ * ot-json1 1.0.2
+ *
+ * Copyright (c) 2013-2018, Joseph Gentle <me@josephg.com>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ *
+ * ot-text-unicode 4.0.0
+ *
+ * All code contributed to this repository is licensed under the standard MIT license:
+ *
+ * Copyright 2011 ottypes library contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following condition:
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * unicount 1.1.0
+ *
+ * Copyright 2019 Joseph Gentle
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 /** A JSON snapshot to which changesets can be applied. */
 export type JSON1Document = null | boolean | number | string | JSON1Document[] | { [key: string]: JSON1Document };
@@ -59,7 +111,7 @@ export interface IJSON1WriteCursor {
 
 type Transform = (op: JSONXActions, against: JSONXActions, side: 'left' | 'right') => JSONXActions;
 
-interface IJSON1Conflict {
+export interface IJSON1Conflict {
     type: number;
     op1: JSONXActions;
     op2: JSONXActions;
@@ -95,28 +147,25 @@ interface IJSON1Operations {
 
 /** Shared JSON1 operations for building, replaying, and rebasing Univer changesets. */
 export const JSON1: IJSON1Operations = {
-    insertOp: (path, value) => new JSON1WriteCursor().writeAtPath(path, 'i', value).get(),
-    removeOp: (path, value = true) => new JSON1WriteCursor().writeAtPath(path, 'r', value).get(),
-    replaceOp: (path, previous, next) => new JSON1WriteCursor().at(path, (writer) => {
-        writer.write('r', previous);
-        writer.write('i', next);
-    }).get(),
-    moveOp: (from, to) => new JSON1WriteCursor().writeMove(from, to).get(),
+    insertOp,
+    removeOp,
+    replaceOp,
+    moveOp,
     readCursor: (op) => new JSON1ReadCursor(op),
     writeCursor: () => new JSON1WriteCursor(),
-    checkValidOp: engine.checkValidOp,
-    isNoop: engine.isNoop,
-    apply: engine.apply,
-    compose: engine.compose,
-    invert: engine.invert,
-    makeInvertible: engine.makeInvertible,
-    invertWithDoc: engine.invertWithDoc,
-    transform: (op, against, side) => engine.transform(op, against, side) ?? null,
-    transformPosition: engine.transformPosition,
-    transformNoConflict: engine.transformNoConflict,
-    createTransform: (allowConflict) => engine.typeAllowingConflictsPred(allowConflict).transform,
-    RM_UNEXPECTED_CONTENT: engine.RM_UNEXPECTED_CONTENT,
-    DROP_COLLISION: engine.DROP_COLLISION,
+    checkValidOp,
+    isNoop: (op) => op == null,
+    apply,
+    compose,
+    invert,
+    makeInvertible,
+    invertWithDoc,
+    transform,
+    transformPosition,
+    transformNoConflict: (op, against, side) => transformWithConflictsPred(() => true, op, against, side),
+    createTransform: (allow) => (op, against, side) => transformWithConflictsPred(allow, op, against, side),
+    RM_UNEXPECTED_CONTENT: ConflictType.RM_UNEXPECTED_CONTENT,
+    DROP_COLLISION: ConflictType.DROP_COLLISION,
 };
 
 export interface IJSON1Subtype<TSnapshot, TEdit> {
@@ -131,7 +180,7 @@ export interface IJSON1Subtype<TSnapshot, TEdit> {
 }
 
 export function registerJSON1Subtype<TSnapshot, TEdit>(subtype: IJSON1Subtype<TSnapshot, TEdit>): void {
-    engine.registerSubtype(subtype);
+    registerSubtype(subtype);
 }
 
 export function editJSON1Subtype(path: JSONXPath, name: string, edit: unknown): JSONXActions {

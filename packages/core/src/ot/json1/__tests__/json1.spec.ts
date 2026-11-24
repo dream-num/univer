@@ -15,8 +15,11 @@
  */
 
 import { insertOp, moveOp, removeOp, replaceOp, type as upstream } from 'ot-json1';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { IJSON1WriteCursor, JSON1Document, JSONXActions, JSONXPath } from '../json1';
+import { JSONX } from '../../../docs/data-model/json-x/json-x';
+import { TextXActionType } from '../../../docs/data-model/text-x/action-types';
+import { TextX } from '../../../docs/data-model/text-x/text-x';
 import { JSON1 } from '../json1';
 
 describe('JSON1 changesets', () => {
@@ -186,6 +189,7 @@ describe('JSON1 cursor interoperability', () => {
             };
             let snapshot: JSON1Document = before;
             let batch: JSONXActions = null;
+            let peerBatch: JSONXActions = null;
             for (let step = 0; step < 40; step++) {
                 const tables = snapshot as Record<string, Array<{ value: JSON1Document }>>;
                 const table = choose(2) ? 'active' : 'archived';
@@ -220,15 +224,19 @@ describe('JSON1 cursor interoperability', () => {
                 const readPeer = rebuild(peer, JSON1.readCursor, JSON1.writeCursor());
                 const readLocal = rebuild(local, upstream.readCursor, upstream.writeCursor());
                 const after: JSON1Document = upstream.apply(snapshot, readLocal)!;
-                expect(upstream.apply(snapshot, readPeer)).toEqual(after);
-                expect(upstream.apply(after, upstream.invertWithDoc(readPeer, snapshot))).toEqual(snapshot);
-                batch = upstream.compose(batch, step % 2 ? readPeer : readLocal);
+                expect(JSON1.apply(snapshot, readPeer)).toEqual(after);
+                expect(JSON1.apply(after, upstream.invertWithDoc(readLocal, snapshot))).toEqual(snapshot);
+                expect(upstream.apply(after, JSON1.invertWithDoc(readPeer, snapshot))).toEqual(snapshot);
+                batch = JSON1.compose(batch, readPeer);
+                peerBatch = upstream.compose(peerBatch, readLocal);
+                expect(batch).toEqual(peerBatch);
                 snapshot = after;
             }
             const replay = rebuild(batch, JSON1.readCursor, JSON1.writeCursor());
             upstream.checkValidOp(replay);
             expect(replay).toStrictEqual(batch);
             expect(upstream.apply(before, replay)).toEqual(snapshot);
+            expect(JSON1.apply(before, peerBatch)).toEqual(snapshot);
             expect(upstream.apply(snapshot, upstream.invertWithDoc(replay, before))).toEqual(before);
         }
     });
@@ -260,5 +268,153 @@ describe('JSON1 cursor interoperability', () => {
             expect(upstream.apply(empty, upstream.invert(removed))).toEqual(value);
         }
         expect(JSON1.moveOp(['order', 2], ['order', 2])).toEqual(moveOp(['order', 2], ['order', 2]));
+    });
+});
+
+/** Operations and snapshots cross the network and history store as JSON. */
+function wire<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value));
+}
+
+describe('JSON1 mixed-version history and collaboration', () => {
+    beforeAll(() => upstream.registerSubtype(TextX));
+
+    it('replays persisted revisions, exchanges undo operations and redoes the original history', () => {
+        const initial = {
+            rows: [{ id: 'a', value: false }, { id: 'b', value: null }],
+            archive: [],
+            title: 'A🤖文',
+            count: 0,
+            body: { dataStream: 'hello\r\n', customBlocks: [], customRanges: [] },
+        };
+        // Frozen wire examples include compact deletion, pick/drop, numeric, Unicode and document edits.
+        const revisions: JSONXActions[] = [
+            [['archive', 0, { d: 0 }], ['rows', 0, { p: 0 }]],
+            [['count', { ena: 3 }], ['title', { es: [1, { d: 1 }, '新'] }]],
+            ['body', { et: 'text-x', e: [{ t: 'r', len: 2 }, { t: 'd', len: 2 }] }],
+            ['rows', 0, { r: true }],
+        ];
+        expect(JSONX.getInstance().removeOp(['rows', 0])).toEqual(revisions[3]);
+        for (const [author, peer] of [[JSON1, upstream], [upstream, JSON1]] as const) {
+            let snapshot: JSON1Document = wire(initial);
+            let authorBatch: JSONXActions = null;
+            let peerBatch: JSONXActions = null;
+            const previous: JSON1Document[] = [];
+            const undos: JSONXActions[] = [];
+            for (const op of revisions) {
+                previous.push(wire(snapshot));
+                const invertible = author.makeInvertible(wire(op), wire(snapshot));
+                const undo = peer.invert(wire(invertible));
+                expect(undo).toEqual(author.invertWithDoc(wire(op), wire(snapshot)));
+                undos.push(undo);
+                authorBatch = author.compose(authorBatch, wire(op));
+                peerBatch = peer.compose(peerBatch, wire(op));
+                const next: JSON1Document = peer.apply(wire(snapshot), wire(op))!;
+                expect(author.apply(wire(snapshot), wire(op))).toEqual(next);
+                snapshot = next;
+            }
+            expect(snapshot).toMatchObject({
+                rows: [],
+                archive: [{ id: 'a', value: false }],
+                title: 'A新文',
+                count: 3,
+                body: { dataStream: 'heo\r\n' },
+            });
+            expect(authorBatch).toEqual(peerBatch);
+            expect(peer.apply(wire(initial), wire(authorBatch))).toEqual(snapshot);
+            expect(author.apply(wire(initial), wire(peerBatch))).toEqual(snapshot);
+            const final = wire(snapshot);
+            for (let i = undos.length - 1; i >= 0; i--) {
+                snapshot = author.apply(snapshot, wire(undos[i]))!;
+                expect(snapshot).toEqual(previous[i]);
+            }
+            for (const redo of revisions) {
+                snapshot = peer.apply(snapshot, wire(redo))!;
+            }
+            expect(snapshot).toEqual(final);
+        }
+    });
+
+    it('replays sparse document bodies with the same TextX undo serialization as older clients', () => {
+        const sparse = { body: { dataStream: 'abc\r\n' } };
+        const deletion: JSONXActions = ['body', { et: 'text-x', e: [{ t: 'r', len: 1 }, { t: 'd', len: 1 }] }];
+        const historicalUndo = upstream.invertWithDoc(wire(deletion), wire(sparse));
+        const oldAfter = upstream.apply(wire(sparse), wire(deletion));
+        const expected = upstream.apply(wire(oldAfter), wire(historicalUndo));
+        const localAfter = JSON1.apply(wire(sparse), wire(deletion));
+        expect(JSON1.apply(wire(localAfter), wire(historicalUndo))).toEqual(expected);
+        expect(upstream.apply(wire(oldAfter), JSON1.invertWithDoc(wire(deletion), wire(sparse)))).toEqual(expected);
+        expect(expected).toMatchObject({ body: { dataStream: sparse.body.dataStream } });
+    });
+
+    it('keeps remote edits when undoing and redoing a concurrent move and rich-text insertion', () => {
+        const initial = { body: { dataStream: 'ab\r\n', customBlocks: [], customRanges: [] }, rows: [{ id: 'A' }, { id: 'B' }] };
+        const leftInsert = JSONX.getInstance().editOp([
+            { t: TextXActionType.RETAIN, len: 1 },
+            { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'L' } },
+        ]);
+        const rightInsert: JSONXActions = ['body', { et: 'text-x', e: [
+            { t: 'r', len: 1 },
+            { t: 'i', len: 1, body: { dataStream: 'R' } },
+        ] }];
+        for (const [left, right] of [[JSON1, upstream], [upstream, JSON1]] as const) {
+            const move = moveOp(['rows', 0], ['rows', 1]);
+            const leftOp = left.compose(move, wire(leftInsert));
+            const rightOp = right.compose(replaceOp(['rows', 0, 'id'], 'A', 'A*'), wire(rightInsert));
+            const afterLeft = left.apply(wire(initial), wire(leftOp))!;
+            const afterRight = right.apply(wire(initial), wire(rightOp))!;
+            const leftPrime = left.transform(wire(leftOp), wire(rightOp), 'left')!;
+            const rightPrime = right.transform(wire(rightOp), wire(leftOp), 'right')!;
+            const merged = right.apply(wire(afterRight), wire(leftPrime))!;
+            expect(left.apply(wire(afterLeft), wire(rightPrime))).toEqual(merged);
+            expect(merged).toMatchObject({ body: { dataStream: 'aLRb\r\n' }, rows: [{ id: 'B' }, { id: 'A*' }] });
+            expect(left.transformPosition(['rows', 0, 'id'], move)).toEqual(['rows', 1, 'id']);
+            const undo = left.invertWithDoc(wire(leftPrime), wire(afterRight));
+            expect(right.apply(wire(merged), wire(undo))).toEqual(afterRight);
+            const redo = right.invertWithDoc(wire(undo), wire(merged));
+            expect(left.apply(wire(afterRight), wire(redo))).toEqual(merged);
+        }
+    });
+
+    const conflicts: Array<{ name: string; type: number; doc: JSON1Document; left: JSONXActions; right: JSONXActions }> = [
+        { name: 'competing insertions', type: upstream.DROP_COLLISION, doc: {}, left: insertOp(['a'], 1), right: insertOp(['a'], 2) },
+        { name: 'removal against a nested edit', type: upstream.RM_UNEXPECTED_CONTENT, doc: { a: {} }, left: removeOp(['a']), right: insertOp(['a', 'x'], 1) },
+        { name: 'cyclic moves', type: upstream.BLACKHOLE, doc: { a: {}, b: {} }, left: moveOp(['a'], ['b', 'a']), right: moveOp(['b'], ['a', 'b']) },
+    ];
+
+    it.each(conflicts)('exchanges conflict details and converges under an accepting policy for $name', ({ type, doc, left, right }) => {
+        const detected = upstream.tryTransform(left, right, 'left');
+        expect(detected.ok).toBe(false);
+        if (detected.ok) {
+            throw new Error('Expected the reference engine to report a conflict');
+        }
+        expect(detected.conflict.type).toBe(type);
+        const detail = { name: 'writeConflict', type: 'writeConflict', conflict: detected.conflict };
+        expect(() => JSON1.transform(left, right, 'left')).toThrowError(expect.objectContaining(detail));
+        expect(() => JSON1.createTransform(() => false)(left, right, 'left')).toThrowError(expect.objectContaining(detail));
+
+        const allow = (conflict: { type: number }) => conflict.type === type;
+        const local = JSON1.createTransform(allow);
+        const old = upstream.typeAllowingConflictsPred(allow).transform;
+        const leftPrime = local(wire(left), wire(right), 'left');
+        const rightPrime = old(wire(right), wire(left), 'right');
+        expect(old(wire(left), wire(right), 'left')).toEqual(leftPrime);
+        expect(JSON1.transformNoConflict(wire(right), wire(left), 'right')).toEqual(rightPrime);
+        const appliedLeft = JSON1.apply(wire(doc), wire(left));
+        const appliedRight = upstream.apply(wire(doc), wire(right));
+        expect(JSON1.apply(appliedLeft, wire(rightPrime))).toEqual(upstream.apply(appliedRight, wire(leftPrime)));
+    });
+
+    it('rejects malformed persisted moves and out-of-order branches in both engines', () => {
+        for (const op of [
+            ['rows', 0, { p: 0 }],
+            [['a', { p: 1 }], ['b', { d: 1 }]],
+            [['b', { i: 1 }], ['a', { i: 2 }]],
+        ] satisfies JSONXActions[]) {
+            for (const engine of [JSON1, upstream]) {
+                expect(() => engine.checkValidOp(wire(op))).toThrow();
+                expect(() => engine.apply({}, wire(op))).toThrow();
+            }
+        }
     });
 });

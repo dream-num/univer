@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Adapted from ot-json1 1.0.2 (Joseph Gentle). See THIRD_PARTY_NOTICES.txt.
+
 import type { IJSON1Component, IJSON1WriteCursor, JSONXActions, JSONXPath } from './json1';
 
 type Key = JSONXPath[number];
@@ -23,9 +25,16 @@ function isComponent(item: OperationList[number] | undefined): item is IJSON1Com
     return item != null && typeof item === 'object' && !Array.isArray(item);
 }
 
-/** Visit the wire tree directly so consumers can inspect or edit a component at its original path. */
+interface IReadPosition {
+    list: OperationList;
+    offset: number;
+    branch: number;
+}
+
+/** A position in the encoded operation. Clones can follow moves without moving the original cursor. */
 export class JSON1ReadCursor {
-    private readonly _path: JSONXPath = [];
+    private _path: JSONXPath = [];
+    private _parents: IReadPosition[] = [];
     private _offset = 0;
 
     constructor(private _list: JSONXActions) {}
@@ -39,31 +48,93 @@ export class JSON1ReadCursor {
         return this._path.slice();
     }
 
-    traverse(writer: null, visit: (component: IJSON1Component, writer: null) => void): void {
+    getKey(): Key {
+        return this._path[this._path.length - 1];
+    }
+
+    clone(): JSON1ReadCursor {
+        const cursor = new JSON1ReadCursor(this._list);
+        cursor._offset = this._offset;
+        cursor._path = this._path.slice();
+        cursor._parents = this._parents.slice();
+        return cursor;
+    }
+
+    descendFirst(): boolean {
         const list = this._list;
         if (list === null) {
-            return;
+            return false;
         }
+        const index = this._offset + (this.getComponent() ? 1 : 0);
+        if (index >= list.length) {
+            return false;
+        }
+        const child = list[index];
+        const branch = Array.isArray(child) ? index : -1;
+        this._parents.push({ list, offset: this._offset, branch });
+        if (Array.isArray(child)) {
+            this._list = child;
+            this._offset = 1;
+            this._path.push(child[0] as Key);
+        } else {
+            this._offset = index + 1;
+            this._path.push(child as Key);
+        }
+        return true;
+    }
 
-        const start = this._offset;
-        const depth = this._path.length;
-        for (let index = start; index < list.length; index++) {
-            const item = list[index];
-            if (Array.isArray(item)) {
-                this._list = item;
-                this._offset = 0;
-                this.traverse(writer, visit);
-            } else if (typeof item === 'object') {
-                this._list = list;
-                this._offset = index;
-                visit(item, writer);
-            } else {
-                this._path.push(item);
-            }
+    nextSibling(): boolean {
+        const depth = this._parents.length - 1;
+        const parent = this._parents[depth];
+        if (!parent || parent.branch < 0 || parent.branch + 1 >= parent.list.length) {
+            return false;
         }
-        this._path.length = depth;
-        this._list = list;
-        this._offset = start;
+        const branch = parent.branch + 1;
+        // Cloned cursors share immutable parent frames.
+        this._parents[depth] = { ...parent, branch };
+        this._list = parent.list[branch] as OperationList;
+        this._offset = 1;
+        this._path[depth] = this._list[0] as Key;
+        return true;
+    }
+
+    ascend(): void {
+        const parent = this._parents.pop();
+        if (!parent) {
+            throw new Error('Cannot ascend above the JSON1 root');
+        }
+        this._list = parent.list;
+        this._offset = parent.offset;
+        this._path.pop();
+    }
+
+    * [Symbol.iterator](): Generator<Key> {
+        if (this.descendFirst()) {
+            do {
+                yield this.getKey();
+            } while (this.nextSibling());
+            this.ascend();
+        }
+    }
+
+    traverse<W extends JSON1WriteCursor | null>(writer: W, visit: (component: IJSON1Component, writer: W) => void): void {
+        const component = this.getComponent();
+        if (component) {
+            visit(component, writer);
+        }
+        for (const key of this) {
+            writer?.descend(key);
+            this.traverse(writer, visit);
+            writer?.ascend();
+        }
+    }
+
+    eachDrop<W extends JSON1WriteCursor | null>(writer: W, visit: (slot: number, writer: W) => void): void {
+        this.traverse(writer, (component, current) => {
+            if (component.d != null) {
+                visit(component.d, current);
+            }
+        });
     }
 }
 
@@ -74,7 +145,7 @@ interface IParentPosition {
 }
 
 /** JSON1 orders numeric array indices before string object keys, even when both spell the same digit. */
-function precedes(a: Key, b: Key): boolean {
+export function precedes(a: Key, b: Key): boolean {
     return typeof a === typeof b ? a < b : typeof a === 'number';
 }
 
@@ -134,23 +205,26 @@ export class JSON1WriteCursor implements IJSON1WriteCursor {
     }
 
     write<K extends keyof IJSON1Component>(key: K, value: IJSON1Component[K]): void {
+        const component = this.getComponent();
+        if (component[key] != null && component[key] !== value) {
+            throw new Error('Cannot overwrite an existing JSON1 component field');
+        }
+        component[key] = value;
+    }
+
+    getComponent(): IJSON1Component {
         for (const segment of this._pending) {
             this._enter(segment);
         }
         this._pending.length = 0;
 
         const existing = this._list[this._offset];
-        let component: IJSON1Component;
         if (isComponent(existing)) {
-            component = existing;
-        } else {
-            component = {};
-            this._list.splice(this._offset, 0, component);
+            return existing;
         }
-        if (component[key] != null && component[key] !== value) {
-            throw new Error('Cannot overwrite an existing JSON1 component field');
-        }
-        component[key] = value;
+        const component: IJSON1Component = {};
+        this._list.splice(this._offset, 0, component);
+        return component;
     }
 
     private _enter(key: Key): void {
@@ -200,7 +274,7 @@ export class JSON1WriteCursor implements IJSON1WriteCursor {
         this.reset();
     }
 
-    at(path: JSONXPath, visit: (writer: IJSON1WriteCursor) => void): this {
+    at(path: JSONXPath, visit: (writer: JSON1WriteCursor) => void): this {
         this.descendPath(path);
         visit(this);
         for (let i = 0; i < path.length; i++) {
@@ -220,7 +294,7 @@ export class JSON1WriteCursor implements IJSON1WriteCursor {
     }
 
     /** Merge fields at paths relative to the current node, retaining move slot numbers and subtype payloads. */
-    mergeTree(op: JSONXActions): void {
+    mergeTree(op: JSONXActions, merge?: (component: IJSON1Component, writer: JSON1WriteCursor) => void): void {
         if (op === null) {
             return;
         }
@@ -232,8 +306,12 @@ export class JSON1WriteCursor implements IJSON1WriteCursor {
         let depth = 0;
         for (const item of op) {
             if (Array.isArray(item)) {
-                this.mergeTree(item);
+                this.mergeTree(item, merge);
             } else if (isComponent(item)) {
+                if (merge) {
+                    merge(item, this);
+                    continue;
+                }
                 for (const field of Object.keys(item) as Array<keyof IJSON1Component>) {
                     this.write(field, item[field]);
                 }

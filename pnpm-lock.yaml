@@ -630,9 +630,6 @@ importers:
       lodash-es:
         specifier: ^4.18.1
         version: 4.18.1
-      ot-json1:
-        specifier: ^1.0.2
-        version: 1.0.2
       rbush:
         specifier: ^4.0.1
         version: 4.0.1
@@ -646,6 +643,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      ot-json1:
+        specifier: 1.0.2
+        version: 1.0.2
       rxjs:
         specifier: 7.8.2
         version: 7.8.2

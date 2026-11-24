@@ -15,7 +15,13 @@
  */
 
 import { ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
-import { ClearSelectionContentCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import { AddHyperLinkMutation } from '../../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../../commands/mutations/remove-hyper-link.mutation';
@@ -23,54 +29,57 @@ import { HyperLinkModel } from '../../models/hyper-link.model';
 import { SheetHyperLinkSetRangeController } from '../set-range.controller';
 
 describe('SheetHyperLinkSetRangeController', () => {
-    it('clears only hyperlinks in resolved content ranges through redo and undo', () => {
-        const univer = new Univer();
-        const injector = univer.__getInjector();
-        injector.add([HyperLinkModel]);
-        injector.add([SheetsSelectionsService]);
-        injector.add([SheetInterceptorService]);
-        injector.add([SheetHyperLinkSetRangeController]);
-        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
-            id: 'test',
-            locale: LocaleType.EN_US,
-            sheetOrder: ['sheet1'],
-            sheets: { sheet1: { id: 'sheet1', name: 'Sheet1', cellData: {} } },
-        });
-        try {
-            const commands = injector.get(ICommandService);
-            commands.registerCommand(AddHyperLinkMutation);
-            commands.registerCommand(RemoveHyperLinkMutation);
-            const model = injector.get(HyperLinkModel);
-            injector.get(SheetHyperLinkSetRangeController);
-            injector.get(SheetsSelectionsService).addSelections([{
-                range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
-                primary: null,
-                style: null,
-            }]);
-            ['A', 'B', 'C'].forEach((id, row) => model.addHyperLink('test', 'sheet1', {
-                id,
-                row,
-                column: 0,
-                display: id,
-                payload: `https://example.com/${id}`,
-            }));
-            const mutations = injector.get(SheetInterceptorService).onCommandExecute({
-                id: ClearSelectionContentCommand.id,
-                params: {
-                    unitId: 'test',
-                    subUnitId: 'sheet1',
-                    ranges: [0, 2].map((row) => ({ startRow: row, endRow: row, startColumn: 0, endColumn: 0 })),
-                },
+    it.each([ClearSelectionContentCommand.id, ClearSelectionAllCommand.id, ClearSelectionFormatCommand.id])(
+        'clears only hyperlinks in resolved ranges through redo and undo (%s)',
+        (commandId) => {
+            const univer = new Univer();
+            const injector = univer.__getInjector();
+            injector.add([HyperLinkModel]);
+            injector.add([SheetsSelectionsService]);
+            injector.add([SheetInterceptorService]);
+            injector.add([SheetHyperLinkSetRangeController]);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                id: 'test',
+                locale: LocaleType.EN_US,
+                sheetOrder: ['sheet1'],
+                sheets: { sheet1: { id: 'sheet1', name: 'Sheet1', cellData: {} } },
             });
-            const links = () => [0, 1, 2].map((row) => model.getHyperLinkByLocation('test', 'sheet1', row, 0)?.id);
-            mutations.redos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
-            expect(links()).toEqual([undefined, 'B', undefined]);
-            mutations.undos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
-            expect(links()).toEqual(['A', 'B', 'C']);
-            mutations.redos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
-            expect(links()).toEqual([undefined, 'B', undefined]);
-        } finally {
-            univer.dispose();
+            try {
+                const commands = injector.get(ICommandService);
+                commands.registerCommand(AddHyperLinkMutation);
+                commands.registerCommand(RemoveHyperLinkMutation);
+                const model = injector.get(HyperLinkModel);
+                injector.get(SheetHyperLinkSetRangeController);
+                injector.get(SheetsSelectionsService).addSelections([{
+                    range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
+                    primary: null,
+                    style: null,
+                }]);
+                ['A', 'B', 'C'].forEach((id, row) => model.addHyperLink('test', 'sheet1', {
+                    id,
+                    row,
+                    column: 0,
+                    display: id,
+                    payload: `https://example.com/${id}`,
+                }));
+                const mutations = injector.get(SheetInterceptorService).onCommandExecute({
+                    id: commandId,
+                    params: {
+                        unitId: 'test',
+                        subUnitId: 'sheet1',
+                        ranges: [0, 2].map((row) => ({ startRow: row, endRow: row, startColumn: 0, endColumn: 0 })),
+                    },
+                });
+                const links = () => [0, 1, 2].map((row) => model.getHyperLinkByLocation('test', 'sheet1', row, 0)?.id);
+                mutations.redos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
+                expect(links()).toEqual([undefined, 'B', undefined]);
+                mutations.undos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
+                expect(links()).toEqual(['A', 'B', 'C']);
+                mutations.redos.forEach(({ id, params }) => commands.syncExecuteCommand(id, params));
+                expect(links()).toEqual([undefined, 'B', undefined]);
+            } finally {
+                univer.dispose();
+            }
         }
-    });
+    );
 });

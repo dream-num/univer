@@ -149,18 +149,49 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
                 range: visibleRange,
                 ranges: [visibleRange],
             };
-            const intercepted = sheetInterceptorService.onCommandExecute({
+            const groups = sheetInterceptorService.getCommandMutationGroups({
                 id: RemoveRowCommandId,
                 params: interceptorParams,
             });
+            const preRedos = groups.flatMap((group) => group.preRedos ?? []);
             const spanRedos = [
-                ...(intercepted.preRedos ?? []),
+                ...preRedos,
                 ...redos,
-                ...intercepted.redos,
+                ...groups.flatMap((group) => group.redos),
             ];
             const result = sequenceExecute(spanRedos, commandService);
             if (!result.result) {
-                // Preserve recovery of already completed spans if a later interceptor fails.
+                // Recover the completed prefix of this span as well as earlier spans.
+                const preUndos: IMutationInfo[] = [];
+                const postUndos: IMutationInfo[] = [];
+                const rollbackPre: IMutationInfo[] = [];
+                const rollbackPost: IMutationInfo[] = [];
+                let preIndex = 0;
+                let postIndex = preRedos.length + redos.length;
+                for (const group of groups) {
+                    const preCount = group.preRedos?.length ?? 0;
+                    const completedPre = Math.max(0, Math.min(preCount, result.index - preIndex));
+                    const completedPost = Math.max(0, Math.min(group.redos.length, result.index - postIndex));
+                    if (group.rollbackMutations) {
+                        rollbackPre.unshift(...group.rollbackMutations.slice(0, completedPre).reverse().flat());
+                        rollbackPost.unshift(...group.rollbackMutations.slice(preCount, preCount + completedPost).reverse().flat());
+                    } else if (completedPre || completedPost) {
+                        // Legacy hooks restore state around the row insertion. Their preUndos
+                        // are not inverses of preRedos (merges, for example, use both phases).
+                        preUndos.push(...group.preUndos ?? []);
+                        postUndos.push(...group.undos);
+                    }
+                    preIndex += preCount;
+                    postIndex += group.redos.length;
+                }
+                undoMutations.unshift(
+                    ...rollbackPost,
+                    ...preUndos,
+                    ...(result.index > preRedos.length ? undos : []),
+                    ...postUndos,
+                    ...rollbackPre
+                );
+                redoMutations.push(...spanRedos.slice(0, result.index));
                 if (redoMutations.length) {
                     undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations, redoMutations });
                 }
@@ -174,9 +205,9 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             sequenceExecute(afterInterceptors.redos, commandService);
 
             undoMutations.unshift(
-                ...(intercepted.preUndos ?? []),
+                ...groups.flatMap((group) => group.preUndos ?? []),
                 ...undos,
-                ...intercepted.undos,
+                ...groups.flatMap((group) => group.undos),
                 ...afterInterceptors.undos
             );
             redoMutations.push(...spanRedos, ...afterInterceptors.redos);

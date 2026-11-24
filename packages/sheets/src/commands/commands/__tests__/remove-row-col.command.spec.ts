@@ -16,6 +16,7 @@
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
+    CommandType,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
@@ -34,8 +35,10 @@ import { handleDefaultRangeChangeWithEffectRefCommands } from '../../../services
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../../skeleton/skeleton.service';
+import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
+import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
@@ -71,6 +74,8 @@ describe('Test remove rows cols', () => {
             InsertColByRangeCommand,
             SetSelectionsOperation,
             SetRangeValuesMutation,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeMutation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
     });
@@ -120,6 +125,78 @@ describe('Test remove rows cols', () => {
             skeleton.dispose();
         }
     });
+
+    it.each(['pre', 'post', 'post-prefix'])(
+        'restores completed rows and hooks after a partial delete fails (%s)',
+        async (phase) => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+            const worksheet = workbook.getActiveSheet()!;
+            const target = { unitId: 'test', subUnitId: worksheet.getSheetId() };
+            commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                ...target,
+                cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } }, 3: { 0: { v: 'D' } } },
+            });
+            const merge = { startRow: 0, endRow: 0, startColumn: 1, endColumn: 2 };
+            commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, { ...target, ranges: [merge] });
+            univer.registerPlugin(UniverRenderEnginePlugin);
+            const renders = get(IRenderManagerService);
+            renders.createRender('test');
+            const pane = renders.createRender('test', { embeddedRender: true }, 'failure-pane');
+            const skeleton = get(SheetSkeletonService).createRenderSkeleton(worksheet, workbook.getStyles(), pane.scene);
+            skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+            pane.mainComponent = univer.__getInjector().createInstance(Spreadsheet, 'failure-sheet', skeleton);
+            renders.focusRender?.('failure-pane');
+            commandService.registerCommand({ id: 'test.fail-delete', type: CommandType.MUTATION, handler: () => false });
+            const hookParams = { ...target, range: { startRow: 10, endRow: 10, startColumn: 0, endColumn: 19 } };
+            const hook = get(SheetInterceptorService).interceptCommand({ getMutations: (command) => {
+                const params = command.params as IRemoveRowColCommandParams;
+                if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
+                    return { redos: [], undos: [] };
+                }
+                const fail = { id: 'test.fail-delete', params: {} };
+                if (phase === 'pre') {
+                    return { preRedos: [fail], redos: [], undos: [] };
+                }
+                if (phase === 'post-prefix') {
+                    return {
+                        redos: [{ id: InsertRowMutation.id, params: hookParams }, fail],
+                        undos: [{ id: RemoveRowMutation.id, params: hookParams }],
+                        rollbackMutations: [[{ id: RemoveRowMutation.id, params: hookParams }], []],
+                    };
+                }
+                return { redos: [fail], undos: [] };
+            } });
+            const laterHook = get(SheetInterceptorService).interceptCommand({ getMutations: (command) => {
+                const params = command.params as IRemoveRowColCommandParams;
+                if (command.id !== RemoveRowCommand.id || params.range?.startRow !== 0) {
+                    return { redos: [], undos: [] };
+                }
+                return {
+                    redos: [{ id: InsertRowMutation.id, params: hookParams }],
+                    undos: [{ id: RemoveRowMutation.id, params: hookParams }],
+                };
+            } });
+            try {
+                const rowCount = worksheet.getRowCount();
+                expect(await commandService.executeCommand(RemoveRowCommand.id, {
+                    ...target,
+                    range: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 19 },
+                })).toBe(false);
+                expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                expect([0, 1, 2, 3].map((row) => worksheet.getCellRaw(row, 0)?.v)).toEqual(['A', 'B', 'C', 'D']);
+                expect(worksheet.getRowCount()).toBe(rowCount);
+                expect(worksheet.getMergeData()).toContainEqual(merge);
+                expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+                expect([0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v))
+                    .toEqual(phase === 'pre' ? ['A', 'B', 'D'] : ['B', 'D', undefined]);
+                expect(worksheet.getRowCount()).toBe(rowCount - (phase === 'post' ? 2 : 1));
+            } finally {
+                hook.dispose();
+                laterHook.dispose();
+                skeleton.dispose();
+            }
+        }
+    );
 
     it('does not delete rows while the focused view projection is pending', async () => {
         const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;

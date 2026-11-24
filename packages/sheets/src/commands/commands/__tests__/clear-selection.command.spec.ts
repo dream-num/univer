@@ -76,68 +76,71 @@ describe('Test clear selection content commands', () => {
     });
 
     describe('clear selection contents', () => {
-        it('clears projected visible rows and restores the same cells on undo', async () => {
-            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
-            const worksheet = workbook.getActiveSheet()!;
-            const unitId = workbook.getUnitId();
-            const subUnitId = worksheet.getSheetId();
-            const skeletons = get(SheetSkeletonService);
-            const skeleton = skeletons.createRenderSkeleton(worksheet, workbook.getStyles());
-            skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
-            const display = new Spreadsheet('test', skeleton);
-            const scene = {} as Scene;
-            univer.__getInjector().add([IRenderManagerService, { useValue: {
-                getRenderUnitById: () => ({ mainComponent: display, scene }),
-            } as never }]);
-            try {
-                expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } } },
-                })).toBe(true);
-                const params = {
-                    unitId,
-                    subUnitId,
-                    ranges: [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 }],
-                };
-                const values = () => [0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v ?? null);
-                skeletons.setDisplayProjectionPending(scene, subUnitId, true);
-                expect(await commandService.executeCommand(ClearSelectionContentCommand.id, params)).toBe(false);
-                expect(values()).toEqual(['A', 'B', 'C']);
-                expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
-                    unitId,
-                    subUnitId,
-                    cellValue: { 3: { 0: { v: 'remote' } } },
-                }, { fromChangeset: true })).toBe(true);
-                expect(worksheet.getCellRaw(3, 0)?.v).toBe('remote');
+        it.each([ClearSelectionContentCommand.id, ClearSelectionAllCommand.id, ClearSelectionFormatCommand.id])(
+            'clears projected visible rows and passes the same ranges to resource hooks (%s)',
+            async (commandId) => {
+                const workbook = get(IUniverInstanceService).getUnit<Workbook>('test')!;
+                const worksheet = workbook.getActiveSheet()!;
+                const unitId = workbook.getUnitId();
+                const subUnitId = worksheet.getSheetId();
+                const skeletons = get(SheetSkeletonService);
+                const skeleton = skeletons.createRenderSkeleton(worksheet, workbook.getStyles());
+                skeleton.setProjection({ isRowFiltered: (row) => row === 1, getCell: () => undefined });
+                const display = new Spreadsheet('test', skeleton);
+                const scene = {} as Scene;
+                univer.__getInjector().add([IRenderManagerService, { useValue: {
+                    getRenderUnitById: () => ({ mainComponent: display, scene }),
+                } as never }]);
+                try {
+                    expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                        unitId,
+                        subUnitId,
+                        cellValue: { 0: { 0: { v: 'A' } }, 1: { 0: { v: 'B' } }, 2: { 0: { v: 'C' } } },
+                    })).toBe(true);
+                    const params = {
+                        unitId,
+                        subUnitId,
+                        ranges: [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 }],
+                    };
+                    const values = () => [0, 1, 2].map((row) => worksheet.getCellRaw(row, 0)?.v ?? null);
+                    skeletons.setDisplayProjectionPending(scene, subUnitId, true);
+                    expect(await commandService.executeCommand(commandId, params)).toBe(false);
+                    expect(values()).toEqual(['A', 'B', 'C']);
+                    expect(commandService.syncExecuteCommand(SetRangeValuesMutation.id, {
+                        unitId,
+                        subUnitId,
+                        cellValue: { 3: { 0: { v: 'remote' } } },
+                    }, { fromChangeset: true })).toBe(true);
+                    expect(worksheet.getCellRaw(3, 0)?.v).toBe('remote');
 
-                const interceptedRanges: unknown[] = [];
-                get(SheetInterceptorService).interceptCommand({
-                    getMutations: (command) => {
-                        if (command.id === ClearSelectionContentCommand.id) {
-                            interceptedRanges.push(command.params);
-                        }
-                        return { redos: [], undos: [] };
-                    },
-                });
-                skeletons.setDisplayProjectionPending(scene, subUnitId, false);
-                expect(await commandService.executeCommand(ClearSelectionContentCommand.id, params)).toBe(true);
-                expect(values()).toEqual([null, 'B', null]);
-                expect(interceptedRanges).toEqual([{
-                    unitId,
-                    subUnitId,
-                    ranges: [
-                        { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-                        { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 },
-                    ],
-                }]);
-                expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
-                expect(values()).toEqual(['A', 'B', 'C']);
-            } finally {
-                display.dispose();
-                skeleton.dispose();
+                    const interceptedRanges: unknown[] = [];
+                    get(SheetInterceptorService).interceptCommand({
+                        getMutations: (command) => {
+                            if (command.id === commandId) {
+                                interceptedRanges.push(command.params);
+                            }
+                            return { redos: [], undos: [] };
+                        },
+                    });
+                    skeletons.setDisplayProjectionPending(scene, subUnitId, false);
+                    expect(await commandService.executeCommand(commandId, params)).toBe(true);
+                    expect(values()).toEqual(commandId === ClearSelectionFormatCommand.id ? ['A', 'B', 'C'] : [null, 'B', null]);
+                    expect(interceptedRanges).toEqual([{
+                        unitId,
+                        subUnitId,
+                        ranges: [
+                            { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                            { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 },
+                        ],
+                    }]);
+                    expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                    expect(values()).toEqual(['A', 'B', 'C']);
+                } finally {
+                    display.dispose();
+                    skeleton.dispose();
+                }
             }
-        });
+        );
 
         describe('correct situations', () => {
             it('will clear selection content when there is a selected range', async () => {

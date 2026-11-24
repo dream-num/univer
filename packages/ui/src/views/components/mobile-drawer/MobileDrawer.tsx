@@ -302,7 +302,7 @@ export function MobileDrawer(props: {
                     data-snap={snap}
                     className={clsx(`
                       univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-20 univer-flex univer-flex-col
-                      univer-overflow-hidden univer-rounded-t-[24px] univer-bg-gray-50 univer-shadow-2xl
+                      univer-overflow-hidden univer-rounded-t-3xl univer-bg-gray-50 univer-shadow-2xl
                       univer-transition-[height] univer-duration-200
                       dark:!univer-bg-gray-900
                     `, 'univer-pointer-events-auto', dragPercent != null && '!univer-transition-none', panelClassName)}

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { editOp, type as engine, insertOp, moveOp, replaceOp } from 'ot-json1';
+import { editOp, type as engine } from 'ot-json1';
+import { JSON1ReadCursor, JSON1WriteCursor } from './cursor';
 
 /** A JSON snapshot to which changesets can be applied. */
 export type JSON1Document = null | boolean | number | string | JSON1Document[] | { [key: string]: JSON1Document };
@@ -94,12 +95,15 @@ interface IJSON1Operations {
 
 /** Shared JSON1 operations for building, replaying, and rebasing Univer changesets. */
 export const JSON1: IJSON1Operations = {
-    insertOp,
-    removeOp: (path, value = true) => engine.writeCursor().writeAtPath(path, 'r', value).get(),
-    replaceOp,
-    moveOp,
-    readCursor: engine.readCursor,
-    writeCursor: engine.writeCursor,
+    insertOp: (path, value) => new JSON1WriteCursor().writeAtPath(path, 'i', value).get(),
+    removeOp: (path, value = true) => new JSON1WriteCursor().writeAtPath(path, 'r', value).get(),
+    replaceOp: (path, previous, next) => new JSON1WriteCursor().at(path, (writer) => {
+        writer.write('r', previous);
+        writer.write('i', next);
+    }).get(),
+    moveOp: (from, to) => new JSON1WriteCursor().writeMove(from, to).get(),
+    readCursor: (op) => new JSON1ReadCursor(op),
+    writeCursor: () => new JSON1WriteCursor(),
     checkValidOp: engine.checkValidOp,
     isNoop: engine.isNoop,
     apply: engine.apply,

@@ -40,7 +40,9 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
  * - v1.5.2 UI rotate and flip: those fields on `axisAlignSheetTransform` with `r`.
  * - v1.5.2 image rotated 90°, inserting columns: `sheetTransform` and
  *   `axisAlignSheetTransform` differ.
- * - v1.5.2 arrange, group / ungroup: order moves and group edits.
+ * - v1.5.2 two images: bringing the bottom one to front changes the order;
+ *   grouping and ungrouping through the toolbar operations sets and clears
+ *   `groupId`, ending ungrouped or, after undo, grouped again.
  * - v1.5.2 floating image inserted from a file, then cropped; Facade builder
  *   image rotated 15°, then cropped (different angle on the two position
  *   fields); Facade setRotate.
@@ -88,13 +90,17 @@ function describeGeometry(drawing: Drawing | undefined, compareTo: Drawing | und
     const anchor = reference.anchorType ?? SheetDrawingAnchorType.Position;
     const position = drawing.axisAlignSheetTransform ?? drawing.sheetTransform;
     const fields: Record<string, unknown> = { anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position };
-    if (anchor !== SheetDrawingAnchorType.None && !reference.groupId) {
+    // Grouped drawings keep their own cell anchor when they have one: v1.5.2
+    // groups leave children in sheet coordinates, which follow the layout.
+    const referencePosition = reference.axisAlignSheetTransform ?? reference.sheetTransform;
+    const anchored = anchor !== SheetDrawingAnchorType.None && (!reference.groupId || referencePosition?.from !== undefined);
+    if (anchored) {
         for (const key of CELL) fields[`from.${key}`] = position?.from?.[key];
         if (anchor === SheetDrawingAnchorType.Both) {
             for (const key of CELL) fields[`to.${key}`] = position?.to?.[key];
         }
     }
-    const pixels = anchor === SheetDrawingAnchorType.None || reference.groupId
+    const pixels = !anchored
         ? ['left', 'top', 'width', 'height']
         : anchor === SheetDrawingAnchorType.Position ? ['width', 'height'] : [];
     for (const key of pixels) fields[`transform.${key}`] = drawing.transform?.[key as 'left'];
@@ -102,6 +108,7 @@ function describeGeometry(drawing: Drawing | undefined, compareTo: Drawing | und
         fields[key] = drawing.transform?.[key] ?? drawing.sheetTransform?.[key] ?? drawing.axisAlignSheetTransform?.[key];
     }
     for (const key of CONTENT) fields[key] = JSON.stringify(drawing[key] ?? null);
+    fields.groupId = drawing.groupId ?? null;
     return fields;
 }
 
@@ -136,11 +143,14 @@ describe.each([
             }
         }
 
-        const expected = (fixture.snapshots[testCase.steps[start].replayed] as unknown as Record<string, { data: Record<string, Drawing> }> | null)?.[subUnitId]?.data ?? {};
+        const stored = (fixture.snapshots[testCase.steps[start].replayed] as unknown as Record<string, { data: Record<string, Drawing>; order: string[] }> | null)?.[subUnitId];
+        const expected = stored?.data ?? {};
         const sheet = bed.get(ISheetDrawingService);
         const manager = bed.get(IDrawingManagerService);
         const skeleton = bed.get(SheetSkeletonService).ensureSkeleton(unitId, subUnitId)!;
         const actual = sheet.getDrawingData(unitId, subUnitId) ?? {};
+        expect(sheet.getDrawingOrder(unitId, subUnitId), 'order').toEqual(stored?.order ?? []);
+        expect(manager.getDrawingOrder(unitId, subUnitId), 'render store order').toEqual(stored?.order ?? []);
         for (const drawingId of new Set([...Object.keys(expected), ...Object.keys(actual)])) {
             const search = { unitId, subUnitId, drawingId };
             expect(manager.getDrawingByParam(search), `${drawingId}: render store`).toEqual(sheet.getDrawingByParam(search));

@@ -104,9 +104,10 @@ export function normalizeHistoricalSheetDrawingEdit(
 
 /**
  * - Drop `angle/flipX/flipY/skewX/skewY` on `sheetTransform` and
- *   `axisAlignSheetTransform`.
+ *   `axisAlignSheetTransform`, and removals of the whole
+ *   `axisAlignSheetTransform` (see `removesWholeAxisAlign`).
  * - Clients from v0.15.5 on write `axisAlignSheetTransform` next to
- *   `sheetTransform`. When the edit still touches `axisAlignSheetTransform`,
+ *   `sheetTransform`. When the edit still writes `axisAlignSheetTransform`,
  *   it is authoritative and `sheetTransform` is dropped.
  * - Clients up to v0.15.4 wrote only `sheetTransform`. Such an edit is applied
  *   to a view of the current drawing, and the result replaces the drawing.
@@ -116,7 +117,7 @@ function translateHistoricalDrawingEdit(
     getDrawing: () => ISheetDrawing | undefined,
     getSkeleton: () => SpreadsheetSkeleton | undefined
 ): DrawingEdit {
-    const kept = edit.filter(([path]) => !isOrientationOnPositionField(path));
+    const kept = edit.filter(([path, component]) => !isOrientationOnPositionField(path) && !removesWholeAxisAlign(path, component));
     if (kept.some(([[field]]) => field === 'axisAlignSheetTransform')) {
         return kept
             .filter(([[field]]) => field !== 'sheetTransform')
@@ -140,6 +141,17 @@ function replacesExistingAxisAlign(path: JSON1.Path, component: JSON1.JSONOpComp
     return path.length === 1 && path[0] === 'axisAlignSheetTransform'
         && component.i !== undefined && component.r === undefined
         && getDrawing()?.axisAlignSheetTransform !== undefined;
+}
+
+/**
+ * The undo of that first edit, generated with `invertWithDoc`, removes the
+ * whole `axisAlignSheetTransform` and restores `sheetTransform`. The current
+ * model derives `axisAlignSheetTransform` from the restored `sheetTransform`
+ * instead; without a `sheetTransform` edit it keeps the cell anchor it has.
+ */
+function removesWholeAxisAlign(path: JSON1.Path, component: JSON1.JSONOpComponent): boolean {
+    return path.length === 1 && path[0] === 'axisAlignSheetTransform'
+        && component.r !== undefined && component.i === undefined;
 }
 
 /** Apply an edit authored against `sheetTransform` only, and derive `axisAlignSheetTransform` from it. */

@@ -70,4 +70,12 @@ describe('normalizeHistoricalSheetDrawingEdit', () => {
         const { axisAlignSheetTransform: _axis, ...withoutAxis } = current;
         expect(normalize(op, withoutAxis as ISheetDrawing)).toEqual(JSON1.insertOp(path('axisAlignSheetTransform'), value));
     });
+
+    it('ignores a removal of the whole axisAlignSheetTransform without a sheetTransform edit', () => {
+        // The undo of a first v0.15.5-era edit removes the field it added; with
+        // nothing to derive a new one from, the current cell anchor stays.
+        const top = JSON1.replaceOp(path('transform', 'top'), 92, 20);
+        const op = compose(JSON1.removeOp(path('axisAlignSheetTransform'), true), top);
+        expect(normalize(op)).toEqual(top);
+    });
 });

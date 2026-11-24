@@ -244,11 +244,12 @@ it('replays legacy chart history whose inserts collide with fields filled by pla
     expect(bed.get(IDrawingManagerService).getDrawingByParam({ unitId, subUnitId, drawingId })).toEqual(result);
 });
 
-it('replays the first v0.15.5-era edit of a drawing created before axisAlignSheetTransform existed', () => {
+it('replays the first v0.15.5-era edit of a drawing created before axisAlignSheetTransform existed, with its undo and redo', () => {
     // v0.15.4 inserted drawings with `sheetTransform` only. Clients from
     // v0.15.5 to v1.0.0-alpha.2 replaced each changed top-level field with
     // `replaceOp(path, oldValue, newValue)`; axisAlignSheetTransform was missing on
-    // their side, so it reached the server as an insert without `r`.
+    // their side, so it reached the server as an insert without `r`. Their
+    // undo, from `invertWithDoc`, removes that field and restores the rest.
     const bed = createSheetsDrawingTestBed();
     onTestFinished(() => bed.univer.dispose());
     const unitId = 'test';
@@ -277,7 +278,8 @@ it('replays the first v0.15.5-era edit of a drawing created before axisAlignShee
         JSON1.insertOp([unitId, subUnitId, 'order', 0], drawingId)
     ), DrawingApplyType.INSERT)).toBe(true);
     const service = bed.get(ISheetDrawingService);
-    expect(service.getDrawingByParam(objects[0])?.axisAlignSheetTransform).toBeDefined();
+    const loaded = Tools.deepClone(service.getDrawingByParam(objects[0])!);
+    expect(loaded.axisAlignSheetTransform).toBeDefined();
 
     const moved = { ...transform, left: transform.left + 137.4, top: transform.top - 53.2 };
     const field = (key: string) => [unitId, subUnitId, 'data', drawingId, key];
@@ -286,11 +288,27 @@ it('replays the first v0.15.5-era edit of a drawing created before axisAlignShee
         JSON1.replaceOp(field('sheetTransform'), inserted.sheetTransform as unknown as JSON1.Doc, transformToDrawingPosition(moved, skeleton) as unknown as JSON1.Doc),
         JSON1.replaceOp(field('axisAlignSheetTransform'), undefined as never, transformToAxisAlignPosition(moved, skeleton) as unknown as JSON1.Doc),
     ].reduce(JSON1.type.compose, null);
-    expect(replay(drag, DrawingApplyType.UPDATE)).toBe(true);
+    const wireDrag = JSON.parse(JSON.stringify(drag)) as JSON1.JSONOp;
+    const clientDoc = { [unitId]: { [subUnitId]: { data: { [drawingId]: inserted }, order: [drawingId] } } };
+    const undo = JSON1.type.invertWithDoc(wireDrag, clientDoc as unknown as JSON1.Doc);
+    const expectDragged = () => {
+        const result = service.getDrawingByParam(objects[0])!;
+        expect(result).not.toHaveProperty('sheetTransform');
+        expect(result.axisAlignSheetTransform.from).toEqual(transformToAxisAlignPosition(moved, skeleton).from);
+        expect(result.transform).toMatchObject({ left: moved.left, top: moved.top, width: 240, height: 150 });
+        expect(bed.get(IDrawingManagerService).getDrawingByParam(objects[0])).toEqual(result);
+    };
 
-    const result = service.getDrawingByParam(objects[0])!;
-    expect(result).not.toHaveProperty('sheetTransform');
-    expect(result.axisAlignSheetTransform.from).toEqual(transformToAxisAlignPosition(moved, skeleton).from);
-    expect(result.transform).toMatchObject({ left: moved.left, top: moved.top, width: 240, height: 150 });
-    expect(bed.get(IDrawingManagerService).getDrawingByParam(objects[0])).toEqual(result);
+    expect(replay(wireDrag, DrawingApplyType.UPDATE)).toBe(true);
+    expectDragged();
+
+    expect(replay(undo, DrawingApplyType.UPDATE)).toBe(true);
+    const restored = service.getDrawingByParam(objects[0])!;
+    expect(restored).not.toHaveProperty('sheetTransform');
+    expect(restored.axisAlignSheetTransform).toEqual(loaded.axisAlignSheetTransform);
+    expect(restored.transform).toMatchObject({ left: transform.left, top: transform.top, width: 240, height: 150 });
+    expect(bed.get(IDrawingManagerService).getDrawingByParam(objects[0])).toEqual(restored);
+
+    expect(replay(wireDrag, DrawingApplyType.UPDATE)).toBe(true);
+    expectDragged();
 });

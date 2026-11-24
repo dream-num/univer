@@ -191,7 +191,7 @@ it('replays legacy chart history whose inserts collide with fields filled by pla
     const unitId = 'test';
     const subUnitId = 'sheet1';
     const drawingId = 'chart';
-    const markers = {
+    const position = {
         from: { row: 4, rowOffset: 26, column: 5, columnOffset: 22 },
         to: { row: 19, rowOffset: 22, column: 10, columnOffset: 38 },
     };
@@ -221,9 +221,9 @@ it('replays legacy chart history whose inserts collide with fields filled by pla
                 drawingId,
                 drawingType: DrawingTypeEnum.DRAWING_CHART,
                 componentKey: 'SheetsChartComponent',
-                sheetTransform: markers,
+                sheetTransform: position,
                 transform: { left: 722, top: 154, width: 468, height: 369 },
-                axisAlignSheetTransform: markers,
+                axisAlignSheetTransform: position,
                 data: { border: '#979DAC', background: '#fff' },
                 allowTransform: true,
             },
@@ -247,7 +247,7 @@ it('replays legacy chart history whose inserts collide with fields filled by pla
 it('replays the first v0.15.5-era edit of a drawing created before axisAlignSheetTransform existed', () => {
     // v0.15.4 inserted drawings with `sheetTransform` only. Clients from
     // v0.15.5 to v1.0.0-alpha.2 replaced each changed top-level field with
-    // `replaceOp(path, oldValue, newValue)`; the axis marker was missing on
+    // `replaceOp(path, oldValue, newValue)`; axisAlignSheetTransform was missing on
     // their side, so it reached the server as an insert without `r`.
     const bed = createSheetsDrawingTestBed();
     onTestFinished(() => bed.univer.dispose());

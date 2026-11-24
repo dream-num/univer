@@ -50,30 +50,24 @@ export function assertCurrentSheetDrawingEdit({ op, reference }: Pick<ISetDrawin
     });
 }
 
-/** `angle`, `flipX`, `flipY`, `skewX` and `skewY`: read only from `transform` in the current model. */
+/** Component of an edit, with its path relative to the drawing (`path[0]` is the field). */
+type DrawingEdit = Array<[path: JSON1.Path, component: JSON1.JSONOpComponent]>;
+
+/** Old clients also wrote these on `sheetTransform` and `axisAlignSheetTransform`; the current model reads them only from `transform`. */
 const ORIENTATION_FIELDS: ReadonlySet<string> = new Set(['angle', 'flipX', 'flipY', 'skewX', 'skewY']);
 
-/** `angle/flipX/flipY/skewX/skewY` written on `sheetTransform` or `axisAlignSheetTransform`. */
-function isMarkerOrientation(path: JSON1.Path): boolean {
-    return (path[4] === 'sheetTransform' || path[4] === 'axisAlignSheetTransform')
-        && path.length === 6
-        && ORIENTATION_FIELDS.has(path[5] as string);
+function isPositionField(path: JSON1.Path): boolean {
+    return path[0] === 'sheetTransform' || path[0] === 'axisAlignSheetTransform';
+}
+
+function isOrientationOnPositionField([field, key, ...rest]: JSON1.Path): boolean {
+    return isPositionField([field]) && rest.length === 0 && ORIENTATION_FIELDS.has(key as string);
 }
 
 /**
  * Translate drawing edits in persisted history written by older clients.
- *
- * - `angle/flipX/flipY/skewX/skewY` on either marker are dropped; the
- *   current model reads them from `transform` only.
- * - Clients from v0.15.5 on write `axisAlignSheetTransform` next to
- *   `sheetTransform`. When an edit still touches the axis marker, it is
- *   authoritative and `sheetTransform` is dropped. Clients up to
- *   v1.0.0-alpha.2 replaced whole fields and omitted `r` when the field was
- *   missing locally, which is the case on the first edit of a drawing created
- *   before v0.15.5; that insert replaces the marker the current model holds.
- * - Clients up to v0.15.4 wrote only `sheetTransform`. Such edits are applied
- *   to a view rebuilt from the current drawing, and the axis marker is derived
- *   from the result.
+ * Edits that touch neither `sheetTransform` nor `axisAlignSheetTransform`
+ * are returned unchanged; see `translateHistoricalDrawingEdit` for the rest.
  */
 export function normalizeHistoricalSheetDrawingEdit(
     op: JSON1.JSONOp,
@@ -83,76 +77,90 @@ export function normalizeHistoricalSheetDrawingEdit(
     getSkeleton: () => SpreadsheetSkeleton | undefined
 ): JSON1.JSONOp {
     JSON1.type.checkValidOp(op);
+    const result = JSON1.type.writeCursor();
+    const edits = new Map<string, DrawingEdit>();
     const cursor = JSON1.type.readCursor(op);
-    const markerEdits = new Set<string>();
-    const axisEdits = new Set<string>();
-    // Unrotated-marker edits that need the old value (leaf edits or removals).
-    const unrotatedEdits = new Map<string, boolean>();
     cursor.traverse(null, (component) => {
         const path = cursor.getPath();
         const drawingId = getDrawingId(path, unitId, subUnitId);
-        const field = path[4];
-        if (drawingId === undefined || (field !== 'sheetTransform' && field !== 'axisAlignSheetTransform')) return;
-        markerEdits.add(drawingId);
-        if (isMarkerOrientation(path)) return;
-        if (field === 'axisAlignSheetTransform') {
-            axisEdits.add(drawingId);
-        } else {
-            unrotatedEdits.set(drawingId, Boolean(unrotatedEdits.get(drawingId) || path.length > 5 || component.r !== undefined));
+        if (drawingId === undefined) {
+            result.mergeTree([...path, component]);
+            return;
         }
+        const edit = edits.get(drawingId) ?? [];
+        edit.push([path.slice(4), component]);
+        edits.set(drawingId, edit);
     });
-    if (!markerEdits.size) return op;
+    if (![...edits.values()].some((edit) => edit.some(([path]) => isPositionField(path)))) return op;
 
-    const canonical = JSON1.type.writeCursor();
-    const viewEdits = new Map<string, JSON1.WriteCursor>();
-    cursor.traverse(null, (component) => {
-        const path = cursor.getPath();
-        const drawingId = getDrawingId(path, unitId, subUnitId);
-        if (drawingId === undefined || !markerEdits.has(drawingId)) {
-            canonical.mergeTree([...path, component]);
-            return;
+    for (const [drawingId, edit] of edits) {
+        const translated = translateHistoricalDrawingEdit(edit, () => getDrawing(drawingId), getSkeleton);
+        for (const [path, component] of translated) {
+            result.mergeTree([unitId, subUnitId, 'data', drawingId, ...path, component]);
         }
-        if (isMarkerOrientation(path)) return;
-        if (axisEdits.has(drawingId)) {
-            if (path[4] === 'sheetTransform') return;
-            const insertsWholeAxis = path[4] === 'axisAlignSheetTransform' && path.length === 5
-                && component.i !== undefined && component.r === undefined;
-            const replaces = insertsWholeAxis && getDrawing(drawingId)?.axisAlignSheetTransform !== undefined;
-            canonical.mergeTree([...path, replaces ? { ...component, r: true } : component]);
-            return;
-        }
-        if (unrotatedEdits.has(drawingId)) {
-            let writer = viewEdits.get(drawingId);
-            if (!writer) {
-                writer = JSON1.type.writeCursor();
-                viewEdits.set(drawingId, writer);
-            }
-            writer.mergeTree([...path.slice(4), component]);
-            return;
-        }
-        canonical.mergeTree([...path, component]);
-    });
-
-    const skeleton = viewEdits.size ? getSkeleton() : undefined;
-    for (const [drawingId, writer] of viewEdits) {
-        const current = getDrawing(drawingId);
-        if (!current) throw new Error('Missing drawing for legacy placement edit.');
-        const view = { ...current };
-        if (!view.sheetTransform && unrotatedEdits.get(drawingId) && skeleton) {
-            view.sheetTransform = getLegacySheetDrawingPosition(current, skeleton);
-        }
-        const updated = { ...JSON1.type.apply(view as unknown as JSON1.Doc, writer.get()) as unknown as ISheetDrawing };
-        if (updated.sheetTransform) {
-            // The edit was authored against the unrotated marker only.
-            Reflect.deleteProperty(updated, 'axisAlignSheetTransform');
-        }
-        const normalized = skeleton && !updated.groupId && updated.anchorType !== SheetDrawingAnchorType.None
-            ? refreshSheetDrawingPlacement(updated, skeleton)
-            : normalizeSheetDrawing(updated);
-        const { sheetTransform: _legacy, ...drawing } = normalized;
-        canonical.mergeTree([unitId, subUnitId, 'data', drawingId, { r: true, i: drawing as unknown as JSON1.Doc }]);
     }
-    return canonical.get();
+    return result.get();
+}
+
+/**
+ * - Drop `angle/flipX/flipY/skewX/skewY` on `sheetTransform` and
+ *   `axisAlignSheetTransform`.
+ * - Clients from v0.15.5 on write `axisAlignSheetTransform` next to
+ *   `sheetTransform`. When the edit still touches `axisAlignSheetTransform`,
+ *   it is authoritative and `sheetTransform` is dropped.
+ * - Clients up to v0.15.4 wrote only `sheetTransform`. Such an edit is applied
+ *   to a view of the current drawing, and the result replaces the drawing.
+ */
+function translateHistoricalDrawingEdit(
+    edit: DrawingEdit,
+    getDrawing: () => ISheetDrawing | undefined,
+    getSkeleton: () => SpreadsheetSkeleton | undefined
+): DrawingEdit {
+    const kept = edit.filter(([path]) => !isOrientationOnPositionField(path));
+    if (kept.some(([[field]]) => field === 'axisAlignSheetTransform')) {
+        return kept
+            .filter(([[field]]) => field !== 'sheetTransform')
+            .map(([path, component]) => [path, replacesExistingAxisAlign(path, component, getDrawing) ? { ...component, r: true } : component]);
+    }
+    if (kept.some(([[field]]) => field === 'sheetTransform')) {
+        const current = getDrawing();
+        if (!current) throw new Error('Missing drawing for legacy placement edit.');
+        return [[[], { r: true, i: applySheetTransformEdit(current, kept, getSkeleton()) as unknown as JSON1.Doc }]];
+    }
+    return kept;
+}
+
+/**
+ * Clients up to v1.0.0-alpha.2 replaced whole fields and sent no `r` for a
+ * field missing on their side. On the first edit of a drawing created before
+ * v0.15.5, that inserts `axisAlignSheetTransform`, which the current model
+ * already derived when it loaded the drawing.
+ */
+function replacesExistingAxisAlign(path: JSON1.Path, component: JSON1.JSONOpComponent, getDrawing: () => ISheetDrawing | undefined): boolean {
+    return path.length === 1 && path[0] === 'axisAlignSheetTransform'
+        && component.i !== undefined && component.r === undefined
+        && getDrawing()?.axisAlignSheetTransform !== undefined;
+}
+
+/** Apply an edit authored against `sheetTransform` only, and derive `axisAlignSheetTransform` from it. */
+function applySheetTransformEdit(current: ISheetDrawing, edit: DrawingEdit, skeleton: SpreadsheetSkeleton | undefined): ISheetDrawing {
+    const view = { ...current };
+    const readsOldValue = edit.some(([path, component]) => path[0] === 'sheetTransform' && (path.length > 1 || component.r !== undefined));
+    if (!view.sheetTransform && readsOldValue && skeleton) {
+        view.sheetTransform = getLegacySheetDrawingPosition(current, skeleton);
+    }
+    const writer = JSON1.type.writeCursor();
+    for (const [path, component] of edit) writer.mergeTree([...path, component]);
+    const updated = { ...JSON1.type.apply(view as unknown as JSON1.Doc, writer.get()) as unknown as ISheetDrawing };
+    if (updated.sheetTransform) {
+        // The old axisAlignSheetTransform no longer matches the edited rectangle.
+        Reflect.deleteProperty(updated, 'axisAlignSheetTransform');
+    }
+    const normalized = skeleton && !updated.groupId && updated.anchorType !== SheetDrawingAnchorType.None
+        ? refreshSheetDrawingPlacement(updated, skeleton)
+        : normalizeSheetDrawing(updated);
+    const { sheetTransform: _legacy, ...drawing } = normalized;
+    return drawing as ISheetDrawing;
 }
 
 function getDrawingId(path: JSON1.Path, unitId: string, subUnitId: string): string | undefined {

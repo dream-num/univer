@@ -33,15 +33,17 @@ import { ISheetDrawingService, SheetDrawingAnchorType } from '../../../services/
  * drag. The cases were picked from a full matrix of drawing shapes and edits,
  * one for each way old history broke replay or takes a separate branch:
  *
- * - v1.5.2 chart with from/to-only markers, then a UI drag: inserts of
+ * - v1.5.2 chart whose position fields hold only from/to, then a UI drag: inserts of
  *   angle/flipX/flipY/skewX/skewY without `r`, and their removal on undo.
  * - v1.5.2 two-cell image, removing rows above: v1.5.2 removes those fields
  *   from `sheetTransform` and adds them back on undo.
  * - v1.5.2 UI rotate and flip: those fields on `axisAlignSheetTransform` with `r`.
- * - v1.5.2 image rotated 90°, inserting columns: the two markers differ.
+ * - v1.5.2 image rotated 90°, inserting columns: `sheetTransform` and
+ *   `axisAlignSheetTransform` differ.
  * - v1.5.2 arrange, group / ungroup: order moves and group edits.
  * - v1.5.2 floating image inserted from a file, then cropped; Facade builder
- *   image rotated 15°, then cropped (contradicting markers); Facade setRotate.
+ *   image rotated 15°, then cropped (different angle on the two position
+ *   fields); Facade setRotate.
  * - v0.15.4 UI drag on a plain and a 90° rotated image, and removing rows
  *   above a chart: whole-field replacements of `sheetTransform` only.
  *
@@ -84,12 +86,12 @@ function describeGeometry(drawing: Drawing | undefined, compareTo: Drawing | und
     if (!drawing) return undefined;
     const reference = compareTo ?? drawing;
     const anchor = reference.anchorType ?? SheetDrawingAnchorType.Position;
-    const markers = drawing.axisAlignSheetTransform ?? drawing.sheetTransform;
+    const position = drawing.axisAlignSheetTransform ?? drawing.sheetTransform;
     const fields: Record<string, unknown> = { anchorType: drawing.anchorType ?? SheetDrawingAnchorType.Position };
     if (anchor !== SheetDrawingAnchorType.None && !reference.groupId) {
-        for (const key of CELL) fields[`from.${key}`] = markers?.from?.[key];
+        for (const key of CELL) fields[`from.${key}`] = position?.from?.[key];
         if (anchor === SheetDrawingAnchorType.Both) {
-            for (const key of CELL) fields[`to.${key}`] = markers?.to?.[key];
+            for (const key of CELL) fields[`to.${key}`] = position?.to?.[key];
         }
     }
     const pixels = anchor === SheetDrawingAnchorType.None || reference.groupId

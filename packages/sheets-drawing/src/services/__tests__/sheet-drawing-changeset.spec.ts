@@ -21,14 +21,14 @@ import { normalizeHistoricalSheetDrawingEdit } from '../sheet-drawing-changeset'
 
 const unitId = 'unit';
 const subUnitId = 'sheet';
-const marker = (row: number) => ({ from: { row, column: 1, rowOffset: 0, columnOffset: 0 }, to: { row: row + 3, column: 4, rowOffset: 0, columnOffset: 0 } });
+const position = (row: number) => ({ from: { row, column: 1, rowOffset: 0, columnOffset: 0 }, to: { row: row + 3, column: 4, rowOffset: 0, columnOffset: 0 } });
 const current: ISheetDrawing = {
     unitId,
     subUnitId,
     drawingId: 'd',
     drawingType: DrawingTypeEnum.DRAWING_IMAGE,
     transform: { left: 10, top: 20, width: 100, height: 60 },
-    axisAlignSheetTransform: marker(2),
+    axisAlignSheetTransform: position(2),
 };
 const path = (...keys: string[]) => [unitId, subUnitId, 'data', 'd', ...keys];
 const compose = (...ops: JSON1.JSONOp[]) => ops.reduce(JSON1.type.compose, null);
@@ -36,12 +36,12 @@ const normalize = (op: JSON1.JSONOp, drawing: ISheetDrawing | undefined = curren
     normalizeHistoricalSheetDrawingEdit(op, unitId, subUnitId, () => drawing, () => undefined);
 
 describe('normalizeHistoricalSheetDrawingEdit', () => {
-    it('returns edits that touch neither marker unchanged', () => {
+    it('returns edits that touch neither sheetTransform nor axisAlignSheetTransform unchanged', () => {
         const op = compose(JSON1.replaceOp(path('transform', 'left'), 10, 30), JSON1.insertOp([unitId, subUnitId, 'order', 0], 'd'));
         expect(normalize(op)).toBe(op);
     });
 
-    it('drops angle/flipX/flipY/skewX/skewY on both markers and keeps them on transform', () => {
+    it('drops angle/flipX/flipY/skewX/skewY on sheetTransform and axisAlignSheetTransform and keeps them on transform', () => {
         const op = compose(
             JSON1.insertOp(path('axisAlignSheetTransform', 'angle'), 0),
             JSON1.insertOp(path('sheetTransform', 'flipX'), false),
@@ -58,13 +58,13 @@ describe('normalizeHistoricalSheetDrawingEdit', () => {
         expect(normalize(op)).toEqual(compose(axis, top));
     });
 
-    it('turns a whole axis marker insert into a replace only when the drawing already has the marker', () => {
+    it('turns a whole axisAlignSheetTransform insert into a replace only when the drawing already has the field', () => {
         // Clients up to v1.0.0-alpha.2 sent `replaceOp(path, undefined, value)`,
         // which serializes without `r`, for a field missing on their side.
-        const value = marker(5);
+        const value = position(5);
         const op = compose(
             JSON.parse(JSON.stringify(JSON1.replaceOp(path('axisAlignSheetTransform'), undefined as never, value))),
-            JSON1.replaceOp(path('sheetTransform'), marker(2), value)
+            JSON1.replaceOp(path('sheetTransform'), position(2), value)
         );
         expect(normalize(op)).toEqual(JSON1.replaceOp(path('axisAlignSheetTransform'), true, value));
         const { axisAlignSheetTransform: _axis, ...withoutAxis } = current;

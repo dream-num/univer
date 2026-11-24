@@ -313,7 +313,7 @@ export class SheetClipboardController extends RxDisposable {
                     ? cell.v
                     : extractPureTextFromCell(cell);
 
-                if (content.trim() === '') {
+                if (content === '') {
                     return content;
                 }
 

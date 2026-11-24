@@ -291,59 +291,51 @@ export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRan
     return true;
 }
 
+function findClosingTsvQuote(text: string, fieldStart: number): number {
+    let quote = text.indexOf('"', fieldStart + 1);
+    while (quote !== -1 && text[quote + 1] === '"') {
+        quote = text.indexOf('"', quote + 2);
+    }
+    if (quote === -1 || (quote + 1 < text.length && !/[\t\r\n]/.test(text[quote + 1]))) {
+        return -1;
+    }
+    return quote;
+}
+
 function parseTsvTextRows(text: string): string[][] {
     const normalized = text.replace(/(?:\r\n|\r|\n)$/, '');
     const rows: string[][] = [[]];
-    let currentField = '';
-    let inQuotes = false;
-    let isFieldStart = true;
+    let fieldStart = 0;
+    let quotedValue: string | undefined;
 
     for (let i = 0; i < normalized.length; i++) {
         const char = normalized[i];
 
-        if (inQuotes) {
-            if (char === '"') {
-                if (normalized[i + 1] === '"') {
-                    currentField += '"';
-                    i++;
-                } else {
-                    inQuotes = false;
-                }
-            } else {
-                currentField += char;
+        if (i === fieldStart && char === '"') {
+            const closingQuote = findClosingTsvQuote(normalized, fieldStart);
+            if (closingQuote !== -1) {
+                quotedValue = normalized.slice(fieldStart + 1, closingQuote).replace(/""/g, '"');
+                i = closingQuote;
+                continue;
             }
+        }
+
+        if (char !== '\t' && char !== '\r' && char !== '\n') {
             continue;
         }
 
-        if (isFieldStart && char === '"') {
-            inQuotes = true;
-            isFieldStart = false;
-            continue;
+        rows[rows.length - 1].push(quotedValue ?? normalized.slice(fieldStart, i));
+        quotedValue = undefined;
+        if (char === '\r' && normalized[i + 1] === '\n') {
+            i++;
         }
-
-        if (char === '\t') {
-            rows[rows.length - 1].push(currentField);
-            currentField = '';
-            isFieldStart = true;
-            continue;
-        }
-
-        if (char === '\r' || char === '\n') {
-            if (char === '\r' && normalized[i + 1] === '\n') {
-                i++;
-            }
-            rows[rows.length - 1].push(currentField);
+        if (char !== '\t') {
             rows.push([]);
-            currentField = '';
-            isFieldStart = true;
-            continue;
         }
-
-        currentField += char;
-        isFieldStart = false;
+        fieldStart = i + 1;
     }
 
-    rows[rows.length - 1].push(currentField);
+    rows[rows.length - 1].push(quotedValue ?? normalized.slice(fieldStart));
     return rows;
 }
 

@@ -521,12 +521,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         } else if (files?.length) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target);
         } else if (text) {
-            // Converts text with tabs and newlines into an HTML table
-            if (/[\n\t]/.test(text)) {
-                return this._pasteHTML(convertTextToTable(text), PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, undefined, target);
-            } else {
-                return this._pastePlainText(text, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target);
-            }
+            return this._pastePlainText(text, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE, target);
         } else {
             return this._pasteUnrecognized(target);
         }
@@ -820,6 +815,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private async _pastePlainText(text: string, pasteType: IPasteHookValueType, target: ISheetRangeLocation): Promise<boolean> {
         if (pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME_PASTE.SPECIAL_PASTE_COL_WIDTH) {
             return false;
+        }
+        if (pasteType === PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE && /[\t\r\n]/.test(text)) {
+            return this._pasteHTML(convertTextToTable(text), pasteType, undefined, target);
         }
         return this._executePaste((h, payload) => {
             return h.onPastePlainText?.(payload, text, { pasteType });
@@ -1809,9 +1807,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 // #region copy generation
 
-function formatPlainTextCell(text: string): string {
+function formatPlainTextCell(text: string, isSingleCell: boolean): string {
     const normalized = text.replace(/\r\n|\r/g, '\n');
-    if (/[\n\t"]/.test(normalized)) {
+    if (/[\n\t]/.test(normalized) || (!isSingleCell && normalized.includes('"'))) {
         return `"${normalized.replace(/"/g, '""')}"`;
     }
     return normalized;
@@ -1825,7 +1823,7 @@ export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanAndDisp
         cols.forEach((col) => {
             const cell = matrix.getValue(row, col);
             if (cell) {
-                const cellText = formatPlainTextCell(getCellTextForClipboard(cell));
+                const cellText = formatPlainTextCell(getCellTextForClipboard(cell), matrixLength === 1 && cols.length === 1);
                 arr.push(cellText);
             }
         });

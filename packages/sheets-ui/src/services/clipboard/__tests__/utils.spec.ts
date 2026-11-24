@@ -379,4 +379,12 @@ describe('test convertTextToTable', () => {
             '<table><tr><td>line1<br>line2</td><td>say "hi"</td></tr><tr><td>row2</td><td>&lt;tag&gt;</td></tr></table>'
         );
     });
+
+    it.each(['"unfinished', '"finished"suffix'])('keeps malformed quoted fields as plain text (%s)', (field) => {
+        const tsv = `${field}\tB1\r\nA2\tB2`;
+
+        expect(convertTextToTable(tsv)).toBe(
+            `<table><tr><td>${field}</td><td>B1</td></tr><tr><td>A2</td><td>B2</td></tr></table>`
+        );
+    });
 });

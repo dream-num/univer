@@ -43,16 +43,29 @@ function include(target: IBoundingBox, box: IBoundingBox) {
     target.maxY = Math.max(target.maxY, box.maxY);
 }
 
-function makeNode<C, L extends boolean>(children: C[], height: number, leaf: L, bounds: (child: C) => IBoundingBox) {
-    const node = { children, height, leaf, minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-    for (const child of children) {
-        include(node, bounds(child));
+function fit<C>(target: IBoundingBox, entries: C[], bounds: (entry: C) => IBoundingBox) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const direct = bounds === boundsOfNode || bounds === RBush.prototype.toBBox;
+    for (let i = 0; i < entries.length; i++) {
+        const box = direct ? entries[i] as IBoundingBox : bounds(entries[i]);
+        minX = Math.min(minX, box.minX);
+        minY = Math.min(minY, box.minY);
+        maxX = Math.max(maxX, box.maxX);
+        maxY = Math.max(maxY, box.maxY);
     }
-    return node;
+    target.minX = minX;
+    target.minY = minY;
+    target.maxX = maxX;
+    target.maxY = maxY;
 }
 
-function overlaps(a: IBoundingBox, b: IBoundingBox) {
-    return a.minX <= b.maxX && a.maxX >= b.minX && a.minY <= b.maxY && a.maxY >= b.minY;
+function makeNode<C, L extends boolean>(children: C[], height: number, leaf: L, bounds: (child: C) => IBoundingBox) {
+    const node = { children, height, leaf, minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+    fit(node, children, bounds);
+    return node;
 }
 
 function covers(outer: IBoundingBox, inner: IBoundingBox) {
@@ -71,9 +84,11 @@ function chooseChild<T>(children: RBushNode<T>[], box: IBoundingBox) {
     let best = children[0];
     let leastGrowth = Infinity;
     let leastArea = Infinity;
-    for (const child of children) {
-        const width = Math.max(child.maxX, box.maxX) - Math.min(child.minX, box.minX);
-        const height = Math.max(child.maxY, box.maxY) - Math.min(child.minY, box.minY);
+    const { minX, minY, maxX, maxY } = box;
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const width = Math.max(child.maxX, maxX) - Math.min(child.minX, minX);
+        const height = Math.max(child.maxY, maxY) - Math.min(child.minY, minY);
         const existingArea = area(child);
         const growth = width * height - existingArea;
         if (growth < leastGrowth || (growth === leastGrowth && existingArea < leastArea)) {
@@ -107,19 +122,37 @@ function groupMargin<C>(entries: C[], minimum: number, bounds: (entry: C) => IBo
     return total;
 }
 
+function orderPage<C>(entries: C[], compare: (a: C, b: C) => number, numeric: boolean) {
+    if (!numeric || entries.length > 16) {
+        entries.sort(compare);
+        return;
+    }
+    // Overflowing pages usually hold ten entries. A stable insertion sort orders them in place.
+    for (let i = 1; i < entries.length; i++) {
+        const entry = entries[i];
+        let j = i;
+        while (j > 0 && compare(entries[j - 1], entry) > 0) {
+            entries[j] = entries[j - 1];
+            j--;
+        }
+        entries[j] = entry;
+    }
+}
+
 function splitPage<C>(
     entries: C[],
     minimum: number,
     bounds: (item: C) => IBoundingBox,
     compareX: (a: C, b: C) => number,
-    compareY: (a: C, b: C) => number
+    compareY: (a: C, b: C) => number,
+    numeric: boolean
 ) {
     // The second stable sort retains X order for tied Y coordinates and vice versa.
-    entries.sort(compareX);
+    orderPage(entries, compareX, numeric);
     const xMargin = groupMargin(entries, minimum, bounds);
-    entries.sort(compareY);
+    orderPage(entries, compareY, numeric);
     if (xMargin < groupMargin(entries, minimum, bounds)) {
-        entries.sort(compareX);
+        orderPage(entries, compareX, numeric);
     }
 
     // Cache the right-hand bounds at each cut. The left-hand bounds only grow as the cut moves.
@@ -188,8 +221,8 @@ export class RBush<T = IBoundingBox> {
 
     private _collect(page: RBushNode<T>, items: T[]) {
         if (page.leaf) {
-            for (const item of page.children) {
-                items.push(item);
+            for (let i = 0; i < page.children.length; i++) {
+                items.push(page.children[i]);
             }
         } else {
             for (let i = page.children.length - 1; i >= 0; i--) {
@@ -199,33 +232,39 @@ export class RBush<T = IBoundingBox> {
     }
 
     private _query(box: IBoundingBox, items?: T[]): boolean {
-        if (!overlaps(this.data, box)) {
+        const { minX, minY, maxX, maxY } = box;
+        const root = this.data;
+        if (!(root.minX <= maxX && root.maxX >= minX && root.minY <= maxY && root.maxY >= minY)) {
             return false;
         }
-        const pending = [this.data];
+        const pending = [root];
         while (pending.length) {
             const page = pending.pop()!;
             if (page.leaf) {
-                for (const item of page.children) {
-                    if (overlaps(this.toBBox(item), box)) {
+                const entries = page.children;
+                for (let i = 0; i < entries.length; i++) {
+                    const entry = entries[i];
+                    const bounds = this.toBBox(entry);
+                    if (bounds.minX <= maxX && bounds.maxX >= minX && bounds.minY <= maxY && bounds.maxY >= minY) {
                         if (!items) {
                             return true;
                         }
-                        items.push(item);
+                        items.push(entry);
                     }
                 }
             } else {
-                for (const child of page.children) {
-                    if (!overlaps(child, box)) {
-                        continue;
-                    }
-                    if (covers(box, child)) {
-                        if (!items) {
-                            return true;
+                const children = page.children;
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    if (child.minX <= maxX && child.maxX >= minX && child.minY <= maxY && child.maxY >= minY) {
+                        if (minX <= child.minX && minY <= child.minY && maxX >= child.maxX && maxY >= child.maxY) {
+                            if (!items) {
+                                return true;
+                            }
+                            this._collect(child, items);
+                        } else {
+                            pending.push(child);
                         }
-                        this._collect(child, items);
-                    } else {
-                        pending.push(child);
                     }
                 }
             }
@@ -254,8 +293,8 @@ export class RBush<T = IBoundingBox> {
             return this;
         }
         if (items.length < this._minimum) {
-            for (const item of items) {
-                this.insert(item);
+            for (let i = 0; i < items.length; i++) {
+                this.insert(items[i]);
             }
             return this;
         }
@@ -277,7 +316,7 @@ export class RBush<T = IBoundingBox> {
     private _pack(items: T[], begin: number, end: number, height: number, fanout: number): RBushNode<T> {
         const size = end - begin + 1;
         if (size <= this._capacity) {
-            return makeNode(items.slice(begin, end + 1), 1, true, (item) => this.toBBox(item));
+            return makeNode(items.slice(begin, end + 1), 1, true, this.toBBox);
         }
         const pageSize = Math.ceil(size / fanout);
         const stripSize = pageSize * Math.ceil(Math.sqrt(fanout));
@@ -319,18 +358,21 @@ export class RBush<T = IBoundingBox> {
         for (let depth = level; depth >= 0; depth--) {
             page = path[depth];
             if (page.children.length <= this._capacity) {
-                for (let i = depth; i >= 0; i--) {
+                for (let i = Math.min(depth, level - 1); i >= 0; i--) {
                     include(path[i], box);
                 }
                 return;
             }
             let sibling: RBushNode<T>;
             if (page.leaf) {
-                const bounds = (item: T) => this.toBBox(item);
-                const rest = splitPage(page.children, this._minimum, bounds, this.compareMinX, this.compareMinY);
+                // Unordered coordinates and custom comparators retain native sort semantics.
+                const numeric = !Number.isNaN(page.minX) && !Number.isNaN(page.minY);
+                const bounds = this.toBBox;
+                const defaultOrder = this.compareMinX === RBush.prototype.compareMinX && this.compareMinY === RBush.prototype.compareMinY;
+                const rest = splitPage(page.children, this._minimum, bounds, this.compareMinX, this.compareMinY, numeric && defaultOrder);
                 sibling = makeNode(rest, 1, true, bounds);
             } else {
-                const rest = splitPage(page.children, this._minimum, boundsOfNode, (a, b) => a.minX - b.minX, (a, b) => a.minY - b.minY);
+                const rest = splitPage(page.children, this._minimum, boundsOfNode, (a, b) => a.minX - b.minX, (a, b) => a.minY - b.minY, false);
                 sibling = makeNode(rest, page.height, false, boundsOfNode);
             }
             this._refit(page);
@@ -346,16 +388,10 @@ export class RBush<T = IBoundingBox> {
     }
 
     private _refit(page: RBushNode<T>) {
-        page.minX = page.minY = Infinity;
-        page.maxX = page.maxY = -Infinity;
         if (page.leaf) {
-            for (const item of page.children) {
-                include(page, this.toBBox(item));
-            }
+            fit(page, page.children, this.toBBox);
         } else {
-            for (const child of page.children) {
-                include(page, child);
-            }
+            fit(page, page.children, boundsOfNode);
         }
     }
 
@@ -377,12 +413,16 @@ export class RBush<T = IBoundingBox> {
             if (!covers(page, box)) {
                 return false;
             }
-            const at = page.children.findIndex((child) => this._erase(child, box, item, equals));
-            if (at < 0) {
+            const children = page.children;
+            let i = 0;
+            while (i < children.length && !this._erase(children[i], box, item, equals)) {
+                i++;
+            }
+            if (i === children.length) {
                 return false;
             }
-            if (!page.children[at].children.length) {
-                page.children.splice(at, 1);
+            if (!children[i].children.length) {
+                children.splice(i, 1);
             }
         }
         if (page.children.length) {

@@ -3,7 +3,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import scrollbar from 'tailwind-scrollbar';
-import plugin from 'tailwindcss/plugin';
 
 const SOURCE_CONTENT = './src/**/*.{js,ts,jsx,tsx}';
 const DEPENDENCY_SOURCE_CONTENT = './node_modules/{name}/src/**/*.{js,ts,jsx,tsx}';
@@ -233,11 +232,6 @@ const config: Omit<Config, 'content'> = {
     },
     plugins: [
         scrollbar,
-        plugin(({ addComponents }) => {
-            addComponents({
-                ':where(.scoped-ui-font) :where(button, input, select, textarea)': { fontFamily: 'inherit' },
-            });
-        }),
     ],
 };
 

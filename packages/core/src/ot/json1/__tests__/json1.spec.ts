@@ -405,6 +405,28 @@ describe('JSON1 mixed-version history and collaboration', () => {
         expect(JSON1.apply(appliedLeft, wire(rightPrime))).toEqual(upstream.apply(appliedRight, wire(leftPrime)));
     });
 
+    it('preserves replay errors for invalid Unicode changes and incomplete undo data', () => {
+        const cases: Array<(engine: typeof JSON1 | typeof upstream) => unknown> = [
+            (engine) => engine.apply(2, [{ es: ['x'] }]),
+            (engine) => engine.apply('text', [{ es: [1, 1, 'x'] }]),
+            (engine) => engine.apply('text', [{ es: [1] }]),
+            (engine) => engine.invert([{ es: [{ d: 1 }] }]),
+        ];
+        for (const run of cases) {
+            let reference: unknown;
+            try {
+                run(upstream);
+            } catch (error) {
+                reference = error;
+            }
+            expect(reference).toBeInstanceOf(Error);
+            expect(() => run(JSON1)).toThrowError(expect.objectContaining({
+                name: (reference as Error).name,
+                message: (reference as Error).message,
+            }));
+        }
+    });
+
     it('rejects malformed persisted moves and out-of-order branches in both engines', () => {
         for (const op of [
             ['rows', 0, { p: 0 }],

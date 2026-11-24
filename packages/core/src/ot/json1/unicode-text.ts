@@ -16,22 +16,20 @@
 
 // Adapted from ot-text-unicode 4.0.0 and unicount 1.1.0. See THIRD_PARTY_NOTICES.txt.
 
+import { assert } from './snapshot';
+
 type TextOpComponent = number | string | { d: number | string };
 
 type TextOp = TextOpComponent[];
 
 const checkOp = (op: TextOp) => {
-    if (!Array.isArray(op)) {
-        throw new TypeError('Op must be an array of components');
-    }
+    assert(Array.isArray(op), 'Op must be an array of components');
     let last = null;
     for (let i = 0; i < op.length; i++) {
         const c = op[i];
         switch (typeof c) {
             case 'object':
-                if (typeof c.d !== 'number' && typeof c.d !== 'string') {
-                    throw new TypeError('Delete must be number or string');
-                }
+                assert(typeof c.d === 'number' || typeof c.d === 'string', 'Delete must be number or string');
                 if (dlen(c.d) <= 0) {
                     throw new Error('Deletes must not be empty');
                 }
@@ -45,16 +43,12 @@ const checkOp = (op: TextOp) => {
                 if (!(c > 0)) {
                     throw new Error('Skip components must be >0');
                 }
-                if (typeof last === 'number') {
-                    throw new TypeError('Adjacent skip components should be combined');
-                }
+                assert(typeof last !== 'number', 'Adjacent skip components should be combined');
                 break;
         }
         last = c;
     }
-    if (typeof last === 'number') {
-        throw new TypeError('Op has a trailing skip');
-    }
+    assert(typeof last !== 'number', 'Op has a trailing skip');
 };
 
 function eachOp(op: TextOp, fn: (c: TextOpComponent, prePos: number, postPos: number) => void) {
@@ -322,13 +316,8 @@ function invert(op: TextOp) {
     return mapOp(op, (c) => {
         switch (typeof c) {
             case 'object':
-                if (typeof c.d === 'number') {
-                    throw new TypeError(
-                        'Cannot invert text op: Deleted characters missing from operation. makeInvertible must be called first.'
-                    );
-                } else {
-                    return c.d;
-                }
+                assert(typeof c.d !== 'number', 'Cannot invert text op: Deleted characters missing from operation. makeInvertible must be called first.');
+                return c.d;
             case 'string':
                 return { d: c };
             case 'number':
@@ -372,23 +361,18 @@ export const unicodeText = {
 };
 function apply(text: string, op: TextOp) {
     checkOp(op);
-    if (typeof text !== 'string') {
-        throw new TypeError(`Invalid document snapshot: ${text}`);
-    }
+    assert(typeof text === 'string', `Invalid document snapshot: ${text}`);
     const result: string[] = [];
     for (const edit of op) {
         if (typeof edit === 'string') {
             result.push(edit);
-        } else {
-            const skip = typeof edit === 'number';
-            const offset = uniToStrPos(text, skip ? edit : dlen(edit.d));
-            if (skip) {
-                if (offset > text.length) {
-                    throw new Error('The op is too long for this document');
-                }
-                result.push(text.slice(0, offset));
-            }
+        } else if (typeof edit === 'number') {
+            const offset = uniToStrPos(text, edit);
+            assert(offset <= text.length, 'The op is too long for this document');
+            result.push(text.slice(0, offset));
             text = text.slice(offset);
+        } else if (typeof edit === 'object') {
+            text = text.slice(uniToStrPos(text, dlen(edit.d)));
         }
     }
     return result.join('') + text;

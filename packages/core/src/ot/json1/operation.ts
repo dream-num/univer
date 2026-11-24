@@ -160,9 +160,7 @@ export function checkValidOp(op: JSONXActions) {
     const EDIT = 2;
     const DESCENT = 3;
     const checkDescent = (descent: OperationList, isRoot: boolean) => {
-        if (!Array.isArray(descent)) {
-            throw new TypeError('Op must be null or a list');
-        }
+        assert(Array.isArray(descent), 'Op must be null or a list');
         if (descent.length === 0) {
             throw new Error('Empty descent');
         }

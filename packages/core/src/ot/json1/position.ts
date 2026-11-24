@@ -15,15 +15,21 @@
  */
 
 import type { JSONXActions, JSONXPath } from './json1';
+import { followMove, singleMove } from './move';
 import { entries } from './operation';
 import { Revision } from './revision';
 import { unicodeText } from './unicode-text';
 
 /** Follow the selected value through relocations, or return null when its subtree disappears. */
 export function transformPosition(path: JSONXPath, op: JSONXActions): JSONXPath | null {
+    const changes = entries(op);
+    const move = singleMove(changes);
+    if (move) {
+        return followMove(path, move);
+    }
     const source = new Revision();
     const value = source.at(path);
-    const result = new Revision(source.root).replay(entries(op));
+    const result = new Revision(source.root).replay(changes);
     const mapped = result.path(value);
     const offset = path[path.length - 1];
     if (mapped && typeof offset === 'number') {

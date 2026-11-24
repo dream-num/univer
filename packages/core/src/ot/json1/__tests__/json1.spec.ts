@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 import type { JSON1Document, JSONXActions, JSONXPath } from '../json1';
 import { JSONX } from '../../../docs/data-model/json-x/json-x';
-import { JSON1 } from '../json1';
+import { JSON1, registerJSON1Subtype } from '../json1';
 
 function wire<T>(value: T): T {
     return JSON.parse(JSON.stringify(value));
@@ -209,13 +209,171 @@ describe('document changesets', () => {
         expect(JSON1.apply(after, resolve(batch.get(), insertion, 'left'))).toEqual({ keep: 1, shared: 2 });
     });
 
-    it('keeps original undo values when an edited or shortened subtree is removed later', () => {
+    it('drops a move from a concurrently deleted subtree without inserting a placeholder', () => {
+        const before = { meta: { name: 'title' }, archive: [] };
+        const move = JSON1.moveOp(['meta', 'name'], ['archive', 0]);
+        const replace = JSON1.replaceOp(['meta'], before.meta, { version: 2 });
+        const expected = { meta: { version: 2 }, archive: [] };
+        expect(JSON1.apply(JSON1.apply(before, replace), JSON1.transform(move, replace, 'left'))).toEqual(expected);
+        expect(JSON1.apply(JSON1.apply(before, move), JSON1.transform(replace, move, 'right'))).toEqual(expected);
+    });
+
+    it('isolates a removal from a move into the same table property when consulting the document policy', () => {
+        const before = { archive: [{ name: 'incoming' }], tableSource: { active: { name: 'old' } } };
+        const move: JSONXActions = [['archive', 0, { p: 0 }], ['tableSource', 'active', { r: true, d: 0 }]];
+        const rename = JSON1.replaceOp(['tableSource', 'active', 'name'], 'old', 'remote');
+        const resolve = JSON1.createTransform(({ op1, op2 }) => op1?.[0] === 'tableSource' && op2?.[0] === 'tableSource');
+        expect(JSON1.apply(JSON1.apply(before, rename), resolve(move, rename, 'left'))).toEqual({
+            archive: [],
+            tableSource: { active: { name: 'incoming' } },
+        });
+    });
+
+    it('preserves removals inside a moved collection after its original parent is deleted', () => {
+        const before = { rows: [{ children: [{ n: 3 }] }], saved: [] };
+        const move = JSON1.moveOp(['rows', 0, 'children'], ['saved', 0]);
+        const trim = JSON1.removeOp(['saved', 0, 0, 'n'], 3);
+        const dropParent = JSON1.removeOp(['rows', 0], {});
+        const history = JSON1.compose(JSON1.compose(move, trim), dropParent);
+        expect(JSON1.apply(before, history)).toEqual({ rows: [], saved: [[{}]] });
+        expect(JSON1.apply({ rows: [], saved: [[{}]] }, JSON1.invertWithDoc(history, before))).toEqual(before);
+    });
+
+    it('keeps both clients from restoring a collection moved into a concurrently deleted row', () => {
+        const before = { rows: [{ id: 'A', children: ['K'] }, { id: 'B', children: [] }] };
+        const lift: JSONXActions = ['rows', [0, { d: 0 }, 'children', { p: 0 }], [1, { r: true }]];
+        const nest: JSONXActions = ['rows', [0, 'children', { p: 0 }], [1, 'children', 0, { i: {} }, 'nested', { d: 0 }]];
+        const expected = { rows: [{ id: 'A' }] };
+        expect(JSON1.apply(JSON1.apply(before, nest), JSON1.transformNoConflict(lift, nest, 'left'))).toEqual(expected);
+        expect(JSON1.apply(JSON1.apply(before, lift), JSON1.transformNoConflict(nest, lift, 'right'))).toEqual(expected);
+    });
+
+    it('removes a value moved out of a collection when both destinations are lost', () => {
+        const before: JSON1Document = { group: [{ v: 1 }, {}], archive: [], saved: {} };
+        const archive: JSONXActions = [['archive', 0, { d: 0 }], ['group', { p: 0 }, 1, { r: true }]];
+        const relocate: JSONXActions = [
+            ['archive', { p: 1 }],
+            ['group', [0, 'v', { p: 0 }], [1, 'links', { d: 1 }]],
+            ['saved', 'v', { d: 0 }],
+        ];
+        const afterRelocate = JSON1.apply(before, relocate);
+        const afterArchive = JSON1.apply(before, archive);
+        expect(JSON1.apply(afterRelocate, JSON1.transformNoConflict(archive, relocate, 'left'))).toEqual({ saved: {} });
+        expect(JSON1.apply(afterArchive, JSON1.transformNoConflict(relocate, archive, 'right'))).toEqual({ saved: {} });
+    });
+
+    it('keeps the winning move outside a cycle even when the other client moves the same row into it', () => {
+        const before: JSON1Document = { rows: [{ cells: [{ n: 1 }, { n: 2 }] }, { id: 'B', cells: [{ n: 3 }] }], saved: {} };
+        const nest: JSONXActions = ['rows', [0, ['cells', [0, { d: 0 }], [1, { p: 1 }, 'sibling', { d: 1 }]], ['copy', { d: 2 }]], [1, { p: 0 }, 'cells', { p: 2 }]];
+        const save: JSONXActions = [
+            ['rows', { p: 1 }, 1, { p: 0 }],
+            ['saved', 'row', { d: 0 }, 'cells', 0, 'rows', { d: 1 }],
+        ];
+        const expected = { saved: { row: { id: 'B' } } };
+        expect(JSON1.apply(JSON1.apply(before, save), JSON1.transformNoConflict(nest, save, 'right'))).toEqual(expected);
+        expect(JSON1.apply(JSON1.apply(before, nest), JSON1.transformNoConflict(save, nest, 'left'))).toEqual(expected);
+    });
+
+    it('consults the removal policy when a moved and edited value loses its parent', () => {
+        const before: JSON1Document = { rows: [{ n: 1 }, {}], saved: {} };
+        const transfer: JSONXActions = ['rows', [0, 'n', { p: 0 }], [1, 'n', { d: 0, ena: 2 }]];
+        const save: JSONXActions = [['rows', [0, 'n', { p: 0 }], [1, { r: true }]], ['saved', 'n', { d: 0 }]];
+        const afterSave = JSON1.apply(before, save);
+        expect(() => JSON1.transform(transfer, save, 'left')).toThrowError(expect.objectContaining({
+            conflict: expect.objectContaining({ type: JSON1.RM_UNEXPECTED_CONTENT }),
+        }));
+        expect(JSON1.apply(afterSave, JSON1.transformNoConflict(transfer, save, 'left'))).toEqual({ rows: [{}], saved: {} });
+    });
+
+    it('shares concurrent equal literals and reports a write conflict for different nested values', () => {
+        const one = JSON1.insertOp(['row'], { name: 'A', cells: [0, false, null] });
+        const same = JSON1.insertOp(['row'], { cells: [0, false, null], name: 'A' });
+        const changed = JSON1.insertOp(['row'], { cells: [0, true, null], name: 'A' });
+        expect(JSON1.transform(one, same, 'left')).toBeNull();
+        expect(() => JSON1.transform(one, changed, 'left')).toThrowError(expect.objectContaining({
+            conflict: expect.objectContaining({ type: JSON1.DROP_COLLISION }),
+        }));
+    });
+
+    it('preserves a subtype edit for a third client that inserted the same literal after a reorder', () => {
+        const before = { rows: [{ count: 0 }, { count: 8 }] };
+        const reorder = JSON1.moveOp(['rows', 1], ['rows', 0]);
+        const replace = JSON1.replaceOp(['rows', 0, 'count'], 0, 3);
+        const increment = JSON1.compose(replace, ['rows', 0, 'count', { ena: 2 }]);
+        const replaced = JSON1.transform(replace, reorder, 'right');
+        const incremented = JSON1.transform(increment, reorder, 'left');
+        const snapshot = JSON1.apply(JSON1.apply(before, reorder), replaced);
+        expect(JSON1.apply(snapshot, JSON1.transform(incremented, replaced, 'right'))).toEqual({ rows: [{ count: 8 }, { count: 5 }] });
+    });
+
+    it('projects insertions and move picks into their respective history coordinates', () => {
+        const before = { cells: ['A', 'B'], saved: [], count: 0 };
+        const add: JSONXActions = [['cells', 0, { i: 'new' }], ['count', { ena: 1 }]];
+        const move = JSON1.moveOp(['cells', 1], ['saved', 0]);
+        expect(JSON1.apply(before, JSON1.compose(add, move))).toEqual({ cells: ['new', 'B'], saved: ['A'], count: 1 });
+        const expected = { cells: ['new', 'A'], saved: ['B'], count: 1 };
+        expect(JSON1.apply(JSON1.apply(before, add), JSON1.transform(move, add, 'right'))).toEqual(expected);
+        expect(JSON1.apply(JSON1.apply(before, move), JSON1.transform(add, move, 'left'))).toEqual(expected);
+    });
+
+    it('replays the result recorded on each side of an overlapping group deletion', () => {
+        const before: JSON1Document = { dest: {}, rows: [{}, { v: 1 }] };
+        const archive: JSONXActions = [
+            ['dest', 'rows', { d: 0 }],
+            ['rows', { p: 0 }, [0, { r: true }], [1, 'v', { p: 1 }]],
+            ['saved', { d: 1 }],
+        ];
+        const nest: JSONXActions = [['dest', { r: true }], ['rows', [0, 'nested', { d: 0 }], [1, { p: 0 }]]];
+        const resolve = JSON1.createTransform((c) => c.type === JSON1.RM_UNEXPECTED_CONTENT);
+        // Both snapshots occur in existing histories, depending on which edit was applied locally.
+        expect(JSON1.apply(JSON1.apply(before, archive), resolve(nest, archive, 'right'))).toEqual({ saved: 1 });
+        expect(JSON1.apply(JSON1.apply(before, nest), resolve(archive, nest, 'left'))).toEqual({});
+    });
+
+    it('preserves the conflict decision for a chain of alternating move destinations', () => {
+        const before = { a: {}, b: {}, c: {}, d: {}, e: {} };
+        const author = JSON1.compose(JSON1.compose(JSON1.moveOp(['a'], ['saved']), JSON1.moveOp(['c'], ['b', 'child'])), JSON1.moveOp(['e'], ['d', 'child']));
+        const peer = JSON1.compose(JSON1.moveOp(['b'], ['a', 'child']), JSON1.moveOp(['d'], ['c', 'child']));
+        const pending = JSON1.moveOp(['e'], ['d', 'child']);
+        expect(() => JSON1.transform(author, peer, 'left')).toThrowError(expect.objectContaining({
+            conflict: { type: 3, op1: pending, op2: null },
+        }));
+        expect(JSON1.apply(JSON1.apply(before, peer), JSON1.transformNoConflict(author, peer, 'left'))).toEqual({
+            saved: { child: { child: { child: {} } } },
+        });
+        expect(JSON1.apply(JSON1.apply(before, author), JSON1.transform(peer, author, 'right'))).toEqual({
+            saved: { child: { child: { child: { child: {} } } } },
+        });
+    });
+
+    it('preserves recorded removals and uses the original snapshot when preparing full undo', () => {
         const before = { rows: [null, false, 2], count: 3 };
         const first = JSON1.compose(JSON1.removeOp(['rows', 0], null), ['count', { ena: 2 }]);
         const remove = JSON1.compose(JSON1.removeOp(['rows'], [false, 2]), JSON1.removeOp(['count'], 5));
         const batch = JSON1.compose(first, remove);
         expect(JSON1.apply(before, batch)).toEqual({});
-        expect(JSON1.apply({}, JSON1.invert(wire(batch)))).toEqual(before);
+        expect(JSON1.apply({}, JSON1.invert(wire(batch)))).toEqual({ rows: [null, false, 2], count: 5 });
+        expect(JSON1.apply({}, JSON1.invertWithDoc(wire(batch), before))).toEqual(before);
+    });
+
+    it('keeps the caller snapshot intact when preparing undo for a mutating subtype', () => {
+        const name = 'document-test-change-metadata';
+        registerJSON1Subtype<Record<string, { count: number }>, number>({
+            name,
+            apply(metadata, delta) {
+                Object.getOwnPropertyDescriptor(metadata, '__proto__')!.value.count += delta;
+                return metadata;
+            },
+            invert: (delta) => -delta,
+            compose: (a, b) => a + b,
+            transform: (delta) => delta,
+        });
+        const before = { annotation: JSON.parse('{"__proto__":{"count":3}}'), removed: 'value' };
+        const actions: JSONXActions = [['annotation', { et: name, e: 2 }], ['removed', { r: true }]];
+        const undo = JSON1.invertWithDoc(actions, before);
+        expect(Object.getOwnPropertyDescriptor(before.annotation, '__proto__')!.value.count).toBe(3);
+        const edited = JSON1.apply(wire(before), actions);
+        expect(JSON1.apply(edited, undo)).toEqual(before);
     });
 
     it('restores edits made within a new literal when redoing its insertion', () => {

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { cloneDeep } from 'lodash-es';
-import type { IJSON1Component, JSON1Document, JSONXActions, JSONXPath } from './json1';
+import type { JSON1Document, JSONXActions, JSONXPath } from './json1';
 import type { IEntry } from './operation';
 import { JSON1WriteCursor } from './cursor';
-import { editComponent, entries, getEdit } from './operation';
+import { cloneDocument, editComponent, entries, getEdit, singleEdit } from './operation';
 
 type Container = JSON1Document[] | Record<string, JSON1Document>;
 
@@ -39,7 +38,10 @@ function insert(parent: Record<string, JSON1Document | undefined>, key: string |
 /** A replay clones each written container once, retaining references to unaffected branches. */
 function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData?: JSON1WriteCursor) {
     const holder: Record<string, JSON1Document | undefined> = { root: snapshot };
-    const owned = new WeakSet<object>();
+    // Most changes touch only a handful of containers. Avoid hashing every freshly cloned
+    // object in that case, and bound membership checks when replaying a large batch.
+    const clones: object[] = [];
+    let owned: Set<object> | undefined;
 
     function target(path: JSONXPath) {
         let parent = holder;
@@ -50,9 +52,16 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
                 throw new Error('Invalid document path');
             }
             let writable: Container = child;
-            if (!owned.has(child)) {
+            if (!(owned ? owned.has(child) : clones.includes(child))) {
                 writable = Array.isArray(child) ? child.slice() : { ...child };
-                owned.add(writable);
+                if (owned) {
+                    owned.add(writable);
+                } else {
+                    clones.push(writable);
+                    if (clones.length === 16) {
+                        owned = new Set(clones);
+                    }
+                }
                 parent[key] = writable;
             }
             parent = writable as Record<string, JSON1Document>;
@@ -62,7 +71,6 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
     }
 
     const slots: JSON1Document[] = [];
-    const captured = new Map<JSONXPath, IJSON1Component>();
     for (let index = changes.length - 1; index >= 0; index--) {
         const { path, component } = changes[index];
         if (component.r === undefined && component.p === undefined) {
@@ -77,7 +85,7 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
             slots[component.p] = value;
         }
         if (undoData && component.r !== undefined) {
-            captured.set(path, { ...component, r: value });
+            changes[index].component = { ...component, r: value };
         }
         if (Array.isArray(parent)) {
             parent.splice(Number(key), 1);
@@ -86,7 +94,7 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
         }
     }
     for (const { path, component } of changes) {
-        let record = captured.get(path) ?? component;
+        let record = component;
         const edit = getEdit(component);
         const value = component.d === undefined ? component.i as JSON1Document | undefined : slots[component.d];
         if (value !== undefined || edit) {
@@ -103,7 +111,7 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
                     const payload = edit.type.makeInvertible(edit.payload, current);
                     record = { ...record, ...editComponent({ ...edit, payload }) };
                 }
-                parent[key] = edit.type.apply(undoData ? cloneDeep(current) : current, edit.payload) as JSON1Document;
+                parent[key] = edit.type.apply(undoData ? cloneDocument(current) : current, edit.payload) as JSON1Document;
             }
         }
         if (undoData) {
@@ -116,7 +124,27 @@ function replay(snapshot: JSON1Document | undefined, changes: IEntry[], undoData
 
 /** Replay structural edits in source order for cuts and result order for insertions. */
 export function apply(snapshot: JSON1Document | undefined, op: JSONXActions) {
-    return op === null ? snapshot : replay(snapshot, entries(op));
+    if (op === null) {
+        return snapshot;
+    }
+    const changes = entries(op);
+    const edit = singleEdit(changes);
+    if (edit) {
+        const path = changes[0].path;
+        if (!path.length && snapshot !== undefined) {
+            return edit.type.apply(snapshot, edit.payload) as JSON1Document;
+        }
+        if (path.length === 1 && snapshot && typeof snapshot === 'object' && Array.isArray(snapshot) === (typeof path[0] === 'number')) {
+            const key = path[0];
+            const source = snapshot as Record<string, JSON1Document>;
+            if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) {
+                const copy = Array.isArray(snapshot) ? snapshot.slice() : { ...snapshot };
+                (copy as Record<string, JSON1Document>)[key] = edit.type.apply(source[key], edit.payload) as JSON1Document;
+                return copy;
+            }
+        }
+    }
+    return replay(snapshot, changes);
 }
 
 /** Capture values at the instant they are removed, after any nested moves have been detached. */

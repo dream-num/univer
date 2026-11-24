@@ -15,15 +15,17 @@
  */
 
 import type { JSONXActions, JSONXPath } from './json1';
-import type { IEdit } from './operation';
+import type { IEdit, IEntry } from './operation';
 import type { Value } from './revision';
+import { combineIndependent } from './batch';
 import { JSON1WriteCursor } from './cursor';
-import { editComponent, entries } from './operation';
+import { separateReorders, singleMove } from './move';
+import { atEdit, comparePath, editComponent, encode, entries, getEdit, independentBranches, singleEdit } from './operation';
 import { Revision } from './revision';
 
-function parentIn(revision: Revision, value: Value, set: Set<Value>) {
+function parentIn(revision: Revision, value: Value, set: Set<Value>, moved: Set<Value>) {
     let parent = revision.location(value)?.parent;
-    while (parent && parent !== revision.root) {
+    while (parent && parent !== revision.root && !moved.has(parent)) {
         if (set.has(parent)) {
             return true;
         }
@@ -32,23 +34,9 @@ function parentIn(revision: Revision, value: Value, set: Set<Value>) {
     return false;
 }
 
-/** Order paths in the same numeric and property order as the changeset writer. */
-export function comparePath(a: JSONXPath, b: JSONXPath) {
-    for (let i = 0; i < Math.min(a.length, b.length); i++) {
-        if (a[i] === b[i]) {
-            continue;
-        }
-        if (typeof a[i] !== typeof b[i]) {
-            return typeof a[i] === 'number' ? -1 : 1;
-        }
-        return a[i] < b[i] ? -1 : 1;
-    }
-    return a.length - b.length;
-}
-
 /** Encode the structural difference between two revisions. Sibling index shifts do not create moves. */
-export function difference(source: Revision, target: Revision, edits: Map<Value, IEdit>): JSONXActions {
-    const writer = new JSON1WriteCursor();
+export function difference(source: Revision, target: Revision, edits: Map<Value, IEdit>, author?: Revision): JSONXActions {
+    const changes: IEntry[] = [];
     const removed = new Set<Value>();
     const inserted = new Set<Value>();
     const moved = new Set<Value>();
@@ -77,37 +65,78 @@ export function difference(source: Revision, target: Revision, edits: Map<Value,
             }
         }
     }
-    const hints = new Map([...source.records, ...target.records]);
-    const sorted = Array.from(moved).sort((a, b) => comparePath(from.get(a)!, from.get(b)!));
+    const hints = source.records.size ? new Map([...source.records, ...target.records]) : target.records;
+    const sorted = Array.from(moved).sort((a, b) => comparePath(to.get(a)!, to.get(b)!));
     for (const [slot, value] of sorted.entries()) {
-        writer.writeMove(from.get(value)!, to.get(value)!, slot);
+        changes.push({ path: from.get(value)!, component: { p: slot } }, { path: to.get(value)!, component: { d: slot } });
     }
     for (const value of removed) {
-        if (!parentIn(source, value, removed)) {
-            writer.writeAtPath(from.get(value)!, 'r', source.literal(value, moved, hints));
+        // A peer move within a concurrently removed subtree is covered by the
+        // ancestor cut. A separately authored child removal stays in the journal.
+        if (author && author.locations.get(value) !== null && parentIn(source, value, removed, moved)) {
+            continue;
         }
+        const recorded = hints.get(value);
+        changes.push({ path: from.get(value)!, component: { r: author || recorded === undefined ? true : recorded } });
     }
+    const placements = inserted.size ? new Set([...inserted, ...moved]) : moved;
     for (const value of inserted) {
-        if (!parentIn(target, value, inserted)) {
-            writer.writeAtPath(to.get(value)!, 'i', target.literal(value, moved, hints));
-        }
+        // Separate incoming children and subtype edits retain their own identity on the wire.
+        // A later peer may insert the very same literal and still need to receive its edit.
+        changes.push({ path: to.get(value)!, component: { i: target.literal(value, placements, hints, undefined, false) } });
     }
     for (const [value, edit] of edits) {
         const path = target.path(value);
-        if (path && source.path(value)) {
-            writer.reset();
-            writer.at(path, (w) => w.mergeTree([editComponent(edit)]));
+        if (path) {
+            const component = editComponent(edit);
+            if (Object.keys(component).length) {
+                changes.push({ path, component });
+            }
         }
     }
-    return writer.get();
+    return encode(changes);
 }
 
 /** Combine consecutive changes by following the identities they cut, edit or reattach. */
-export function compose(first: JSONXActions, second: JSONXActions) {
+export function compose(first: JSONXActions, second: JSONXActions): JSONXActions {
     if (!first || !second) {
         return first ?? second;
     }
+    const a = entries(first);
+    const b = entries(second);
+    if (independentBranches(a, b)) {
+        return encode([a[0], b[0]]);
+    }
+    const earlier = singleEdit(a);
+    const later = singleEdit(b);
+    if (earlier && later && earlier.type === later.type && comparePath(a[0].path, b[0].path) === 0) {
+        return atEdit(a[0].path, earlier.type, earlier.type.compose(earlier.payload, later.payload));
+    }
+    if (a.length === 1 && b.length === 1 && !earlier && !later && comparePath(a[0].path, b[0].path) === 0) {
+        const { component: x, path } = a[0];
+        const y = b[0].component;
+        if (!getEdit(x) && !getEdit(y)) {
+            // An insert followed by its removal cancels. A replacement leaves the original removal.
+            if (x.i !== undefined && y.r !== undefined) {
+                const component = { ...(x.r === undefined ? {} : { r: x.r }), ...(y.i === undefined ? {} : { i: y.i }) };
+                return Object.keys(component).length ? [...path, component] : null;
+            }
+            if (x.r !== undefined && x.i === undefined && y.i !== undefined && y.r === undefined) {
+                return [...path, { r: x.r, i: y.i }];
+            }
+        }
+    }
+    const firstMove = singleMove(a);
+    const secondMove = singleMove(b);
+    if (firstMove && secondMove && separateReorders(firstMove, secondMove)) {
+        const slot = comparePath(firstMove.to, secondMove.to) < 0 ? 0 : 1;
+        return new JSON1WriteCursor().writeMove(firstMove.from, firstMove.to, slot).writeMove(secondMove.from, secondMove.to, 1 - slot).get();
+    }
+    const independent = combineIndependent(a, b);
+    if (independent !== undefined) {
+        return independent;
+    }
     const base = new Revision();
-    const final = new Revision(base.root).replay(entries(first)).replay(entries(second));
+    const final = new Revision(base.root).replay(a).replay(b);
     return difference(base, final, final.edits);
 }

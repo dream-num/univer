@@ -15,11 +15,11 @@
  */
 
 import type { Ctor } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
 import type { IFunctionNames } from '../basics/function';
 import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { BaseFunction } from '../functions/base-function';
-import { Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
-import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -135,14 +135,8 @@ export class FormulaController extends Disposable {
     private _registerFunctions() {
         const config = this._configService.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
-        const functions: BaseFunction[] = ALL_IMPLEMENTED_FUNCTIONS.concat(config?.function ?? [])
-            .map((registerObject) => {
-                const Func = registerObject[0] as Ctor<BaseFunction>;
-                const name = registerObject[1] as IFunctionNames;
-
-                return new Func(name);
-            });
-
-        this._functionService.registerExecutors(...functions);
+        const registrations = config?.functionRegistry ?? ALL_IMPLEMENTED_FUNCTIONS.concat(config?.function ?? [])
+            .map(([Func, name]) => ({ name, create: () => new (Func as Ctor<BaseFunction>)(name as IFunctionNames) }));
+        this.disposeWithMe(this._functionService.registerFunctionFactories(...registrations));
     }
 }

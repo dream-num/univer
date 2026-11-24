@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DataSyncPrimaryController } from '@univerjs/rpc';
 import {
     CommandService,
     ConfigService,
@@ -26,8 +25,12 @@ import {
     LifecycleService,
     toDisposable,
 } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { CustomFunction } from '../../functions/custom-function';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
 import { FormulaCacheService } from '../../services/formula-cache.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
@@ -39,12 +42,14 @@ type FormulaDataSyncController = Pick<
     'registerSyncingMutations' | 'syncUnitMutations' | 'waitForPendingMutations'
 >;
 
-function createController(dataSyncPrimaryController?: FormulaDataSyncController): {
+function createController(dataSyncPrimaryController?: FormulaDataSyncController, config?: IUniverEngineFormulaConfig): {
     controller: FormulaController;
     commandService: ICommandService;
     registerOtherFormulaService: RegisterOtherFormulaService;
+    functions: IFunctionService;
 } {
     const injector = new Injector();
+    onTestFinished(() => injector.dispose());
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
@@ -53,22 +58,41 @@ function createController(dataSyncPrimaryController?: FormulaDataSyncController)
     injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
     injector.add([LifecycleService]);
     injector.add([RegisterOtherFormulaService]);
+    injector.add([FormulaController]);
+    if (dataSyncPrimaryController) {
+        injector.add([DataSyncPrimaryController, { useValue: dataSyncPrimaryController }]);
+    }
+    injector.get(IConfigService).setConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY, config ?? {});
     const registerOtherFormulaService = injector.get(RegisterOtherFormulaService);
     const commandService = injector.get(ICommandService);
     return {
-        controller: new FormulaController(
-            commandService,
-            injector.get(IFunctionService),
-            injector.get(IConfigService),
-            dataSyncPrimaryController,
-            registerOtherFormulaService
-        ),
+        controller: injector.get(FormulaController),
         commandService,
         registerOtherFormulaService,
+        functions: injector.get(IFunctionService),
     };
 }
 
 describe('FormulaController', () => {
+    it('bootstraps the exact registry without creating default or duplicate executors', () => {
+        let created = 0;
+        const first = createController(undefined, { functionRegistry: [{ name: 'ONLY', create: () => {
+            created++;
+            const executor = new CustomFunction('ONLY');
+            executor.calculateCustom = (value) => Number(value) * 2;
+            return executor;
+        } }] });
+        expect(created).toBe(1);
+        expect(first.functions.hasExecutor('SUM')).toBe(false);
+        const second = createController(undefined, { functionRegistry: first.functions.getFunctionRegistrations() });
+        expect(created).toBe(2);
+        expect(second.functions.getExecutor('ONLY')?.calculateCustom(4)).toBe(8);
+        expect(second.functions.getExecutor('ONLY')).not.toBe(first.functions.getExecutor('ONLY'));
+        first.functions.unregisterExecutors('ONLY');
+        const empty = createController(undefined, { functionRegistry: first.functions.getFunctionRegistrations() });
+        expect(empty.functions.getExecutors().size).toBe(0);
+    });
+
     it('registers the generic other-formula dirty mutation', () => {
         const { commandService, controller } = createController();
 

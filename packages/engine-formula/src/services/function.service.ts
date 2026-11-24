@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IAccessor, IDisposable, Nullable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
+import { createIdentifier, Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
-import { createIdentifier, Disposable, Inject, toDisposable } from '@univerjs/core';
 import { FormulaCacheService } from './formula-cache.service';
 
+export interface IFunctionRegistration {
+    readonly name: IFunctionNames;
+    /** Create a fresh executor using services from the target calculation context. */
+    readonly create: (accessor: IAccessor) => BaseFunction;
+}
+
 export interface IFunctionService {
+    readonly functionVersion: number;
+    readonly functionsChanged$: Observable<readonly IFunctionNames[]>;
+    registerFunctionFactories(...registrations: IFunctionRegistration[]): IDisposable;
+    getFunctionRegistrations(): readonly IFunctionRegistration[];
     /**
      * Use register to register a function, new CustomFunction(inject, name)
      */
@@ -61,11 +73,19 @@ export interface IFunctionService {
 export const IFunctionService = createIdentifier<IFunctionService>('univer.formula-function.service');
 
 export class FunctionService extends Disposable implements IFunctionService {
+    private readonly _registrations = new Map<IFunctionNames, { definition: IFunctionRegistration; executor: BaseFunction }>();
+    private readonly _functionsChanged = new Subject<readonly IFunctionNames[]>();
+    readonly functionsChanged$: Observable<readonly IFunctionNames[]> = this._functionsChanged.asObservable();
+    private _functionVersion = 0;
+    get functionVersion(): number { return this._functionVersion; }
     private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();
 
     private _functionDescriptions: Map<IFunctionNames, IFunctionInfo> = new Map();
 
-    constructor(@Inject(FormulaCacheService) private readonly _cacheService: FormulaCacheService) {
+    constructor(
+        @Inject(FormulaCacheService) private readonly _cacheService: FormulaCacheService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
         super();
     }
 
@@ -73,13 +93,59 @@ export class FunctionService extends Disposable implements IFunctionService {
         super.dispose();
         this._functionExecutors.clear();
         this._functionDescriptions.clear();
+        this._registrations.clear();
+        this._functionsChanged.complete();
     }
 
     registerExecutors(...functions: BaseFunction[]) {
-        this._cacheService.clearFunctions(functions.map((executor) => executor.name));
-        for (let i = 0; i < functions.length; i++) {
-            const func = functions[i];
+        const changed = new Set<IFunctionNames>();
+        for (const func of functions) {
+            if (this._functionExecutors.get(func.name) === func) {
+                continue;
+            }
             this._functionExecutors.set(func.name, func);
+            this._registrations.delete(func.name);
+            changed.add(func.name);
+        }
+        this._publishChanges([...changed]);
+    }
+
+    registerFunctionFactories(...registrations: IFunctionRegistration[]): IDisposable {
+        // Construct the whole batch before changing the live registry or its caches.
+        const entries = registrations.map(({ name, create }) => {
+            const executor = create(this._injector);
+            if (executor.name !== name) {
+                throw new Error(`Function factory name mismatch: ${name}`);
+            }
+            return { definition: { name, create }, executor };
+        });
+        for (const entry of entries) {
+            this._registrations.set(entry.definition.name, entry);
+            this._functionExecutors.set(entry.definition.name, entry.executor);
+        }
+        this._publishChanges([...new Set(entries.map(({ definition }) => definition.name))]);
+        return toDisposable(() => {
+            const names = entries.filter((entry) => this._registrations.get(entry.definition.name) === entry)
+                .map(({ definition }) => definition.name);
+            this.unregisterExecutors(...names);
+        });
+    }
+
+    getFunctionRegistrations(): readonly IFunctionRegistration[] {
+        return Array.from(this._functionExecutors, ([name, executor]) => {
+            const registration = this._registrations.get(name);
+            if (registration?.executor !== executor) {
+                throw new Error(`No factory registered for function: ${name}`);
+            }
+            return { ...registration.definition };
+        });
+    }
+
+    private _publishChanges(names: IFunctionNames[]): void {
+        if (names.length) {
+            this._cacheService.clearFunctions(names);
+            this._functionVersion++;
+            this._functionsChanged.next(names);
         }
     }
 
@@ -96,11 +162,14 @@ export class FunctionService extends Disposable implements IFunctionService {
     }
 
     unregisterExecutors(...functionTokens: IFunctionNames[]) {
-        this._cacheService.clearFunctions(functionTokens);
-        for (let i = 0; i < functionTokens.length; i++) {
-            const functionToken = functionTokens[i];
-            this._functionExecutors.delete(functionToken);
+        const changed: IFunctionNames[] = [];
+        for (const token of functionTokens) {
+            if (this._functionExecutors.delete(token)) {
+                this._registrations.delete(token);
+                changed.push(token);
+            }
         }
+        this._publishChanges(changed);
     }
 
     registerDescriptions(...descriptions: IFunctionInfo[]): IDisposable {

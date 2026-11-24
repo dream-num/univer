@@ -154,6 +154,15 @@ export class FunctionNode extends BaseAstNode {
             this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
     }
 
+    override preservesReferenceInRangeEndpoint(child: BaseAstNode): boolean {
+        const args = this.getChildren();
+        const index = args.indexOf(child);
+        return this.getToken() === FUNCTION_NAMES_META.CUBE ||
+            this._functionExecutor.preservesReferenceInRangeEndpointArgument?.(index, args.length) === true ||
+            (this._functionExecutor instanceof If && index > 0) ||
+            this.preservesLazyIfReferenceArray(child);
+    }
+
     override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
 
@@ -216,16 +225,7 @@ export class FunctionNode extends BaseAstNode {
         }
         let child: BaseAstNode = this;
         let parent = child.getParent();
-        while (parent instanceof FunctionNode) {
-            const args = parent.getChildren();
-            const argumentIndex = args.indexOf(child);
-            // These calls can pass a reference result through to the range operator.
-            if (parent.getToken() !== FUNCTION_NAMES_META.CUBE &&
-                !parent._functionExecutor.preservesReferenceInRangeEndpointArgument?.(argumentIndex, args.length) &&
-                !(parent._functionExecutor instanceof If && argumentIndex > 0) &&
-                !parent.preservesLazyIfReferenceArray(child)) {
-                return;
-            }
+        while (parent?.preservesReferenceInRangeEndpoint(child)) {
             child = parent;
             parent = child.getParent();
         }

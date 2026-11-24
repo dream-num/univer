@@ -150,6 +150,10 @@ export class BaseAstNode {
         return false;
     }
 
+    preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
+        return false;
+    }
+
     isCalculated() {
         return this._calculateState;
     }

@@ -393,7 +393,8 @@ function targetPosition(target: number, first: number, history: ITimeline, dateS
     // The forecast axis keeps the calendar day even when it rolls into the following month.
     if (target < anchor(period)) period--;
     const start = calendarMonthDistance(history.first, first, dateSystem) / monthStep;
-    return period - start + (target - anchor(period)) / history.step;
+    const previous = anchor(period);
+    return period - start + (target - previous) / (anchor(period + 1) - previous);
 }
 
 function calendarMonthDistance(first: number, last: number, dateSystem: DateSystem): number {

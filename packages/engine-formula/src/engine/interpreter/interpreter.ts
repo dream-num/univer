@@ -458,7 +458,10 @@ export class Interpreter extends Disposable {
                 return true;
             }
             if (parent.nodeType === NodeType.FUNCTION) {
-                return parent.preservesLazyIfReferenceArray(child);
+                if (parent.preservesLazyIfReferenceArray(child)) return true;
+                if (!parent.preservesReferenceInRangeEndpoint(child)) return false;
+            } else if (parent.nodeType === NodeType.LAMBDA && !parent.preservesReferenceInRangeEndpoint(child)) {
+                return false;
             }
 
             child = parent;

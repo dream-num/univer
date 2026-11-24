@@ -185,6 +185,7 @@ export {
     fromCallback,
     takeAfter,
 } from './shared/rxjs';
+export { getTextChangeRange } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export { cssPxToEmu, EMU_PER_CSS_PX, emuToCssPx } from './shared/units';

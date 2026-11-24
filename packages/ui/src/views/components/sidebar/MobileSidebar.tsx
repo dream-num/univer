@@ -78,7 +78,7 @@ export function MobileSidebar() {
                     aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
                     className="
                       univer-pointer-events-auto univer-absolute univer-inset-0 univer-m-0 univer-appearance-none
-                      univer-rounded-none univer-border-0 univer-bg-black/35 univer-p-0
+                      univer-rounded-none univer-border-0 univer-bg-black/[.35] univer-p-0
                     "
                     onClick={close}
                 />

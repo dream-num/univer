@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import scrollbar from 'tailwind-scrollbar';
+import plugin from 'tailwindcss/plugin';
 
 const SOURCE_CONTENT = './src/**/*.{js,ts,jsx,tsx}';
 const DEPENDENCY_SOURCE_CONTENT = './node_modules/{name}/src/**/*.{js,ts,jsx,tsx}';
@@ -85,6 +86,7 @@ const config: Omit<Config, 'content'> = {
     theme: {
         extend: {
             colors: {
+                black: 'rgb(var(--univer-black-rgb, 0 0 0) / <alpha-value>)',
                 primary: {
                     50: 'var(--univer-primary-50)',
                     100: 'var(--univer-primary-100)',
@@ -231,6 +233,11 @@ const config: Omit<Config, 'content'> = {
     },
     plugins: [
         scrollbar,
+        plugin(({ addComponents }) => {
+            addComponents({
+                ':where(.scoped-ui-font) :where(button, input, select, textarea)': { fontFamily: 'inherit' },
+            });
+        }),
     ],
 };
 

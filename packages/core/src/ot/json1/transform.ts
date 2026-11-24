@@ -44,17 +44,18 @@ function fragment(path: JSONXPath, op: JSONXActions): JSONXActions {
     }
     const { component } = match;
     const writer = new JSON1WriteCursor();
-    writer.at(match.path, (w) => w.mergeTree([component]));
-    const slots = [component.p, component.d].filter((slot) => slot !== undefined);
-    for (const other of changes) {
-        if (other === match) {
-            continue;
+    const slots = Array.from(new Set([component.p, component.d].filter((slot) => slot !== undefined)));
+    for (const entry of changes) {
+        const part = entry === match ? { ...component } : {};
+        for (const field of ['p', 'd'] as const) {
+            const slot = entry.component[field];
+            if (slot !== undefined && slots.includes(slot)) {
+                part[field] = slots.indexOf(slot);
+            }
         }
-        if (other.component.p !== undefined && slots.includes(other.component.p)) {
-            writer.writeAtPath(other.path, 'p', other.component.p);
-        }
-        if (other.component.d !== undefined && slots.includes(other.component.d)) {
-            writer.writeAtPath(other.path, 'd', other.component.d);
+        if (Object.keys(part).length) {
+            writer.reset();
+            writer.at(entry.path, (w) => w.mergeTree([part]));
         }
     }
     return writer.get();

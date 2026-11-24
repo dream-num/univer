@@ -172,6 +172,21 @@ describe('document changesets', () => {
         }
     });
 
+    it('passes a self-contained move to the conflict policy when only one destination collides', () => {
+        const batch = JSON1.writeCursor();
+        batch.writeMove(['x'], ['keep'], 0).writeMove(['y'], ['shared'], 1);
+        const insertion = JSON1.insertOp(['shared'], 3);
+        const base = { x: 1, y: 2 };
+        const resolve = JSON1.createTransform(({ op1, op2 }) => {
+            JSON1.checkValidOp(op1);
+            expect(JSON1.apply(base, op1)).toEqual({ x: 1, shared: 2 });
+            expect(op2).toEqual(insertion);
+            return true;
+        });
+        const after = JSON1.apply(base, insertion);
+        expect(JSON1.apply(after, resolve(batch.get(), insertion, 'left'))).toEqual({ keep: 1, shared: 2 });
+    });
+
     it('keeps original undo values when an edited or shortened subtree is removed later', () => {
         const before = { rows: [null, false, 2], count: 3 };
         const first = JSON1.compose(JSON1.removeOp(['rows', 0], null), ['count', { ena: 2 }]);

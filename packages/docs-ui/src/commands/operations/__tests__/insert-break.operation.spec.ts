@@ -39,7 +39,11 @@ import {
     InsertOddPageSectionBreakMenuFactory,
 } from '../../../menu/menu';
 import { createCommandTestBed } from '../../commands/__tests__/create-command-test-bed';
-import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from '../insert-break.operation';
+import {
+    DOCUMENT_SECTION_BREAK_MENU_OPERATIONS,
+    InsertDocumentColumnBreakOperation,
+    InsertDocumentSectionBreakOperation,
+} from '../insert-break.operation';
 
 function createTraditionalDocument(): IDocumentData {
     return {
@@ -86,6 +90,9 @@ describe('document break operations', () => {
         commandService.registerCommand(InsertDocumentSectionBreakCommand);
         commandService.registerCommand(InsertDocumentColumnBreakOperation);
         commandService.registerCommand(InsertDocumentSectionBreakOperation);
+        for (const operation of Object.values(DOCUMENT_SECTION_BREAK_MENU_OPERATIONS)) {
+            commandService.registerCommand(operation);
+        }
 
         const selectionManager = get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({
@@ -136,19 +143,20 @@ describe('document break operations', () => {
         ]);
     });
 
-    it('routes all five Section Break menu items through the shared operation', () => {
-        const items = [
-            { item: InsertContinuousSectionBreakMenuFactory(injector), sectionType: SectionType.CONTINUOUS },
-            { item: InsertNextColumnSectionBreakMenuFactory(injector), sectionType: SectionType.NEXT_COLUMN },
-            { item: InsertNextPageSectionBreakMenuFactory(injector), sectionType: SectionType.NEXT_PAGE },
-            { item: InsertEvenPageSectionBreakMenuFactory(injector), sectionType: SectionType.EVEN_PAGE },
-            { item: InsertOddPageSectionBreakMenuFactory(injector), sectionType: SectionType.ODD_PAGE },
-        ];
+    it.each([
+        { factory: InsertContinuousSectionBreakMenuFactory, sectionType: SectionType.CONTINUOUS },
+        { factory: InsertNextColumnSectionBreakMenuFactory, sectionType: SectionType.NEXT_COLUMN },
+        { factory: InsertNextPageSectionBreakMenuFactory, sectionType: SectionType.NEXT_PAGE },
+        { factory: InsertEvenPageSectionBreakMenuFactory, sectionType: SectionType.EVEN_PAGE },
+        { factory: InsertOddPageSectionBreakMenuFactory, sectionType: SectionType.ODD_PAGE },
+    ])('inserts a section of type $sectionType from its toolbar item ID', ({ factory, sectionType }) => {
+        const item = factory(injector);
+        const nextSectionId = getDocumentBody().sectionBreaks?.[1].sectionId;
 
-        for (const { item, sectionType } of items) {
-            expect(item.commandId).toBe(InsertDocumentSectionBreakOperation.id);
-            expect(item.params).toEqual({ sectionType });
-        }
+        expect(commandService.syncExecuteCommand(item.id)).toBe(true);
+        const sections = getDocumentBody().sectionBreaks;
+        expect(sections?.[1]).toMatchObject({ startIndex: 5 });
+        expect(sections?.[2]).toMatchObject({ sectionId: nextSectionId, sectionType });
     });
 
     function getDocumentBody(): IDocumentBody {

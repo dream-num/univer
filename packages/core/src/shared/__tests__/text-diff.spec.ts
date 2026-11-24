@@ -35,6 +35,18 @@ describe('diffText', () => {
         expect(diffText('😀', '😁')).toEqual([[-1, '😀'], [1, '😁']]);
     });
 
+    it('retains the only matching character inside a long selection replacement', () => {
+        const removed = 'abcd'.repeat(32);
+        const inserted = '文本'.repeat(64);
+        expect(diffText(`${removed}📌${removed}`, `${inserted}📌${inserted}`)).toEqual([
+            [-1, removed],
+            [1, inserted],
+            [0, '📌'],
+            [-1, removed],
+            [1, inserted],
+        ]);
+    });
+
     it('can represent a splice between UTF-16 surrogate halves', () => {
         const before = '🧑';
         const after = '\uD83Ea\uDDD1';

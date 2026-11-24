@@ -115,6 +115,22 @@ function commonAnchor(longer: string, shorter: string) {
     return best;
 }
 
+function sharesCodeUnit(shorter: string, longer: string) {
+    if (longer.includes(shorter[0])) {
+        return true;
+    }
+    const units = new Set<number>();
+    for (let i = 1; i < shorter.length; i++) {
+        units.add(shorter.charCodeAt(i));
+    }
+    for (let i = 0; i < longer.length; i++) {
+        if (units.has(longer.charCodeAt(i))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Meet the two Myers wavefronts in the middle. Only the furthest position for each
 // diagonal is needed, so working memory is linear in the combined string length.
 function middleCut(a: string, b: string) {
@@ -130,11 +146,13 @@ function middleCut(a: string, b: string) {
     for (let distance = 0; distance < radius; distance++) {
         for (let side = 0; side <= 1; side++) {
             const path = paths[side];
+            const positions = path.x;
+            const opposite = paths[1 - side].x;
+            const checkOverlap = (side === 0) === odd;
             for (let k = -distance + path.skipLow; k <= distance - path.skipHigh; k += 2) {
                 const index = radius + k;
-                let x = k === -distance || (k !== distance && path.x[index - 1] < path.x[index + 1])
-                    ? path.x[index + 1]
-                    : path.x[index - 1] + 1;
+                // Unvisited diagonals hold -1, so the same step also works on the two outer edges.
+                let x = Math.max(positions[index - 1] + 1, positions[index + 1]);
                 let y = x - k;
                 if (side === 0) {
                     while (x < a.length && y < b.length && a.charCodeAt(x) === b.charCodeAt(y)) {
@@ -147,13 +165,13 @@ function middleCut(a: string, b: string) {
                         y++;
                     }
                 }
-                path.x[index] = x;
+                positions[index] = x;
                 if (x > a.length) {
                     path.skipHigh += 2;
                 } else if (y > b.length) {
                     path.skipLow += 2;
-                } else if ((side === 0) === odd) {
-                    const other = paths[1 - side].x[radius + delta - k];
+                } else if (checkOverlap) {
+                    const other = opposite[radius + delta - k];
                     if (other >= 0 && x + other >= a.length) {
                         return side === 0 ? [x, y] : [other, other - delta + k];
                     }
@@ -303,6 +321,11 @@ function compareMiddle(a: string, b: string): TextEdit[] {
             const y = deleting ? anchor.shortStart : anchor.longStart;
             return compare(a.slice(0, x), b.slice(0, y), false)
                 .concat([[0, a.slice(x, x + anchor.length)]], compare(a.slice(x + anchor.length), b.slice(y + anchor.length), false));
+        }
+        // Without a shared code unit the only possible edits are a full deletion and insertion.
+        // Check before the quadratic search when the unmatched text is large enough.
+        if (longer.length >= 64 && !sharesCodeUnit(shorter, longer)) {
+            return [[-1, a], [1, b]];
         }
         const cut = middleCut(a, b);
         // A cut at either endpoint cannot shrink the problem (e.g. unmatched surrogate halves).

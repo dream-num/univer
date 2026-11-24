@@ -98,11 +98,11 @@ class ExcelLcm extends ExcelGcd {
 
 type Operation = 'mod' | 'mround' | 'quotient';
 
-type BinaryArithmeticConstructor = new (name: IFunctionNames) => BaseFunction & {
+interface IExcelBinaryArithmetic extends BaseFunction {
     calculate(...args: BaseValueObject[]): BaseValueObject;
-};
+}
 
-function binaryArithmetic(kind: Operation): BinaryArithmeticConstructor {
+function binaryArithmetic(kind: Operation): new (name: IFunctionNames) => IExcelBinaryArithmetic {
     return class ExcelBinaryArithmetic extends BaseFunction {
         override minParams = 2;
         override maxParams = 2;

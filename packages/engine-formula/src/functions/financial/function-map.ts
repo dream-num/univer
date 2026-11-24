@@ -72,7 +72,7 @@ import { Yield } from './yield';
 import { Yielddisc } from './yielddisc';
 import { Yieldmat } from './yieldmat';
 
-export const functionFinancial: NonNullable<IUniverEngineFormulaConfig['function']> = [
+export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
     [Accrintm, FUNCTION_NAMES_FINANCIAL.ACCRINTM],
     [Amordegrc, FUNCTION_NAMES_FINANCIAL.AMORDEGRC],
@@ -128,4 +128,4 @@ export const functionFinancial: NonNullable<IUniverEngineFormulaConfig['function
     [Yield, FUNCTION_NAMES_FINANCIAL.YIELD],
     [Yielddisc, FUNCTION_NAMES_FINANCIAL.YIELDDISC],
     [Yieldmat, FUNCTION_NAMES_FINANCIAL.YIELDMAT],
-];
+] satisfies NonNullable<IUniverEngineFormulaConfig['function']>;

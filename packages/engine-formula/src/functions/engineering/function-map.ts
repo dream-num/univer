@@ -74,7 +74,7 @@ import { Oct2bin } from './oct2bin';
 import { Oct2dec } from './oct2dec';
 import { Oct2hex } from './oct2hex';
 
-export const functionEngineering: NonNullable<IUniverEngineFormulaConfig['function']> = [
+export const functionEngineering = [
     [Besseli, FUNCTION_NAMES_ENGINEERING.BESSELI],
     [Besselj, FUNCTION_NAMES_ENGINEERING.BESSELJ],
     [Besselk, FUNCTION_NAMES_ENGINEERING.BESSELK],
@@ -132,4 +132,4 @@ export const functionEngineering: NonNullable<IUniverEngineFormulaConfig['functi
     [Oct2bin, FUNCTION_NAMES_ENGINEERING.OCT2BIN],
     [Oct2dec, FUNCTION_NAMES_ENGINEERING.OCT2DEC],
     [Oct2hex, FUNCTION_NAMES_ENGINEERING.OCT2HEX],
-];
+] satisfies NonNullable<IUniverEngineFormulaConfig['function']>;

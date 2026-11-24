@@ -265,7 +265,11 @@ describe('GETPIVOTDATA', () => {
         }
     });
 
-    it.each([3, undefined])('matches a single column field with two measures and data start row %s', (firstDataRow) => {
+    it.each([
+        [3, [5, 6]],
+        [undefined, undefined],
+        [3, []],
+    ])('uses the actual grand totals with data start row %s and total columns %j', (firstDataRow, columnGrandTotals) => {
         const range = { startRow: 0, endRow: 4, startColumn: 0, endColumn: 6 };
         class HostedGetpivotdata extends Getpivotdata {
             protected override get pivotReportLookup(): IPivotFormulaReportLookup {
@@ -278,7 +282,7 @@ describe('GETPIVOTDATA', () => {
                             { sourceName: 'Amount', displayName: 'Sum of Amount' },
                             { sourceName: 'Quantity', displayName: 'Sum of Quantity' },
                         ],
-                        layout: { firstDataRow },
+                        layout: { firstDataRow, columnGrandTotals },
                     }),
                 };
             }
@@ -288,7 +292,7 @@ describe('GETPIVOTDATA', () => {
         try {
             const grid = [
                 ['', 'Column Labels'],
-                ['', 'Online', '', 'Retail', '', 'Total Sum of Amount', 'Total Sum of Quantity'],
+                ['', 'Total Sum of Amount', '', 'Retail', '', 'Total Sum of Amount', 'Total Sum of Quantity'],
                 ['Row Labels', 'Sum of Amount', 'Sum of Quantity', 'Sum of Amount', 'Sum of Quantity'],
                 ['East', 110, 3, 90, 2, 200, 5],
                 ['Grand Total', 110, 3, 90, 2, 200, 5],
@@ -297,10 +301,10 @@ describe('GETPIVOTDATA', () => {
                 value === '' ? [] : [[r, c, typeof value === 'number' ? number(value) : text(value)]]
             ));
             const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
-            expect.soft(lookup('Amount', 'Region', 'East', 'Channel', 'Online')).toBe(110);
-            expect(lookup('Quantity', 'Channel', 'Online', 'Region', 'East')).toBe(3);
-            expect(lookup('Amount')).toBe(200);
-            expect(lookup('Quantity')).toBe(5);
+            expect.soft(lookup('Amount', 'Region', 'East', 'Channel', 'Total Sum of Amount')).toBe(110);
+            expect(lookup('Quantity', 'Channel', 'Total Sum of Amount', 'Region', 'East')).toBe(3);
+            expect(lookup('Amount')).toBe(columnGrandTotals?.length === 0 ? ErrorType.REF : 200);
+            expect(lookup('Quantity')).toBe(columnGrandTotals?.length === 0 ? ErrorType.REF : 5);
         } finally {
             bed.univer.dispose();
         }

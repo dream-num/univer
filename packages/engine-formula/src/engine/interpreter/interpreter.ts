@@ -26,6 +26,7 @@ import type { BaseValueObject } from '../value-object/base-value-object';
 import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
+import { operatorToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { FunctionNode } from '../ast-node/function-node';
@@ -453,7 +454,7 @@ export class Interpreter extends Disposable {
         let parent = child.getParent();
 
         while (parent != null) {
-            if (parent.nodeType === NodeType.UNION) {
+            if (parent.nodeType === NodeType.UNION || parent.getToken() === operatorToken.INTERSECTION) {
                 return true;
             }
             if (parent.nodeType === NodeType.FUNCTION) {

@@ -59,6 +59,8 @@ export interface IPivotFormulaReport {
         firstDataRow?: number;
         grandTotalLabel?: string;
         columnFieldNames?: readonly (readonly string[])[];
+        /** Worksheet columns belonging to the rendered column grand totals, in measure order. */
+        columnGrandTotals?: readonly number[];
         subtotalLabel?: string;
         rightToLeft?: boolean;
         pageFields?: readonly { names: readonly string[]; value: string; displayValue?: string }[];
@@ -280,9 +282,9 @@ function visiblePivotGet(
         if (hasHeaderItems && matchedColumn == null) {
             continue;
         }
-        const needsTotalColumn = Boolean(report?.columnFields.length && !columnPairs.length);
+        const needsTotalColumn = report?.columnFields.length && !columnPairs.length;
         const totalColumn = needsTotalColumn
-            ? findPivotGrandTotalColumn(reader, headerRow, dataColumn, anchorRange, dataField, grandTotalLabel, firstDataRow)
+            ? findPivotGrandTotalColumn(reader, headerRow, dataColumn, anchorRange, dataField, report, grandTotalLabel, firstDataRow)
             : undefined;
         if ((report && columnPairs.length && matchedColumn == null) || (needsTotalColumn && totalColumn == null)) {
             return null;
@@ -317,13 +319,27 @@ function findPivotGrandTotalColumn(
     dataColumn: number,
     range: IRange,
     dataField: string,
+    report: IPivotFormulaReport,
     label: string,
     firstDataRow?: number
 ): number | undefined {
+    const totalColumns = report.layout?.columnGrandTotals;
+    if (totalColumns && totalColumns.length === report.dataFields.length) {
+        let measure = report.dataFields.findIndex(({ displayName }) => samePivotText(displayName, dataField));
+        if (measure < 0) {
+            measure = report.dataFields.findIndex(({ sourceName }) => samePivotDataField(sourceName, dataField));
+        }
+        const column = totalColumns[measure];
+        if (column == null || column < range.startColumn || column > range.endColumn) return;
+        return report.layout?.rightToLeft ? range.startColumn + range.endColumn - column : column;
+    }
+    if (totalColumns?.length === 0) return;
     if (dataColumn > range.startColumn) {
         // Measure-specific totals can sit above the row of detail measure captions.
         for (let row = range.startRow; row <= headerRow; row++) {
-            for (let column = dataColumn + 1; column <= range.endColumn; column++) {
+            for (let column = range.endColumn; column > dataColumn; column--) {
+                const physicalColumn = report.layout?.rightToLeft ? range.startColumn + range.endColumn - column : column;
+                if (totalColumns && !totalColumns.includes(physicalColumn)) continue;
                 const caption = reader.text(row, column).trim();
                 for (const total of ['Total', label]) {
                     const prefix = `${total} `;
@@ -337,7 +353,13 @@ function findPivotGrandTotalColumn(
         }
         return;
     }
-    return findPivotColumnItemMatch(reader, headerRow, dataColumn, range.endRow, range.endColumn, [['', label]], firstDataRow)?.column;
+    const dataStart = firstDataRow ?? findFirstPivotDataRow(reader, headerRow, dataColumn, range.endRow, range.endColumn);
+    if (dataStart == null) return;
+    for (let row = headerRow; row < dataStart; row++) {
+        for (let column = range.endColumn; column > dataColumn; column--) {
+            if (samePivotText(reader.text(row, column), label)) return column;
+        }
+    }
 }
 
 function findPivotColumnByHeaderItems(

@@ -295,6 +295,8 @@ describe('GETPIVOTDATA', () => {
             const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
             expect.soft(lookup('Amount', 'Region', 'East', 'Channel', 'Online')).toBe(110);
             expect(lookup('Quantity', 'Channel', 'Online', 'Region', 'East')).toBe(3);
+            expect(lookup('Amount')).toBe(200);
+            expect(lookup('Quantity')).toBe(5);
         } finally {
             bed.univer.dispose();
         }

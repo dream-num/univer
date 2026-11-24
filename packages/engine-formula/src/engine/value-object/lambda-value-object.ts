@@ -90,6 +90,9 @@ export class LambdaValueObjectObject extends BaseValueObject {
         if (depth > 0) {
             // The recursive call shares this AST, including already evaluated sibling nodes.
             visitLambdaTree(node, (child) => previousValues.set(child, child.getValue()));
+        } else {
+            // A LET binding can still point to this node after the invocation.
+            previousValues.set(node, node.getValue());
         }
         const values = new Map(keys.map((key, index) => [key, variants[index] ?? NullValueObject.create(true)]));
         const restoreBindings = [LambdaParameterNode.bindValues(node.getScope(), values)];

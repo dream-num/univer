@@ -40,7 +40,7 @@ interface ITimeline {
     first: number;
     last: number;
     step: number;
-    monthly: boolean;
+    monthStep: number;
 }
 
 interface ISeries {
@@ -112,7 +112,7 @@ export abstract class EtsFunction extends BaseFunction {
             if (statisticMode && target === 8) return NumberValueObject.create(history.step);
 
             if (prepared === undefined) {
-                prepared = fillTimeline(history, completion === 1, aggregation);
+                prepared = fillTimeline(history, completion === 1, aggregation, dateSystem);
                 if (typeof prepared !== 'string') {
                     period = season === 1
                         ? detectEtsPeriod(prepared.values)
@@ -222,9 +222,10 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
     const tolerance = timestampTolerance(first, last);
     let step = findTimelineStep(sorted, tolerance);
     if (!Number.isFinite(step) || step <= 0) return ErrorValueObject.create(ErrorType.NUM);
-    const monthly = step >= 28 && step <= 31 && first >= 61 && last <= MAX_DATE_SERIAL
-        && sorted.every((time, index) => shiftMonth(first, index, dateSystem) === time);
-    if (!monthly) {
+    const monthStep = step >= 28 && first >= 61 && last <= MAX_DATE_SERIAL
+        ? findCalendarMonthStep(sorted, dateSystem)
+        : 0;
+    if (monthStep === 0) {
         // Estimate the grid step over the full span so rounding in individual gaps cannot accumulate.
         const span = last - first;
         const calibrated = span / Math.round(span / step);
@@ -232,7 +233,21 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
             step = calibrated;
         }
     }
-    return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthly };
+    return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthStep };
+}
+
+function findCalendarMonthStep(times: readonly number[], dateSystem: DateSystem): number {
+    const first = times[0];
+    let step = 0;
+    for (let i = 1; i < times.length; i++) {
+        const months = calendarMonthDistance(first, times[i], dateSystem);
+        if (months <= 0 || shiftMonth(first, months, dateSystem) !== times[i]) return 0;
+        let remainder = months;
+        while (remainder !== 0) {
+            [step, remainder] = [remainder, step % remainder];
+        }
+    }
+    return step;
 }
 
 function timestampTolerance(first: number, last: number): number {
@@ -265,7 +280,7 @@ function findTimelineStep(sorted: readonly number[], tolerance: number): number 
     return count > frequency ? sum / count : step;
 }
 
-function fillTimeline(history: ITimeline, complete: boolean, aggregation: number): ISeries | ErrorType {
+function fillTimeline(history: ITimeline, complete: boolean, aggregation: number, dateSystem: DateSystem): ISeries | ErrorType {
     let { groups, first, last } = history;
     if (complete) {
         const points = [...groups];
@@ -279,9 +294,9 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
         last = points[end - 1][0];
     }
     let irregular = false;
-    const { step, monthly } = history;
+    const { step, monthStep } = history;
     const tolerance = Math.max(1e-9, Math.min(1e-6, timestampTolerance(first, last) / step));
-    if (!monthly) {
+    if (monthStep === 0) {
         const phases = new Map<number, { anchor: number; count: number }>();
         for (const time of groups.keys()) {
             const position = (time - first) / step;
@@ -310,12 +325,14 @@ function fillTimeline(history: ITimeline, complete: boolean, aggregation: number
             groups = aligned;
         }
     }
-    const size = monthly ? groups.size : Math.round((last - first) / step) + 1;
+    const positionOf = monthStep > 0
+        ? (time: number) => calendarMonthDistance(first, time, dateSystem) / monthStep
+        : (time: number) => (time - first) / step;
+    const size = Math.round(positionOf(last)) + 1;
     if (size > MAX_POINTS || groups.size < size * 0.7) return ErrorType.NUM;
     const values: number[] = new Array<number>(size).fill(NaN);
-    let index = 0;
     for (const [time, samples] of groups) {
-        const position = monthly ? index++ : (time - first) / step;
+        const position = positionOf(time);
         const rounded = Math.round(position);
         if (Math.abs(position - rounded) > tolerance) return ErrorType.NUM;
         values[rounded] = aggregate(samples.length === 0 && !complete ? [0] : samples, aggregation);
@@ -358,10 +375,15 @@ function shiftMonth(serial: number, months: number, dateSystem: DateSystem): num
 }
 
 function targetPosition(target: number, first: number, history: ITimeline, dateSystem: DateSystem): number {
-    if (!history.monthly) return (target - first) / history.step;
+    if (history.monthStep === 0) return (target - first) / history.step;
     if (!Number.isInteger(target) || target > MAX_DATE_SERIAL) return NaN;
+    const months = calendarMonthDistance(history.first, target, dateSystem);
+    if (shiftMonth(history.first, months, dateSystem) !== target) return NaN;
+    return (months - calendarMonthDistance(history.first, first, dateSystem)) / history.monthStep;
+}
+
+function calendarMonthDistance(first: number, last: number, dateSystem: DateSystem): number {
     const start = excelSerialToDate(first, dateSystem);
-    const end = excelSerialToDate(target, dateSystem);
-    const months = 12 * (end.getUTCFullYear() - start.getUTCFullYear()) + end.getUTCMonth() - start.getUTCMonth();
-    return shiftMonth(first, months, dateSystem) === target ? months : NaN;
+    const end = excelSerialToDate(last, dateSystem);
+    return 12 * (end.getUTCFullYear() - start.getUTCFullYear()) + end.getUTCMonth() - start.getUTCMonth();
 }

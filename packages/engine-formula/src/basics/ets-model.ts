@@ -132,10 +132,10 @@ export function detectEtsPeriod(values: readonly number[]): number {
     const correlations = maxLag <= DIRECT_LAG_LIMIT
         ? Array.from({ length: maxLag + 2 }, (_, lag) => lagCorrelation(window, lag))
         : etsLagCorrelations(window, maxLag + 1);
-    return findLagPeak(correlations, maxLag);
+    return findLagPeak(correlations, maxLag, values);
 }
 
-function findLagPeak(correlations: ArrayLike<number>, maxLag: number): number {
+function findLagPeak(correlations: ArrayLike<number>, maxLag: number, values: readonly number[]): number {
     let period = correlations[1] < -0.25 && correlations[2] > 0.09 ? 2 : 0;
     for (let lag = 2; period === 0 && lag <= maxLag; lag++) {
         const score = correlations[lag];
@@ -147,12 +147,34 @@ function findLagPeak(correlations: ArrayLike<number>, maxLag: number): number {
         // A shorter peak may describe a recurring shape whose offsets repeat on a longer cycle.
         for (let lag = period + 1; lag <= maxLag; lag++) {
             if (correlations[lag] >= 1 - CORRELATION_TOLERANCE) {
-                // A longer multiple of a known short cycle is not a new period.
-                return lag <= DIRECT_LAG_LIMIT ? period : lag;
+                return hasMaterialCycleVariation(values, period, lag) ? lag : period;
             }
         }
     }
     return period;
+}
+
+function hasMaterialCycleVariation(values: readonly number[], shortPeriod: number, longPeriod: number): boolean {
+    const start = values.length - longPeriod - 1;
+    const origin = values[start];
+    const slope = (values[start + longPeriod] - origin) / longPeriod;
+    const phaseSums = new Float64Array(shortPeriod);
+    let sum = 0;
+    let squares = 0;
+    for (let i = 0; i < longPeriod; i++) {
+        const level = values[start + i] - origin - slope * i;
+        phaseSums[i % shortPeriod] += level;
+        sum += level;
+        squares += level * level;
+    }
+    let fittedSquares = 0;
+    for (let phase = 0; phase < shortPeriod; phase++) {
+        const count = Math.ceil((longPeriod - phase) / shortPeriod);
+        fittedSquares += phaseSums[phase] ** 2 / count;
+    }
+    const explained = fittedSquares - sum ** 2 / longPeriod;
+    // Keep the shorter cycle when its repeat-to-repeat variation is small relative to the pattern.
+    return (squares - fittedSquares) * 4 > explained;
 }
 
 function etsLagCorrelations(changes: readonly number[], maxLag: number): Float64Array {

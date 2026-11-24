@@ -448,6 +448,9 @@ describe('Persisted calculation settings', () => {
             ['=SUM(A2:A3 SWITCH(1,1,A1:A4))', 5, 5],
             ['=SUM(IFS(D1=1,A1:A4,TRUE,A3:A4) A2:A3)', 5, 3],
             ['=SUM(A2:A3 SWITCH(D1,1,A1:A4,A3:A4))', 5, 3],
+            ['=LET(myvar,A1:A4,SUM(myvar (A2:A3)))', 5, 5],
+            ['=LAMBDA(myvar,SUM(myvar (A2:A3)))(A1:A4)', 5, 5],
+            ['=LET(f,LAMBDA(x,x+1),f(5)+f(6))', 13, 13],
         ] as const;
         try {
             bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
@@ -552,6 +555,10 @@ describe('Persisted calculation settings', () => {
                 ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,168)/24),h+1))', 168],
                 ['=LET(h,SEQUENCE(168)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
                 ['=LET(h,SEQUENCE(240)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
+                ['=LET(h,SEQUENCE(192)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,48)/12),h+1))', 48],
+                ['=LET(h,SEQUENCE(288)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,72)/24),h+1))', 24],
+                ['=LET(h,SEQUENCE(60)-1,k,FILTER(h,(MOD(h,12)<>2)*(MOD(h,12)<>8)),FORECAST.ETS.SEASONALITY(MOD(k,12),EDATE(DATE(2020,1,1),k)))', 12],
+                ['=LET(h,SEQUENCE(24)-1,FORECAST.ETS.SEASONALITY(MOD(h,4),EDATE(DATE(2020,1,1),h*3)))', 4],
                 ['=LET(h,SEQUENCE(800)-1,k,FILTER(h,MOD(h,6)<>0),FORECAST.ETS.SEASONALITY(MOD(k,168),45000+k/24))', 168],
                 ['=FORECAST.ETS.SEASONALITY(SEQUENCE(672),SEQUENCE(672))', 0],
             ] as const;

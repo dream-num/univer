@@ -30,6 +30,7 @@ import {
 } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
+import { normalizeFunctionToken } from '../../basics/function';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
 import {
     isReferenceString,
@@ -60,6 +61,7 @@ import {
 } from '../../basics/token-type';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { NEW_EXCEL_FUNCTIONS } from '../../functions/new-excel-functions';
+import { getLambdaParameterDeclaration, normalizeLambdaVariable } from '../utils/function-definition';
 import {
     isReferenceStringWithEffectiveColumn,
     replaceRefPrefixString,
@@ -1244,7 +1246,7 @@ export class LexerTreeBuilder extends Disposable {
         const left = this._segment.trim();
         if (left !== '') {
             if (grouped && !this.isColonOpen()) {
-                if (isReferenceStringWithEffectiveColumn(left)) {
+                if (isReferenceStringWithEffectiveColumn(left) || this._hasLocalRangeName(left)) {
                     return true;
                 }
                 if (names?.unitId == null || names.hasFunction(left.toUpperCase())) {
@@ -1260,6 +1262,27 @@ export class LexerTreeBuilder extends Disposable {
         const previous = this._getLastChildCurrent();
         return previous === matchToken.CLOSE_BRACKET ||
             (previous instanceof LexerNode && this._findPreviousToken(formula, current - 1) === matchToken.CLOSE_BRACKET);
+    }
+
+    private _hasLocalRangeName(name: string): boolean {
+        const variable = normalizeLambdaVariable(name);
+        let child = this._currentLexerNode;
+        for (let parent = child.getParent(); parent; parent = parent.getParent()) {
+            const token = normalizeFunctionToken(parent.getToken().trim().toUpperCase());
+            if (token === DEFAULT_TOKEN_LET_FUNCTION_NAME || token === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME) {
+                const children = parent.getChildren();
+                const isLet = token === DEFAULT_TOKEN_LET_FUNCTION_NAME;
+                const limit = children.indexOf(child) - Number(isLet);
+                for (let index = 0; index < limit; index += isLet ? 2 : 1) {
+                    const declaration = getLambdaParameterDeclaration(children[index]);
+                    if (declaration && normalizeLambdaVariable(declaration) === variable) {
+                        return true;
+                    }
+                }
+            }
+            child = parent;
+        }
+        return false;
     }
 
     private _openSquareBracket() {

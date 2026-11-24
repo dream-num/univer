@@ -264,7 +264,7 @@ function visiblePivotGet(
         }
         const needsTotalColumn = Boolean(report?.columnFields.length && !columnPairs.length);
         const totalColumn = needsTotalColumn
-            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, [['', grandTotalLabel]], firstDataRow)?.column
+            ? findPivotGrandTotalColumn(reader, headerRow, dataColumn, anchorRange, dataField, grandTotalLabel, firstDataRow)
             : undefined;
         if ((report && columnPairs.length && matchedColumn == null) || (needsTotalColumn && totalColumn == null)) {
             return null;
@@ -291,6 +291,35 @@ function visiblePivotGet(
     }
 
     return null;
+}
+
+function findPivotGrandTotalColumn(
+    reader: IPivotCellReader,
+    headerRow: number,
+    dataColumn: number,
+    range: IRange,
+    dataField: string,
+    label: string,
+    firstDataRow?: number
+): number | undefined {
+    if (dataColumn > range.startColumn) {
+        // Measure-specific totals can sit above the row of detail measure captions.
+        for (let row = range.startRow; row <= headerRow; row++) {
+            for (let column = dataColumn + 1; column <= range.endColumn; column++) {
+                const caption = reader.text(row, column).trim();
+                for (const total of ['Total', label]) {
+                    const prefix = `${total} `;
+                    const suffix = ` ${total}`;
+                    if ((caption.toLowerCase().startsWith(prefix.toLowerCase()) && samePivotDataField(caption.slice(prefix.length), dataField)) ||
+                        (caption.toLowerCase().endsWith(suffix.toLowerCase()) && samePivotDataField(caption.slice(0, -suffix.length), dataField))) {
+                        return column;
+                    }
+                }
+            }
+        }
+        return;
+    }
+    return findPivotColumnItemMatch(reader, headerRow, dataColumn, range.endRow, range.endColumn, [['', label]], firstDataRow)?.column;
 }
 
 function findPivotColumnByHeaderItems(

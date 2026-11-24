@@ -265,6 +265,68 @@ describe('GETPIVOTDATA', () => {
         }
     });
 
+    it.each(['legacy', 'ltr', 'rtl', 'disabled', 'collapsed'])('reads measure-specific column subtotals in %s reports', (mode) => {
+        const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 12 };
+        const physical = (column: number) => mode === 'rtl' ? range.endColumn - column : column;
+        const columnSubtotals = mode === 'disabled'
+            ? []
+            : [
+                mode === 'collapsed' ? [physical(5), 1, 0, ['North']] : [physical(5), 1, 0],
+                [physical(6), 1, 1],
+                [physical(9), 1, 0],
+                [physical(10), 1, 1],
+            ] as const;
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Region', 'Category', 'Detail'],
+                        columnFields: ['Category', 'Detail'],
+                        dataFields: [
+                            { sourceName: 'Sales', displayName: 'Sum of Sales' },
+                            { sourceName: 'Units', displayName: 'Sum of Units' },
+                        ],
+                        layout: {
+                            firstDataRow: 4,
+                            rightToLeft: mode === 'rtl',
+                            columnFieldNames: [['Category'], ['Detail']],
+                            columnGrandTotals: [physical(11), physical(12)],
+                            columnSubtotals: mode === 'legacy' ? undefined : columnSubtotals,
+                        },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = [
+                ['', 'Column Labels'],
+                ['', 'North', '', '', '', mode === 'legacy' ? 'North Sum of Sales' : 'Localized subtotal', 'North Sum of Units', 'South', '', 'South Sum of Sales', 'South Sum of Units'],
+                ['', 'Online', '', 'Retail', '', '', '', 'Retail'],
+                ['Row Labels', 'Sum of Sales', 'Sum of Units', 'Sum of Sales', 'Sum of Units', '', '', 'Sum of Sales', 'Sum of Units'],
+                ['East', 20, 2, 10, 1, 30, 3, 90, 9, 90, 9, 120, 12],
+                ['Grand Total', 20, 2, 10, 1, 30, 3, 90, 9, 90, 9, 120, 12],
+            ];
+            if (mode === 'collapsed') {
+                for (const row of grid) row.fill('', 1, 5);
+            }
+            const cells = grid.flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, physical(c), typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
+            expect(lookup('Sales', 'Category', 'North')).toBe(mode === 'disabled' ? ErrorType.REF : 30);
+            expect(lookup('Units', 'Category', 'North', 'Region', 'East')).toBe(mode === 'disabled' ? ErrorType.REF : 3);
+            expect(lookup('Units', 'Category', 'South')).toBe(9);
+            expect(lookup('Sales', 'Detail', 'Retail', 'Category', 'North')).toBe(mode === 'collapsed' ? ErrorType.REF : 10);
+            expect(lookup('Sales', 'Detail', 'Retail')).toBe(ErrorType.REF);
+            expect(lookup('Units')).toBe(12);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it.each([
         [3, [5, 6]],
         [undefined, undefined],

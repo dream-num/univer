@@ -182,10 +182,10 @@ describe('GETPIVOTDATA', () => {
                 return {
                     getPivotFormulaReport: () => ({
                         ranges: [range],
-                        fields: ['Category', 'Year', 'Quarter'],
+                        fields: ['Category', 'Year', 'Fiscal Year', 'Quarter'],
                         columnFields: ['Year', 'Fiscal Year', 'Quarter'],
                         dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
-                        layout: { firstDataRow, rightToLeft },
+                        layout: { firstDataRow, rightToLeft, columnFieldNames: [['Year', 'Fiscal Year'], ['Quarter']] },
                     }),
                 };
             }
@@ -213,6 +213,10 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('Quarter', 'Q2', 'Year', '2026')).toBe(22);
             expect(lookup('Quarter', 'Q2', 'Category', 'West', 'Year', '2026')).toBe(10);
             expect(lookup('Year', '2025', 'Quarter', 'Q2')).toBe(7);
+            expect(lookup('Fiscal Year', '2026')).toBe(31);
+            expect(lookup('Year', '2026', 'Category', 'East')).toBe(18);
+            expect(lookup('Quarter', 'Q2')).toBe(ErrorType.REF);
+            expect(lookup('Year', '2026', 'Fiscal Year', '2026')).toBe(ErrorType.REF);
             expect(lookup('Year', '2026', 'Quarter', 'Q3')).toBe(ErrorType.REF);
             expect(lookup('Year', 'Column Labels', 'Quarter', '2025')).toBe(ErrorType.REF);
         } finally {

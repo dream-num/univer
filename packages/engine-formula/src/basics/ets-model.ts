@@ -174,7 +174,7 @@ function hasMaterialCycleVariation(values: readonly number[], shortPeriod: numbe
     }
     const explained = fittedSquares - sum ** 2 / longPeriod;
     // Keep the shorter cycle when its repeat-to-repeat variation is small relative to the pattern.
-    return (squares - fittedSquares) * 4 > explained;
+    return (squares - fittedSquares) * 2 > explained;
 }
 
 function etsLagCorrelations(changes: readonly number[], maxLag: number): Float64Array {

@@ -26,13 +26,15 @@ import { mapFinancialScalars } from '../financial/scalar-arguments';
 import { Sum } from '../math/sum';
 import { And } from './and';
 import { Byrow } from './byrow';
-import { Map } from './map';
-import { Reduce } from './reduce';
-import { Scan } from './scan';
-import { Makearray } from './makearray';
 import { FUNCTION_NAMES_LOGICAL } from './function-names';
 import { If } from './if';
+import { Ifs } from './ifs';
+import { Makearray } from './makearray';
+import { Map } from './map';
 import { Or } from './or';
+import { Reduce } from './reduce';
+import { Scan } from './scan';
+import { Switch } from './switch';
 import { Xor } from './xor';
 
 function booleanText(value: BaseValueObject): boolean | undefined {
@@ -107,8 +109,7 @@ function conditionValue(condition: BaseValueObject): boolean | BaseValueObject {
     return booleanText(condition) ?? ErrorValueObject.create(ErrorType.VALUE);
 }
 
-class ExcelIfs extends BaseFunction {
-    override minParams = 2;
+class ExcelIfs extends Ifs {
     override maxParams = 254;
     override needsReferenceObject = true;
 
@@ -142,8 +143,7 @@ function switchValuesEqual(expression: BaseValueObject, candidate: BaseValueObje
     return left === right;
 }
 
-class ExcelSwitch extends BaseFunction {
-    override minParams = 3;
+class ExcelSwitch extends Switch {
     override maxParams = 255;
     override needsReferenceObject = true;
 

@@ -40,7 +40,6 @@ import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { IFormulaDataSnapshot } from '../models/formula-data-snapshot';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
-    AsyncLock,
     CellValueType,
     createIdentifier,
     Disposable,
@@ -52,6 +51,7 @@ import {
     ObjectMatrix,
     Rectangle,
     requestImmediateMacroTask,
+    SerialTaskQueue,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
@@ -118,7 +118,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
     protected readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
 
-    protected _executeLock = new AsyncLock();
+    protected readonly _executionQueue = new SerialTaskQueue();
 
     protected _isCalculateTreeModel: boolean = false;
     protected _workbookCalculationSettings: Record<string, IWorkbookCalculationSettings> = {};
@@ -400,7 +400,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         if (this._disposed) {
             return;
         }
-        return this._executeLock.acquire('FORMULA_EXECUTION_LOCK', async () => {
+        return this._executionQueue.run(async () => {
             if (this._disposed) {
                 return;
             }

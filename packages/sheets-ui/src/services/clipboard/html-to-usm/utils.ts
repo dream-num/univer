@@ -15,10 +15,10 @@
  */
 
 import type { IParagraph, IParagraphStyle, ITextRun, Nullable } from '@univerjs/core';
-import type { ICellDataWithSpanInfo } from '../type';
 import { createParagraphId, DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 import { sanitizeParsedHtml } from '@univerjs/ui';
+import type { ICellDataWithSpanInfo } from '../type';
 
 function cleanTextNodes(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -29,8 +29,13 @@ function cleanTextNodes(node: Node) {
          * \t => tab
          * multiple spaces => indentation
          * These will be treated as a single space in excel cell. '\r\n   ' = ' '
+         * Immediately after <br>, Excel HTML line-wraps with `\r?\n[\t ]*` which is formatting indentation, not content space.
          */
-        node.textContent = (node.textContent || '').replace(/\r?\n[\t ]*/g, ' ');
+        const rawText = node.textContent || '';
+        const textAfterLineBreak = node.previousSibling?.nodeName.toLowerCase() === 'br'
+            ? rawText.replace(/^\r?\n[\t ]*/, '')
+            : rawText;
+        node.textContent = textAfterLineBreak.replace(/\r?\n[\t ]*/g, ' ');
         return;
     }
 

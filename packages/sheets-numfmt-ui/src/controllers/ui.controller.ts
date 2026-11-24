@@ -17,8 +17,6 @@
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import type { LocaleKey } from '../locale/types';
-import type { ISheetNumfmtPanelProps } from '../views/SheetNumfmtPanel';
 import {
     CellValueType,
     Disposable,
@@ -52,6 +50,8 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import type { LocaleKey } from '../locale/types';
+import type { ISheetNumfmtPanelProps } from '../views/SheetNumfmtPanel';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 
@@ -244,6 +244,7 @@ export class SheetNumfmtUIController extends Disposable {
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                                displayOnly: true,
                                 priority: 99,
                                 effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                                 handler: (cell, location, next) => {

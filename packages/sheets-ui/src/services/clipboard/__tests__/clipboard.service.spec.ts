@@ -18,6 +18,7 @@ import type { ICellData, IRange, IStyleData, Nullable, Univer, Workbook } from '
 import type { IClipboardInterfaceService } from '@univerjs/ui';
 import {
     BooleanNumber,
+    CellValueType,
     CommandType,
     CustomCommandExecutionError,
     extractPureTextFromCell,
@@ -59,6 +60,7 @@ import {
     WorksheetCopyPermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
+import { PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import type { IClipboardItem } from './mock-clipboard';
 import { SheetCopyCommand, SheetCutCommand } from '../../../commands/commands/clipboard.command';
@@ -1162,6 +1164,148 @@ describe('Test clipboard', () => {
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
+    });
+});
+
+describe('Multiline clipboard cells', () => {
+    let univer: Univer;
+    let workbook: Workbook;
+    let commands: ICommandService;
+    let clipboard: ISheetClipboardService;
+    let writes: Array<{ text: string; html: string }>;
+
+    beforeEach(() => {
+        writes = [];
+        const boundary: IClipboardInterfaceService = {
+            supportClipboard: true,
+            write: async (text, html) => { writes.push({ text, html }); },
+            writeText: async (text) => { writes.push({ text, html: '' }); },
+            readText: async () => '',
+            read: async () => [],
+        };
+        const bed = clipboardTestBed(undefined, undefined, boundary);
+        univer = bed.univer;
+        workbook = bed.sheet;
+        commands = bed.get(ICommandService);
+        for (const command of [
+            SetRangeValuesMutation,
+            SetWorksheetRowHeightMutation,
+            SetWorksheetColWidthMutation,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeMutation,
+            SetSelectionsOperation,
+            SetWorksheetRowAutoHeightMutation,
+        ]) {
+            commands.registerCommand(command);
+        }
+        bed.get(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet1' });
+        clipboard = bed.get(ISheetClipboardService);
+    });
+
+    afterEach(() => univer.dispose());
+
+    function select(range: IRange) {
+        return commands.executeCommand(SetSelectionsOperation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            selections: [{ range: { ...range, rangeType: RANGE_TYPE.NORMAL }, primary: null, style: null }],
+        });
+    }
+
+    it('exports multiline cells as Excel-compatible HTML and quoted TSV', async () => {
+        await commands.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: {
+                0: {
+                    0: {
+                        p: {
+                            id: 'doc-multiline',
+                            body: {
+                                dataStream: 'line1\rline2\r\n',
+                                paragraphs: [
+                                    { startIndex: 5, paragraphId: 'p1' },
+                                    { startIndex: 11, paragraphId: 'p2' },
+                                ],
+                                sectionBreaks: [{ startIndex: 12, sectionId: 's1' }],
+                            },
+                            documentStyle: {},
+                        },
+                    },
+                    1: { v: 'plain1\nplain2', t: CellValueType.STRING },
+                },
+                1: { 0: { v: 'quote "here"' }, 1: { v: '\n', t: CellValueType.STRING } },
+            },
+        });
+        await select({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 });
+
+        expect(await commands.executeCommand(SheetCopyCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        const [{ text, html }] = writes;
+        expect(html).toContain('br { mso-data-placement: same-cell; }');
+        expect(html).toMatch(/<td[^>]*>line1<br>line2<\/td>/);
+        expect(html).toMatch(/<td[^>]*>plain1<br>plain2<\/td>/);
+        expect(html).toMatch(/<td[^>]*><br><\/td>/);
+        expect(text).toBe('"line1\nline2"\t"plain1\nplain2"\n"quote ""here"""\t"\n"');
+    });
+
+    it('round-trips a quoted single cell through plain text', async () => {
+        const value = 'quote "here"';
+        await commands.executeCommand(SetRangeValuesMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            cellValue: { 0: { 0: { v: value } } },
+        });
+        await select({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 });
+        expect(await commands.executeCommand(SheetCopyCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+        })).toBe(true);
+
+        await select({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 0 });
+        expect(await clipboard.legacyPaste(undefined, writes[0].text)).toBe(true);
+        expect(workbook.getActiveSheet().getCellRaw(3, 0)?.v).toBe(value);
+    });
+
+    it('pastes multiline Excel HTML without splitting cells or inserting leading spaces', async () => {
+        await select({ startRow: 3, endRow: 3, startColumn: 0, endColumn: 0 });
+        const html = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                  xmlns:x="urn:schemas-microsoft-com:office:excel">
+            <head><style>br { mso-data-placement: same-cell; } .xl65 { color: #ff0000; }</style></head>
+            <body><table><tr>
+                <td class="xl65">first<br>\r\n  second</td>
+                <td><span style="font-weight:bold">alpha<br>beta</span></td>
+            </tr></table></body></html>
+        `;
+
+        expect(await clipboard.legacyPaste(html)).toBe(true);
+
+        const sheet = workbook.getActiveSheet();
+        expect(sheet.getCellRaw(3, 0)?.p?.body?.dataStream).toBe('first\rsecond\r\n');
+        expect(sheet.getCellRaw(3, 1)?.p?.body?.dataStream).toBe('alpha\rbeta\r\n');
+    });
+
+    it.each(['keyboard', 'clipboard item'])('pastes quoted multiline TSV through the %s entry point', async (entry) => {
+        await select({ startRow: 12, endRow: 12, startColumn: 0, endColumn: 0 });
+        const tsv = '"row1-a\nrow1-b"\tcol2\r\nrow2-a\trow2-b\r\n';
+        const pasted = entry === 'keyboard'
+            ? await clipboard.legacyPaste(undefined, tsv)
+            : await clipboard.paste({
+                presentationStyle: 'unspecified',
+                types: [PLAIN_TEXT_CLIPBOARD_MIME_TYPE],
+                getType: async () => new Blob([tsv], { type: PLAIN_TEXT_CLIPBOARD_MIME_TYPE }),
+            });
+        expect(pasted).toBe(true);
+
+        const sheet = workbook.getActiveSheet();
+        expect(sheet.getCellRaw(12, 0)?.p?.body?.dataStream).toBe('row1-a\rrow1-b\r\n');
+        expect(sheet.getCellRaw(12, 1)?.v).toBe('col2');
+        expect(sheet.getCellRaw(13, 0)?.v).toBe('row2-a');
+        expect(sheet.getCellRaw(13, 1)?.v).toBe('row2-b');
     });
 });
 

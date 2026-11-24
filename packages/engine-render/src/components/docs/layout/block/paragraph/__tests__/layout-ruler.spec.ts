@@ -3197,14 +3197,19 @@ describe('layout-ruler', () => {
         expect(pages[1].sections[0].columns[0].lines[0].top).toBe(0);
     });
 
-    it.each([false, true].flatMap((incremental) =>
-        [TableTextWrapType.WRAP, TableTextWrapType.NONE].map((textWrap) => ({ incremental, textWrap }))))(
-        'moves a fitting text-anchored float intact without changing inline pagination ($incremental, $textWrap)',
-        ({ incremental, textWrap }) => {
+    it.each([false, true].flatMap((incremental) => [
+        { incremental, textWrap: TableTextWrapType.WRAP, mode: undefined, savedBreak: false },
+        { incremental, textWrap: TableTextWrapType.NONE, mode: undefined, savedBreak: false },
+        { incremental, textWrap: TableTextWrapType.WRAP, mode: '12', savedBreak: false },
+        { incremental, textWrap: TableTextWrapType.WRAP, mode: '12', savedBreak: true },
+    ]))(
+        'paginates text-anchored tables ($incremental, $textWrap, Word mode $mode, saved break $savedBreak)',
+        ({ incremental, textWrap, mode, savedBreak }) => {
             const T = DataStreamTreeTokenType;
             const prefix = `Before${T.PARAGRAPH}`;
             const row = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
-            const tableStream = `${T.TABLE_START}${row.repeat(2)}${T.TABLE_END}`;
+            const secondRow = savedBreak ? row.replace('Cell', `${T.PAGE_BREAK}Cell`) : row;
+            const tableStream = `${T.TABLE_START}${row}${secondRow}${T.TABLE_END}`;
             const content = `${prefix}${tableStream}${T.PARAGRAPH}After`;
             const paragraphs = [...content.matchAll(/\r/g)].filter((match) => match.index !== prefix.length + tableStream.length).map((match) => ({
                 startIndex: match.index,
@@ -3216,6 +3221,7 @@ describe('layout-ruler', () => {
                 body: {
                     paragraphs,
                     tables: [{ tableId: 'table', startIndex: prefix.length, endIndex: prefix.length + tableStream.length }],
+                    renderedPageBreaks: savedBreak ? [content.indexOf(T.PAGE_BREAK)] : undefined,
                 },
                 tableSource: { table: {
                     tableId: 'table',
@@ -3234,7 +3240,11 @@ describe('layout-ruler', () => {
                         trHeight: { val: { v: 60 }, hRule: TableRowHeightRule.EXACT },
                     })),
                 } },
-                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 200, height: 200 } },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    pageSize: { width: 200, height: 200 },
+                    compatibilitySettings: mode == null ? undefined : { compatibilityMode: mode },
+                },
             });
             const sourceBefore = JSON.stringify(bed.dataModel.getSnapshot());
             const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
@@ -3251,7 +3261,7 @@ describe('layout-ruler', () => {
                 }
                 const pages = skeleton.getSkeletonData()!.pages;
                 expect(pages).toHaveLength(2);
-                if (textWrap === TableTextWrapType.WRAP) {
+                if (textWrap === TableTextWrapType.WRAP && !savedBreak) {
                     expect(pages[0].skeTables.size).toBe(0);
                     const table = [...pages[1].skeTables.values()][0];
                     expect(table.rows).toHaveLength(2);
@@ -3259,6 +3269,8 @@ describe('layout-ruler', () => {
                     expect(table.top).toBe(10);
                 } else {
                     expect(pages.map((page) => [...page.skeTables.values()].map((table) => table.rows.length))).toEqual([[1], [1]]);
+                    expect(pages[0].skeTables.values().next().value?.rows[0].index).toBe(0);
+                    expect(pages[1].skeTables.values().next().value?.rows[0].index).toBe(1);
                 }
                 expect(JSON.stringify(bed.dataModel.getSnapshot())).toBe(sourceBefore);
             } finally {
@@ -3272,7 +3284,12 @@ describe('layout-ruler', () => {
     it.each([
         { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 30 },
         { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 10 },
-    ].flatMap((positionV) => [undefined, '12', '14', '15'].map((mode) => ({ positionV, mode }))))('respects Word floating table pagination mode $mode at $positionV.relativeFrom', ({ positionV, mode }) => {
+    ].flatMap((positionV) => [
+        ...[undefined, '12', '14', '15'].map((mode) => ({ positionV, mode, noBreak: undefined })),
+        { positionV, mode: '12', noBreak: BooleanNumber.FALSE },
+        { positionV, mode: '12', noBreak: BooleanNumber.TRUE },
+        { positionV, mode: '15', noBreak: BooleanNumber.TRUE },
+    ]))('respects Word floating table pagination mode $mode and no-break flag $noBreak at $positionV.relativeFrom', ({ positionV, mode, noBreak }) => {
         const T = DataStreamTreeTokenType;
         const rows = ['First', 'Second', 'Third', 'Fourth'].map((text) =>
             `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${text}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`
@@ -3311,6 +3328,7 @@ describe('layout-ruler', () => {
                 documentFlavor: DocumentFlavor.TRADITIONAL,
                 pageSize: { width: 200, height: 200 },
                 ...(mode == null ? {} : { compatibilitySettings: { compatibilityMode: mode } }),
+                ...(noBreak == null ? {} : { compatibilityFlags: { doNotBreakWrappedTables: noBreak } }),
             },
         });
         sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
@@ -3318,7 +3336,7 @@ describe('layout-ruler', () => {
         const table = createTableSkeleton(ctx, curPage, viewModel, paragraphNode.children[0], sectionBreakConfig);
         const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, table);
-        if (mode === '12' || mode === '14') {
+        if (noBreak === BooleanNumber.TRUE) {
             expect(pages).toHaveLength(1);
             const intact = [...pages[0].skeTables.values()];
             expect(intact).toHaveLength(1);

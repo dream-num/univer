@@ -20,7 +20,6 @@ installShims();
 
 export * from './bases';
 export { dedupe, dedupeBy, groupBy, makeArray, remove, rotate } from './common/array';
-export * from './common/async';
 export { isBooleanString } from './common/boolean';
 export * from './common/const';
 export * from './common/di';
@@ -57,6 +56,7 @@ export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
 export { sequence, sequenceAsync } from './common/sequence';
 export type { ISequenceExecuteResult } from './common/sequence';
+export { SerialTaskQueue } from './common/serial-task-queue';
 export { mergeSets } from './common/set';
 export { UnitModel, UniverInstanceType } from './common/unit';
 export { isSafeUrl, normalizeUrl, resolveWithBasePath } from './common/url';

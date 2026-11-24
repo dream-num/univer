@@ -206,13 +206,6 @@ function createService() {
     injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
     const service = injector.get(ICalculateFormulaService) as CalculateFormulaService;
 
-    // Make execution deterministic in tests.
-    (service as any)._executeLock = {
-        acquire: vi.fn(async (_key: string, callback: () => Promise<void>) => {
-            await callback();
-        }),
-    };
-
     return {
         service,
         mocks: {

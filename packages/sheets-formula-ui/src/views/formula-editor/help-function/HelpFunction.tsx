@@ -70,7 +70,12 @@ function Help(props: {
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={item.name}>
                         <span
-                            className={active === i ? 'univer-text-primary-500' : ''}
+                            className={active === i
+                                ? `
+                                  univer-text-primary-500
+                                  dark:!univer-text-primary-300
+                                `
+                                : ''}
                             onClick={() => onClick(i)}
                         >
                             {generateParam(item)}
@@ -200,7 +205,12 @@ export function HelpFunction(props: {
                                     functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                         <Params
                                             key={i}
-                                            className={paramIndex === i ? 'univer-text-primary-500' : ''}
+                                            className={paramIndex === i
+                                                ? `
+                                                  univer-text-primary-500
+                                                  dark:!univer-text-primary-300
+                                                `
+                                                : ''}
                                             title={item.name}
                                             value={`${item.require ? required : optional} ${item.detail}`}
                                         />

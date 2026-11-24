@@ -63,7 +63,7 @@ export class LambdaNode extends BaseAstNode {
         return this._lambdaId === null;
     }
 
-    override preservesReferenceInRangeEndpoint(): boolean {
+    override preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
         return !this.isEmptyParamFunction();
     }
 

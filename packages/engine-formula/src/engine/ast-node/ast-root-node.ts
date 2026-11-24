@@ -23,7 +23,7 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class AstRootNode extends BaseAstNode {
-    override preservesReferenceInRangeEndpoint(): boolean {
+    override preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
         // In a lambda invocation this node holds the values bound to its parameters.
         return true;
     }

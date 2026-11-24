@@ -58,7 +58,8 @@ export interface IPivotFormulaReport {
     layout?: {
         firstDataRow?: number;
         grandTotalLabel?: string;
-        pageFields?: readonly { names: readonly string[]; value: string }[];
+        rightToLeft?: boolean;
+        pageFields?: readonly { names: readonly string[]; value: string; displayValue?: string }[];
     };
 }
 
@@ -86,7 +87,7 @@ interface IPivotCellReader {
 class PivotCellReader implements IPivotCellReader {
     private readonly _styles: Nullable<Styles>;
 
-    constructor(private readonly _anchor: BaseReferenceObject, private readonly _range?: IRange) {
+    constructor(private readonly _anchor: BaseReferenceObject, private readonly _range?: IRange, private readonly _rightToLeft = false) {
         this._styles = _anchor.getCurrentStylesData();
     }
 
@@ -99,7 +100,7 @@ class PivotCellReader implements IPivotCellReader {
     }
 
     leftPadding(row: number, column: number): number {
-        const cell = this._storedCell(row, column);
+        const cell = this._storedCell(row, this._physicalColumn(column));
         if (cell == null) {
             return 0;
         }
@@ -119,11 +120,16 @@ class PivotCellReader implements IPivotCellReader {
     }
 
     private _readCell(row: number, column: number): Nullable<ICellData> {
-        if (!this._contains(row, column)) {
+        const physicalColumn = this._physicalColumn(column);
+        if (!this._contains(row, physicalColumn)) {
             return null;
         }
-        const runtimeCell = this._anchor.getCurrentRuntimeSheetData()?.getValue(row, column);
-        return runtimeCell ?? (this._range && this._anchor.getRuntimeFeatureCellValue(row, column)) ?? this._storedCell(row, column);
+        const runtimeCell = this._anchor.getCurrentRuntimeSheetData()?.getValue(row, physicalColumn);
+        return runtimeCell ?? (this._range && this._anchor.getRuntimeFeatureCellValue(row, physicalColumn)) ?? this._storedCell(row, physicalColumn);
+    }
+
+    private _physicalColumn(column: number): number {
+        return this._rightToLeft && this._range ? this._range.startColumn + this._range.endColumn - column : column;
     }
 
     private _storedCell(row: number, column: number): Nullable<ICellData> {
@@ -175,7 +181,8 @@ export class Getpivotdata extends BaseFunction {
             const item = this._textArgument(variants[index + 1]);
             const pageField = report?.layout?.pageFields?.find(({ names }) => names.some((name) => samePivotText(name, field)));
             if (pageField) {
-                if (!pageField.value || !samePivotText(pageField.value, item)) {
+                const { value, displayValue } = pageField;
+                if (!value || (!samePivotText(value, item) && (displayValue === undefined || !samePivotText(displayValue, item)))) {
                     return ErrorValueObject.create(ErrorType.REF);
                 }
             } else {
@@ -192,7 +199,7 @@ export class Getpivotdata extends BaseFunction {
             }
             dataField = measure.displayName || measure.sourceName;
         }
-        const result = visiblePivotGet(new PivotCellReader(reference, body), body ?? range, dataField, fieldPairs, report);
+        const result = visiblePivotGet(new PivotCellReader(reference, body, report?.layout?.rightToLeft), body ?? range, dataField, fieldPairs, report);
 
         return result ?? ErrorValueObject.create(ErrorType.REF);
     }

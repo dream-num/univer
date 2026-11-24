@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { Accrint } from './accrint';
 import { Accrintm } from './accrintm';
 import { Amordegrc } from './amordegrc';
@@ -71,7 +72,7 @@ import { Yield } from './yield';
 import { Yielddisc } from './yielddisc';
 import { Yieldmat } from './yieldmat';
 
-export const functionFinancial = [
+export const functionFinancial: NonNullable<IUniverEngineFormulaConfig['function']> = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
     [Accrintm, FUNCTION_NAMES_FINANCIAL.ACCRINTM],
     [Amordegrc, FUNCTION_NAMES_FINANCIAL.AMORDEGRC],

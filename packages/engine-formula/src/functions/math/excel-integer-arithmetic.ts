@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IFunctionNames } from '../../basics/function';
 import type { IUniverEngineFormulaConfig } from '../../config/config';
 import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../engine/value-object/base-value-object';
@@ -97,7 +98,11 @@ class ExcelLcm extends ExcelGcd {
 
 type Operation = 'mod' | 'mround' | 'quotient';
 
-function binaryArithmetic(kind: Operation): typeof BaseFunction {
+type BinaryArithmeticConstructor = new (name: IFunctionNames) => BaseFunction & {
+    calculate(...args: BaseValueObject[]): BaseValueObject;
+};
+
+function binaryArithmetic(kind: Operation): BinaryArithmeticConstructor {
     return class ExcelBinaryArithmetic extends BaseFunction {
         override minParams = 2;
         override maxParams = 2;

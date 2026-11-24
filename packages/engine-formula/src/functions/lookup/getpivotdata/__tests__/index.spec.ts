@@ -128,7 +128,7 @@ describe('GETPIVOTDATA', () => {
                             fields: ['Region', 'Year', 'Category'],
                             columnFields: ['Year'],
                             dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
-                            layout: { firstDataRow: 4, pageFields: [{ names: ['Category'], value: 'X' }] },
+                            layout: { firstDataRow: 4, pageFields: [{ names: ['Category'], value: 'X', displayValue: 'Combined' }] },
                         }
                         : undefined,
                 };
@@ -159,6 +159,7 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('A3', 'Region', 'North', 'Year', '2025')).toBe(80);
             expect(lookup('A3', 'Year', '2025')).toBe(80);
             expect(lookup('A3', 'Region', 'North', 'Year', '2025', 'Category', 'X')).toBe(80);
+            expect(lookup('A3', 'Region', 'North', 'Year', '2025', 'Category', 'Combined')).toBe(80);
             expect(lookup('A3', 'Region', 'North', 'Category', 'Y')).toBe(ErrorType.REF);
             expect(lookup('A3', 'Region', 'North', 'Year', 'Missing')).toBe(ErrorType.REF);
             expect(lookup('A3', 'Unknown', 'North')).toBe(ErrorType.REF);
@@ -170,7 +171,11 @@ describe('GETPIVOTDATA', () => {
         }
     });
 
-    it.each([3, undefined])('matches both column field headers with data start row %s', (firstDataRow) => {
+    it.each([
+        [3, false],
+        [undefined, false],
+        [3, true],
+    ])('matches column fields with data start row %s and RTL %s', (firstDataRow, rightToLeft) => {
         const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 7 };
         class HostedGetpivotdata extends Getpivotdata {
             protected override get pivotReportLookup(): IPivotFormulaReportLookup {
@@ -180,7 +185,7 @@ describe('GETPIVOTDATA', () => {
                         fields: ['Category', 'Year', 'Quarter'],
                         columnFields: ['Year', 'Fiscal Year', 'Quarter'],
                         dataFields: [{ sourceName: 'Amount', displayName: 'Sum of Amount' }],
-                        layout: { firstDataRow },
+                        layout: { firstDataRow, rightToLeft },
                     }),
                 };
             }
@@ -197,10 +202,13 @@ describe('GETPIVOTDATA', () => {
                 ['Grand Total', 5, 7, 12, 9, 22, 31, 43],
             ];
             const cells = grid.flatMap((values, row) => values.flatMap((value, column): Array<[number, number, ICellData]> =>
-                value === '' ? [] : [[row, column, typeof value === 'number' ? number(value) : text(value)]]
+                value === '' ? [] : [[row, rightToLeft ? range.endColumn - column : column, typeof value === 'number' ? number(value) : text(value)]]
             ));
             const report = anchor(cells);
             const lookup = (...pairs: string[]) => getObjectValue(fn.calculate(textArg('Amount'), report, ...pairs.map(textArg)));
+            if (rightToLeft) {
+                expect(getObjectValue(fn.calculate(textArg('Amount'), anchor(cells, 'B1')))).toBe(43);
+            }
             expect(lookup('Year', '2026', 'Quarter', 'Q2')).toBe(22);
             expect(lookup('Quarter', 'Q2', 'Year', '2026')).toBe(22);
             expect(lookup('Quarter', 'Q2', 'Category', 'West', 'Year', '2026')).toBe(10);

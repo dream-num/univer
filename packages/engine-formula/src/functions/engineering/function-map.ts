@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverEngineFormulaConfig } from '../../config/config';
 import { Besseli } from './besseli';
 import { Besselj } from './besselj';
 import { Besselk } from './besselk';
@@ -73,7 +74,7 @@ import { Oct2bin } from './oct2bin';
 import { Oct2dec } from './oct2dec';
 import { Oct2hex } from './oct2hex';
 
-export const functionEngineering = [
+export const functionEngineering: NonNullable<IUniverEngineFormulaConfig['function']> = [
     [Besseli, FUNCTION_NAMES_ENGINEERING.BESSELI],
     [Besselj, FUNCTION_NAMES_ENGINEERING.BESSELJ],
     [Besselk, FUNCTION_NAMES_ENGINEERING.BESSELK],

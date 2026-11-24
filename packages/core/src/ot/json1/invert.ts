@@ -32,7 +32,13 @@ import {
     shallowClone,
 } from './snapshot';
 
-// Exchange picks with drops and removes with inserts. Embedded edits follow the moved value back to its source.
+/**
+ * Exchange picks with drops and removes with inserts. Move inverse subtype edits back to the paths
+ * where their values will be restored. Each removal must already contain the value to reinsert.
+ *
+ * @param op - An operation prepared with `makeInvertible`, or authored with its undo data.
+ * @returns An operation applicable to the revision immediately after `op`.
+ */
 export function invert(op: JSONXActions): JSONXActions {
     if (op == null) {
         return null;
@@ -42,6 +48,7 @@ export function invert(op: JSONXActions): JSONXActions {
     let editsToTransform: undefined | Set<IJSON1Component>;
     const heldPick: JSON1ReadCursor[] = [];
     const heldWrites: JSON1WriteCursor[] = [];
+    /** Reverse structural components and compute the final value of each literal insertion so undo can remove it. */
     function invertSimple(r: JSON1ReadCursor, w: JSON1WriteCursor, subDoc: JSON1Document | undefined) {
         const c = r.getComponent();
         let insertHere;
@@ -103,6 +110,7 @@ export function invert(op: JSONXActions): JSONXActions {
     }
     invertSimple(r, w, undefined);
     if (editsToTransform) {
+        /** Follow forward drops back to their picks to emit inverse edits on the restored subtree. */
         function transformEdits(rPick: JSON1ReadCursor | null, rDrop: JSON1ReadCursor, w: JSON1WriteCursor) {
             const cd = rDrop.getComponent();
             if (cd) {
@@ -172,7 +180,13 @@ export function invert(op: JSONXActions): JSONXActions {
 const anyComponent = (op: OperationList, fn: (c: IJSON1Component) => boolean): boolean =>
     op.some((c) => (typeof c === 'object' ? (Array.isArray(c) ? anyComponent(c, fn) : fn(c)) : false));
 
-// Capture removed values and subtype undo data from the snapshot immediately before this operation.
+/**
+ * Record values taken from the source snapshot and let each subtype capture its own undo data.
+ *
+ * @param op - Forward operation, potentially containing compact removals or text deletions by length.
+ * @param doc - Snapshot immediately before `op` is applied.
+ * @returns A forward operation with equivalent effects and enough information for supported subtypes to invert.
+ */
 export function makeInvertible(op: JSONXActions, doc: JSON1Document) {
     if (op == null || !anyComponent(op, (c) => c.r !== undefined || getEditType(c)?.makeInvertible != null)) {
         return op;
@@ -182,6 +196,10 @@ export function makeInvertible(op: JSONXActions, doc: JSON1Document) {
     let hasEdits = false;
     const heldPick: JSON1ReadCursor[] = [];
     const heldDoc: JSON1Document[] = [];
+    /**
+     * Process children before recording a parent removal so its undo value excludes descendants picked into move slots.
+     * Keep those moved values for subtype edits at their destinations.
+     */
     const traversePick = (r: JSON1ReadCursor, w: JSON1WriteCursor, subDoc: JSON1Document | undefined) => {
         const c = r.getComponent();
         let modified = false;
@@ -246,6 +264,7 @@ export function makeInvertible(op: JSONXActions, doc: JSON1Document) {
     traversePick(r, w, doc);
     if (hasEdits) {
         w.reset();
+        /** Find the pre-edit subtype value in the source snapshot, an inserted literal, or a subtree held by a move. */
         function traverseDrop(
             rPick: JSON1ReadCursor | null,
             rDrop: JSON1ReadCursor,
@@ -307,6 +326,7 @@ export function makeInvertible(op: JSONXActions, doc: JSON1Document) {
     return result;
 }
 
+/** Prepare and invert `op` against its source revision. Apply the returned undo at the revision produced by `op`. */
 export function invertWithDoc(op: JSONXActions, doc: JSON1Document) {
     return invert(makeInvertible(op, doc));
 }

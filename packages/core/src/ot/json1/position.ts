@@ -22,7 +22,14 @@ import { advancer } from './navigation';
 import { checkValidOp, getEdit, getEditType } from './operation';
 import { getComponent, hasDrop, hasPick } from './snapshot';
 
-// Track the original path through picks, follow its move slot, then account for drops and embedded edits.
+/**
+ * Follow a source path through removals, moves and insertions. When the path enters an edited subtype,
+ * delegate the next position to that subtype if it implements position mapping.
+ *
+ * @param path - Path in the source snapshot. The caller retains its original array.
+ * @param op - Operation taking the source snapshot to the result snapshot.
+ * @returns The mapped path, or `null` when the tracked value was removed.
+ */
 export function transformPosition(path: JSONXPath, op: JSONXActions): JSONXPath | null {
     path = path.slice();
     checkValidOp(op);

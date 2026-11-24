@@ -23,7 +23,13 @@ import { advancer, eachChildOf } from './navigation';
 import { checkValidOp, getEdit, getEditType, writeEdit } from './operation';
 import { assert, getComponent, hasDrop, hasPick, setOrRemoveChild } from './snapshot';
 
-/** Join sequential operations at the intermediate snapshot, keeping move slots connected across both operations. */
+/**
+ * Compose two changesets across their shared intermediate revision.
+ *
+ * @param op1 - Operation from the original revision to the intermediate revision.
+ * @param op2 - Operation from the intermediate revision to the final revision.
+ * @returns A single operation that can be replayed directly on the original revision.
+ */
 export function compose(op1: JSONXActions, op2: JSONXActions) {
     checkValidOp(op1);
     checkValidOp(op2);
@@ -54,8 +60,11 @@ export function compose(op1: JSONXActions, op2: JSONXActions) {
             held2Drop[c.d] = r2.clone();
         }
     });
-    // At the intermediate snapshot, match the first operation’s drops to the second operation’s picks.
-    // Stage writes for moved subtrees until their source or destination in the composed operation is known.
+    /**
+     * Match drops from the first operation to picks from the second at the same intermediate path.
+     * A moved subtree can be encountered before its opposite endpoint. Keep its writes by slot until
+     * both paths in the composed operation are known.
+     */
     function xfBoundary(
         r1Pick: JSON1ReadCursor | null,
         r1Drop: JSON1ReadCursor | null,

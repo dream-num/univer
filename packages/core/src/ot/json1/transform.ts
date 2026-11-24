@@ -34,15 +34,20 @@ import {
 } from './operation';
 import { assert, deepClone, deepEqual, getComponent, hasDrop, hasPick } from './snapshot';
 
+/** Kinds of structural conflicts reported to the collaboration conflict policy. */
 export enum ConflictType {
+    /** One operation removes a subtree where the other introduces or edits content. */
     RM_UNEXPECTED_CONTENT = 1,
+    /** Two operations place competing values at the same destination. */
     DROP_COLLISION = 2,
+    /** Concurrent moves create a cycle in which each destination depends on another moved subtree. */
     BLACKHOLE = 3,
 }
 
 const LEFT = 0;
 const RIGHT = 1;
 
+/** Copy the branch arrays while sharing component objects so traversal survives structural writes to the output. */
 const shallowCloneOp = (op: JSONXActions) => {
     if (op == null) {
         return null;
@@ -57,7 +62,12 @@ const shallowCloneOp = (op: JSONXActions) => {
     return result;
 };
 
-// Rebase the first operation against the second. A conflict carries the conflicting slices from both operands.
+/**
+ * Rebase `op1` onto `op2` from a common source revision. First locate the peer’s moves, then write
+ * surviving picks and drops in their new coordinates. Defer writes whose destination follows a move.
+ *
+ * @returns The rebased operation, or the conflicting portions of both inputs for the caller to resolve.
+ */
 function tryTransform(
     op1: JSONXActions,
     op2: JSONXActions,
@@ -99,7 +109,7 @@ function tryTransform(
     const r1 = new JSON1ReadCursor(op1);
     const r2 = new JSON1ReadCursor(op2);
     const w = new JSON1WriteCursor();
-    // Index the peer’s picks in the original snapshot so descendants can follow a moved ancestor.
+    /** Index the peer’s picks by slot in the source snapshot so edits to a descendant can follow its moved ancestor. */
     function scanOp2Pick(
         r2Pick: JSON1ReadCursor,
         r1Pick: JSON1ReadCursor | null = null,
@@ -134,7 +144,7 @@ function tryTransform(
         ap1.end();
     }
     scanOp2Pick(r2, r1, null);
-    // Locate the peer’s drop destinations and detect moves into a deleted ancestor.
+    /** Locate the peer’s drop destinations and identify moved content that would land under a removed ancestor. */
     function scanOp2Drop(
         r1Pick: JSON1ReadCursor | null,
         r2Pick: JSON1ReadCursor | null,
@@ -239,7 +249,7 @@ function tryTransform(
     }
     const pickComponents: (null | IJSON1Component)[] = [];
     let cancelledRemoves: null | Set<IJSON1Component> = null;
-    // Write surviving picks, deferring children whose destination depends on a peer move.
+    /** Write surviving picks and removals, deferring writes inside subtrees relocated by the peer. */
     function writeOp1Pick(
         r1Pick: JSON1ReadCursor,
         r2Pick: JSON1ReadCursor | null,
@@ -333,7 +343,7 @@ function tryTransform(
     writeOp1Pick(r1, r2, r2.clone(), w, null);
     w.reset();
     const outputSlotMap: number[] = [];
-    // Translate array indices through both pick and drop phases and write the rebased edits.
+    /** Map destinations through both pick and drop index shifts. Rebase embedded edits where the same value survives. */
     function writeOp1Drop(
         p1Pick: JSON1ReadCursor | null,
         p1Drop: JSON1ReadCursor,
@@ -619,7 +629,10 @@ function tryTransform(
     }
     const heldOutDropRead: JSON1ReadCursor[] = [];
     const heldOutDropWrites: JSON1WriteCursor[] = [];
-    // Attach deferred edits at their final destinations. A cycle of unresolved moves forms a blackhole conflict.
+    /**
+     * Attach deferred writes at the surviving destinations of peer moves. Writes that depend on each other
+     * in a cycle supply the move paths for a blackhole conflict.
+     */
     function writeHeldOp2Drop(
         p2Drop: JSON1ReadCursor,
         outPick: JSON1ReadCursor | null,
@@ -767,6 +780,14 @@ function throwConflictErr(conflict: IJSON1Conflict): never {
     });
 }
 
+/**
+ * Rebase `op1` to apply after `op2`. Both operations must start at the same revision.
+ *
+ * @param op1 - Operation to rebase.
+ * @param op2 - Peer operation already applied to the target revision.
+ * @param side - Priority of `op1` in a tie. Rebase `op2` using the opposite side.
+ * @throws A `writeConflict` error containing the conflict kind and the conflicting portions of `op1` and `op2`.
+ */
 export function transform(op1: JSONXActions, op2: JSONXActions, side: 'left' | 'right') {
     const res = tryTransform(op1, op2, side);
     if (res.ok) {
@@ -786,6 +807,10 @@ const opThatRemovesDE = (op: JSONXActions) => {
     return w.get();
 };
 
+/**
+ * Return corrections for the two operations. A competing drop uses side priority, a removal wins over
+ * unexpected content, and cyclic moves discard the affected destinations on both sides.
+ */
 const resolveConflict = (conflict: IJSON1Conflict, side: 'left' | 'right') => {
     const { type, op1, op2 } = conflict;
     switch (type) {
@@ -809,7 +834,15 @@ const resolveConflict = (conflict: IJSON1Conflict, side: 'left' | 'right') => {
 
 type AllowConflictPred = (c: IJSON1Conflict) => boolean;
 
-// Resolve one accepted conflict at a time. Normalize before retrying so empty subtype edits make progress.
+/**
+ * Resolve one accepted conflict at a time. Normalize the corrected inputs before retrying, and compose
+ * corrections to the peer into the returned operation so it can run after the original `op2`.
+ *
+ * @param allowConflict - Called for each conflict. Returning `false` propagates the conflict to the caller.
+ * @param op1 - Operation to rebase.
+ * @param op2 - Concurrent operation that will already have been applied.
+ * @param side - Priority assigned to `op1` for this pair.
+ */
 export function transformWithConflictsPred(
     allowConflict: AllowConflictPred,
     op1: JSONXActions,

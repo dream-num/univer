@@ -30,13 +30,22 @@ import {
     shallowClone,
 } from './snapshot';
 
-// Apply picks in reverse sibling order, then drops in forward order. Only paths changed by either pass are copied.
+/**
+ * Apply structural changes in two passes. Picks run from the highest sibling index down so removals
+ * preserve source indices. Drops run in ascending order using result indices. Move slots carry values
+ * between the passes, including values moved across parents.
+ *
+ * @param snapshot - Document at the revision where the operation was authored. An absent root is `undefined`.
+ * @param op - Operation to replay. A `null` operation returns `snapshot` directly.
+ * @returns The new root, which can be `undefined` after a root removal.
+ */
 export function apply(snapshot: JSON1Document | undefined, op: JSONXActions) {
     checkValidOp(op);
     if (op === null) {
         return snapshot;
     }
     const held: JSON1Document[] = [];
+    /** Detach removed or moved values from the source tree. Rebuild ancestors only where a child changed. */
     function pick(subDoc: JSON1Document | undefined, descent: OperationList) {
         const stack: (JSON1Document | undefined)[] = [];
         let i = 0;
@@ -76,6 +85,7 @@ export function apply(snapshot: JSON1Document | undefined, op: JSONXActions) {
         return subDoc;
     }
     snapshot = pick(snapshot, op) as JSON1Document;
+    /** Insert literals and held values, then pass the resulting value at each edited path to its subtype. */
     function drop(root: JSON1Document, descent: OperationList) {
         let subDoc = root;
         let i = 0;

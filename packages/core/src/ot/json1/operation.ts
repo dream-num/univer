@@ -22,6 +22,7 @@ import { JSON1WriteCursor } from './cursor';
 import { assert } from './snapshot';
 import { unicodeText } from './unicode-text';
 
+/** Runtime hooks used when decoding an embedded edit, normalizing it or mapping a position inside its value. */
 interface IRegisteredSubtype extends IJSON1Subtype<unknown, unknown> {
     checkValidOp?(edit: unknown): void;
     normalize?(edit: unknown): unknown;
@@ -30,6 +31,7 @@ interface IRegisteredSubtype extends IJSON1Subtype<unknown, unknown> {
 
 const subtypes = new Map<string, IRegisteredSubtype>();
 
+/** Index a subtype under its name and optional URI. Registering an identifier again updates its implementation. */
 export function registerSubtype(subtype: IRegisteredSubtype) {
     subtypes.set(subtype.name, subtype);
     if (subtype.uri) {
@@ -55,9 +57,11 @@ registerSubtype({
     invert: (a: number) => -a,
 });
 
+/** Encode a single subtype edit at `path`. Keep an empty edit when `preserveNoop` is set or the subtype has no no-op check. */
 export const editOp = (path: JSONXPath, type: IRegisteredSubtype | string, subOp: unknown, preserveNoop = false) =>
     new JSON1WriteCursor().at(path, (w) => writeEdit(w, type, subOp, preserveNoop)).get();
 
+/** Resolve an explicit subtype or the implicit subtype of `es` and `ena`. Structural components return `null`. */
 export function getEditType(component?: IJSON1Component | null) {
     if (component?.et) {
         return typeOrThrow(component.et);
@@ -68,6 +72,7 @@ export function getEditType(component?: IJSON1Component | null) {
     return component?.ena != null ? typeOrThrow('number') : null;
 }
 
+/** Read the embedded payload, preserving numeric additions of zero. */
 export function getEdit(component: IJSON1Component) {
     if (component.es) {
         return component.es;
@@ -75,6 +80,10 @@ export function getEdit(component: IJSON1Component) {
     return component.ena ?? component.e;
 }
 
+/**
+ * Write the compact `ena` or `es` field for built-in subtype names. Other identifiers are encoded in `et` with payload `e`.
+ * Set `preserveNoop` when a caller needs to retain an explicitly empty edit.
+ */
 export const writeEdit = (
     w: JSON1WriteCursor,
     typeOrName: IRegisteredSubtype | string,
@@ -110,7 +119,12 @@ function checkScalar(s: unknown): asserts s is number | string {
     }
 }
 
-// Validate the wire tree and require every move slot to have exactly one pick and one drop.
+/**
+ * Validate the encoding without reading a snapshot. Siblings must be ordered, each component can hold one edit,
+ * and slots numbered from zero must each have one pick and one drop. `null` is a valid empty operation.
+ *
+ * @throws When a structural rule fails, a named subtype is missing, or a subtype validator rejects an edit.
+ */
 export function checkValidOp(op: JSONXActions) {
     if (op === null) {
         return;
@@ -210,6 +224,10 @@ export function checkValidOp(op: JSONXActions) {
     }
 }
 
+/**
+ * Rebuild the operation in wire order, renumber moves by first visit and normalize embedded edits where supported.
+ * Conflict resolution uses this form before retrying the transform.
+ */
 export function normalize(op: JSONXActions) {
     let nextSlot = 0;
     const slotMap: number[] = [];
@@ -236,15 +254,19 @@ export function normalize(op: JSONXActions) {
     return w.get();
 }
 
+/** Build an insertion at an object key, array index or the root. Array indices refer to the insertion position. */
 export function insertOp(path: JSONXPath, value: JSON1Document): JSONXActions {
     return new JSON1WriteCursor().writeAtPath(path, 'i', value).get();
 }
+/** Build a removal. Omitting `value` writes `r: true`. Use the source snapshot to recover the removed value for undo. */
 export function removeOp(path: JSONXPath, value: JSON1Document = true): JSONXActions {
     return new JSON1WriteCursor().writeAtPath(path, 'r', value).get();
 }
+/** Connect one source path to one destination path using slot zero. The destination is in the result snapshot. */
 export function moveOp(from: JSONXPath, to: JSONXPath): JSONXActions {
     return new JSON1WriteCursor().writeMove(from, to).get();
 }
+/** Record the previous value in `r` and the replacement in `i` at the same path. */
 export function replaceOp(path: JSONXPath, previous: JSON1Document, next: JSON1Document): JSONXActions {
     return new JSON1WriteCursor()
         .at(path, (w) => {

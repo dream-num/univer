@@ -19,33 +19,42 @@
 import type { JSON1ReadCursor, JSON1WriteCursor } from './cursor';
 import type { IJSON1Component, JSON1Document, JSONXActions, JSONXPath } from './json1';
 
+/** An encoded branch. A valid branch contains at least one component or child. */
 export type OperationList = NonNullable<JSONXActions>;
 
+/** A string property name or a numeric array index used in a JSON1 path. */
 export type Key = JSONXPath[number];
 
+/** Throw a plain `Error` on a failed wire or snapshot invariant. Replay callers observe the supplied message. */
 export function assert(condition: unknown, message?: string): asserts condition {
     if (!condition) {
         throw new Error(message);
     }
 }
 
+/** Read from a positioned cursor, or return `null` for an absent branch. A writer materializes its current component. */
 export const getComponent = (r?: JSON1ReadCursor | JSON1WriteCursor | null) => (r ? r.getComponent() : null);
 
 function isObject(value: unknown): value is IJSONObject {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+/** Copy one container so changes can share untouched descendants with the input snapshot. */
 export const shallowClone = (obj: JSON1Document) =>
     Array.isArray(obj) ? obj.slice() : obj !== null && typeof obj === 'object' ? Object.assign({}, obj) : obj;
 
+/** Test for either operation that detaches a value during the pick pass (`p` or `r`). */
 export const hasPick = (c?: IJSON1Component | null) => c && (c.p != null || c.r !== undefined);
 
+/** Test for either operation that supplies a value during the drop pass (`d` or `i`). */
 export const hasDrop = (c?: IJSON1Component | null) => c && (c.d != null || c.i !== undefined);
 
+/** An object snapshot with string property names and JSON values. */
 export interface IJSONObject {
     [k: string]: JSON1Document;
 }
 
+/** Return a shallow copy with the property removed or the indexed array element spliced out. */
 export function removeChild(container: JSON1Document[] | IJSONObject, key: Key) {
     assert(container != null);
     if (typeof key === 'number') {
@@ -60,6 +69,11 @@ export function removeChild(container: JSON1Document[] | IJSONObject, key: Key) 
     return container;
 }
 
+/**
+ * Insert into a writable container and return the inserted value. Array insertion shifts later elements.
+ *
+ * @throws If the index exceeds the array length, the container is incompatible, or the destination property is occupied.
+ */
 export function insertChildMut(container: JSON1Document[] | IJSONObject, key: Key, value: JSON1Document) {
     if (typeof key === 'number') {
         assert(container != null, 'Container is missing for key');
@@ -77,18 +91,22 @@ export function insertChildMut(container: JSON1Document[] | IJSONObject, key: Ke
     return value;
 }
 
+/** Return a shallow copy with the child at `k` replaced. Array indices retain their positions. */
 export const replaceChild = (obj: JSON1Document[] | IJSONObject, k: Key, v: JSON1Document) => {
     obj = shallowClone(obj) as typeof obj;
     (obj as IJSONObject)[k] = v;
     return obj;
 };
 
+/** Check that the container admits this key kind. A numeric key requires an array. Existence is checked separately. */
 export const isValidKey = (container: JSON1Document | undefined, key: Key): boolean =>
     container == null ? false : typeof key === 'number' ? Array.isArray(container) : typeof container === 'object';
 
+/** Read a child if its container admits the key. An absent container or child yields `undefined`. */
 export const maybeGetChild = (container: JSON1Document | undefined, key: Key): JSON1Document | undefined =>
     isValidKey(container, key) ? (container as IJSONObject)[key] : undefined;
 
+/** Update a child in a writable container. An `undefined` child splices an array element or deletes an object property. */
 export const setOrRemoveChild = (container: JSON1Document[] | IJSONObject, key: Key, child?: JSON1Document) => {
     if (typeof key === 'number') {
         assert(Array.isArray(container));
@@ -143,6 +161,7 @@ function eqArr(a: JSON1Document[], b: JSON1Document) {
     return true;
 }
 
+/** Compare JSON values recursively when deciding whether competing inserted content is equivalent. */
 export function deepEqual(a: JSON1Document, b: JSON1Document) {
     // This will cover null, bools, string and number
     if (a === b) {
@@ -158,6 +177,7 @@ export function deepEqual(a: JSON1Document, b: JSON1Document) {
     return Array.isArray(a) ? eqArr(a, b) : eqObj(a, b);
 }
 
+/** Copy a JSON subtree so a stored operation can retain its own copy of snapshot or component data. */
 export function deepClone(old: JSON1Document): JSON1Document {
     if (old === null) {
         return null;

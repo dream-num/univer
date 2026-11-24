@@ -21,7 +21,14 @@ import type { IJSON1Component } from './json1';
 import type { Key } from './snapshot';
 import { precedes } from './cursor';
 
-// Advance through ordered siblings, optionally mapping array indices across picks or drops. Call end() to restore the parent.
+/**
+ * Scan siblings once while matching a sequence of target keys in ascending order.
+ *
+ * @param r - Reader at the parent, or `null` for an absent branch.
+ * @param listMap - Maps an array index into target coordinates. Return the bitwise complement of an index to skip it.
+ * @param listAdv - Runs when a numeric sibling is passed, allowing the caller to update its running offset.
+ * @returns A lookup that positions the reader at a match or returns `null`. Call its `end()` once to restore the parent.
+ */
 export function advancer(
     r: JSON1ReadCursor | null,
     listMap?: (k: number, c: IJSON1Component | null) => number,
@@ -64,6 +71,10 @@ export function advancer(
     return advance;
 }
 
+/**
+ * Walk the union of two ordered child lists. Visit a shared key once with both readers at that child.
+ * A missing child is passed as `null`. Both readers return to their parents on normal completion.
+ */
 export function eachChildOf(
     r1: JSON1ReadCursor | null,
     r2: JSON1ReadCursor | null,

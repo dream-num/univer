@@ -18,10 +18,13 @@
 
 import { assert } from './snapshot';
 
+/** A retain length, inserted text, or a deletion recorded by code-point count or by its original text. */
 type TextOpComponent = number | string | { d: number | string };
 
+/** An `es` edit applied left to right. Text remaining after the last component is retained implicitly. */
 type TextOp = TextOpComponent[];
 
+/** Check the stored text-edit format. Retains are positive and separated by edits. A trailing retain is implicit. */
 const checkOp = (op: TextOp) => {
     assert(Array.isArray(op), 'Op must be an array of components');
     let last = null;
@@ -51,6 +54,7 @@ const checkOp = (op: TextOp) => {
     assert(typeof last !== 'number', 'Op has a trailing skip');
 };
 
+/** Visit components with code-point offsets in both the input text and the edited result. */
 function eachOp(op: TextOp, fn: (c: TextOpComponent, prePos: number, postPos: number) => void) {
     let prePos = 0;
     let postPos = 0;
@@ -85,6 +89,7 @@ const normalize = (op: TextOp) => mapOp(op, (component) => component);
 
 const dlen = (d: number | string) => (typeof d === 'number' ? d : strPosToUni(d));
 
+/** Append a component in normalized form. Adjacent deletions keep their text when both carry the deleted strings. */
 const makeAppend = (op: TextOp) => (component: TextOpComponent) => {
     if (!component || (typeof component === 'object' && (component.d === 0 || component.d === ''))) {
         return;
@@ -113,6 +118,7 @@ const componentLength = (c: TextOpComponent): number =>
                 ? c.d
                 : strPosToUni(c.d);
 
+/** Slice by wire-level code-point offsets, converting them to JavaScript string offsets at the boundary. */
 const uniSlice = (s: string, startUni: number, endUni?: number) => {
     const start = uniToStrPos(s, startUni);
     const end = endUni == null ? Infinity : uniToStrPos(s, endUni);
@@ -122,6 +128,10 @@ const uniSlice = (s: string, startUni: number, endUni?: number) => {
 const dslice = (d: number | string, start: number, end?: number) =>
     typeof d === 'number' ? (end == null ? d - start : Math.min(d, end) - start) : uniSlice(d, start, end);
 
+/**
+ * Read an edit in chunks of up to the requested number of code points. `-1` takes the rest of the current component.
+ * The caller can keep insertions or deletions whole when they occupy only one side of a transform or composition.
+ */
 const makeTake = (op: TextOp) => {
     let idx = 0;
     let offset = 0;
@@ -177,6 +187,7 @@ const trim = (op: TextOp) => {
     return op;
 };
 
+/** Rebase `op1` across a concurrent text edit. At a shared insertion position, `left` places its text first. */
 function transform(op1: TextOp, op2: TextOp, side: 'left' | 'right') {
     if (side !== 'left' && side !== 'right') {
         throw new Error(`side (${side}) must be 'left' or 'right'`);
@@ -233,6 +244,7 @@ function transform(op1: TextOp, op2: TextOp, side: 'left' | 'right') {
     return trim(newOp);
 }
 
+/** Consume both edits in the coordinates of the intermediate text and emit one edit against the original string. */
 function compose(op1: TextOp, op2: TextOp) {
     checkOp(op1);
     checkOp(op2);
@@ -284,6 +296,7 @@ function compose(op1: TextOp, op2: TextOp) {
     return trim(result);
 }
 
+/** Map a code-point offset through an edit. An insertion exactly at the cursor leaves the cursor before the new text. */
 const transformPosition = (cursor: number, op: TextOp) => {
     let pos = 0;
     for (let i = 0; i < op.length && cursor > pos; i++) {
@@ -307,11 +320,13 @@ const transformPosition = (cursor: number, op: TextOp) => {
     return cursor;
 };
 
+/** Replace deletion lengths with the source substrings they remove so undo can reinsert the original characters. */
 function makeInvertible(op: TextOp, doc: string) {
     return mapOp(op, (c, prePos) =>
         typeof c === 'object' && typeof c.d === 'number' ? { d: uniSlice(doc, prePos, prePos + c.d) } : c);
 }
 
+/** Swap insertions and recorded deletions. A length-only deletion needs `makeInvertible` before it can be inverted. */
 function invert(op: TextOp) {
     return mapOp(op, (c) => {
         switch (typeof c) {
@@ -325,8 +340,10 @@ function invert(op: TextOp) {
         }
     });
 }
-// Wire offsets count Unicode code points. Keep the 4.0.0 offset rules for stored text edits.
-// Offset conversion adapted from unicount 1.1.0, Copyright 2019 Joseph Gentle (ISC).
+/**
+ * Count code points using the surrogate-pair rules used by stored text edits.
+ * Offset conversion adapted from unicount 1.1.0, Copyright 2019 Joseph Gentle (ISC).
+ */
 function strPosToUni(text: string) {
     let count = 0;
     for (let index = 0; index < text.length; index++, count++) {
@@ -339,6 +356,7 @@ function strPosToUni(text: string) {
     }
     return count;
 }
+/** Convert a wire code-point count into a UTF-16 offset for JavaScript string operations. */
 function uniToStrPos(text: string, count: number) {
     let offset = 0;
     while (count-- > 0) {
@@ -347,6 +365,7 @@ function uniToStrPos(text: string, count: number) {
     }
     return offset;
 }
+/** Built-in `text-unicode` subtype used by the JSON1 `es` field. String offsets on the wire count Unicode code points. */
 export const unicodeText = {
     name: 'text-unicode',
     uri: 'http://sharejs.org/types/text-unicode',
@@ -359,6 +378,7 @@ export const unicodeText = {
     normalize,
     isNoop: (op: TextOp) => op.length === 0,
 };
+/** Replay retains, insertions and deletions, then copy the implicit trailing retain from the source text. */
 function apply(text: string, op: TextOp) {
     checkOp(op);
     assert(typeof text === 'string', `Invalid document snapshot: ${text}`);

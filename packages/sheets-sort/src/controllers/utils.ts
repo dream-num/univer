@@ -37,8 +37,6 @@ type SortableCell = Nullable<ICellData>;
 
 const HASH_CHAR_CODE = 35; // '#'
 
-const removeStringSymbol = (str: string) => str.replace(/-/gi, '').replace(/'/gi, '');
-
 export const isNullValue = (cell: Nullable<ICellData>) => !cell || (cell.v == null && cell.p == null);
 
 /**
@@ -135,23 +133,146 @@ function readLogical(cell: SortableCell): number {
     return cell ? Number(getCellValue(CellValueType.BOOLEAN, cell)) : 0;
 }
 
-function compareText(a: string, b: string): number {
-    const left = removeStringSymbol(a.toLocaleLowerCase());
-    const right = removeStringSymbol(b.toLocaleLowerCase());
-    if (left < right) {
-        return -1;
-    }
-    if (left > right) {
-        return 1;
-    }
-    return 0;
+export type TextComparer = (a: string, b: string) => number;
+
+// Excel sorts text left to right: digits, then spaces and punctuation in this order, then letters.
+const EXCEL_SYMBOL_ORDER = ' !"#$%&()*,./:;?@[\\]^_`{|}~+<=>';
+
+enum UnitClass {
+    DIGIT = 0,
+    SYMBOL = 1,
+    LETTER = 2,
 }
+
+const DIGIT_START = /^\p{Nd}/u;
+const LETTER_START = /^[\p{L}\p{M}]/u;
+const TEXT_UNITS = /[\p{L}\p{M}]+|[^\p{L}\p{M}]/gu;
+
+const unitClass = (unit: string): UnitClass => {
+    if (DIGIT_START.test(unit)) return UnitClass.DIGIT;
+    if (LETTER_START.test(unit)) return UnitClass.LETTER;
+    return UnitClass.SYMBOL;
+};
+
+const symbolRank = (symbol: string) => {
+    const rank = EXCEL_SYMBOL_ORDER.indexOf(symbol);
+    return rank === -1 ? EXCEL_SYMBOL_ORDER.length : rank;
+};
+
+const isAsciiDigit = (unit: string) => unit >= '0' && unit <= '9';
+
+/** A text split into the units it sorts by, with each unit's class worked out once. */
+interface IPreparedText {
+    readonly units: readonly string[];
+    readonly classes: readonly UnitClass[];
+}
+
+// Excel ignores case, hyphens and apostrophes when it sorts text.
+const normalizeText = (text: string) => text.toLocaleLowerCase().replace(/-/g, '').replace(/'/g, '');
+
+const prepareText = (text: string): IPreparedText => {
+    const units = normalizeText(text).match(TEXT_UNITS) ?? [];
+    return { units, classes: units.map(unitClass) };
+};
+
+const compareUnits = (a: IPreparedText, b: IPreparedText, collator: Intl.Collator) => {
+    const length = Math.min(a.units.length, b.units.length);
+
+    for (let i = 0; i < length; i++) {
+        const unitA = a.units[i];
+        const unitB = b.units[i];
+
+        // Identical units are equal in every class, and shared prefixes are common in a sort.
+        if (unitA === unitB) continue;
+
+        const classA = a.classes[i];
+        const classB = b.classes[i];
+
+        if (classA !== classB) return classA - classB;
+
+        const order = classA === UnitClass.SYMBOL
+            ? symbolRank(unitA) - symbolRank(unitB) || (unitA < unitB ? -1 : 1)
+            : classA === UnitClass.DIGIT && isAsciiDigit(unitA) && isAsciiDigit(unitB)
+                // ASCII digits collate by value in every locale, and a digit unit is one character.
+                ? unitA.charCodeAt(0) - unitB.charCodeAt(0)
+                : collator.compare(unitA, unitB);
+
+        if (order !== 0) return order;
+    }
+
+    return a.units.length - b.units.length;
+};
+
+// Bounds the prepared texts a comparer keeps if a sort is larger than this.
+const MAX_PREPARED_TEXTS = 200_000;
+
+/**
+ * Compares text in Excel's order, ignoring case, hyphens and apostrophes: runs of letters by the
+ * locale's collation, so an accented letter sorts beside its base letter, and digits before
+ * spaces and punctuation before letters. Accents only break ties between texts that are
+ * otherwise equal.
+ *
+ * A sort compares each text many times, so each text is normalized and split once and kept
+ * until the current task ends; the comparer holds no texts between sorts.
+ */
+export const createTextComparer = (locale?: string): TextComparer => {
+    const baseCollator = new Intl.Collator(locale, { sensitivity: 'base' });
+    const accentCollator = new Intl.Collator(locale, { sensitivity: 'accent' });
+    const prepared = new Map<string, IPreparedText>();
+    let releaseScheduled = false;
+
+    const prepare = (text: string): IPreparedText => {
+        let entry = prepared.get(text);
+
+        if (entry === undefined) {
+            if (prepared.size >= MAX_PREPARED_TEXTS) prepared.clear();
+            entry = prepareText(text);
+            prepared.set(text, entry);
+
+            if (!releaseScheduled) {
+                releaseScheduled = true;
+                queueMicrotask(() => {
+                    prepared.clear();
+                    releaseScheduled = false;
+                });
+            }
+        }
+
+        return entry;
+    };
+
+    return (a, b) => {
+        if (a === b) return 0;
+
+        const preparedA = prepare(a);
+        const preparedB = prepare(b);
+
+        return compareUnits(preparedA, preparedB, baseCollator) || compareUnits(preparedA, preparedB, accentCollator);
+    };
+};
+
+/** Univer locales are written `enUS`; Intl expects `en-US`. */
+export const createRegionTextComparer = (region: string): TextComparer => {
+    try {
+        return createTextComparer(region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2'));
+    } catch {
+        return createTextComparer();
+    }
+};
+
+const defaultTextComparer = createTextComparer();
 
 /**
  * Compare two cells the same way Excel sorts a range: by value kind first, then by value inside the
- * kind. Blank cells are always sorted last, whichever direction is used.
+ * kind. Blank cells are always sorted last, whichever direction is used. Text is compared with
+ * `compareText`, which defaults to Excel's order in the runtime's default locale.
  */
-export function compareCells(type: SortType, a: SortableCell, b: SortableCell): number {
+export function compareCells(
+    type: SortType,
+    a: SortableCell,
+    b: SortableCell,
+    compareText: TextComparer = defaultTextComparer
+): number {
     const rankA = getSortRank(a);
     const rankB = getSortRank(b);
 

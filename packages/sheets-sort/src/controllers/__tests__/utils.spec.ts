@@ -97,3 +97,24 @@ describe('compareCells', () => {
         });
     });
 });
+
+describe('compareCells text order', () => {
+    const sorted = (values: string[], type = SortType.ASC) => values
+        .map((value) => cell(value, CellValueType.STRING))
+        .sort((a, b) => compareCells(type, a, b))
+        .map((textCell) => textCell.v);
+
+    it('sorts accented letters beside their base letter', () => {
+        expect(sorted(['zoe', 'éclair', 'ángel', 'bob', 'abc'])).toEqual(['abc', 'ángel', 'bob', 'éclair', 'zoe']);
+        expect(sorted(['zoe', 'éclair', 'ángel', 'bob', 'abc'], SortType.DESC)).toEqual(['zoe', 'éclair', 'bob', 'ángel', 'abc']);
+    });
+
+    it('ignores case, hyphens and apostrophes', () => {
+        expect(sorted(['co-op', 'b', "c'd", 'A'])).toEqual(['A', 'b', "c'd", 'co-op']);
+    });
+
+    it('uses the text comparer it is given', () => {
+        const reversed = (a: string, b: string) => b.localeCompare(a);
+        expect(compareCells(SortType.ASC, cell('a', CellValueType.STRING), cell('b', CellValueType.STRING), reversed)).toBeGreaterThan(0);
+    });
+});

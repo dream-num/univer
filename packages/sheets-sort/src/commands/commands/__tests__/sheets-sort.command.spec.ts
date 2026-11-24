@@ -121,8 +121,9 @@ describe('SortRangeCommand with mixed cell types', () => {
             { v: '10', t: CellValueType.FORCE_STRING },
         ];
 
-        // Numbers stored as text sort as text, not as numbers: '10' comes before '9'.
-        expect(await sortRows({ cells }, SortType.ASC)).toEqual([3, 1, 5, 4, 2, 0]);
+        // Numbers stored as text sort as text, not as numbers: '10' comes before '9'. Excel's text
+        // order puts digits before symbols, so both come before the error-looking text '#N/A'.
+        expect(await sortRows({ cells }, SortType.ASC)).toEqual([3, 5, 4, 1, 2, 0]);
     });
 
     it('falls back to the value kind of cells without a type', async () => {

@@ -236,22 +236,23 @@ function visiblePivotGet(
     const columnFields = report?.columnFields;
     const columnFieldIndex = (field: string) => columnFields?.findIndex((name) => samePivotText(name, field)) ?? -1;
     const columnPairs = report ? fieldPairs.filter(([field]) => columnFieldIndex(field) >= 0) : fieldPairs;
-    const columnItems = report && columnPairs.length > 1
+    const columnItems = report
         ? [...columnPairs].sort(([left], [right]) => columnFieldIndex(left) - columnFieldIndex(right)).map(([, item]) => item)
-        : undefined;
+        : [];
     for (let headerRow = startRow; headerRow <= lastHeaderRow; headerRow++) {
         const dataColumn = findPivotDataColumn(reader, headerRow, startColumn, maxColumn, dataField);
         if (dataColumn == null) {
             continue;
         }
 
-        const columnMatch = columnPairs.length && !columnItems
+        const hasHeaderItems = columnItems.length > 1 || (columnItems.length === 1 && dataColumn > startColumn);
+        const columnMatch = columnPairs.length && !hasHeaderItems
             ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs, firstDataRow)
             : null;
-        const matchedColumn = columnItems
+        const matchedColumn = hasHeaderItems
             ? findPivotColumnByHeaderItems(reader, anchorRange, headerRow, dataColumn, dataField, columnItems, firstDataRow)
             : columnMatch?.column;
-        if (columnItems && matchedColumn == null) {
+        if (hasHeaderItems && matchedColumn == null) {
             continue;
         }
         const needsTotalColumn = Boolean(report?.columnFields.length && !columnPairs.length);

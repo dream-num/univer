@@ -145,8 +145,11 @@ function findLagPeak(correlations: ArrayLike<number>, maxLag: number): number {
     }
     if (period > 0 && correlations[period] < 1 - CORRELATION_TOLERANCE) {
         // A shorter peak may describe a recurring shape whose offsets repeat on a longer cycle.
-        for (let lag = Math.max(period, DIRECT_LAG_LIMIT) + 1; lag <= maxLag; lag++) {
-            if (correlations[lag] >= 1 - CORRELATION_TOLERANCE) return lag;
+        for (let lag = period + 1; lag <= maxLag; lag++) {
+            if (correlations[lag] >= 1 - CORRELATION_TOLERANCE) {
+                // A longer multiple of a known short cycle is not a new period.
+                return lag <= DIRECT_LAG_LIMIT ? period : lag;
+            }
         }
     }
     return period;

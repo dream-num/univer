@@ -436,6 +436,10 @@ describe('Persisted calculation settings', () => {
             ['=SUM(A1:INDEX(IFS(TRUE,(A2:A4,B2:B4)),2,1,1))', 6, 6],
             ['=SUM (A1:A4)', 10, 10],
             ['=SUM(MyRange (A2:A3))', 5, 5],
+            ['=SUM(MovingBlock (A2:A3))', 5, 5],
+            ['=SUM(AliasRange (A2:A3))', 5, 5],
+            ['=NamedFn(A2:A3)', 15, 15],
+            ['=NamedFn (A2:A3)', ErrorType.VALUE, ErrorType.VALUE],
             ['=SUM(A1:OFFSET(IFS(TRUE,A2),1,0))', 6, 6],
             ['=SUM(A1:OFFSET(SWITCH(1,1,A2),1,0))', 6, 6],
             ['=SUM(IFS(TRUE,A1:A4) A2:A3)', 5, 5],
@@ -450,6 +454,21 @@ describe('Persisted calculation settings', () => {
                 id: 'grouped-range',
                 name: 'MyRange',
                 formulaOrRefString: '=Sheet1!$A$1:$A$4',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'moving-block',
+                name: 'MovingBlock',
+                formulaOrRefString: '=OFFSET(Sheet1!$A$1,0,0,4,1)',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'alias-range',
+                name: 'AliasRange',
+                formulaOrRefString: '=MyRange',
+            });
+            bed.get(IDefinedNamesService).registerDefinedName(bed.unitId, {
+                id: 'named-lambda',
+                name: 'NamedFn',
+                formulaOrRefString: '=LAMBDA(arg,SUM(arg)+10)',
             });
             cells.reset();
             for (let row = 0; row < 4; row++) {
@@ -531,11 +550,14 @@ describe('Persisted calculation settings', () => {
                 ['=FORECAST.ETS.SEASONALITY(MOD(SEQUENCE(420)-1,168),SEQUENCE(420))', 168],
                 ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,168),45000+h/24))', 168],
                 ['=LET(h,SEQUENCE(672)-1,FORECAST.ETS.SEASONALITY(MOD(h,24)+3*INT(MOD(h,168)/24),h+1))', 168],
+                ['=LET(h,SEQUENCE(168)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
+                ['=LET(h,SEQUENCE(240)-1,FORECAST.ETS.SEASONALITY(MOD(h,12)+3*INT(MOD(h,24)/12),h+1))', 12],
+                ['=LET(h,SEQUENCE(800)-1,k,FILTER(h,MOD(h,6)<>0),FORECAST.ETS.SEASONALITY(MOD(k,168),45000+k/24))', 168],
                 ['=FORECAST.ETS.SEASONALITY(SEQUENCE(672),SEQUENCE(672))', 0],
             ] as const;
             const result = await calculate(bed, { 0: Object.fromEntries(cases.map(([f], index) => [index + 9, { f }])) }, false);
             const actual = result.unitData[bed.unitId]?.[bed.sheetId];
-            cases.forEach(([formula, expected], index) => expect(actual?.getValue(0, index + 9)?.v, formula).toBe(expected));
+            cases.forEach(([formula, expected], index) => expect.soft(actual?.getValue(0, index + 9)?.v, formula).toBe(expected));
         } finally {
             bed.univer.dispose();
         }

@@ -47,7 +47,6 @@ univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: false });
 - Load the locale resources from `@univerjs/engine-formula/locale/<language>` for each language enabled by your application.
 - Import `@univerjs/engine-formula/facade` when using this package through Univer Facade APIs.
 - Custom calculation engines must await `FormulaResultService` before emitting completion. Subclasses of `CalculateFormulaService` must pass this service to the base constructor.
-- Named LAMBDA evaluation allows at most 64 simultaneously active calls. Deeper recursion returns `#NUM!` to protect the runtime; this boundary does not promise the same recursion limit as every Excel version.
 
 ## Resources
 

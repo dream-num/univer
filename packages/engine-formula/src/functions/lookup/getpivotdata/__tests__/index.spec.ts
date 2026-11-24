@@ -253,6 +253,45 @@ describe('GETPIVOTDATA', () => {
         }
     });
 
+    it.each([3, undefined])('matches a single column field with two measures and data start row %s', (firstDataRow) => {
+        const range = { startRow: 0, endRow: 4, startColumn: 0, endColumn: 6 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Region', 'Channel'],
+                        columnFields: ['Channel'],
+                        dataFields: [
+                            { sourceName: 'Amount', displayName: 'Sum of Amount' },
+                            { sourceName: 'Quantity', displayName: 'Sum of Quantity' },
+                        ],
+                        layout: { firstDataRow },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+        try {
+            const grid = [
+                ['', 'Column Labels'],
+                ['', 'Online', '', 'Retail', '', 'Total Sum of Amount', 'Total Sum of Quantity'],
+                ['Row Labels', 'Sum of Amount', 'Sum of Quantity', 'Sum of Amount', 'Sum of Quantity'],
+                ['East', 110, 3, 90, 2, 200, 5],
+                ['Grand Total', 110, 3, 90, 2, 200, 5],
+            ];
+            const cells = grid.flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, c, typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), anchor(cells), ...pairs.map(textArg)));
+            expect.soft(lookup('Amount', 'Region', 'East', 'Channel', 'Online')).toBe(110);
+            expect(lookup('Quantity', 'Channel', 'Online', 'Region', 'East')).toBe(3);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('accepts the source field name of an aggregated caption', () => {
         const result = testFunction.calculate(
             textArg('Status'),

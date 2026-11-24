@@ -219,10 +219,19 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
 
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
-    const step = findTimelineStep(sorted, timestampTolerance(first, last));
+    const tolerance = timestampTolerance(first, last);
+    let step = findTimelineStep(sorted, tolerance);
     if (!Number.isFinite(step) || step <= 0) return ErrorValueObject.create(ErrorType.NUM);
     const monthly = step >= 28 && step <= 31 && first >= 61 && last <= MAX_DATE_SERIAL
         && sorted.every((time, index) => shiftMonth(first, index, dateSystem) === time);
+    if (!monthly) {
+        // Estimate the grid step over the full span so rounding in individual gaps cannot accumulate.
+        const span = last - first;
+        const calibrated = span / Math.round(span / step);
+        if (Math.abs(calibrated - step) <= Math.min(tolerance, step * 1e-6)) {
+            step = calibrated;
+        }
+    }
     return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthly };
 }
 

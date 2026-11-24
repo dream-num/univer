@@ -1251,8 +1251,8 @@ export class LexerTreeBuilder extends Disposable {
                     return false;
                 }
                 const identifier = this._getHasSheetNameDefinedName(left, names.unitId, names);
-                const definition = names.getValueByName(names.unitId, identifier, names.sheetId);
-                return definition != null && isReferenceStringWithEffectiveColumn(definition.formulaOrRefString.replace(/^=/, ''));
+                // Preserve the operator before expanding a name into a reference, a formula or another name.
+                return names.getValueByName(names.unitId, identifier, names.sheetId) != null;
             }
             return /(?:^|!)\$?[\p{L}_][\p{L}\d_.$]*$/u.test(left) || (this.isColonOpen() && /^\$?\d+$/u.test(left));
         }

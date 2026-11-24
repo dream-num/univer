@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import { bench, describe } from 'vitest';
+import process from 'node:process';
+import { expect, it } from 'vitest';
 import { detectEtsPeriod } from '../ets-model';
 
-describe('ETS seasonality', () => {
+it.runIf(process.env.RUN_ETS_BENCHMARK === '1')('benchmarks ETS seasonality on 35,040 nonperiodic hourly values', () => {
     let seed = 37;
     const values = Array.from({ length: 35_040 }, () => {
         seed = (Math.imul(seed, 1_664_525) + 1_013_904_223) >>> 0;
         return seed / 2 ** 32;
     });
 
-    bench('searches four years of non-periodic hourly values', () => {
-        if (detectEtsPeriod(values) !== 0) {
-            throw new Error('Expected no seasonal period');
-        }
-    });
+    for (let run = 0; run < 10; run++) {
+        expect(detectEtsPeriod(values)).toBe(0);
+    }
+    const runs = 30;
+    const start = performance.now();
+    for (let run = 0; run < runs; run++) {
+        detectEtsPeriod(values);
+    }
+    const average = (performance.now() - start) / runs;
+    process.stdout.write(`ETS seasonality averaged ${average.toFixed(2)} ms over ${runs} runs\n`);
 });

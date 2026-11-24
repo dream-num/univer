@@ -1020,7 +1020,11 @@ export function getTwoArrayNumberValues(
             };
         }
 
-        if (array1Object.isNull() || array2Object.isNull() || array1Object.isBoolean() || array2Object.isBoolean()) {
+        if (
+            array1Object.isNull() || array2Object.isNull() ||
+            array1Object.isBoolean() || array2Object.isBoolean() ||
+            array1Object.isString() || array2Object.isString()
+        ) {
             continue;
         }
 

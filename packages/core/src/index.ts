@@ -172,10 +172,12 @@ export { ImageCacheMap } from './shared/cache/image-cache';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { customNameCharacterCheck, nameCharacterCheck } from './shared/name';
-export { RBush, RTree } from './shared/r-tree';
-export type { BBox, IRTreeItem } from './shared/r-tree';
+export { RTree } from './shared/r-tree';
+export type { IRTreeItem } from './shared/r-tree';
 export { generateRandomId } from './shared/random-id';
 export { getIntersectRange } from './shared/range';
+export { RBush } from './shared/rbush';
+export type { IBoundingBox as BBox } from './shared/rbush';
 export { getRecordValueKey } from './shared/record-value';
 export type { RecordSelection, RecordValue } from './shared/record-value';
 export {
@@ -185,6 +187,7 @@ export {
     fromCallback,
     takeAfter,
 } from './shared/rxjs';
+export { getTextChangeRange } from './shared/text-diff';
 export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { isNodeEnv } from './shared/tools';
 export { cssPxToEmu, EMU_PER_CSS_PX, emuToCssPx } from './shared/units';

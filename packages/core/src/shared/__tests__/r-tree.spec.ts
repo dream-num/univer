@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { describe, expect, it, vi } from 'vitest';
 import type { IRange } from '../../sheets/typedef';
 import type { IRTreeItem } from '../r-tree';
+import { describe, expect, it, vi } from 'vitest';
 import { RTree } from '../r-tree';
 
 describe('RTree integration', () => {

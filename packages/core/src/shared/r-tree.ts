@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { BBox } from 'rbush';
-import KDBush from 'kdbush';
-import RBush from 'rbush';
 import type { IUnitRange } from '../sheets/typedef';
+import type { IBoundingBox, RBushNode } from './rbush';
+import KDBush from 'kdbush';
+import { RBush } from './rbush';
 
 type StringOrNumber = string | number;
 type CellIds = StringOrNumber | Set<StringOrNumber>;
@@ -27,13 +27,8 @@ export interface IRTreeItem extends IUnitRange {
     id: StringOrNumber;
 }
 
-interface IRBushItem extends BBox {
+interface IRBushItem extends IBoundingBox {
     id: StringOrNumber;
-}
-
-interface IRBushNode extends BBox {
-    children: (IRBushNode | IRBushItem)[];
-    leaf: boolean;
 }
 
 interface IRdTreeItem {
@@ -44,7 +39,7 @@ interface IRdTreeItem {
 
 export interface IRTreeData {
     [unitId: string]: {
-        [subUnitId: string]: IRTreeItem[];
+        [subUnitId: string]: RBushNode<IRBushItem>;
     };
 }
 
@@ -398,7 +393,7 @@ export class RTree {
             }
         }
         // With the point cache enabled, remove() treats point searches as point-cache-only removals.
-        const matches = (id: StringOrNumber, bounds: BBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
+        const matches = (id: StringOrNumber, bounds: IBoundingBox, rangedOnly = false) => searches.get(id)?.some(({ range }) =>
             (!rangedOnly || !this._enableOneCellCache || range.startRow !== range.endRow || range.startColumn !== range.endColumn) &&
             range.startColumn <= bounds.maxX && range.endColumn >= bounds.minX &&
             range.startRow <= bounds.maxY && range.endRow >= bounds.minY
@@ -442,18 +437,19 @@ export class RTree {
         // Probe a bounded number of candidates without allocating a full-tree snapshot.
         let remaining = 128;
         if (searches.size > remaining) return false;
-        const visit = (node: IRBushNode, range: IUnitRange['range']): boolean => {
+        const visit = (node: RBushNode<IRBushItem>, range: IUnitRange['range']): boolean => {
             if (--remaining < 0) return false;
             if (!node.leaf && range.startColumn <= node.minX && range.endColumn >= node.maxX &&
                 range.startRow <= node.minY && range.endRow >= node.maxY) {
                 return false;
             }
-            for (const child of node.children) {
+            for (let i = 0; i < node.children.length; i++) {
+                const child = node.children[i];
                 if (range.startColumn <= child.maxX && range.endColumn >= child.minX &&
                     range.startRow <= child.maxY && range.endRow >= child.minY) {
                     if (node.leaf) {
                         if (--remaining < 0) return false;
-                    } else if (!visit(child as IRBushNode, range)) {
+                    } else if (!visit(node.children[i], range)) {
                         return false;
                     }
                 }
@@ -461,7 +457,7 @@ export class RTree {
             return true;
         };
         const tree = this._tree.get(unitId)?.get(sheetId);
-        const root = tree?.toJSON() as IRBushNode | undefined;
+        const root = tree?.toJSON();
         const cells = this._oneCellCache.get(unitId)?.get(sheetId);
         for (const [id, ranges] of searches) {
             if (Number.isNaN(id)) return false;
@@ -500,7 +496,7 @@ export class RTree {
         return result;
     }
 
-    fromJSON(data: IRTreeData) {
+    fromJSON(data: Record<string, Record<string, unknown>>) {
         this._tree.clear();
         for (const unitId in data) {
             this._tree.set(unitId, new Map());
@@ -512,5 +508,3 @@ export class RTree {
         }
     }
 }
-
-export { type BBox, RBush };

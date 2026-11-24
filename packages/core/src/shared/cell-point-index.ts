@@ -207,7 +207,10 @@ export class CellPointIndex {
         }
 
         const partitions = this._getPartitions();
-        const ordered = all && partitions ? new Array<CellPoint>(points.length) : undefined;
+        // With all cells on one axis, alternate splits cannot prune either half.
+        // Finish the ranks on the first ambiguous range so later windows use the cell map.
+        const line = this._minColumn === this._maxColumn || this._minRow === this._maxRow;
+        const ordered = (all || line) && partitions ? new Array<CellPoint>(points.length) : undefined;
         let keys = partitions?.columns;
         const compare = (a: number, b: number) => {
             const x = keys![a];
@@ -242,10 +245,10 @@ export class CellPointIndex {
             }
             const pivot = collect(middle, rank);
             // The median is followed by the upper half and then the lower half.
-            if (byColumn ? right >= pivot.column : bottom >= pivot.row) {
+            if (ordered || (byColumn ? right >= pivot.column : bottom >= pivot.row)) {
                 visit(middle + 1, end, !byColumn, rank + 1);
             }
-            if (byColumn ? left <= pivot.column : top <= pivot.row) {
+            if (ordered || (byColumn ? left <= pivot.column : top <= pivot.row)) {
                 visit(start, middle, !byColumn, rank + end - middle);
             }
         };

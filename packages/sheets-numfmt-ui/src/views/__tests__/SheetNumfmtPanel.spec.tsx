@@ -16,7 +16,7 @@
 
 import type { Root } from 'react-dom/client';
 import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
-import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { ILocalStorageService, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
 import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
@@ -49,6 +49,7 @@ afterEach(async () => {
 async function renderPanel(value: ISheetNumfmtPanelProps['value']) {
     const injector = new Injector([
         [LocaleService],
+        [RegionService],
         [ILocalStorageService, { useClass: DesktopLocalStorageService }],
         [UserHabitController],
     ]);

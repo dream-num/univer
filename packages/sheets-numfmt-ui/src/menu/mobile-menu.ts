@@ -32,6 +32,7 @@ import {
 import {
     AddDecimalCommand,
     CURRENCYFORMAT,
+    getDefaultDateFormat,
     NUMBERFORMAT,
     SetCurrencyCommand,
     SetPercentCommand,
@@ -73,8 +74,8 @@ export interface IMobileNumberFormatMenuConfig {
     customPatterns: string[];
 }
 
-export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMobileNumberFormatMenuConfig {
-    const detailOptions: IMobileNumberFormatMenuConfig['detailOptions'] = MENU_OPTIONS(currencySymbol)
+export function createMobileNumberFormatMenuConfig(currencySymbol: string, region?: string): IMobileNumberFormatMenuConfig {
+    const detailOptions: IMobileNumberFormatMenuConfig['detailOptions'] = MENU_OPTIONS(currencySymbol, region)
         .slice(0, -1)
         .map((item) => item === '|'
             ? { divider: true }
@@ -91,7 +92,7 @@ export function createMobileNumberFormatMenuConfig(currencySymbol: string): IMob
         quickOptions: [
             { label: 'sheets-numfmt-ui.percent', commandId: SetPercentCommand.id },
             { label: 'sheets-numfmt-ui.currency', commandId: SetCurrencyCommand.id },
-            { label: 'sheets-numfmt-ui.date', commandId: SetMobileNumfmtCommand.id, value: 'yyyy-mm-dd;@' },
+            { label: 'sheets-numfmt-ui.date', commandId: SetMobileNumfmtCommand.id, value: region ? `${getDefaultDateFormat(region)};@` : 'yyyy-mm-dd;@' },
             {
                 label: 'sheets-numfmt-ui.text',
                 commandId: SetMobileNumfmtCommand.id,
@@ -137,8 +138,9 @@ export function FactoryMobileOtherMenuItem(
             worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
-        mobileNumberFormat: createMobileNumberFormatMenuConfig(
-            getCurrencySymbolByLocale(regionService.getCurrentRegion())
-        ),
+        get mobileNumberFormat() {
+            const region = regionService.getCurrentRegion();
+            return createMobileNumberFormatMenuConfig(getCurrencySymbolByLocale(region), region);
+        },
     };
 }

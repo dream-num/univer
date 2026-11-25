@@ -18,6 +18,7 @@ export {
     getCurrencyFormat,
     getCurrencySymbolIconByLocale,
 } from './base/const/currency-symbols';
+export { getDefaultDateFormat } from './base/const/date-format';
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';

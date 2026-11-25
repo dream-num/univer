@@ -15,7 +15,7 @@
  */
 
 import type { Root } from 'react-dom/client';
-import { excelDateTimeSerial, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { excelDateTimeSerial, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -36,7 +36,7 @@ afterEach(() => {
 
 describe('DatePanel', () => {
     it('preserves an existing non-preset date pattern when opened in English', () => {
-        const injector = new Injector([[LocaleService]]);
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS });
@@ -68,8 +68,8 @@ describe('DatePanel', () => {
         expect(isDatePanel(pattern)).toBe(true);
     });
 
-    it('updates presets on locale changes without replacing a user-selected format', () => {
-        const injector = new Injector([[LocaleService]]);
+    it.each([false, true])('updates presets without replacing a user-selected format (explicit region: %s)', (explicitRegion) => {
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
@@ -94,6 +94,11 @@ describe('DatePanel', () => {
             </RediContext.Provider>
         ));
 
+        if (explicitRegion) {
+            act(() => injector.get(RegionService).setRegion('enIN' as LocaleType));
+            expect(container.querySelector('li a')?.textContent?.trim()).toBe('05/08/1930');
+            expect(onActionChange.mock.lastCall![0]()).toBe('dd/mm/yyyy');
+        }
         expect(container.textContent).not.toContain('下午');
         const option = Array.from(container.querySelectorAll('li a')).find((element) =>
             element.textContent?.trim() === '1:30 PM');
@@ -101,7 +106,10 @@ describe('DatePanel', () => {
         act(() => option!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         const selectedPattern = onChange.mock.lastCall![0];
 
-        act(() => localeService.setLocale(LocaleType.ZH_CN));
+        act(() => {
+            localeService.setLocale(LocaleType.ZH_CN);
+            if (explicitRegion) injector.get(RegionService).setRegion(LocaleType.ZH_CN);
+        });
 
         expect(container.textContent).toContain('1930年08月05日');
         expect(container.textContent).toContain('下午 1:30');

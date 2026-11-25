@@ -37,17 +37,12 @@ export function CurrencyPanel(props: IBusinessComponentProps) {
     const { onActionChange, onChange: onValueChange } = props;
     const localeService = useDependency(LocaleService);
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [suffix, setSuffix] = useState(() => getCurrencyType(props.defaultPattern) || userHabitCurrency[0]);
+    const [selectedCurrency, setSuffix] = useState(() => getCurrencyType(props.defaultPattern));
+    const suffix = selectedCurrency ?? userHabitCurrency[0];
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [pattern, setPattern] = useState(() => {
-        const negativeOptions = getCurrencyFormatOptions(suffix);
-        const pattern =
-            negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ||
-            negativeOptions[0].value;
-        return pattern;
-    });
-
     const negativeOptions = useMemo(() => getCurrencyFormatOptions(suffix), [suffix]);
+    const [selectedPattern, setPattern] = useState<string>();
+    const pattern = selectedPattern ?? negativeOptions.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern))?.value ?? negativeOptions[0].value;
     const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
     useLayoutEffect(() => {

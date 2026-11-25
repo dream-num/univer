@@ -17,6 +17,7 @@
 import { getCurrencySymbolByLocale } from '@univerjs/core';
 
 const currencyIcons: Readonly<Record<string, string>> = {
+    '$': 'DollarIcon',
     '€': 'EuroIcon',
     '₽': 'RoubleIcon',
     '¥': 'RmbIcon',
@@ -33,7 +34,7 @@ const currencyIcons: Readonly<Record<string, string>> = {
  */
 export function getCurrencySymbolIconByLocale(locale: string) {
     const symbol = getCurrencySymbolByLocale(locale);
-    return { icon: currencyIcons[symbol] ?? 'DollarIcon', symbol, locale };
+    return { icon: currencyIcons[symbol] ?? 'RegionalCurrencyIcon', symbol, locale };
 }
 
 /**

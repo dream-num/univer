@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
+import { getRegionTag, LocaleType } from '@univerjs/core';
 
 interface IDateFormatProfile {
     dates: readonly string[];
@@ -80,14 +80,48 @@ const DATE_FORMAT_PROFILES: Record<LocaleType, IDateFormatProfile> = {
     },
 };
 
-export function getDateFormatPatterns(locale: LocaleType): string[] {
-    const profile = DATE_FORMAT_PROFILES[locale] ?? ISO_DATE_PROFILE;
+const builtInRegions = new Map(Object.values(LocaleType).map((locale) => [getRegionTag(locale).toLowerCase(), locale]));
+
+export function getDateFormatLocale(region: string): LocaleType | undefined {
+    return builtInRegions.get(getRegionTag(region).toLowerCase());
+}
+
+function getDateProfile(region: string): IDateFormatProfile {
+    const locale = getDateFormatLocale(region);
+    if (locale) return DATE_FORMAT_PROFILES[locale];
+    const tag = getRegionTag(region);
+    try {
+        if (Intl.DateTimeFormat.supportedLocalesOf(tag).length) {
+            const parts = new Intl.DateTimeFormat(tag, { calendar: 'gregory', timeZone: 'UTC' }).formatToParts(0);
+            const first = parts.find(({ type }) => type === 'day' || type === 'month' || type === 'year')?.type;
+            if (first === 'month') return MDY_DATE_PROFILE;
+            if (first === 'day') {
+                return parts.some(({ type, value }) => type === 'literal' && value.includes('.')) ? DMY_DOT_DATE_PROFILE : DMY_DATE_PROFILE;
+            }
+        }
+    } catch (error) {
+        if (!(error instanceof RangeError)) throw error;
+    }
+    return ISO_DATE_PROFILE;
+}
+
+function preferredDate(profile: IDateFormatProfile): string {
+    return profile === ISO_DATE_PROFILE || profile === CJK_DATE_PROFILE ? 'yyyy-MM-dd' : profile.dates[0];
+}
+
+export function getDefaultDateFormat(region: string): string {
+    return preferredDate(getDateProfile(region));
+}
+
+export function getDateFormatPatterns(region: string): string[] {
+    const profile = getDateProfile(region);
     const clockPatterns = ['hh:mm', 'h:mm', 'h:mm:ss'];
     const timePatterns = clockPatterns.map((pattern) => profile.periodBeforeTime
         ? `AM/PM ${pattern}`
         : `${pattern} AM/PM`);
 
     return [...new Set([
+        preferredDate(profile),
         'yyyy-MM-dd',
         ...profile.dates,
         'h:mm:ss',

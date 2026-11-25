@@ -16,7 +16,7 @@
 
 import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
-import { LocaleService, numfmt } from '@univerjs/core';
+import { LocaleService, numfmt, RegionService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { getDateFormatOptions } from '@univerjs/sheets-numfmt';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -30,9 +30,12 @@ export const isDatePanel = (pattern: string) => {
 export function DatePanel(props: IBusinessComponentProps) {
     const { onActionChange, onChange, defaultPattern } = props;
     const localeService = useDependency(LocaleService);
-    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
-    const [suffix, setSuffix] = useState(() => defaultPattern || getDateFormatOptions(locale)[0].value);
-    const options = useMemo(() => getDateFormatOptions(locale, suffix), [locale, suffix]);
+    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const regionService = useDependency(RegionService);
+    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const [selected, setSuffix] = useState(defaultPattern);
+    const options = useMemo(() => getDateFormatOptions(region, selected), [region, selected]);
+    const suffix = selected || options[0].value;
 
     useLayoutEffect(() => {
         onActionChange(() => suffix);

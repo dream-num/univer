@@ -15,7 +15,7 @@
  */
 
 import type { Root } from 'react-dom/client';
-import { Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
 import { RediContext } from '@univerjs/ui';
@@ -38,7 +38,7 @@ afterEach(() => {
 
 describe('MobileCustomFormat', () => {
     it('selects an existing pattern from a mobile dropdown and confirms it', () => {
-        const injector = new Injector([[LocaleService]]);
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS });
@@ -79,7 +79,7 @@ describe('MobileCustomFormat', () => {
     });
 
     it('resolves live date presets while preserving a selection across locale changes', () => {
-        const injector = new Injector([[LocaleService]]);
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
@@ -113,6 +113,11 @@ describe('MobileCustomFormat', () => {
         act(() => getButton('m/d/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
         act(() => getButton(localeService.t('sheets-numfmt-ui.confirm')).dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(onConfirm).toHaveBeenCalledExactlyOnceWith('m/d/yyyy');
+
+        act(() => injector.get(RegionService).setRegion('enIN' as LocaleType));
+        act(() => select!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        act(() => getButton('dd/mm/yyyy').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        expect(container.querySelector('input')?.value).toBe('dd/mm/yyyy');
     });
 });
 

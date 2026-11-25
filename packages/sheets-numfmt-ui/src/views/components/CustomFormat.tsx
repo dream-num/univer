@@ -16,7 +16,7 @@
 
 import type { LocaleKey } from '../../locale/types';
 import type { IBusinessComponentProps } from './interface';
-import { ILocalStorageService, LocaleService } from '@univerjs/core';
+import { getCurrencySymbolByLocale, ILocalStorageService, LocaleService, RegionService } from '@univerjs/core';
 import { borderClassName, clsx, Input } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { CURRENCYFORMAT, getDateFormatOptions, NUMBERFORMAT } from '@univerjs/sheets-numfmt';
@@ -32,7 +32,9 @@ export function CustomFormat(props: IBusinessComponentProps) {
     const userHabitController = useDependency(UserHabitController);
     const localStorageService = useDependency(ILocalStorageService);
     const localeService = useDependency(LocaleService);
-    const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const regionService = useDependency(RegionService);
+    const region = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
 
     const [pattern, setPattern] = useState(defaultPattern);
     useLayoutEffect(() => {
@@ -52,8 +54,8 @@ export function CustomFormat(props: IBusinessComponentProps) {
 
         localStorageService.getItem<string[]>(historyPatternKey).then((historyList) => {
             const list = [
-                ...CURRENCYFORMAT.map((item) => item.suffix('$')),
-                ...getDateFormatOptions(locale).map((item) => item.value),
+                ...CURRENCYFORMAT.map((item) => item.suffix(getCurrencySymbolByLocale(region))),
+                ...getDateFormatOptions(region).map((item) => item.value),
                 ...NUMBERFORMAT.map((item) => item.suffix),
                 ...(historyList ?? []),
             ];
@@ -67,7 +69,7 @@ export function CustomFormat(props: IBusinessComponentProps) {
         return () => {
             cancelled = true;
         };
-    }, [locale, localStorageService, userHabitController]);
+    }, [region, localStorageService, userHabitController]);
 
     const handleClick = (p: string) => {
         setPattern(p);

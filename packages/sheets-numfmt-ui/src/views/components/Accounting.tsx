@@ -33,8 +33,9 @@ export function AccountingPanel(props: IBusinessComponentProps) {
 
     const [decimal, setDecimal] = useState(() => getDecimalFromPattern(defaultPattern || '', 2));
     const userHabitCurrency = useContext(UserHabitCurrencyContext);
-    const [suffix, setSuffix] = useState(() => getCurrencyType(defaultPattern) || userHabitCurrency[0]);
-    const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), []);
+    const [selectedCurrency, setSuffix] = useState(() => getCurrencyType(defaultPattern));
+    const suffix = selectedCurrency ?? userHabitCurrency[0];
+    const options = useMemo(() => userHabitCurrency.map((key) => ({ label: key, value: key })), [userHabitCurrency]);
 
     const localeService = useDependency(LocaleService);
 

@@ -16,13 +16,15 @@
 
 import type { Root } from 'react-dom/client';
 import type { ISheetNumfmtPanelProps } from '../SheetNumfmtPanel';
-import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { DesktopLogService, ILocalStorageService, ILogService, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import designEnUS from '@univerjs/design/locale/en-US';
-import { DesktopLocalStorageService, RediContext } from '@univerjs/ui';
+import { getCurrencySymbolIconByLocale } from '@univerjs/sheets-numfmt';
+import { ComponentManager, DesktopLocalStorageService, IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentsController } from '../../controllers/components.controller';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
@@ -49,6 +51,7 @@ afterEach(async () => {
 async function renderPanel(value: ISheetNumfmtPanelProps['value']) {
     const injector = new Injector([
         [LocaleService],
+        [RegionService],
         [ILocalStorageService, { useClass: DesktopLocalStorageService }],
         [UserHabitController],
     ]);
@@ -74,7 +77,7 @@ async function renderPanel(value: ISheetNumfmtPanelProps['value']) {
         ));
     };
     await rerender(value);
-    return { container, localeService, onChange, rerender };
+    return { container, injector, localeService, onChange, rerender };
 }
 
 async function confirmPanel(container: HTMLElement, label = 'Confirm') {
@@ -88,6 +91,53 @@ async function confirmPanel(container: HTMLElement, label = 'Confirm') {
 }
 
 describe('SheetNumfmtPanel', () => {
+    it.each([
+        ['Currency', undefined, '₹'],
+        ['Accounting', undefined, '₹'],
+        ['Currency', '€', '€'],
+    ])('confirms %s using the regional default or saved choice %s', async (category, saved, expected) => {
+        const { container, injector, onChange } = await renderPanel({ defaultValue: 100000, defaultPattern: '', row: 0, col: 0 });
+        if (saved) await injector.get(ILocalStorageService).setItem('userHabitController_numfmtCurrency', [saved]);
+        await act(async () => injector.get(RegionService).setRegion('enIN' as LocaleType));
+        const trigger = container.querySelector<HTMLButtonElement>('[data-u-comp="select"]')!;
+        trigger.focus();
+        await act(async () => {
+            trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+        });
+        const option = Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemradio"]')).find((item) => item.textContent?.trim() === category);
+        expect(option).toBeDefined();
+        await act(async () => option!.click());
+        await confirmPanel(container);
+        expect(onChange.mock.lastCall?.[0].value).toContain(expected);
+    });
+
+    it('renders the registered currency glyph and keeps an explicit currency on the cell', async () => {
+        const { container, injector, onChange } = await renderPanel({
+            defaultValue: 100000,
+            defaultPattern: '"€"#,##0.00',
+            row: 0,
+            col: 0,
+        });
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([ComponentManager]);
+        injector.add([IconManager]);
+        injector.add([ComponentsController]);
+        injector.get(ComponentsController);
+        const region = injector.get(RegionService);
+        await act(async () => region.setRegion('mlIN' as LocaleType));
+        const icons = injector.get(IconManager);
+        const { icon } = getCurrencySymbolIconByLocale(region.getCurrentRegion());
+        expect(icons.has(icon)).toBe(true);
+        const Icon = icons.get(icon);
+        const target = document.createElement('div');
+        const root = createRoot(target);
+        roots.push(root);
+        act(() => root.render(<RediContext.Provider value={{ injector }}><Icon /></RediContext.Provider>));
+        expect(target.textContent).toBe('₹');
+        await confirmPanel(container);
+        expect(onChange.mock.lastCall?.[0].value).toContain('€');
+    });
+
     it('keeps the active category and selected date format when its labels are translated', async () => {
         const { container, localeService, onChange } = await renderPanel({
             defaultValue: 0.5625,

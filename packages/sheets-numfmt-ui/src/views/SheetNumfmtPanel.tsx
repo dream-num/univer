@@ -54,15 +54,14 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
 
 function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
     const { onChange } = props;
-    const { defaultValue, defaultPattern, row, col } = props.value;
+    const { defaultValue, defaultPattern } = props.value;
     const localeService = useDependency(LocaleService);
     useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const currentPatternRef = useRef<() => string | null>(() => '');
     const nextTick = useNextTick();
 
     const [type, setType] = useState(findDefaultType);
-    const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
-    const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
+    const { mark, userHabitCurrency } = useCurrencyOptions();
 
     const BusinessComponent = TYPE_OPTIONS.find((item) => item.label === type)?.component;
 
@@ -133,7 +132,7 @@ function SheetNumfmtPanelContent(props: ISheetNumfmtPanelProps) {
                 <div>
                     {BusinessComponent && (
                         <UserHabitCurrencyContext.Provider value={userHabitCurrency}>
-                            <BusinessComponent {...subProps} key={key} />
+                            <BusinessComponent {...subProps} />
                         </UserHabitCurrencyContext.Provider>
                     )}
                 </div>

@@ -15,7 +15,7 @@
  */
 
 import type { Root } from 'react-dom/client';
-import { excelDateTimeSerial, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { excelDateTimeSerial, Injector, LocaleService, LocaleType, RegionService } from '@univerjs/core';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -36,7 +36,7 @@ afterEach(() => {
 
 describe('DatePanel', () => {
     it('preserves an existing non-preset date pattern when opened in English', () => {
-        const injector = new Injector([[LocaleService]]);
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS });
@@ -69,7 +69,7 @@ describe('DatePanel', () => {
     });
 
     it('updates presets on locale changes without replacing a user-selected format', () => {
-        const injector = new Injector([[LocaleService]]);
+        const injector = new Injector([[LocaleService], [RegionService]]);
         injectors.push(injector);
         const localeService = injector.get(LocaleService);
         localeService.load({ [LocaleType.EN_US]: enUS, [LocaleType.ZH_CN]: zhCN });
@@ -108,5 +108,36 @@ describe('DatePanel', () => {
         expect(onActionChange.mock.lastCall![0]()).toBe(selectedPattern);
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(container.querySelector('li a.univer-bg-gray-200')?.textContent).toContain('1:30 下午');
+    });
+
+    it('offers the region\'s date order, not the UI language\'s, when the host sets a region', () => {
+        const injector = new Injector([[LocaleService], [RegionService]]);
+        injectors.push(injector);
+        const localeService = injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection('ltr');
+        injector.get(RegionService).setRegion('enIN' as LocaleType);
+        const container = document.createElement('div');
+        containers.push(container);
+        document.body.appendChild(container);
+        const root = createRoot(container);
+        roots.push(root);
+
+        act(() => root.render(
+            <RediContext.Provider value={{ injector }}>
+                <DatePanel
+                    defaultPattern=""
+                    defaultValue={0}
+                    onActionChange={vi.fn()}
+                    onChange={vi.fn()}
+                />
+            </RediContext.Provider>
+        ));
+
+        const labels = Array.from(container.querySelectorAll('li a')).map((element) => element.textContent?.trim());
+        expect(labels).toContain('05/08/1930');
+        expect(labels).toContain('5 Aug 1930');
+        expect(labels).not.toContain('08/05/1930');
     });
 });

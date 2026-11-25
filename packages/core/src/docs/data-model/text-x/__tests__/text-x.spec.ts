@@ -266,6 +266,52 @@ describe('test TextX methods and branches', () => {
         expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
     });
 
+    it('keeps a reconnect batch compact when 500 separate bookmark moves alternate with REF fields', { timeout: 30_000 }, () => {
+        const count = 500;
+        const before: IDocumentData = {
+            id: 'doc',
+            documentStyle: {},
+            body: {
+                dataStream: `${'Book    '.repeat(count)}\r\n`,
+                customBlocks: [],
+                customRanges: Array.from({ length: count }, (_, index) => bookmarkAt(`legacy-bookmark-${index}`, index * 8)),
+            },
+        };
+        const jsonX = JSONX.getInstance();
+        let current = Tools.deepClone(before);
+        let composed: ReturnType<typeof jsonX.editOp> = null;
+
+        function record(actions: TextXAction[]) {
+            const edit = jsonX.editOp(actions);
+            JSONX.invertWithDoc(edit, current);
+            const transported = JSON.parse(JSON.stringify(edit)) as typeof edit;
+            current = JSONX.apply(current, transported) as unknown as IDocumentData;
+            composed = JSONX.compose(composed, transported);
+        }
+
+        for (const bookmark of before.body!.customRanges!) {
+            record(updateBookmarks([{ rangeId: bookmark.rangeId, range: bookmarkAt(bookmark.rangeId, bookmark.startIndex + 1) }]));
+            record([
+                { t: TextXActionType.RETAIN, len: count * 8 },
+                { t: TextXActionType.INSERT, len: 3, body: {
+                    dataStream: '\u001F1\u001E',
+                    customRanges: [{
+                        rangeId: `ref-${bookmark.rangeId}`,
+                        rangeType: CustomRangeType.FIELD,
+                        startIndex: 0,
+                        endIndex: 2,
+                        properties: { instruction: `REF ${bookmark.rangeId}` },
+                    }],
+                } },
+            ]);
+        }
+
+        const wire = JSON.stringify(composed);
+        expect(wire.length).toBeLessThan(500_000);
+        expect(JSONX.apply(Tools.deepClone(before), JSON.parse(wire))).toEqual(current);
+        expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
+    });
+
     it.each([1, 4])('keeps serialized history for a bulk move across %s retains linear', (batches) => {
         const bytes = (count: number) => {
             const body: IDocumentBody = {

@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody } from '../../../types/interfaces/i-document-data';
-import type { IRetainAction, TextXAction } from './action-types';
+import type { BookmarkOrder, IRetainAction, TextXAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { CustomRangeType } from '../../../types/interfaces/i-document-data';
@@ -131,6 +131,55 @@ export function transformRangeUpdate(
     return propertyPaths.length ? [{ ...update, propertyPaths }] : [];
 }
 
+function decodeBookmarkOrders(entries: BookmarkOrder[]): string[][] {
+    if (!Array.isArray(entries)) {
+        throw new TypeError('Invalid bookmark order table.');
+    }
+    const orders: string[][] = [];
+    for (const entry of entries) {
+        if (!Array.isArray(entry)) {
+            throw new TypeError('Invalid bookmark order table.');
+        }
+        if (typeof entry[0] !== 'number') {
+            if (entry.some((id) => typeof id !== 'string')) {
+                throw new Error('Invalid bookmark order table.');
+            }
+            orders.push(entry as string[]);
+            continue;
+        }
+        const [prefixCount, suffixCount, inserted] = entry;
+        const previous = orders[orders.length - 1];
+        if (!previous || entry.length !== 3 || typeof prefixCount !== 'number' || typeof suffixCount !== 'number' ||
+            !Number.isInteger(prefixCount) || !Number.isInteger(suffixCount) ||
+            prefixCount < 0 || suffixCount < 0 || prefixCount + suffixCount > previous.length ||
+            !Array.isArray(inserted) || inserted.some((id) => typeof id !== 'string')) {
+            throw new Error('Invalid bookmark order splice.');
+        }
+        orders.push(previous.slice(0, prefixCount).concat(inserted, previous.slice(previous.length - suffixCount)));
+    }
+    return orders;
+}
+
+function encodeBookmarkOrder(order: string[], previous: string[] | undefined, fullLength: number): BookmarkOrder {
+    if (!previous) {
+        return order;
+    }
+    const common = Math.min(order.length, previous.length);
+    let prefix = 0;
+    while (prefix < common && order[prefix] === previous[prefix]) {
+        prefix++;
+    }
+    let suffix = 0;
+    while (suffix < common - prefix && order[order.length - suffix - 1] === previous[previous.length - suffix - 1]) {
+        suffix++;
+    }
+    if (!prefix && !suffix) {
+        return order;
+    }
+    const splice: BookmarkOrder = [prefix, suffix, order.slice(prefix, order.length - suffix)];
+    return JSON.stringify(splice).length < fullLength ? splice : order;
+}
+
 export function getRangeUpdates(actions: TextXAction[]): IRangeUpdate[] {
     const updates = new Map<string, IRangeUpdate>();
     let orders: string[][] | undefined;
@@ -139,10 +188,7 @@ export function getRangeUpdates(actions: TextXAction[]): IRangeUpdate[] {
             continue;
         }
         if (action.bookmarkOrders !== undefined) {
-            orders = action.bookmarkOrders;
-            if (!Array.isArray(orders) || orders.some((order) => !Array.isArray(order) || order.some((id) => typeof id !== 'string'))) {
-                throw new Error('Invalid bookmark order table.');
-            }
+            orders = decodeBookmarkOrders(action.bookmarkOrders);
         }
         for (const { fallbackOrderIndex, ...update } of action.rangeUpdates ?? []) {
             const fallbackOrder = fallbackOrderIndex === undefined ? undefined : orders?.[fallbackOrderIndex];
@@ -180,7 +226,8 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRangeUpdate
     if (!updates?.length) {
         return actions;
     }
-    const bookmarkOrders: string[][] = [];
+    const bookmarkOrders: BookmarkOrder[] = [];
+    let previousOrder: string[] | undefined;
     const indices = new Map<string[], number>();
     const equalOrders = new Map<string, number>();
     const rangeUpdates = updates.map(({ fallbackOrder, ...update }) => {
@@ -192,7 +239,8 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRangeUpdate
             const key = JSON.stringify(fallbackOrder);
             fallbackOrderIndex = equalOrders.get(key);
             if (fallbackOrderIndex === undefined) {
-                fallbackOrderIndex = bookmarkOrders.push(fallbackOrder) - 1;
+                fallbackOrderIndex = bookmarkOrders.push(encodeBookmarkOrder(fallbackOrder, previousOrder, key.length)) - 1;
+                previousOrder = fallbackOrder;
                 equalOrders.set(key, fallbackOrderIndex);
             }
             indices.set(fallbackOrder, fallbackOrderIndex);

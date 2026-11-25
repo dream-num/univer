@@ -27,6 +27,8 @@ export enum TextXActionType {
     DELETE = 'd',
 }
 
+export type BookmarkOrder = string[] | [prefixCount: number, suffixCount: number, inserted: string[]];
+
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
  */
@@ -54,8 +56,8 @@ export interface IRetainAction {
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;
-    /** Shared successor orders for this and following retains, until another table is declared. */
-    bookmarkOrders?: string[][];
+    /** Shared orders for this and following retains. Splices retain a prefix and suffix of the preceding order in this table. */
+    bookmarkOrders?: BookmarkOrder[];
     /** Before-document values captured by makeInvertible; never persisted in a document body. */
     oldRangeUpdates?: IRetainAction['rangeUpdates'];
 }

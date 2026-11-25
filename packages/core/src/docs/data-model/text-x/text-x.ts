@@ -471,7 +471,7 @@ export class TextX {
         const ranges = doc.customRanges ?? [];
         let rangeIndices: Map<string, number> | undefined;
         let originalOrder: string[] | undefined;
-        let bookmarkOrders: string[][] | undefined;
+        let bookmarkOrders: IRetainAction['bookmarkOrders'];
         let originalOrderIndex: number | undefined;
 
         for (const action of actions) {

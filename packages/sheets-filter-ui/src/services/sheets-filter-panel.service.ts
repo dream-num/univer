@@ -447,11 +447,13 @@ export class ByConditionsModel extends Disposable implements IFilterByModel {
         }
 
         const filterColumn = FilterConditionItems.mapToFilterColumn(this.conditionItem, this.filterConditionFormParams);
-        const previousFilters = this._filterModel.getFilterColumn(this.col)?.getColumnData().customFilters?.customFilters;
+        const previousColumn = this._filterModel.getFilterColumn(this.col)?.getColumnData();
+        const previousFilters = previousColumn?.customFilters?.customFilters;
+        const [previousCondition] = FilterConditionItems.testMappingFilterColumn(previousColumn);
         filterColumn?.customFilters?.customFilters.forEach((filter, index) => {
             const previous = previousFilters?.[index];
             // The condition form does not expose the imported comparison type.
-            if (previous?.compareAsText && previous.operator === filter.operator && previous.val === filter.val) {
+            if (this.conditionItem === previousCondition && previous?.compareAsText && previous.operator === filter.operator) {
                 filter.compareAsText = true;
             }
         });

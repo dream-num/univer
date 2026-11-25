@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IWorkbookData, Univer } from '@univerjs/core';
 import {
     ICommandService,
     isNodeEnv,
@@ -22,12 +22,12 @@ import {
     LifecycleStages,
     LocaleService,
     LocaleType,
-    Univer,
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverSheetsFormulaPlugin } from '../../plugin';
+import { createFormulaTestBed } from '../../services/__tests__/util';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
 import '../../facade';
@@ -62,8 +62,9 @@ describe('standalone Sheet formula calculation trigger', () => {
 
     beforeEach(() => {
         vi.mocked(isNodeEnv).mockReturnValue(false);
-        univer = new Univer();
-        const locale = univer.__getInjector().get(LocaleService);
+        const testBed = createFormulaTestBed();
+        univer = testBed.univer;
+        const locale = testBed.get(LocaleService);
         locale.load({ [LocaleType.EN_US]: {} });
         locale.setLocale(LocaleType.EN_US);
     });

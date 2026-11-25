@@ -93,6 +93,7 @@ function positiveMean(harmonic: boolean) {
     return class ExcelPositiveMean extends BaseFunction {
         override minParams = 1;
         override maxParams = 255;
+        override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
         override calculate(...args: BaseValueObject[]): BaseValueObject {
             let sum = 0;

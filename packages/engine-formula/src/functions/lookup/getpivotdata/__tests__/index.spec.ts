@@ -216,7 +216,8 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('Fiscal Year', '2026')).toBe(31);
             expect(lookup('Year', '2026', 'Category', 'East')).toBe(18);
             expect(lookup('Quarter', 'Q2')).toBe(ErrorType.REF);
-            expect(lookup('Year', '2026', 'Fiscal Year', '2026')).toBe(ErrorType.REF);
+            expect(lookup('Year', '2026', 'Fiscal Year', '2026')).toBe(31);
+            expect(lookup('Year', '2026', 'Fiscal Year', '2025')).toBe(ErrorType.REF);
             expect(lookup('Year', '2026', 'Quarter', 'Q3')).toBe(ErrorType.REF);
             expect(lookup('Year', 'Column Labels', 'Quarter', '2025')).toBe(ErrorType.REF);
         } finally {
@@ -260,6 +261,39 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('Sales', 'Country', 'US', 'Channel', 'Retail')).toBe(100);
             expect(lookup('Count of Country', 'Channel', 'Retail', 'Country', 'US')).toBe(1);
             expect(lookup('Sales', 'Country', 'Column Labels', 'Channel', 'US')).toBe(ErrorType.REF);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
+    it('keeps a legacy column grand total out of item matching', () => {
+        const range = { startRow: 0, endRow: 1, startColumn: 0, endColumn: 2 };
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Category'],
+                        columnFields: ['Category'],
+                        dataFields: [{ sourceName: 'Sales', displayName: 'Sum of Sales' }],
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        try {
+            const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+            const ref = anchor([
+                [0, 0, text('Sum of Sales')],
+                [0, 1, text('North')],
+                [0, 2, text('Grand Total')],
+                [1, 0, number(10)],
+                [1, 1, number(10)],
+                [1, 2, number(10)],
+            ]);
+            expect(getObjectValue(fn.calculate(textArg('Sales'), ref, textArg('Category'), textArg('North')))).toBe(10);
+            expect(getObjectValue(fn.calculate(textArg('Sales'), ref, textArg('Category'), textArg('Grand Total')))).toBe(ErrorType.REF);
+            expect(getObjectValue(fn.calculate(textArg('Sales'), ref))).toBe(10);
         } finally {
             bed.univer.dispose();
         }
@@ -548,6 +582,7 @@ describe('GETPIVOTDATA', () => {
             expect(lookup('Category', 'North', 'Detail', 'Retail')).toBe(10);
             expect(lookup('Detail', 'Retail', 'Category', 'North')).toBe(10);
             expect(lookup('Detail', 'Retail', 'Group', 'South')).toBe(90);
+            expect(lookup('Detail', 'Retail', 'Category', 'South', 'Group', 'South')).toBe(90);
             expect(lookup('Detail', 'Retail', 'Category', 'North', 'Group', 'South')).toBe(ErrorType.REF);
             expect(lookup('Category', 'Gift Total', 'Detail', 'Retail')).toBe(ErrorType.REF);
             expect(lookup()).toBe(134);

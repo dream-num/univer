@@ -292,7 +292,7 @@ export { excelMatchFunctions } from './functions/lookup/excel-match';
 export { functionLookup } from './functions/lookup/function-map';
 export { FUNCTION_NAMES_LOOKUP } from './functions/lookup/function-names';
 export { Getpivotdata, IPivotFormulaReportLookup } from './functions/lookup/getpivotdata';
-export type { IPivotFormulaReport, PivotFormulaColumnSubtotal, PivotFormulaCompactRowGroup } from './functions/lookup/getpivotdata';
+export type { IPivotFormulaReport, PivotFormulaColumnSubtotal, PivotFormulaCompactRowGroup, PivotFormulaMeasureRow } from './functions/lookup/getpivotdata';
 export { ExcelHyperlink } from './functions/lookup/hyperlink';
 export { excelCircularFunctions } from './functions/math/excel-circular-functions';
 export { excelIntegerArithmeticFunctions, ExcelQuotient } from './functions/math/excel-integer-arithmetic';

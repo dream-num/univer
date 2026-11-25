@@ -52,6 +52,8 @@ type PivotColumnItem = readonly [level: number, item: string];
 
 export type PivotFormulaColumnSubtotal = readonly [column: number, level: number, measureIndex: number, collapsedItems?: readonly string[]];
 export type PivotFormulaCompactRowGroup = readonly [row: number, level: number, total?: 'top' | 'bottom'];
+/** A visible value row. Unchanged leading labels are shared with the preceding value row. */
+export type PivotFormulaMeasureRow = readonly [row: number, measureIndex: number, commonLabels: number, labels: readonly string[]];
 
 export interface IPivotFormulaReport {
     /** The body is last, following any page field ranges. */
@@ -65,6 +67,8 @@ export interface IPivotFormulaReport {
         columnFieldNames?: readonly (readonly string[])[];
         columnHeaders?: { firstColumn: number; fieldRows: readonly number[]; measureRow: number };
         rowFieldNames?: readonly (readonly string[])[];
+        /** Compact and outline reports can require an exposed subtotal when Values precedes a row field. */
+        rowMeasures?: { firstColumn: number; rows: readonly PivotFormulaMeasureRow[]; requireSubtotal?: boolean };
         /** Group headings and totals in a compact projection. Detail rows use the deepest field. */
         compactRowGroups?: readonly PivotFormulaCompactRowGroup[];
         /** Worksheet columns belonging to the rendered column grand totals, in measure order. */
@@ -201,7 +205,10 @@ export class Getpivotdata extends BaseFunction {
                 }
             } else {
                 if (report) {
-                    const previous = fieldPairs.find(([name]) => samePivotText(name, field));
+                    if (!report.fields.some((name) => samePivotText(name, field))) return ErrorValueObject.create(ErrorType.REF);
+                    const matchesField = (names: readonly string[]) => names.some((name) => samePivotText(name, field));
+                    const aliases = report.layout?.rowFieldNames?.find(matchesField) ?? report.layout?.columnFieldNames?.find(matchesField);
+                    const previous = fieldPairs.find(([name]) => samePivotText(name, field) || aliases?.some((alias) => samePivotText(name, alias)));
                     if (previous) {
                         if (!samePivotText(previous[1], item)) return ErrorValueObject.create(ErrorType.REF);
                         continue;
@@ -215,7 +222,7 @@ export class Getpivotdata extends BaseFunction {
         if (report) {
             const measure = report.dataFields.find((field) => samePivotText(field.displayName, dataField)) ??
                 report.dataFields.find((field) => samePivotText(field.sourceName, dataField));
-            if (!measure || fieldPairs.some(([field]) => !report.fields.some((name) => samePivotText(name, field)))) {
+            if (!measure) {
                 return ErrorValueObject.create(ErrorType.REF);
             }
             dataField = measure.displayName || measure.sourceName;
@@ -261,6 +268,7 @@ function visiblePivotGet(
     const lastHeaderRow = rowlessCaptionRow ?? (firstDataRow == null ? maxRow : Math.min(maxRow, firstDataRow - 1));
     const columnFields = report?.columnFields;
     const columnHeaders = report?.layout?.columnHeaders;
+    const rowMeasures = report?.layout?.rowMeasures;
     const columnFieldNames = report?.layout?.columnFieldNames;
     const hierarchy = columnFieldNames && columnFieldNames.length > 1 ? columnFieldNames : undefined;
     const columnFieldIndex = (field: string) => columnFieldNames?.length
@@ -276,19 +284,28 @@ function visiblePivotGet(
         if (previous?.[0] === level) return null;
         columnItems.push([level, item]);
     }
-    for (let headerRow = startRow; headerRow <= lastHeaderRow; headerRow++) {
+    for (let headerRow = rowMeasures ? lastHeaderRow : startRow; headerRow <= lastHeaderRow; headerRow++) {
         if (columnHeaders && columnItems.length && headerRow !== columnHeaders.measureRow) continue;
-        const dataColumn = columnHeaders && columnItems.length
+        const dataColumn = rowMeasures?.firstColumn ?? (columnHeaders && columnItems.length
             ? columnHeaders.firstColumn
-            : findPivotDataColumn(reader, headerRow, startColumn, maxColumn, dataField);
+            : findPivotDataColumn(reader, headerRow, startColumn, maxColumn, dataField));
         if (dataColumn == null) {
             continue;
         }
 
         const hasHeaderItems = columnItems.length > 1 || (columnItems.length === 1 &&
-            (columnHeaders !== undefined || dataColumn > startColumn || hierarchy != null || report?.layout?.columnSubtotals !== undefined));
+            (rowMeasures !== undefined || columnHeaders !== undefined || dataColumn > startColumn || hierarchy != null || report?.layout?.columnSubtotals !== undefined));
         const columnMatch = columnPairs.length && !hasHeaderItems
-            ? findPivotColumnItemMatch(reader, headerRow, dataColumn, maxRow, maxColumn, columnPairs, firstDataRow)
+            ? findPivotColumnItemMatch(
+                reader,
+                headerRow,
+                dataColumn,
+                maxRow,
+                maxColumn,
+                columnPairs,
+                firstDataRow,
+                report && report.layout?.columnGrandTotals === undefined ? grandTotalLabel : undefined
+            )
             : null;
         const matchedColumn = hasHeaderItems
             ? findPivotColumnByHeaderItems(
@@ -308,7 +325,7 @@ function visiblePivotGet(
         }
         const needsTotalColumn = report?.columnFields.length && !columnPairs.length;
         const totalColumn = needsTotalColumn
-            ? findPivotGrandTotalColumn(reader, headerRow, dataColumn, anchorRange, dataField, report, grandTotalLabel, firstDataRow)
+            ? findPivotGrandTotalColumn(reader, headerRow, rowMeasures ? startColumn : dataColumn, anchorRange, dataField, report, grandTotalLabel, firstDataRow)
             : undefined;
         if ((report && columnPairs.length && matchedColumn == null) || (needsTotalColumn && totalColumn == null)) {
             return null;
@@ -320,7 +337,9 @@ function visiblePivotGet(
 
         let row: Nullable<number>;
         const compactGroups = report?.layout?.compactRowGroups;
-        if (rowPairs.length === 0) {
+        if (rowMeasures && report) {
+            row = findPivotMeasureRow(rowMeasures.rows, findPivotMeasureIndex(report, dataField), rowPairs, report.layout?.rowFieldNames ?? [], rowMeasures.requireSubtotal);
+        } else if (rowPairs.length === 0) {
             const rowlessWithColumnHeaders = columnHeaders?.firstColumn === startColumn && firstDataRow === maxRow;
             const rowlessRow = rowlessWithColumnHeaders || (headerRow === rowlessCaptionRow && dataColumn === startColumn)
                 ? firstDataRow
@@ -340,7 +359,7 @@ function visiblePivotGet(
             }
         }
 
-        if (row == null) {
+        if (row == null || (rowMeasures && (row < startRow || row > maxRow || resolvedColumn < startColumn || resolvedColumn > maxColumn))) {
             return null;
         }
 
@@ -362,6 +381,11 @@ function findPivotGrandTotalColumn(
     firstDataRow?: number
 ): number | undefined {
     const totalColumns = report.layout?.columnGrandTotals;
+    if (report.layout?.rowMeasures && totalColumns) {
+        const column = totalColumns[0];
+        if (column == null || column < range.startColumn || column > range.endColumn) return;
+        return report.layout.rightToLeft ? range.startColumn + range.endColumn - column : column;
+    }
     if (totalColumns && totalColumns.length === report.dataFields.length) {
         const measure = findPivotMeasureIndex(report, dataField);
         const column = totalColumns[measure];
@@ -417,8 +441,9 @@ function findPivotColumnByHeaderItems(
     const layout = report?.layout;
     const headers = layout?.columnHeaders;
     const subtotals = layout?.columnSubtotals;
-    const hasMeasureRow = headers !== undefined || dataColumn > startColumn ||
-        (subtotals !== undefined && (report?.dataFields.length ?? 0) > 1 && headerRow === (dataStartRow ?? 0) - 1);
+    const rowMeasures = layout?.rowMeasures;
+    const hasMeasureRow = !rowMeasures && (headers !== undefined || dataColumn > startColumn ||
+        (subtotals !== undefined && (report?.dataFields.length ?? 0) > 1 && headerRow === (dataStartRow ?? 0) - 1));
     const firstDataRow = dataStartRow ?? findFirstPivotDataRow(
         reader,
         hasMeasureRow ? headerRow : headerRow + levels,
@@ -445,7 +470,7 @@ function findPivotColumnByHeaderItems(
     const measure = report ? findPivotMeasureIndex(report, dataField) : -1;
     const physicalColumn = (column: number) => layout?.rightToLeft ? startColumn + endColumn - column : column;
     const firstGrandTotal = layout?.columnGrandTotals?.[0];
-    const firstColumn = headers?.firstColumn ?? (hasMeasureRow && dataColumn === startColumn ? startColumn : startColumn + 1);
+    const firstColumn = rowMeasures?.firstColumn ?? headers?.firstColumn ?? (hasMeasureRow && dataColumn === startColumn ? startColumn : startColumn + 1);
     const measureLevel = headers?.fieldRows.findIndex((row) => row > headers.measureRow);
     let measureCaption = '';
     let subtotalIndex = 0;
@@ -534,7 +559,8 @@ function findPivotColumnItemMatch(
     maxRow: number,
     maxColumn: number,
     fieldPairs: PivotFieldPair[],
-    dataStartRow?: number
+    dataStartRow?: number,
+    grandTotalLabel?: string
 ): Nullable<IPivotColumnItemMatch> {
     const firstDataRow = dataStartRow ?? findFirstPivotDataRow(reader, headerRow, dataColumn, maxRow, maxColumn);
     if (firstDataRow == null) {
@@ -550,6 +576,7 @@ function findPivotColumnItemMatch(
         const item = fieldPairs[index][1];
         for (let row = headerRow; row <= lastHeaderRow; row++) {
             for (let column = dataColumn + 1; column <= maxColumn; column++) {
+                if (column === maxColumn && grandTotalLabel && samePivotText(item, grandTotalLabel)) continue;
                 if (samePivotText(reader.text(row, column), item)) {
                     return { index, column };
                 }
@@ -638,6 +665,41 @@ function matchPivotParents(depth: number): (labels: readonly string[]) => boolea
         }
         return true;
     };
+}
+
+function findPivotMeasureRow(
+    rows: readonly PivotFormulaMeasureRow[],
+    measure: number,
+    pairs: readonly PivotFieldPair[],
+    fields: readonly (readonly string[])[],
+    requireSubtotal = false
+): number | undefined {
+    const items = pairs.map(([field, item]) => [fields.findIndex((names) => names.some((name) => samePivotText(name, field))), item] as const);
+    if (items.some(([level]) => level < 0)) return;
+    const depth = Math.max(-1, ...items.map(([level]) => level)) + 1;
+    const matchesParents = matchPivotParents(Math.max(0, depth - 1));
+    const labels: string[] = [];
+    let subtotal: number | undefined;
+    let detail: number | undefined;
+    let multipleDetails = false;
+    for (const [row, index, commonLabels, suffix] of rows) {
+        if (commonLabels < 0 || commonLabels > labels.length) return;
+        labels.splice(commonLabels, labels.length - commonLabels, ...suffix);
+        if (index !== measure || labels.length < depth || (depth === 0 && labels.length !== 0) ||
+            !items.every(([level, item]) => samePivotText(labels[level] ?? '', item))) {
+            continue;
+        }
+        if (requireSubtotal && labels.length !== depth) continue;
+        if (items.length < depth && !matchesParents(labels)) return;
+        if (labels.length === depth) {
+            if (subtotal !== undefined) return;
+            subtotal = row;
+        } else if (labels.length === fields.length) {
+            multipleDetails ||= detail !== undefined;
+            detail = row;
+        }
+    }
+    return subtotal ?? (multipleDetails ? undefined : detail);
 }
 
 function findCompactPivotRow(

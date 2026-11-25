@@ -24,6 +24,8 @@ export class Average extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+
     override calculate(...variants: BaseValueObject[]) {
         let accumulatorSum: BaseValueObject = NumberValueObject.create(0);
         let accumulatorCount: BaseValueObject = NumberValueObject.create(0);

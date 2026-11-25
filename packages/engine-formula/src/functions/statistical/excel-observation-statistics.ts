@@ -97,6 +97,7 @@ function observationStatistic(
         override minParams = 1;
 
         override maxParams = 255;
+        override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
         override needsReferenceObject = true;
 

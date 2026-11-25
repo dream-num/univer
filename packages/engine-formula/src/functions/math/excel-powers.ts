@@ -25,9 +25,9 @@ import { NullValueObject, NumberValueObject } from '../../engine/value-object/pr
 import { BaseFunction } from '../base-function';
 import { mapFinancialScalars, resolveSingleCellArgument } from '../financial/scalar-arguments';
 import { FUNCTION_NAMES_MATH } from './function-names';
-import { Sum } from './sum';
 import { Randarray } from './randarray';
 import { Randbetween } from './randbetween';
+import { Sum } from './sum';
 
 const MIN_NORMAL = 2 ** -1022;
 
@@ -135,6 +135,7 @@ function numericAggregate(isProduct: boolean) {
     return class ExcelNumericAggregate extends BaseFunction {
         override minParams = 1;
         override maxParams = 255;
+        override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
         override calculate(...variants: BaseValueObject[]): BaseValueObject {
             let result = isProduct ? 1 : 0;

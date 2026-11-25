@@ -270,7 +270,7 @@ function visiblePivotGet(
     const columnItems: PivotColumnItem[] = [];
     for (const [index, [field, item]] of sortedColumnPairs.entries()) {
         const level = columnFieldNames?.length ? columnFieldIndex(field) : index;
-        const previous = columnItems.at(-1);
+        const previous = columnItems[columnItems.length - 1];
         if (previous?.[0] === level) return null;
         columnItems.push([level, item]);
     }
@@ -317,7 +317,7 @@ function visiblePivotGet(
         const compactGroups = report?.layout?.compactRowGroups;
         if (rowPairs.length === 0) {
             row = (headerRow === rowlessCaptionRow && dataColumn === startColumn ? headerRow : findRowlessPivotRow(reader, headerRow, startColumn, maxRow))
-                ?? (compactGroups ? compactGroups.findLast(([, level]) => level === 0)?.[0] : findGrandTotalRow(reader, headerRow, startColumn, maxRow, grandTotalLabel));
+                ?? findGrandTotalRow(reader, headerRow, startColumn, maxRow, grandTotalLabel, compactGroups);
         } else if (compactGroups && firstDataRow != null && report?.layout?.rowFieldNames) {
             row = findCompactPivotRow(reader, anchorRange, firstDataRow, rowPairs, report.layout.rowFieldNames, compactGroups);
         } else {
@@ -427,6 +427,7 @@ function findPivotColumnByHeaderItems(
     const requestsSubtotal = requestedDepth < levels;
     const omittedAncestor = items.length < requestedDepth;
     const matchesItems = () => items.every(([level, item]) => samePivotText(labels[level] ?? '', item));
+    const matchesParents = matchPivotParents(deepestLevel);
     const subtotalLabel = layout?.subtotalLabel ?? 'Total';
     const subtotalSuffix = `${subtotalItem} ${subtotalLabel}`;
     const subtotalPrefix = `${subtotalLabel} ${subtotalItem}`;
@@ -449,7 +450,7 @@ function findPivotColumnByHeaderItems(
             if (collapsedItems) labels.splice(0, labels.length, ...collapsedItems);
             if (requestsSubtotal && subtotal[1] === requestedDepth && (subtotal[2] === -1 || subtotal[2] === measure) && matchesItems()) {
                 if (!omittedAncestor) return column;
-                if (matchedSubtotal !== undefined) return;
+                if (matchedSubtotal !== undefined || !matchesParents(labels)) return;
                 matchedSubtotal = column;
             }
             continue;
@@ -474,13 +475,14 @@ function findPivotColumnByHeaderItems(
         }
         if (legacySubtotalMatch && labels.slice(requestedDepth).every((label) => !label)) {
             if (!omittedAncestor) return column;
-            if (matchedSubtotal !== undefined) return;
+            if (matchedSubtotal !== undefined || !matchesParents(labels)) return;
             matchedSubtotal = column;
         }
         if (labels.length >= levels && labels.every(Boolean) && matchesItems() &&
             (!hasMeasureRow || samePivotDataField(reader.text(headerRow, column), dataField))) {
             if (!requestsSubtotal && !omittedAncestor) return column;
             if (subtotals !== undefined || omittedAncestor) {
+                if (omittedAncestor && !matchesParents(labels)) return;
                 multipleDetails ||= matchedDetail !== undefined;
                 matchedDetail = column;
             }
@@ -588,14 +590,37 @@ function findGrandTotalRow(
     headerRow: number,
     startColumn: number,
     maxRow: number,
-    label: string
+    label: string,
+    compactGroups?: readonly PivotFormulaCompactRowGroup[]
 ): Nullable<number> {
+    if (compactGroups) {
+        for (let index = compactGroups.length - 1; index >= 0; index--) {
+            const [row, level] = compactGroups[index];
+            if (level === 0) return row;
+        }
+        return null;
+    }
     for (let row = headerRow + 1; row <= maxRow; row++) {
         if (samePivotText(reader.text(row, startColumn), label)) {
             return row;
         }
     }
     return null;
+}
+
+/** A subtotal and its detail cells describe one group only when their parents match. */
+function matchPivotParents(depth: number): (labels: readonly string[]) => boolean {
+    let parents: string[] | undefined;
+    return (labels) => {
+        if (!parents) {
+            parents = labels.slice(0, depth);
+            return true;
+        }
+        for (let level = 0; level < depth; level++) {
+            if (!samePivotText(parents[level] ?? '', labels[level] ?? '')) return false;
+        }
+        return true;
+    };
 }
 
 function findCompactPivotRow(
@@ -609,6 +634,8 @@ function findCompactPivotRow(
     const items = pairs.map(([field, item]) => [fields.findIndex((names) => names.some((name) => samePivotText(name, field))), item] as const);
     if (items.some(([level], index) => level < 0 || items.findIndex(([other]) => other === level) !== index)) return null;
     const requestedDepth = Math.max(...items.map(([level]) => level)) + 1;
+    const omittedAncestor = items.length < requestedDepth;
+    const matchesParents = matchPivotParents(requestedDepth - 1);
     const labels: string[] = [];
     let groupIndex = 0;
     let match: number | undefined;
@@ -629,10 +656,11 @@ function findCompactPivotRow(
             continue;
         }
         if (depth === requestedDepth) {
-            if (items.length === requestedDepth) return row;
-            if (match !== undefined) return null;
+            if (!omittedAncestor) return row;
+            if (match !== undefined || !matchesParents(labels)) return null;
             match = row;
         } else if (!group) {
+            if (omittedAncestor && !matchesParents(labels)) return null;
             multipleDetails ||= detail !== undefined;
             detail = row;
         }
@@ -663,9 +691,16 @@ function findTabularHierarchyRow(
         fields.push(caption);
     }
     if (fields.length < 2) return;
-    const items = pairs.map(([field, item]) => [fields.findIndex((name) => samePivotText(name, field)), item] as const);
-    if (items.some(([level]) => level < 0)) return;
+    const fieldNames = fields.map((caption) => report.layout?.rowFieldNames?.find((names) => names.some((name) => samePivotText(name, caption))));
+    const items = pairs.map(([field, item]) => {
+        const displayIndex = fields.findIndex((caption) => samePivotText(caption, field));
+        const level = displayIndex >= 0 ? displayIndex : fieldNames.findIndex((names) => names?.some((name) => samePivotText(name, field)));
+        return [level, item] as const;
+    });
+    if (items.some(([level], index) => level < 0 || items.findIndex(([other]) => other === level) !== index)) return null;
     const requestedDepth = Math.max(...items.map(([level]) => level)) + 1;
+    const omittedAncestor = items.length < requestedDepth;
+    const matchesParents = matchPivotParents(requestedDepth - 1);
     const labels: string[] = [];
     const captions: string[] = [];
     const grandTotal = report.layout?.grandTotalLabel ?? PIVOT_GRAND_TOTAL_LABEL;
@@ -674,10 +709,12 @@ function findTabularHierarchyRow(
     let detail: number | undefined;
     let multipleDetails = false;
     for (let row = firstDataRow; row <= range.endRow; row++) {
+        let deepest = -1;
         for (let level = 0; level < fields.length; level++) {
-            captions[level] = reader.text(row, range.startColumn + level).trim();
+            const caption = reader.text(row, range.startColumn + level).trim();
+            captions[level] = caption;
+            if (caption) deepest = level;
         }
-        const deepest = captions.findLastIndex(Boolean);
         if (deepest < 0) continue;
         if (deepest === 0 && row === range.endRow && samePivotText(captions[0], grandTotal)) break;
         for (let level = 0; level <= deepest; level++) {
@@ -694,10 +731,11 @@ function findTabularHierarchyRow(
         labels.length = Math.min(labels.length, deepest + 1);
         if (deepest + 1 < requestedDepth || !items.every(([level, item]) => samePivotText(labels[level] ?? '', item))) continue;
         if (deepest + 1 === requestedDepth) {
-            if (items.length === requestedDepth) return row;
-            if (match !== undefined) return null;
+            if (!omittedAncestor) return row;
+            if (match !== undefined || !matchesParents(labels)) return null;
             match = row;
         } else {
+            if (omittedAncestor && !matchesParents(labels)) return null;
             multipleDetails ||= detail !== undefined;
             detail = row;
         }

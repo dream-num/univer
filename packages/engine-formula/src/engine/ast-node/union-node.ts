@@ -128,6 +128,10 @@ export class UnionNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        if (this.isAddress() && (variant1.getUnitId() !== variant2.getUnitId() || variant1.getSheetId() !== variant2.getSheetId())) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         return getRangeReferenceObjectFromCache(variant1, variant2);
 
         // if (variant1.isCell() && variant2.isCell()) {

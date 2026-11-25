@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -114,6 +114,6 @@ export const CancelFrozenCommand: ICommand<ICancelFrozenCommandParams> = {
             });
             return true;
         }
-        return true;
+        return false;
     },
 };

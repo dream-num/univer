@@ -187,6 +187,10 @@ export interface IWorksheetData {
     /** Image tiled behind the worksheet grid. It is not included when printing. */
     backgroundImage?: IWorksheetBackgroundImage;
 
+    /**
+     * Right-to-left sheet view flag, persisted with the worksheet snapshot for file and collaboration round-trips.
+     * Chart Sheet drawing placement reads it; grid rendering does not currently mirror the sheet.
+     */
     rightToLeft: BooleanNumber;
 
     /**

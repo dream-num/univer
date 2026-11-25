@@ -28,6 +28,8 @@ import {
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    LocaleService,
+    LocaleType,
     NamedStyleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -91,6 +93,10 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     }
     const univer = new Univer();
     const injector = univer.__getInjector();
+    const locale = injector.get(LocaleService);
+    locale.load({ [LocaleType.EN_US]: {} });
+    locale.setLocale(LocaleType.EN_US);
+    locale.setDirection('ltr');
     const root = document.createElement('div');
     document.body.appendChild(root);
     injector.add([ILayoutService, { useValue: {
@@ -302,6 +308,7 @@ describe('DocRenderController bounded input publication', () => {
         Reflect.set(FontCache, '_context', null);
         FontCache.invalidateMetrics(() => true);
     });
+
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
@@ -812,6 +819,68 @@ describe('DocRenderController bounded input publication', () => {
             expect(editor.model.getBody()?.dataStream.startsWith('HelloAB world')).toBe(true);
             expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(7);
             expect(viewport.viewportScrollY).toBeLessThan(manualScroll);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('prepares a complete immutable print layout while initial flavor %i layout is still progressive', async (documentFlavor) => {
+        const editor = createEditor(500, false, true, documentFlavor);
+        try {
+            await vi.advanceTimersByTimeAsync(1_000);
+            const terminalOffset = editor.model.getBody()!.dataStream.length - 1;
+            const before = JSON.stringify(editor.model.getSnapshot());
+            expect(editor.skeleton.hasCompleteLayout()).toBe(false);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBe(-1);
+
+            const controller = editor.render.with(DocRenderController);
+            expect(await controller.prepareForPrint()).toBe(true);
+
+            expect(editor.skeleton.hasCompleteLayout()).toBe(true);
+            expect(editor.skeleton.getLayoutProgress()).toBeNull();
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBeGreaterThanOrEqual(0);
+            expect(editor.skeleton.getSkeletonData()!.pages.every((page) => !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder)).toBe(true);
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(terminalOffset)).toBeGreaterThanOrEqual(0);
+            expect(editor.skeleton.getLayoutProgress()).toBeNull();
+            expect(JSON.stringify(editor.model.getSnapshot())).toBe(before);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('waits for configured fonts before preparing a complete print layout', async () => {
+        let fontsReady!: () => void;
+        const initialization = new Promise<void>((resolve) => {
+            fontsReady = resolve;
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, initialization);
+        try {
+            const controller = editor.render.with(DocRenderController);
+            const before = JSON.stringify(editor.model.getSnapshot());
+            const preparation = controller.prepareForPrint();
+            await Promise.resolve();
+            expect(editor.skeleton.hasCompleteLayout()).toBe(false);
+            fontsReady();
+            expect(await preparation).toBe(true);
+            expect(editor.skeleton.findBodyPageIndexByCharIndex(editor.model.getBody()!.dataStream.length - 1)).toBeGreaterThanOrEqual(0);
+            expect(JSON.stringify(editor.model.getSnapshot())).toBe(before);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('does not resume print preparation after its render is disposed while fonts are pending', async () => {
+        let fontsReady!: () => void;
+        const initialization = new Promise<void>((resolve) => {
+            fontsReady = resolve;
+        });
+        const editor = createEditor(500, false, true, DocumentFlavor.MODERN, false, false, initialization);
+        try {
+            const preparation = editor.render.with(DocRenderController).prepareForPrint();
+            editor.render.dispose();
+            fontsReady();
+            expect(await preparation).toBe(false);
         } finally {
             editor.dispose();
         }

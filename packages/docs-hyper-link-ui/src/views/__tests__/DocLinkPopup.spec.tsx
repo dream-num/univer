@@ -32,7 +32,7 @@ import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutatio
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
+import { BrowserClipboardService, DesktopLayoutService, IClipboardInterfaceService, IDialogService, ILayoutService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
@@ -45,10 +45,12 @@ import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.servic
 import { DocHyperLinkEdit } from '../DocHyperLinkEdit';
 import { DocLinkPopup } from '../DocLinkPopup';
 import { MobileDocHyperLinkEdit } from '../MobileDocHyperLinkEdit';
+import { MobileDocLinkPopup } from '../MobileDocLinkPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const UNIT_ID = 'doc-link-popup-doc';
+const execCommandDescriptor = Object.getOwnPropertyDescriptor(document, 'execCommand');
 
 class TestDocCanvasPopManagerService {
     disposeCount = 0;
@@ -110,7 +112,9 @@ function createPopupTestBed(documentData = createDocData()) {
     injector.add([DocStateEmitService]);
     injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
+    injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService }]);
     injector.add([IDialogService, {
         useValue: {
             close: () => {},
@@ -212,6 +216,11 @@ describe('DocLinkPopup', () => {
         container = undefined;
         currentTestBed = undefined;
         vi.restoreAllMocks();
+        if (execCommandDescriptor) {
+            Object.defineProperty(document, 'execCommand', execCommandDescriptor);
+        } else {
+            Reflect.deleteProperty(document, 'execCommand');
+        }
         vi.useRealTimers();
     });
 
@@ -443,6 +452,118 @@ describe('DocLinkPopup', () => {
         expect(updatedLink?.properties).toEqual({
             url: 'https://docs.univer.ai',
         });
+        expect(currentTestBed.popupService.editing).toBeNull();
+    });
+
+    it.each(['TOC', 'REF', 'PAGEREF', 'NOTEREF'])('keeps %s generated link targets visible without generic edit/unlink actions', (fieldType) => {
+        const data = createDocData();
+        data.body!.dataStream = '\u001FHello world\u001E\r\n';
+        data.body!.customRanges = [
+            { startIndex: 0, endIndex: 12, rangeId: 'field', rangeType: CustomRangeType.FIELD, properties: { fieldType, instruction: fieldType } },
+            { startIndex: 7, endIndex: 11, rangeId: 'existing-link', rangeType: CustomRangeType.HYPERLINK, properties: { bookmarkId: '_TocExample' } },
+        ];
+        currentTestBed = createPopupTestBed(data);
+        const info = { unitId: UNIT_ID, linkId: 'existing-link', startIndex: 7, endIndex: 11 };
+        currentTestBed.popupService.showInfoPopup(info);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const actions = renderPopup(root, container, currentTestBed);
+        expect(container.textContent).toContain('#_TocExample');
+        expect(container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]')?.disabled).toBe(false);
+        expect(actions.edit).toBeNull();
+        expect(actions.remove).toBeNull();
+        expect(currentTestBed.popupService.showEditPopup(UNIT_ID, info)).toBeNull();
+        expect(currentTestBed.popupService.editing).toBeNull();
+    });
+
+    it.each([false, true])('copies the original internal target without the native clipboard API (mobile: %s)', async (mobile) => {
+        const data = createDocData();
+        data.body!.customRanges![0].properties = { bookmarkId: '_TocExample' };
+        data.body!.customRanges!.push({ startIndex: 0, endIndex: 4, rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, properties: { bookmarkId: '_TocExample' } });
+        currentTestBed = createPopupTestBed(data);
+        showExistingLink(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        act(() => root!.render(<RediContext.Provider value={{ injector: currentTestBed!.injector }}>{mobile ? <MobileDocLinkPopup /> : <DocLinkPopup />}</RediContext.Provider>));
+
+        vi.spyOn(navigator, 'clipboard', 'get').mockReturnValue(undefined as never);
+        const snapshot = structuredClone(currentTestBed.doc.getSnapshot());
+        const copied: string[] = [];
+        const execCommand = vi.fn((command: string) => {
+            expect(command).toBe('copy');
+            copied.push(document.querySelector('textarea')!.value);
+            return true;
+        });
+        Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
+        expect(container.querySelector('button[aria-label="Hello"]')).toBeTruthy();
+        const copy = container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]')!;
+        container.tabIndex = 0;
+        container.focus();
+        await act(async () => {
+            copy.click();
+            await Promise.resolve();
+        });
+        expect(copied).toEqual(['#_TocExample']);
+        expect(document.activeElement).toBe(container);
+        expect(document.querySelector('textarea')).toBeNull();
+        expect(currentTestBed.doc.getSnapshot()).toEqual(snapshot);
+    });
+
+    it('navigates a mobile internal link within the document', async () => {
+        const data = createDocData();
+        data.body!.customRanges![0].properties = { bookmarkId: '_TocExample' };
+        data.body!.customRanges!.push({ startIndex: 0, endIndex: 4, rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, properties: { bookmarkId: '_TocExample' } });
+        currentTestBed = createPopupTestBed(data);
+        const selection = currentTestBed.injector.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId: UNIT_ID, subUnitId: UNIT_ID });
+        selection.__TEST_ONLY_add([{ startOffset: 6, endOffset: 6, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
+        showExistingLink(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        act(() => root!.render(<RediContext.Provider value={{ injector: currentTestBed!.injector }}><MobileDocLinkPopup /></RediContext.Provider>));
+        const open = vi.spyOn(window, 'open').mockReturnValue(null);
+        const target = container.querySelector<HTMLButtonElement>('button[aria-label="Hello"]');
+        const destinations: number[] = [];
+        const navigation = selection.refreshSelection$.subscribe((event) => {
+            if (event) {
+                destinations.push(event.docRanges[0].startOffset);
+            }
+        });
+        expect(target).toBeTruthy();
+        await act(async () => {
+            target!.click();
+            await Promise.resolve();
+        });
+        expect(destinations).toContain(0);
+        expect(open).not.toHaveBeenCalled();
+        navigation.unsubscribe();
+    });
+
+    it.each([false, true])('retains an internal target when confirming its hyperlink editor (mobile: %s)', async (mobile) => {
+        const data = createDocData();
+        data.body!.customRanges![0].properties = { bookmarkId: '_TocExample', textStyleMode: 'text' };
+        data.body!.customRanges!.push({ startIndex: 0, endIndex: 4, rangeId: 'target', rangeType: CustomRangeType.BOOKMARK, properties: { bookmarkId: '_TocExample' } });
+        currentTestBed = createPopupTestBed(data);
+        const selection = currentTestBed.injector.get(DocSelectionManagerService);
+        selection.__TEST_ONLY_setCurrentSelection({ unitId: UNIT_ID, subUnitId: UNIT_ID });
+        selection.__TEST_ONLY_add([{ startOffset: 6, endOffset: 11, collapsed: false, isActive: true, segmentId: '', style: null as never }]);
+        currentTestBed.popupService.showEditPopup(UNIT_ID, { unitId: UNIT_ID, linkId: 'existing-link', startIndex: 6, endIndex: 10, segmentId: '' });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderEditPopup(root, currentTestBed, mobile);
+        const inputs = Array.from(container.querySelectorAll('input'));
+        expect(inputs[1].value).toBe('#_TocExample');
+        const confirm = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Confirm')!;
+        await act(async () => {
+            confirm.click();
+            await Promise.resolve();
+        });
+        expect(currentTestBed.doc.getBody()?.customRanges?.find((range) => range.rangeId === 'existing-link')?.properties)
+            .toEqual({ bookmarkId: '_TocExample', textStyleMode: 'text' });
         expect(currentTestBed.popupService.editing).toBeNull();
     });
 

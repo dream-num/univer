@@ -16,14 +16,57 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IUpdateDocHyperLinkCommandParams } from '../update-link.command';
-import { CustomRangeType, ICommandService, IUniverInstanceService, Tools, Univer, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, ICommandService, IUniverInstanceService, Tools, Univer, UniverInstanceType, validateDocumentStructure } from '@univerjs/core';
 import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
+import type { IUpdateDocHyperLinkCommandParams } from '../update-link.command';
 import { UpdateDocHyperLinkCommand } from '../update-link.command';
 
 describe('UpdateDocHyperLinkCommand', () => {
+    it.each(['#target', 'https://example.test'])('preserves nested fields and rich formatting when changing only the target to %s', async (payload) => {
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([DocSelectionManagerService]);
+            injector.add([DocStateEmitService]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'nested-link',
+                documentStyle: {},
+                body: {
+                    dataStream: 'See \u001F3\u001E\r\n',
+                    textRuns: [{ st: 0, ed: 4, ts: { bl: 1 } }, { st: 4, ed: 7, ts: { it: 1 } }],
+                    customRanges: [
+                        { rangeId: 'link', rangeType: CustomRangeType.HYPERLINK, startIndex: 0, endIndex: 6, properties: { bookmarkId: 'target' } },
+                        { rangeId: 'ref', rangeType: CustomRangeType.FIELD, startIndex: 4, endIndex: 6, properties: { fieldType: 'REF', instruction: 'REF target', cachedResult: '3' } },
+                    ],
+                },
+            });
+            injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+            const commands = injector.get(ICommandService);
+            commands.registerCommand(UpdateDocHyperLinkCommand);
+            commands.registerCommand(RichTextEditingMutation);
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: doc.getUnitId(), subUnitId: doc.getUnitId() });
+            selections.__TEST_ONLY_add([{ startOffset: 0, endOffset: 7, collapsed: false, isActive: true, segmentId: '', style: null as never }]);
+            const before = Tools.deepClone(doc.getBody());
+            expect(validateDocumentStructure(doc.getSnapshot())).toEqual([]);
+            const undo = await commands.executeCommand<IUpdateDocHyperLinkCommandParams, IRichTextEditingMutationParams>(UpdateDocHyperLinkCommand.id, { unitId: doc.getUnitId(), linkId: 'link', segmentId: '', label: 'See 3', payload });
+            expect(undo).toBeTruthy();
+            expect(doc.getBody()?.dataStream).toBe(before?.dataStream);
+            expect(doc.getBody()?.textRuns).toEqual(before?.textRuns);
+            expect(doc.getBody()?.customRanges?.find((range) => range.rangeId === 'ref')).toEqual(before?.customRanges?.[1]);
+            expect(validateDocumentStructure(doc.getSnapshot())).toEqual([]);
+            const updated = Tools.deepClone(doc.getBody());
+            const redo = commands.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, undo);
+            expect(doc.getBody()).toEqual(before);
+            commands.syncExecuteCommand(RichTextEditingMutation.id, redo);
+            expect(doc.getBody()).toEqual(updated);
+        } finally {
+            univer.dispose();
+        }
+    });
     it.each([{}, { textStyleMode: 'text' }, { textColorMode: 'text' }])('retains formatting policy %j when changing label and URL', async (policy) => {
         const univer = new Univer();
         try {

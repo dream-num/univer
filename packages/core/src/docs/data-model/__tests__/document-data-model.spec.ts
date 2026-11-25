@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
+import { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
-import { describe, expect, it } from 'vitest';
-import { CustomRangeType, DocStyleType } from '../../../types/interfaces/i-document-data';
+import { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import { Tools } from '../../../shared/tools';
+import { CustomRangeType, DocStyleType, DocumentFlavor } from '../../../types/interfaces/i-document-data';
 import { DocumentDataModel } from '../document-data-model';
 import { JSONX } from '../json-x/json-x';
 import { validateDocumentStructure } from '../text-x/structure-validator';
 import { TextX } from '../text-x/text-x';
 import { getRichTextEditPath } from '../text-x/utils';
+
+let testInjector: Injector;
+beforeEach(() => {
+    testInjector = new Injector();
+});
+afterEach(() => testInjector.dispose());
 
 function body(text: string): IDocumentBody {
     return {
@@ -35,7 +44,7 @@ function body(text: string): IDocumentBody {
 }
 
 function createDocument(): DocumentDataModel {
-    return new DocumentDataModel({
+    return testInjector.createInstance(DocumentDataModel, {
         id: 'doc',
         body: {
             ...body('A\uFFFCB'),
@@ -46,7 +55,105 @@ function createDocument(): DocumentDataModel {
     });
 }
 
+describe('public document metadata', () => {
+    it.each([UpdateDocsAttributeType.COVER, UpdateDocsAttributeType.REPLACE])('preserves imported section identity during property edits and peer replay (%s)', (coverType) => {
+        const data = { id: 'legacy-sections', body: body('Body') };
+        data.body.sectionBreaks![0].sectionId = 'legacy-section';
+        const document = testInjector.createInstance(DocumentDataModel, Tools.deepClone(data));
+        const peer = testInjector.createInstance(DocumentDataModel, Tools.deepClone(data));
+        const text = new TextX().retain(5).retain(1, {
+            dataStream: '',
+            sectionBreaks: [{ startIndex: 0, sectionId: 'legacy-section', columnProperties: [{ width: 100, paddingEnd: 0 }] }],
+        }, coverType);
+        const actions = JSONX.getInstance().editOp(text.serialize(), ['body']);
+        document.apply(actions);
+        peer.apply(Tools.deepClone(actions));
+        expect(document.getBody()?.sectionBreaks?.[0].sectionId).toBe('legacy-section');
+        expect(document.getSnapshot()).toEqual(peer.getSnapshot());
+    });
+
+    it.each(['headers', 'footers', 'notes'] as const)('keeps pending %s creation actions immutable after segment typing', (collection) => {
+        const document = testInjector.createInstance(DocumentDataModel, {
+            id: 'pending-segment',
+            body: body('Body'),
+            [collection]: {},
+        });
+        const segment = collection === 'notes'
+            ? { noteId: 'segment', type: 'footnote', body: body('') }
+            : { [collection === 'headers' ? 'headerId' : 'footerId']: 'segment', body: body('') };
+        const creation = JSONX.getInstance().insertOp([collection, 'segment'], segment);
+        const pending = Tools.deepClone(creation);
+        document.apply(creation);
+        document.apply(JSONX.getInstance().editOp(new TextX().insert(6, { dataStream: 'Header' }).serialize(), [collection, 'segment', 'body']));
+        expect(document.getSnapshot()[collection]?.segment.body?.dataStream).toBe('Header\r\n');
+        expect(creation).toEqual(pending);
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('persists named aliases and typed properties through edits, undo and reload (%s)', (documentFlavor) => {
+        const document = testInjector.createInstance(DocumentDataModel, {
+            id: 'metadata',
+            body: body('Text'),
+            documentStyle: { documentFlavor },
+            styles: { DOCXHeading: { name: 'Heading', aliases: ['Original'], type: DocStyleType.paragraph } },
+            customProperties: {
+                DOCXDOCID: { type: 'string', value: 'Block DocID' },
+                Count: { type: 'integer', value: 3 },
+                Ratio: { type: 'number', value: 1.25 },
+                Converted: { type: 'boolean', value: false },
+                Prepared: { type: 'date', value: '2024-10-23T12:34:56Z' },
+            },
+        });
+        const before = structuredClone(document.getSnapshot());
+        const jsonX = JSONX.getInstance();
+        try {
+            const propertyEdit = jsonX.replaceOp(['customProperties', 'DOCXDOCID', 'value'], 'Block DocID', 'Edited & metadata');
+            const propertyUndo = JSONX.invertWithDoc(propertyEdit, before);
+            document.apply(propertyEdit);
+            const aliasEdit = jsonX.replaceOp(['styles', 'DOCXHeading', 'aliases'], ['Original'], ['Edited']);
+            const aliasUndo = JSONX.invertWithDoc(aliasEdit, document.getSnapshot());
+            document.apply(aliasEdit);
+            const restored = testInjector.createInstance(DocumentDataModel, JSON.parse(JSON.stringify(document.getSnapshot())));
+            try {
+                expect(restored.getSnapshot().customProperties).toEqual({
+                    ...before.customProperties,
+                    DOCXDOCID: { type: 'string', value: 'Edited & metadata' },
+                });
+                expect(restored.getSnapshot().styles?.DOCXHeading.aliases).toEqual(['Edited']);
+                expect(restored.getBody()).toEqual(before.body);
+            } finally {
+                restored.dispose();
+            }
+            document.apply(aliasUndo);
+            document.apply(propertyUndo);
+            expect(document.getSnapshot()).toEqual(before);
+        } finally {
+            document.dispose();
+        }
+    });
+});
+
 describe('document footnote segments', () => {
+    it('inherits shared document styles in headers and footers without duplicating persisted definitions', () => {
+        const document = testInjector.createInstance(DocumentDataModel, {
+            id: 'doc',
+            body: body('Body'),
+            documentStyle: { textStyle: { ff: 'Calibri', fs: 11 } },
+            styles: { Story: { name: 'Story', type: DocStyleType.paragraph, textStyle: { fs: 9 } } },
+            headers: { header: { headerId: 'header', body: body('Header') } },
+            footers: { footer: { footerId: 'footer', body: body('Footer') } },
+        });
+        try {
+            for (const model of [document.headerModelMap.get('header'), document.footerModelMap.get('footer')]) {
+                expect(model?.getSnapshot().styles?.Story.textStyle?.fs).toBe(9);
+                expect(model?.getDocumentStyle().textStyle).toMatchObject({ ff: 'Calibri', fs: 11 });
+            }
+            expect(Object.keys(document.getSnapshot().headers!.header)).toEqual(['headerId', 'body']);
+            expect(Object.keys(document.getSnapshot().footers!.footer)).toEqual(['footerId', 'body']);
+        } finally {
+            document.dispose();
+        }
+    });
+
     it('inherits document styles and refreshes them without persisting duplicate styles in each note', () => {
         const document = createDocument();
         const jsonX = JSONX.getInstance();
@@ -88,7 +195,7 @@ describe('document footnote segments', () => {
         const edit = JSONX.getInstance().editOp(new TextX().insert(2, { dataStream: '前文' }).serialize(), ['body']);
         document.apply(edit);
         expect(document.getBody()?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 3, properties: { noteId: 'note' } });
-        const restored = new DocumentDataModel(document.getSnapshot());
+        const restored = testInjector.createInstance(DocumentDataModel, document.getSnapshot());
         expect(restored.getSelfOrHeaderFooterModel('note')?.getBody()).toEqual(document.getSnapshot().notes?.note.body);
         expect(restored.getSnapshot().noteSettings?.footnote).toEqual(document.getSnapshot().noteSettings?.footnote);
         expect(validateDocumentStructure(restored.getSnapshot())).toEqual([]);

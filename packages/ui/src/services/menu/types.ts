@@ -59,6 +59,7 @@ export enum RibbonDataGroup {
     FORMULAS = 'ribbon.data.formulas',
     RULES = 'ribbon.data.rules',
     ORGANIZATION = 'ribbon.data.organization',
+    ANALYSIS = 'ribbon.data.analysis',
     OTHERS = 'ribbon.data.others',
 }
 

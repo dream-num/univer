@@ -33,6 +33,7 @@ import {
     Rect,
     Scene,
     SHEET_VIEWPORT_KEY,
+    Spreadsheet,
     Vector2,
     Viewport,
 } from '@univerjs/engine-render';
@@ -60,6 +61,7 @@ import {
     SetScrollOperation,
     SetScrollRelativeCommand,
     SetZoomRatioOperation,
+    SHEET_VIEW_KEY,
     SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -151,13 +153,13 @@ function createTestBed(hasSkeleton = true, controllerType = SheetTableControlsRe
         injector.get(SheetSkeletonManagerService).setCurrent({ sheetId: 'sheet-1' });
     }
     const tables = injector.get(TableManager);
-    const addTable = () => tables.addTable('unit-1', 'sheet-1', 'Orders', {
-        startRow: 2,
-        endRow: 4,
-        startColumn: 2,
-        endColumn: 4,
+    const addTable = (startRow = 2, startColumn = 2) => tables.addTable('unit-1', 'sheet-1', 'Orders', {
+        startRow,
+        endRow: startRow + 2,
+        startColumn,
+        endColumn: startColumn + 2,
     }, ['Name', 'Amount', 'Tax'], 'table-1');
-    return { injector, scene, engine, addTable, attachPopupByPosition, popupDisposable };
+    return { injector, scene, engine, components: context.components, addTable, attachPopupByPosition, popupDisposable };
 }
 
 describe('SheetTableControlsRenderController', () => {
@@ -221,6 +223,7 @@ describe('SheetTableControlsRenderController', () => {
         const commands = injector.get(ICommandService);
         commands.registerCommand({ id: SetScrollOperation.id, type: CommandType.OPERATION, handler: () => true });
         const removal = tables.tableDelete$.subscribe(() => {
+            const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
             // A scroll can arrive after the model removes a table but before the controls receive that notification.
             shape.setItems([]);
             expect(commands.syncExecuteCommand(SetScrollOperation.id)).toBe(true);
@@ -228,7 +231,6 @@ describe('SheetTableControlsRenderController', () => {
         });
         disposables.push({ dispose: () => removal.unsubscribe() });
         injector.get(SheetTableControlsRenderController);
-        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
         expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBeGreaterThan(12);
 
         tables.deleteTable('unit-1', 'top-table');
@@ -237,6 +239,42 @@ describe('SheetTableControlsRenderController', () => {
         expect(commands.syncExecuteCommand(SetScrollOperation.id)).toBe(true);
         expect(sceneMakeDirty).not.toHaveBeenCalled();
         expect(skeleton.gapConfig.rowGaps?.[0]?.size).toBe(12);
+    });
+
+    it('keeps the table menu below the column header as the row above it changes height', () => {
+        const { injector, scene, engine, addTable } = createTestBed();
+        const skeletons = injector.get(SheetSkeletonManagerService);
+        const skeleton = skeletons.getCurrentSkeleton()!;
+        injector.get(SheetTableControlsRenderController);
+        addTable(1);
+        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
+        for (const height of [8, 8, 50]) {
+            skeleton.worksheet.getRowManager().setRowHeight(0, height);
+            skeletons.makeDirty({ sheetId: 'sheet-1' });
+            skeletons.setCurrent({ sheetId: 'sheet-1' });
+            shape.render(engine.getCanvas().getContext());
+            const anchor = shape.getAnchorRegion('table-1')!;
+            expect(anchor.top).toBeGreaterThanOrEqual(skeleton.columnHeaderHeightAndMarginTop);
+            expect(anchor.top + anchor.height).toBe(skeleton.getNoMergeCellWithCoordByIndex(1, 2).startY);
+        }
+        expect(skeleton.getRowGapSize(0)).toBe(0);
+    });
+
+    it('keeps the insert-row target inside the grid for a table starting in column A', () => {
+        const { injector, scene, engine, components, addTable } = createTestBed();
+        const skeleton = injector.get(SheetSkeletonManagerService).getCurrentSkeleton()!;
+        const sheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN, skeleton);
+        components.set(SHEET_VIEW_KEY.MAIN, sheet);
+        disposables.push(sheet);
+        addTable(2, 0);
+        injector.get(SheetTableControlsRenderController);
+        const cell = skeleton.getNoMergeCellWithCoordByIndex(3, 0);
+        sheet.onPointerMove$.emitEvent({ offsetX: cell.startX + 20, offsetY: cell.endY - 2 } as never);
+        const shape = scene.getObject('SheetTableControlsShape') as SheetTableControlsShape;
+        shape.render(engine.getCanvas().getContext());
+        const region = shape.hitTest(cell.startX + 5, cell.endY);
+        expect(region).toMatchObject({ type: 'insert-row', tableId: 'table-1', index: 4 });
+        expect(region!.left).toBeGreaterThanOrEqual(skeleton.rowHeaderWidthAndMarginLeft);
     });
 
     it('keeps sheet caches for selection refreshes and invalidates them for table refreshes', () => {

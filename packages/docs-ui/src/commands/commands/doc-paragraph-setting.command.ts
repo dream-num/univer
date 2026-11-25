@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, getDocumentParagraphStyleForUpdate, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import { DocHistoryAction, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocParagraphSettingCommandParams {
@@ -69,7 +69,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
 
         for (const paragraph of paragraphs) {
             const { startIndex } = paragraph;
-            const paragraphStyle = { ...paragraph.paragraphStyle, ...config.paragraph };
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
@@ -81,7 +80,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
                     dataStream: '',
                     paragraphs: [{
                         ...paragraph,
-                        paragraphStyle,
+                        paragraphStyle: getDocumentParagraphStyleForUpdate(docDataModel.getSnapshot(), paragraph, config.paragraph),
                         startIndex: 0,
                     }],
                 },

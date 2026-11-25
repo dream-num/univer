@@ -15,6 +15,7 @@
  */
 
 import { compareToken } from '../../basics/token';
+import { isSurrogatePairAt } from './char-kit';
 
 /**
  * For SearchType
@@ -69,6 +70,14 @@ export function normalizeTextForComparison(value: string): string {
         : lower;
 }
 
+/**
+ * Text equality for an exact lookup, where ? and * are ordinary characters (XLOOKUP and XMATCH
+ * match mode 0). It ignores case, as the `=` comparison does.
+ */
+export function isLiteralTextMatch(currentValue: string, value: string): boolean {
+    return normalizeTextForComparison(currentValue) === normalizeTextForComparison(value);
+}
+
 export function isMatchWildcard(currentValue: string, value: string) {
     const pattern = escapeRegExpForWildcard(value).replace(/~?[*?]/g, (match) => {
         if (match.startsWith('~')) {
@@ -93,6 +102,113 @@ export function replaceWildcard(value: string) {
         }
         return ' ';
     });
+}
+
+/**
+ * A wildcard pattern read as text to look for, rather than as text to compare with.
+ * `?` matches one character, `*` matches any text, and `~` makes the character after it
+ * literal; a trailing `~` adds nothing to the pattern.
+ */
+export interface IWildcardPattern {
+    /** The text to look for, escapes resolved, when the pattern has no wildcard. */
+    literal: string | null;
+    /** The parts between `*` wildcards; `null` inside a part stands for `?`. */
+    segments: ReadonlyArray<ReadonlyArray<string | null>>;
+}
+
+export function parseWildcardPattern(pattern: string): IWildcardPattern {
+    const segments: (string | null)[][] = [[]];
+    let hasWildcard = false;
+
+    for (let i = 0; i < pattern.length; i++) {
+        const char = pattern[i];
+
+        if (char === '~') {
+            // Whatever follows a tilde is literal; a trailing tilde contributes nothing.
+            if (i + 1 < pattern.length) {
+                segments[segments.length - 1].push(pattern[i + 1]);
+                i++;
+            }
+        } else if (char === '*') {
+            hasWildcard = true;
+            segments.push([]);
+        } else if (char === '?') {
+            hasWildcard = true;
+            segments[segments.length - 1].push(null);
+        } else {
+            segments[segments.length - 1].push(char);
+        }
+    }
+
+    return { literal: hasWildcard ? null : segments[0].join(''), segments };
+}
+
+/**
+ * Index of the earliest match of `pattern` in `text` at or after `fromIndex`, or -1.
+ *
+ * The parts of a wildcard pattern are placed at their leftmost position, so the cost
+ * is text length times pattern length and no input can make the search backtrack.
+ */
+export function searchWildcard(text: string, pattern: IWildcardPattern, fromIndex: number): number {
+    if (pattern.literal !== null) {
+        return text.indexOf(pattern.literal, fromIndex);
+    }
+
+    const { segments } = pattern;
+    const start = findSegment(text, segments[0], fromIndex);
+
+    if (start === -1) {
+        return -1;
+    }
+
+    let position = matchSegmentAt(text, segments[0], start);
+
+    for (let i = 1; i < segments.length; i++) {
+        const found = findSegment(text, segments[i], position);
+
+        if (found === -1) {
+            return -1;
+        }
+
+        position = matchSegmentAt(text, segments[i], found);
+    }
+
+    return start;
+}
+
+/** Leftmost start at or after `fromIndex` where `segment` matches, or -1. */
+function findSegment(text: string, segment: ReadonlyArray<string | null>, fromIndex: number) {
+    for (let start = fromIndex; start + segment.length <= text.length; start++) {
+        if (matchSegmentAt(text, segment, start) !== -1) {
+            return start;
+        }
+    }
+
+    return -1;
+}
+
+/**
+ * End of `segment` matched at `start`, or -1. A `?` covers one character, so a surrogate
+ * pair such as an emoji is a single `?`; positions stay in UTF-16 units, as LEN counts them.
+ */
+function matchSegmentAt(text: string, segment: ReadonlyArray<string | null>, start: number) {
+    let position = start;
+
+    for (const token of segment) {
+        if (position >= text.length) {
+            return -1;
+        }
+
+        if (token === null) {
+            position += isSurrogatePairAt(text, position) ? 2 : 1;
+        } else if (token === text[position]) {
+            position++;
+        } else {
+            return -1;
+        }
+    }
+
+    return position;
 }
 
 export function compareWithWildcard(currentValue: string, value: string, operator: compareToken, isCaseSensitive = true) {

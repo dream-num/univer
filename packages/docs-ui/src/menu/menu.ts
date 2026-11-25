@@ -31,6 +31,7 @@ import {
     NAMED_STYLE_MAP,
     NamedStyleType,
     PresetListType,
+    resolveDocumentParagraphBullet,
     SectionType,
     ThemeService,
     Tools,
@@ -98,6 +99,7 @@ import { DocOpenPageSettingCommand } from '../commands/operations/open-page-sett
 import { getCommandSkeleton } from '../commands/util';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { DocMenuStyleService } from '../services/doc-menu-style.service';
+import { isEastAsianTextAtRange } from '../utils/east-asian-text';
 import { EditorColorPicker } from '../views/EditorColorPicker';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../views/list-type-picker/index';
 
@@ -752,7 +754,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     return;
                 }
 
-                const ff = textRun.ts?.ff;
+                // Word shows the East Asian family for CJK text, which the model keeps in a
+                // separate slot from the Latin family (`ff`).
+                const ff = textRun.isEastAsian && textRun.ts?.eastAsiaFontFamily != null
+                    ? textRun.ts.eastAsiaFontFamily
+                    : textRun.ts?.ff;
 
                 subscriber.next(ff ?? defaultValue);
             };
@@ -1441,10 +1447,11 @@ const listValueFactory$ = (accessor: IAccessor) => {
                 const paragraphs = BuildTextUtils.range.getParagraphsInRange(range, doc?.getBody()?.paragraphs ?? [], doc?.getBody()?.dataStream ?? '');
                 let listType: string | undefined;
                 if (paragraphs.every((p) => {
+                    const bullet = resolveDocumentParagraphBullet(docDataModel.getSnapshot(), p);
                     if (!listType) {
-                        listType = p.bullet?.listType;
+                        listType = bullet?.listType;
                     }
-                    return p.bullet && p.bullet.listType === listType;
+                    return bullet && bullet.listType === listType;
                 })) {
                     subscriber.next(listType as PresetListType);
                     return;
@@ -1676,6 +1683,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
                 ...namedStyle,
                 ...cacheStyle,
             },
+            isEastAsian: false,
         };
     }
 
@@ -1689,6 +1697,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
                 ...namedStyle,
                 ...cacheStyle,
             },
+            isEastAsian: false,
         };
     }
 
@@ -1701,6 +1710,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
             ...curTextStyle,
             ...cacheStyle,
         },
+        isEastAsian: isEastAsianTextAtRange(body.dataStream, activeRange.startOffset, activeRange.endOffset),
     };
 }
 
@@ -1744,7 +1754,7 @@ export function getParagraphStyleAtCursor(accessor: IAccessor) {
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;
         if (startOffset > prevIndex && startOffset <= startIndex) {
-            return paragraph;
+            return { ...paragraph, bullet: resolveDocumentParagraphBullet(docDataModel.getSnapshot(), paragraph) };
         }
 
         prevIndex = startIndex;

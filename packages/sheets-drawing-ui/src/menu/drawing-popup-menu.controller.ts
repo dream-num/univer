@@ -30,6 +30,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     RxDisposable,
+    SheetTypes,
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -57,6 +58,7 @@ import type { LocaleKey } from '../locale/types';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { UniverSheetsDrawingUIPlugin } from '../plugin';
+import { SheetCanvasFloatDomManagerService } from '../services/canvas-float-dom-manager.service';
 
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
@@ -65,6 +67,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         @Inject(LocaleService) protected readonly _localeService: LocaleService,
         @IDrawingManagerService protected readonly _drawingManagerService: IDrawingManagerService,
         @Inject(SheetCanvasPopManagerService) protected readonly _canvasPopManagerService: SheetCanvasPopManagerService,
+        @Inject(SheetCanvasFloatDomManagerService) private readonly _canvasFloatDomManagerService: SheetCanvasFloatDomManagerService,
         @IRenderManagerService protected readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IMessageService protected readonly _messageService: IMessageService,
@@ -216,6 +219,12 @@ export class DrawingPopupMenuController extends RxDisposable {
             ...(menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType)),
             ...this._getFloatingObjectMenuItems(),
         ];
+        const worksheet = this._univerInstanceService
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            ?.getSheetBySheetId(subUnitId);
+        const renderedPosition$ = worksheet?.getConfig().type === SheetTypes.CHART
+            ? this._canvasFloatDomManagerService.getFloatDomInfo(drawingId)?.position$
+            : undefined;
 
         return this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
             componentKey: COMPONENT_IMAGE_POPUP_MENU,
@@ -226,7 +235,7 @@ export class DrawingPopupMenuController extends RxDisposable {
                 menuItems,
                 icon: this._canvasPopManagerService.getFeatureMenuIcon(drawingType),
             },
-        }));
+        }, renderedPosition$));
     }
 
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {

@@ -53,7 +53,12 @@ export class Trim extends BaseFunction {
             textValue = textValue.toLocaleUpperCase();
         }
 
-        textValue = textValue.trim().replace(/\s+/g, ' ');
+        // Excel's TRIM treats U+0020 and U+3000 (ideographic space) as spaces: leading and
+        // trailing runs are dropped, and an inner run collapses to its first character.
+        // Tabs, line feeds and non-breaking spaces (160) stay.
+        textValue = textValue
+            .replace(/^[ \u3000]+|[ \u3000]+$/g, '')
+            .replace(/[ \u3000]{2,}/g, (run) => run.charAt(0));
 
         return StringValueObject.create(textValue);
     }

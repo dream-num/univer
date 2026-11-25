@@ -41,6 +41,10 @@ export interface IDocumentData extends IReferenceSource {
     rev?: number;
     locale?: LocaleType;
     title?: string;
+    /** Organization associated with the document, used by built-in property fields. */
+    company?: string;
+    /** Editable metadata referenced by document-property fields. */
+    customProperties?: Record<string, IDocumentCustomProperty>;
     body?: IDocumentBody; // Rich text.
     /** Independent rich-text segments addressed by footnote or endnote references in the main body. */
     notes?: Record<string, IDocumentNote>;
@@ -53,6 +57,11 @@ export interface IDocumentData extends IReferenceSource {
     resources?: IResources;
     disabled?: boolean;
 }
+
+export type IDocumentCustomProperty =
+    | { type: 'string' | 'date'; value: string }
+    | { type: 'integer' | 'number'; value: number }
+    | { type: 'boolean'; value: boolean };
 
 export interface IReferenceSource {
     tableSource?: ITables; // Table
@@ -81,10 +90,15 @@ export interface IFootnoteProperties {
     columnCount?: number;
 }
 
+/** Editable note decorations may contain tables as well as ordinary paragraphs. */
+export interface IDocumentNoteDecoration extends IDocumentBody {
+    tableSource?: ITables;
+}
+
 export interface IFootnoteSettings extends IFootnoteProperties {
-    separator?: IDocumentBody;
-    continuationSeparator?: IDocumentBody;
-    continuationNotice?: IDocumentBody;
+    separator?: IDocumentNoteDecoration;
+    continuationSeparator?: IDocumentNoteDecoration;
+    continuationNotice?: IDocumentNoteDecoration;
 }
 
 export type DocumentNoteType = 'footnote' | 'endnote';
@@ -95,9 +109,9 @@ export interface IEndnoteProperties extends Omit<IFootnoteProperties, 'position'
 }
 
 export interface IEndnoteSettings extends IEndnoteProperties {
-    separator?: IDocumentBody;
-    continuationSeparator?: IDocumentBody;
-    continuationNotice?: IDocumentBody;
+    separator?: IDocumentNoteDecoration;
+    continuationSeparator?: IDocumentNoteDecoration;
+    continuationNotice?: IDocumentNoteDecoration;
 }
 
 export interface INoteSettings {
@@ -265,11 +279,28 @@ export enum DocumentBlockType {
 
 export interface IDocStyle {
     name: string;
+    /** Whether this is a user-defined style, independent of its display name. */
+    customStyle?: boolean;
+    /** Alternate names used by named-style references and directories. */
+    aliases?: string[];
     basedOn?: string;
     link?: string;
     type: DocStyleType;
     textStyle?: ITextStyle;
     paragraphStyle?: IParagraphStyle;
+    /** Authored table defaults inherited through basedOn. */
+    tableProperties?: Pick<ITable, 'cellSpacing'>;
+    /** Authored row defaults inherited through the named table style. */
+    rowProperties?: Pick<ITableRow, 'cellSpacing'>;
+    /** Typography inherited by the matching regions of a named table style. */
+    conditionalStyles?: Partial<Record<
+        'wholeTable' | 'firstRow' | 'lastRow' | 'firstCol' | 'lastCol' |
+        'band1Horz' | 'band2Horz' | 'band1Vert' | 'band2Vert' |
+        'nwCell' | 'neCell' | 'swCell' | 'seCell',
+        Pick<IDocStyle, 'textStyle' | 'paragraphStyle'>
+    >>;
+    /** Numbering properties inherited by paragraphs using this style; null disables numbering. */
+    bullet?: Partial<IBullet> | null;
 }
 
 export enum DocStyleType {
@@ -301,6 +332,10 @@ export interface IHeaderData extends IReferenceSource {
 export interface IListData {
     listType: string;
     nestingLevel: INestingLevel[];
+    /** Imported list instances that continue the same counters. Other list IDs start independently. */
+    counterIds?: string[];
+    /** Imported instance/level restart offsets, applied once when that instance and level first occur. */
+    counterStarts?: Record<string, Record<number, number>>;
 }
 
 /**
@@ -312,6 +347,8 @@ export interface INestingLevel {
     // The glyph format contains one or more placeholders, and these placeholder are replaced with the appropriate values depending on the glyphType or glyphSymbol. The placeholders follow the pattern %[nestingLevel]. Furthermore, placeholders can have prefixes and suffixes. Thus, the glyph format follows the pattern <prefix>%[nestingLevel]<suffix>. Note that the prefix and suffix are optional and can be arbitrary strings.
     //  <prefix>%[nestingLevel]<suffix>
     glyphFormat: string; // https://developers.google.com/docs/api/reference/rest/v1/documents#nestinglevel，ms word lvlText
+    /** Separator after the number, corresponding to OOXML w:suff. */
+    followNumberWith?: FollowNumberWithType;
     textStyle?: ITextStyle;
     startNumber: number; // zero-based offset; 0 renders the first ordered item as 1
 
@@ -452,6 +489,8 @@ export interface IHyperlink {
     headingId?: string; // headingId
     /** Use authored text formatting instead of the default link color and underline. */
     textStyleMode?: 'link' | 'text';
+    /** Navigation supplied by the enclosing reference field's hyperlink switch. */
+    referenceFieldLink?: boolean;
 }
 
 /**
@@ -492,6 +531,20 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 
 export type IHyperLinkCustomRange = ICustomRange<IHyperlink>;
 
+export enum SpecialCharacterKind {
+    NON_BREAKING_HYPHEN = 'nonBreakingHyphen',
+    OPTIONAL_HYPHEN = 'optionalHyphen',
+    EM_SPACE = 'emSpace',
+    EN_SPACE = 'enSpace',
+}
+
+/** A single editable character atom, distinct from an ordinary Unicode text character. */
+export interface ISpecialCharacterCustomRange extends ICustomRange<{ kind: SpecialCharacterKind }> {
+    rangeType: CustomRangeType.CUSTOM;
+    wholeEntity: true;
+    properties: { kind: SpecialCharacterKind };
+}
+
 /** Legacy Word form field settings. Macro names are retained as data, never executed by the SDK. */
 export interface IFormFieldData {
     name?: string;
@@ -508,8 +561,19 @@ export interface IFormFieldData {
 }
 
 export interface IFieldRangeProperties {
-    /** Original OOXML field instruction. This is the round-trip source of truth. */
+    /** Field instruction text; nested field structure is retained in instructionParts. */
     instruction: string;
+    /** Editable character styles at UTF-16 offsets within instruction, separate from the visible result. */
+    instructionTextRuns?: ITextRun[];
+    /** Text and nested fields occurring inside the instruction, separate from its visible result. */
+    instructionParts?: Array<string | {
+        instruction: string;
+        cachedResult?: string;
+        dirty?: BooleanNumber;
+        locked?: BooleanNumber;
+        instructionTextRuns?: ITextRun[];
+        instructionParts?: IFieldRangeProperties['instructionParts'];
+    }>;
     /** Upper-case first token of `instruction`, used only for field dispatch. */
     fieldType: string;
     sourceKind?: 'complex' | 'simple';
@@ -739,6 +803,8 @@ export interface IPageBorders {
 export interface IDocStyleBase extends IMargin {
     pageBorders?: IPageBorders;
     pageNumberStart?: number; // pageNumberStart
+    /** OOXML printed page-number format; omitted means decimal. */
+    pageNumberFormat?: string;
     /** Page size in 96-DPI layout pixels. */
     pageSize?: ISize;
 
@@ -789,9 +855,25 @@ export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderA
     /** Imported OOXML compatSetting values, including the Word compatibilityMode. */
     compatibilitySettings?: Record<string, string>;
     textStyle?: ITextStyle; // default style for text
+    /** Theme group used only when no document, named-style or direct font family is declared. */
+    defaultFontTheme?: 'major' | 'minor';
+    /** Editable Latin theme families; omitted entries inherit the application's Office theme. */
+    latinFontScheme?: { major?: string; minor?: string };
     /** Document-declared alternate families, tried only after the authored font is unavailable. */
     fontFamilyFallbacks?: Record<string, string>;
+    /** Document-declared font classifications used when an authored font lacks a glyph. */
+    fontFamilyClasses?: Record<string, 'auto' | 'decorative' | 'modern' | 'roman' | 'script' | 'swiss'>;
+    /** Editable East Asian major/minor theme fonts and language-specific script mappings. */
+    eastAsiaFontScheme?: {
+        major: { fontFamily?: string; scriptFonts?: Record<string, string> };
+        minor: { fontFamily?: string; scriptFonts?: Record<string, string> };
+        language?: string;
+    };
     defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
+    /** Named paragraph style inherited when a paragraph has no explicit style reference. */
+    defaultParagraphStyleId?: string;
+    /** Named table style inherited when a table has no explicit style reference. */
+    defaultTableStyleId?: string;
     background?: IDocumentBackground; // Page background image.
 }
 
@@ -905,7 +987,8 @@ export interface IParagraph {
     /** Optional stable named-style reference. Direct paragraph style has higher precedence. */
     styleId?: string;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
-    bullet?: IBullet; // bullet
+    /** Direct numbering overrides. Omitted properties inherit from the named style; null disables numbering. */
+    bullet?: Partial<IBullet> | null;
     /** Imported resolved numbering, used to distinguish later edits from unchanged inheritance. */
     sourceBullet?: IBullet | null;
     /** Imported direct numbering. Absent inherits from the style; null explicitly disables numbering. */
@@ -1119,6 +1202,8 @@ export interface ITextStyle extends IStyleBase {
     hidden?: boolean;
     /** Word font-type hint for characters shared by Latin, East Asian and complex scripts. */
     fontHint?: 'default' | 'eastAsia' | 'cs';
+    /** East Asian theme binding; null explicitly selects the authored font family instead. */
+    eastAsiaFontTheme?: 'major' | 'minor' | null;
     /** Alignment tab anchored to the page margins or paragraph indents. Applies only to a tab character. */
     positionedTab?: { alignment: TabStopAlignment; relativeTo: 'margin' | 'indent'; leader?: TabStopLeader };
     /** Original font-specific OOXML symbol; only applies to the matching character. */
@@ -1127,6 +1212,8 @@ export interface ITextStyle extends IStyleBase {
     lang?: string;
     /** Alternate language from the authored text properties (BCP 47). Absent inherits. */
     altLang?: string;
+    /** Language for complex-script text (BCP 47), independent of its writing direction. Absent inherits. */
+    bidiLang?: string;
     /** Minimum font size for pair kerning, in the same units as fs. Zero disables it; absent inherits. */
     kerning?: number;
     /** Display capital letters without changing the source text. Absent inherits. */
@@ -1177,13 +1264,15 @@ export interface IParagraphStyle extends IParagraphProperties {
     textStyle?: ITextStyle; // paragraph textStyle
     /** Formatting of the paragraph terminator only, not inherited by body text. */
     paragraphMarkTextStyle?: ITextStyle;
+    /** Named character style of the paragraph terminator, below its direct formatting. */
+    paragraphMarkStyleId?: string;
 }
 
 /**
  * Paragraph properties that may be inherited from the document defaults.
  * Paragraph identity and named/text styles have their own inheritance mechanisms.
  */
-export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'outlineLevel' | 'textStyle' | 'paragraphMarkTextStyle'>;
+export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' | 'namedStyleType' | 'outlineLevel' | 'textStyle' | 'paragraphMarkTextStyle' | 'paragraphMarkStyleId'>;
 
 export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId
@@ -1332,6 +1421,8 @@ export interface IDocsBorder {
  */
 export interface IParagraphBorder extends IDocsBorder {
     padding: number; // padding
+    /** Word line border style; preserves compound strokes beyond the legacy dash pattern. */
+    style?: string;
 }
 
 /**
@@ -1472,6 +1563,8 @@ export interface IColumn {
  * Properties of table
  */
 export interface ITable {
+    /** Named table style in the document's styles collection. */
+    styleId?: string;
     tableRows: ITableRow[]; // tableRows
     tableColumns: ITableColumn[]; // tableColumns
     align: TableAlignmentType; // 17.4.28 jc (Table Alignment)
@@ -1484,6 +1577,10 @@ export interface ITable {
     size: IWidthInTableSize;
     tableId: string;
     cellMargin?: ITableCellMargin; // cellMargin
+    /** Default distance between cell edges, outside the table text margins. */
+    cellSpacing?: INumberUnit;
+    /** Default table edges; explicit cell borders override these values. */
+    borderDefaults?: ITableBorderDefaults;
     layout?: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
     overlap?: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
     description?: string; // 17.4.46 tblDescription (Table Description)
@@ -1517,8 +1614,14 @@ export interface ITableRowSize {
  * Properties of row of table
  */
 export interface ITableRow {
+    /** Row cell spacing inside the table text margins; overrides table defaults. */
+    cellSpacing?: INumberUnit;
+    /** Row-specific table default spacing outside the text margins (OOXML tblPrEx). */
+    defaultCellSpacing?: INumberUnit;
     /** Authored row-level default margins (OOXML tblPrEx); imported cells contain resolved margins. */
     cellMargin?: ITableCellMargin;
+    /** Row-specific table edges; imported cells also contain their resolved borders. */
+    borderDefaults?: ITableBorderDefaults;
     /**
      * Rows do not persist stream offsets. Their ordinal position must match the
      * corresponding `TABLE_ROW_START`/`TABLE_ROW_END` pair in `dataStream`.
@@ -1557,6 +1660,8 @@ export interface ITableCell {
     borderTop?: ITableCellBorder; // borderTop
     borderBottom?: ITableCellBorder; // borderBottom
     size?: IWidthInTableSize; // size
+    /** Original OOXML cell-width unit; retained for percentage-width conversion and export. */
+    tcWidthType?: 'auto' | 'dxa' | 'nil' | 'pct';
     tcFitText?: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
     /** Exclude the cell's final paragraph mark from content height (OOXML w:hideMark). */
     tcHideMark?: BooleanNumber;
@@ -1576,6 +1681,15 @@ export interface ITableCellMargin {
 /**
  * Properties of cell border
  */
+export interface ITableBorderDefaults {
+    top?: ITableCellBorder;
+    left?: ITableCellBorder;
+    bottom?: ITableCellBorder;
+    right?: ITableCellBorder;
+    insideHorizontal?: ITableCellBorder;
+    insideVertical?: ITableCellBorder;
+}
+
 export interface ITableCellBorder {
     color: IColorStyle; // color
     width?: INumberUnit; // width
@@ -1615,6 +1729,8 @@ export enum FontStyleType {
 export interface INumberUnit {
     v: number; // value
     u?: NumberUnitType; // unit
+    /** Absolute document length used when a relative value is zero or cleared. */
+    fallback?: number;
 }
 
 export interface IObjectPositionH {

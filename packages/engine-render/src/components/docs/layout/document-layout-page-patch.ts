@@ -15,6 +15,7 @@
  */
 
 import type { IDocDrawingBase, IDocumentData, IReferenceSource, ITable, ITableRow } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -31,6 +32,7 @@ import type {
     IDocumentSkeletonSection,
     IDocumentSkeletonTable,
 } from '../../../basics/i-document-skeleton-cached';
+import { resolveTableCellSpacing } from './table-cell-spacing';
 
 export type IDocumentSkeletonGlyphPatch = Omit<IDocumentSkeletonGlyph, 'parent'>;
 
@@ -64,6 +66,7 @@ export interface IDocumentSkeletonTablePatch extends Omit<IDocumentSkeletonTable
     rows: IDocumentSkeletonRowPatch[];
     tableSource?: ITable;
     tableSourceId?: string;
+    resolvedTableColumns?: ITable['tableColumns'];
 }
 
 export interface IDocumentSkeletonColumnGroupColumnPatch extends Omit<IDocumentSkeletonColumnGroupColumn, 'page' | 'parent'> {
@@ -178,6 +181,7 @@ function serializeTable(
     return {
         ...geometry,
         ...(!omitResourceSources ? { tableSource } : {}),
+        ...(omitResourceSources ? { resolvedTableColumns: tableSource.tableColumns } : {}),
         tableSourceId: tableSource.tableId,
         rows: source.rows.map((row) => {
             const serializedRow = withoutParent(row);
@@ -213,9 +217,11 @@ export function serializeDocumentSkeletonPage(
     return {
         ...geometry,
         sections: source.sections.map(serializeSection),
-        ...(noteDecorations == null ? {} : {
-            noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
-        }),
+        ...(noteDecorations == null
+            ? {}
+            : {
+                noteDecorations: noteDecorations.map((decoration) => ({ ...decoration, page: serializeDocumentSkeletonPage(decoration.page, omitResourceSources) })),
+            }),
         ...(notes == null
             ? {}
             : {
@@ -325,7 +331,10 @@ function requireTableSource(
     if (tableSource == null) {
         throw new Error(`Document layout publication is missing table source "${sourceId}".`);
     }
-    return tableSource;
+    const resolved = resolveTableCellSpacing(tableSource, snapshot);
+    return source.resolvedTableColumns == null || Tools.diffValue(source.resolvedTableColumns, resolved.tableColumns)
+        ? resolved
+        : { ...resolved, tableColumns: source.resolvedTableColumns };
 }
 
 function hydrateTable(
@@ -338,6 +347,7 @@ function hydrateTable(
     const {
         tableSource: _tableSource,
         tableSourceId: _tableSourceId,
+        resolvedTableColumns: _resolvedTableColumns,
         rows: sourceRows,
         ...tableGeometry
     } = source;
@@ -463,18 +473,22 @@ function hydrateDocumentSkeletonPageInternal(
     const page: IDocumentSkeletonPage = {
         ...geometry,
         sections: [],
-        ...(noteDecorations == null ? {} : {
-            noteDecorations: noteDecorations.map((decoration) => ({
-                ...decoration,
-                page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
-            })),
-        }),
-        ...(notes == null ? {} : {
-            notes: notes.map((note) => ({
-                ...note,
-                page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
-            })),
-        }),
+        ...(noteDecorations == null
+            ? {}
+            : {
+                noteDecorations: noteDecorations.map((decoration) => ({
+                    ...decoration,
+                    page: hydrateDocumentSkeletonPageInternal(decoration.page, undefined, snapshot, decoration.page.segmentId),
+                })),
+            }),
+        ...(notes == null
+            ? {}
+            : {
+                notes: notes.map((note) => ({
+                    ...note,
+                    page: hydrateDocumentSkeletonPageInternal(note.page, undefined, snapshot, note.noteId),
+                })),
+            }),
         skeDrawings: new Map(source.skeDrawings.map(([drawingId, drawing]) => [
             drawingId,
             hydrateDrawing(drawing, snapshot, resourceSegmentId),

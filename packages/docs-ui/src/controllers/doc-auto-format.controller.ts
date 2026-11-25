@@ -15,10 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { ITabCommandParams } from '../commands/commands/auto-format.command';
-import { Disposable, Inject, QuickListTypeMap } from '@univerjs/core';
+import { Disposable, Inject, QuickListTypeMap, resolveDocumentParagraphBullet } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ITabCommandParams } from '../commands/commands/auto-format.command';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
 import {
@@ -59,18 +59,20 @@ export class DocAutoFormatController extends Disposable {
                 id: TabCommand.id,
                 match: (context) => {
                     const { selection, paragraphs, unit } = context;
+                    const snapshot = unit.getSnapshot();
+                    const bullets = paragraphs.map((paragraph) => resolveDocumentParagraphBullet(snapshot, paragraph));
 
                     // 1. match 1 bullet paragraph, range.start == paragraph.start
-                    if (paragraphs.length === 1 && selection.startOffset === paragraphs[0].paragraphStart && paragraphs[0].bullet) {
+                    if (paragraphs.length === 1 && selection.startOffset === paragraphs[0].paragraphStart && bullets[0]) {
                         // 2. cross paragraphs, some paragraph is bullet
                         const allParagraphs = unit.getBody()?.paragraphs;
                         // 3. disable first bullet indent
-                        const bulletParagraphs = allParagraphs?.filter((p) => p.bullet?.listId === paragraphs[0].bullet!.listId);
+                        const bulletParagraphs = allParagraphs?.filter((p) => resolveDocumentParagraphBullet(snapshot, p)?.listId === bullets[0]!.listId);
                         if (bulletParagraphs?.findIndex((p) => p.startIndex === paragraphs[0].startIndex) === 0) {
                             return false;
                         }
                         return true;
-                    } else if (paragraphs.length > 1 && paragraphs.some((p) => p.bullet)) {
+                    } else if (paragraphs.length > 1 && bullets.some(Boolean)) {
                         return true;
                     }
                     return false;
@@ -184,15 +186,15 @@ export class DocAutoFormatController extends Disposable {
             this._docAutoFormatService.registerAutoFormat({
                 id: EnterCommand.id,
                 match: (context) => {
-                    const { paragraphs } = context;
+                    const { paragraphs, unit } = context;
                     // selection at empty bullet paragraph
-                    if (paragraphs.length === 1 && paragraphs[0].bullet && paragraphs[0].paragraphStart === paragraphs[0].paragraphEnd) {
+                    if (paragraphs.length === 1 && resolveDocumentParagraphBullet(unit.getSnapshot(), paragraphs[0]) && paragraphs[0].paragraphStart === paragraphs[0].paragraphEnd) {
                         return true;
                     }
                     return false;
                 },
                 getMutations: (context) => {
-                    const bullet = context.paragraphs[0].bullet;
+                    const bullet = resolveDocumentParagraphBullet(context.unit.getSnapshot(), context.paragraphs[0]);
                     if (!bullet) {
                         return [];
                     }
@@ -209,7 +211,7 @@ export class DocAutoFormatController extends Disposable {
                     return [{
                         id: ListOperationCommand.id,
                         params: {
-                            listType: context.paragraphs[0].bullet!.listType,
+                            listType: bullet.listType,
                         },
                     }];
                 },

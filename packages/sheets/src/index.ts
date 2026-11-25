@@ -262,7 +262,6 @@ export { type ISetWorksheetNameCommandParams } from './commands/commands/set-wor
 export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
 export { SetWorksheetPermissionPointsCommand } from './commands/commands/set-worksheet-permission-points.command';
 export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet-protection.command';
-export { SetWorksheetRightToLeftCommand } from './commands/commands/set-worksheet-right-to-left.command';
 export { SetWorksheetRowCountCommand } from './commands/commands/set-worksheet-row-count.command';
 export {
     DeltaRowHeightCommand,
@@ -446,7 +445,6 @@ export type {
 } from './commands/mutations/set-worksheet-permission-points.mutation';
 export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
 export type { ISetWorksheetProtectionParams } from './commands/mutations/set-worksheet-protection.mutation';
-export { SetWorksheetRightToLeftMutation } from './commands/mutations/set-worksheet-right-to-left.mutation';
 export {
     SetWorksheetRowCountMutation,
     SetWorksheetRowCountUndoMutationFactory,

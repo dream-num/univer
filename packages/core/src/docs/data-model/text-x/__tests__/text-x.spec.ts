@@ -131,12 +131,13 @@ describe('test TextX methods and branches', () => {
         { t: TextXActionType.RETAIN, len: 0, rangeUpdates },
     ];
 
-    it('converges when the original text of a moved legacy bookmark is deleted', () => {
+    it.each([false, true])('converges when deleting a moved bookmark’s original text (delete its next anchor: %s)', (deleteAnchor) => {
         const original: IDocumentBody = {
             dataStream: 'One\rTwo\rEnd\r\n',
             customRanges: [
                 { ...bookmarkAt('z'), endIndex: 2 },
-                { ...bookmarkAt('a', 4), endIndex: 6 },
+                deleteAnchor ? { ...bookmarkAt('a'), endIndex: 2 } : { ...bookmarkAt('a', 4), endIndex: 6 },
+                { ...bookmarkAt('b', 4), endIndex: 6 },
             ],
             customBlocks: [],
         };
@@ -145,6 +146,7 @@ describe('test TextX methods and branches', () => {
         const left = TextX.apply(TextX.apply(Tools.deepClone(original), move), TextX.transform(remove, move, 'left'));
         const right = TextX.apply(TextX.apply(Tools.deepClone(original), remove), TextX.transform(move, remove, 'right'));
         expect(left).toEqual(right);
+        expect(left.customRanges?.map(({ rangeId }) => rangeId)).toEqual(deleteAnchor ? ['z', 'b'] : ['z', 'a', 'b']);
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(move, remove))).toEqual(left);
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(remove, TextX.transform(move, remove, 'right')))).toEqual(right);
     });

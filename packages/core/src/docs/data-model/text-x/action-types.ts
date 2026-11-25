@@ -47,6 +47,8 @@ export interface IRetainAction {
         nextRangeId?: string | null;
         /** Where to reinsert a moved bookmark if a concurrent text edit removed its old target. */
         fallbackNextRangeId?: string | null;
+        /** Following ranges in original order, if the first anchor is also deleted. */
+        fallbackNextRangeIds?: string[];
         /** Only these property paths are written; missing values remove properties. Arrays are atomic. */
         propertyPaths?: string[][];
     }>;

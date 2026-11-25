@@ -88,6 +88,8 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
             await fallbackStorage.setItem('fallback', 'local');
 
             expect(await fallbackStorage.getItem('fallback')).toBe('local');
+            await expect(fallbackStorage.updateItem('fallback', () => 'split')).rejects.toThrow('IndexedDB is unavailable');
+            expect(await fallbackStorage.getItem('fallback')).toBe('local');
             vi.stubGlobal('indexedDB', originalIndexedDB);
         });
 
@@ -119,9 +121,9 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
             }
         });
 
-        it('uses the cross-client lock for fallback updates and preserves a rejected write', async () => {
+        it('uses one cross-client lock for every fallback write and preserves a rejected update', async () => {
             const navigator = globalThis.navigator;
-            const request = vi.fn(async (_key: string, write: () => boolean) => write());
+            const request = vi.fn(async (_key: string, write: () => unknown) => write());
             vi.stubGlobal('navigator', { locks: { request } });
             try {
                 await browserStorage.setItem('source', 'original');
@@ -130,7 +132,9 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
                 expect(await browserStorage.updateItem<string>('source', (value) =>
                     value === 'original' ? 'stale' : undefined)).toBe(false);
                 expect(await browserStorage.getItem('source')).toBe('updated');
-                expect(request).toHaveBeenCalledWith(`${STORAGE_PREFIX}source`, expect.any(Function));
+                await browserStorage.removeItem('source');
+                await browserStorage.clear();
+                expect(request.mock.calls.map(([name]) => name)).toEqual(new Array(5).fill('UniverLocalStorage'));
             } finally {
                 vi.stubGlobal('navigator', navigator);
             }

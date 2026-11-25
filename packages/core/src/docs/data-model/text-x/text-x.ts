@@ -484,6 +484,9 @@ export class TextX {
                             // A peer may delete the old target before applying this move.
                             if (update.fallbackNextRangeId === undefined) {
                                 update.fallbackNextRangeId = nextRangeId;
+                                if (index + 2 < ranges.length) {
+                                    update.fallbackNextRangeIds = ranges.slice(index + 2).map((item) => item.rangeId);
+                                }
                             }
                             if (!changesText) {
                                 nextRangeId = undefined;

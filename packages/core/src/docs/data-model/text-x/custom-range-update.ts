@@ -161,10 +161,14 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRetainActio
 }
 
 export function validateRangeUpdates(updates: IRetainAction['rangeUpdates'], resultLength: number): void {
-    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, propertyPaths } of updates ?? []) {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackNextRangeIds, propertyPaths } of updates ?? []) {
         if (fallbackNextRangeId !== undefined && (range?.rangeType !== CustomRangeType.BOOKMARK || propertyPaths || nextRangeId !== undefined ||
             (fallbackNextRangeId !== null && typeof fallbackNextRangeId !== 'string'))) {
             throw new Error('Invalid bookmark move anchor.');
+        }
+        if (fallbackNextRangeIds !== undefined && (typeof fallbackNextRangeId !== 'string' ||
+            !Array.isArray(fallbackNextRangeIds) || fallbackNextRangeIds.some((id) => typeof id !== 'string'))) {
+            throw new Error('Invalid bookmark move anchors.');
         }
         if (propertyPaths !== undefined) {
             validatePropertyPaths(propertyPaths);
@@ -207,7 +211,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
         return;
     }
     const ranges = doc.customRanges ?? [];
-    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
+    for (const { rangeId, range, nextRangeId, fallbackNextRangeId, fallbackNextRangeIds, propertyPaths } of getRangeUpdateApplyOrder(updates)) {
         const index = ranges.findIndex((item) => item.rangeId === rangeId);
         if (range && propertyPaths) {
             if (index >= 0) {
@@ -225,7 +229,17 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRetainAction['ra
             } else if (index >= 0) {
                 ranges[index] = Tools.deepClone(range);
             } else {
-                const anchor = fallbackNextRangeId == null ? -1 : ranges.findIndex((item) => item.rangeId === fallbackNextRangeId);
+                let anchor = fallbackNextRangeId == null ? -1 : ranges.findIndex((item) => item.rangeId === fallbackNextRangeId);
+                if (anchor < 0 && fallbackNextRangeIds?.length) {
+                    const positions = new Map(ranges.map((item, index) => [item.rangeId, index]));
+                    for (const candidate of fallbackNextRangeIds) {
+                        const position = positions.get(candidate);
+                        if (position !== undefined) {
+                            anchor = position;
+                            break;
+                        }
+                    }
+                }
                 ranges.splice(anchor < 0 ? ranges.length : anchor, 0, Tools.deepClone(range));
             }
         } else if (index >= 0) {
@@ -270,6 +284,7 @@ export function moveRangeUpdates(
             : moved ?? null };
         if (mapped.range?.rangeType !== CustomRangeType.BOOKMARK && mapped.fallbackNextRangeId !== undefined) {
             delete mapped.fallbackNextRangeId;
+            delete mapped.fallbackNextRangeIds;
         }
         return mapped;
     });

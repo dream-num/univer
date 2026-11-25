@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
+import { getRegionLocale } from '@univerjs/core';
 
 const KATAKANA = '。「」、・ヲァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン\u3099\u309A';
 const CURRENCY_AND_SIGNS = '¢£¬¯¦¥₩';
@@ -66,9 +66,10 @@ HALF_TO_FULL.set('\u309C', '\u309A');
 FULL_TO_HALF.set('\u309B', '\uFF9E');
 FULL_TO_HALF.set('\u309C', '\uFF9F');
 
-export function usesEastAsianCharacterWidth(region: LocaleType | undefined): boolean {
-    return region === LocaleType.JA_JP || region === LocaleType.KO_KR ||
-        region === LocaleType.ZH_CN || region === LocaleType.ZH_TW || region === LocaleType.ZH_HK;
+export function usesEastAsianCharacterWidth(region: string | undefined): boolean {
+    const locale = region && getRegionLocale(region);
+    if (!locale) return false;
+    return locale.language === 'ja' || locale.language === 'ko' || locale.language === 'zh';
 }
 
 export function toHalfWidth(text: string): string {

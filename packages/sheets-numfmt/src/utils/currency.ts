@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { currencySymbols } from '@univerjs/core';
+import { numfmt } from '@univerjs/core';
 
-export const getCurrencyType = (pattern: string) => {
-    const item = currencySymbols.find((code) => pattern.includes(code));
-    return item;
-};
+export const getCurrencyType = numfmt.getCurrencySymbol;

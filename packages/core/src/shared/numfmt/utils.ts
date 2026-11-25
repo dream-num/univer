@@ -16,8 +16,8 @@
 
 import type { ParseData } from './api';
 import type { ParseOptions } from './parse-value';
-import { regexp } from '../../common/regexp';
 import { LocaleType } from '../../types/enum/locale-type';
+import { reCurrencySymbols } from './constants';
 import { parseDate, parseNumber, parseTime, tokenize, tokenTypes } from './api';
 
 export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
@@ -168,43 +168,9 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 
 const ignoreCommonPatterns = new Set(['m d']);
 const ignoreAMPMPatterns = new Set(['h:mm AM/PM', 'hh:mm AM/PM']);
-export const currencySymbols = [
-    'Rp',
-    'zł',
-    'NT$',
-    'R$',
-    'HK$',
-    '$',
-    '£',
-    '¥',
-    '¤',
-    '֏',
-    '؋',
-    '৳',
-    '฿',
-    '៛',
-    '₡',
-    '₦',
-    '₩',
-    '₪',
-    '₫',
-    '€',
-    '₭',
-    '₮',
-    '₱',
-    '₲',
-    '₴',
-    '₸',
-    '₹',
-    '₺',
-    '₼',
-    '₽',
-    '₾',
-    '₿',
-    '﷼',
-];
+export { currencySymbols } from './currency-symbols';
 
-const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${regexp.charset(...Array.from(new Set(currencySymbols.join(''))))}+`);
+const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${reCurrencySymbols.source}+`);
 
 /**
  * Get the numfmt parse value, and filter out the parse error.

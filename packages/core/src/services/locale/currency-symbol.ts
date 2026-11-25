@@ -14,35 +14,14 @@
  * limitations under the License.
  */
 
-import { getRegionTag, LocaleType } from '../../types/enum/locale-type';
+import { regionCurrencySymbols } from '../../shared/numfmt/currency-symbols';
+import { getRegionLocale } from '../../types/enum/locale-type';
 
-const localeCurrencySymbols: readonly (readonly [string, string])[] = [
-    [LocaleType.EN_US, '$'],
-    [LocaleType.RU_RU, '₽'],
-    [LocaleType.VI_VN, '₫'],
-    [LocaleType.ZH_CN, '¥'],
-    [LocaleType.ZH_TW, 'NT$'],
-    [LocaleType.ZH_HK, 'HK$'],
-    [LocaleType.FR_FR, '€'],
-    [LocaleType.FA_IR, '﷼'],
-    [LocaleType.KO_KR, '₩'],
-    [LocaleType.ES_ES, '€'],
-    [LocaleType.CA_ES, '€'],
-    [LocaleType.SK_SK, '€'],
-    [LocaleType.JA_JP, '¥'],
-    [LocaleType.PT_BR, 'R$'],
-    [LocaleType.DE_DE, '€'],
-    [LocaleType.IT_IT, '€'],
-    [LocaleType.ID_ID, 'Rp'],
-    [LocaleType.PL_PL, 'zł'],
-    [LocaleType.AR_SA, '﷼'],
-    ['en-IN', '₹'],
-];
-
-const localeCurrencySymbolMap = new Map(
-    localeCurrencySymbols.map(([locale, symbol]) => [getRegionTag(locale).toLowerCase(), symbol] as const)
-);
-
-export function getCurrencySymbolByLocale(locale: string): string {
-    return localeCurrencySymbolMap.get(getRegionTag(locale).toLowerCase()) ?? '$';
+export function getCurrencySymbolByLocale(region: string): string {
+    const locale = getRegionLocale(region);
+    if (!locale) return '$';
+    const maximized = locale.maximize();
+    return regionCurrencySymbols.get(maximized.baseName)
+        ?? regionCurrencySymbols.get(maximized.region ?? '')
+        ?? '¤';
 }

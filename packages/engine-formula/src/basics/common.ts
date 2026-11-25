@@ -23,7 +23,6 @@ import type {
     IRowData,
     IUnitRange,
     IWorkbookCalculationSettings,
-    LocaleType,
     Nullable,
     ObjectMatrix,
     Styles,
@@ -259,7 +258,7 @@ export interface IUnitRowData {
 
 export interface IFormulaDatasetConfig {
     /** Effective region captured for this calculation request. */
-    region?: LocaleType;
+    region?: string;
     /** Sheet metadata changed; rebind and calculate affected references without forcing all formulas. */
     dirtyReferenceUnits?: string[];
     /** Recalculate iteration-sensitive groups and their dependents in these workbooks. */

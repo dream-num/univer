@@ -151,3 +151,20 @@ export const LOCALE_META: Record<LocaleType, ILocaleMeta> = {
 export function getRegionTag(region: string = ''): string {
     return LOCALE_META[region as LocaleType]?.tag ?? region.replace(/^([a-z]{2,3})([A-Z]{2})$/, '$1-$2');
 }
+
+// Formatting typically reuses one region across a sheet.
+let lastRegion: string | undefined;
+let lastLocale: Intl.Locale | undefined;
+
+export function getRegionLocale(region: string): Intl.Locale | undefined {
+    if (region !== lastRegion) {
+        lastRegion = region;
+        try {
+            lastLocale = new Intl.Locale(getRegionTag(region));
+        } catch (error) {
+            if (!(error instanceof RangeError)) throw error;
+            lastLocale = undefined;
+        }
+    }
+    return lastLocale;
+}

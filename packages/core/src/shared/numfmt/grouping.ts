@@ -15,7 +15,7 @@
  */
 
 import type { NumberGrouping } from './types';
-import { getRegionTag } from '../../types/enum/locale-type';
+import { getRegionLocale } from '../../types/enum/locale-type';
 
 interface IRegionGrouping {
     readonly number: NumberGrouping;
@@ -73,7 +73,14 @@ const regionGrouping = new Map<string, IRegionGrouping>([
 ]);
 
 export function getRegionGrouping(region?: string): IRegionGrouping {
-    return region ? regionGrouping.get(getRegionTag(region).toLowerCase()) ?? standardGrouping : standardGrouping;
+    const locale = region && getRegionLocale(region);
+    if (!locale) return standardGrouping;
+    const exact = regionGrouping.get(locale.baseName.toLowerCase());
+    if (exact) return exact;
+    if (locale.script && locale.region) {
+        return regionGrouping.get(`${locale.language}-${locale.region.toLowerCase()}`) ?? standardGrouping;
+    }
+    return standardGrouping;
 }
 
 export function getNumberGrouping(region?: string, currency = false): NumberGrouping {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DateSystem, ICellData, LocaleType, Nullable, Styles } from '@univerjs/core';
-import { currencySymbols, getCurrencySymbolByLocale, getNumfmtParseValueFilter, numfmt } from '@univerjs/core';
+import type { DateSystem, ICellData, Nullable, Styles } from '@univerjs/core';
+import { getCurrencySymbolByLocale, getNumfmtParseValueFilter, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
 
@@ -190,17 +190,13 @@ export function clearNumberFormatTypeCache() {
  * @returns
  */
 function getNumberFormatTypeRaw(pattern: string): NumberFormatType {
-    if (isAccounting(pattern)) {
+    const type = numfmt.getFormatInfo(pattern).type as FormatType || 'unknown';
+    if (type === 'currency' && pattern.startsWith('_(')) {
         return NumberFormatType.Accounting;
     }
 
-    const type = numfmt.getFormatInfo(pattern).type as FormatType || 'unknown';
     return NumberFormatTypeMap[type];
 }
-
-function isAccounting(pattern: string) {
-    return !!currencySymbols.find((code) => pattern.includes(code)) && pattern.startsWith('_(');
-};
 
 /**
  * The number format of the formula inherits the number format of the referenced cell, usually taking the format of the cell at the front position, but some formats have higher priority, there are some special cases.
@@ -251,7 +247,7 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
     return previousPattern || nextPattern;
 }
 
-export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
+export function getCurrencyFormat(locale: string, numberDigits: number = 2): string {
     let _numberDigits = numberDigits;
 
     if (numberDigits > 127) {
@@ -267,7 +263,7 @@ export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2):
     return `"${getCurrencySymbolByLocale(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbolByLocale(locale)}"#,##0${decimal})`;
 }
 
-export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {
+export function applyCurrencyFormat(locale: string, number: number, numberDigits: number = 2): string {
     return numfmt.format(getCurrencyFormat(locale, numberDigits), number, { region: locale });
 }
 

@@ -25,7 +25,6 @@ import type {
     ParsedFormatSection,
 } from './types';
 import {
-    reCurrencySymbols,
     u_DAY,
     u_HOUR,
     u_MIN,
@@ -33,12 +32,13 @@ import {
     u_SEC,
     u_YEAR,
 } from './constants';
+import { currencySymbolFromLiteral } from './currency-symbols';
 
 export function hasCurrencyToken(part: FormatSection, currencyId?: string | null): boolean {
     return part.tokens.some((token) => (
         token.type === 'string' &&
         typeof token.value === 'string' &&
-        (currencyId ? token.value === currencyId : reCurrencySymbols.test(token.value))
+        (currencyId ? token.value === currencyId : token.currency || currencySymbolFromLiteral(token.value) !== undefined)
     ));
 }
 

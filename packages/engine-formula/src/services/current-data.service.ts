@@ -144,7 +144,7 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
-    getCalculationRegion(): LocaleType;
+    getCalculationRegion(): string;
     getDateSystem(unitId?: string): DateSystem;
 
     getSheetsInfo(unitId?: string): {
@@ -158,7 +158,7 @@ export interface IFormulaCurrentConfigService {
 
     setSheetNameMap(sheetIdToNameMap: IUnitSheetIdToNameMap): void;
 
-    loadDataLite(rowData?: IUnitRowData, region?: LocaleType): void;
+    loadDataLite(rowData?: IUnitRowData, region?: string): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -208,7 +208,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
-    private _calculationRegion: LocaleType | undefined;
+    private _calculationRegion: string | undefined;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -358,7 +358,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._localeService.getCurrentLocale();
     }
 
-    getCalculationRegion(): LocaleType {
+    getCalculationRegion(): string {
         return this._calculationRegion ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
     }
 
@@ -487,7 +487,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
     }
 
-    loadDataLite(rowData?: IUnitRowData, region?: LocaleType) {
+    loadDataLite(rowData?: IUnitRowData, region?: string) {
         this._calculationRegion = region ?? this._regionService?.getCurrentRegion() ?? this.getLocale();
         const { allUnitData, unitNameMap, unitSheetNameMap, unitStylesData } = this._loadSheetData();
 

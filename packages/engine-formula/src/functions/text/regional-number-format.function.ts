@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '@univerjs/core';
 import { BaseFunction } from '../base-function';
 
 export abstract class RegionalNumberFormatFunction extends BaseFunction {
-    private _getRegion?: () => LocaleType;
+    private _getRegion?: () => string;
 
-    override bindCalculationRegion(getRegion: () => LocaleType): void {
+    override bindCalculationRegion(getRegion: () => string): void {
         this._getRegion = getRegion;
     }
 
-    protected getNumberFormatRegion(): LocaleType | undefined {
+    protected getNumberFormatRegion(): string | undefined {
         return this._getRegion?.();
     }
 }

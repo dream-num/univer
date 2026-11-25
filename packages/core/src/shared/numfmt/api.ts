@@ -61,6 +61,7 @@ import {
     TOKEN_TEXT,
     TOKEN_ZERO,
 } from './constants';
+import { currencySymbolFromLiteral } from './currency-symbols';
 import { createDateTimeEditPattern } from './date-time-edit-pattern';
 import { dateInfo, info, isDate, isPercent, isText } from './format-info';
 import { formatValue, formatColor as formatValueColor } from './format-number';
@@ -68,6 +69,7 @@ import { getRegionGrouping } from './grouping';
 import { defaultOptions } from './options';
 import { parsePattern } from './parse-pattern';
 import { dateToSerial as handleDates } from './serial-date';
+import { tokenize } from './tokenize';
 
 export { dec2frac } from './dec-to-frac';
 export { addLocale, getLocale, parseLocale } from './locale';
@@ -151,6 +153,19 @@ export function formatColor(
     return formatValueColor(normalizedValue, data, resolvedOptions);
 }
 
+/** Gets the first displayed currency symbol, including an explicit Excel currency token. */
+export function getCurrencySymbol(pattern: string): string | undefined {
+    for (const token of tokenize(pattern)) {
+        if (token.type === TOKEN_LOCALE) {
+            const symbol = token.value.split('-')[0];
+            if (symbol) return symbol;
+        } else if (token.type === TOKEN_STRING || token.type === TOKEN_ESCAPED || token.type === TOKEN_CHAR) {
+            const symbol = currencySymbolFromLiteral(token.value);
+            if (symbol) return symbol;
+        }
+    }
+}
+
 /** Determine if a given format pattern is a date pattern. */
 export function isDateFormat(pattern: string): boolean {
     const data = prepareFormatterData(pattern, false);
@@ -185,8 +200,9 @@ export function getFormatInfo(
     options: { currency?: string } = {}
 ): FormatInfo {
     const data = prepareFormatterData(pattern, false);
+    if (options.currency) return info(data.partitions, options.currency);
     if (!data.info) {
-        data.info = info(data.partitions, options?.currency);
+        data.info = info(data.partitions);
     }
     return data.info;
 }

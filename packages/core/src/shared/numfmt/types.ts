@@ -118,6 +118,7 @@ export interface FormatToken {
 }
 
 export interface RenderToken {
+    currency?: boolean;
     type: string;
     raw?: string;
     value?: string | string[];

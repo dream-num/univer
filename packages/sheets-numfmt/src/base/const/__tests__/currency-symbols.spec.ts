@@ -39,7 +39,7 @@ describe('currency symbols', () => {
         ].map((locale) => getCurrencySymbolIconByLocale(locale).icon)).toEqual([
             'DongIcon',
             'RialIcon',
-            'RialIcon',
+            'DollarIcon',
             'RupiahIcon',
             'ZlotyIcon',
         ]);

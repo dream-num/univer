@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRange, IWorkbookCalculationSettings, LocaleType, Nullable } from '@univerjs/core';
+import type { ICellData, IUnitRange, IWorkbookCalculationSettings, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
@@ -86,7 +86,7 @@ export interface ICalculateFormulaService {
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
     stopFormulaExecution(): void;
     calculate(formulaString: string, transformSuffix?: boolean, unitId?: string): void;
-    executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: LocaleType): Promise<IFormulaExecuteResultMap>;
+    executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: string): Promise<IFormulaExecuteResultMap>;
     getAllDependencyJson(rowData?: IUnitRowData): Promise<IFormulaDependencyTreeJson[]>;
     getCellDependencyJson(unitId: string, sheetId: string, row: number, column: number, rowData?: IUnitRowData): Promise<IFormulaDependencyTreeFullJson | undefined>;
     getRangeDependents(unitRanges: IUnitRange[]): Promise<IFormulaDependencyTreeJson[]>;
@@ -708,7 +708,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
         return this._runtimeService.getAllRuntimeData();
     }
 
-    async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: LocaleType) {
+    async executeFormulas(formulas: IFormulaStringMap, rowData?: IUnitRowData, region?: string) {
         if (this._disposed) {
             return Object.create(null) as IFormulaExecuteResultMap;
         }

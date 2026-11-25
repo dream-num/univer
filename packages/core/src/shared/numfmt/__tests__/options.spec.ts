@@ -23,7 +23,8 @@ import { expect } from 'vitest';
 import { getCurrencySymbolByLocale } from '../../../services/locale/currency-symbol';
 import { DateSystem } from '../../../types/enum/date-system';
 import { LOCALE_META } from '../../../types/enum/locale-type';
-import { format } from '../api';
+import { format, getCurrencySymbol, getFormatInfo } from '../api';
+import { currencySymbols } from '../currency-symbols';
 import { getTimeZoneName, numfmtTest } from './test-utils';
 
 /* global process */
@@ -115,6 +116,40 @@ numfmtTest('region grouping can differ between numbers and currency', (t) => {
     t.format('"₹"#,##0', 1234567890, '₹1,234,567,890', { region: 'ml-IN' });
     t.format('"₹"#,##0', 1234567890, '₹1,23,45,67,890', { region: 'hi-IN' });
     t.format('#,##0;"₹"#,##0', -1234567890, '₹1,234,567,890', { region: 'mr-IN' });
+});
+
+numfmtTest('uses the same currency tokens for classification, selection and monetary grouping', (t) => {
+    for (const symbol of currencySymbols) {
+        const pattern = `"${symbol}"#,##0`;
+        expect(getFormatInfo(pattern).type, symbol).toBe('currency');
+        expect(getCurrencySymbol(pattern), symbol).toBe(symbol);
+        t.format(pattern, 123456789, `${symbol}123,456,789`, { region: 'ml-IN' });
+    }
+    t.format('0" hours"', 12, '12 hours');
+    expect(getFormatInfo('#,##0" Reports"').type).toBe('grouped');
+    expect(getCurrencySymbol('[$-409]#,##0;[Red]-#,##0')).toBeUndefined();
+    t.format('[$ABC-409]#,##0', 123456789, 'ABC123,456,789', { region: 'ml-IN' });
+    expect(getFormatInfo('"Rp"#,##0', { currency: 'USD' }).type).toBe('grouped');
+    expect(getFormatInfo('"Rp"#,##0').type).toBe('currency');
+});
+
+numfmtTest('keeps grouping for equivalent regional tags and scripts', (t) => {
+    for (const region of ['enIN', 'en-IN-u-nu-latn', 'hi-Deva-IN', 'bn-Beng-BD']) {
+        t.format('#,##0', 123456789, '12,34,56,789', { region });
+    }
+    t.format('#,##0', 123456789, '12,34,56,789', { region: 'en-IN-x-test' });
+    t.format('#,##0', 123456789, '123,456,789', { region: 'pa-Arab-PK' });
+});
+
+numfmtTest('uses regional currency symbols including language and script variants', () => {
+    for (const [region, expected] of [
+        ['de-AT', '€'], ['en-IE', '€'], ['fr-BE', '€'], ['pt-PT', '€'],
+        ['de-CH', 'CHF'], ['th-TH', '฿'], ['hu-HU', 'Ft'], ['da-DK', 'kr.'],
+        ['en-HK', '$'], ['zhHK', 'HK$'], ['zh-Hans-HK', '$'], ['bs-Cyrl-BA', 'КМ'],
+        ['en-IN-u-nu-latn', '₹'], ['es-419', 'XDR'], ['en-AQ', '¤'],
+    ]) {
+        expect(getCurrencySymbolByLocale(region), region).toBe(expected);
+    }
 });
 
 numfmtTest('grouping sequences support finite groups, repetition and no grouping', (t) => {

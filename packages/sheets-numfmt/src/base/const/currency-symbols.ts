@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '@univerjs/core';
 import { getCurrencySymbolByLocale } from '@univerjs/core';
 
 const currencyIcons: Readonly<Record<string, string>> = {
@@ -23,6 +22,7 @@ const currencyIcons: Readonly<Record<string, string>> = {
     '¥': 'RmbIcon',
     '₫': 'DongIcon',
     '﷼': 'RialIcon',
+    'ريال': 'RialIcon',
     '₩': 'WonIcon',
     Rp: 'RupiahIcon',
     zł: 'ZlotyIcon',
@@ -31,7 +31,7 @@ const currencyIcons: Readonly<Record<string, string>> = {
 /**
  * Get the currency symbol icon based on the locale.
  */
-export function getCurrencySymbolIconByLocale(locale: LocaleType) {
+export function getCurrencySymbolIconByLocale(locale: string) {
     const symbol = getCurrencySymbolByLocale(locale);
     return { icon: currencyIcons[symbol] ?? 'DollarIcon', symbol, locale };
 }
@@ -39,7 +39,7 @@ export function getCurrencySymbolIconByLocale(locale: LocaleType) {
 /**
  * Get the currency format string based on the locale and number of digits.
  */
-export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
+export function getCurrencyFormat(locale: string, numberDigits: number = 2): string {
     let _numberDigits = numberDigits;
 
     if (numberDigits > 127) {

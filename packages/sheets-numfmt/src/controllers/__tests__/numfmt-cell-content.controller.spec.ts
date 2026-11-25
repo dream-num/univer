@@ -223,7 +223,7 @@ describe('SheetsNumfmtCellContentController', () => {
         expect(view()).toBe('100,000');
 
         const region = get(RegionService);
-        region.setRegion('en-IN' as LocaleType);
+        region.setRegion('en-IN');
         expect(view()).toBe('1,00,000');
 
         region.setRegion(LocaleType.EN_US);

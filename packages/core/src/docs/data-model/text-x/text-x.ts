@@ -493,14 +493,12 @@ export class TextX {
                             // A peer may delete the old target before applying this move.
                             if (update.fallbackNextRangeId === undefined) {
                                 update.fallbackNextRangeId = nextRangeId;
-                                if (index + 2 < ranges.length) {
-                                    bookmarkOrders ??= action.bookmarkOrders = [];
-                                    if (originalOrderIndex === undefined) {
-                                        originalOrder ??= ranges.map((item) => item.rangeId);
-                                        originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
-                                    }
-                                    update.fallbackOrderIndex = originalOrderIndex;
+                                bookmarkOrders ??= action.bookmarkOrders = [];
+                                if (originalOrderIndex === undefined) {
+                                    originalOrder ??= ranges.map((item) => item.rangeId);
+                                    originalOrderIndex = bookmarkOrders.push(originalOrder) - 1;
                                 }
+                                update.fallbackOrderIndex = originalOrderIndex;
                             }
                             if (!changesText) {
                                 nextRangeId = undefined;

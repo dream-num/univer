@@ -200,6 +200,67 @@ describe('test TextX methods and branches', () => {
         expect(TextX.apply(Tools.deepClone(original), TextX.compose(TextX.compose(composed, prefix), moveAgain))).toEqual(sequentialMove);
     });
 
+    it('preserves the slots of legacy bookmarks when moving onto the same target during a field paste', () => {
+        const original: IDocumentBody = {
+            dataStream: 'One\rTwo\rEnd\r\n',
+            customRanges: [
+                { ...bookmarkAt('z'), endIndex: 2 },
+                { ...bookmarkAt('a'), endIndex: 2 },
+                { ...bookmarkAt('b', 4), endIndex: 6 },
+            ],
+        };
+        const moveToEnd = (rangeId: string, body: IDocumentBody): TextXAction[] => TextX.makeInvertible(
+            updateBookmarks([{ rangeId, range: { ...bookmarkAt(rangeId, 8), endIndex: 10 } }]),
+            Tools.deepClone(body)
+        );
+        const before = TextX.apply(Tools.deepClone(original), moveToEnd('z', original));
+        const move = moveToEnd('a', before);
+        const paste: TextXAction[] = [
+            { t: TextXActionType.DELETE, len: 3 },
+            {
+                t: TextXActionType.INSERT,
+                len: 3,
+                body: {
+                    dataStream: '\u001F1\u001E',
+                    customRanges: [{ rangeId: 'field', rangeType: CustomRangeType.FIELD, startIndex: 0, endIndex: 2, properties: { instruction: 'PAGE' } }],
+                },
+            },
+        ];
+        const moveAfterPaste = TextX.transform(move, paste, 'right');
+        const pasteAfterMove = TextX.transform(paste, move, 'left');
+        const expected = TextX.apply(TextX.apply(Tools.deepClone(before), move), pasteAfterMove);
+        expect(expected.customRanges?.map(({ rangeId }) => rangeId)).toEqual(['field', 'b', 'z', 'a']);
+        expect(TextX.apply(TextX.apply(Tools.deepClone(before), paste), moveAfterPaste)).toEqual(expected);
+        expect(TextX.apply(Tools.deepClone(before), TextX.compose(move, pasteAfterMove))).toEqual(expected);
+        expect(TextX.apply(Tools.deepClone(before), TextX.compose(paste, moveAfterPaste))).toEqual(expected);
+    });
+
+    it('deduplicates equal bookmark orders when composing separately recorded moves', () => {
+        const count = 250;
+        const before: IDocumentData = {
+            id: 'doc',
+            documentStyle: {},
+            body: {
+                dataStream: 'Body\rNext\r\n',
+                customRanges: Array.from({ length: count }, (_, index) => bookmarkAt(`bookmark-${String(index).padStart(4, '0')}`)),
+            },
+        };
+        const jsonX = JSONX.getInstance();
+        let current = Tools.deepClone(before);
+        const edits = before.body!.customRanges!.map(({ rangeId }) => {
+            const edit = jsonX.editOp(updateBookmarks([{ rangeId, range: bookmarkAt(rangeId, 5) }]));
+            JSONX.invertWithDoc(edit, current);
+            const transported = JSON.parse(JSON.stringify(edit)) as typeof edit;
+            current = JSONX.apply(current, transported) as unknown as IDocumentData;
+            return transported;
+        });
+        const composed = edits.reduce((combined, edit) => JSONX.compose(combined, edit));
+        const wire = JSON.stringify(composed);
+        expect(wire.length).toBeLessThan(count * 400);
+        expect(JSONX.apply(Tools.deepClone(before), JSON.parse(wire))).toEqual(current);
+        expect(JSONX.apply(current, JSONX.invertWithDoc(JSON.parse(wire), before))).toEqual(before);
+    });
+
     it.each([1, 4])('keeps serialized history for a bulk move across %s retains linear', (batches) => {
         const bytes = (count: number) => {
             const body: IDocumentBody = {

@@ -182,13 +182,19 @@ export function appendRangeUpdates(actions: TextXAction[], updates: IRangeUpdate
     }
     const bookmarkOrders: string[][] = [];
     const indices = new Map<string[], number>();
+    const equalOrders = new Map<string, number>();
     const rangeUpdates = updates.map(({ fallbackOrder, ...update }) => {
         if (!fallbackOrder) {
             return update;
         }
         let fallbackOrderIndex = indices.get(fallbackOrder);
         if (fallbackOrderIndex === undefined) {
-            fallbackOrderIndex = bookmarkOrders.push(fallbackOrder) - 1;
+            const key = JSON.stringify(fallbackOrder);
+            fallbackOrderIndex = equalOrders.get(key);
+            if (fallbackOrderIndex === undefined) {
+                fallbackOrderIndex = bookmarkOrders.push(fallbackOrder) - 1;
+                equalOrders.set(key, fallbackOrderIndex);
+            }
             indices.set(fallbackOrder, fallbackOrderIndex);
         }
         return { ...update, fallbackOrderIndex };
@@ -206,7 +212,7 @@ export function validateRangeUpdates(updates: IRangeUpdate[], resultLength: numb
             (fallbackNextRangeId !== null && typeof fallbackNextRangeId !== 'string'))) {
             throw new Error('Invalid bookmark move anchor.');
         }
-        if (fallbackOrder !== undefined && typeof fallbackNextRangeId !== 'string') {
+        if (fallbackOrder !== undefined && fallbackNextRangeId === undefined) {
             throw new Error('Invalid bookmark move anchors.');
         }
         if (bookmarkOrderPosition !== undefined && (range?.rangeType !== CustomRangeType.BOOKMARK || propertyPaths ||
@@ -290,6 +296,47 @@ function applyRangeUpdateBatch(ranges: ICustomRange[], updates: IRangeUpdate[]):
     }
 }
 
+function orderRangesAtInsertion(ranges: ICustomRange[], positioned: IRangeUpdate[]): void {
+    const positions = new Map(positioned.map(({ rangeId, bookmarkOrderPosition }) => [rangeId, bookmarkOrderPosition!]));
+    const positionOf = (range: ICustomRange) => positions.get(range.rangeId) ?? range.startIndex;
+    ranges.sort((left, right) => positionOf(left) - positionOf(right));
+    const orders = new Map<number, string[]>();
+    for (const { bookmarkOrderPosition, fallbackOrder } of positioned) {
+        if (fallbackOrder && !orders.has(bookmarkOrderPosition!)) {
+            orders.set(bookmarkOrderPosition!, fallbackOrder);
+        }
+    }
+    const ranks = new Map<string[], Map<string, number>>();
+    for (let start = 0; start < ranges.length;) {
+        const position = positionOf(ranges[start]);
+        let end = start + 1;
+        while (end < ranges.length && positionOf(ranges[end]) === position) {
+            end++;
+        }
+        const order = orders.get(position);
+        if (order && end - start > 1) {
+            let rank = ranks.get(order);
+            if (!rank) {
+                rank = new Map(order.map((id, index) => [id, index]));
+                ranks.set(order, rank);
+            }
+            // The paste sorts stably. Restore the prior order of the surviving legacy ranges that tie.
+            const slots: number[] = [];
+            for (let index = start; index < end; index++) {
+                if (rank.has(ranges[index].rangeId)) {
+                    slots.push(index);
+                }
+            }
+            const ordered = slots.map((index) => ranges[index])
+                .sort((left, right) => rank.get(left.rangeId)! - rank.get(right.rangeId)!);
+            for (const [offset, index] of slots.entries()) {
+                ranges[index] = ordered[offset];
+            }
+        }
+        start = end;
+    }
+}
+
 export function applyRangeUpdates(doc: IDocumentBody, updates: IRangeUpdate[]): void {
     if (!updates.length) {
         return;
@@ -299,9 +346,7 @@ export function applyRangeUpdates(doc: IDocumentBody, updates: IRangeUpdate[]): 
     if (positioned.length) {
         // Sort at the positions used by the insert before later identity edits retain their slots.
         applyRangeUpdateBatch(ranges, positioned);
-        const positions = new Map(positioned.map(({ rangeId, bookmarkOrderPosition }) => [rangeId, bookmarkOrderPosition]));
-        ranges.sort((left, right) =>
-            (positions.get(left.rangeId) ?? left.startIndex) - (positions.get(right.rangeId) ?? right.startIndex));
+        orderRangesAtInsertion(ranges, positioned);
         applyRangeUpdateBatch(ranges, updates.filter((update) => update.bookmarkOrderPosition === undefined));
     } else {
         applyRangeUpdateBatch(ranges, updates);

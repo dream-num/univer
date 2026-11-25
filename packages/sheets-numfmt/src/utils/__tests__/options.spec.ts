@@ -65,6 +65,21 @@ describe('getDateFormatOptions', () => {
         expect(options.some((option) => option.label === '1930-08-05')).toBe(true);
         expect(options.some((option) => /[年月日]|上午|下午/.test(option.label))).toBe(false);
     });
+
+    it.each(['enIN', 'enGB'])('offers day-first English presets for the region %s', (region) => {
+        const options = getDateFormatOptions(region as LocaleType);
+        expect(options.slice(1, 4)).toEqual([
+            { label: '05/08/1930', value: 'dd/mm/yyyy' },
+            { label: '5/8/1930', value: 'd/m/yyyy' },
+            { label: '5 Aug 1930', value: 'd mmm yyyy' },
+        ]);
+        expect(options.some((option) => option.value === 'mm/dd/yyyy')).toBe(false);
+    });
+
+    it('offers ISO presets, not the runtime locale\'s, for a region the runtime has no date data for', () => {
+        expect(getDateFormatOptions('xxYY' as LocaleType).map((option) => option.value))
+            .toEqual(getDateFormatOptions('unsupported' as LocaleType).map((option) => option.value));
+    });
 });
 
 describe('format options', () => {

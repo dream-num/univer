@@ -41,6 +41,8 @@ export class Index extends BaseFunction {
 
     override maxParams = 4;
 
+    override lazyIfReferenceArrayArgumentIndexes = [0];
+
     override needsReferenceObject = true;
 
     override preservesReferenceInRangeEndpointArgument(argumentIndex: number): boolean {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IWorkbookData } from '@univerjs/core';
 import {
     ICommandService,
     isNodeEnv,
@@ -25,13 +26,13 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverSheetsFormulaPlugin } from '../../plugin';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
 import '../../facade';
 
-function createWorkbookData() {
+function createWorkbookData(): IWorkbookData {
     return {
         id: 'standalone-sheet-formula',
         name: 'Standalone Sheet Formula',
@@ -57,21 +58,55 @@ function createWorkbookData() {
 }
 
 describe('standalone Sheet formula calculation trigger', () => {
-    let univer: Univer | undefined;
+    let univer: Univer;
+
+    beforeEach(() => {
+        vi.mocked(isNodeEnv).mockReturnValue(false);
+        univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        locale.load({ [LocaleType.EN_US]: {} });
+        locale.setLocale(LocaleType.EN_US);
+    });
 
     afterEach(() => {
-        univer?.dispose();
-        univer = undefined;
+        univer.dispose();
         vi.restoreAllMocks();
     });
 
-    it('calculates on cold start and recalculates after value and formula edits', async () => {
-        vi.mocked(isNodeEnv).mockReturnValue(false);
+    it('keeps the selected IF range for lookup arguments on cold start and after edits', async () => {
+        univer.registerPlugin(UniverSheetsFormulaPlugin);
+        const api = FUniver.newAPI(univer);
+        const data = createWorkbookData();
+        const lookup = '=XLOOKUP(3,IF(B1,B2:B4,B5:B7),IF(B1,C2:C4,C5:C7))';
+        data.sheets['sheet-1']!.cellData = {
+            0: { 0: { f: lookup }, 1: { v: 1 } },
+            1: { 0: { f: '=VLOOKUP(3,IF(B1,B2:C4,B5:C7),2,FALSE)' }, 1: { v: 2 }, 2: { v: 20 } },
+            2: { 0: { f: lookup }, 1: { v: 3 }, 2: { v: 30 } },
+            3: { 0: { f: '=LOOKUP(3,B2:B4,IF(B1,C2:C4,C5:C7))' }, 1: { v: 4 }, 2: { v: 40 } },
+            4: { 0: { f: '=HLOOKUP(IF(B1,2,4),IF(B1,B2:C4,B5:C7),2,FALSE)' }, 1: { v: 4 }, 2: { v: 50 } },
+            5: { 0: { f: '=XMATCH(3,IF(B1,B2:B4,B5:B7))' }, 1: { v: 3 }, 2: { v: 60 } },
+            6: { 0: { f: '=INDEX(IF(B1,B2:C4,B5:C7),2,2)' }, 1: { v: 2 }, 2: { v: 70 } },
+        };
+        const sheet = api.createWorkbook(data).getActiveSheet();
+        const results = sheet.getRange('A1:A7');
+        const initial = api.getFormula().onCalculationResultApplied(10_000);
+        univer.__getInjector().get(LifecycleService).stage = LifecycleStages.Rendered;
+        await initial;
+        expect(results.getValues()).toEqual([[30], [30], [30], [30], [3], [2], [30]]);
 
-        univer = new Univer();
+        const switched = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('B1').setValue(0);
+        await switched;
+        expect(results.getValues()).toEqual([[60], [60], [60], [60], [3], [2], [60]]);
+
+        const edited = api.getFormula().onCalculationResultApplied(10_000);
+        sheet.getRange('C6').setValue(61);
+        await edited;
+        expect(results.getValues()).toEqual([[61], [61], [61], [61], [3], [2], [61]]);
+    });
+
+    it('calculates on cold start and recalculates after value and formula edits', async () => {
         const injector = univer.__getInjector();
-        injector.get(LocaleService).load({ [LocaleType.EN_US]: {} });
-        injector.get(LocaleService).setLocale(LocaleType.EN_US);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         let calculationStarts = 0;

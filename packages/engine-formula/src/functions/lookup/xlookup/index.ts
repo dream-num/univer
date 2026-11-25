@@ -32,6 +32,8 @@ export class Xlookup extends BaseFunction {
 
     override maxParams = 6;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1, 2];
+
     override needsReferenceObject = true;
 
     override calculate(

@@ -19,6 +19,7 @@ import type { DateSystem, IRange, Nullable } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { AstNodePromiseType } from '../../basics/common';
+import { operatorToken } from '../../basics/token';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
@@ -152,6 +153,16 @@ export class BaseAstNode {
 
     preservesReferenceInRangeEndpoint(_child: BaseAstNode): boolean {
         return false;
+    }
+
+    isUsedAsRangeEndpoint(): boolean {
+        let child: BaseAstNode = this;
+        let parent = child.getParent();
+        while (parent?.preservesReferenceInRangeEndpoint(child)) {
+            child = parent;
+            parent = child.getParent();
+        }
+        return parent?.nodeType === NodeType.UNION || parent?.getToken() === operatorToken.INTERSECTION;
     }
 
     isCalculated() {

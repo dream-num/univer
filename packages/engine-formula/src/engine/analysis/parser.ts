@@ -66,7 +66,7 @@ const MAX_NAMED_LAMBDA_CALL_DEPTH = 64;
 class NamedLambdaCallNode extends BaseAstNode {
     constructor(
         token: string,
-        private readonly _evaluate: (args: FunctionVariantType[]) => FunctionVariantType | AsyncObject,
+        private readonly _evaluate: (args: FunctionVariantType[], preserveReference: boolean) => FunctionVariantType | AsyncObject,
         private readonly _callee?: BaseAstNode
     ) {
         super(token);
@@ -77,12 +77,16 @@ class NamedLambdaCallNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
+    override preservesReferenceInRangeEndpoint(child: BaseAstNode): boolean {
+        return child !== this._callee;
+    }
+
     override execute() {
-        this.setValue(this._evaluate(this._arguments()) as FunctionVariantType);
+        this.setValue(this._evaluate(this._arguments(), this.isUsedAsRangeEndpoint()) as FunctionVariantType);
     }
 
     override async executeAsync(): Promise<AstNodePromiseType> {
-        const value = this._evaluate(this._arguments());
+        const value = this._evaluate(this._arguments(), this.isUsedAsRangeEndpoint());
         this.setValue(value instanceof AsyncObject ? await value.getValue() : value);
         return AstNodePromiseType.SUCCESS;
     }
@@ -124,6 +128,10 @@ class EtaReducedLambdaValue extends LambdaValueObjectObject {
     }
 
     override execute(...args: FunctionVariantType[]) {
+        return this.executeWithReference(...args);
+    }
+
+    override executeWithReference(...args: FunctionVariantType[]) {
         return args.length === 0 ? this : this._call(args);
     }
 }
@@ -202,7 +210,7 @@ export class AstTreeBuilder extends Disposable {
         if (!definedName) {
             return;
         }
-        const node = new NamedLambdaCallNode(token, (args) => this._executeNamedLambda(token, unitId, sheetId, args));
+        const node = new NamedLambdaCallNode(token, (args, preserveReference) => this._executeNamedLambda(token, unitId, sheetId, args, preserveReference));
         this._namedLambdaCalls.push(node);
         return node;
     }
@@ -219,10 +227,10 @@ export class AstTreeBuilder extends Disposable {
     }
 
     private _createExpressionLambdaCall(token: string, callee: BaseAstNode): NamedLambdaCallNode {
-        const node = new NamedLambdaCallNode(token, (args) => {
+        const node = new NamedLambdaCallNode(token, (args, preserveReference) => {
             const value = callee.getValue();
             if (value instanceof LambdaValueObjectObject) {
-                return value.execute(...args);
+                return preserveReference ? value.executeWithReference(...args) : value.execute(...args);
             }
             return value?.isError() ? value : ErrorValueObject.create(ErrorType.VALUE);
         }, callee);
@@ -230,7 +238,7 @@ export class AstTreeBuilder extends Disposable {
         return node;
     }
 
-    private _executeNamedLambda(token: string, unitId: string, sheetId: Nullable<string>, args: FunctionVariantType[]): FunctionVariantType | AsyncObject {
+    private _executeNamedLambda(token: string, unitId: string, sheetId: Nullable<string>, args: FunctionVariantType[], preserveReference: boolean): FunctionVariantType | AsyncObject {
         if (this._namedLambdaCallDepth >= MAX_NAMED_LAMBDA_CALL_DEPTH) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
@@ -257,7 +265,7 @@ export class AstTreeBuilder extends Disposable {
             if (!(lambda instanceof LambdaValueObjectObject)) {
                 return lambda.isError() ? lambda : ErrorValueObject.create(ErrorType.VALUE);
             }
-            const result = lambda.execute(...args);
+            const result = preserveReference ? lambda.executeWithReference(...args) : lambda.execute(...args);
             if (result instanceof AsyncObject) {
                 asynchronous = true;
                 return new AsyncObject(result.getValue().finally(() => this._namedLambdaCallDepth--));

@@ -72,6 +72,11 @@ export class LambdaValueObjectObject extends BaseValueObject {
     }
 
     execute(...variants: FunctionVariantType[]) {
+        const value = this.executeWithReference(...variants);
+        return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject | AsyncObject;
+    }
+
+    executeWithReference(...variants: FunctionVariantType[]): FunctionVariantType | AsyncObject {
         const node = this._lambdaNode;
         const interpreter = this._interpreter;
         const keys = this._lambdaPrivacyVarKeys;
@@ -124,8 +129,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
                 asynchronous = true;
                 return new AsyncObject(result.finally(restoreInvocation));
             }
-            const value = interpreter.execute(data);
-            return value.isReferenceObject() ? (value as BaseReferenceObject).toArrayValueObject() : value as BaseValueObject;
+            return interpreter.execute(data);
         } finally {
             if (!asynchronous) {
                 restoreInvocation();

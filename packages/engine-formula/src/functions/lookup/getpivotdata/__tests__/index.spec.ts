@@ -330,6 +330,56 @@ describe('GETPIVOTDATA', () => {
         }
     });
 
+    it.each([false, true])('reads measure groups above the deepest column field (RTL %s)', (rightToLeft) => {
+        const range = { startRow: 0, endRow: 4, startColumn: 0, endColumn: 7 };
+        const physical = (column: number) => rightToLeft ? range.endColumn - column : column;
+        class HostedGetpivotdata extends Getpivotdata {
+            protected override get pivotReportLookup(): IPivotFormulaReportLookup {
+                return {
+                    getPivotFormulaReport: () => ({
+                        ranges: [range],
+                        fields: ['Category', 'Detail'],
+                        columnFields: ['Category', 'Detail'],
+                        dataFields: [
+                            { sourceName: 'Sales', displayName: 'Sum of Sales' },
+                            { sourceName: 'Units', displayName: 'Sum of Units' },
+                        ],
+                        layout: {
+                            firstDataRow: 4,
+                            rightToLeft,
+                            columnFieldNames: [['Category'], ['Detail']],
+                            columnHeaders: { firstColumn: 0, fieldRows: [1, 3], measureRow: 2 },
+                            columnGrandTotals: [physical(6), physical(7)],
+                            columnSubtotals: [[physical(4), 1, 0], [physical(5), 1, 1]],
+                        },
+                    }),
+                };
+            }
+        }
+        const bed = createFunctionTestBed();
+        try {
+            const fn = bed.get(Injector).createInstance(HostedGetpivotdata, FUNCTION_NAMES_LOOKUP.GETPIVOTDATA);
+            const cells = [
+                ['Category', 'Values', 'Detail'],
+                ['North', '', '', '', 'North Sum of Sales', 'North Sum of Units', 'Sum of Sales', 'Sum of Units'],
+                ['Sum of Sales', '', 'Sum of Units'],
+                ['Retail', 'Online', 'Retail', 'Online'],
+                [10, 20, 1, 2, 30, 3, 30, 3],
+            ].flatMap((row, r) => row.flatMap((value, c): Array<[number, number, ICellData]> =>
+                value === '' ? [] : [[r, physical(c), typeof value === 'number' ? number(value) : text(value)]]
+            ));
+            const ref = anchor(cells);
+            const lookup = (measure: string, ...pairs: string[]) => getObjectValue(fn.calculate(textArg(measure), ref, ...pairs.map(textArg)));
+            expect(lookup('Sales', 'Category', 'North')).toBe(30);
+            expect(lookup('Sales', 'Category', 'North', 'Detail', 'Online')).toBe(20);
+            expect(lookup('Units', 'Category', 'North')).toBe(3);
+            expect(lookup('Units', 'Detail', 'Online', 'Category', 'North')).toBe(2);
+            expect(lookup('Sales')).toBe(30);
+        } finally {
+            bed.univer.dispose();
+        }
+    });
+
     it('matches separated column levels and selects the visible subtotal at the deepest requested level', () => {
         const range = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 10 };
         class HostedGetpivotdata extends Getpivotdata {

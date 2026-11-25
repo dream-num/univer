@@ -41,7 +41,6 @@ interface ITimeline {
     last: number;
     step: number;
     monthStep: number;
-    calendarDay: number;
 }
 
 interface ISeries {
@@ -223,9 +222,9 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
     const tolerance = timestampTolerance(first, last);
     let step = findTimelineStep(sorted, tolerance);
     if (!Number.isFinite(step) || step <= 0) return ErrorValueObject.create(ErrorType.NUM);
-    const [monthStep, calendarDay] = step >= 28 && first >= 61 && last <= MAX_DATE_SERIAL
+    const monthStep = step >= 28 && first >= 61 && last <= MAX_DATE_SERIAL
         ? findCalendarMonthStep(sorted, dateSystem)
-        : [0, 0];
+        : 0;
     if (monthStep === 0) {
         // Estimate the grid step over the full span so rounding in individual gaps cannot accumulate.
         const span = last - first;
@@ -234,26 +233,26 @@ function readTimeline(values: BaseValueObject, timeline: BaseValueObject, dateSy
             step = calibrated;
         }
     }
-    return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthStep, calendarDay };
+    return { groups: new Map(sorted.map((time) => [time, groups.get(time)!])), step, first, last, monthStep };
 }
 
-function findCalendarMonthStep(times: readonly number[], dateSystem: DateSystem): [number, number] {
+function findCalendarMonthStep(times: readonly number[], dateSystem: DateSystem): number {
     const first = times[0];
     let sameDay = true;
     let monthEnd = shiftMonth(first, 0, dateSystem, true) === first;
     let step = 0;
     for (let i = 1; i < times.length; i++) {
         const months = calendarMonthDistance(first, times[i], dateSystem);
-        if (months <= 0) return [0, 0];
+        if (months <= 0) return 0;
         sameDay &&= shiftMonth(first, months, dateSystem) === times[i];
         monthEnd &&= shiftMonth(first, months, dateSystem, true) === times[i];
-        if (!sameDay && !monthEnd) return [0, 0];
+        if (!sameDay && !monthEnd) return 0;
         let remainder = months;
         while (remainder !== 0) {
             [step, remainder] = [remainder, step % remainder];
         }
     }
-    return [step, monthEnd ? 31 : excelSerialToDate(first, dateSystem).getUTCDate()];
+    return step;
 }
 
 function timestampTolerance(first: number, last: number): number {
@@ -383,18 +382,20 @@ function shiftMonth(serial: number, months: number, dateSystem: DateSystem, mont
 function targetPosition(target: number, first: number, history: ITimeline, dateSystem: DateSystem): number {
     if (history.monthStep === 0) return (target - first) / history.step;
     if (target > MAX_DATE_SERIAL) return NaN;
-    const { monthStep, calendarDay } = history;
-    const origin = excelSerialToDate(history.first, dateSystem);
+    const { monthStep, last, step } = history;
+    const end = calendarMonthDistance(first, last, dateSystem) / monthStep;
+    // A four-week forecast interval uses a fixed day step even for month-end observations.
+    if (step < 29) return end + (target - last) / step;
+    const origin = excelSerialToDate(last, dateSystem);
     const anchor = (period: number) => excelDateSerial(
-        new Date(Date.UTC(origin.getUTCFullYear(), origin.getUTCMonth() + period * monthStep, calendarDay)),
+        new Date(Date.UTC(origin.getUTCFullYear(), origin.getUTCMonth() + period * monthStep, origin.getUTCDate())),
         dateSystem
     );
-    let period = Math.floor(calendarMonthDistance(history.first, target, dateSystem) / monthStep);
+    let period = Math.floor(calendarMonthDistance(last, target, dateSystem) / monthStep);
     // The forecast axis keeps the calendar day even when it rolls into the following month.
     while (target < anchor(period)) period--;
-    const start = calendarMonthDistance(history.first, first, dateSystem) / monthStep;
     const previous = anchor(period);
-    return period - start + (target - previous) / (anchor(period + 1) - previous);
+    return end + period + (target - previous) / (anchor(period + 1) - previous);
 }
 
 function calendarMonthDistance(first: number, last: number, dateSystem: DateSystem): number {

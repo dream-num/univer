@@ -25,13 +25,14 @@ import type {
     FunctionVariantType,
     NodeValueType,
 } from '../reference-object/base-reference-object';
+import type { MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { normalizeFunctionToken } from '../../basics/function';
-import { matchToken, operatorToken } from '../../basics/token';
+import { matchToken } from '../../basics/token';
 import { COLUMN_LIKE_FUNCTION_NAMES } from '../../functions/column-like-functions';
 import { If } from '../../functions/logical/if';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -45,7 +46,6 @@ import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
 import { IFormulaUnitReferenceResolver } from '../../services/unit-reference-resolver.service';
-import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { getFixedArrayResultRange, isExplicitDynamicArrayFormula } from '../utils/array-object';
 import { prefixHandler } from '../utils/prefix-handler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
@@ -220,16 +220,7 @@ export class FunctionNode extends BaseAstNode {
 
     private _calculateReferenceEndpoint(children: BaseAstNode[]) {
         const calculate = this._functionExecutor.calculateReferenceEndpoint;
-        if (!calculate) {
-            return;
-        }
-        let child: BaseAstNode = this;
-        let parent = child.getParent();
-        while (parent?.preservesReferenceInRangeEndpoint(child)) {
-            child = parent;
-            parent = child.getParent();
-        }
-        if (parent?.nodeType !== NodeType.UNION && parent?.getToken() !== operatorToken.INTERSECTION) {
+        if (!calculate || !this.isUsedAsRangeEndpoint()) {
             return;
         }
         const variants: FunctionVariantType[] = [];
@@ -240,12 +231,7 @@ export class FunctionNode extends BaseAstNode {
             }
             variants.push(value);
         }
-        const result = calculate.call(this._functionExecutor, variants);
-        if (result.isReferenceObject() && !(result instanceof MultiAreaReferenceObject)) {
-            // A selected reference keeps its own worksheet when paired with the other endpoint.
-            return new MultiAreaReferenceObject('', [[result as BaseReferenceObject]], MultiAreaArrayMode.STACK_AREAS);
-        }
-        return result;
+        return calculate.call(this._functionExecutor, variants);
     }
 
     private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem): BaseValueObject[] {
